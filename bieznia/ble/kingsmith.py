@@ -46,6 +46,9 @@ _PRINTABLE = re.compile(r"^[\x20-\x7e\t]*$")
 # Sekwencja startowa jak w QZ (bez niej bieżnia nie odpowiada na odczyty).
 INIT_COMMANDS = ("shake", "net", "get_dn", "get_pk", "time_posix {now}", "version")
 GET_PROPS = "servers getProp 1 2 7 12 23 24 31"
+# Subskrypcja telemetrii oficjalnej aplikacji KS Fit (wg opisu protokołu z projektu
+# beltcontrol). Tylko odczyt. Na części modeli daje częstsze, częściowe ramki "props".
+TELEMETRY_PROPS = "servers getProp 1 9 15 2 10 11 12 13 14"
 
 
 def table_order(device_name: str) -> list[str]:

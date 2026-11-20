@@ -31,6 +31,8 @@ stale_after_s = 3.0
 # zatrzymuje postać od razu, bez czekania na pełny stop bieżni
 quick_stop = true
 brake_drop = 0.6
+# blisko progu chodu (próg + brake_near) każdy spadek = zatrzymywanie się
+brake_near = 0.6
 brake_hold_s = 3.0
 
 [hotkeys]

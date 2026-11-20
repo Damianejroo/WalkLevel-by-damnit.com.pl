@@ -6,6 +6,7 @@ Tylko ODCZYT: żaden sterownik nie wysyła poleceń zmiany prędkości ani start
 from __future__ import annotations
 
 import asyncio
+import itertools
 import logging
 import re
 import time
@@ -27,6 +28,12 @@ _SERVICE_PREFERENCE = ("0002", "0001", "0000")
 # Najdłuższa przerwa między ramkami z prędkością, przy której potwierdzenia odpytywania
 # jeszcze podtrzymują ostatnią prędkość (X21 wysyła ją co ok. 2 s).
 PROPS_TIMEOUT_S = 6.0
+
+
+# Ile czekamy na prędkość po przejściu na subskrypcję KS Fit, zanim wrócimy do listy z QZ.
+TELEMETRY_FALLBACK_S = 5.0
+# Co ile sekund zapisać do logu, jak często bieżnia podaje prędkość.
+STATS_EVERY_S = 30.0
 
 
 class UnsupportedDevice(Exception):
@@ -118,6 +125,10 @@ class KingSmithDriver:
         self.last_reply = 0.0
         self.last_props_at = float("-inf")
         self.unanswered_polls = 0
+        self.poll_command = kingsmith.GET_PROPS
+        self.telemetry_since = 0.0
+        self.props_times: list[float] = []
+        self.stats_at = 0.0
         self._reply = asyncio.Event()
 
     def describe(self) -> str:
@@ -178,6 +189,7 @@ class KingSmithDriver:
                 self.on_reading(self.last_speed, self.last_steps)
             return
         self.last_props_at = now
+        self.props_times.append(now)
         if "CurrentSpeed" in props:
             self.last_speed = max(0.0, props["CurrentSpeed"])
         if props.get("runState") == 0:  # taśma zatrzymana
@@ -210,6 +222,11 @@ class KingSmithDriver:
             if await self._wait_reply(self.REPLY_WAIT_S * 2):
                 break
             self.codec.try_next_table()
+        # Próba szybszej telemetrii (jak KS Fit). Gdy prędkość przestanie przychodzić,
+        # poll() sam wróci do listy z QZ, która na X21 działa na pewno.
+        self.poll_command = kingsmith.TELEMETRY_PROPS
+        self.telemetry_since = self.stats_at = time.monotonic()
+        await self.send(self.poll_command)
 
     async def poll(self) -> None:
         """Bieżnia nie wysyła prędkości sama przy stałym tempie - pytamy ją cyklicznie."""
@@ -218,7 +235,34 @@ class KingSmithDriver:
             log.info("Brak odpowiedzi - próbuję tablicy szyfrowania %s", self.codec.table)
             self.unanswered_polls = 0
         self.unanswered_polls += 1
-        await self.send(kingsmith.GET_PROPS)
+        now = time.monotonic()
+        if (
+            self.poll_command == kingsmith.TELEMETRY_PROPS
+            and now - self.telemetry_since > TELEMETRY_FALLBACK_S
+            and now - self.last_props_at > TELEMETRY_FALLBACK_S
+        ):
+            log.warning("Subskrypcja KS Fit nie daje prędkości - wracam do odpytywania z QZ")
+            self.poll_command = kingsmith.GET_PROPS
+        self._log_stats(now)
+        await self.send(self.poll_command)
+
+    def _log_stats(self, now: float) -> None:
+        """Raz na 30 s: jak często naprawdę przychodzi prędkość (do diagnozy opóźnień)."""
+        if now - self.stats_at < STATS_EVERY_S:
+            return
+        self.stats_at = now
+        times = [t for t in self.props_times if now - t <= STATS_EVERY_S]
+        self.props_times = times
+        if len(times) >= 2:
+            gaps = sorted(b - a for a, b in itertools.pairwise(times))
+            log.info(
+                "Telemetria (%s): %d ramek z danymi w %.0f s, typowo co %.2f s, najdłużej %.2f s",
+                "KS Fit" if self.poll_command == kingsmith.TELEMETRY_PROPS else "QZ",
+                len(times),
+                STATS_EVERY_S,
+                gaps[len(gaps) // 2],
+                gaps[-1],
+            )
 
 
 class FtmsDriver:

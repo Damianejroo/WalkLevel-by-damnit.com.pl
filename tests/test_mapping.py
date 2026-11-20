@@ -132,3 +132,23 @@ def test_quick_slowdown_resumes_walking_when_speed_holds() -> None:
     assert not m.update(3.5, 4.0).walk  # nadal w oknie 3 s
     assert m.update(3.5, 5.5).walk  # nie spada dalej - to było tylko zwolnienie
     assert m.update(4.0, 6.0).walk
+
+
+# zatrzymania z logu wersji 0.2.6 (próg chodu testera 1,0 km/h): (ramki, stop przed, stop teraz)
+STOP_SLOW = [(0.0, 1.7), (2.0, 1.7), (4.0, 1.5), (6.0, 1.0), (8.0, 0.0), (10.0, 0.0)]
+STOP_RAMP = [(0.0, 2.0), (2.0, 2.0), (4.0, 1.9), (6.0, 1.0), (8.0, 0.0), (10.0, 0.0)]
+
+
+def test_slow_walk_stop_is_caught_near_the_walk_threshold() -> None:
+    assert replay(STOP_SLOW, quick=False) == pytest.approx(8.0)
+    assert replay(STOP_SLOW, quick=True) == pytest.approx(4.0)  # 1,7 -> 1,5 przy progu 1,0
+
+
+def test_ramp_stop_is_caught_on_the_big_drop() -> None:
+    assert replay(STOP_RAMP, quick=True) == pytest.approx(6.0)  # 1,9 -> 1,0 (0,9 km/h)
+
+
+def test_remote_steps_of_half_kmh_do_not_stop_running() -> None:
+    m = SpeedMapper(MappingConfig(stand_below=1.0, run_on=4.0, run_off=3.4))
+    for t, v in enumerate([5.0, 4.5, 4.0, 3.5]):  # pilot w dół po 0,5 km/h
+        assert m.update(v, t * 2.0).walk

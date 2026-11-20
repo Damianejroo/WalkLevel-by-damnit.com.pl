@@ -26,7 +26,10 @@ class MappingConfig:
     # a zmiana tempa pilotem to ok. 0,2-0,3 km/h. Duży spadek = hamowanie = postać staje
     # od razu, zamiast czekać kilka sekund na pełne zatrzymanie taśmy.
     quick_stop: bool = True
-    brake_drop: float = 0.6
+    brake_drop: float = 0.6  # pilot zmienia do 0,5 km/h na odczyt, stop to 0,7-1,0
+    # Blisko progu chodu każdy spadek prędkości oznacza zatrzymywanie się
+    # (X21 przy stopie zwalnia przez 1,5 -> 1,0 -> 0 km/h).
+    brake_near: float = 0.6
     # Ile sekund bez dalszego spadku, zanim uznamy, że to było tylko zwolnienie.
     brake_hold_s: float = 3.0
 
@@ -84,7 +87,7 @@ class SpeedMapper:
             self._braking = False
             return
         if last is not None and raw < last - 1e-9:
-            if last - raw >= cfg.brake_drop:
+            if last - raw >= cfg.brake_drop or raw <= cfg.stand_below + cfg.brake_near:
                 self._braking = True
             self._last_fall = now  # każdy dalszy spadek podtrzymuje hamowanie
         elif last is not None and raw > last + 1e-9:

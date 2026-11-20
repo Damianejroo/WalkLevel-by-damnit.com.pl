@@ -294,3 +294,20 @@ def test_real_x21_session_streams_speed_without_gaps(monkeypatch: pytest.MonkeyP
     walking = [t for t, _ in readings if t >= moving[0]]
     gaps = [b - a for a, b in itertools.pairwise(walking)]
     assert max(gaps) < 1.5, f"przerwa {max(gaps):.2f} s"
+
+
+def test_driver_switches_to_ks_fit_telemetry_and_falls_back(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bieznia.ble import drivers
+
+    treadmill = FakeTreadmill()
+    driver, _readings = asyncio.run(run_driver(treadmill))
+    assert any(t == kingsmith.TELEMETRY_PROPS for t in treadmill.received)
+    assert driver.poll_command == kingsmith.TELEMETRY_PROPS
+    # brak prędkości przez dłużej niż próg powrotu -> wracamy do listy z QZ
+    now = [driver.telemetry_since + drivers.TELEMETRY_FALLBACK_S + 1.0]
+    monkeypatch.setattr(drivers.time, "monotonic", lambda: now[0])
+    driver.last_props_at = now[0] - drivers.TELEMETRY_FALLBACK_S - 1.0
+    asyncio.run(driver.poll())
+    assert driver.poll_command == kingsmith.GET_PROPS
