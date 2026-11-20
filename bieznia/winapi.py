@@ -72,17 +72,25 @@ def is_key_down(vk: int) -> bool:
     return bool(_user32.GetAsyncKeyState(vk) & 0x8000)
 
 
+def key_input(scan: int, down: bool, extended: bool = False) -> INPUT:
+    """Zdarzenie klawiatury dla SendInput.
+
+    Uwaga: dane klawisza MUSZĄ trafić do unii (u.ki). Zapis INPUT(ki=...) tworzy tylko
+    atrybut Pythona - Windows dostaje wtedy puste zdarzenie, zgłasza sukces i nic się
+    nie dzieje (tak było do wersji 0.2.2).
+    """
+    flags = KEYEVENTF_SCANCODE | (0 if down else KEYEVENTF_KEYUP)
+    if extended:  # strzałki, prawy Ctrl/Alt, Insert, Home...
+        flags |= KEYEVENTF_EXTENDEDKEY
+    ki = KEYBDINPUT(wVk=0, wScan=scan, dwFlags=flags, time=0, dwExtraInfo=INJECT_TAG)
+    return INPUT(type=INPUT_KEYBOARD, u=_INPUTUNION(ki=ki))
+
+
 def send_scancode(scan: int, down: bool, extended: bool = False) -> None:
     """Naciska/puszcza klawisz po kodzie skanowania (gry z DirectInput go widzą)."""
     if not IS_WINDOWS:
         return
-    flags = KEYEVENTF_SCANCODE | (0 if down else KEYEVENTF_KEYUP)
-    if extended:  # strzałki, prawy Ctrl/Alt, Insert, Home...
-        flags |= KEYEVENTF_EXTENDEDKEY
-    event = INPUT(
-        type=INPUT_KEYBOARD,
-        ki=KEYBDINPUT(wVk=0, wScan=scan, dwFlags=flags, time=0, dwExtraInfo=INJECT_TAG),
-    )
+    event = key_input(scan, down, extended)
     if _user32.SendInput(1, ctypes.byref(event), ctypes.sizeof(INPUT)) != 1:
         raise ctypes.WinError(ctypes.get_last_error())
 

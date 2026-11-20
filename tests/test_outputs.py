@@ -94,3 +94,16 @@ def test_broken_settings_file_falls_back_to_defaults(tmp_path: Path) -> None:
     path = tmp_path / "ustawienia.json"
     path.write_text("{ to nie jest json", encoding="utf-8")
     assert settings.load_settings(path) == {}
+
+
+def test_held_walk_key_repeats_like_a_real_keyboard(sent: list[tuple[int, bool, bool]]) -> None:
+    now = [0.0]
+    out = keyboard.KeyboardOutput(clock=lambda: now[0])
+    for step in range(20):  # 1 s chodu, klatki co 50 ms
+        now[0] = step * 0.05
+        out.apply(WALK)
+    downs = [e for e in sent if e == (W, True, False)]
+    assert len(downs) > 5  # pierwsze wciśnięcie + powtórzenia po ok. 0,35 s
+    assert all(e[1] for e in sent)  # w trakcie chodu nic nie jest puszczane
+    out.apply(Control.idle())
+    assert sent[-1] == (W, False, False)

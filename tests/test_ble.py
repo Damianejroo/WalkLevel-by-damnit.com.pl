@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import itertools
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -251,3 +252,45 @@ def test_ftms_and_unknown_devices() -> None:
     assert isinstance(make_driver(FtmsOnly(), "X", lambda *_: None), FtmsDriver)  # type: ignore[arg-type]
     with pytest.raises(UnsupportedDevice):
         make_driver(Headphones(), "JBL", lambda *_: None)  # type: ignore[arg-type]
+
+
+# --- prawdziwa sesja z bieżnią KS-NACH-X21C (log testera) ----------------------
+
+
+def test_real_x21_session_streams_speed_without_gaps(monkeypatch: pytest.MonkeyPatch) -> None:
+    from pathlib import Path
+
+    from bieznia.ble import drivers
+
+    lines = Path(__file__).with_name("dane").joinpath("x21-ramki.txt").read_text(encoding="utf-8")
+    frames = [
+        (float(t), bytes.fromhex(h))
+        for t, h in (line.split() for line in lines.splitlines() if not line.startswith("#"))
+    ]
+    clock = [0.0]
+    monkeypatch.setattr(drivers.time, "monotonic", lambda: clock[0])
+    readings: list[tuple[float, float]] = []
+    channel = drivers.Channel(
+        f"00011234{BASE}",
+        FakeChar(f"0001fed7{BASE}", ["write-without-response"]),
+        FakeChar(f"0001fed8{BASE}", ["notify"]),
+    )
+    driver = KingSmithDriver(
+        FakeTreadmill(), [channel], "KS-NACH-X21C", lambda s, _st: readings.append((clock[0], s))
+    )
+    undecoded = 0
+    for t, data in frames:
+        clock[0] = t
+        for frame in channel.frames.feed(data):
+            if kingsmith.decode(frame, "v5") is None:
+                undecoded += 1
+        driver._on_notify(channel, None, bytearray(data))
+    assert undecoded == 0  # także odpowiedzi kończące się \r ("servers 0\r")
+    assert driver.codec.table == "v5"
+    speeds = {s for _, s in readings}
+    assert {0.0, 1.6, 2.0, 2.5, 3.0, 2.3} <= speeds
+    # podczas chodu (od pierwszej prędkości > 0) dane przychodzą częściej niż bezpiecznik 3 s
+    moving = [t for t, s in readings if s > 0]
+    walking = [t for t, _ in readings if t >= moving[0]]
+    gaps = [b - a for a, b in itertools.pairwise(walking)]
+    assert max(gaps) < 1.5, f"przerwa {max(gaps):.2f} s"

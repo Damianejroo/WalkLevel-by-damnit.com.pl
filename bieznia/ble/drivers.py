@@ -24,6 +24,11 @@ _KS_UUID = re.compile(r"^000[0-2](fed7|fed8|1234)-0000-1000-8000-00805f9b34fb$")
 _SERVICE_PREFERENCE = ("0002", "0001", "0000")
 
 
+# Najdłuższa przerwa między ramkami z prędkością, przy której potwierdzenia odpytywania
+# jeszcze podtrzymują ostatnią prędkość (X21 wysyła ją co ok. 2 s).
+PROPS_TIMEOUT_S = 6.0
+
+
 class UnsupportedDevice(Exception):
     """Urządzenie nie ma żadnej znanej usługi bieżni."""
 
@@ -111,6 +116,7 @@ class KingSmithDriver:
         self.last_speed = 0.0
         self.last_steps: int | None = None
         self.last_reply = 0.0
+        self.last_props_at = float("-inf")
         self.unanswered_polls = 0
         self._reply = asyncio.Event()
 
@@ -162,8 +168,16 @@ class KingSmithDriver:
 
     def _handle(self, text: str) -> None:
         props = kingsmith.parse_props(text)
+        now = time.monotonic()
         if not props:
+            # X21 wysyła prędkość sam co ok. 2 s, a na nasze odpytywanie (co 0,75 s)
+            # odpowiada krótkim "servers 0". To potwierdzenie = bieżnia żyje, prędkość
+            # bez zmian. Bez świeżej ramki z prędkością (PROPS_TIMEOUT_S) nic nie wysyłamy -
+            # wtedy bezpiecznik w silniku zatrzyma postać.
+            if text.startswith("servers") and now - self.last_props_at < PROPS_TIMEOUT_S:
+                self.on_reading(self.last_speed, self.last_steps)
             return
+        self.last_props_at = now
         if "CurrentSpeed" in props:
             self.last_speed = max(0.0, props["CurrentSpeed"])
         if props.get("runState") == 0:  # taśma zatrzymana

@@ -26,7 +26,7 @@ max_speed = 10.0
 # średnia z ostatnich N odczytów
 smoothing_samples = 3
 # brak odczytu dłużej niż tyle sekund = stoisz (bezpiecznik)
-stale_after_s = 2.0
+stale_after_s = 3.0
 
 [hotkeys]
 toggle = "F8"

@@ -73,7 +73,8 @@ def decode(frame: bytes, table: str) -> str | None:
         return None
     try:
         raw = base64.b64decode(frame.translate(_DECODE[table]), validate=True)
-        text = raw.decode("ascii")
+        # X21 kończy odpowiedzi znakiem CR/LF wewnątrz zaszyfrowanej treści
+        text = raw.decode("ascii").rstrip("\r\n")
     except (binascii.Error, ValueError):
         return None
     return text if _PRINTABLE.match(text) else None
