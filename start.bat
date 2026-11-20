@@ -37,7 +37,8 @@ if not exist ".git" (
     echo.
     echo [BLAD] Nadzorca nie dziala. Za 30 s pobiore poprawke z GitHuba i sprobuje ponownie.
     echo        Zamknij okno, zeby przerwac.
-    timeout /t 30 /nobreak >nul
+    rem Pelna sciezka: "timeout" z Git Basha w PATH to inny program. ping dziala tez bez konsoli.
+    "%SystemRoot%\System32\PING.EXE" -n 31 127.0.0.1 >nul
     git pull --ff-only --quiet
     set "BIEZNIA_RESUME="
     goto petla
