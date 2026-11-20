@@ -14,7 +14,7 @@ from bieznia import aktualizacje as akt
 
 PAYLOAD = b"MZ" + b"instalator" * 1000
 SHA = hashlib.sha256(PAYLOAD).hexdigest()
-URL = "https://github.com/Damianejroo/bieznia-olek/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe"
+URL = "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe"
 
 
 def release_json(**asset: Any) -> dict[str, Any]:

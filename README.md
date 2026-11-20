@@ -1,6 +1,6 @@
-# Bieżnia Gamingowa
+# WalkingPad X21 PC Gaming by damnit.com.pl
 
-Aplikacja na Windows, która zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie
+**Bieżnia Gamingowa** to aplikacja na Windows, która zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie
 w grach: chód to **W**, bieg to **Shift + W** (oba klawisze można zmienić). Łączy się z bieżnią przez Bluetooth i sama ją
 wyszukuje.
 
@@ -9,7 +9,7 @@ kontakt@damnit.com.pl
 
 ## Instalacja
 
-1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/Damianejroo/bieznia-olek/releases/latest).
+1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/latest).
 2. Uruchom instalator i kliknij **Instaluj** (jeden ekran, bez administratora). Po instalacji
    aplikacja otworzy się sama.
    Windows może pokazać okno „System Windows ochronił ten komputer” (aplikacja nie ma
@@ -130,7 +130,7 @@ bieżnia sama nic nie wysyła. Zapasowo obsługiwany jest standard FTMS.
   instalator jest uruchamiany dopiero po zgodności sumy SHA-256 podanej przez GitHub,
 - wydania budują się w GitHub Actions z przypiętych wersji (akcje po commitach, Inno Setup
   po sumie SHA-256, biblioteki z `uv.lock` z sumami) i mają poświadczenie pochodzenia
-  (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/bieznia-olek`),
+  (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl`),
 - instalacja i działanie bez administratora; aplikacja tylko czyta bieżnię, startuje
   z wyłączonym sterowaniem i puszcza W/Shift po utracie danych, awarii albo zamknięciu,
 - skróty F6-F8 są sprawdzane globalnie, ale program nie czyta ani nie zapisuje innych
