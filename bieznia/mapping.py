@@ -9,20 +9,22 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any
 
+STOPPED_KMH = 0.05
+
 
 @dataclass(frozen=True)
 class MappingConfig:
     stand_below: float = 0.8
     run_on: float = 6.3
     run_off: float = 5.7
-    max_speed: float = 10.0
+    max_speed: float = 12.0
     smoothing_samples: int = 3
     stale_after_s: float = 2.0
 
     def __post_init__(self) -> None:
-        if not 0 <= self.stand_below < self.run_off <= self.run_on < self.max_speed:
+        if not 0 <= self.stand_below < self.run_off <= self.run_on <= self.max_speed:
             raise ValueError(
-                "Wymagane: 0 <= stand_below < run_off <= run_on < max_speed, "
+                "Wymagane: 0 <= stand_below < run_off <= run_on <= max_speed, "
                 f"jest: {self.stand_below=}, {self.run_off=}, {self.run_on=}, {self.max_speed=}"
             )
         if self.smoothing_samples < 1:
@@ -61,7 +63,8 @@ class SpeedMapper:
         self._window.append(max(0.0, speed_kmh))
         speed = sum(self._window) / len(self._window)
 
-        if speed < cfg.stand_below:
+        # stojąca taśma nigdy nie rusza postaci, nawet przy progu chodu 0 km/h
+        if speed < cfg.stand_below or speed <= STOPPED_KMH:
             self._running = False
             return Control(speed=speed, stick=0.0, walk=False, run=False)
 

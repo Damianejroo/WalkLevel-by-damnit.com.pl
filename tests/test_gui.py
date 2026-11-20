@@ -251,3 +251,15 @@ def test_always_on_top_really_sets_topmost(window: gui.App) -> None:
     assert is_topmost(hwnd)
     window.on_always_on_top(False)
     assert not is_topmost(hwnd)
+
+
+def test_threshold_sliders_cover_0_to_12_and_keep_order(window: gui.App) -> None:
+    walk, run = window.walk_slider, window.run_slider
+    assert (walk.minimum(), walk.maximum(), run.minimum(), run.maximum()) == (0, 120, 0, 120)
+    walk.setValue(100)  # chód 10 km/h - bieg musi przesunąć się w górę
+    window.on_thresholds(walk)
+    assert run.value() / 10 >= walk.value() / 10 + 0.8
+    run.setValue(20)  # bieg 2 km/h - chód zjeżdża w dół
+    window.on_thresholds(run)
+    assert walk.value() / 10 <= 2.0 - 0.8
+    assert window.bridge.mapping.run_on == run.value() / 10

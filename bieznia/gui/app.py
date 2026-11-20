@@ -407,10 +407,15 @@ class App:
         hlay.setContentsMargins(14, 10, 14, 12)
         hlay.setSpacing(8)
         self.gauge = Gauge(t)
+        self.gauge.max_speed = float(self.config["mapping"]["max_speed"])
+        self.gauge.walk_from = float(self.settings["stand_below"])
+        self.gauge.run_from = float(self.settings["run_on"])
         hlay.addWidget(self.gauge, 1)
         self.belt = Belt(t)
         hlay.addWidget(self.belt)
         self.spark = Sparkline(t)
+        self.spark.max_speed = self.gauge.max_speed
+        self.spark.run_from = self.gauge.run_from
         hlay.addWidget(self.spark)
         lay.addWidget(hero)
 
@@ -514,10 +519,11 @@ class App:
         sl = QVBoxLayout(speed)
         sl.setContentsMargins(14, 12, 14, 14)
         sl.addWidget(label("Progi prędkości", "section"))
+        max_kmh = float(self.config["mapping"]["max_speed"])
         self.walk_slider, walk_value = self.slider(
-            0.3, 2.0, self.settings["stand_below"], "Chód od"
+            0.0, max_kmh, self.settings["stand_below"], "Chód od"
         )
-        self.run_slider, run_value = self.slider(3.0, 9.0, self.settings["run_on"], "Bieg od")
+        self.run_slider, run_value = self.slider(0.0, max_kmh, self.settings["run_on"], "Bieg od")
         for title, s, v in (
             ("Chód od", self.walk_slider, walk_value),
             ("Bieg od", self.run_slider, run_value),
@@ -529,9 +535,9 @@ class App:
             row.addWidget(s, 1)
             row.addWidget(v)
             sl.addLayout(row)
-            s.sliderReleased.connect(self.on_thresholds)
+            s.sliderReleased.connect(lambda sl_=s: self.on_thresholds(sl_))
             s.valueChanged.connect(
-                lambda _v, sl_=s: None if sl_.isSliderDown() else self.on_thresholds()
+                lambda _v, sl_=s: None if sl_.isSliderDown() else self.on_thresholds(sl_)
             )
         note = label(
             f"Bieg wyłącza się {fmt_num(HYSTERESIS)} km/h niżej, żeby Shift nie migał.", "small"
@@ -808,9 +814,26 @@ class App:
         self.save()
         self.render_output_hint()
 
-    def on_thresholds(self) -> None:
+    def on_thresholds(self, moved: Any = None) -> None:
+        """Progi chodu i biegu. Ruszony suwak wygrywa, drugi przesuwa się o odstęp."""
+        top = float(self.config["mapping"]["max_speed"])
+        gap = HYSTERESIS + 0.2  # bieg wyłącza się 0,6 niżej i nadal musi być nad chodem
         walk = self.walk_slider.value() / 10
-        run = max(self.run_slider.value() / 10, walk + HYSTERESIS + 0.2)
+        run = self.run_slider.value() / 10
+        if run < walk + gap:
+            if moved is self.walk_slider:
+                run = min(top, walk + gap)
+                walk = min(walk, run - gap)
+            else:
+                walk = max(0.0, run - gap)
+                run = max(run, walk + gap)
+        walk, run = round(walk, 1), round(run, 1)
+        for slider, value in ((self.walk_slider, walk), (self.run_slider, run)):
+            if slider.value() != round(value * 10):
+                slider.blockSignals(True)
+                slider.setValue(round(value * 10))
+                slider.blockSignals(False)
+                slider.valueChanged.emit(slider.value())  # odśwież napis obok suwaka
         try:
             mapping = MappingConfig.from_dict(
                 {

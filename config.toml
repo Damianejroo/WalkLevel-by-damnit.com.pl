@@ -22,7 +22,7 @@ stand_below = 0.8
 run_on = 6.3
 run_off = 5.7
 # prędkość, przy której gałka pada jest wychylona na 100%
-max_speed = 10.0
+max_speed = 12.0
 # średnia z ostatnich N odczytów
 smoothing_samples = 3
 # brak odczytu dłużej niż tyle sekund = stoisz (bezpiecznik)

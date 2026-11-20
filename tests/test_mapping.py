@@ -67,3 +67,11 @@ def test_invalid_config_is_rejected(kwargs: dict[str, float]) -> None:
 def test_from_dict_ignores_unknown_keys() -> None:
     cfg = MappingConfig.from_dict({"run_on": 7.0, "foo": 1})
     assert cfg.run_on == 7.0
+
+
+def test_full_x21_range_and_zero_walk_threshold() -> None:
+    m = mapper(stand_below=0.0, run_on=12.0, run_off=11.4, max_speed=12.0)
+    assert not m.update(0.0).walk  # stojąca taśma nie rusza postaci
+    assert m.update(0.5).walk
+    assert m.update(12.0).run
+    assert m.update(12.0).stick == 1.0
