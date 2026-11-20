@@ -26,6 +26,7 @@ if errorlevel 1 (
   exit /b 1
 )
 echo Pierwszy start aplikacji pobierze jeszcze Pythona i biblioteki (ok. 150 MB, tylko raz).
+echo Pierwsze otwarcie okna moze potrwac 1-3 minuty - Windows sprawdza nowe pliki.
 
 :narzedzia
 set "PATH=%TOOLS%\uv;%TOOLS%\git\cmd;%PATH%"

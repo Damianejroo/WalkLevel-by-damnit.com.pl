@@ -12,8 +12,9 @@ ją wyszukuje i sama się aktualizuje.
 3. Kliknij dwa razy **`Uruchom.bat`**. Jeśli Windows zapyta o niezweryfikowanego wydawcę,
    wybierz Uruchom (to zwykły skrypt z tej paczki).
 
-Pierwsze uruchomienie pobiera narzędzia, Pythona i biblioteki (ok. 200 MB, jednorazowo) do
-ukrytego folderu `.narzedzia` obok aplikacji. Nic nie jest instalowane w systemie i nie trzeba
+Pierwsze uruchomienie pobiera narzędzia, Pythona i biblioteki (ok. 150 MB do pobrania, ok.
+0,5 GB na dysku, jednorazowo) do folderu `.narzedzia` obok aplikacji. Pierwsze otwarcie okna
+może potrwać 1-3 minuty, bo Windows sprawdza nowe pliki - kolejne starty trwają kilka sekund. Nic nie jest instalowane w systemie i nie trzeba
 uprawnień administratora. Usunięcie folderu usuwa wszystko.
 
 Potem w ustawieniach aplikacji możesz kliknąć **Utwórz skrót na pulpicie**.

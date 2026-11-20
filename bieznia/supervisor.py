@@ -99,6 +99,7 @@ class Supervisor:
     # --- proces mostu -------------------------------------------------------
 
     def start_child(self) -> None:
+        log.info("Uruchamiam aplikację…")
         cmd = [sys.executable, "-m", "bieznia", *self.app_args]
         env = dict(os.environ)
         if self.resume_next:

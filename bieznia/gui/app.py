@@ -66,6 +66,7 @@ from bieznia.sources.simulator import SimulatedTreadmill
 log = logging.getLogger("bieznia")
 
 TICK_MS = 50
+STARTED = time.monotonic()  # import tego modułu to praktycznie start procesu
 HYSTERESIS = 0.6
 
 
@@ -917,6 +918,7 @@ def run_gui(config: dict[str, Any], enabled: bool) -> int:
 
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Bieznia.App")
     app = App(qt, config, enabled)
+    log.info("Okno gotowe po %.1f s", time.monotonic() - STARTED)
     signal.signal(signal.SIGINT, app.request_stop)
     if hasattr(signal, "SIGBREAK"):  # tak zamyka nas nadzorca przed aktualizacją
         signal.signal(signal.SIGBREAK, app.request_stop)
