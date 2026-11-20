@@ -83,7 +83,7 @@ from bieznia.gui.widgets import (
     label,
 )
 from bieznia.hotkeys import Hotkeys
-from bieznia.klawisze import RUN_DEFAULT, WALK_DEFAULT, Key, problem
+from bieznia.klawisze import RUN_DEFAULT, TOGGLE_DEFAULT, WALK_DEFAULT, Key, problem
 from bieznia.logs import set_detailed
 from bieznia.mapping import MappingConfig
 from bieznia.paths import FROZEN
@@ -243,6 +243,8 @@ class App:
             "last_version": config.get("ui", {}).get("last_version", ""),
             "walk_key": config["output"].get("walk_key"),
             "run_key": config["output"].get("run_key"),
+            "toggle_key": config["output"].get("toggle_key"),
+            "belt_control": bool(config.get("ble", {}).get("belt_control", True)),
         }
         self.report_endpoint = str(config.get("zgloszenia", {}).get("adres", "")).strip()
         self.tasks: queue.Queue[tuple[str, Any]] = queue.Queue()
@@ -256,7 +258,10 @@ class App:
         self.bridge = Bridge(
             MappingConfig.from_dict(config["mapping"]), self.settings["output"], enabled, keys
         )
-        self.hotkeys = Hotkeys(config["hotkeys"])
+        self.toggle_key = Key.from_dict(self.settings["toggle_key"], TOGGLE_DEFAULT)
+        if self.toggle_key.vk == 0:  # zapis sprzed wersji z kodem wirtualnym
+            self.toggle_key = TOGGLE_DEFAULT
+        self.hotkeys = self.make_hotkeys()
         self.worker = BleWorker()
         self.logs: queue.Queue[str] = queue.Queue()
         self.log_lines: list[str] = []
@@ -450,8 +455,8 @@ class App:
         ctexts = QVBoxLayout()
         ctexts.setSpacing(0)
         ctexts.addWidget(label("Sterowanie w grze", "title"))
-        key = self.config["hotkeys"]["toggle"]
-        ctexts.addWidget(label(f"{key} włącza i wyłącza - działa też w grze", "muted"))
+        self.control_subtitle = label("", "muted")
+        ctexts.addWidget(self.control_subtitle)
         crow.addLayout(ctexts, 1)
         self.enable_switch = Switch(t, "Sterowanie w grze", self.bridge.state.enabled)
         self.enable_switch.toggled.connect(self.on_enable)
@@ -467,9 +472,12 @@ class App:
         walk_key, run_key = self.bridge.keys
         self.walk_btn = KeyButton("Chód", walk_key)
         self.run_btn = KeyButton("Bieg", run_key)
+        self.toggle_btn = KeyButton("Start/stop", self.toggle_key)
         self.walk_btn.captured.connect(lambda k: self.on_key("walk", k))
         self.run_btn.captured.connect(lambda k: self.on_key("run", k))
+        self.toggle_btn.captured.connect(lambda k: self.on_key("toggle", k))
         clay.addWidget(ResponsiveRow(self.walk_btn, self.run_btn))
+        clay.addWidget(self.toggle_btn)
         self.output_hint = label("", "muted")
         self.output_hint.setWordWrap(True)
         self.output_hint.setMinimumHeight(22)
@@ -477,6 +485,7 @@ class App:
         lay.addWidget(control)
         lay.addStretch(1)
 
+        self.render_control_subtitle()
         self.render_output_hint()
         return page
 
@@ -568,6 +577,22 @@ class App:
             quick,
         )
         lay.addWidget(speed)
+
+        belt = card()
+        bl = QVBoxLayout(belt)
+        bl.setContentsMargins(14, 12, 14, 14)
+        bl.addWidget(label("Sterowanie bieżnią", "section"))
+        self.belt_switch = Switch(t, "Start i stop bieżni", self.settings["belt_control"])
+        self.belt_switch.toggled.connect(self.on_belt_control)
+        self.setting_row(
+            bl,
+            "Start i stop bieżni",
+            "Włączenie sterowania uruchamia taśmę, wyłączenie ją zatrzymuje - klawiszem,"
+            " przełącznikiem albo przyciskiem na ekranie. Prędkość dalej zmieniasz pilotem."
+            " Wyłącz, jeśli wolisz startować tylko pilotem.",
+            self.belt_switch,
+        )
+        lay.addWidget(belt)
 
         look = card()
         ll = QVBoxLayout(look)
@@ -829,9 +854,64 @@ class App:
         self.change("floating_pos", [point.x(), point.y()])
 
     def toggle_from_bubble(self) -> None:
-        enabled = self.bridge.toggle()
-        self.enable_switch.set_silently(enabled)
-        save_enabled(enabled)
+        self.set_control(not self.bridge.state.enabled)
+
+    def set_control(self, on: bool) -> None:
+        """Jedno miejsce dla skrótu, przełącznika i przycisku na ekranie.
+
+        Wyłączenie najpierw puszcza klawisze (postać staje od razu), potem zatrzymuje taśmę.
+        """
+        changed = on != self.bridge.state.enabled
+        self.bridge.set_enabled(on)
+        self.enable_switch.set_silently(on)
+        save_enabled(on)
+        if changed and self.belt_commands_possible():
+            if not on:
+                self.worker.belt("stop")
+            elif self.bridge.state.control.speed > 0:
+                log.info("Taśma już jedzie - nie wysyłam startu")
+            else:
+                self.worker.belt("start")
+                self.render_output_hint("Uruchamiam bieżnię…")
+
+    def belt_commands_possible(self) -> bool:
+        return bool(self.settings["belt_control"]) and not self.settings["simulator"]
+
+    def on_belt_control(self, on: bool) -> None:
+        self.change("belt_control", on)
+        self.render_control_subtitle()
+
+    def render_control_subtitle(self) -> None:
+        key = self.toggle_key.name
+        if self.settings["belt_control"]:
+            text = f"{key} uruchamia i zatrzymuje bieżnię - działa też w grze"
+        else:
+            text = f"{key} włącza i wyłącza - działa też w grze"
+        self.control_subtitle.setText(text)
+
+    def make_hotkeys(self) -> Hotkeys:
+        keys = self.config["hotkeys"]
+        return Hotkeys(
+            {
+                "toggle": self.toggle_key.vk,
+                "sim_slower": keys["sim_slower"],
+                "sim_faster": keys["sim_faster"],
+            }
+        )
+
+    def on_belt_event(self, result: str) -> None:
+        messages = {
+            "started": "Bieżnia rusza. Prędkość zmieniasz pilotem.",
+            "stopped": "Bieżnia zatrzymana.",
+            "refused": "Bieżnia nie przyjęła startu. Obudź ją pilotem albo sprawdź, czy klucz"
+            " bezpieczeństwa jest na miejscu, i spróbuj jeszcze raz.",
+            "unknown": "Wysłano start, ale bieżnia nie odpowiedziała. Jeśli taśma nie rusza,"
+            " uruchom ją pilotem.",
+            "unsupported": "Ta bieżnia nie obsługuje startu z aplikacji - użyj pilota.",
+            "not_connected": "Brak połączenia z bieżnią - start i stop tylko pilotem.",
+        }
+        log.info("Taśma: %s", result)
+        self.render_output_hint(messages.get(result, ""))
 
     def show_main(self) -> None:
         w = self.window
@@ -849,8 +929,7 @@ class App:
             self.update_btn.setToolTip(f"Aktualizuj do wersji {self.update_available}")
 
     def on_enable(self, on: bool) -> None:
-        self.bridge.set_enabled(on)
-        save_enabled(on)
+        self.set_control(on)
 
     def on_output(self, kind: str) -> None:
         self.bridge.set_output(kind)
@@ -870,16 +949,28 @@ class App:
 
     def on_key(self, role: str, key: Key) -> None:
         walk, run = self.bridge.keys
-        walk, run = (key, run) if role == "walk" else (walk, key)
-        error = problem(walk, run)
+        toggle = self.toggle_key
+        if role == "walk":
+            walk = key
+        elif role == "run":
+            run = key
+        else:
+            toggle = key
+        error = problem(walk, run, toggle)
         if error:
             self.render_output_hint(error)
             return
         self.bridge.set_keys(walk, run)
         self.walk_btn.set_key(walk)
         self.run_btn.set_key(run)
+        self.toggle_btn.set_key(toggle)
         self.settings["walk_key"] = walk.to_dict()
         self.settings["run_key"] = run.to_dict()
+        if toggle != self.toggle_key:
+            self.toggle_key = toggle
+            self.settings["toggle_key"] = toggle.to_dict()
+            self.hotkeys = self.make_hotkeys()  # trzymany właśnie klawisz się nie liczy
+            self.render_control_subtitle()
         self.save()
         self.render_output_hint()
 
@@ -1255,6 +1346,8 @@ class App:
             self.render_devices()
             self.pages.go(self.DEVICES)
             self.devices_status.setText(event.text)
+        elif event.kind == "belt":
+            self.on_belt_event(event.text)
         elif event.kind == "report":
             self.diag_status.setText(f"Raport: {event.text}")
             log.info("Raport diagnostyczny: %s", event.text)
@@ -1285,10 +1378,11 @@ class App:
                 break
 
         actions = self.hotkeys.poll()
-        state = self.bridge.tick(time.monotonic(), actions)
         if "toggle" in actions:
-            self.enable_switch.set_silently(state.enabled)
-            save_enabled(state.enabled)
+            actions.discard("toggle")
+            if not any(b.capturing for b in (self.walk_btn, self.run_btn, self.toggle_btn)):
+                self.set_control(not self.bridge.state.enabled)
+        state = self.bridge.tick(time.monotonic(), actions)
 
         c = state.control
         if not state.live and not self.settings["simulator"]:
@@ -1334,7 +1428,10 @@ class App:
         self.quitting = True
         self.timer.stop()
         self.bubble.close()
+        was_enabled = self.bridge.state.enabled
         self.bridge.shutdown()
+        if was_enabled and self.belt_commands_possible() and self.worker.stop_belt_now():
+            log.info("Zamykanie: zatrzymano taśmę")
         self.worker.shutdown()
         self.save()
         self.qt.quit()

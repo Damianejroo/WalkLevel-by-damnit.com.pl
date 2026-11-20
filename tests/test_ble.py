@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import itertools
+import queue
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
 
-from bieznia.ble import ftms, kingsmith
+from bieznia.ble import drivers, ftms, kingsmith
 from bieznia.ble.drivers import (
     FtmsDriver,
     KingSmithDriver,
@@ -132,6 +134,8 @@ class FakeTreadmill:
     speed: float = 3.5
     answer_empty: bool = True
     extra_silent_channel: bool = False
+    running: bool = True
+    refuse_start: bool = False
     callbacks: dict[str, Any] = field(default_factory=dict)
     received: list[str] = field(default_factory=list)
     _buf: dict[str, bytearray] = field(default_factory=dict)
@@ -181,7 +185,20 @@ class FakeTreadmill:
         self.received.append(text)
         word = text.split()[0]
         if word == "servers":
-            self._reply(prefix, f"props CurrentSpeed {self.speed} RunningSteps 120 runState 1")
+            speed = self.speed if self.running else 0.0
+            state = int(self.running)
+            self._reply(prefix, f"props CurrentSpeed {speed} RunningSteps 120 runState {state}")
+        elif text == kingsmith.CMD_CONTROL:
+            self._reply(prefix, "props ControlMode 1")
+        elif text == kingsmith.CMD_START:
+            if self.refuse_start:
+                self._reply(prefix, "props Error ErrorCode -5000")
+            else:
+                self.running = True
+                self._reply(prefix, "props runState 1")
+        elif text == kingsmith.CMD_STOP:
+            self.running = False
+            self._reply(prefix, "props runState 0")
         else:
             self._reply(prefix, f"{word} ok")
 
@@ -260,8 +277,6 @@ def test_ftms_and_unknown_devices() -> None:
 def test_real_x21_session_streams_speed_without_gaps(monkeypatch: pytest.MonkeyPatch) -> None:
     from pathlib import Path
 
-    from bieznia.ble import drivers
-
     lines = Path(__file__).with_name("dane").joinpath("x21-ramki.txt").read_text(encoding="utf-8")
     frames = [
         (float(t), bytes.fromhex(h))
@@ -299,7 +314,6 @@ def test_real_x21_session_streams_speed_without_gaps(monkeypatch: pytest.MonkeyP
 def test_driver_switches_to_ks_fit_telemetry_and_falls_back(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from bieznia.ble import drivers
 
     treadmill = FakeTreadmill()
     driver, _readings = asyncio.run(run_driver(treadmill))
@@ -307,7 +321,111 @@ def test_driver_switches_to_ks_fit_telemetry_and_falls_back(
     assert driver.poll_command == kingsmith.TELEMETRY_PROPS
     # brak prędkości przez dłużej niż próg powrotu -> wracamy do listy z QZ
     now = [driver.telemetry_since + drivers.TELEMETRY_FALLBACK_S + 1.0]
-    monkeypatch.setattr(drivers.time, "monotonic", lambda: now[0])
+    # tylko zegar sterownika - zegar asyncio musi iść dalej (pauzy między fragmentami)
+    monkeypatch.setattr(drivers, "time", SimpleNamespace(monotonic=lambda: now[0]))
     driver.last_props_at = now[0] - drivers.TELEMETRY_FALLBACK_S - 1.0
     asyncio.run(driver.poll())
     assert driver.poll_command == kingsmith.GET_PROPS
+
+
+# --- start i stop taśmy -----------------------------------------------------------
+
+
+def test_start_belt_takes_control_and_starts() -> None:
+    async def scenario() -> tuple[str, list[str], bool]:
+        treadmill = FakeTreadmill(running=False)
+        driver, _ = await run_driver(treadmill)
+        result = await driver.start_belt()
+        return result, treadmill.received, treadmill.running
+
+    result, received, running = asyncio.run(scenario())
+    assert result == "started"
+    assert running
+    i = received.index(kingsmith.CMD_CONTROL)
+    assert received[i + 1] == kingsmith.CMD_START  # najpierw przejęcie sterowania
+
+
+def test_refused_start_is_retried_three_times() -> None:
+    async def scenario() -> tuple[str, list[str], int | None]:
+        treadmill = FakeTreadmill(running=False, refuse_start=True)
+        driver, _ = await run_driver(treadmill)
+        result = await driver.start_belt()
+        return result, treadmill.received, driver.last_error
+
+    result, received, error = asyncio.run(scenario())
+    assert result == "refused"
+    assert error == -5000
+    assert received.count(kingsmith.CMD_START) == drivers.START_ATTEMPTS
+    assert received.count(kingsmith.CMD_CONTROL) == drivers.START_ATTEMPTS
+
+
+def test_stop_belt_stops() -> None:
+    async def scenario() -> tuple[bool, int | None]:
+        treadmill = FakeTreadmill()
+        driver, _ = await run_driver(treadmill)
+        # w długiej sesji tablica jest już znana - krótkiej odpowiedzi można wtedy ufać
+        driver.codec.candidates = ["v1"]
+        await driver.stop_belt()
+        await asyncio.sleep(0.01)
+        return treadmill.running, driver.run_state
+
+    running, state = asyncio.run(scenario())
+    assert not running
+    assert state == 0
+
+
+class StubDriver:
+    protocol = "stub"
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+        self.started = asyncio.Event()
+
+    async def start(self) -> None:
+        pass
+
+    async def poll(self) -> None:
+        pass
+
+    def describe(self) -> str:
+        return "stub"
+
+    async def start_belt(self) -> str:
+        self.calls.append("start")
+        self.started.set()
+        await asyncio.sleep(10)  # bieżnia długo się namyśla
+        return "started"
+
+    async def stop_belt(self) -> None:
+        self.calls.append("stop")
+
+
+def test_worker_stop_cancels_pending_start() -> None:
+    from bieznia.ble.worker import BleWorker
+
+    worker = BleWorker.__new__(BleWorker)  # bez wątku - sama pętla poleceń
+    worker.events = queue.Queue()
+    worker._belt_task = None
+
+    async def scenario() -> StubDriver:
+        driver = StubDriver()
+        lost = asyncio.Event()
+        worker._commands = asyncio.Queue()
+        stream = asyncio.create_task(worker._stream(driver, lost))  # type: ignore[arg-type]
+        worker._commands.put_nowait("start")
+        await asyncio.wait_for(driver.started.wait(), 2)
+        worker._commands.put_nowait("start")  # drugi start w trakcie - ignorowany
+        worker._commands.put_nowait("stop")
+        for _ in range(50):
+            await asyncio.sleep(0.01)
+            if "stop" in driver.calls:
+                break
+        lost.set()
+        await asyncio.wait_for(stream, 2)
+        return driver
+
+    driver = asyncio.run(scenario())
+    assert driver.calls == ["start", "stop"]
+    assert worker._belt_task is not None and worker._belt_task.cancelled()
+    events = [worker.events.get_nowait() for _ in range(worker.events.qsize())]
+    assert [(e.kind, e.text) for e in events] == [("belt", "stopped")]

@@ -36,6 +36,7 @@ brake_near = 0.6
 brake_hold_s = 3.0
 
 [hotkeys]
+# w oknie zmienisz go przyciskiem "Start/stop" (to tylko domyślny i tryb bez okna)
 toggle = "F8"
 sim_slower = "F6"
 sim_faster = "F7"
@@ -53,6 +54,8 @@ branch = "main"
 # Zapamiętana bieżnia (ustawia się sama po pierwszym połączeniu w oknie).
 device_address = ""
 device_name = ""
+# start i stop taśmy razem z włączeniem/wyłączeniem sterowania (KingSmith)
+belt_control = true
 
 [ui]
 simulator = false

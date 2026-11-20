@@ -1,4 +1,4 @@
-"""Globalne skróty (F1-F12): wykrywa moment wciśnięcia, także gdy gra ma fokus.
+"""Globalne skróty: wykrywa moment wciśnięcia klawisza, także gdy gra ma fokus.
 
 Sprawdza wyłącznie klawisze z konfiguracji, niczego nie zapisuje.
 """
@@ -14,11 +14,16 @@ VK_CODES = {f"F{i}": 0x6F + i for i in range(1, 13)}
 
 class Hotkeys:
     def __init__(
-        self, bindings: dict[str, str], key_down: Callable[[int], bool] = is_key_down
+        self, bindings: dict[str, str | int], key_down: Callable[[int], bool] = is_key_down
     ) -> None:
-        """bindings: akcja -> nazwa klawisza, np. {"toggle": "F8"}."""
+        """bindings: akcja -> nazwa klawisza ("F8") albo kod wirtualny (0x77)."""
         self._vk: dict[str, int] = {}
         for action, key in bindings.items():
+            if isinstance(key, int):
+                if not 0 < key < 0x100:
+                    raise ValueError(f"Zły kod klawisza {key!r} dla {action!r}")
+                self._vk[action] = key
+                continue
             name = key.upper()
             if name not in VK_CODES:
                 raise ValueError(

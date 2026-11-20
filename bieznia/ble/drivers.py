@@ -6,6 +6,7 @@ Tylko ODCZYT: żaden sterownik nie wysyła poleceń zmiany prędkości ani start
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import itertools
 import logging
 import re
@@ -29,6 +30,14 @@ _SERVICE_PREFERENCE = ("0002", "0001", "0000")
 # jeszcze podtrzymują ostatnią prędkość (X21 wysyła ją co ok. 2 s).
 PROPS_TIMEOUT_S = 6.0
 
+
+# Odstępy zapisu jak w KS Fit: po każdym fragmencie i po całej wiadomości.
+FRAGMENT_GAP_S = 0.03
+LINE_GAP_S = 0.06
+START_ATTEMPTS = 3
+START_VERDICT_S = 2.5
+# Kody błędów od producenta (MIoT: -9999..-5000) = odmowa polecenia.
+VENDOR_ERRORS = range(-9999, -4999)
 
 # Ile czekamy na prędkość po przejściu na subskrypcję KS Fit, zanim wrócimy do listy z QZ.
 TELEMETRY_FALLBACK_S = 5.0
@@ -101,6 +110,10 @@ class Driver(Protocol):
 
     def describe(self) -> str: ...
 
+    async def start_belt(self) -> str: ...
+
+    async def stop_belt(self) -> None: ...
+
 
 class KingSmithDriver:
     """WalkingPad R2 / X21 / G1 / X23 - szyfrowany protokół tekstowy (patrz kingsmith.py)."""
@@ -129,6 +142,11 @@ class KingSmithDriver:
         self.telemetry_since = 0.0
         self.props_times: list[float] = []
         self.stats_at = 0.0
+        self.write_lock = asyncio.Lock()  # całe wiadomości nie mogą się przeplatać
+        self.run_state: int | None = None
+        self.control_mode: int | None = None
+        self.last_error: int | None = None
+        self._state_event = asyncio.Event()
         self._reply = asyncio.Event()
 
     def describe(self) -> str:
@@ -143,12 +161,52 @@ class KingSmithDriver:
         response = "write-without-response" not in props
         for chunk in kingsmith.chunks(data):
             await self.client.write_gatt_char(channel.write, chunk, response=response)
+            await asyncio.sleep(FRAGMENT_GAP_S)
+        await asyncio.sleep(LINE_GAP_S)
 
     async def send(self, text: str) -> None:
         data = self.codec.encode(text)
-        log.debug(">> %s  [%s] %s", text or "(pusta)", self.codec.table, data.hex(" "))
-        for channel in [self.active] if self.active else self.channels:
-            await self._write(channel, data)
+        async with self.write_lock:
+            log.debug(">> %s  [%s] %s", text or "(pusta)", self.codec.table, data.hex(" "))
+            for channel in [self.active] if self.active else self.channels:
+                await self._write(channel, data)
+
+    # --- sterowanie taśmą ---------------------------------------------------
+
+    async def _wait_state(self, timeout: float) -> None:
+        self._state_event.clear()
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(self._state_event.wait(), timeout)
+
+    async def start_belt(self) -> str:
+        """Uruchamia taśmę. Zwraca 'started', 'refused' albo 'unknown'.
+
+        Bieżnia potrafi odmówić (błąd -5000, np. w trybie czuwania albo bez klucza) -
+        jak KS Fit ponawiamy do trzech razy, ControlMode przy każdej próbie od nowa.
+        """
+        for attempt in range(1, START_ATTEMPTS + 1):
+            self.last_error = None
+            await self.send(kingsmith.CMD_CONTROL)
+            await self.send(kingsmith.CMD_START)
+            deadline = time.monotonic() + START_VERDICT_S
+            while time.monotonic() < deadline:
+                if self.run_state == 1:
+                    log.info("Bieżnia ruszyła (próba %d)", attempt)
+                    return "started"
+                if self.last_error is not None:
+                    break
+                await self._wait_state(deadline - time.monotonic())
+            if self.last_error is not None:
+                log.warning("Bieżnia odmówiła startu (kod %s), próba %d", self.last_error, attempt)
+            if self.run_state == 1:
+                return "started"
+        if self.last_error is not None:
+            return "refused"
+        return "unknown"  # brak odpowiedzi - prędkość pokaże, czy taśma jedzie
+
+    async def stop_belt(self) -> None:
+        await self.send(kingsmith.CMD_STOP)
+        log.info("Wysłano stop taśmy")
 
     async def _wait_reply(self, timeout: float) -> bool:
         self._reply.clear()
@@ -178,6 +236,7 @@ class KingSmithDriver:
                 self._handle(decoded.text)
 
     def _handle(self, text: str) -> None:
+        self._track_state(text)
         props = kingsmith.parse_props(text)
         now = time.monotonic()
         if not props:
@@ -198,6 +257,26 @@ class KingSmithDriver:
             self.last_steps = int(props["RunningSteps"])
         # Każda ramka z danymi = żywa bieżnia, nawet jeśli prędkość się nie zmieniła.
         self.on_reading(self.last_speed, self.last_steps)
+
+    def _track_state(self, text: str) -> None:
+        """Stan taśmy i odpowiedzi na polecenia (start/stop, odmowa)."""
+        parts = text.split()
+        if len(parts) >= 3 and parts[0] == "props" and parts[1] == "Error":
+            with contextlib.suppress(ValueError):
+                self.last_error = int(parts[-1])
+                if self.last_error not in VENDOR_ERRORS:
+                    log.info("Bieżnia zgłasza błąd %s (nie odmowa)", self.last_error)
+            self._state_event.set()
+            return
+        props = kingsmith.parse_props(text)
+        if "runState" in props:
+            self.run_state = int(props["runState"])
+            self._state_event.set()
+        if "ControlMode" in props:
+            self.control_mode = int(props["ControlMode"])
+            self._state_event.set()
+        if props.get("CurrentSpeed", 0.0) > 0 and self.run_state is None:
+            self.run_state = 1
 
     # --- cykl życia ---------------------------------------------------------
 
@@ -289,6 +368,13 @@ class FtmsDriver:
 
     async def poll(self) -> None:
         pass
+
+    async def start_belt(self) -> str:
+        log.warning("Start taśmy przez FTMS nie jest jeszcze obsługiwany")
+        return "unsupported"
+
+    async def stop_belt(self) -> None:
+        log.warning("Stop taśmy przez FTMS nie jest jeszcze obsługiwany")
 
 
 def make_driver(client: GattClient, device_name: str, on_reading: ReadingCallback) -> Driver:

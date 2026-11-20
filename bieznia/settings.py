@@ -28,6 +28,8 @@ SECTIONS = {
     "output": "output",
     "walk_key": "output",
     "run_key": "output",
+    "toggle_key": "output",
+    "belt_control": "ble",
     "device_address": "ble",
     "device_name": "ble",
     "simulator": "ui",

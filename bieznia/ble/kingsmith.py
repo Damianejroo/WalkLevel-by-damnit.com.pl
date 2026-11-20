@@ -50,6 +50,13 @@ GET_PROPS = "servers getProp 1 2 7 12 23 24 31"
 # beltcontrol). Tylko odczyt. Na części modeli daje częstsze, częściowe ramki "props".
 TELEMETRY_PROPS = "servers getProp 1 9 15 2 10 11 12 13 14"
 
+# Sterowanie (wg QZ i opisu protokołu KS Fit z projektu beltcontrol). Start: przejęcie
+# sterowania (ControlMode 1) i ruch (runState 1) - taśma rusza ze stałą prędkością
+# startową bieżni (X21: 1,0 km/h). Stop i pauza to to samo polecenie.
+CMD_CONTROL = "props ControlMode 1"
+CMD_START = "props runState 1"
+CMD_STOP = "props runState 0"
+
 
 def table_order(device_name: str) -> list[str]:
     """Kolejność prób: X23 (KS-NACH-MXG) używa v7, reszta zwykle v1."""

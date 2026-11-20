@@ -32,7 +32,9 @@ i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 
 | Co | Jak |
 | --- | --- |
-| Włącz / wyłącz sterowanie | przełącznik w oknie albo **F8** (działa też w grze) |
+| Włącz / wyłącz sterowanie | przełącznik w oknie albo **F8** (działa też w grze) - razem z tym bieżnia rusza i staje |
+| Zmiana klawisza F8 | kliknij **Start/stop: F8** i naciśnij nowy klawisz (nie może to być klawisz chodu ani biegu) |
+| Start i stop bieżni | Ustawienia > Sterowanie bieżnią (domyślnie włączone). Taśma rusza z 1 km/h, prędkość dalej zmieniasz pilotem |
 | Podgląd | nic nie jest naciskane, widać tylko, co by się stało |
 | Klawiatura | chód i bieg naciskają wybrane klawisze w aktywnym oknie |
 | Zmiana klawiszy | kliknij **Chód: W** albo **Bieg: Shift** i naciśnij nowy klawisz (np. strzałkę w górę, Ctrl); Esc anuluje |
@@ -41,8 +43,11 @@ i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 | Test bez bieżni | Ustawienia > Symulator bieżni, potem **F6** wolniej, **F7** szybciej |
 | Przycisk na ekranie | Ustawienia > Przycisk na ekranie: mały przycisk zawsze na wierzchu - klik włącza i wyłącza sterowanie, prawy przycisk otwiera okno, przeciągnij, żeby przesunąć |
 
-Sterowanie startuje zawsze **wyłączone**. Gdy bieżnia przestanie wysyłać dane (2 s), postać
-się zatrzymuje. Aplikacja tylko czyta bieżnię - nigdy nie zmienia jej prędkości.
+Sterowanie startuje zawsze **wyłączone**. Gdy bieżnia przestanie wysyłać dane (3 s), postać
+się zatrzymuje. Wyłączenie sterowania najpierw puszcza klawisze (postać staje od razu), potem
+zatrzymuje taśmę. Zamknięcie aplikacji przy włączonym sterowaniu też zatrzymuje taśmę.
+Prędkości aplikacja (jeszcze) nie zmienia. Gdy bieżnia nie przyjmie startu, obudź ją pilotem
+albo sprawdź klucz bezpieczeństwa.
 
 ### Aktualizacje
 
@@ -124,7 +129,9 @@ X21 mówi własnym, szyfrowanym protokołem KingSmith (opisanym w otwartym stero
 `FED7`, powiadomienia z `FED8`, tekst w base64 z tablicą podstawień. Bieżnie różnią się
 tablicą (7 wariantów) - aplikacja wykrywa ją z odpowiedzi bieżni i nigdy nie podaje prędkości
 z niepewnie odszyfrowanej ramki. Prędkość jest odpytywana co 0,75 s, bo przy stałym tempie
-bieżnia sama nic nie wysyła. Zapasowo obsługiwany jest standard FTMS.
+bieżnia sama nic nie wysyła. Start to `props ControlMode 1` + `props runState 1` (do trzech
+prób, gdy bieżnia odpowie błędem), stop to `props runState 0`. Zapasowo obsługiwany jest
+standard FTMS (tylko odczyt).
 
 ## Bezpieczeństwo
 
@@ -133,10 +140,11 @@ bieżnia sama nic nie wysyła. Zapasowo obsługiwany jest standard FTMS.
 - wydania budują się w GitHub Actions z przypiętych wersji (akcje po commitach, Inno Setup
   po sumie SHA-256, biblioteki z `uv.lock` z sumami) i mają poświadczenie pochodzenia
   (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl`),
-- instalacja i działanie bez administratora; aplikacja tylko czyta bieżnię, startuje
-  z wyłączonym sterowaniem i puszcza W/Shift po utracie danych, awarii albo zamknięciu,
-- skróty F6-F8 są sprawdzane globalnie, ale program nie czyta ani nie zapisuje innych
-  klawiszy.
+- instalacja i działanie bez administratora; aplikacja startuje z wyłączonym sterowaniem,
+  wysyła do bieżni tylko start i stop (na żądanie użytkownika) i puszcza W/Shift po utracie
+  danych, awarii albo zamknięciu,
+- skróty (F6, F7 i klawisz start/stop) są sprawdzane globalnie, ale program nie czyta ani nie
+  zapisuje innych klawiszy.
 
 ## Licencja
 

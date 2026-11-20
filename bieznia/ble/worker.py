@@ -20,7 +20,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from bieznia.ble.drivers import UnsupportedDevice, looks_like_treadmill, make_driver
+from bieznia.ble.drivers import Driver, UnsupportedDevice, looks_like_treadmill, make_driver
 from bieznia.sources import Reading
 
 log = logging.getLogger("bieznia.ble")
@@ -82,6 +82,9 @@ class BleWorker:
         self._thread = threading.Thread(target=self._run, name="bluetooth", daemon=True)
         self._session: asyncio.Task[None] | None = None
         self._target: tuple[str, str] | None = None
+        self._commands: asyncio.Queue[str] | None = None
+        self._belt_task: asyncio.Task[None] | None = None
+        self._driver: Driver | None = None
         self._thread.start()
 
     # --- API dla wątku głównego --------------------------------------------
@@ -97,6 +100,35 @@ class BleWorker:
 
     def diagnose(self, path: Path) -> None:
         self._submit(self._diagnose(path))
+
+    def belt(self, command: str) -> None:
+        """Start ("start") albo stop ("stop") taśmy. Wynik przychodzi jako zdarzenie "belt"."""
+        if command not in ("start", "stop"):
+            raise ValueError(command)
+        self._loop.call_soon_threadsafe(self._queue_command, command)
+
+    def _queue_command(self, command: str) -> None:
+        if self._commands is None:
+            self.events.put(BleEvent("belt", text="not_connected"))
+            return
+        self._commands.put_nowait(command)
+
+    def stop_belt_now(self, timeout: float = 1.5) -> bool:
+        """Stop taśmy z czekaniem (zamykanie aplikacji). False, gdy nie było połączenia."""
+        try:
+            return bool(self._submit(self._stop_now()).result(timeout))
+        except (concurrent.futures.TimeoutError, RuntimeError):
+            log.warning("Stop taśmy nie zdążył się wysłać")
+            return False
+
+    async def _stop_now(self) -> bool:
+        driver = self._driver
+        if driver is None:
+            return False
+        if self._belt_task is not None and not self._belt_task.done():
+            self._belt_task.cancel()
+        await driver.stop_belt()
+        return True
 
     def shutdown(self, timeout: float = 4.0) -> None:
         try:
@@ -205,10 +237,15 @@ class BleWorker:
                     await driver.start()
                     self._link(Link.STREAMING, driver.describe())
                     attempt = 0
-                    while not lost.is_set():
-                        await driver.poll()
-                        with contextlib.suppress(TimeoutError):
-                            await asyncio.wait_for(lost.wait(), POLL_S)
+                    self._commands = asyncio.Queue()
+                    self._driver = driver
+                    try:
+                        await self._stream(driver, lost)
+                    finally:
+                        self._commands = None
+                        self._driver = None
+                        if self._belt_task is not None:
+                            self._belt_task.cancel()
                 log.warning("Bieżnia się rozłączyła")
                 self._link(Link.RETRYING, "Bieżnia się rozłączyła - łączę ponownie…")
             except asyncio.CancelledError:
@@ -226,6 +263,33 @@ class BleWorker:
                     return
             attempt += 1
             await asyncio.sleep(min(RETRY_MAX_S, 2.0 * attempt))
+
+    async def _stream(self, driver: Driver, lost: asyncio.Event) -> None:
+        """Odpytywanie co POLL_S i polecenia start/stop z okna (stop przerywa start)."""
+        assert self._commands is not None
+        next_poll = 0.0
+        while not lost.is_set():
+            now = time.monotonic()
+            if now >= next_poll:
+                next_poll = now + POLL_S
+                await driver.poll()
+            try:
+                command = await asyncio.wait_for(
+                    self._commands.get(), max(0.0, next_poll - time.monotonic())
+                )
+            except TimeoutError:
+                continue
+            if command == "stop":
+                if self._belt_task is not None and not self._belt_task.done():
+                    self._belt_task.cancel()
+                await driver.stop_belt()
+                self.events.put(BleEvent("belt", text="stopped"))
+            elif command == "start" and (self._belt_task is None or self._belt_task.done()):
+                self._belt_task = asyncio.create_task(self._start_belt(driver))
+
+    async def _start_belt(self, driver: Driver) -> None:
+        result = await driver.start_belt()
+        self.events.put(BleEvent("belt", text=result))
 
     async def _diagnose(self, path: Path) -> None:
         from bieznia.ble.diagnostics import run_diagnostics

@@ -798,7 +798,7 @@ class KeyButton(QPushButton):
         if e.key() == Qt.Key.Key_Escape:
             self.stop()
             return
-        key = key_from_native(e.nativeScanCode(), key_label(e))
+        key = key_from_native(e.nativeScanCode(), key_label(e), e.nativeVirtualKey())
         self.stop()
         if key is not None:
             self.captured.emit(key)

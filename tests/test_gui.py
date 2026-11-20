@@ -38,6 +38,13 @@ class FakeWorker:
     def diagnose(self, path: Path) -> None:
         self.calls.append("diagnose")
 
+    def belt(self, command: str) -> None:
+        self.calls.append(f"belt {command}")
+
+    def stop_belt_now(self, timeout: float = 1.5) -> bool:
+        self.calls.append("stop_belt_now")
+        return True
+
     def shutdown(self, timeout: float = 4.0) -> None:
         self.calls.append("shutdown")
 
@@ -292,3 +299,86 @@ def test_floating_button_remembers_position(window: gui.App) -> None:
 
     window.on_bubble_moved(QPoint(100, 200))
     assert window.settings["floating_pos"] == [100, 200]
+
+
+def test_control_switch_starts_and_stops_the_belt(window: gui.App) -> None:
+    worker = fake(window)
+    assert window.settings["belt_control"]  # domyślnie włączone
+    window.enable_switch.setChecked(True)
+    assert window.bridge.state.enabled
+    assert worker.calls[-1] == "belt start"
+    window.handle_event(BleEvent("belt", text="refused"))
+    assert "klucz" in window.output_hint.text()
+    window.toggle_from_bubble()  # przycisk na ekranie wyłącza i zatrzymuje
+    assert not window.bridge.state.enabled
+    assert not window.enable_switch.isChecked()
+    assert worker.calls[-1] == "belt stop"
+    window.handle_event(BleEvent("belt", text="stopped"))
+    assert "zatrzymana" in window.output_hint.text()
+
+
+def test_belt_control_can_be_turned_off(window: gui.App) -> None:
+    worker = fake(window)
+    window.on_belt_control(False)
+    assert not window.settings["belt_control"]
+    assert "włącza i wyłącza" in window.control_subtitle.text()
+    window.set_control(True)
+    window.set_control(False)
+    assert not [c for c in worker.calls if c.startswith("belt")]
+
+
+def test_simulator_never_sends_belt_commands(window: gui.App) -> None:
+    worker = fake(window)
+    window.on_simulator(True)
+    window.set_control(True)
+    assert not [c for c in worker.calls if c.startswith("belt")]
+
+
+def test_hotkey_toggles_control_and_belt_but_not_while_capturing(window: gui.App) -> None:
+    from bieznia.hotkeys import Hotkeys
+
+    worker = fake(window)
+    down: set[int] = set()
+    window.hotkeys = Hotkeys({"toggle": window.toggle_key.vk}, key_down=lambda vk: vk in down)
+    down.add(0x77)  # F8
+    window.tick()
+    assert window.bridge.state.enabled
+    assert worker.calls[-1] == "belt start"
+    down.clear()
+    window.tick()
+    window.walk_btn.start()  # wybór klawisza: F8 nie może przy okazji ruszyć taśmy
+    down.add(0x77)
+    window.tick()
+    assert window.bridge.state.enabled
+    window.walk_btn.stop()
+
+
+def test_toggle_key_can_be_changed(window: gui.App) -> None:
+    from PySide6.QtCore import QEvent, Qt
+    from PySide6.QtGui import QKeyEvent
+
+    assert window.toggle_btn.text() == "Start/stop: F8"
+    window.toggle_btn.start()
+    event = QKeyEvent(
+        QEvent.Type.KeyPress, Qt.Key.Key_F9, Qt.KeyboardModifier.NoModifier, 0x43, 0x78, 0, ""
+    )
+    window.toggle_btn.keyPressEvent(event)
+    assert (window.toggle_key.scan, window.toggle_key.vk) == (0x43, 0x78)
+    assert window.settings["toggle_key"]["vk"] == 0x78
+    assert window.control_subtitle.text().startswith("F9")
+    # klawisz chodu nie może być jednocześnie start/stop
+    window.toggle_btn.start()
+    w = QKeyEvent(
+        QEvent.Type.KeyPress, Qt.Key.Key_W, Qt.KeyboardModifier.NoModifier, 0x11, 0x57, 0, "w"
+    )
+    window.toggle_btn.keyPressEvent(w)
+    assert window.toggle_key.vk == 0x78
+    assert "Start/stop" in window.output_hint.text()
+
+
+def test_quit_stops_running_belt(window: gui.App) -> None:
+    worker = fake(window)
+    window.set_control(True)
+    window.quit()
+    assert "stop_belt_now" in worker.calls
+    assert worker.calls.index("stop_belt_now") < worker.calls.index("shutdown")

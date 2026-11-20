@@ -41,6 +41,15 @@ def test_key_held_at_startup_is_ignored() -> None:
 def test_unknown_hotkey_is_rejected() -> None:
     with pytest.raises(ValueError):
         Hotkeys({"toggle": "Q"}, key_down=FakeKeyboard())
+    with pytest.raises(ValueError):
+        Hotkeys({"toggle": 0}, key_down=FakeKeyboard())
+
+
+def test_hotkey_by_virtual_key_code() -> None:
+    kb = FakeKeyboard()
+    hk = Hotkeys({"toggle": 0x24, "sim_faster": "F7"}, key_down=kb)  # Home
+    kb.down.add(0x24)
+    assert hk.poll() == {"toggle"}
 
 
 def test_simulator_ramps_towards_target() -> None:
