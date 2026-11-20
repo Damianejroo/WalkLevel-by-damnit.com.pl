@@ -128,3 +128,18 @@ def test_supervisor_knows_its_own_files() -> None:
     assert "bieznia/supervisor.py" in files
     assert "bieznia/updater.py" in files
     assert "uv.lock" in files
+
+
+def test_supervisor_sees_itself_when_run_as_main() -> None:
+    # python -m bieznia.supervisor: moduł nadzorcy jest w sys.modules jako "__main__"
+    import subprocess as sp
+    import sys
+
+    root = Path(__file__).resolve().parents[1]
+    code = (
+        "import runpy, sys; sys.argv=['x'];"
+        "g = runpy.run_module('bieznia.supervisor', run_name='not_main', alter_sys=True);"
+        "print(sorted(g['own_files'](__import__('pathlib').Path.cwd())))"
+    )
+    out = sp.run([sys.executable, "-c", code], cwd=root, capture_output=True, text=True, check=True)
+    assert "bieznia/supervisor.py" in out.stdout

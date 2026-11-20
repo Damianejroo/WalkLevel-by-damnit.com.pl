@@ -46,12 +46,14 @@ SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
 def own_files(root: Path) -> set[str]:
     """Pliki repo, z których zbudowany jest działający nadzorca (ich zmiana = przeładowanie)."""
     files = set(RELAUNCH_FILES)
+    paths = [Path(__file__)]  # uruchomiony przez -m ten moduł nazywa się "__main__"
     for name, module in list(sys.modules.items()):
         path = getattr(module, "__file__", None)
-        if not (name == "bieznia" or name.startswith("bieznia.")) or not path:
-            continue
+        if path and (name in ("bieznia", "__main__") or name.startswith("bieznia.")):
+            paths.append(Path(path))
+    for path in paths:
         with contextlib.suppress(ValueError):  # moduł spoza repo
-            files.add(Path(path).resolve().relative_to(root.resolve()).as_posix())
+            files.add(path.resolve().relative_to(root.resolve()).as_posix())
     return files
 
 
