@@ -51,6 +51,8 @@ device_name = ""
 simulator = false
 record = false
 always_on_top = false
+# mały przycisk zawsze na wierzchu: klik włącza/wyłącza sterowanie, prawy otwiera okno
+floating_button = false
 # system | light | dark
 theme = "system"
 large_text = false

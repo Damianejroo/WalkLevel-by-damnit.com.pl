@@ -25,6 +25,7 @@ from PySide6.QtGui import (
     QColor,
     QDesktopServices,
     QFont,
+    QGuiApplication,
     QIcon,
     QPainter,
     QPaintEvent,
@@ -59,6 +60,7 @@ from bieznia.gui.widgets import (
     Belt,
     DeviceRow,
     ElidedLabel,
+    FloatingToggle,
     FocusRing,
     Gauge,
     HoldButton,
@@ -232,6 +234,8 @@ class App:
             "simulator": bool(config.get("ui", {}).get("simulator", False)),
             "record": bool(config.get("ui", {}).get("record", False)),
             "always_on_top": bool(config.get("ui", {}).get("always_on_top", False)),
+            "floating_button": bool(config.get("ui", {}).get("floating_button", False)),
+            "floating_pos": config.get("ui", {}).get("floating_pos"),
             "theme": config.get("ui", {}).get("theme", "system"),
             "large_text": bool(config.get("ui", {}).get("large_text", False)),
             "detailed_logs": bool(config.get("ui", {}).get("detailed_logs", True)),
@@ -269,6 +273,14 @@ class App:
         self.build()
         self.apply_source()
         self.apply_recording()
+
+        self.bubble = FloatingToggle(self.t)
+        self.bubble.toggled.connect(self.toggle_from_bubble)
+        self.bubble.open_requested.connect(self.show_main)
+        self.bubble.moved.connect(self.on_bubble_moved)
+        self.place_bubble()
+        if self.settings["floating_button"]:
+            self.bubble.show()
 
         hints = self.qt.styleHints()
         if hasattr(hints, "colorSchemeChanged"):  # motyw Windows zmieniony w trakcie
@@ -563,6 +575,15 @@ class App:
         top = Switch(t, "Zawsze na wierzchu", self.settings["always_on_top"])
         top.toggled.connect(self.on_always_on_top)
         self.setting_row(ll, "Zawsze na wierzchu", "Okno nie chowa się pod grą", top)
+        floating = Switch(t, "Przycisk na ekranie", self.settings["floating_button"])
+        floating.toggled.connect(self.on_floating_button)
+        self.setting_row(
+            ll,
+            "Przycisk na ekranie",
+            "Mały przycisk zawsze na wierzchu: klik włącza i wyłącza sterowanie, prawy przycisk"
+            " otwiera to okno. Nie zabiera ostrości grze.",
+            floating,
+        )
         lay.addWidget(look)
 
         tests = card()
@@ -749,6 +770,7 @@ class App:
         fix_width(self.status_action, STATUS_ACTIONS)  # duży tekst zmienia szerokość napisów
         for key_button in (self.walk_btn, self.run_btn):
             key_button.updateGeometry()
+        self.bubble.retheme(self.t)
         self.render_link()
         self.render_update_label()
 
@@ -771,6 +793,42 @@ class App:
         else:
             w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, on)
             w.show()
+
+    # --- przycisk na ekranie --------------------------------------------------
+
+    def on_floating_button(self, on: bool) -> None:
+        self.change("floating_button", on)
+        if on:
+            self.place_bubble()
+            self.bubble.show()
+        else:
+            self.bubble.hide()
+
+    def place_bubble(self) -> None:
+        pos = self.settings.get("floating_pos")
+        if isinstance(pos, list) and len(pos) == 2:
+            point = QPoint(int(pos[0]), int(pos[1]))
+            if QGuiApplication.screenAt(point + QPoint(28, 28)) is not None:
+                self.bubble.move(point)
+                return
+        area = self.qt.primaryScreen().availableGeometry()  # domyślnie: prawa krawędź, środek
+        self.bubble.move(area.right() - FloatingToggle.SIZE - 24, area.center().y())
+
+    def on_bubble_moved(self, point: QPoint) -> None:
+        self.change("floating_pos", [point.x(), point.y()])
+
+    def toggle_from_bubble(self) -> None:
+        enabled = self.bridge.toggle()
+        self.enable_switch.set_silently(enabled)
+        save_enabled(enabled)
+
+    def show_main(self) -> None:
+        w = self.window
+        if w is None:
+            return
+        w.showNormal()
+        w.raise_()
+        w.activateWindow()
 
     def render_update_label(self) -> None:
         style = f"color: {self.t.accent}; font-weight: 600;" if self.update_available else ""
@@ -1231,6 +1289,9 @@ class App:
         if state.enabled and self.settings["output"] == "dry" and c.walk:
             caption += " (podgląd)"
         self.gauge.set_speed(c.speed, mode, caption)
+        self.bubble.set_state(
+            state.enabled, mode, c.speed, state.live or self.settings["simulator"]
+        )
         self.belt.set_speed(c.speed)
 
         self.frame += 1
@@ -1255,6 +1316,7 @@ class App:
             return
         self.quitting = True
         self.timer.stop()
+        self.bubble.close()
         self.bridge.shutdown()
         self.worker.shutdown()
         self.save()

@@ -263,3 +263,32 @@ def test_threshold_sliders_cover_0_to_12_and_keep_order(window: gui.App) -> None
     window.on_thresholds(run)
     assert walk.value() / 10 <= 2.0 - 0.8
     assert window.bridge.mapping.run_on == run.value() / 10
+
+
+def test_floating_button_toggles_control_and_opens_window(window: gui.App) -> None:
+    from PySide6.QtCore import Qt
+
+    bubble = window.bubble
+    assert not window.settings["floating_button"]  # domyślnie wyłączony
+    assert not bubble.isVisible()
+    assert bubble.windowFlags() & Qt.WindowType.WindowDoesNotAcceptFocus  # nie zabiera fokusu grze
+    assert bubble.windowFlags() & Qt.WindowType.WindowStaysOnTopHint
+    window.on_floating_button(True)
+    assert bubble.isVisible()
+    before = window.bridge.state.enabled
+    bubble.toggled.emit()  # lewy klik
+    assert window.bridge.state.enabled is not before
+    assert window.enable_switch.isChecked() is window.bridge.state.enabled
+    window.tick()
+    assert bubble.enabled is window.bridge.state.enabled
+    bubble.open_requested.emit()  # prawy klik
+    assert window.window is not None and window.window.isVisible()
+    window.on_floating_button(False)
+    assert not bubble.isVisible()
+
+
+def test_floating_button_remembers_position(window: gui.App) -> None:
+    from PySide6.QtCore import QPoint
+
+    window.on_bubble_moved(QPoint(100, 200))
+    assert window.settings["floating_pos"] == [100, 200]

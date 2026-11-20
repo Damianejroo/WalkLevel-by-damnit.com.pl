@@ -11,6 +11,7 @@ from PySide6.QtCore import (
     QEasingCurve,
     QEvent,
     QObject,
+    QPoint,
     QPointF,
     QPropertyAnimation,
     QRectF,
@@ -27,6 +28,7 @@ from PySide6.QtGui import (
     QFontMetricsF,
     QKeyEvent,
     QKeySequence,
+    QMouseEvent,
     QPainter,
     QPainterPath,
     QPen,
@@ -872,3 +874,130 @@ def fix_width(widget: QPushButton, texts: Iterable[str]) -> None:
     bold.setWeight(QFont.Weight.DemiBold)
     fm = QFontMetricsF(bold)
     widget.setFixedWidth(round(max(fm.horizontalAdvance(t) for t in texts)) + 40)
+
+
+class FloatingToggle(QWidget):
+    """Mały przycisk zawsze na wierzchu: lewy klik włącza/wyłącza sterowanie, prawy otwiera
+    okno, przeciąganie przesuwa. Okno nie przyjmuje fokusu (WS_EX_NOACTIVATE) - kliknięcie
+    nie zabiera ostrości grze, więc klawisze dalej trafiają do gry.
+    """
+
+    toggled = Signal()
+    open_requested = Signal()
+    moved = Signal(QPoint)
+
+    SIZE = 56
+
+    def __init__(self, t: Theme) -> None:
+        super().__init__(
+            None,
+            Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.Tool
+            | Qt.WindowType.WindowDoesNotAcceptFocus,
+        )
+        self.t = t
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        self.setFixedSize(self.SIZE, self.SIZE)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setWindowTitle("Bieżnia - sterowanie")
+        self.enabled = False
+        self.mode = "idle"
+        self.speed = 0.0
+        self.live = False
+        self.hover = False
+        self._press: tuple[QPoint, QPoint, bool] | None = None
+        self._describe()
+
+    def retheme(self, t: Theme) -> None:
+        self.t = t
+        self.update()
+
+    def set_state(self, enabled: bool, mode: str, speed: float, live: bool) -> None:
+        state = (enabled, mode, round(speed, 1), live)
+        if state == (self.enabled, self.mode, round(self.speed, 1), self.live):
+            return
+        self.enabled, self.mode, self.speed, self.live = enabled, mode, speed, live
+        self._describe()
+        self.update()
+
+    def _describe(self) -> None:
+        state = "włączone" if self.enabled else "wyłączone"
+        self.setAccessibleName(f"Sterowanie w grze: {state}")
+        self.setToolTip(
+            f"Sterowanie: {state}\nKliknij - {'wyłącz' if self.enabled else 'włącz'}\n"
+            "Prawy przycisk - okno Bieżni\nPrzeciągnij - przesuń"
+        )
+
+    def enterEvent(self, e: QEvent) -> None:
+        self.hover = True
+        self.update()
+
+    def leaveEvent(self, e: QEvent) -> None:
+        self.hover = False
+        self.update()
+
+    def paintEvent(self, _e: QEvent) -> None:
+        t = self.t
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        r = QRectF(3, 3, self.SIZE - 6, self.SIZE - 6)
+        if self.enabled:
+            fill = QColor({"walk": t.accent, "run": t.run}.get(self.mode, t.accent))
+            ink = QColor(t.on_accent)
+            p.setPen(QPen(QColor(t.text if self.hover else fill), 2))
+        else:
+            fill = QColor(t.surface_2 if self.hover else t.surface)
+            ink = QColor(t.text_2)
+            p.setPen(QPen(QColor(t.control), 2))
+        p.setBrush(fill)
+        p.drawEllipse(r)
+        # Napisy jako kształty (ścieżki): zwykły tekst dostaje na przezroczystym oknie
+        # kolorowe obwódki ClearType, ścieżka jest wygładzana tylko w odcieniach.
+        show_speed = self.enabled and self.live
+        icon = QFont(th.ICON_FONT)
+        icon.setPixelSize(22)
+        centre_y = self.SIZE / 2 - (6 if show_speed else 0)
+        _fill_text(p, th.ICONS["walk"], icon, self.SIZE / 2, centre_y, ink)
+        if show_speed:
+            small = tabular(QFont(th.FONT))
+            small.setPixelSize(12)
+            small.setWeight(QFont.Weight.DemiBold)
+            _fill_text(p, fmt_num(self.speed), small, self.SIZE / 2, self.SIZE - 15, ink)
+
+    def mousePressEvent(self, e: QMouseEvent) -> None:
+        if e.button() == Qt.MouseButton.LeftButton:
+            self._press = (e.globalPosition().toPoint(), self.pos(), False)
+        elif e.button() == Qt.MouseButton.RightButton:
+            self.open_requested.emit()
+
+    def mouseMoveEvent(self, e: QMouseEvent) -> None:
+        if self._press is None:
+            return
+        start, origin, _ = self._press
+        delta = e.globalPosition().toPoint() - start
+        if abs(delta.x()) + abs(delta.y()) > 4:
+            self._press = (start, origin, True)
+            self.move(origin + delta)
+
+    def mouseReleaseEvent(self, e: QMouseEvent) -> None:
+        if e.button() != Qt.MouseButton.LeftButton or self._press is None:
+            return
+        dragged = self._press[2]
+        self._press = None
+        if dragged:
+            self.moved.emit(self.pos())
+        else:
+            self.toggled.emit()
+
+
+def _fill_text(p: QPainter, text: str, font: QFont, cx: float, cy: float, color: QColor) -> None:
+    """Rysuje tekst jako wypełniony kształt, wyśrodkowany w punkcie (cx, cy)."""
+    path = QPainterPath()
+    path.addText(0, 0, font, text)
+    box = path.boundingRect()
+    path.translate(cx - box.center().x(), cy - box.center().y())
+    p.setPen(Qt.PenStyle.NoPen)
+    p.setBrush(color)
+    p.drawPath(path)

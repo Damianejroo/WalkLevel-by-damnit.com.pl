@@ -32,6 +32,8 @@ SECTIONS = {
     "simulator": "ui",
     "record": "ui",
     "always_on_top": "ui",
+    "floating_button": "ui",
+    "floating_pos": "ui",
     "theme": "ui",
     "large_text": "ui",
     "detailed_logs": "ui",

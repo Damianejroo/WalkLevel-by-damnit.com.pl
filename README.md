@@ -38,6 +38,7 @@ i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 | Zmiana klawiszy | kliknij **Chód: W** albo **Bieg: Shift** i naciśnij nowy klawisz (np. strzałkę w górę, Ctrl); Esc anuluje |
 | Progi chodu i biegu | Ustawienia > Progi prędkości |
 | Test bez bieżni | Ustawienia > Symulator bieżni, potem **F6** wolniej, **F7** szybciej |
+| Przycisk na ekranie | Ustawienia > Przycisk na ekranie: mały przycisk zawsze na wierzchu - klik włącza i wyłącza sterowanie, prawy przycisk otwiera okno, przeciągnij, żeby przesunąć |
 
 Sterowanie startuje zawsze **wyłączone**. Gdy bieżnia przestanie wysyłać dane (2 s), postać
 się zatrzymuje. Aplikacja tylko czyta bieżnię - nigdy nie zmienia jej prędkości.
