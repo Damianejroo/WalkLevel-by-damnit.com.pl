@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from bieznia.app import apply_overrides, parse_args
+from bieznia.cli import apply_overrides, parse_args
 from bieznia.config import load_config
 from bieznia.mapping import MappingConfig
 

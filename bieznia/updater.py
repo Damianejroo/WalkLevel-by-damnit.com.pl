@@ -88,7 +88,7 @@ def check_and_update(git: Git, remote: str = "origin", branch: str = "main") -> 
             return UpdateResult(
                 Status.SKIPPED,
                 "lokalna historia rozjechała się z GitHubem (nowe lokalne commity albo force-push)"
-                " – nie aktualizuję, żeby niczego nie skasować",
+                " - nie aktualizuję, żeby niczego nie skasować",
                 old=old,
                 new=new,
             )
@@ -96,7 +96,7 @@ def check_and_update(git: Git, remote: str = "origin", branch: str = "main") -> 
         if git.out("status", "--porcelain", "--untracked-files=no"):
             return UpdateResult(
                 Status.SKIPPED,
-                "są lokalne zmiany w plikach z repo – cofnij je (git restore .), żeby wrócić"
+                "są lokalne zmiany w plikach z repo - cofnij je (git restore .), żeby wrócić"
                 " do aktualizacji",
                 old=old,
                 new=new,

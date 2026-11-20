@@ -42,3 +42,16 @@ remote = "origin"
 branch = "main"
 # co ile sekund sprawdzać GitHuba
 interval_s = 10
+
+[ble]
+# Zapamiętana bieżnia (ustawia się sama po pierwszym połączeniu w oknie).
+device_address = ""
+device_name = ""
+
+[ui]
+simulator = false
+record = false
+always_on_top = false
+# system | light | dark
+theme = "system"
+large_text = false

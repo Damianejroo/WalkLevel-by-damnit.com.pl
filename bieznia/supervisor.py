@@ -5,7 +5,7 @@ Uruchamiany w pętli przez start.bat:
     uv run --locked --no-dev python -m bieznia.supervisor [argumenty mostu]
 
 Kody wyjścia: 0 = koniec (Ctrl+C), 3 = start.bat ma uruchomić nadzorcę od nowa
-(zmienił się jego własny kod albo zależności – `uv run` je wtedy zsynchronizuje).
+(zmienił się jego własny kod albo zależności - `uv run` je wtedy zsynchronizuje).
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from bieznia.updater import Git, GitError, Status, UpdateResult, check_and_updat
 from bieznia.winapi import release_movement_keys
 
 # Nadzorca celowo importuje mało modułów: zmiana któregokolwiek z nich wymaga
-# jego przeładowania, zmiana reszty kodu – tylko restartu mostu.
+# jego przeładowania, zmiana reszty kodu - tylko restartu mostu.
 
 log = logging.getLogger("nadzorca")
 
@@ -38,8 +38,8 @@ BACKOFF_START_S = 2.0
 BACKOFF_MAX_S = 60.0
 # Zmiana tych plików wymaga nowego środowiska (uv run) albo nowego nadzorcy.
 RELAUNCH_FILES = {"pyproject.toml", "uv.lock", ".python-version"}
-# Tylko zmiany tych ścieżek restartują most (README, testy, CI itp. – nie).
-RESTART_PREFIXES = ("src/", "config.toml")
+# Tylko zmiany tych ścieżek restartują most (README, testy, CI itp. - nie).
+RESTART_PREFIXES = ("bieznia/", "config.toml")
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
 
 
@@ -53,6 +53,23 @@ def own_files(root: Path) -> set[str]:
         with contextlib.suppress(ValueError):  # moduł spoza repo
             files.add(Path(path).resolve().relative_to(root.resolve()).as_posix())
     return files
+
+
+def kill_tree(proc: subprocess.Popen[bytes]) -> None:
+    """Zabija proces razem z dziećmi.
+
+    python.exe z .venv to tylko launcher - prawdziwy interpreter jest jego dzieckiem.
+    Samo proc.kill() zostawiłoby osierocony most, który mógłby dalej trzymać W.
+    """
+    taskkill = Path(os.environ.get("SYSTEMROOT", r"C:\Windows")) / "System32" / "taskkill.exe"
+    if sys.platform == "win32" and taskkill.exists():
+        subprocess.run(
+            [str(taskkill), "/T", "/F", "/PID", str(proc.pid)], capture_output=True, check=False
+        )
+    else:
+        proc.kill()
+    with contextlib.suppress(subprocess.TimeoutExpired):
+        proc.wait(timeout=STOP_TIMEOUT_S)
 
 
 def needs_app_restart(changed: list[str]) -> bool:
@@ -77,6 +94,7 @@ class Supervisor:
         self.resume_next = False
         self.backoff = BACKOFF_START_S
         self.last_message = ""
+        self.finished = False
 
     # --- proces mostu -------------------------------------------------------
 
@@ -104,14 +122,13 @@ class Supervisor:
                 child.terminate()
             child.wait(timeout=STOP_TIMEOUT_S)
         except (subprocess.TimeoutExpired, OSError):
-            log.warning("Most nie zamknął się sam – zabijam proces")
-            child.kill()
-            child.wait()
+            log.warning("Most nie zamknął się sam - zabijam proces")
+            kill_tree(child)
             self.failsafe_release()
 
     @staticmethod
     def failsafe_release() -> None:
-        # Most zginął bez sprzątania – puść za niego W i Shift.
+        # Most zginął bez sprzątania - puść za niego W i Shift.
         try:
             release_movement_keys()
         except OSError as exc:
@@ -122,7 +139,9 @@ class Supervisor:
             return
         self.child = None
         if rc == 0:
-            log.info("Most zakończył pracę. Czekam na aktualizacje (Ctrl+C = wyjście).")
+            # Użytkownik zamknął okno (albo skończyło się nagranie) - kończymy całość.
+            log.info("Aplikacja zamknięta - kończę")
+            self.finished = True
             return
         self.failsafe_release()
         if now - self.child_started > HEALTHY_AFTER_S:
@@ -150,7 +169,7 @@ class Supervisor:
             self.stop_child()
             return True
         if not needs_app_restart(result.changed):
-            log.info("Zmiany nie dotyczą mostu – działa dalej bez restartu")
+            log.info("Zmiany nie dotyczą mostu - działa dalej bez restartu")
             return False
         was_running = self.child is not None
         self.stop_child()
@@ -186,14 +205,16 @@ class Supervisor:
                     result = check_and_update(self.git, self.remote, self.branch)
                     self.report(result)
                     if result.status is Status.UPDATED and self.apply_update(result):
-                        log.info("Zmienił się kod nadzorcy lub zależności – przeładowuję")
+                        log.info("Zmienił się kod nadzorcy lub zależności - przeładowuję")
                         return EXIT_RELAUNCH
                 self.watch_child(now)
+                if self.finished:
+                    return 0
                 if self.child is None and self.restart_at is not None and now >= self.restart_at:
                     self.start_child()
                 time.sleep(0.5)
         except KeyboardInterrupt:
-            log.info("Ctrl+C – kończę")
+            log.info("Ctrl+C - kończę")
             self.stop_child()
             return 0
 

@@ -3,25 +3,27 @@ name = "bieznia"
 version = "0.1.0"
 description = "Most: bieżnia WalkingPad X21 -> klawiatura / pad w grach na Windows"
 readme = "README.md"
-license = "MIT"
+license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-# Na razie bez zależności runtime: tylko biblioteka standardowa (ctypes do Windows API).
-dependencies = []
-
-[project.scripts]
-bieznia = "bieznia.app:main"
+# bleak: Bluetooth LE (na Windows przez WinRT), sv-ttk: wygląd okna w stylu Windows 11.
+dependencies = [
+    "bleak>=3.1,<4",
+    "pyside6-essentials>=6.12,<7",
+]
 
 [dependency-groups]
 dev = [
+    "mypy>=2.4.1",
     "pytest>=8",
     "ruff>=0.8",
 ]
 
-[build-system]
-# Backend wbudowany w uv: budowany w procesie, bez pobierania czegokolwiek z PyPI.
-requires = ["uv_build>=0.11.16,<0.12"]
-build-backend = "uv_build"
+[tool.uv]
+# Aplikacja, nie biblioteka: nic nie jest budowane ani instalowane, kod działa wprost
+# z folderu repo (python -m bieznia). Mniej kroków u testera i brak pobierania
+# narzędzi do budowania z PyPI.
+package = false
 
 [tool.ruff]
 line-length = 100
@@ -29,8 +31,16 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
-# Teksty są po polsku: półpauza „–” jest tu celowa.
-ignore = ["RUF001", "RUF002", "RUF003"]
+# RUF001-003 zostają włączone: pilnują zasady "tylko dywiz" (bez półpauz) w tekstach.
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["RUF012"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["bieznia"]

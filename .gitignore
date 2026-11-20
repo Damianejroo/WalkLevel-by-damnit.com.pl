@@ -12,6 +12,8 @@ dist/
 logs/
 nagrania/
 config.local.toml
+dane/
 
 # Prywatne notatki i dokumenty
 *.docx
+.narzedzia/

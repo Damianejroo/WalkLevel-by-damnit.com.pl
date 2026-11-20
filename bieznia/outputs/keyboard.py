@@ -21,7 +21,7 @@ class KeyboardOutput:
         try:
             send_scancode(scan, down)
         except OSError as exc:
-            # Np. ekran blokady, okno UAC albo Ctrl+Alt+Del – spróbujemy w następnej klatce.
+            # Np. ekran blokady, okno UAC albo Ctrl+Alt+Del - spróbujemy w następnej klatce.
             if not self._failing:
                 log.warning("Windows odrzucił naciśnięcie klawisza: %s", exc)
                 self._failing = True
@@ -33,7 +33,7 @@ class KeyboardOutput:
 
     def apply(self, control: Control) -> None:
         if control.run:
-            # Najpierw Shift, potem W – gra od razu widzi bieg.
+            # Najpierw Shift, potem W - gra od razu widzi bieg.
             self._set(SCAN_LSHIFT, True)
             self._set(SCAN_W, True)
         elif control.walk:

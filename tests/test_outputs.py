@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from bieznia import app
+from bieznia import settings
 from bieznia.mapping import Control
 from bieznia.outputs import keyboard
 from bieznia.winapi import SCAN_LSHIFT, SCAN_W
@@ -52,12 +52,32 @@ def test_rejected_key_is_retried_instead_of_crashing(monkeypatch: pytest.MonkeyP
 def test_enabled_state_survives_update_restart(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(app, "STATE_FILE", tmp_path / "stan.json")
-    app.save_state(True)
-    assert json.loads((tmp_path / "stan.json").read_text(encoding="utf-8")) == {"enabled": True}
+    state = tmp_path / "stan.json"
+    settings.save_enabled(True, state)
+    assert json.loads(state.read_text(encoding="utf-8")) == {"enabled": True}
 
-    monkeypatch.delenv(app.RESUME_ENV, raising=False)
-    assert app.load_resumed_state() is None  # zwykły start: zawsze z konfiguracji
+    monkeypatch.delenv(settings.RESUME_ENV, raising=False)
+    assert settings.load_resumed_enabled(state) is None  # zwykły start: zawsze z konfiguracji
 
-    monkeypatch.setenv(app.RESUME_ENV, "1")
-    assert app.load_resumed_state() is True
+    monkeypatch.setenv(settings.RESUME_ENV, "1")
+    assert settings.load_resumed_enabled(state) is True
+
+
+def test_user_settings_round_trip_and_merge(tmp_path: Path) -> None:
+    path = tmp_path / "ustawienia.json"
+    saved = {"run_on": 7.0, "output": "keys", "device_name": "KS-X21", "obcy": 1}
+    settings.save_settings(saved, path)
+    loaded = settings.load_settings(path)
+    assert loaded == {"run_on": 7.0, "output": "keys", "device_name": "KS-X21"}
+    config = settings.apply_settings(
+        {"mapping": {"run_on": 6.3}, "output": {"type": "dry"}}, loaded
+    )
+    assert config["mapping"]["run_on"] == 7.0
+    assert config["output"]["type"] == "keys"
+    assert config["ble"]["device_name"] == "KS-X21"
+
+
+def test_broken_settings_file_falls_back_to_defaults(tmp_path: Path) -> None:
+    path = tmp_path / "ustawienia.json"
+    path.write_text("{ to nie jest json", encoding="utf-8")
+    assert settings.load_settings(path) == {}

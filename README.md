@@ -1,126 +1,127 @@
 # Bieżnia → gra
 
-Most, który zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie w grach na Windows:
-chód to **W**, bieg to **Shift+W** (później także analogowa gałka pada).
+Aplikacja, która zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie w grach na
+Windows: chód to **W**, bieg to **Shift + W**. Łączy się z bieżnią przez Bluetooth, sama
+ją wyszukuje i sama się aktualizuje.
 
-> **Etap:** szkielet. Działa symulator bieżni i odtwarzanie nagrań, prawdziwa bieżnia
-> (Bluetooth / QZ) dojdzie w kolejnych krokach.
+## Dla testera: uruchomienie bez instalacji
 
-## Dla testera (Olek): instalacja raz na zawsze
+1. Pobierz paczkę: **[bieznia-olek-main.zip](https://github.com/Damianejroo/bieznia-olek/archive/refs/heads/main.zip)**
+2. Rozpakuj ją (prawy przycisk > Wyodrębnij wszystkie) do zwykłego folderu, np. Dokumenty.
+   Nie do OneDrive i nie do Program Files.
+3. Kliknij dwa razy **`Uruchom.bat`**. Jeśli Windows zapyta o niezweryfikowanego wydawcę,
+   wybierz Uruchom (to zwykły skrypt z tej paczki).
 
-1. Otwórz **PowerShell** (zwykły, nie jako administrator) i zainstaluj dwa programy
-   z oficjalnego źródła Microsoftu (winget):
+Pierwsze uruchomienie pobiera narzędzia, Pythona i biblioteki (ok. 200 MB, jednorazowo) do
+ukrytego folderu `.narzedzia` obok aplikacji. Nic nie jest instalowane w systemie i nie trzeba
+uprawnień administratora. Usunięcie folderu usuwa wszystko.
 
-   ```powershell
-   winget install --id Git.Git -e
-   winget install --id astral-sh.uv -e
-   ```
+Potem w ustawieniach aplikacji możesz kliknąć **Utwórz skrót na pulpicie**.
 
-   Zamknij i otwórz PowerShell ponownie, żeby je widział.
+### Zanim połączysz bieżnię
 
-2. Pobierz repozytorium (najlepiej do folderu użytkownika, **nie** do OneDrive):
+- włącz bieżnię,
+- rozłącz telefon: zamknij KS Fit albo wyłącz w nim Bluetooth (bieżnia przyjmuje jedno
+  połączenie naraz),
+- włącz Bluetooth w Windows (Start > Ustawienia > Bluetooth i urządzenia).
 
-   ```powershell
-   cd $HOME
-   git clone https://github.com/Damianejroo/bieznia-olek.git
-   ```
-
-3. Wejdź do folderu `bieznia-olek` i kliknij dwa razy **`start.bat`**.
-   Za pierwszym razem `uv` sam pobierze Pythona – to chwilę potrwa.
-
-Od teraz **zawsze uruchamiasz tylko `start.bat`**. Sam pobiera nowe wersje z GitHuba
-(co ok. 10 s) i restartuje most – jeśli był włączony, wraca włączony. Nic nie musisz
-aktualizować ręcznie. Gdyby nowa wersja się wysypała, okno samo co 30 s próbuje pobrać
-poprawkę.
+Aplikacja przy pierwszym starcie sama szuka bieżni. Jeśli znajdzie jedną, łączy się od razu
+i zapamiętuje ją na przyszłość. Jeśli kilka - pokazuje listę do wyboru.
 
 ### Obsługa
 
-| Klawisz | Co robi |
+| Co | Jak |
 | --- | --- |
-| **F8** | włącza / wyłącza most (startuje **wyłączony**) |
-| F6 / F7 | tylko w symulatorze: wolniej / szybciej |
-| Ctrl+C w oknie konsoli | zamyka wszystko |
+| Włącz / wyłącz sterowanie | przełącznik w oknie albo **F8** (działa też w grze) |
+| Podgląd | nic nie jest naciskane, widać tylko, co by się stało |
+| Klawiatura W / Shift | chód naciska W, bieg Shift + W w aktywnym oknie |
+| Progi chodu i biegu | Ustawienia > Progi prędkości |
+| Test bez bieżni | Ustawienia > Symulator bieżni, potem **F6** wolniej, **F7** szybciej |
 
-Domyślnie most pracuje „na sucho” (`dry`): tylko pisze w konsoli, co by nacisnął.
-Żeby naprawdę naciskał klawisze w grze:
+Sterowanie startuje zawsze **wyłączone**. Gdy bieżnia przestanie wysyłać dane (2 s), postać
+się zatrzymuje. Aplikacja tylko czyta bieżnię - nigdy nie zmienia jej prędkości.
 
-```powershell
-.\start.bat --output keys
-```
+### Gdy coś nie działa
 
-Inne przydatne opcje: `--record` (nagrywa odczyty do folderu `nagrania/`), `--replay PLIK`
-(odtwarza nagranie), `--enabled` (startuje od razu włączony).
+Kliknij ikonę **Dziennik** (na dole okna) > **Zapisz raport diagnostyczny** i wyślij plik
+z folderu `logs` (raport `diagnostyka-…txt` oraz `bluetooth.log`). Raport zawiera listę
+urządzeń Bluetooth w pobliżu i surową rozmowę z bieżnią - to wystarczy do poprawki.
 
-Stałe zmiany ustawień: utwórz obok plik `config.local.toml` i wpisz tylko to, co chcesz zmienić,
-np.:
+Aktualizacje przychodzą same, zwykle kilka sekund po wysłaniu poprawki. Aplikacja na chwilę
+się zamknie i otworzy ponownie. Jeśli nowa wersja się wysypie, okno konsoli co 30 s próbuje
+pobrać poprawkę.
 
-```toml
-[output]
-type = "keys"
-```
+### Gry
 
-**Nie edytuj plików z repo** – przy lokalnych zmianach aktualizacja się wstrzyma
-(i powie o tym w konsoli). Logi są w folderze `logs/`, możesz je podesłać przy problemach.
-
-### Gdy gra nie reaguje na klawisze
-
-Windows nie pozwala zwykłemu programowi naciskać klawiszy w programie uruchomionym jako
-administrator. Jeśli gra (albo jej launcher) działa jako admin, most też musiałby – wtedy
-daj znać, zamiast od razu uruchamiać go jako administrator.
+- Jeśli gra działa jako administrator, Windows nie pozwoli zwykłej aplikacji naciskać w niej
+  klawiszy. Wtedy daj znać, zamiast uruchamiać wszystko jako administrator.
+- Gry z ochroną przed oszustwami (np. sieciowe strzelanki) mogą traktować sztucznie naciskane
+  klawisze jak automatyzację. Używaj w grach, które na to pozwalają, na własną
+  odpowiedzialność.
 
 ## Dla programisty
 
 ```powershell
-uv sync                         # środowisko z narzędziami dev
-uv run python -m bieznia        # most z symulatorem (F6/F7/F8)
-uv run pytest                   # testy
-uv run ruff check; uv run ruff format
+uv sync                                   # środowisko z narzędziami
+uv run python -m bieznia                  # okno
+uv run python -m bieznia --headless       # bez okna (symulator, logi w konsoli)
+uv run python -m bieznia --diagnostyka    # tylko raport Bluetooth
+uv run pytest; uv run ruff check; uv run ruff format; uv run mypy
 ```
 
 Struktura:
 
-- `src/bieznia/mapping.py` – prędkość → W / Shift / gałka (wygładzanie, histereza)
-- `src/bieznia/sources/` – źródła odczytów: `simulator`, `replay` (tu dojdzie bieżnia)
-- `src/bieznia/outputs/` – wyjścia: `dry`, `keyboard` (tu dojdzie pad)
-- `src/bieznia/supervisor.py` + `updater.py` – nadzorca z auto-aktualizacją u testera
-- `start.bat` – punkt startu u testera
+- `bieznia/ble/` - Bluetooth: protokół KingSmith (`kingsmith.py`), FTMS, sterowniki,
+  wątek połączenia z ponawianiem, raport diagnostyczny
+- `bieznia/engine.py` - źródło > mapowanie > wyjście, bezpieczniki, liczniki
+- `bieznia/mapping.py` - prędkość > W / Shift / gałka (wygładzanie, histereza)
+- `bieznia/gui/` - okno PySide6: tokeny i motywy (`theme.py`), kontrolki, widoki
+- `bieznia/supervisor.py` + `updater.py` - nadzorca z auto-aktualizacją u testera
+- `Uruchom.bat` + `narzedzia/bootstrap.ps1` - start bez instalacji
 
-Każdy push na `main` trafia do testera w ciągu ok. 10 s, więc **na `main` wypychaj tylko kod,
-który się uruchamia**. Eksperymenty rób na innych gałęziach. Nie rób force-pusha na `main`:
-nadzorca go nie zastosuje (celowo) i tester zostanie na starej wersji.
+### Jak działa połączenie z X21
 
-Co się dzieje u testera po pushu:
+X21 mówi własnym, szyfrowanym protokołem KingSmith (opisanym w otwartym sterowniku
+[QZ / qdomyos-zwift](https://github.com/cagnulein/qdomyos-zwift)): usługa `0x1234`, zapis do
+`FED7`, powiadomienia z `FED8`, tekst w base64 z tablicą podstawień. Bieżnie różnią się
+tablicą (7 wariantów) - aplikacja wykrywa ją z odpowiedzi bieżni i nigdy nie podaje prędkości
+z niepewnie odszyfrowanej ramki. Prędkość jest odpytywana co 0,75 s, bo przy stałym tempie
+bieżnia sama nic nie wysyła. Zapasowo obsługiwany jest standard FTMS.
 
-| Zmienione pliki | Efekt |
+### Aktualizacje u testera
+
+Każdy push na `main` trafia do testera w ok. 10 s, więc **na `main` wypychaj tylko kod,
+który się uruchamia**. Eksperymenty rób na innych gałęziach. Force-push na `main` jest
+zablokowany regułą repozytorium.
+
+| Zmienione pliki | Efekt u testera |
 | --- | --- |
-| `src/` (poza nadzorcą), `config.toml` | restart mostu (stan F8 zachowany) |
-| kod nadzorcy, `pyproject.toml`, `uv.lock`, `.python-version` | `start.bat` uruchamia nadzorcę od nowa, `uv` synchronizuje środowisko |
-| README, testy, `.github/`, `start.bat` | nic – `start.bat` zadziała przy następnym ręcznym starcie |
-
-Gdy nadzorca się wysypie (np. błąd składni), `start.bat` co 30 s robi `git pull --ff-only`
-i próbuje ponownie – wystarczy wypchnąć poprawkę.
+| `bieznia/` (poza nadzorcą), `config.toml` | restart aplikacji (stan F8 zachowany) |
+| kod nadzorcy, `pyproject.toml`, `uv.lock`, `.python-version` | nadzorca od nowa, `uv` synchronizuje środowisko |
+| README, testy, `.github/`, `Uruchom.bat` | nic - zadziała przy następnym starcie |
 
 ## Bezpieczeństwo
 
-Automatyczna aktualizacja oznacza, że **kod z gałęzi `main` tego repo uruchamia się na komputerze
+Automatyczna aktualizacja oznacza, że **kod z gałęzi `main` uruchamia się na komputerze
 testera**. Dlatego:
 
-- pisać do repo może tylko właściciel (konto z włączonym 2FA); cudze pull requesty nic
-  nie zmieniają, dopóki nie zostaną zmergowane,
-- na `main` zablokowane są force-push i usunięcie gałęzi (reguły repo na GitHubie),
-- nadzorca pobiera tylko gałąź `main` (nigdy pull requestów) i robi wyłącznie
-  **fast-forward**: nie kasuje lokalnych zmian, nie stosuje przepisanej historii, nie pyta
-  o hasła, a przy zerwanym połączeniu sam przerywa pobieranie,
-- zależności są przypięte w `uv.lock` (z sumami kontrolnymi), instalowane przez `uv --locked`,
-  a pakiet budowany jest wbudowanym backendem `uv_build`; obecnie most nie ma żadnych
-  zależności poza biblioteką standardową Pythona,
-- CI ma tylko prawo odczytu, nie ma sekretów, a akcje są przypięte do konkretnych commitów,
-- most działa bez uprawnień administratora i **tylko czyta** dane z bieżni – nigdy nie zmienia
-  jej prędkości,
-- most startuje wyłączony, a po utracie danych z bieżni (2 s) albo po awarii puszcza W i Shift
-  (robi to też nadzorca, gdyby most padł),
-- skróty F6–F8 są sprawdzane globalnie, ale program nie czyta ani nie zapisuje innych klawiszy.
+- pisać do repo może tylko właściciel (konto z 2FA), force-push i usunięcie `main` są
+  zablokowane, cudze pull requesty nic nie zmieniają, dopóki nie zostaną zmergowane,
+- nadzorca pobiera tylko gałąź `main` i robi wyłącznie fast-forward: nie kasuje lokalnych
+  zmian, nie stosuje przepisanej historii, nie pyta o hasła, przy zerwanym połączeniu sam
+  przerywa pobieranie,
+- narzędzia pobierane przy pierwszym starcie (uv, MinGit) mają przypięte wersje i sumy
+  SHA-256, Python pochodzi z uv (też ze sprawdzaniem sum), biblioteki są przypięte
+  w `uv.lock` z sumami kontrolnymi; projekt niczego nie buduje,
+- CI ma tylko prawo odczytu, bez sekretów, akcje przypięte do konkretnych commitów,
+- aplikacja działa bez administratora, tylko czyta bieżnię, startuje z wyłączonym
+  sterowaniem i puszcza W/Shift po utracie danych, awarii albo zamknięciu (robi to też
+  nadzorca, który w razie potrzeby zabija cały proces razem z dziećmi),
+- skróty F6-F8 są sprawdzane globalnie, ale program nie czyta ani nie zapisuje innych
+  klawiszy.
 
 ## Licencja
 
-MIT – zobacz [LICENSE](LICENSE).
+GPL-3.0-or-later - zobacz [LICENSE](LICENSE). Protokół KingSmith odtworzony na podstawie
+sterownika z projektu [QZ (qdomyos-zwift)](https://github.com/cagnulein/qdomyos-zwift),
+również na licencji GPL-3.0.

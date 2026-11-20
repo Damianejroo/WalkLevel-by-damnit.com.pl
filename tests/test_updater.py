@@ -112,10 +112,10 @@ def test_unreachable_remote_is_an_error(repos: tuple[Path, Path], tmp_path: Path
 @pytest.mark.parametrize(
     ("changed", "expected"),
     [
-        (["src/bieznia/mapping.py"], True),
+        (["bieznia/mapping.py"], True),
         (["config.toml"], True),
         (["README.md", "tests/test_mapping.py", ".github/workflows/ci.yml"], False),
-        (["start.bat"], False),
+        (["Uruchom.bat"], False),
     ],
 )
 def test_only_relevant_changes_restart_app(changed: list[str], expected: bool) -> None:
@@ -125,6 +125,6 @@ def test_only_relevant_changes_restart_app(changed: list[str], expected: bool) -
 def test_supervisor_knows_its_own_files() -> None:
     root = Path(__file__).resolve().parents[1]
     files = own_files(root)
-    assert "src/bieznia/supervisor.py" in files
-    assert "src/bieznia/updater.py" in files
+    assert "bieznia/supervisor.py" in files
+    assert "bieznia/updater.py" in files
     assert "uv.lock" in files

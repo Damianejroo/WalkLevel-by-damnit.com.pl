@@ -69,7 +69,7 @@ if IS_WINDOWS:
 
 
 def is_key_down(vk: int) -> bool:
-    """Czy klawisz (kod VK) jest teraz wciśnięty – działa też, gdy okno nie ma fokusu."""
+    """Czy klawisz (kod VK) jest teraz wciśnięty - działa też, gdy okno nie ma fokusu."""
     if not IS_WINDOWS:
         return False
     return bool(_user32.GetAsyncKeyState(vk) & 0x8000)
