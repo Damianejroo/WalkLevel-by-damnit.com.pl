@@ -5,6 +5,7 @@ Czysta logika bez Windows API, w całości pokryta testami.
 
 from __future__ import annotations
 
+import time
 from collections import deque
 from dataclasses import dataclass
 from typing import Any
@@ -18,8 +19,16 @@ class MappingConfig:
     run_on: float = 6.3
     run_off: float = 5.7
     max_speed: float = 12.0
-    smoothing_samples: int = 3
-    stale_after_s: float = 2.0
+    # Bieżnia podaje już płynną prędkość taśmy - wygładzanie tylko dodawało opóźnienie.
+    smoothing_samples: int = 1
+    stale_after_s: float = 3.0
+    # Szybkie zatrzymanie: przy stopie X21 zwalnia ok. 0,7-1 km/h na odczyt (co 2 s),
+    # a zmiana tempa pilotem to ok. 0,2-0,3 km/h. Duży spadek = hamowanie = postać staje
+    # od razu, zamiast czekać kilka sekund na pełne zatrzymanie taśmy.
+    quick_stop: bool = True
+    brake_drop: float = 0.6
+    # Ile sekund bez dalszego spadku, zanim uznamy, że to było tylko zwolnienie.
+    brake_hold_s: float = 3.0
 
     def __post_init__(self) -> None:
         if not 0 <= self.stand_below < self.run_off <= self.run_on <= self.max_speed:
@@ -53,15 +62,46 @@ class SpeedMapper:
         self.config = config
         self._window: deque[float] = deque(maxlen=config.smoothing_samples)
         self._running = False
+        self._last_raw: float | None = None
+        self._braking = False
+        self._last_fall = 0.0
+
+    @property
+    def braking(self) -> bool:
+        return self._braking
 
     def reset(self) -> None:
         self._window.clear()
         self._running = False
+        self._last_raw = None
+        self._braking = False
 
-    def update(self, speed_kmh: float) -> Control:
+    def _track_braking(self, raw: float, now: float) -> None:
         cfg = self.config
-        self._window.append(max(0.0, speed_kmh))
+        last = self._last_raw
+        self._last_raw = raw
+        if not cfg.quick_stop or raw <= STOPPED_KMH:
+            self._braking = False
+            return
+        if last is not None and raw < last - 1e-9:
+            if last - raw >= cfg.brake_drop:
+                self._braking = True
+            self._last_fall = now  # każdy dalszy spadek podtrzymuje hamowanie
+        elif last is not None and raw > last + 1e-9:
+            self._braking = False  # taśma przyspiesza - idziemy dalej
+        if self._braking and now - self._last_fall > cfg.brake_hold_s:
+            self._braking = False  # przestało spadać - to było tylko zwolnienie
+
+    def update(self, speed_kmh: float, now: float | None = None) -> Control:
+        cfg = self.config
+        raw = max(0.0, speed_kmh)
+        self._track_braking(raw, time.monotonic() if now is None else now)
+        self._window.append(raw)
         speed = sum(self._window) / len(self._window)
+
+        if self._braking:
+            self._running = False
+            return Control(speed=speed, stick=0.0, walk=False, run=False)
 
         # stojąca taśma nigdy nie rusza postaci, nawet przy progu chodu 0 km/h
         if speed < cfg.stand_below or speed <= STOPPED_KMH:

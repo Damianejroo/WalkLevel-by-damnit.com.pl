@@ -54,7 +54,7 @@ def test_stale_data_stops_the_character() -> None:
     source.push(0.0, 4.0)
     assert bridge.tick(0.0).control.walk
     assert bridge.tick(1.0).control.walk  # jeszcze świeże
-    state = bridge.tick(3.0)  # dłużej niż stale_after_s bez odczytu
+    state = bridge.tick(4.0)  # dłużej niż stale_after_s (3 s) bez odczytu
     assert not state.control.walk and not state.live
     assert spy.applied[-1] is False
 

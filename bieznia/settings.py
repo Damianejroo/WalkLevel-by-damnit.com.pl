@@ -24,6 +24,7 @@ SECTIONS = {
     "stand_below": "mapping",
     "run_on": "mapping",
     "run_off": "mapping",
+    "quick_stop": "mapping",
     "output": "output",
     "walk_key": "output",
     "run_key": "output",

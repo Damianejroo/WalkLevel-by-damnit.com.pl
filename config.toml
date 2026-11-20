@@ -24,9 +24,14 @@ run_off = 5.7
 # prędkość, przy której gałka pada jest wychylona na 100%
 max_speed = 12.0
 # średnia z ostatnich N odczytów
-smoothing_samples = 3
+smoothing_samples = 1
 # brak odczytu dłużej niż tyle sekund = stoisz (bezpiecznik)
 stale_after_s = 3.0
+# szybkie zatrzymanie: gwałtowne hamowanie taśmy (spadek >= brake_drop km/h na odczyt)
+# zatrzymuje postać od razu, bez czekania na pełny stop bieżni
+quick_stop = true
+brake_drop = 0.6
+brake_hold_s = 3.0
 
 [hotkeys]
 toggle = "F8"

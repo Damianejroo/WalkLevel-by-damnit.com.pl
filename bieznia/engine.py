@@ -130,7 +130,7 @@ class Bridge:
         reading = self.source.poll(now, set(actions)) if self.source else None
         if reading is not None:
             self._last_reading = reading
-            self.state.control = self.mapper.update(reading.speed_kmh)
+            self.state.control = self.mapper.update(reading.speed_kmh, reading.t)
             self.state.live = True
             self.state.steps = reading.steps
             self._update_cadence(reading)

@@ -75,3 +75,60 @@ def test_full_x21_range_and_zero_walk_threshold() -> None:
     assert m.update(0.5).walk
     assert m.update(12.0).run
     assert m.update(12.0).stick == 1.0
+
+
+# --- szybkie zatrzymanie: prawdziwe sekwencje z bieżni KS-NACH-X21C (log testera) ---------
+# Bieżnia podaje prędkość co ~2 s; między ramkami aplikacja co 0,75 s powtarza ostatnią
+# prędkość (sygnał życia), więc symulujemy oba źródła odczytów.
+
+
+def replay(frames: list[tuple[float, float]], quick: bool, walk_from: float = 1.0) -> float | None:
+    """Zwraca czas, w którym postać przestała iść (albo None)."""
+    m = SpeedMapper(MappingConfig(stand_below=walk_from, run_on=4.0, run_off=3.4, quick_stop=quick))
+    readings: list[tuple[float, float]] = []
+    for (t, v), nxt in zip(
+        frames, [*frames[1:], (frames[-1][0] + 2.0, frames[-1][1])], strict=True
+    ):
+        hb = t
+        while hb < nxt[0]:
+            readings.append((hb, v))
+            hb += 0.75
+    walking = False
+    for t, v in readings:
+        c = m.update(v, t)
+        if c.walk:
+            walking = True
+        elif walking:
+            return t
+    return None
+
+
+STOP_1 = [(44.6, 2.3), (46.6, 2.2), (48.6, 1.2), (50.6, 1.0), (53.0, 0.0), (55.0, 0.0)]
+STOP_2 = [(12.8, 3.6), (14.8, 2.7), (16.8, 1.8), (18.8, 1.6), (20.7, 1.4), (22.7, 1.0), (25.5, 0.0)]
+STOP_3 = [(0.0, 1.7), (2.0, 1.7), (4.0, 1.7), (6.1, 1.0), (8.0, 0.0), (10.0, 0.0)]
+
+
+@pytest.mark.parametrize(
+    ("frames", "before", "after"),
+    [(STOP_1, 53.0, 48.6), (STOP_2, 25.5, 14.8), (STOP_3, 8.0, 6.1)],
+)
+def test_quick_stop_cuts_stop_lag(
+    frames: list[tuple[float, float]], before: float, after: float
+) -> None:
+    assert replay(frames, quick=False) == pytest.approx(before)
+    assert replay(frames, quick=True) == pytest.approx(after)
+
+
+def test_slowing_down_with_remote_does_not_stop() -> None:
+    # pilot: 3,0 -> 2,8 -> 2,5 -> 2,5 ... (spadki 0,2-0,3 km/h)
+    frames = [(0.0, 3.0), (2.0, 2.8), (4.0, 2.5), (6.0, 2.5), (8.0, 2.5)]
+    assert replay(frames, quick=True) is None
+
+
+def test_quick_slowdown_resumes_walking_when_speed_holds() -> None:
+    m = SpeedMapper(MappingConfig(stand_below=1.0, run_on=6.3, run_off=5.7))
+    assert m.update(5.0, 0.0).walk
+    assert not m.update(3.5, 2.0).walk  # spadek 1,5 = hamowanie
+    assert not m.update(3.5, 4.0).walk  # nadal w oknie 3 s
+    assert m.update(3.5, 5.5).walk  # nie spada dalej - to było tylko zwolnienie
+    assert m.update(4.0, 6.0).walk

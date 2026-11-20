@@ -228,6 +228,7 @@ class App:
             "stand_below": config["mapping"]["stand_below"],
             "run_on": config["mapping"]["run_on"],
             "run_off": config["mapping"]["run_off"],
+            "quick_stop": bool(config["mapping"].get("quick_stop", True)),
             "output": config["output"]["type"],
             "device_address": config.get("ble", {}).get("device_address", ""),
             "device_name": config.get("ble", {}).get("device_name", ""),
@@ -556,6 +557,16 @@ class App:
         )
         note.setWordWrap(True)
         sl.addWidget(note)
+        quick = Switch(t, "Szybkie zatrzymanie", self.settings["quick_stop"])
+        quick.toggled.connect(self.on_quick_stop)
+        self.setting_row(
+            sl,
+            "Szybkie zatrzymanie",
+            "Gdy taśma gwałtownie hamuje, postać staje od razu - bez czekania kilku sekund na"
+            " pełny stop (bieżnia podaje prędkość co 2 s). Wyłącz, jeśli zmieniasz tempo pilotem"
+            " i postać niepotrzebnie się zatrzymuje.",
+            quick,
+        )
         lay.addWidget(speed)
 
         look = card()
@@ -899,6 +910,7 @@ class App:
                     "stand_below": walk,
                     "run_on": run,
                     "run_off": run - HYSTERESIS,
+                    "quick_stop": self.settings["quick_stop"],
                 }
             )
         except ValueError as exc:
@@ -910,6 +922,11 @@ class App:
         self.spark.run_from = run
         self.gauge.update()
         self.save()
+
+    def on_quick_stop(self, on: bool) -> None:
+        self.settings["quick_stop"] = on
+        self.on_thresholds()
+        log.info("Szybkie zatrzymanie %s", "włączone" if on else "wyłączone")
 
     def apply_source(self) -> None:
         if self.settings["simulator"]:

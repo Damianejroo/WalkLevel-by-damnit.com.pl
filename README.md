@@ -37,6 +37,7 @@ i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 | Klawiatura | chód i bieg naciskają wybrane klawisze w aktywnym oknie |
 | Zmiana klawiszy | kliknij **Chód: W** albo **Bieg: Shift** i naciśnij nowy klawisz (np. strzałkę w górę, Ctrl); Esc anuluje |
 | Progi chodu i biegu | Ustawienia > Progi prędkości |
+| Szybkie zatrzymanie | Ustawienia > Progi prędkości: gdy taśma gwałtownie hamuje, postać staje od razu (domyślnie włączone) |
 | Test bez bieżni | Ustawienia > Symulator bieżni, potem **F6** wolniej, **F7** szybciej |
 | Przycisk na ekranie | Ustawienia > Przycisk na ekranie: mały przycisk zawsze na wierzchu - klik włącza i wyłącza sterowanie, prawy przycisk otwiera okno, przeciągnij, żeby przesunąć |
 
