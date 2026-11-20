@@ -30,8 +30,8 @@ def test_scripts_are_plain_ascii() -> None:
 
 def test_bootstrap_pins_versions_and_checksums() -> None:
     text = PS1.read_text(encoding="ascii")
-    urls = re.findall(r"Url\s*=\s*'([^']+)'", text)
-    shas = re.findall(r"Sha\s*=\s*'([^']+)'", text)
+    urls = re.findall(r"^\s*Url\s*=\s*'([^']+)'", text, re.MULTILINE)
+    shas = re.findall(r"^\s*Sha\s*=\s*'([^']+)'", text, re.MULTILINE)
     assert len(urls) == len(shas) == 2
     assert all(u.startswith("https://github.com/") and "/download/" in u for u in urls)
     assert all(re.fullmatch(r"[0-9a-f]{64}", s) for s in shas)
