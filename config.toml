@@ -13,6 +13,7 @@ replay_file = ""
 # keys – naciska W i Shift w aktywnym oknie (np. w grze)
 type = "dry"
 # keyboard  - trzymane klawisze chodu/biegu ustawiają prędkość taśmy
+# gamepad   - wychylenie lewej gałki pada ustawia prędkość taśmy (skokami)
 # treadmill - chodzenie po bieżni naciska klawisze w grze
 direction = "keyboard"
 # Most startuje WYŁĄCZONY, włączasz go klawiszem toggle (F8).
@@ -63,6 +64,8 @@ belt_control = true
 idle_speed = 1.0
 walk_speed = 1.5
 run_speed = 2.5
+# tryb "Pad -> bieżnia": [wychylenie gałki w %, prędkość km/h], od 2 do 5 skoków
+pad_steps = [[0, 1.0], [25, 1.5], [50, 2.5], [100, 4.0]]
 
 [ui]
 simulator = false

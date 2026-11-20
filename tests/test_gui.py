@@ -445,3 +445,77 @@ def test_without_belt_start_stop_turning_off_slows_down(window: gui.App) -> None
     window.set_control(False)
     assert speeds(worker) == ["speed 1.5", "speed 1"]
     assert not [c for c in worker.calls if c.startswith("belt")]
+
+
+class StickSource:
+    name = "DualSense"
+
+    def __init__(self) -> None:
+        self.y = 0.0
+
+    def read(self) -> Any:
+        from bieznia.pad import PadState
+
+        return PadState(self.name, 0.0, self.y)
+
+
+def settle(window: gui.App) -> None:
+    import time
+
+    window.tick()
+    time.sleep(gui.PAD_SETTLE_S + 0.05)
+    window.tick()
+
+
+def test_gamepad_stick_steps_set_belt_speed(window: gui.App) -> None:
+    from bieznia.pad import PadReader
+
+    worker = fake(window)
+    stick = StickSource()
+    window.pad = PadReader(lambda: [stick])  # type: ignore[list-item]
+    window.direction_seg.changed.emit("gamepad")
+    assert window.keys_row.isHidden()  # klawisze chodu i biegu niepotrzebne
+    assert window.bridge.output_kind == "dry"
+    window.set_control(True)
+    settle(window)
+    assert speeds(worker) == ["speed 1"]  # gałka puszczona = skok 1
+    stick.y = 0.4  # ok. 37% wychylenia
+    settle(window)
+    assert speeds(worker)[-1] == "speed 1.5"
+    stick.y = 1.0
+    window.tick()  # w drodze - jeszcze nic
+    assert speeds(worker)[-1] == "speed 1.5"
+    settle(window)
+    assert speeds(worker)[-1] == "speed 4"
+    window.render_pad_status()
+    assert "DualSense" in window.pad_status.text()
+    assert "skok 4" in window.pad_status.text()
+
+
+def test_gamepad_step_count_and_thresholds_are_editable(window: gui.App) -> None:
+    window.pad_count_seg.changed.emit("3")
+    assert window.settings["pad_steps"] == [(0, 1.0), (50, 2.0), (100, 3.0)]
+    assert len(window.pad_at_sliders) == 3
+    middle = window.pad_at_sliders[1]
+    assert middle is not None
+    middle.setValue(100)  # nie może przeskoczyć następnego skoku
+    assert window.settings["pad_steps"][1][0] == 100 - 5
+    middle.setValue(30)
+    assert window.settings["pad_steps"][1][0] == 30
+    window.pad_count_seg.changed.emit("5")
+    assert len(window.settings["pad_steps"]) == 5
+    window.direction_seg.changed.emit("gamepad")
+    assert "od 75%" in window.output_hint.text()
+
+
+def test_gamepad_without_pad_keeps_idle_speed(window: gui.App) -> None:
+    from bieznia.pad import PadReader
+
+    worker = fake(window)
+    window.pad = PadReader(lambda: [])
+    window.direction_seg.changed.emit("gamepad")
+    window.set_control(True)
+    settle(window)
+    assert speeds(worker) == ["speed 1"]
+    window.render_pad_status()
+    assert "Nie widzę pada" in window.pad_status.text()

@@ -33,6 +33,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QApplication,
+    QGridLayout,
     QHBoxLayout,
     QLineEdit,
     QPlainTextEdit,
@@ -52,6 +53,7 @@ from bieznia import (
     aktualizacje,
     zgloszenia,
 )
+from bieznia import pad as gamepad
 from bieznia.ble import kingsmith
 from bieznia.ble.worker import BleEvent, BleWorker, FoundDevice, Link
 from bieznia.engine import Bridge
@@ -106,6 +108,7 @@ STATUS_ACTIONS = (
 TICK_MS = 50
 STARTED = time.monotonic()  # import tego modułu to praktycznie start procesu
 HYSTERESIS = 0.6
+PAD_SETTLE_S = 0.15  # gałka w drodze przez skoki - wysyłamy dopiero, gdy się zatrzyma
 
 
 class QueueLogHandler(logging.Handler):
@@ -250,9 +253,15 @@ class App:
             "idle_speed": float(config.get("ble", {}).get("idle_speed", 1.0)),
             "walk_speed": float(config.get("ble", {}).get("walk_speed", 1.5)),
             "run_speed": float(config.get("ble", {}).get("run_speed", 2.5)),
+            "pad_steps": gamepad.parse_steps(config.get("ble", {}).get("pad_steps")),
         }
-        if self.settings["direction"] not in ("keyboard", "treadmill"):
+        if self.settings["direction"] not in ("keyboard", "gamepad", "treadmill"):
             self.settings["direction"] = "keyboard"
+        self.pad = gamepad.PadReader()
+        self.pad_picker = gamepad.StepPicker()
+        self.pad_state: gamepad.PadState | None = None
+        self.pad_step = 0
+        self.pad_step_since = 0.0
         self.key_down = is_key_down  # podmieniane w testach
         self.belt_target: float | None = None  # ostatnia prędkość wysłana z klawiszy
         self.report_endpoint = str(config.get("zgloszenia", {}).get("adres", "")).strip()
@@ -472,7 +481,11 @@ class App:
         crow.addWidget(self.enable_switch)
         clay.addLayout(crow)
         self.direction_seg = Segmented(
-            [("keyboard", "Klawisze → bieżnia"), ("treadmill", "Bieżnia → gra")],
+            [
+                ("keyboard", "Klawisze → bieżnia"),
+                ("gamepad", "Pad → bieżnia"),
+                ("treadmill", "Bieżnia → gra"),
+            ],
             self.settings["direction"],
             "Kierunek sterowania",
         )
@@ -492,7 +505,8 @@ class App:
         self.walk_btn.captured.connect(lambda k: self.on_key("walk", k))
         self.run_btn.captured.connect(lambda k: self.on_key("run", k))
         self.toggle_btn.captured.connect(lambda k: self.on_key("toggle", k))
-        clay.addWidget(ResponsiveRow(self.walk_btn, self.run_btn))
+        self.keys_row = ResponsiveRow(self.walk_btn, self.run_btn)
+        clay.addWidget(self.keys_row)
         clay.addWidget(self.toggle_btn)
         self.output_hint = label("", "muted")
         self.output_hint.setWordWrap(True)
@@ -632,6 +646,36 @@ class App:
         speeds_note.setWordWrap(True)
         bl.addWidget(speeds_note)
         lay.addWidget(belt)
+
+        padc = card()
+        pl = QVBoxLayout(padc)
+        pl.setContentsMargins(14, 12, 14, 14)
+        pl.addWidget(label("Pad → bieżnia", "section"))
+        self.pad_status = label("", "small")
+        self.pad_status.setWordWrap(True)
+        pl.addWidget(self.pad_status)
+        counts = [(str(n), f"{n} {'skoki' if n < 5 else 'skoków'}") for n in range(2, 6)]
+        self.pad_count_seg = Segmented(
+            counts, str(len(self.settings["pad_steps"])), "Liczba skoków"
+        )
+        self.pad_count_seg.changed.connect(lambda v: self.on_pad_count(int(v)))
+        pl.addWidget(self.pad_count_seg)
+        rows = QWidget()
+        self.pad_grid = QGridLayout(rows)
+        self.pad_grid.setContentsMargins(0, 4, 0, 0)
+        self.pad_grid.setHorizontalSpacing(8)
+        self.pad_grid.setColumnStretch(1, 1)
+        self.pad_grid.setColumnStretch(3, 1)
+        pl.addWidget(rows)
+        pad_note = label(
+            "Skok obowiązuje od podanego wychylenia lewej gałki (w dowolną stronę). Skok 1 to"
+            " gałka puszczona. DualSense i pady Xbox działają przez kabel albo Bluetooth.",
+            "small",
+        )
+        pad_note.setWordWrap(True)
+        pl.addWidget(pad_note)
+        lay.addWidget(padc)
+        self.render_pad_rows()
 
         look = card()
         ll = QVBoxLayout(look)
@@ -905,9 +949,9 @@ class App:
         self.enable_switch.set_silently(on)
         save_enabled(on)
         self.belt_target = None  # po zmianie prędkość z klawiszy idzie od nowa
-        keyboard = self.settings["direction"] == "keyboard" and not self.settings["simulator"]
-        if changed and not on and keyboard and not self.settings["belt_control"]:
-            self.worker.set_speed(self.settings["idle_speed"])  # bez stopu: zwolnij
+        sets_speed = self.sets_speed() and not self.settings["simulator"]
+        if changed and not on and sets_speed and not self.settings["belt_control"]:
+            self.worker.set_speed(self.idle_target())  # bez stopu: zwolnij
         if changed and self.belt_commands_possible():
             if not on:
                 self.worker.belt("stop")
@@ -926,11 +970,11 @@ class App:
 
     def render_control_subtitle(self) -> None:
         key = self.toggle_key.name
+        start = "uruchamia i zatrzymuje" if self.settings["belt_control"] else "włącza i wyłącza"
         if self.settings["direction"] == "keyboard":
-            start = (
-                "uruchamia i zatrzymuje" if self.settings["belt_control"] else "włącza i wyłącza"
-            )
             text = f"{key} {start}, {self.bridge.keys[0].name} przyspiesza taśmę"
+        elif self.settings["direction"] == "gamepad":
+            text = f"{key} {start}, gałka pada ustawia prędkość"
         elif self.settings["belt_control"]:
             text = f"{key} uruchamia i zatrzymuje bieżnię - działa też w grze"
         else:
@@ -939,14 +983,25 @@ class App:
 
     def on_direction(self, kind: str) -> None:
         self.change("direction", kind)
+        self.direction_seg.set_value(kind)
         log.info("Kierunek sterowania: %s", kind)
         self.apply_direction()
 
+    def sets_speed(self) -> bool:
+        """Klawisze albo pad ustawiają prędkość taśmy (a nie odwrotnie)."""
+        return self.settings["direction"] in ("keyboard", "gamepad")
+
+    def idle_target(self) -> float:
+        if self.settings["direction"] == "gamepad":
+            return float(self.settings["pad_steps"][0][1])
+        return float(self.settings["idle_speed"])
+
     def apply_direction(self) -> None:
-        """Klawisze -> bieżnia: aplikacja niczego nie naciska, tylko słucha klawiszy gracza."""
-        keyboard = self.settings["direction"] == "keyboard"
-        self.bridge.set_output("dry" if keyboard else self.settings["output"])
-        self.output_seg.setVisible(not keyboard)
+        """Klawisze/pad -> bieżnia: aplikacja niczego nie naciska, tylko słucha gracza."""
+        sets_speed = self.sets_speed()
+        self.bridge.set_output("dry" if sets_speed else self.settings["output"])
+        self.output_seg.setVisible(not sets_speed)
+        self.keys_row.setVisible(self.settings["direction"] != "gamepad")
         self.belt_target = None
         self.render_control_subtitle()
         self.render_output_hint()
@@ -955,6 +1010,105 @@ class App:
         self.change(key, round(kmh, 1))
         self.belt_target = None  # zmieniona prędkość trafia na taśmę od razu
         self.render_output_hint()
+
+    # --- pad ------------------------------------------------------------------
+
+    def render_pad_rows(self) -> None:
+        grid = self.pad_grid
+        while (item := grid.takeAt(0)) is not None:
+            if (w := item.widget()) is not None:
+                w.deleteLater()
+        grid.addWidget(label("Wychylenie", "small"), 0, 1, 1, 2)
+        grid.addWidget(label("Prędkość", "small"), 0, 3, 1, 2)
+        self.pad_at_sliders: list[Slider | None] = []
+        for i, (at, speed) in enumerate(self.settings["pad_steps"], start=1):
+            name = label(f"Skok {i}")
+            name.setMinimumWidth(56)
+            grid.addWidget(name, i, 0)
+            if i == 1:
+                grid.addWidget(label("puszczona", "muted"), i, 1, 1, 2)
+                self.pad_at_sliders.append(None)
+            else:
+                s = Slider(Qt.Orientation.Horizontal)
+                s.setRange(gamepad.MIN_GAP, 100)
+                s.setValue(at)
+                s.setAccessibleName(f"Skok {i}: wychylenie")
+                s.setFixedHeight(th.CONTROL_H)
+                value = label(f"{at}%")
+                value.setMinimumWidth(40)
+                value.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                s.valueChanged.connect(lambda v, n=i - 1, lb=value: self.on_pad_at(n, v, lb))
+                grid.addWidget(s, i, 1)
+                grid.addWidget(value, i, 2)
+                self.pad_at_sliders.append(s)
+            sp, sp_value = self.slider(
+                kingsmith.SPEED_MIN, kingsmith.SPEED_MAX, speed, f"Skok {i}: prędkość"
+            )
+            sp.valueChanged.connect(lambda v, n=i - 1: self.on_pad_speed(n, v / 10))
+            grid.addWidget(sp, i, 3)
+            grid.addWidget(sp_value, i, 4)
+
+    def on_pad_count(self, count: int) -> None:
+        if count == len(self.settings["pad_steps"]):
+            return
+        self.change("pad_steps", list(gamepad.PRESETS[count]))
+        self.belt_target = None
+        self.render_pad_rows()
+        self.render_output_hint()
+
+    def on_pad_at(self, index: int, value: int, value_label: Any) -> None:
+        steps = list(self.settings["pad_steps"])
+        lo = steps[index - 1][0] + gamepad.MIN_GAP
+        hi = steps[index + 1][0] - gamepad.MIN_GAP if index + 1 < len(steps) else 100
+        clamped = max(lo, min(hi, value))
+        slider = self.pad_at_sliders[index]
+        if clamped != value and slider is not None:
+            slider.setValue(clamped)  # wraca tu z poprawną wartością
+            return
+        value_label.setText(f"{clamped}%")
+        steps[index] = (clamped, steps[index][1])
+        self.settings["pad_steps"] = steps
+        self.save()
+        self.render_output_hint()
+
+    def on_pad_speed(self, index: int, kmh: float) -> None:
+        steps = list(self.settings["pad_steps"])
+        steps[index] = (steps[index][0], round(kmh, 1))
+        self.settings["pad_steps"] = steps
+        self.save()
+        self.belt_target = None
+        self.render_output_hint()
+
+    def pad_target(self, now: float) -> tuple[float, str, str, bool]:
+        """Prędkość ze skoku gałki. Ostatnie pole: skok trzyma się już chwilę (można wysłać)."""
+        steps = self.settings["pad_steps"]
+        self.pad_state = self.pad.read()
+        deflection = self.pad_state.deflection if self.pad_state else 0.0
+        index = self.pad_picker.update(steps, deflection)
+        if index != self.pad_step:
+            self.pad_step, self.pad_step_since = index, now
+        speed = float(steps[index][1])
+        held = "idle" if index == 0 else ("run" if index == len(steps) - 1 else "walk")
+        if self.pad_state is None:
+            caption = f"Brak pada - taśma {fmt_num(speed)} km/h"
+        else:
+            caption = (
+                f"Gałka {round(deflection * 100)}% - skok {index + 1} - taśma {fmt_num(speed)} km/h"
+            )
+        settled = now - self.pad_step_since >= PAD_SETTLE_S
+        return speed, held, caption, settled
+
+    def render_pad_status(self) -> None:
+        state = self.pad_state
+        if self.settings["direction"] != "gamepad":
+            text = "Wybierz kierunek Pad → bieżnia na ekranie głównym."
+        elif state is None:
+            text = "Nie widzę pada. Podłącz DualSense albo pada Xbox (kablem albo Bluetooth)."
+        else:
+            step = self.pad_step + 1
+            text = f"{state.name}: wychylenie {round(state.deflection * 100)}%, skok {step}."
+        if self.pad_status.text() != text:
+            self.pad_status.setText(text)
 
     def keyboard_target(self) -> tuple[float, str]:
         """Prędkość taśmy z trzymanych klawiszy: chód + bieg, sam chód albo nic."""
@@ -1019,6 +1173,11 @@ class App:
         walk, run = self.bridge.keys
         if problem_text:
             text = problem_text
+        elif self.settings["direction"] == "gamepad":
+            steps = ", ".join(
+                f"od {at}%: {fmt_num(speed)}" for at, speed in self.settings["pad_steps"]
+            )
+            text = f"Gałka pada - {steps} km/h."
         elif self.settings["direction"] == "keyboard":
             s = self.settings
             text = (
@@ -1469,10 +1628,23 @@ class App:
         state = self.bridge.tick(time.monotonic(), actions)
 
         c = state.control
-        keyboard = self.settings["direction"] == "keyboard"
+        direction = self.settings["direction"]
         capturing = any(b.capturing for b in (self.walk_btn, self.run_btn, self.toggle_btn))
-        target, held = self.keyboard_target() if keyboard else (0.0, "idle")
-        sends = keyboard and state.enabled and not capturing and not self.settings["simulator"]
+        settled = True
+        speed_caption = ""
+        if direction == "gamepad":
+            target, held, speed_caption, settled = self.pad_target(time.monotonic())
+        elif direction == "keyboard":
+            target, held = self.keyboard_target()
+        else:
+            target, held = 0.0, "idle"
+        sends = (
+            direction != "treadmill"
+            and state.enabled
+            and settled
+            and not capturing
+            and not self.settings["simulator"]
+        )
         if sends and target != self.belt_target:
             self.belt_target = target
             self.worker.set_speed(target)
@@ -1481,7 +1653,12 @@ class App:
                 "offline",
                 "Brak danych" if self.link is not Link.STREAMING else "Czekam na dane",
             )
-        elif keyboard:
+        elif direction == "gamepad":
+            mode = held if state.enabled else "idle"
+            caption = (
+                speed_caption if state.enabled else f"Wyłączone - {self.toggle_key.name} włącza"
+            )
+        elif direction == "keyboard":
             walk_key, run_key = self.bridge.keys
             mode = held if state.enabled else "idle"
             caption = {
@@ -1498,7 +1675,12 @@ class App:
             mode, caption = "walk", f"Chód - {self.bridge.keys[0].name}"
         else:
             mode, caption = "idle", "Stoisz"
-        if state.enabled and not keyboard and self.settings["output"] == "dry" and c.walk:
+        if (
+            state.enabled
+            and direction == "treadmill"
+            and self.settings["output"] == "dry"
+            and c.walk
+        ):
             caption += " (podgląd)"
         self.gauge.set_speed(c.speed, mode, caption)
         self.bubble.set_state(
@@ -1515,6 +1697,7 @@ class App:
             self.stat_time.set(f"{minutes}:{seconds:02d}")
             self.spark.set_points(list(state.history))
             self.render_link()
+            self.render_pad_status()
 
     def request_stop(self, *_args: Any) -> None:
         self.stop_requested = True  # wywoływane z obsługi sygnału - właściwe zamknięcie w tick()

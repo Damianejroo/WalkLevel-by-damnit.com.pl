@@ -34,6 +34,7 @@ SECTIONS = {
     "idle_speed": "ble",
     "walk_speed": "ble",
     "run_speed": "ble",
+    "pad_steps": "ble",
     "device_address": "ble",
     "device_name": "ble",
     "simulator": "ui",

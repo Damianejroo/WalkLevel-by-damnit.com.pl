@@ -34,6 +34,7 @@ i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 | --- | --- |
 | Włącz / wyłącz sterowanie | przełącznik w oknie albo **F8** (działa też w grze) - razem z tym bieżnia rusza i staje |
 | Kierunek **Klawisze → bieżnia** (domyślny) | trzymasz W - taśma przyspiesza do prędkości chodu, W + Shift - do biegu, puszczasz - zwalnia do prędkości bez klawisza. Aplikacja niczego wtedy nie naciska, W naciskasz sam w grze |
+| Kierunek **Pad → bieżnia** | wychylenie lewej gałki (DualSense albo pad Xbox, kabel lub Bluetooth) ustawia prędkość skokami: domyślnie 0 / 25 / 50 / 100% = 1 / 1,5 / 2,5 / 4 km/h. Liczba skoków (2-5), progi i prędkości w Ustawieniach > Pad → bieżnia |
 | Kierunek **Bieżnia → gra** | chodzenie po bieżni naciska W, szybszy chód W + Shift (jak dotąd) |
 | Prędkości taśmy | Ustawienia > Sterowanie bieżnią: bez klawisza (domyślnie 1 km/h), chód (1,5), bieg (2,5) |
 | Zmiana klawisza F8 | kliknij **Start/stop: F8** i naciśnij nowy klawisz (nie może to być klawisz chodu ani biegu) |
