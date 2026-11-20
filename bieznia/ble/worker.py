@@ -89,6 +89,7 @@ class BleWorker:
         self._target: tuple[str, str] | None = None
         self._commands: asyncio.Queue[str] | None = None
         self._belt_task: asyncio.Task[None] | None = None
+        self._belt_kind = ""
         self._driver: Driver | None = None
         self._target_speed: float | None = None  # ostatnia prośba z okna
         self._sent_speed: float | None = None  # ostatnia wysłana do bieżni
@@ -147,7 +148,7 @@ class BleWorker:
             return False
         if self._belt_task is not None and not self._belt_task.done():
             self._belt_task.cancel()
-        await driver.stop_belt()
+        await driver.stop_belt(verify=False)  # zamykanie: bez czekania na potwierdzenie
         return True
 
     def shutdown(self, timeout: float = 4.0) -> None:
@@ -292,7 +293,7 @@ class BleWorker:
         while not lost.is_set():
             now = time.monotonic()
             if now >= next_poll:
-                next_poll = now + POLL_S
+                next_poll = now + driver.poll_interval()
                 await driver.poll()
                 await self._check_speed(driver)
             try:
@@ -307,12 +308,22 @@ class BleWorker:
                     await self._apply_speed(driver)
             elif command == "stop":
                 if self._belt_task is not None and not self._belt_task.done():
-                    self._belt_task.cancel()
-                await driver.stop_belt()
+                    self._belt_task.cancel()  # stop przerywa start w toku
                 self._sent_speed = None
-                self.events.put(BleEvent("belt", text="stopped"))
-            elif command == "start" and (self._belt_task is None or self._belt_task.done()):
+                self._belt_task = asyncio.create_task(self._stop_belt(driver))
+                self._belt_kind = "stop"
+            elif command == "start":
+                busy = self._belt_task is not None and not self._belt_task.done()
+                if busy and self._belt_kind == "start":
+                    continue  # start już w toku
+                if busy and self._belt_task is not None:
+                    self._belt_task.cancel()  # sprawdzanie stopu przerwane nowym startem
                 self._belt_task = asyncio.create_task(self._start_belt(driver))
+                self._belt_kind = "start"
+
+    async def _stop_belt(self, driver: Driver) -> None:
+        await driver.stop_belt()
+        self.events.put(BleEvent("belt", text="stopped"))
 
     async def _start_belt(self, driver: Driver) -> None:
         result = await driver.start_belt()

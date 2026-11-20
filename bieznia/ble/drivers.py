@@ -34,8 +34,19 @@ PROPS_TIMEOUT_S = 6.0
 # Odstępy zapisu jak w KS Fit: po każdym fragmencie i po całej wiadomości.
 FRAGMENT_GAP_S = 0.03
 LINE_GAP_S = 0.06
-START_ATTEMPTS = 3
-START_VERDICT_S = 2.5
+START_ATTEMPTS = 4
+STOP_ATTEMPTS = 3
+# Czy bieżnia posłuchała, widać w pierwszej ramce z danymi, która przyszła co najmniej
+# VERDICT_FRAME_S po poleceniu (ramki co ok. 2 s, więc najpóźniej po VERDICT_MAX_S).
+# Log testera (v0.2.8): pierwszy start bywa gubiony bez śladu - stałe 2,5 s czekania
+# przed ponowieniem dawało 5-6 s rozruchu.
+VERDICT_FRAME_S = 1.0  # ramka tuż po poleceniu bywa jeszcze sprzed niego (log: do 1,6 s)
+VERDICT_MAX_S = 2.6
+CONTROL_GAP_S = 0.4
+# Gdy bieżnia sama wysyła dane (subskrypcja KS Fit, co ok. 2 s), odpytujemy rzadziej -
+# KS Fit nie zasypuje jej zapytaniami, a my gubiliśmy ok. 40% poleceń przy pytaniu co 0,75 s.
+CALM_POLL_S = 2.0
+BUSY_POLL_S = 0.75  # ControlMode i runState jedno po drugim - drugie potrafi przepaść
 # X21 po cichu gubi część poleceń prędkości, najczęściej te wysłane tuż po jego własnej
 # ramce z danymi (log testera: 6 z 12 zgubionych przyszło do 0,3 s po ramce). Czekamy chwilę.
 QUIET_AFTER_PUSH_S = 0.4
@@ -111,11 +122,13 @@ class Driver(Protocol):
 
     async def poll(self) -> None: ...
 
+    def poll_interval(self) -> float: ...
+
     def describe(self) -> str: ...
 
     async def start_belt(self) -> str: ...
 
-    async def stop_belt(self) -> None: ...
+    async def stop_belt(self, verify: bool = True) -> None: ...
 
     async def set_speed(self, kmh: float) -> bool: ...
 
@@ -185,35 +198,71 @@ class KingSmithDriver:
         with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(self._state_event.wait(), timeout)
 
+    async def _quiet(self) -> None:
+        """Chwila ciszy po ramce z danymi - polecenia wysłane tuż po niej X21 często gubi."""
+        since_push = time.monotonic() - self.last_props_at
+        if 0 <= since_push < QUIET_AFTER_PUSH_S:
+            await asyncio.sleep(QUIET_AFTER_PUSH_S - since_push)
+
+    async def _verdict(self, sent_at: float, want: int) -> str:
+        """'ok' (runState == want), 'error' (odmowa) albo 'no' (świeża ramka bez zmiany)."""
+        deadline = sent_at + VERDICT_MAX_S
+        while True:
+            if self.run_state == want:
+                return "ok"
+            if self.last_error is not None:
+                return "error"
+            if self.last_props_at >= sent_at + VERDICT_FRAME_S:
+                return "no"
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return "no"
+            await self._wait_state(remaining)
+
     async def start_belt(self) -> str:
         """Uruchamia taśmę. Zwraca 'started', 'refused' albo 'unknown'.
 
-        Bieżnia potrafi odmówić (błąd -5000, np. w trybie czuwania albo bez klucza) -
-        jak KS Fit ponawiamy do trzech razy, ControlMode przy każdej próbie od nowa.
+        Bieżnia potrafi odmówić (błąd -5000, np. w trybie czuwania albo bez klucza) albo
+        zgubić polecenie bez śladu - ponawiamy, gdy tylko ramka z danymi pokaże, że stoi.
         """
+        if self.run_state == 1:
+            log.info("Taśma już jedzie - nie wysyłam startu")
+            return "started"
         for attempt in range(1, START_ATTEMPTS + 1):
             self.last_error = None
-            await self.send(kingsmith.CMD_CONTROL)
+            await self._quiet()
+            if self.control_mode != 1:  # jak QZ: przejęcie sterowania tylko, gdy potrzebne
+                await self.send(kingsmith.CMD_CONTROL)
+                await asyncio.sleep(CONTROL_GAP_S)
             await self.send(kingsmith.CMD_START)
-            deadline = time.monotonic() + START_VERDICT_S
-            while time.monotonic() < deadline:
-                if self.run_state == 1:
-                    log.info("Bieżnia ruszyła (próba %d)", attempt)
-                    return "started"
-                if self.last_error is not None:
-                    break
-                await self._wait_state(deadline - time.monotonic())
-            if self.last_error is not None:
-                log.warning("Bieżnia odmówiła startu (kod %s), próba %d", self.last_error, attempt)
-            if self.run_state == 1:
+            verdict = await self._verdict(time.monotonic(), 1)
+            if verdict == "ok":
+                log.info("Bieżnia ruszyła (próba %d)", attempt)
                 return "started"
+            if verdict == "error":
+                log.warning("Bieżnia odmówiła startu (kod %s), próba %d", self.last_error, attempt)
+                self.control_mode = None  # następna próba z przejęciem sterowania od nowa
+            else:
+                log.info("Bieżnia nie zareagowała na start (próba %d) - ponawiam", attempt)
         if self.last_error is not None:
             return "refused"
         return "unknown"  # brak odpowiedzi - prędkość pokaże, czy taśma jedzie
 
-    async def stop_belt(self) -> None:
-        await self.send(kingsmith.CMD_STOP)
-        log.info("Wysłano stop taśmy")
+    async def stop_belt(self, verify: bool = True) -> None:
+        """Stop od razu; potem sprawdzamy w danych i w razie potrzeby ponawiamy."""
+        for attempt in range(1, STOP_ATTEMPTS + 1):
+            self.last_error = None
+            await self.send(kingsmith.CMD_STOP)
+            if not verify:
+                log.info("Wysłano stop taśmy")
+                return
+            verdict = await self._verdict(time.monotonic(), 0)
+            if verdict == "ok":
+                log.info("Taśma zatrzymana (próba %d)", attempt)
+                return
+            log.warning("Bieżnia nie zareagowała na stop (próba %d) - ponawiam", attempt)
+            await self._quiet()
+        log.warning("Bieżnia nie potwierdziła stopu")
 
     def belt_speed(self) -> tuple[float, float] | None:
         """Prędkość z ostatniej ramki z danymi i czas tej ramki (time.monotonic)."""
@@ -223,9 +272,7 @@ class KingSmithDriver:
 
     async def set_speed(self, kmh: float) -> bool:
         command = kingsmith.speed_command(kmh)
-        since_push = time.monotonic() - self.last_props_at
-        if 0 <= since_push < QUIET_AFTER_PUSH_S:
-            await asyncio.sleep(QUIET_AFTER_PUSH_S - since_push)
+        await self._quiet()
         await self.send(command)
         log.info("Prędkość taśmy: %s", command.rsplit(" ", 1)[-1])
         return True
@@ -270,6 +317,7 @@ class KingSmithDriver:
                 self.on_reading(self.last_speed, self.last_steps)
             return
         self.last_props_at = now
+        self._state_event.set()  # każda ramka rozstrzyga, czy polecenie zadziałało
         self.props_times.append(now)
         if "CurrentSpeed" in props:
             self.last_speed = max(0.0, props["CurrentSpeed"])
@@ -347,6 +395,12 @@ class KingSmithDriver:
         self._log_stats(now)
         await self.send(self.poll_command)
 
+    def poll_interval(self) -> float:
+        pushing = time.monotonic() - self.last_props_at < PROPS_TIMEOUT_S / 2
+        if self.poll_command == kingsmith.TELEMETRY_PROPS and pushing:
+            return CALM_POLL_S
+        return BUSY_POLL_S
+
     def _log_stats(self, now: float) -> None:
         """Raz na 30 s: jak często naprawdę przychodzi prędkość (do diagnozy opóźnień)."""
         if now - self.stats_at < STATS_EVERY_S:
@@ -391,11 +445,14 @@ class FtmsDriver:
     async def poll(self) -> None:
         pass
 
+    def poll_interval(self) -> float:
+        return BUSY_POLL_S
+
     async def start_belt(self) -> str:
         log.warning("Start taśmy przez FTMS nie jest jeszcze obsługiwany")
         return "unsupported"
 
-    async def stop_belt(self) -> None:
+    async def stop_belt(self, verify: bool = True) -> None:
         log.warning("Stop taśmy przez FTMS nie jest jeszcze obsługiwany")
 
     async def set_speed(self, kmh: float) -> bool:

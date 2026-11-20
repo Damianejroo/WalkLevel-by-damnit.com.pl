@@ -136,6 +136,7 @@ class FakeTreadmill:
     extra_silent_channel: bool = False
     running: bool = True
     refuse_start: bool = False
+    drop_commands: int = 0  # tyle poleceń start/stop przepada bez śladu (jak w X21)
     callbacks: dict[str, Any] = field(default_factory=dict)
     received: list[str] = field(default_factory=list)
     _buf: dict[str, bytearray] = field(default_factory=dict)
@@ -190,6 +191,8 @@ class FakeTreadmill:
             self._reply(prefix, f"props CurrentSpeed {speed} RunningSteps 120 runState {state}")
         elif text == kingsmith.CMD_CONTROL:
             self._reply(prefix, "props ControlMode 1")
+        elif text in (kingsmith.CMD_START, kingsmith.CMD_STOP) and self.drop_commands > 0:
+            self.drop_commands -= 1
         elif text == kingsmith.CMD_START:
             if self.refuse_start:
                 self._reply(prefix, "props Error ErrorCode -5000")
@@ -387,6 +390,9 @@ class StubDriver:
     async def poll(self) -> None:
         pass
 
+    def poll_interval(self) -> float:
+        return 0.75
+
     def describe(self) -> str:
         return "stub"
 
@@ -396,7 +402,7 @@ class StubDriver:
         await asyncio.sleep(10)  # bieżnia długo się namyśla
         return "started"
 
-    async def stop_belt(self) -> None:
+    async def stop_belt(self, verify: bool = True) -> None:
         self.calls.append("stop")
 
     async def set_speed(self, kmh: float) -> bool:
@@ -420,6 +426,7 @@ def bare_worker() -> Any:
     worker._speed_at_send = 0.0
     worker._resends = 0
     worker._speed_confirmed = True
+    worker._belt_kind = ""
     return worker
 
 
@@ -434,6 +441,7 @@ def test_worker_stop_cancels_pending_start() -> None:
         worker._commands.put_nowait("start")
         await asyncio.wait_for(driver.started.wait(), 2)
         worker._commands.put_nowait("start")  # drugi start w trakcie - ignorowany
+        starting.append(worker._belt_task)
         worker._commands.put_nowait("stop")
         for _ in range(50):
             await asyncio.sleep(0.01)
@@ -443,9 +451,10 @@ def test_worker_stop_cancels_pending_start() -> None:
         await asyncio.wait_for(stream, 2)
         return driver
 
+    starting: list[Any] = []
     driver = asyncio.run(scenario())
     assert driver.calls == ["start", "stop"]
-    assert worker._belt_task is not None and worker._belt_task.cancelled()
+    assert starting[0] is not None and starting[0].cancelled()
     events = [worker.events.get_nowait() for _ in range(worker.events.qsize())]
     assert [(e.kind, e.text) for e in events] == [("belt", "stopped")]
 
@@ -596,3 +605,120 @@ def test_speed_waits_after_treadmill_push(monkeypatch: pytest.MonkeyPatch) -> No
     driver.last_props_at = drivers.time.monotonic() - 0.1  # ramka przed chwilą
     asyncio.run(driver.set_speed(2.5))
     assert slept and 0.25 < slept[0] <= drivers.QUIET_AFTER_PUSH_S
+
+
+# --- start/stop: gubione polecenia, ponowienia ---------------------------------------
+
+
+async def run_with_frames(treadmill: FakeTreadmill, action: Any) -> Any:
+    """Sterownik z bieżnią, która co chwilę wysyła ramki z danymi (jak X21 co 2 s)."""
+    driver, _ = await run_driver(treadmill)
+    driver.codec.candidates = ["v1"]
+
+    async def frames() -> None:
+        while True:
+            await driver.poll()
+            await asyncio.sleep(0.05)
+
+    pusher = asyncio.create_task(frames())
+    try:
+        return driver, await action(driver)
+    finally:
+        pusher.cancel()
+
+
+@pytest.fixture
+def fast_verdict(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(drivers, "VERDICT_FRAME_S", 0.1)
+    monkeypatch.setattr(drivers, "VERDICT_MAX_S", 0.5)
+    monkeypatch.setattr(drivers, "QUIET_AFTER_PUSH_S", 0.0)
+
+
+@pytest.mark.usefixtures("fast_verdict")
+def test_lost_start_is_resent_without_control_mode() -> None:
+    treadmill = FakeTreadmill(running=False, drop_commands=1)
+
+    async def start(driver: Any) -> str:
+        driver.control_mode = 1  # z ramek: bieżnia już jest w trybie sterowania
+        return str(await driver.start_belt())
+
+    _, result = asyncio.run(run_with_frames(treadmill, start))
+    assert result == "started"
+    assert treadmill.received.count(kingsmith.CMD_START) == 2
+    assert kingsmith.CMD_CONTROL not in treadmill.received  # zbędne polecenie = zgubiony start
+
+
+@pytest.mark.usefixtures("fast_verdict")
+def test_running_belt_gets_no_start_command() -> None:
+    treadmill = FakeTreadmill(running=True)
+
+    async def start(driver: Any) -> str:
+        driver.run_state = 1
+        return str(await driver.start_belt())
+
+    _, result = asyncio.run(run_with_frames(treadmill, start))
+    assert result == "started"
+    assert kingsmith.CMD_START not in treadmill.received
+
+
+@pytest.mark.usefixtures("fast_verdict")
+def test_lost_stop_is_resent() -> None:
+    treadmill = FakeTreadmill(running=True, drop_commands=1)
+
+    async def stop(driver: Any) -> None:
+        driver.run_state = 1
+        await driver.stop_belt()
+
+    asyncio.run(run_with_frames(treadmill, stop))
+    assert not treadmill.running
+    assert treadmill.received.count(kingsmith.CMD_STOP) == 2
+
+
+@pytest.mark.usefixtures("fast_verdict")
+def test_stop_on_quit_does_not_wait() -> None:
+    treadmill = FakeTreadmill(running=True, drop_commands=5)
+
+    async def stop(driver: Any) -> None:
+        driver.run_state = 1
+        await driver.stop_belt(verify=False)
+
+    asyncio.run(run_with_frames(treadmill, stop))
+    assert treadmill.received.count(kingsmith.CMD_STOP) == 1
+
+
+def test_polling_calms_down_when_treadmill_pushes_data() -> None:
+    driver = KingSmithDriver(FakeTreadmill(), [], "KS-X21", lambda s, _st: None)
+    assert driver.poll_interval() == drivers.BUSY_POLL_S
+    driver.poll_command = kingsmith.TELEMETRY_PROPS
+    driver.last_props_at = drivers.time.monotonic()
+    assert driver.poll_interval() == drivers.CALM_POLL_S
+    driver.last_props_at = drivers.time.monotonic() - 10  # dane przestały przychodzić
+    assert driver.poll_interval() == drivers.BUSY_POLL_S
+
+
+def test_new_start_interrupts_stop_check() -> None:
+    worker = bare_worker()
+
+    class SlowStop(StubDriver):
+        async def stop_belt(self, verify: bool = True) -> None:
+            self.calls.append("stop")
+            await asyncio.sleep(10)  # sprawdzanie stopu trwa
+
+        async def start_belt(self) -> str:
+            self.calls.append("start")
+            return "started"
+
+    async def scenario() -> SlowStop:
+        driver = SlowStop()
+        lost = asyncio.Event()
+        worker._commands = asyncio.Queue()
+        stream = asyncio.create_task(worker._stream(driver, lost))  # type: ignore[arg-type]
+        worker._commands.put_nowait("stop")
+        await asyncio.sleep(0.05)
+        worker._commands.put_nowait("start")  # F8 jeszcze raz, zanim stop się potwierdził
+        await asyncio.sleep(0.05)
+        lost.set()
+        await asyncio.wait_for(stream, 2)
+        return driver
+
+    assert asyncio.run(scenario()).calls == ["stop", "start"]

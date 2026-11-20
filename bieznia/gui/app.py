@@ -955,9 +955,7 @@ class App:
         if changed and self.belt_commands_possible():
             if not on:
                 self.worker.belt("stop")
-            elif self.bridge.state.control.speed > 0:
-                log.info("Taśma już jedzie - nie wysyłam startu")
-            else:
+            else:  # czy taśma już jedzie, sprawdza sterownik (stan bieżni, nie prędkość)
                 self.worker.belt("start")
                 self.render_output_hint("Uruchamiam bieżnię…")
 
