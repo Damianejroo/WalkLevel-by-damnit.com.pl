@@ -1,16 +1,21 @@
 name: CI
 
+# Siatka bezpieczeństwa po pushu. Wydanie (wydanie.yml) i tak powtarza testy przed budową,
+# więc zmiany w samej dokumentacji nie uruchamiają CI.
 on:
   push:
     branches: [main]
+    paths-ignore: ["**.md", "LICENSE"]
   pull_request:
+    paths-ignore: ["**.md", "LICENSE"]
 
 permissions:
   contents: read
 
+# Nowszy push przerywa starszy, niedokończony przebieg - liczy się tylko ostatni stan.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 jobs:
   test:
