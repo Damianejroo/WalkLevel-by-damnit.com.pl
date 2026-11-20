@@ -1,0 +1,4 @@
+* text=auto eol=lf
+# cmd.exe źle czyta pliki .bat z końcami linii LF
+*.bat text eol=crlf
+*.cmd text eol=crlf

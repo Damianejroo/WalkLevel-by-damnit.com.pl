@@ -1,0 +1,38 @@
+[project]
+name = "bieznia"
+version = "0.1.0"
+description = "Most: bieżnia WalkingPad X21 -> klawiatura / pad w grach na Windows"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+# Na razie bez zależności runtime: tylko biblioteka standardowa (ctypes do Windows API).
+dependencies = []
+
+[project.scripts]
+bieznia = "bieznia.app:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bieznia"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+# Teksty są po polsku: półpauza „–” jest tu celowa.
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

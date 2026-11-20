@@ -1,0 +1,17 @@
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Dane lokalne (nie trafiają do repo)
+logs/
+nagrania/
+config.local.toml
+
+# Prywatne notatki i dokumenty
+*.docx
