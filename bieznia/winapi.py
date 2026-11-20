@@ -63,6 +63,10 @@ if IS_WINDOWS:
     _user32.SendInput.restype = wintypes.UINT
     _user32.GetAsyncKeyState.argtypes = (ctypes.c_int,)
     _user32.GetAsyncKeyState.restype = ctypes.c_short
+    _user32.MapVirtualKeyW.argtypes = (wintypes.UINT, wintypes.UINT)
+    _user32.MapVirtualKeyW.restype = wintypes.UINT
+
+MAPVK_VSC_TO_VK_EX = 3
 
 
 def is_key_down(vk: int) -> bool:
@@ -70,6 +74,14 @@ def is_key_down(vk: int) -> bool:
     if not IS_WINDOWS:
         return False
     return bool(_user32.GetAsyncKeyState(vk) & 0x8000)
+
+
+def vk_from_scan(scan: int, extended: bool = False) -> int:
+    """Kod wirtualny dla kodu skanowania (lewy/prawy Shift, Ctrl i Alt rozróżnione)."""
+    if not IS_WINDOWS:
+        return 0
+    code = (0xE000 | scan) if extended else scan
+    return int(_user32.MapVirtualKeyW(code, MAPVK_VSC_TO_VK_EX))
 
 
 def key_input(scan: int, down: bool, extended: bool = False) -> INPUT:

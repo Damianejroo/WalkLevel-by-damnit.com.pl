@@ -399,6 +399,10 @@ class StubDriver:
     async def stop_belt(self) -> None:
         self.calls.append("stop")
 
+    async def set_speed(self, kmh: float) -> bool:
+        self.calls.append(f"speed {kmh:g}")
+        return True
+
 
 def test_worker_stop_cancels_pending_start() -> None:
     from bieznia.ble.worker import BleWorker
@@ -429,3 +433,53 @@ def test_worker_stop_cancels_pending_start() -> None:
     assert worker._belt_task is not None and worker._belt_task.cancelled()
     events = [worker.events.get_nowait() for _ in range(worker.events.qsize())]
     assert [(e.kind, e.text) for e in events] == [("belt", "stopped")]
+
+
+def test_speed_command_format_like_qz() -> None:
+    assert kingsmith.speed_command(1.5) == "props CurrentSpeed 1.5"
+    assert kingsmith.speed_command(3.0) == "props CurrentSpeed 3"
+    assert kingsmith.speed_command(0.0) == "props CurrentSpeed 0.5"  # 0 nie zatrzymuje taśmy
+    assert kingsmith.speed_command(30) == "props CurrentSpeed 12"
+
+
+def test_driver_sends_speed() -> None:
+    async def scenario() -> list[str]:
+        treadmill = FakeTreadmill()
+        driver, _ = await run_driver(treadmill)
+        await driver.set_speed(2.5)
+        return treadmill.received
+
+    assert asyncio.run(scenario())[-1] == "props CurrentSpeed 2.5"
+
+
+def test_worker_sends_only_newest_speed_and_applies_it_after_start() -> None:
+    from bieznia.ble.worker import BleWorker
+
+    worker = BleWorker.__new__(BleWorker)
+    worker.events = queue.Queue()
+    worker._belt_task = None
+    worker._target_speed = None
+    worker._sent_speed = None
+
+    async def scenario() -> StubDriver:
+        driver = StubDriver()
+        driver.start_belt = quick_start  # type: ignore[method-assign]
+        lost = asyncio.Event()
+        worker._commands = asyncio.Queue()
+        stream = asyncio.create_task(worker._stream(driver, lost))  # type: ignore[arg-type]
+        for kmh in (1.0, 1.5, 2.5):  # klawisze w szybkim tempie - liczy się ostatni
+            worker._queue_speed(kmh)
+        await asyncio.sleep(0.05)
+        worker._queue_speed(2.5)  # bez zmiany - nic nie idzie do bieżni
+        worker._commands.put_nowait("start")
+        await asyncio.sleep(0.05)
+        lost.set()
+        await asyncio.wait_for(stream, 2)
+        return driver
+
+    async def quick_start() -> str:
+        return "started"
+
+    driver = asyncio.run(scenario())
+    # po starcie bieżnia jedzie z prędkością startową - docelowa idzie jeszcze raz
+    assert driver.calls == ["speed 2.5", "speed 2.5"]

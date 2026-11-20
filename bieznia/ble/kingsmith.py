@@ -56,6 +56,14 @@ TELEMETRY_PROPS = "servers getProp 1 9 15 2 10 11 12 13 14"
 CMD_CONTROL = "props ControlMode 1"
 CMD_START = "props runState 1"
 CMD_STOP = "props runState 0"
+# Prędkość docelowa jak w QZ (forceSpeed): liczba bez zbędnych zer, np. "1.5", "3".
+SPEED_MIN = 0.5
+SPEED_MAX = 12.0
+
+
+def speed_command(kmh: float) -> str:
+    value = round(min(SPEED_MAX, max(SPEED_MIN, kmh)), 1)
+    return f"props CurrentSpeed {value:g}"
 
 
 def table_order(device_name: str) -> list[str]:

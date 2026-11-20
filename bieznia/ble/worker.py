@@ -85,6 +85,8 @@ class BleWorker:
         self._commands: asyncio.Queue[str] | None = None
         self._belt_task: asyncio.Task[None] | None = None
         self._driver: Driver | None = None
+        self._target_speed: float | None = None  # ostatnia prośba z okna
+        self._sent_speed: float | None = None  # ostatnia wysłana do bieżni
         self._thread.start()
 
     # --- API dla wątku głównego --------------------------------------------
@@ -106,6 +108,15 @@ class BleWorker:
         if command not in ("start", "stop"):
             raise ValueError(command)
         self._loop.call_soon_threadsafe(self._queue_command, command)
+
+    def set_speed(self, kmh: float) -> None:
+        """Prędkość docelowa taśmy. Liczy się tylko najnowsza - starsze prośby przepadają."""
+        self._loop.call_soon_threadsafe(self._queue_speed, round(kmh, 1))
+
+    def _queue_speed(self, kmh: float) -> None:
+        self._target_speed = kmh
+        if self._commands is not None:
+            self._commands.put_nowait("speed")
 
     def _queue_command(self, command: str) -> None:
         if self._commands is None:
@@ -239,6 +250,7 @@ class BleWorker:
                     attempt = 0
                     self._commands = asyncio.Queue()
                     self._driver = driver
+                    self._sent_speed = None
                     try:
                         await self._stream(driver, lost)
                     finally:
@@ -279,17 +291,32 @@ class BleWorker:
                 )
             except TimeoutError:
                 continue
-            if command == "stop":
+            if command == "speed":
+                starting = self._belt_task is not None and not self._belt_task.done()
+                if not starting:  # w trakcie startu prędkość ustawi _start_belt
+                    await self._apply_speed(driver)
+            elif command == "stop":
                 if self._belt_task is not None and not self._belt_task.done():
                     self._belt_task.cancel()
                 await driver.stop_belt()
+                self._sent_speed = None
                 self.events.put(BleEvent("belt", text="stopped"))
             elif command == "start" and (self._belt_task is None or self._belt_task.done()):
                 self._belt_task = asyncio.create_task(self._start_belt(driver))
 
     async def _start_belt(self, driver: Driver) -> None:
         result = await driver.start_belt()
+        self._sent_speed = None  # po starcie taśma jedzie z prędkością startową bieżni
+        if result in ("started", "unknown"):
+            await self._apply_speed(driver)
         self.events.put(BleEvent("belt", text=result))
+
+    async def _apply_speed(self, driver: Driver) -> None:
+        target = self._target_speed
+        if target is None or target == self._sent_speed:
+            return
+        if await driver.set_speed(target):
+            self._sent_speed = target
 
     async def _diagnose(self, path: Path) -> None:
         from bieznia.ble.diagnostics import run_diagnostics

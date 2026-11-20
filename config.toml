@@ -12,6 +12,9 @@ replay_file = ""
 # dry  – tylko pokazuje, co by zrobił (bezpieczne, nic nie naciska)
 # keys – naciska W i Shift w aktywnym oknie (np. w grze)
 type = "dry"
+# keyboard  - trzymane klawisze chodu/biegu ustawiają prędkość taśmy
+# treadmill - chodzenie po bieżni naciska klawisze w grze
+direction = "keyboard"
 # Most startuje WYŁĄCZONY, włączasz go klawiszem toggle (F8).
 start_enabled = false
 
@@ -56,6 +59,10 @@ device_address = ""
 device_name = ""
 # start i stop taśmy razem z włączeniem/wyłączeniem sterowania (KingSmith)
 belt_control = true
+# tryb "Klawisze -> bieżnia": prędkość taśmy bez klawisza, z klawiszem chodu i z chodem + biegiem
+idle_speed = 1.0
+walk_speed = 1.5
+run_speed = 2.5
 
 [ui]
 simulator = false

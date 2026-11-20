@@ -41,6 +41,9 @@ class FakeWorker:
     def belt(self, command: str) -> None:
         self.calls.append(f"belt {command}")
 
+    def set_speed(self, kmh: float) -> None:
+        self.calls.append(f"speed {kmh:g}")
+
     def stop_belt_now(self, timeout: float = 1.5) -> bool:
         self.calls.append("stop_belt_now")
         return True
@@ -111,6 +114,7 @@ def test_pages_switch_and_controls(window: gui.App) -> None:
 
 
 def test_simulator_drives_gauge(window: gui.App) -> None:
+    window.on_direction("treadmill")  # chodzenie naciska klawisze
     window.on_simulator(True)
     source: Any = window.bridge.source
     source.target = source.speed = 5.0
@@ -343,7 +347,7 @@ def test_hotkey_toggles_control_and_belt_but_not_while_capturing(window: gui.App
     down.add(0x77)  # F8
     window.tick()
     assert window.bridge.state.enabled
-    assert worker.calls[-1] == "belt start"
+    assert "belt start" in worker.calls
     down.clear()
     window.tick()
     window.walk_btn.start()  # wybór klawisza: F8 nie może przy okazji ruszyć taśmy
@@ -382,3 +386,62 @@ def test_quit_stops_running_belt(window: gui.App) -> None:
     window.quit()
     assert "stop_belt_now" in worker.calls
     assert worker.calls.index("stop_belt_now") < worker.calls.index("shutdown")
+
+
+def speeds(worker: FakeWorker) -> list[str]:
+    return [c for c in worker.calls if c.startswith("speed")]
+
+
+def test_held_keys_set_belt_speed(window: gui.App) -> None:
+    worker = fake(window)
+    assert window.settings["direction"] == "keyboard"  # domyślnie klawisze sterują taśmą
+    assert window.bridge.output_kind == "dry"  # aplikacja sama niczego nie naciska
+    assert window.output_seg.isHidden()
+    down: set[int] = set()
+    window.key_down = lambda vk: vk in down
+    window.tick()
+    assert speeds(worker) == []  # sterowanie wyłączone - taśma w spokoju
+    window.set_control(True)
+    window.tick()
+    window.tick()
+    assert speeds(worker) == ["speed 1"]  # bez klawisza: bieg jałowy, wysłany raz
+    down.add(0x57)  # W
+    window.tick()
+    assert speeds(worker)[-1] == "speed 1.5"
+    down.add(0xA0)  # lewy Shift
+    window.tick()
+    assert speeds(worker)[-1] == "speed 2.5"
+    down.discard(0x57)  # sam Shift to nie bieg
+    window.tick()
+    assert speeds(worker)[-1] == "speed 1"
+    window.walk_speed_slider.setValue(20)  # Chód: 2,0 km/h
+    assert window.settings["walk_speed"] == 2.0
+    down.add(0x57)
+    down.discard(0xA0)
+    window.tick()
+    assert speeds(worker)[-1] == "speed 2"
+
+
+def test_treadmill_direction_presses_keys_and_never_sets_speed(window: gui.App) -> None:
+    worker = fake(window)
+    window.direction_seg.changed.emit("treadmill")
+    assert window.settings["direction"] == "treadmill"
+    assert not window.output_seg.isHidden()
+    window.key_down = lambda vk: True
+    window.set_control(True)
+    window.tick()
+    assert speeds(worker) == []
+    window.direction_seg.changed.emit("keyboard")
+    window.tick()
+    assert speeds(worker) == ["speed 2.5"]
+
+
+def test_without_belt_start_stop_turning_off_slows_down(window: gui.App) -> None:
+    worker = fake(window)
+    window.on_belt_control(False)
+    window.key_down = lambda vk: vk == 0x57
+    window.set_control(True)
+    window.tick()
+    window.set_control(False)
+    assert speeds(worker) == ["speed 1.5", "speed 1"]
+    assert not [c for c in worker.calls if c.startswith("belt")]

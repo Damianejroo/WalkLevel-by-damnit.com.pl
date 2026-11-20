@@ -52,6 +52,7 @@ from bieznia import (
     aktualizacje,
     zgloszenia,
 )
+from bieznia.ble import kingsmith
 from bieznia.ble.worker import BleEvent, BleWorker, FoundDevice, Link
 from bieznia.engine import Bridge
 from bieznia.gui import theme as th
@@ -91,7 +92,7 @@ from bieznia.recorder import Recorder
 from bieznia.settings import save_enabled, save_settings
 from bieznia.sources.ble_source import QueueSource
 from bieznia.sources.simulator import SimulatedTreadmill
-from bieznia.winapi import set_topmost
+from bieznia.winapi import is_key_down, set_topmost, vk_from_scan
 
 log = logging.getLogger("bieznia")
 
@@ -245,7 +246,15 @@ class App:
             "run_key": config["output"].get("run_key"),
             "toggle_key": config["output"].get("toggle_key"),
             "belt_control": bool(config.get("ble", {}).get("belt_control", True)),
+            "direction": config["output"].get("direction", "keyboard"),
+            "idle_speed": float(config.get("ble", {}).get("idle_speed", 1.0)),
+            "walk_speed": float(config.get("ble", {}).get("walk_speed", 1.5)),
+            "run_speed": float(config.get("ble", {}).get("run_speed", 2.5)),
         }
+        if self.settings["direction"] not in ("keyboard", "treadmill"):
+            self.settings["direction"] = "keyboard"
+        self.key_down = is_key_down  # podmieniane w testach
+        self.belt_target: float | None = None  # ostatnia prędkość wysłana z klawiszy
         self.report_endpoint = str(config.get("zgloszenia", {}).get("adres", "")).strip()
         self.tasks: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.update_busy = False
@@ -462,6 +471,13 @@ class App:
         self.enable_switch.toggled.connect(self.on_enable)
         crow.addWidget(self.enable_switch)
         clay.addLayout(crow)
+        self.direction_seg = Segmented(
+            [("keyboard", "Klawisze → bieżnia"), ("treadmill", "Bieżnia → gra")],
+            self.settings["direction"],
+            "Kierunek sterowania",
+        )
+        self.direction_seg.changed.connect(self.on_direction)
+        clay.addWidget(self.direction_seg)
         self.output_seg = Segmented(
             [("dry", "Podgląd"), ("keys", "Klawiatura")],
             self.settings["output"],
@@ -485,8 +501,7 @@ class App:
         lay.addWidget(control)
         lay.addStretch(1)
 
-        self.render_control_subtitle()
-        self.render_output_hint()
+        self.apply_direction()
         return page
 
     def build_devices(self) -> QWidget:
@@ -592,6 +607,30 @@ class App:
             " Wyłącz, jeśli wolisz startować tylko pilotem.",
             self.belt_switch,
         )
+        for title, key in (
+            ("Bez klawisza", "idle_speed"),
+            ("Chód", "walk_speed"),
+            ("Bieg", "run_speed"),
+        ):
+            s, v = self.slider(
+                kingsmith.SPEED_MIN, kingsmith.SPEED_MAX, self.settings[key], f"Prędkość: {title}"
+            )
+            row = QHBoxLayout()
+            name = label(title)
+            name.setMinimumWidth(100)
+            row.addWidget(name)
+            row.addWidget(s, 1)
+            row.addWidget(v)
+            bl.addLayout(row)
+            s.valueChanged.connect(lambda value, k=key: self.on_belt_speed(k, value / 10))
+            setattr(self, f"{key}_slider", s)
+        speeds_note = label(
+            "Prędkości dla trybu Klawisze → bieżnia: bez klawisza, z klawiszem chodu i z chodem"
+            " + biegiem. Taśma przyspiesza i zwalnia sama, płynnie.",
+            "small",
+        )
+        speeds_note.setWordWrap(True)
+        bl.addWidget(speeds_note)
         lay.addWidget(belt)
 
         look = card()
@@ -865,6 +904,10 @@ class App:
         self.bridge.set_enabled(on)
         self.enable_switch.set_silently(on)
         save_enabled(on)
+        self.belt_target = None  # po zmianie prędkość z klawiszy idzie od nowa
+        keyboard = self.settings["direction"] == "keyboard" and not self.settings["simulator"]
+        if changed and not on and keyboard and not self.settings["belt_control"]:
+            self.worker.set_speed(self.settings["idle_speed"])  # bez stopu: zwolnij
         if changed and self.belt_commands_possible():
             if not on:
                 self.worker.belt("stop")
@@ -883,11 +926,46 @@ class App:
 
     def render_control_subtitle(self) -> None:
         key = self.toggle_key.name
-        if self.settings["belt_control"]:
+        if self.settings["direction"] == "keyboard":
+            start = (
+                "uruchamia i zatrzymuje" if self.settings["belt_control"] else "włącza i wyłącza"
+            )
+            text = f"{key} {start}, {self.bridge.keys[0].name} przyspiesza taśmę"
+        elif self.settings["belt_control"]:
             text = f"{key} uruchamia i zatrzymuje bieżnię - działa też w grze"
         else:
             text = f"{key} włącza i wyłącza - działa też w grze"
         self.control_subtitle.setText(text)
+
+    def on_direction(self, kind: str) -> None:
+        self.change("direction", kind)
+        log.info("Kierunek sterowania: %s", kind)
+        self.apply_direction()
+
+    def apply_direction(self) -> None:
+        """Klawisze -> bieżnia: aplikacja niczego nie naciska, tylko słucha klawiszy gracza."""
+        keyboard = self.settings["direction"] == "keyboard"
+        self.bridge.set_output("dry" if keyboard else self.settings["output"])
+        self.output_seg.setVisible(not keyboard)
+        self.belt_target = None
+        self.render_control_subtitle()
+        self.render_output_hint()
+
+    def on_belt_speed(self, key: str, kmh: float) -> None:
+        self.change(key, round(kmh, 1))
+        self.belt_target = None  # zmieniona prędkość trafia na taśmę od razu
+        self.render_output_hint()
+
+    def keyboard_target(self) -> tuple[float, str]:
+        """Prędkość taśmy z trzymanych klawiszy: chód + bieg, sam chód albo nic."""
+        walk, run = self.bridge.keys
+        walk_down = self.key_down(walk.vk or vk_from_scan(walk.scan, walk.extended))
+        run_down = self.key_down(run.vk or vk_from_scan(run.scan, run.extended))
+        if walk_down and run_down:
+            return self.settings["run_speed"], "run"
+        if walk_down:
+            return self.settings["walk_speed"], "walk"
+        return self.settings["idle_speed"], "idle"
 
     def make_hotkeys(self) -> Hotkeys:
         keys = self.config["hotkeys"]
@@ -941,6 +1019,12 @@ class App:
         walk, run = self.bridge.keys
         if problem_text:
             text = problem_text
+        elif self.settings["direction"] == "keyboard":
+            s = self.settings
+            text = (
+                f"{walk.name}: {fmt_num(s['walk_speed'])} km/h, {walk.name} + {run.name}:"
+                f" {fmt_num(s['run_speed'])} km/h, bez klawisza: {fmt_num(s['idle_speed'])} km/h."
+            )
         elif self.settings["output"] == "keys":
             text = f"Gra dostaje {walk.name} i {run.name} + {walk.name} (aktywne okno)."
         else:
@@ -970,7 +1054,7 @@ class App:
             self.toggle_key = toggle
             self.settings["toggle_key"] = toggle.to_dict()
             self.hotkeys = self.make_hotkeys()  # trzymany właśnie klawisz się nie liczy
-            self.render_control_subtitle()
+        self.render_control_subtitle()
         self.save()
         self.render_output_hint()
 
@@ -1385,11 +1469,28 @@ class App:
         state = self.bridge.tick(time.monotonic(), actions)
 
         c = state.control
+        keyboard = self.settings["direction"] == "keyboard"
+        capturing = any(b.capturing for b in (self.walk_btn, self.run_btn, self.toggle_btn))
+        target, held = self.keyboard_target() if keyboard else (0.0, "idle")
+        sends = keyboard and state.enabled and not capturing and not self.settings["simulator"]
+        if sends and target != self.belt_target:
+            self.belt_target = target
+            self.worker.set_speed(target)
         if not state.live and not self.settings["simulator"]:
             mode, caption = (
                 "offline",
                 "Brak danych" if self.link is not Link.STREAMING else "Czekam na dane",
             )
+        elif keyboard:
+            walk_key, run_key = self.bridge.keys
+            mode = held if state.enabled else "idle"
+            caption = {
+                "run": f"{walk_key.name} + {run_key.name} - taśma {fmt_num(target)} km/h",
+                "walk": f"{walk_key.name} - taśma {fmt_num(target)} km/h",
+                "idle": f"Bez klawisza - taśma {fmt_num(target)} km/h",
+            }[held]
+            if not state.enabled:
+                caption = f"Wyłączone - {self.toggle_key.name} włącza"
         elif c.run:
             walk_key, run_key = self.bridge.keys
             mode, caption = "run", f"Bieg - {run_key.name} + {walk_key.name}"
@@ -1397,7 +1498,7 @@ class App:
             mode, caption = "walk", f"Chód - {self.bridge.keys[0].name}"
         else:
             mode, caption = "idle", "Stoisz"
-        if state.enabled and self.settings["output"] == "dry" and c.walk:
+        if state.enabled and not keyboard and self.settings["output"] == "dry" and c.walk:
             caption += " (podgląd)"
         self.gauge.set_speed(c.speed, mode, caption)
         self.bubble.set_state(

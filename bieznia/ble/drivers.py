@@ -114,6 +114,8 @@ class Driver(Protocol):
 
     async def stop_belt(self) -> None: ...
 
+    async def set_speed(self, kmh: float) -> bool: ...
+
 
 class KingSmithDriver:
     """WalkingPad R2 / X21 / G1 / X23 - szyfrowany protokół tekstowy (patrz kingsmith.py)."""
@@ -207,6 +209,12 @@ class KingSmithDriver:
     async def stop_belt(self) -> None:
         await self.send(kingsmith.CMD_STOP)
         log.info("Wysłano stop taśmy")
+
+    async def set_speed(self, kmh: float) -> bool:
+        command = kingsmith.speed_command(kmh)
+        await self.send(command)
+        log.info("Prędkość taśmy: %s", command.rsplit(" ", 1)[-1])
+        return True
 
     async def _wait_reply(self, timeout: float) -> bool:
         self._reply.clear()
@@ -375,6 +383,9 @@ class FtmsDriver:
 
     async def stop_belt(self) -> None:
         log.warning("Stop taśmy przez FTMS nie jest jeszcze obsługiwany")
+
+    async def set_speed(self, kmh: float) -> bool:
+        return False
 
 
 def make_driver(client: GattClient, device_name: str, on_reading: ReadingCallback) -> Driver:
