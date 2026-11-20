@@ -1,8 +1,10 @@
 """Pad: wychylenie lewej gałki zamienione na skoki prędkości taśmy.
 
 Odczyt bez dodatkowych bibliotek i bez fokusu (gra może być na wierzchu):
+- HID - DualSense i DualShock 4 przez kabel i Bluetooth (raporty czytane wprost; przez
+  Bluetooth, gdy Steam przełączy pada w pełny raport 0x31, winmm widzi zamrożoną gałkę),
 - XInput - pady Xbox i wszystko, co Steam/DS4Windows udaje jako pad Xbox,
-- winmm (DirectInput) - DualSense, DualShock i inne pady HID.
+- winmm (DirectInput) - pozostałe pady HID.
 Program tylko czyta pozycję gałki, niczego nie wysyła do gry.
 """
 
@@ -12,6 +14,7 @@ import ctypes
 import itertools
 import logging
 import math
+import threading
 import time
 from collections.abc import Callable, Iterable
 from ctypes import wintypes
@@ -240,9 +243,242 @@ class WinmmSource:
         return PadState(self.name, x, y)
 
 
+# --- pady Sony wprost przez HID -------------------------------------------------
+
+BT_HID = "00001124-0000-1000-8000-00805f9b34fb"  # usługa HID Bluetooth w ścieżce urządzenia
+
+
+def parse_sony(report: bytes) -> tuple[float, float] | None:
+    """Lewa gałka z raportu DualSense/DualShock 4 (USB i oba tryby Bluetooth)."""
+    if not report:
+        return None
+    rid = report[0]
+    if rid == 0x01 and len(report) >= 3:  # USB, albo Bluetooth w trybie podstawowym
+        lx, ly = report[1], report[2]
+    elif rid == 0x31 and len(report) >= 4:  # DualSense, Bluetooth, pełny raport
+        lx, ly = report[2], report[3]
+    elif rid == 0x11 and len(report) >= 5:  # DualShock 4, Bluetooth, pełny raport
+        lx, ly = report[3], report[4]
+    else:
+        return None
+    x = max(-1.0, min(1.0, (lx - 127.5) / 127.5))
+    y = max(-1.0, min(1.0, (127.5 - ly) / 127.5))  # w raporcie oś Y rośnie w dół
+    return x, y
+
+
+class GUID(ctypes.Structure):
+    _fields_ = (
+        ("d1", wintypes.DWORD),
+        ("d2", wintypes.WORD),
+        ("d3", wintypes.WORD),
+        ("d4", ctypes.c_ubyte * 8),
+    )
+
+
+class SP_DEVICE_INTERFACE_DATA(ctypes.Structure):
+    _fields_ = (
+        ("cbSize", wintypes.DWORD),
+        ("guid", GUID),
+        ("flags", wintypes.DWORD),
+        ("reserved", ctypes.c_size_t),
+    )
+
+
+class HIDD_ATTRIBUTES(ctypes.Structure):
+    _fields_ = (
+        ("Size", wintypes.ULONG),
+        ("VendorID", wintypes.USHORT),
+        ("ProductID", wintypes.USHORT),
+        ("Version", wintypes.USHORT),
+    )
+
+
+GENERIC_READ = 0x80000000
+SHARE_READ_WRITE = 0x3  # Steam i gra czytają pada równolegle - nie zabieramy go nikomu
+OPEN_EXISTING = 3
+DIGCF_PRESENT_INTERFACE = 0x12
+INVALID_HANDLE = ctypes.c_void_p(-1).value
+
+_setupapi = _load(("setupapi",)) if IS_WINDOWS else None
+_hid = _load(("hid",)) if IS_WINDOWS else None
+_k32 = ctypes.WinDLL("kernel32", use_last_error=True) if IS_WINDOWS else None
+if _setupapi is not None and _hid is not None and _k32 is not None:
+    _setupapi.SetupDiGetClassDevsW.restype = ctypes.c_void_p
+    _setupapi.SetupDiGetClassDevsW.argtypes = (
+        ctypes.POINTER(GUID),
+        wintypes.LPCWSTR,
+        wintypes.HWND,
+        wintypes.DWORD,
+    )
+    _setupapi.SetupDiEnumDeviceInterfaces.argtypes = (
+        ctypes.c_void_p,
+        ctypes.c_void_p,
+        ctypes.POINTER(GUID),
+        wintypes.DWORD,
+        ctypes.POINTER(SP_DEVICE_INTERFACE_DATA),
+    )
+    _setupapi.SetupDiGetDeviceInterfaceDetailW.argtypes = (
+        ctypes.c_void_p,
+        ctypes.POINTER(SP_DEVICE_INTERFACE_DATA),
+        ctypes.c_void_p,
+        wintypes.DWORD,
+        ctypes.POINTER(wintypes.DWORD),
+        ctypes.c_void_p,
+    )
+    _setupapi.SetupDiDestroyDeviceInfoList.argtypes = (ctypes.c_void_p,)
+    _hid.HidD_GetHidGuid.argtypes = (ctypes.POINTER(GUID),)
+    _hid.HidD_GetAttributes.argtypes = (wintypes.HANDLE, ctypes.POINTER(HIDD_ATTRIBUTES))
+    _k32.CreateFileW.restype = wintypes.HANDLE
+    _k32.CreateFileW.argtypes = (
+        wintypes.LPCWSTR,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        ctypes.c_void_p,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.HANDLE,
+    )
+    _k32.ReadFile.argtypes = (
+        wintypes.HANDLE,
+        ctypes.c_void_p,
+        wintypes.DWORD,
+        ctypes.POINTER(wintypes.DWORD),
+        ctypes.c_void_p,
+    )
+    _k32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    _k32.CancelIoEx.argtypes = (wintypes.HANDLE, ctypes.c_void_p)
+
+
+def _open(path: str, access: int) -> int | None:
+    assert _k32 is not None
+    handle = _k32.CreateFileW(path, access, SHARE_READ_WRITE, None, OPEN_EXISTING, 0, None)
+    return None if handle in (None, 0, INVALID_HANDLE) else int(handle)
+
+
+def sony_hid_paths() -> list[tuple[str, int]]:
+    """Ścieżki urządzeń HID firmy Sony (pady) i ich PID."""
+    if _setupapi is None or _hid is None or _k32 is None:
+        return []
+    guid = GUID()
+    _hid.HidD_GetHidGuid(ctypes.byref(guid))
+    info = _setupapi.SetupDiGetClassDevsW(ctypes.byref(guid), None, None, DIGCF_PRESENT_INTERFACE)
+    if not info or info == INVALID_HANDLE:
+        return []
+    found: list[tuple[str, int]] = []
+    try:
+        for index in itertools.count():
+            data = SP_DEVICE_INTERFACE_DATA()
+            data.cbSize = ctypes.sizeof(data)
+            if not _setupapi.SetupDiEnumDeviceInterfaces(
+                info, None, ctypes.byref(guid), index, ctypes.byref(data)
+            ):
+                break
+            need = wintypes.DWORD()
+            _setupapi.SetupDiGetDeviceInterfaceDetailW(
+                info, ctypes.byref(data), None, 0, ctypes.byref(need), None
+            )
+            if need.value <= 4:
+                continue
+            buf = ctypes.create_string_buffer(need.value)
+            # cbSize struktury SP_DEVICE_INTERFACE_DETAIL_DATA_W (DWORD + WCHAR[1], z wyrównaniem)
+            ctypes.cast(buf, ctypes.POINTER(wintypes.DWORD))[0] = (
+                8 if ctypes.sizeof(ctypes.c_void_p) == 8 else 6
+            )
+            if not _setupapi.SetupDiGetDeviceInterfaceDetailW(
+                info, ctypes.byref(data), buf, need, None, None
+            ):
+                continue
+            path = ctypes.wstring_at(ctypes.addressof(buf) + 4)
+            if "vid_054c" not in path.lower() and "vid&0002054c" not in path.lower():
+                continue  # nie Sony - nie otwieramy cudzych urządzeń
+            handle = _open(path, 0)
+            if handle is None:
+                continue
+            attrs = HIDD_ATTRIBUTES()
+            attrs.Size = ctypes.sizeof(attrs)
+            ok = _hid.HidD_GetAttributes(handle, ctypes.byref(attrs))
+            _k32.CloseHandle(handle)
+            if (
+                ok
+                and attrs.VendorID == SONY
+                and (attrs.ProductID in DUALSENSE or attrs.ProductID in DUALSHOCK)
+            ):
+                found.append((path, int(attrs.ProductID)))
+    finally:
+        _setupapi.SetupDiDestroyDeviceInfoList(info)
+    return found
+
+
+class HidSource:
+    """Pad Sony czytany w osobnym wątku (pad sam wysyła raporty setki razy na sekundę)."""
+
+    STALE_S = 1.0
+    FIRST_REPORT_S = 0.3
+
+    def __init__(self, path: str, pid: int) -> None:
+        self.path = path
+        model = DUALSENSE.get(pid) or DUALSHOCK.get(pid) or "Pad PlayStation"
+        self.name = f"{model} ({'Bluetooth' if BT_HID in path.lower() else 'USB'})"
+        self._lock = threading.Lock()
+        self._xy: tuple[float, float] | None = None
+        self._at = float("-inf")
+        self._first = threading.Event()
+        self._stop = False
+        self._handle: int | None = None
+
+    def start(self) -> bool:
+        if _k32 is None:
+            return False
+        self._handle = _open(self.path, GENERIC_READ)
+        if self._handle is None:
+            log.info("Nie da się czytać pada %s (zajęty na wyłączność?)", self.name)
+            return False
+        threading.Thread(target=self._run, name="pad-hid", daemon=True).start()
+        if self._first.wait(self.FIRST_REPORT_S):
+            return True
+        self.stop()
+        return False
+
+    def stop(self) -> None:
+        self._stop = True
+        if self._handle is not None and _k32 is not None:
+            _k32.CancelIoEx(self._handle, None)
+
+    def _run(self) -> None:
+        assert _k32 is not None and self._handle is not None
+        buf = ctypes.create_string_buffer(1024)
+        got = wintypes.DWORD()
+        try:
+            while not self._stop:
+                if not _k32.ReadFile(self._handle, buf, len(buf), ctypes.byref(got), None):
+                    break  # pad odłączony albo odczyt przerwany
+                xy = parse_sony(buf.raw[: got.value])
+                if xy is None:
+                    continue
+                with self._lock:
+                    self._xy, self._at = xy, time.monotonic()
+                self._first.set()
+        finally:
+            _k32.CloseHandle(self._handle)
+            with self._lock:
+                self._at = float("-inf")
+
+    def read(self) -> PadState | None:
+        with self._lock:
+            xy, at = self._xy, self._at
+        if xy is None or time.monotonic() - at > self.STALE_S:
+            return None
+        return PadState(self.name, *xy)
+
+
 def discover() -> list[Source]:
-    """Podłączone pady: najpierw XInput, potem pozostałe (DualSense i inne pady HID)."""
+    """Podłączone pady: Sony przez HID, potem XInput, potem pozostałe przez winmm."""
     found: list[Source] = []
+    for path, pid in sony_hid_paths():
+        hid_source = HidSource(path, pid)
+        if hid_source.start():
+            found.append(hid_source)
+    sony_hid = bool(found)
     if _xinput is not None:
         for slot in range(4):
             source = XInputSource(slot)
@@ -256,6 +492,8 @@ def discover() -> list[Source]:
             winmm_source = WinmmSource(joy_id, caps)
             if found and winmm_source.vendor == MICROSOFT:
                 continue  # ten sam pad Xbox już jest przez XInput
+            if sony_hid and winmm_source.vendor == SONY:
+                continue  # ten sam pad Sony już jest przez HID (pewniej, także przez BT)
             if winmm_source.read() is not None:
                 found.append(winmm_source)
     return found
@@ -289,10 +527,12 @@ class PadReader:
         if now < self._next_scan:
             return None
         self._next_scan = now + RESCAN_S
+        chosen: PadState | None = None
         for source in self._find():
-            state = source.read()
+            state = source.read() if chosen is None else None
             if state is not None:
-                self._source = source
+                self._source, chosen = source, state
                 log.info("Pad: %s", source.name)
-                return state
-        return None
+            elif isinstance(source, HidSource):
+                source.stop()  # nieużywany - nie trzymamy wątku
+        return chosen

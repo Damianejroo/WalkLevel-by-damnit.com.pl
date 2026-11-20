@@ -88,3 +88,21 @@ def test_real_pad_discovery_does_not_crash() -> None:
     for source in pad.discover():
         state = source.read()
         assert state is None or -1.0 <= state.x <= 1.0
+        if isinstance(source, pad.HidSource):
+            source.stop()
+
+
+def test_sony_reports_usb_and_bluetooth() -> None:
+    from bieznia.pad import parse_sony
+
+    # prawdziwe ramki DualSense z Bluetooth (pełny raport 0x31, gałka w spoczynku)
+    rest = parse_sony(bytes.fromhex("31d1817d7e7f0000") + bytes(70))
+    assert rest is not None and abs(rest[0]) < 0.02 and abs(rest[1]) < 0.03
+    forward = parse_sony(bytes([0x31, 0x00, 128, 0]) + bytes(74))
+    assert forward is not None and forward[1] == 1.0  # Y=0 w raporcie = do przodu
+    usb = parse_sony(bytes([0x01, 255, 128]) + bytes(61))
+    assert usb is not None and usb[0] == 1.0
+    ds4_bt = parse_sony(bytes([0x11, 0xC0, 0x00, 0, 255]) + bytes(73))
+    assert ds4_bt is not None and ds4_bt == (-1.0, -1.0)
+    assert parse_sony(bytes([0x05, 1, 2, 3])) is None  # inne raporty pomijamy
+    assert parse_sony(b"") is None
