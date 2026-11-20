@@ -25,6 +25,8 @@ SECTIONS = {
     "run_on": "mapping",
     "run_off": "mapping",
     "output": "output",
+    "walk_key": "output",
+    "run_key": "output",
     "device_address": "ble",
     "device_name": "ble",
     "simulator": "ui",

@@ -4,40 +4,53 @@ from pathlib import Path
 import pytest
 
 from bieznia import settings
+from bieznia.klawisze import RUN_DEFAULT, WALK_DEFAULT, Key
 from bieznia.mapping import Control
 from bieznia.outputs import keyboard
-from bieznia.winapi import SCAN_LSHIFT, SCAN_W
 
 WALK = Control(speed=3.0, stick=0.2, walk=True, run=False)
 RUN = Control(speed=7.0, stick=0.7, walk=True, run=True)
+W, SHIFT = WALK_DEFAULT.scan, RUN_DEFAULT.scan
 
 
 @pytest.fixture
-def sent(monkeypatch: pytest.MonkeyPatch) -> list[tuple[int, bool]]:
-    events: list[tuple[int, bool]] = []
-    monkeypatch.setattr(keyboard, "send_scancode", lambda scan, down: events.append((scan, down)))
-    monkeypatch.setattr(keyboard, "release_movement_keys", lambda: None)
+def sent(monkeypatch: pytest.MonkeyPatch) -> list[tuple[int, bool, bool]]:
+    events: list[tuple[int, bool, bool]] = []
+    monkeypatch.setattr(
+        keyboard, "send_scancode", lambda scan, down, ext=False: events.append((scan, down, ext))
+    )
     return events
 
 
-def test_keys_are_sent_only_on_change(sent: list[tuple[int, bool]]) -> None:
+def test_keys_are_sent_only_on_change(sent: list[tuple[int, bool, bool]]) -> None:
     out = keyboard.KeyboardOutput()
     out.apply(WALK)
     out.apply(WALK)
     out.apply(RUN)
     out.apply(Control.idle())
     assert sent == [
-        (SCAN_W, True),
-        (SCAN_LSHIFT, True),
-        (SCAN_W, False),
-        (SCAN_LSHIFT, False),
+        (W, True, False),
+        (SHIFT, True, False),
+        (W, False, False),
+        (SHIFT, False, False),
     ]
+
+
+def test_custom_keys_arrow_up_and_ctrl(sent: list[tuple[int, bool, bool]]) -> None:
+    up = Key(0x48, True, "Strzałka w górę")
+    ctrl = Key(0x1D, False, "Ctrl")
+    out = keyboard.KeyboardOutput(up, ctrl)
+    out.apply(RUN)
+    assert sent == [(0x1D, True, False), (0x48, True, True)]  # strzałka jako klawisz rozszerzony
+    sent.clear()
+    out.release_all()
+    assert (0x48, False, True) in sent and (0x1D, False, False) in sent
 
 
 def test_rejected_key_is_retried_instead_of_crashing(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[tuple[int, bool]] = []
 
-    def flaky(scan: int, down: bool) -> None:
+    def flaky(scan: int, down: bool, extended: bool = False) -> None:
         calls.append((scan, down))
         if len(calls) == 1:
             raise OSError("ekran blokady")
@@ -46,7 +59,7 @@ def test_rejected_key_is_retried_instead_of_crashing(monkeypatch: pytest.MonkeyP
     out = keyboard.KeyboardOutput()
     out.apply(WALK)  # odrzucone
     out.apply(WALK)  # ponowiona próba
-    assert calls == [(SCAN_W, True), (SCAN_W, True)]
+    assert calls == [(W, True), (W, True)]
 
 
 def test_enabled_state_survives_update_restart(

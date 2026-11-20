@@ -20,21 +20,35 @@ from PySide6.QtCore import (
     QVariantAnimation,
     Signal,
 )
-from PySide6.QtGui import QColor, QFont, QFontMetricsF, QPainter, QPainterPath, QPen
+from PySide6.QtGui import (
+    QColor,
+    QFocusEvent,
+    QFont,
+    QFontMetricsF,
+    QKeyEvent,
+    QKeySequence,
+    QPainter,
+    QPainterPath,
+    QPen,
+)
 from PySide6.QtWidgets import (
     QAbstractButton,
     QApplication,
+    QBoxLayout,
     QButtonGroup,
     QFrame,
-    QHBoxLayout,
+    QGridLayout,
     QLabel,
+    QLayout,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
 
 from bieznia.gui import theme as th
 from bieznia.gui.theme import Theme
+from bieznia.klawisze import Key, key_from_native
 
 
 def ease(points: tuple[float, float, float, float]) -> QEasingCurve:
@@ -135,7 +149,9 @@ def card() -> QFrame:
 
 
 def label(text: str = "", name: str = "") -> QLabel:
+    """Napis zawijany do szerokości okna - długi tekst nie rozpycha układu."""
     lbl = QLabel(text)
+    lbl.setWordWrap(True)
     if name:
         lbl.setObjectName(name)
     return lbl
@@ -233,9 +249,12 @@ class Segmented(QFrame):
         self.setObjectName("segbox")
         self.setAccessibleName(name)
         self.setFixedHeight(th.CONTROL_H)
-        lay = QHBoxLayout(self)
+        # Segmenty obok siebie; gdy naprawdę brakuje miejsca - jeden pod drugim.
+        lay = QBoxLayout(QBoxLayout.Direction.LeftToRight, self)
         lay.setContentsMargins(3, 3, 3, 3)
         lay.setSpacing(2)
+        lay.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
+        self.box = lay
         self.group = QButtonGroup(self)
         self.buttons: dict[str, QPushButton] = {}
         for key, text in options:
@@ -255,6 +274,23 @@ class Segmented(QFrame):
         if key in self.buttons:
             self.buttons[key].setChecked(True)
 
+    def needed_width(self) -> int:
+        widths = [b.sizeHint().width() for b in self.buttons.values()]
+        return sum(widths) + self.box.spacing() * (len(widths) - 1) + 6 + 4
+
+    def minimumSizeHint(self) -> QSize:
+        widest = max(b.minimumSizeHint().width() for b in self.buttons.values())
+        return QSize(widest + 10, th.CONTROL_H)
+
+    def resizeEvent(self, e: QEvent) -> None:
+        horizontal = self.width() >= self.needed_width()
+        want = QBoxLayout.Direction.LeftToRight if horizontal else QBoxLayout.Direction.TopToBottom
+        if self.box.direction() != want:
+            self.box.setDirection(want)
+            rows = 1 if horizontal else len(self.buttons)
+            self.setFixedHeight(th.CONTROL_H + (rows - 1) * (th.CONTROL_H - 8))
+        super().resizeEvent(e)  # type: ignore[arg-type]
+
 
 class HoldButton(QPushButton):
     """Akcja niebezpieczna: przytrzymaj ok. 1 s zamiast okna z pytaniem."""
@@ -269,7 +305,7 @@ class HoldButton(QPushButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setAccessibleName(f"{text} (przytrzymaj)")
         self.setToolTip("Przytrzymaj, żeby potwierdzić")
-        self.setStyleSheet(f"color: {t.danger}; border-color: {t.danger};")
+        self.retheme(t)
         self._progress = 0.0
         self._anim = QVariantAnimation(self)
         self._anim.setDuration(self.HOLD_MS)
@@ -279,6 +315,10 @@ class HoldButton(QPushButton):
         self._anim.finished.connect(self._done)
         self.pressed.connect(self._anim.start)
         self.released.connect(self._cancel)
+
+    def retheme(self, t: Theme) -> None:
+        self.t = t
+        self.setStyleSheet(f"color: {t.danger}; border-color: {t.danger};")
 
     def _set_progress(self, v: float) -> None:
         self._progress = float(v)
@@ -352,7 +392,7 @@ class Gauge(QWidget):
     def __init__(self, t: Theme) -> None:
         super().__init__()
         self.t = t
-        self.setFixedHeight(224)
+        self.setFixedHeight(184)
         self.setMinimumWidth(260)
         self.max_speed = 10.0
         self.walk_from = 0.8
@@ -458,7 +498,7 @@ class Gauge(QWidget):
         p.setFont(mode_font)
         p.setPen(QColor(color if self.mode in ("walk", "run") else t.text_2))
         p.drawText(
-            QRectF(rect.left(), center.y() + radius * 0.52, rect.width(), 24),
+            QRectF(0, center.y() + radius * 0.52, self.width(), 24),  # cała szerokość karty
             Qt.AlignmentFlag.AlignCenter,
             self.caption,
         )
@@ -520,7 +560,7 @@ class Sparkline(QWidget):
     def __init__(self, t: Theme) -> None:
         super().__init__()
         self.t = t
-        self.setFixedHeight(44)
+        self.setFixedHeight(40)
         self.points: list[tuple[float, float]] = []
         self.max_speed = 10.0
         self.run_from = 6.3
@@ -541,6 +581,20 @@ class Sparkline(QWidget):
 
         p.setPen(QPen(QColor(t.line), 1, Qt.PenStyle.DashLine))
         p.drawLine(QPointF(0, y(self.run_from)), QPointF(w, y(self.run_from)))
+        small = QFont(p.font())
+        small.setPixelSize(12)
+        p.setFont(small)
+        p.setPen(QColor(t.text_2))
+        p.drawText(
+            QRectF(0, y(self.run_from) - 16, w, 14),
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom,
+            "bieg",
+        )
+        p.drawText(
+            QRectF(0, 0, w, 14),
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
+            "ostatnia minuta",
+        )
         if len(self.points) < 2:
             return
         now = self.points[-1][0]
@@ -564,6 +618,7 @@ class StatTile(QFrame):
         lay.setSpacing(2)
         self.title = label(title, "small")
         self.value = label("-", "statValue")
+        self.value.setWordWrap(False)  # liczba z jednostką zawsze w jednej linii
         self.value.setFont(tabular(self.value.font()))
         lay.addWidget(self.title)
         lay.addWidget(self.value)
@@ -593,3 +648,179 @@ class DeviceRow(QPushButton):
         for w in (title, sub):
             w.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
             lay.addWidget(w)
+
+
+class ElidedLabel(QLabel):
+    """Napis w jednej linii, skracany wielokropkiem, gdy brakuje miejsca.
+
+    Nie rozpycha okna; pełna treść jest w podpowiedzi i w nazwie dla czytników ekranu.
+    """
+
+    def __init__(self, text: str = "", name: str = "") -> None:
+        super().__init__()
+        if name:
+            self.setObjectName(name)
+        self._full = ""
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        self.setMinimumWidth(40)
+        self.setText(text)
+
+    def text(self) -> str:
+        return self._full
+
+    def setText(self, text: str) -> None:
+        self._full = text
+        self.setAccessibleName(text)
+        self._elide()
+
+    def _elide(self) -> None:
+        shown = self.fontMetrics().elidedText(self._full, Qt.TextElideMode.ElideRight, self.width())
+        self.setToolTip(self._full if shown != self._full else "")
+        QLabel.setText(self, shown)
+
+    def resizeEvent(self, e: QEvent) -> None:
+        super().resizeEvent(e)  # type: ignore[arg-type]
+        self._elide()
+
+    def changeEvent(self, e: QEvent) -> None:
+        super().changeEvent(e)
+        if e.type() in (QEvent.Type.FontChange, QEvent.Type.StyleChange):
+            self._elide()
+
+
+class ResponsiveRow(QWidget):
+    """Przyciski obok siebie, a gdy brakuje miejsca - jeden pod drugim. Nic nie jest ucinane."""
+
+    def __init__(self, *widgets: QWidget, spacing: int = 8) -> None:
+        super().__init__()
+        self.widgets = widgets
+        self.box = QBoxLayout(QBoxLayout.Direction.LeftToRight, self)
+        self.box.setContentsMargins(0, 0, 0, 0)
+        self.box.setSpacing(spacing)
+        # Układ nie wymusza minimalnej szerokości = sumy przycisków (inaczej okno nie zwęzi się).
+        self.box.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
+        for w in widgets:
+            self.box.addWidget(w, 1)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+
+    def needed_width(self) -> int:
+        widths = [w.sizeHint().width() for w in self.widgets if not w.isHidden()]
+        return sum(widths) + self.box.spacing() * max(0, len(widths) - 1)
+
+    def minimumSizeHint(self) -> QSize:
+        widest = max((w.minimumSizeHint().width() for w in self.widgets), default=0)
+        return QSize(widest, super().minimumSizeHint().height())
+
+    def resizeEvent(self, e: QEvent) -> None:
+        horizontal = self.width() >= self.needed_width()
+        want = QBoxLayout.Direction.LeftToRight if horizontal else QBoxLayout.Direction.TopToBottom
+        if self.box.direction() != want:
+            self.box.setDirection(want)
+            self.updateGeometry()
+        super().resizeEvent(e)  # type: ignore[arg-type]
+
+
+def key_label(event: QKeyEvent) -> str:
+    """Czytelna nazwa naciśniętego klawisza (litera albo nazwa z Qt)."""
+    text = event.text()
+    if text and text.isprintable() and not text.isspace():
+        return text.upper()
+    return QKeySequence(event.key()).toString()
+
+
+class KeyButton(QPushButton):
+    """Przycisk z klawiszem: kliknij, naciśnij nowy klawisz (Esc anuluje)."""
+
+    captured = Signal(object)  # klawisze.Key
+
+    def __init__(self, role: str, key: Key) -> None:
+        super().__init__()
+        self.role = role
+        self.key = key
+        self.capturing = False
+        self.setFixedHeight(th.CONTROL_H)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setToolTip("Kliknij i naciśnij nowy klawisz (Esc anuluje)")
+        self.clicked.connect(self.start)
+        self.show_key()
+
+    def show_key(self) -> None:
+        self.setText(f"{self.role}: {self.key.name}")
+        self.setAccessibleName(f"{self.role}: {self.key.name}. Kliknij, żeby zmienić klawisz")
+
+    def set_key(self, key: Key) -> None:
+        self.key = key
+        self.show_key()
+
+    def start(self) -> None:
+        if self.capturing:
+            return
+        self.capturing = True
+        self.setText(f"{self.role}: naciśnij klawisz…")
+        self.grabKeyboard()
+
+    def stop(self) -> None:
+        if self.capturing:
+            self.releaseKeyboard()
+            self.capturing = False
+        self.show_key()
+
+    def keyPressEvent(self, e: QKeyEvent) -> None:
+        if not self.capturing:
+            super().keyPressEvent(e)
+            return
+        if e.isAutoRepeat():
+            return
+        if e.key() == Qt.Key.Key_Escape:
+            self.stop()
+            return
+        key = key_from_native(e.nativeScanCode(), key_label(e))
+        self.stop()
+        if key is not None:
+            self.captured.emit(key)
+
+    def focusOutEvent(self, e: QFocusEvent) -> None:
+        self.stop()
+        super().focusOutEvent(e)
+
+
+class TileGrid(QWidget):
+    """Kafelki w jednym rzędzie, a w wąskim oknie w siatce 2 x 2."""
+
+    def __init__(self, *tiles: QWidget, spacing: int = 8) -> None:
+        super().__init__()
+        self.tiles = tiles
+        self.grid = QGridLayout(self)
+        self.grid.setContentsMargins(0, 0, 0, 0)
+        self.grid.setSpacing(spacing)
+        self.grid.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
+        self.columns = 0
+        self._place(len(tiles))
+
+    def _place(self, columns: int) -> None:
+        if columns == self.columns:
+            return
+        self.columns = columns
+        for tile in self.tiles:
+            self.grid.removeWidget(tile)
+        for i, tile in enumerate(self.tiles):
+            self.grid.addWidget(tile, i // columns, i % columns)
+        for c in range(len(self.tiles)):
+            self.grid.setColumnStretch(c, 1 if c < columns else 0)
+        self.updateGeometry()
+
+    def needed_width(self, columns: int) -> int:
+        widest = max(t.minimumSizeHint().width() for t in self.tiles)
+        return widest * columns + self.grid.spacing() * (columns - 1)
+
+    def minimumSizeHint(self) -> QSize:
+        two = min(2, len(self.tiles))
+        rows = -(-len(self.tiles) // two)
+        tile_h = max(t.minimumSizeHint().height() for t in self.tiles)
+        return QSize(self.needed_width(two), tile_h * rows + self.grid.spacing() * (rows - 1))
+
+    def resizeEvent(self, e: QEvent) -> None:
+        many = len(self.tiles)
+        self._place(many if self.width() >= self.needed_width(many) else min(2, many))
+        super().resizeEvent(e)  # type: ignore[arg-type]

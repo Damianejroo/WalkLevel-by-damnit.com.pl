@@ -21,7 +21,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-from bieznia import CONTACT, __version__
+from bieznia import APP_NAME, CONTACT, __version__
 
 MAX_LOG_BYTES = 1_000_000  # z każdego logu bierzemy tylko koniec
 MAX_REPORT_BYTES = 8 * 1024 * 1024
@@ -122,7 +122,7 @@ def send_report(report: Path, endpoint: str, description: str, contact: str = ""
 
 
 def mailto_link(description: str, report: Path) -> str:
-    subject = f"Bieżnia {__version__} - zgłoszenie problemu"
+    subject = f"{APP_NAME} {__version__} - zgłoszenie problemu"
     body = (
         f"{description.strip()}\n\n"
         f"Paczka z logami do dołączenia: {report.name}\n"

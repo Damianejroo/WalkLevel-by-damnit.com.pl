@@ -105,11 +105,28 @@ def render(size: int) -> QImage:
     return draw(size)
 
 
+WIZARD_SIZES = (55, 64, 83, 110)  # obrazek w nagłówku instalatora: 100/125/150/200% DPI
+
+
+def wizard_image(size: int) -> QImage:
+    """BMP bez przezroczystości (Inno Setup), ikona z marginesem na białym tle okna."""
+    img = QImage(size, size, QImage.Format.Format_RGB32)
+    img.fill(QColor("#ffffff"))
+    p = QPainter(img)
+    inner = round(size * 0.9)
+    offset = (size - inner) // 2
+    p.drawImage(offset, offset, render(inner))
+    p.end()
+    return img
+
+
 def main() -> int:
     _app = QGuiApplication(sys.argv)
     images = [(size, png_bytes(render(size))) for size in SIZES]
     write_ico(ROOT / "packaging" / "bieznia.ico", images)
     render(256).save(str(ROOT / "bieznia" / "gui" / "ikona.png"))
+    for size in WIZARD_SIZES:
+        wizard_image(size).save(str(ROOT / "packaging" / f"instalator-{size}.bmp"), "BMP")
     print("Zapisano packaging/bieznia.ico i bieznia/gui/ikona.png")
     return 0
 

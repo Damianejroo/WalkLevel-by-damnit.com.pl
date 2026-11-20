@@ -9,6 +9,7 @@ import logging
 from collections import deque
 from dataclasses import dataclass, field
 
+from bieznia.klawisze import RUN_DEFAULT, WALK_DEFAULT, Key
 from bieznia.mapping import Control, MappingConfig, SpeedMapper
 from bieznia.outputs import Output, create_output
 from bieznia.recorder import Recorder
@@ -36,11 +37,18 @@ class Snapshot:
 
 
 class Bridge:
-    def __init__(self, mapping: MappingConfig, output: str = "dry", enabled: bool = False) -> None:
+    def __init__(
+        self,
+        mapping: MappingConfig,
+        output: str = "dry",
+        enabled: bool = False,
+        keys: tuple[Key, Key] = (WALK_DEFAULT, RUN_DEFAULT),
+    ) -> None:
         self.mapping = mapping
         self.mapper = SpeedMapper(mapping)
+        self.keys = keys
         self.output_kind = output
-        self.output: Output = create_output(output)
+        self.output: Output = create_output(output, *keys)
         self.source: Source | None = None
         self.recorder: Recorder | None = None
         self.state = Snapshot(enabled=enabled, output=output)
@@ -60,9 +68,19 @@ class Bridge:
         if kind == self.output_kind:
             return
         self.output.release_all()
-        self.output = create_output(kind)
+        self.output = create_output(kind, *self.keys)
         self.output_kind = self.state.output = kind
-        log.info("Wyjście: %s", "klawiatura (W / Shift)" if kind == "keys" else "podgląd")
+        walk, run = self.keys
+        log.info(
+            "Wyjście: %s", f"klawiatura ({walk.name} / {run.name})" if kind == "keys" else "podgląd"
+        )
+
+    def set_keys(self, walk: Key, run: Key) -> None:
+        """Nowe klawisze chodu/biegu - stare są najpierw puszczane."""
+        self.output.release_all()
+        self.keys = (walk, run)
+        self.output = create_output(self.output_kind, walk, run)
+        log.info("Klawisze: chód %s, bieg %s + %s", walk.name, run.name, walk.name)
 
     def set_mapping(self, mapping: MappingConfig) -> None:
         self.mapping = mapping

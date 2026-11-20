@@ -97,6 +97,7 @@ ICONS = {
     "keyboard": "",
     "eye": "",
     "walk": "",
+    "download": "",
 }
 
 

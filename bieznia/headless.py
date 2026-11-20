@@ -9,6 +9,7 @@ from typing import Any
 
 from bieznia.engine import Bridge
 from bieznia.hotkeys import Hotkeys
+from bieznia.klawisze import RUN_DEFAULT, WALK_DEFAULT, Key
 from bieznia.mapping import MappingConfig
 from bieznia.recorder import Recorder
 from bieznia.sources import SourceFinished, create_source
@@ -27,7 +28,13 @@ class StopFlag:
 
 
 def run(config: dict[str, Any], enabled: bool, stop: StopFlag) -> int:
-    bridge = Bridge(MappingConfig.from_dict(config["mapping"]), config["output"]["type"], enabled)
+    keys = (
+        Key.from_dict(config["output"].get("walk_key"), WALK_DEFAULT),
+        Key.from_dict(config["output"].get("run_key"), RUN_DEFAULT),
+    )
+    bridge = Bridge(
+        MappingConfig.from_dict(config["mapping"]), config["output"]["type"], enabled, keys
+    )
     bridge.set_source(create_source(config["source"]))
     if config["record"]["enabled"]:
         recorder = Recorder(Path("nagrania"))

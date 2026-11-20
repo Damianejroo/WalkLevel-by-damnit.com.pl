@@ -1,7 +1,7 @@
-# Bieżnia
+# Bieżnia Gamingowa
 
 Aplikacja na Windows, która zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie
-w grach: chód to **W**, bieg to **Shift + W**. Łączy się z bieżnią przez Bluetooth i sama ją
+w grach: chód to **W**, bieg to **Shift + W** (oba klawisze można zmienić). Łączy się z bieżnią przez Bluetooth i sama ją
 wyszukuje.
 
 Twórca: **damnit.com.pl Damian Skrzypiec** · [damnit.com.pl](https://damnit.com.pl) ·
@@ -10,10 +10,11 @@ kontakt@damnit.com.pl
 ## Instalacja
 
 1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/Damianejroo/bieznia-olek/releases/latest).
-2. Uruchom instalator. Nie wymaga uprawnień administratora.
+2. Uruchom instalator i kliknij **Instaluj** (jeden ekran, bez administratora). Po instalacji
+   aplikacja otworzy się sama.
    Windows może pokazać okno „System Windows ochronił ten komputer” (aplikacja nie ma
    płatnego certyfikatu wydawcy) - kliknij **Więcej informacji > Uruchom mimo to**.
-3. Otwórz **Bieżnię** z menu Start albo ze skrótu na pulpicie.
+3. Później otwieraj **Bieżnię Gamingową** z menu Start albo ze skrótu na pulpicie.
 
 Wymagania: Windows 10 lub 11 (64-bit), Bluetooth. Instalator ma ok. 20 MB.
 
@@ -33,7 +34,8 @@ i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 | --- | --- |
 | Włącz / wyłącz sterowanie | przełącznik w oknie albo **F8** (działa też w grze) |
 | Podgląd | nic nie jest naciskane, widać tylko, co by się stało |
-| Klawiatura W / Shift | chód naciska W, bieg Shift + W w aktywnym oknie |
+| Klawiatura | chód i bieg naciskają wybrane klawisze w aktywnym oknie |
+| Zmiana klawiszy | kliknij **Chód: W** albo **Bieg: Shift** i naciśnij nowy klawisz (np. strzałkę w górę, Ctrl); Esc anuluje |
 | Progi chodu i biegu | Ustawienia > Progi prędkości |
 | Test bez bieżni | Ustawienia > Symulator bieżni, potem **F6** wolniej, **F7** szybciej |
 
@@ -42,14 +44,14 @@ się zatrzymuje. Aplikacja tylko czyta bieżnię - nigdy nie zmienia jej prędko
 
 ### Aktualizacje
 
-Gdy wyjdzie nowa wersja, kliknij **Aktualizuj** na dole okna (albo Ustawienia > Sprawdź
-aktualizacje). Aplikacja pobierze instalator z GitHuba, sprawdzi jego sumę kontrolną,
+Gdy wyjdzie nowa wersja, kliknij ikonę **Aktualizuj** (strzałka w dół) na górze okna albo
+Ustawienia > Sprawdź aktualizacje. Aplikacja pobierze instalator z GitHuba, sprawdzi jego sumę kontrolną,
 zainstaluje go i uruchomi się ponownie. Ustawienia i logi zostają. Bez kliknięcia nic się
 nie pobiera ani nie instaluje.
 
 ### Gdy coś nie działa
 
-Kliknij **Zgłoś problem** (ikona na dole okna), opisz, co się stało, i wyślij. Do zgłoszenia
+Kliknij **Zgłoś problem** (ikona na górze okna), opisz, co się stało, i wyślij. Do zgłoszenia
 trafiają logi aplikacji i Bluetooth - okno pokazuje dokładnie, co zostanie dołączone.
 Szczegółowe logi Bluetooth można wyłączyć w Ustawieniach > Dziennik i zgłoszenia.
 
@@ -65,7 +67,7 @@ Przy problemach z połączeniem pomaga też **Dziennik > Zapisz raport diagnosty
 
 ### Odinstalowanie
 
-Ustawienia Windows > Aplikacje > Bieżnia > Odinstaluj. Ustawienia i logi zostają w
+Ustawienia Windows > Aplikacje > Bieżnia Gamingowa > Odinstaluj. Ustawienia i logi zostają w
 `%LOCALAPPDATA%\Bieznia` - usuń ten folder, jeśli chcesz pozbyć się wszystkiego.
 
 ## Prywatność

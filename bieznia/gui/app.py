@@ -8,6 +8,7 @@ dwa motywy. Tło okna to materiał systemowy Windows (Mica), treść na pełnych
 from __future__ import annotations
 
 import contextlib
+import ctypes
 import logging
 import os
 import queue
@@ -42,7 +43,16 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bieznia import HOMEPAGE, REPOSITORY, __author__, __version__, aktualizacje, zgloszenia
+from bieznia import (
+    APP_NAME,
+    HOMEPAGE,
+    REPOSITORY,
+    TITLE,
+    __author__,
+    __version__,
+    aktualizacje,
+    zgloszenia,
+)
 from bieznia.ble.worker import BleEvent, BleWorker, FoundDevice, Link
 from bieznia.engine import Bridge
 from bieznia.gui import theme as th
@@ -50,15 +60,19 @@ from bieznia.gui.theme import Theme
 from bieznia.gui.widgets import (
     Belt,
     DeviceRow,
+    ElidedLabel,
     FocusRing,
     Gauge,
     HoldButton,
+    KeyButton,
     Motion,
+    ResponsiveRow,
     Segmented,
     Sparkline,
     StatTile,
     StatusDot,
     Switch,
+    TileGrid,
     button,
     card,
     ease,
@@ -67,6 +81,7 @@ from bieznia.gui.widgets import (
     label,
 )
 from bieznia.hotkeys import Hotkeys
+from bieznia.klawisze import RUN_DEFAULT, WALK_DEFAULT, Key, problem
 from bieznia.logs import set_detailed
 from bieznia.mapping import MappingConfig
 from bieznia.paths import FROZEN
@@ -122,10 +137,17 @@ class Window(QWidget):
         self.t = t
         self.on_close = on_close
         self.backdrop = False
-        self.setWindowTitle("Bieżnia")
+        self.setWindowTitle(TITLE)
         self.setWindowIcon(app_icon(t))
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setMinimumSize(420, 640)
+
+    def retheme(self, t: Theme) -> None:
+        self.t = t
+        if sys.platform == "win32" and self.isVisible():
+            ok = th.apply_backdrop(int(self.winId()), t.name == "dark")  # pasek tytułu też
+            self.backdrop = self.backdrop or ok
+        self.update()
 
     def showEvent(self, e: Any) -> None:
         if not self.backdrop:
@@ -206,13 +228,20 @@ class App:
             "large_text": bool(config.get("ui", {}).get("large_text", False)),
             "detailed_logs": bool(config.get("ui", {}).get("detailed_logs", True)),
             "last_version": config.get("ui", {}).get("last_version", ""),
+            "walk_key": config["output"].get("walk_key"),
+            "run_key": config["output"].get("run_key"),
         }
         self.report_endpoint = str(config.get("zgloszenia", {}).get("adres", "")).strip()
         self.tasks: queue.Queue[tuple[str, Any]] = queue.Queue()
         self.update_busy = False
+        self.update_available = ""
         self.report_busy = False
+        keys = (
+            Key.from_dict(self.settings["walk_key"], WALK_DEFAULT),
+            Key.from_dict(self.settings["run_key"], RUN_DEFAULT),
+        )
         self.bridge = Bridge(
-            MappingConfig.from_dict(config["mapping"]), self.settings["output"], enabled
+            MappingConfig.from_dict(config["mapping"]), self.settings["output"], enabled, keys
         )
         self.hotkeys = Hotkeys(config["hotkeys"])
         self.worker = BleWorker()
@@ -232,6 +261,10 @@ class App:
         self.build()
         self.apply_source()
         self.apply_recording()
+
+        hints = self.qt.styleHints()
+        if hasattr(hints, "colorSchemeChanged"):  # motyw Windows zmieniony w trakcie
+            hints.colorSchemeChanged.connect(self.on_system_scheme)
 
         self.timer = QTimer()
         self.timer.setInterval(TICK_MS)
@@ -255,8 +288,6 @@ class App:
     # --- budowa okna --------------------------------------------------------
 
     def build(self) -> None:
-        old = self.window
-        geometry = old.saveGeometry() if old else None
         self.t = th.resolve_theme(self.settings["theme"])
         scale = 1.15 if self.settings["large_text"] else 1.0
         self.qt.setStyleSheet(th.qss(self.t, scale))
@@ -275,35 +306,72 @@ class App:
         self.ring = FocusRing(w, self.t)
 
         w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.settings["always_on_top"])
-        if geometry is not None:
-            w.restoreGeometry(geometry)
-        else:
-            screen = self.qt.primaryScreen().availableGeometry()
-            w.resize(460, min(800, screen.height() - 60))
-        if old is not None:
-            old.on_close = lambda: True
-            old.close()
-            old.deleteLater()
+        screen = self.qt.primaryScreen().availableGeometry()
+        w.resize(460, min(840, screen.height() - 60))
         w.show()
+        w.setFocus(Qt.FocusReason.OtherFocusReason)  # nic nie ma ostrości ani obwódki na starcie
         self.render_link()
         self.render_devices()
         self.log_view.setPlainText("\n".join(self.log_lines))
+
+    def sticky_page(self, title: str) -> tuple[QWidget, QVBoxLayout]:
+        """Podstrona: pasek z Wróć zawsze na górze, przewija się tylko treść pod nim."""
+        return self.framed_page(header(title, lambda: self.pages.go(self.MAIN, back=True)))
+
+    def framed_page(self, bar_lay: QHBoxLayout) -> tuple[QWidget, QVBoxLayout]:
+        """Widok z paskiem przyklejonym u góry (nawigacja w tym samym miejscu na każdym ekranie)."""
+        page = QWidget()
+        page.setObjectName("page")
+        outer = QVBoxLayout(page)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+        bar = QWidget()
+        bar.setObjectName("page")
+        bar_lay.setContentsMargins(th.PAD, 12, th.PAD, 8)
+        bar.setLayout(bar_lay)
+        outer.addWidget(bar)
+        inner = QWidget()
+        lay = page_layout(inner)
+        lay.setContentsMargins(th.PAD, 0, th.PAD, th.PAD)
+        outer.addWidget(self.scroll(inner), 1)
+        return page, lay
 
     def scroll(self, inner: QWidget) -> QScrollArea:
         area = QScrollArea()
         area.setWidgetResizable(True)
         area.setFrameShape(QScrollArea.Shape.NoFrame)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         area.setWidget(inner)
         return area
 
     def build_main(self) -> QWidget:
         t = self.t
-        inner = QWidget()
-        lay = page_layout(inner)
+        bar = QHBoxLayout()
+        bar.setSpacing(4)
+        names = QVBoxLayout()
+        names.setSpacing(0)
+        names.addWidget(ElidedLabel(APP_NAME, "title"))
+        self.update_label = ElidedLabel(f"wersja {__version__}", "small")
+        names.addWidget(self.update_label)
+        bar.addLayout(names, 1)
+        self.update_btn = icon_button("download", "Aktualizuj")
+        self.update_btn.clicked.connect(lambda: self.run_task(self.check_update_task, True))
+        if not FROZEN:
+            self.update_btn.setEnabled(False)
+            self.update_btn.setToolTip("Aktualizacje działają w wersji zainstalowanej")
+        report_btn = icon_button("report", "Zgłoś problem")
+        report_btn.clicked.connect(lambda: self.pages.go(self.REPORT))
+        log_btn = icon_button("log", "Dziennik i raport diagnostyczny")
+        log_btn.clicked.connect(lambda: self.pages.go(self.LOG))
+        settings_btn = icon_button("settings", "Ustawienia")
+        settings_btn.clicked.connect(lambda: self.pages.go(self.SETTINGS))
+        for b in (self.update_btn, report_btn, log_btn, settings_btn):
+            bar.addWidget(b)
+        page, lay = self.framed_page(bar)
 
         # stan połączenia - zawsze w tym miejscu, stała wysokość
         status = card()
-        status.setFixedHeight(68)
+        status.setFixedHeight(62)
         srow = QHBoxLayout(status)
         srow.setContentsMargins(14, 8, 10, 8)
         srow.setSpacing(10)
@@ -311,9 +379,9 @@ class App:
         srow.addWidget(self.dot)
         texts = QVBoxLayout()
         texts.setSpacing(0)
-        self.status_title = label("", "")
+        self.status_title = ElidedLabel("", "")
         self.status_title.setStyleSheet("font-weight: 600;")
-        self.status_sub = label("", "muted")
+        self.status_sub = ElidedLabel("", "muted")
         texts.addStretch(1)
         texts.addWidget(self.status_title)
         texts.addWidget(self.status_sub)
@@ -327,31 +395,24 @@ class App:
         # prędkość
         hero = card()
         hlay = QVBoxLayout(hero)
-        hlay.setContentsMargins(14, 12, 14, 14)
-        hlay.setSpacing(10)
+        hlay.setContentsMargins(14, 10, 14, 12)
+        hlay.setSpacing(8)
         self.gauge = Gauge(t)
         hlay.addWidget(self.gauge, 1)
         self.belt = Belt(t)
         hlay.addWidget(self.belt)
-        spark_head = QHBoxLayout()
-        spark_head.addWidget(label("Ostatnia minuta", "small"))
-        spark_head.addStretch(1)
-        spark_head.addWidget(label("linia przerywana - próg biegu", "small"))
-        hlay.addLayout(spark_head)
         self.spark = Sparkline(t)
         hlay.addWidget(self.spark)
         lay.addWidget(hero)
 
         # liczby
-        stats = QHBoxLayout()
-        stats.setSpacing(8)
         self.stat_steps = StatTile("Kroki")
         self.stat_cadence = StatTile("Kroki/min")
         self.stat_distance = StatTile("Dystans")
         self.stat_time = StatTile("Czas ruchu")
-        for tile in (self.stat_steps, self.stat_cadence, self.stat_distance, self.stat_time):
-            stats.addWidget(tile, 1)
-        lay.addLayout(stats)
+        lay.addWidget(
+            TileGrid(self.stat_steps, self.stat_cadence, self.stat_distance, self.stat_time)
+        )
 
         # sterowanie
         control = card()
@@ -370,12 +431,18 @@ class App:
         crow.addWidget(self.enable_switch)
         clay.addLayout(crow)
         self.output_seg = Segmented(
-            [("dry", "Podgląd"), ("keys", "Klawiatura W / Shift")],
+            [("dry", "Podgląd"), ("keys", "Klawiatura")],
             self.settings["output"],
             "Wyjście",
         )
         self.output_seg.changed.connect(self.on_output)
         clay.addWidget(self.output_seg)
+        walk_key, run_key = self.bridge.keys
+        self.walk_btn = KeyButton("Chód", walk_key)
+        self.run_btn = KeyButton("Bieg", run_key)
+        self.walk_btn.captured.connect(lambda k: self.on_key("walk", k))
+        self.run_btn.captured.connect(lambda k: self.on_key("run", k))
+        clay.addWidget(ResponsiveRow(self.walk_btn, self.run_btn))
         self.output_hint = label("", "muted")
         self.output_hint.setWordWrap(True)
         self.output_hint.setMinimumHeight(22)
@@ -383,29 +450,8 @@ class App:
         lay.addWidget(control)
         lay.addStretch(1)
 
-        # stopka
-        foot = QHBoxLayout()
-        settings_btn = icon_button("settings", "Ustawienia")
-        settings_btn.clicked.connect(lambda: self.pages.go(self.SETTINGS))
-        log_btn = icon_button("log", "Dziennik i raport diagnostyczny")
-        log_btn.clicked.connect(lambda: self.pages.go(self.LOG))
-        report_btn = icon_button("report", "Zgłoś problem")
-        report_btn.clicked.connect(lambda: self.pages.go(self.REPORT))
-        foot.addWidget(settings_btn)
-        foot.addWidget(log_btn)
-        foot.addWidget(report_btn)
-        foot.addStretch(1)
-        self.update_label = label(f"wersja {__version__}", "small")
-        foot.addWidget(self.update_label)
-        self.update_btn = button("Aktualizuj", "", "Pobierz i zainstaluj najnowszą wersję")
-        self.update_btn.clicked.connect(lambda: self.run_task(self.check_update_task, True))
-        if not FROZEN:
-            self.update_btn.setEnabled(False)
-            self.update_btn.setToolTip("Aktualizacje działają w wersji zainstalowanej")
-        foot.addWidget(self.update_btn)
-        lay.addLayout(foot)
         self.render_output_hint()
-        return self.scroll(inner)
+        return page
 
     def build_devices(self) -> QWidget:
         page = QWidget()
@@ -453,9 +499,7 @@ class App:
 
     def build_settings(self) -> QWidget:
         t = self.t
-        inner = QWidget()
-        lay = page_layout(inner)
-        lay.addLayout(header("Ustawienia", lambda: self.pages.go(self.MAIN, back=True)))
+        page, lay = self.sticky_page("Ustawienia")
 
         speed = card()
         sl = QVBoxLayout(speed)
@@ -496,13 +540,13 @@ class App:
             self.settings["theme"],
             "Motyw",
         )
-        theme_seg.changed.connect(lambda v: self.change("theme", v, rebuild=True))
+        theme_seg.changed.connect(lambda v: self.on_look("theme", v))
         ll.addWidget(theme_seg)
         big = Switch(t, "Duży tekst", self.settings["large_text"])
-        big.toggled.connect(lambda v: self.change("large_text", v, rebuild=True))
+        big.toggled.connect(lambda v: self.on_look("large_text", v))
         self.setting_row(ll, "Duży tekst", "Wszystkie napisy większe o 15%", big)
         top = Switch(t, "Zawsze na wierzchu", self.settings["always_on_top"])
-        top.toggled.connect(lambda v: self.change("always_on_top", v, rebuild=True))
+        top.toggled.connect(self.on_always_on_top)
         self.setting_row(ll, "Zawsze na wierzchu", "Okno nie chowa się pod grą", top)
         lay.addWidget(look)
 
@@ -556,21 +600,18 @@ class App:
         )
         what.setWordWrap(True)
         gl.addWidget(what)
-        grow = QHBoxLayout()
         open_logs = button("Otwórz folder logów")
         open_logs.clicked.connect(lambda: self.open_folder(Path("logs")))
         report = button("Zgłoś problem")
         report.clicked.connect(lambda: self.pages.go(self.REPORT))
-        grow.addWidget(open_logs, 1)
-        grow.addWidget(report, 1)
-        gl.addLayout(grow)
+        gl.addWidget(ResponsiveRow(open_logs, report))
         lay.addWidget(logs)
 
         about = card()
         al = QVBoxLayout(about)
         al.setContentsMargins(14, 12, 14, 14)
         al.addWidget(label("O aplikacji", "section"))
-        al.addWidget(label(f"Bieżnia {__version__}"))
+        al.addWidget(label(TITLE))
         al.addWidget(label(f"© 2026 {__author__}", "small"))
         self.about_status = label("", "muted")
         self.about_status.setWordWrap(True)
@@ -580,7 +621,7 @@ class App:
         check.clicked.connect(lambda: self.run_task(self.check_update_task, True))
         check.setEnabled(FROZEN)
         al.addWidget(check)
-        links = QHBoxLayout()
+        link_buttons = []
         for text, url in (
             ("Strona autora", HOMEPAGE),
             ("Prywatność", f"https://github.com/{REPOSITORY}/blob/main/POLITYKA-PRYWATNOSCI.md"),
@@ -588,16 +629,14 @@ class App:
         ):
             b = button(text)
             b.clicked.connect(lambda _=False, u=url: QDesktopServices.openUrl(QUrl(u)))
-            links.addWidget(b, 1)
-        al.addLayout(links)
+            link_buttons.append(b)
+        al.addWidget(ResponsiveRow(*link_buttons))
         lay.addWidget(about)
         lay.addStretch(1)
-        return self.scroll(inner)
+        return page
 
     def build_report(self) -> QWidget:
-        inner = QWidget()
-        lay = page_layout(inner)
-        lay.addLayout(header("Zgłoś problem", lambda: self.pages.go(self.MAIN, back=True)))
+        page, lay = self.sticky_page("Zgłoś problem")
         intro = label(
             "Opisz, co się stało. Razem z opisem trafią logi, żeby autor mógł szybko znaleźć "
             "przyczynę.",
@@ -642,7 +681,7 @@ class App:
         self.report_send.clicked.connect(self.send_report)
         lay.addWidget(self.report_send)
         lay.addStretch(1)
-        return self.scroll(inner)
+        return page
 
     def build_log(self) -> QWidget:
         page = QWidget()
@@ -662,14 +701,11 @@ class App:
         self.diag_status = label("", "muted")
         self.diag_status.setFixedHeight(24)
         lay.addWidget(self.diag_status)
-        row = QHBoxLayout()
         folder = button("Otwórz folder logów")
         folder.clicked.connect(lambda: self.open_folder(Path("logs")))
         report = button("Zapisz raport diagnostyczny", "primary")
         report.clicked.connect(self.diagnose)
-        row.addWidget(folder, 1)
-        row.addWidget(report, 1)
-        lay.addLayout(row)
+        lay.addWidget(ResponsiveRow(folder, report))
         return page
 
     # --- akcje --------------------------------------------------------------
@@ -678,11 +714,53 @@ class App:
         with contextlib.suppress(OSError):
             save_settings(self.settings)
 
-    def change(self, key: str, value: Any, rebuild: bool = False) -> None:
+    def change(self, key: str, value: Any) -> None:
         self.settings[key] = value
         self.save()
-        if rebuild:
-            QTimer.singleShot(0, self.build)
+
+    def apply_look(self) -> None:
+        """Motyw i wielkość tekstu na żywo - bez przebudowy okna i bez zmiany widoku."""
+        self.t = th.resolve_theme(self.settings["theme"])
+        scale = 1.15 if self.settings["large_text"] else 1.0
+        self.qt.setStyleSheet(th.qss(self.t, scale))
+        if self.window is None:
+            return
+        for widget in [self.window, *self.window.findChildren(QWidget)]:
+            if hasattr(widget, "retheme"):
+                widget.retheme(self.t)
+            elif hasattr(widget, "t"):
+                widget.t = self.t
+                widget.update()
+        self.render_link()
+        self.render_update_label()
+
+    def on_look(self, key: str, value: Any) -> None:
+        self.change(key, value)
+        self.apply_look()
+
+    def on_system_scheme(self, *_: Any) -> None:
+        if self.settings["theme"] == "system":
+            self.apply_look()
+
+    def on_always_on_top(self, on: bool) -> None:
+        self.change("always_on_top", on)
+        w = self.window
+        if w is None:
+            return
+        if sys.platform == "win32":
+            # bez ukrywania okna: SetWindowPos(HWND_TOPMOST / HWND_NOTOPMOST)
+            flags = 0x0001 | 0x0002 | 0x0010  # SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+            ctypes.windll.user32.SetWindowPos(int(w.winId()), -1 if on else -2, 0, 0, 0, 0, flags)
+        else:
+            w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, on)
+            w.show()
+
+    def render_update_label(self) -> None:
+        style = f"color: {self.t.accent}; font-weight: 600;" if self.update_available else ""
+        self.update_label.setStyleSheet(style)
+        self.update_btn.setStyleSheet(f"color: {self.t.accent};" if self.update_available else "")
+        if self.update_available:
+            self.update_btn.setToolTip(f"Aktualizuj do wersji {self.update_available}")
 
     def on_enable(self, on: bool) -> None:
         self.bridge.set_enabled(on)
@@ -694,12 +772,30 @@ class App:
         self.save()
         self.render_output_hint()
 
-    def render_output_hint(self) -> None:
-        if self.settings["output"] == "keys":
-            text = "Chód = W, bieg = Shift + W w aktywnym oknie (kliknij w grę)."
+    def render_output_hint(self, problem_text: str = "") -> None:
+        walk, run = self.bridge.keys
+        if problem_text:
+            text = problem_text
+        elif self.settings["output"] == "keys":
+            text = f"Gra dostaje {walk.name} i {run.name} + {walk.name} (aktywne okno)."
         else:
             text = "Podgląd: nic nie jest naciskane."
         self.output_hint.setText(text)
+
+    def on_key(self, role: str, key: Key) -> None:
+        walk, run = self.bridge.keys
+        walk, run = (key, run) if role == "walk" else (walk, key)
+        error = problem(walk, run)
+        if error:
+            self.render_output_hint(error)
+            return
+        self.bridge.set_keys(walk, run)
+        self.walk_btn.set_key(walk)
+        self.run_btn.set_key(run)
+        self.settings["walk_key"] = walk.to_dict()
+        self.settings["run_key"] = run.to_dict()
+        self.save()
+        self.render_output_hint()
 
     def on_thresholds(self) -> None:
         walk = self.walk_slider.value() / 10
@@ -855,8 +951,9 @@ class App:
             self.update_label.setText(data)
             self.about_status.setText(data)
         elif kind == "update_available":
+            self.update_available = data
             self.update_label.setText(f"Dostępna wersja {data}")
-            self.update_label.setStyleSheet(f"color: {self.t.accent}; font-weight: 600;")
+            self.render_update_label()
             self.about_status.setText(f"Dostępna nowa wersja {data} - kliknij Aktualizuj.")
         elif kind == "update_current":
             if data:  # tylko po kliknięciu - ciche sprawdzenie przy starcie nic nie mówi
@@ -1091,9 +1188,10 @@ class App:
                 "Brak danych" if self.link is not Link.STREAMING else "Czekam na dane",
             )
         elif c.run:
-            mode, caption = "run", "Bieg - Shift + W"
+            walk_key, run_key = self.bridge.keys
+            mode, caption = "run", f"Bieg - {run_key.name} + {walk_key.name}"
         elif c.walk:
-            mode, caption = "walk", "Chód - W"
+            mode, caption = "walk", f"Chód - {self.bridge.keys[0].name}"
         else:
             mode, caption = "idle", "Stoisz"
         if state.enabled and self.settings["output"] == "dry" and c.walk:
@@ -1132,8 +1230,8 @@ class App:
 def run_gui(config: dict[str, Any], enabled: bool) -> int:
     qt = QApplication.instance() or QApplication(sys.argv)
     assert isinstance(qt, QApplication)
-    qt.setApplicationName("Bieżnia")
-    qt.setApplicationDisplayName("Bieżnia")
+    qt.setApplicationName(APP_NAME)
+    qt.setApplicationDisplayName(TITLE)  # równe tytułowi okna - Qt nie dopisze go drugi raz
     if sys.platform == "win32":
         with contextlib.suppress(AttributeError, OSError):
             import ctypes

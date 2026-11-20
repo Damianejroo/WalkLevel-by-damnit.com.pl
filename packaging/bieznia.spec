@@ -68,12 +68,12 @@ version_info = VSVersionInfo(
         StringFileInfo([
             StringTable("041504B0", [
                 StringStruct("CompanyName", "damnit.com.pl Damian Skrzypiec"),
-                StringStruct("FileDescription", "Bieżnia - sterowanie w grach chodzeniem po bieżni"),
+                StringStruct("FileDescription", "Bieżnia Gamingowa by damnit.com.pl"),
                 StringStruct("FileVersion", VERSION),
                 StringStruct("InternalName", "Bieznia"),
                 StringStruct("LegalCopyright", "© 2026 damnit.com.pl Damian Skrzypiec, GPL-3.0"),
                 StringStruct("OriginalFilename", "Bieznia.exe"),
-                StringStruct("ProductName", "Bieżnia"),
+                StringStruct("ProductName", "Bieżnia Gamingowa"),
                 StringStruct("ProductVersion", VERSION),
             ])
         ]),

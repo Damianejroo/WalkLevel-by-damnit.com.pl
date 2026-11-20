@@ -113,11 +113,61 @@ def test_simulator_drives_gauge(window: gui.App) -> None:
     window.on_simulator(False)
 
 
-def test_theme_rebuild_keeps_working(window: gui.App) -> None:
-    window.settings["theme"] = "light"
-    window.build()
+def test_theme_changes_live_and_stays_in_settings(window: gui.App) -> None:
+    window.pages.go(window.SETTINGS)
+    before = window.window
+    window.on_look("theme", "light")
     window.tick()
     assert window.t.name == "light"
+    assert window.gauge.t.name == "light" and window.enable_switch.t.name == "light"
+    assert window.window is before  # to samo okno, bez przebudowy
+    assert window.pages.currentIndex() == window.SETTINGS
+    window.on_look("theme", "dark")
+    window.on_look("large_text", True)
+    assert window.pages.currentIndex() == window.SETTINGS
+
+
+def test_key_capture_changes_walk_key(window: gui.App) -> None:
+    from PySide6.QtCore import QEvent, Qt
+    from PySide6.QtGui import QKeyEvent
+
+    window.walk_btn.start()
+    event = QKeyEvent(
+        QEvent.Type.KeyPress, Qt.Key.Key_Up, Qt.KeyboardModifier.NoModifier, 0x148, 0x26, 0, ""
+    )
+    window.walk_btn.keyPressEvent(event)
+    walk, run = window.bridge.keys
+    assert (walk.scan, walk.extended, walk.name) == (0x48, True, "Strzałka w górę")
+    assert window.walk_btn.text() == "Chód: Strzałka w górę"
+    assert window.settings["walk_key"]["scan"] == 0x48
+    # ten sam klawisz dla biegu jest odrzucany z wyjaśnieniem
+    window.run_btn.start()
+    window.run_btn.keyPressEvent(event)
+    assert window.bridge.keys[1] == run
+    assert "różne" in window.output_hint.text()
+
+
+def test_narrow_window_clips_no_buttons(window: gui.App) -> None:
+    from PySide6.QtWidgets import QApplication, QPushButton
+
+    assert window.window is not None
+    # offscreen ma zastępczą czcionkę ok. 2x szerszą niż Segoe UI - okno proporcjonalnie szersze
+    offscreen = QApplication.platformName() == "offscreen"
+    window.window.resize(560 if offscreen else 420, 760)
+    for page in (window.MAIN, window.SETTINGS, window.LOG, window.REPORT):
+        window.pages.go(page)
+        for _ in range(3):
+            QApplication.processEvents()
+        current = window.pages.currentWidget()
+        assert current is not None
+        for b in current.findChildren(QPushButton):
+            if not b.isVisible() or b.objectName() in ("icon", "seg", "row"):
+                continue
+            if QApplication.platformName() != "offscreen":  # prawdziwe czcionki tylko na ekranie
+                needed = b.fontMetrics().horizontalAdvance(b.text()) + 2 * 16
+                assert b.width() >= needed, f"ucięty przycisk {b.text()!r}: {b.width()} < {needed}"
+            right = b.mapTo(current, b.rect().topRight()).x()
+            assert right <= current.width(), f"przycisk {b.text()!r} wystaje poza okno"
 
 
 def test_report_page_prepares_email_without_endpoint(
