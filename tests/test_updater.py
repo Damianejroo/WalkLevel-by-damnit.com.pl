@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from bieznia.supervisor import own_files
+from bieznia.supervisor import needs_app_restart, own_files
 from bieznia.updater import Git, Status, check_and_update
 
 GIT_CFG = [
@@ -107,6 +107,19 @@ def test_unreachable_remote_is_an_error(repos: tuple[Path, Path], tmp_path: Path
     _, tester = repos
     git(tester, "remote", "set-url", "origin", str(tmp_path / "nie-ma"))
     assert check_and_update(Git(tester)).status is Status.ERROR
+
+
+@pytest.mark.parametrize(
+    ("changed", "expected"),
+    [
+        (["src/bieznia/mapping.py"], True),
+        (["config.toml"], True),
+        (["README.md", "tests/test_mapping.py", ".github/workflows/ci.yml"], False),
+        (["start.bat"], False),
+    ],
+)
+def test_only_relevant_changes_restart_app(changed: list[str], expected: bool) -> None:
+    assert needs_app_restart(changed) is expected
 
 
 def test_supervisor_knows_its_own_files() -> None:

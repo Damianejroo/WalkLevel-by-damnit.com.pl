@@ -1,8 +1,11 @@
 """Nadzorca u testera: uruchamia most, co kilka sekund sprawdza GitHuba,
 po nowym commicie zatrzymuje most, aktualizuje kod i uruchamia go ponownie.
 
-Uruchamiany przez start.bat:
+Uruchamiany w pętli przez start.bat:
     uv run --locked --no-dev python -m bieznia.supervisor [argumenty mostu]
+
+Kody wyjścia: 0 = koniec (Ctrl+C), 3 = start.bat ma uruchomić nadzorcę od nowa
+(zmienił się jego własny kod albo zależności – `uv run` je wtedy zsynchronizuje).
 """
 
 from __future__ import annotations
@@ -10,6 +13,7 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -18,24 +22,30 @@ from pathlib import Path
 
 from bieznia.config import load_config
 from bieznia.logs import setup_logging
-from bieznia.updater import Git, Status, UpdateResult, check_and_update
+from bieznia.updater import Git, GitError, Status, UpdateResult, check_and_update
 from bieznia.winapi import release_movement_keys
 
-# Uwaga: nadzorca importuje celowo mało modułów. Zmiana któregokolwiek z nich
-# wymusza przeładowanie nadzorcy (dodatkowy proces), zmiana reszty – tylko restart mostu.
+# Nadzorca celowo importuje mało modułów: zmiana któregokolwiek z nich wymaga
+# jego przeładowania, zmiana reszty kodu – tylko restartu mostu.
 
 log = logging.getLogger("nadzorca")
 
+EXIT_RELAUNCH = 3
+RESUME_ENV = "BIEZNIA_RESUME"
 STOP_TIMEOUT_S = 5.0
 HEALTHY_AFTER_S = 30.0
 BACKOFF_START_S = 2.0
 BACKOFF_MAX_S = 60.0
-ALWAYS_RELAUNCH = {"pyproject.toml", "uv.lock", ".python-version"}
+# Zmiana tych plików wymaga nowego środowiska (uv run) albo nowego nadzorcy.
+RELAUNCH_FILES = {"pyproject.toml", "uv.lock", ".python-version"}
+# Tylko zmiany tych ścieżek restartują most (README, testy, CI itp. – nie).
+RESTART_PREFIXES = ("src/", "config.toml")
+SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
 
 
 def own_files(root: Path) -> set[str]:
     """Pliki repo, z których zbudowany jest działający nadzorca (ich zmiana = przeładowanie)."""
-    files = set(ALWAYS_RELAUNCH)
+    files = set(RELAUNCH_FILES)
     for name, module in list(sys.modules.items()):
         path = getattr(module, "__file__", None)
         if not (name == "bieznia" or name.startswith("bieznia.")) or not path:
@@ -45,6 +55,10 @@ def own_files(root: Path) -> set[str]:
     return files
 
 
+def needs_app_restart(changed: list[str]) -> bool:
+    return any(path.startswith(RESTART_PREFIXES) for path in changed)
+
+
 class Supervisor:
     def __init__(self, root: Path, app_args: list[str]) -> None:
         self.root = root
@@ -52,11 +66,15 @@ class Supervisor:
         update_cfg = load_config(root)["update"]
         self.remote = str(update_cfg["remote"])
         self.branch = str(update_cfg["branch"])
+        for value in (self.remote, self.branch):
+            if not SAFE_NAME.match(value):
+                raise ValueError(f"Niedozwolona nazwa remote/gałęzi w [update]: {value!r}")
         self.interval = float(update_cfg["interval_s"])
         self.git = Git(root)
         self.child: subprocess.Popen[bytes] | None = None
         self.child_started = 0.0
         self.restart_at: float | None = 0.0
+        self.resume_next = False
         self.backoff = BACKOFF_START_S
         self.last_message = ""
 
@@ -64,33 +82,36 @@ class Supervisor:
 
     def start_child(self) -> None:
         cmd = [sys.executable, "-m", "bieznia", *self.app_args]
+        env = dict(os.environ)
+        if self.resume_next:
+            env[RESUME_ENV] = "1"  # po aktualizacji most wraca do stanu włączony/wyłączony
+        self.resume_next = False
         # Własna grupa procesów: możemy wysłać mu CTRL_BREAK bez zatrzymywania siebie.
         flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-        self.child = subprocess.Popen(cmd, cwd=self.root, creationflags=flags)
+        self.child = subprocess.Popen(cmd, cwd=self.root, env=env, creationflags=flags)
         self.child_started = time.monotonic()
         self.restart_at = None
 
     def stop_child(self) -> None:
         child, self.child = self.child, None
-        if child is None:
+        if child is None or child.poll() is not None:
             return
-        if child.poll() is None:
-            log.info("Zatrzymuję most…")
-            try:
-                if hasattr(signal, "CTRL_BREAK_EVENT"):
-                    os.kill(child.pid, signal.CTRL_BREAK_EVENT)
-                else:
-                    child.terminate()
-                child.wait(timeout=STOP_TIMEOUT_S)
-            except (subprocess.TimeoutExpired, OSError):
-                log.warning("Most nie zamknął się sam – zabijam proces")
-                child.kill()
-                child.wait()
-        self.failsafe_release()
+        log.info("Zatrzymuję most…")
+        try:
+            if hasattr(signal, "CTRL_BREAK_EVENT"):
+                os.kill(child.pid, signal.CTRL_BREAK_EVENT)
+            else:
+                child.terminate()
+            child.wait(timeout=STOP_TIMEOUT_S)
+        except (subprocess.TimeoutExpired, OSError):
+            log.warning("Most nie zamknął się sam – zabijam proces")
+            child.kill()
+            child.wait()
+            self.failsafe_release()
 
     @staticmethod
     def failsafe_release() -> None:
-        # Gdyby most zginął w trakcie trzymania W/Shift, puść je za niego.
+        # Most zginął bez sprzątania – puść za niego W i Shift.
         try:
             release_movement_keys()
         except OSError as exc:
@@ -100,10 +121,10 @@ class Supervisor:
         if self.child is None or (rc := self.child.poll()) is None:
             return
         self.child = None
-        self.failsafe_release()
         if rc == 0:
             log.info("Most zakończył pracę. Czekam na aktualizacje (Ctrl+C = wyjście).")
             return
+        self.failsafe_release()
         if now - self.child_started > HEALTHY_AFTER_S:
             self.backoff = BACKOFF_START_S
         log.error("Most padł (kod %s). Restart za %.0f s albo po aktualizacji.", rc, self.backoff)
@@ -122,36 +143,27 @@ class Supervisor:
         else:
             self.last_message = ""
 
-    def sync_dependencies(self) -> None:
-        cmd = ["uv", "sync", "--locked", "--no-dev", "--inexact", "--quiet"]
-        proc = subprocess.run(cmd, cwd=self.root, check=False)
-        if proc.returncode != 0:
-            log.error(
-                "uv sync nie powiódł się (kod %s) – zależności mogą być nieaktualne",
-                proc.returncode,
-            )
-
-    def relaunch(self) -> int:
-        log.info("Zmienił się kod nadzorcy – uruchamiam go ponownie")
-        cmd = ["uv", "run", "--locked", "--no-dev", "python", "-m", "bieznia.supervisor"]
-        proc = subprocess.Popen([*cmd, *self.app_args], cwd=self.root)
-        while True:
-            try:
-                return proc.wait()
-            except KeyboardInterrupt:
-                continue  # Ctrl+C dostaje też nowy nadzorca – czekamy, aż sam się zamknie
-
     def apply_update(self, result: UpdateResult) -> bool:
-        """Zwraca True, gdy trzeba przeładować samego nadzorcę."""
-        log.info("Nowa wersja: %s (%d plików)", result.message, len(result.changed))
+        """Zwraca True, gdy start.bat ma uruchomić nadzorcę od nowa."""
+        log.info("Nowa wersja: %s (plików: %d)", result.message, len(result.changed))
         if set(result.changed) & own_files(self.root):
+            self.stop_child()
             return True
+        if not needs_app_restart(result.changed):
+            log.info("Zmiany nie dotyczą mostu – działa dalej bez restartu")
+            return False
+        was_running = self.child is not None
         self.stop_child()
-        if {"pyproject.toml", "uv.lock"} & set(result.changed):
-            self.sync_dependencies()
+        self.resume_next = was_running
         self.backoff = BACKOFF_START_S
         self.restart_at = 0.0
         return False
+
+    def describe_version(self) -> str:
+        try:
+            return self.git.out("log", "-1", "--format=%h %s")
+        except (GitError, subprocess.TimeoutExpired, OSError) as exc:
+            return f"nieznana ({exc})"
 
     # --- pętla --------------------------------------------------------------
 
@@ -161,8 +173,10 @@ class Supervisor:
             self.remote,
             self.branch,
             self.interval,
-            self.git.out("log", "-1", "--format=%h %s"),
+            self.describe_version(),
         )
+        # Start po przeładowaniu nadzorcy (kod 3) traktujemy jak restart po aktualizacji.
+        self.resume_next = os.environ.pop(RESUME_ENV, "") == "1"
         next_check = 0.0
         try:
             while True:
@@ -172,8 +186,8 @@ class Supervisor:
                     result = check_and_update(self.git, self.remote, self.branch)
                     self.report(result)
                     if result.status is Status.UPDATED and self.apply_update(result):
-                        self.stop_child()
-                        return self.relaunch()
+                        log.info("Zmienił się kod nadzorcy lub zależności – przeładowuję")
+                        return EXIT_RELAUNCH
                 self.watch_child(now)
                 if self.child is None and self.restart_at is not None and now >= self.restart_at:
                     self.start_child()

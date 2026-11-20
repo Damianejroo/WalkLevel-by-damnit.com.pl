@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
@@ -31,17 +32,30 @@ class GitError(RuntimeError):
     pass
 
 
+# Repo jest publiczne: nigdy nie pytaj o hasło (ani w konsoli, ani w okienku),
+# a przy zerwanym połączeniu przerwij sam zamiast wisieć.
+GIT_OPTIONS = (
+    "-c",
+    "credential.helper=",
+    "-c",
+    "http.lowSpeedLimit=1000",
+    "-c",
+    "http.lowSpeedTime=20",
+)
+
+
 class Git:
     def __init__(self, repo: Path) -> None:
         self.repo = repo
-        # Nigdy nie pytaj o hasło w konsoli – fetch ma się udać albo szybko polec.
+        self.exe = shutil.which("git") or "git"
         self.env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"}
 
     def __call__(self, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
         proc = subprocess.run(
-            ["git", *args],
+            [self.exe, *GIT_OPTIONS, *args],
             cwd=self.repo,
             env=self.env,
+            stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True,
             encoding="utf-8",

@@ -29,7 +29,9 @@ chód to **W**, bieg to **Shift+W** (później także analogowa gałka pada).
    Za pierwszym razem `uv` sam pobierze Pythona – to chwilę potrwa.
 
 Od teraz **zawsze uruchamiasz tylko `start.bat`**. Sam pobiera nowe wersje z GitHuba
-(co ok. 10 s) i restartuje most. Nic nie musisz aktualizować ręcznie.
+(co ok. 10 s) i restartuje most – jeśli był włączony, wraca włączony. Nic nie musisz
+aktualizować ręcznie. Gdyby nowa wersja się wysypała, okno samo co 30 s próbuje pobrać
+poprawkę.
 
 ### Obsługa
 
@@ -87,8 +89,16 @@ Każdy push na `main` trafia do testera w ciągu ok. 10 s, więc **na `main` wyp
 który się uruchamia**. Eksperymenty rób na innych gałęziach. Nie rób force-pusha na `main`:
 nadzorca go nie zastosuje (celowo) i tester zostanie na starej wersji.
 
-Zmiana wersji Pythona (`.python-version`) wymaga, żeby tester zamknął i uruchomił `start.bat`
-ponownie.
+Co się dzieje u testera po pushu:
+
+| Zmienione pliki | Efekt |
+| --- | --- |
+| `src/` (poza nadzorcą), `config.toml` | restart mostu (stan F8 zachowany) |
+| kod nadzorcy, `pyproject.toml`, `uv.lock`, `.python-version` | `start.bat` uruchamia nadzorcę od nowa, `uv` synchronizuje środowisko |
+| README, testy, `.github/`, `start.bat` | nic – `start.bat` zadziała przy następnym ręcznym starcie |
+
+Gdy nadzorca się wysypie (np. błąd składni), `start.bat` co 30 s robi `git pull --ff-only`
+i próbuje ponownie – wystarczy wypchnąć poprawkę.
 
 ## Bezpieczeństwo
 
@@ -97,10 +107,14 @@ testera**. Dlatego:
 
 - pisać do repo może tylko właściciel (konto z włączonym 2FA); cudze pull requesty nic
   nie zmieniają, dopóki nie zostaną zmergowane,
-- nadzorca robi wyłącznie **fast-forward** z `origin/main`: nie kasuje lokalnych zmian,
-  nie wykonuje force-pusha, nie pyta o hasła,
-- zależności są przypięte w `uv.lock` (z sumami kontrolnymi), instalowane przez `uv --locked`;
-  obecnie most nie ma żadnych zależności poza biblioteką standardową Pythona,
+- na `main` zablokowane są force-push i usunięcie gałęzi (reguły repo na GitHubie),
+- nadzorca pobiera tylko gałąź `main` (nigdy pull requestów) i robi wyłącznie
+  **fast-forward**: nie kasuje lokalnych zmian, nie stosuje przepisanej historii, nie pyta
+  o hasła, a przy zerwanym połączeniu sam przerywa pobieranie,
+- zależności są przypięte w `uv.lock` (z sumami kontrolnymi), instalowane przez `uv --locked`,
+  a pakiet budowany jest wbudowanym backendem `uv_build`; obecnie most nie ma żadnych
+  zależności poza biblioteką standardową Pythona,
+- CI ma tylko prawo odczytu, nie ma sekretów, a akcje są przypięte do konkretnych commitów,
 - most działa bez uprawnień administratora i **tylko czyta** dane z bieżni – nigdy nie zmienia
   jej prędkości,
 - most startuje wyłączony, a po utracie danych z bieżni (2 s) albo po awarii puszcza W i Shift

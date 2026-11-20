@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import json
 import logging
+import os
 import signal
 import time
 from pathlib import Path
@@ -21,6 +24,27 @@ from bieznia.sources import SourceFinished, create_source
 log = logging.getLogger("bieznia")
 
 TICK_S = 0.05
+STATE_FILE = Path("logs") / "stan.json"
+RESUME_ENV = "BIEZNIA_RESUME"
+
+
+def save_state(enabled: bool) -> None:
+    with contextlib.suppress(OSError):
+        STATE_FILE.parent.mkdir(exist_ok=True)
+        STATE_FILE.write_text(json.dumps({"enabled": enabled}), encoding="utf-8")
+
+
+def load_resumed_state() -> bool | None:
+    """Stan włączony/wyłączony sprzed restartu – tylko po restarcie przez aktualizację.
+
+    Zwykły start (start.bat) zawsze zaczyna od ustawienia z konfiguracji (domyślnie wyłączony).
+    """
+    if os.environ.get(RESUME_ENV) != "1":
+        return None
+    try:
+        return bool(json.loads(STATE_FILE.read_text(encoding="utf-8"))["enabled"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
 
 
 class _StopFlag:
@@ -63,7 +87,9 @@ def run(config: dict[str, Any], stop: _StopFlag) -> int:
     hotkeys = Hotkeys(config["hotkeys"])
     source = create_source(config["source"])
     recorder = Recorder(Path("nagrania")) if config["record"]["enabled"] else None
-    enabled = bool(config["output"]["start_enabled"])
+    resumed = load_resumed_state()
+    enabled = bool(config["output"]["start_enabled"]) if resumed is None else resumed
+    save_state(enabled)
 
     keys = config["hotkeys"]
     log.info(
@@ -88,6 +114,7 @@ def run(config: dict[str, Any], stop: _StopFlag) -> int:
             actions = hotkeys.poll()
             if "toggle" in actions:
                 enabled = not enabled
+                save_state(enabled)
                 log.info("Most %s", "WŁĄCZONY" if enabled else "WYŁĄCZONY")
                 if not enabled:
                     output.release_all()
