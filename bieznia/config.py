@@ -6,6 +6,8 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
+from bieznia.paths import resource_dir
+
 DEFAULT_FILE = "config.toml"
 LOCAL_FILE = "config.local.toml"
 
@@ -21,10 +23,11 @@ def _merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
 
 
 def load_config(root: Path | None = None) -> dict[str, Any]:
-    root = root or Path.cwd()
-    with (root / DEFAULT_FILE).open("rb") as f:
+    """Domyślne ustawienia z paczki (albo z `root`) + config.local.toml z folderu danych."""
+    defaults = (root or resource_dir()) / DEFAULT_FILE
+    with defaults.open("rb") as f:
         config = tomllib.load(f)
-    local = root / LOCAL_FILE
+    local = (root or Path.cwd()) / LOCAL_FILE
     if local.exists():
         with local.open("rb") as f:
             config = _merge(config, tomllib.load(f))

@@ -352,7 +352,7 @@ class Gauge(QWidget):
     def __init__(self, t: Theme) -> None:
         super().__init__()
         self.t = t
-        self.setFixedHeight(250)
+        self.setFixedHeight(224)
         self.setMinimumWidth(260)
         self.max_speed = 10.0
         self.walk_from = 0.8
@@ -520,7 +520,7 @@ class Sparkline(QWidget):
     def __init__(self, t: Theme) -> None:
         super().__init__()
         self.t = t
-        self.setFixedHeight(64)
+        self.setFixedHeight(44)
         self.points: list[tuple[float, float]] = []
         self.max_speed = 10.0
         self.run_from = 6.3

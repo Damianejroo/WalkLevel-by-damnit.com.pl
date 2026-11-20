@@ -10,8 +10,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from bieznia import __version__
 from bieznia.config import load_config
 from bieznia.logs import setup_logging
+from bieznia.paths import FROZEN, enter_data_dir
 from bieznia.settings import apply_settings, load_resumed_enabled, load_settings, save_enabled
 
 log = logging.getLogger("bieznia")
@@ -52,8 +54,11 @@ def report_path() -> Path:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    setup_logging("bieznia")
-    config = apply_overrides(apply_settings(load_config(), load_settings()), args)
+    enter_data_dir()  # exe: %LOCALAPPDATA%\Bieznia, z kodu: bieżący folder
+    user = load_settings()
+    setup_logging("bieznia", detailed=bool(user.get("detailed_logs", True)))
+    log.info("Bieżnia %s (%s)", __version__, "exe" if FROZEN else "z kodu")
+    config = apply_overrides(apply_settings(load_config(), user), args)
     resumed = load_resumed_enabled()
     enabled = bool(config["output"]["start_enabled"]) if resumed is None else resumed
     save_enabled(enabled)

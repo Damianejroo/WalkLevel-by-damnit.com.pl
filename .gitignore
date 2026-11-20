@@ -6,14 +6,16 @@ __pycache__/
 .ruff_cache/
 build/
 dist/
+# wynik packaging/zbuduj.py
 *.egg-info/
 
 # Dane lokalne (nie trafiają do repo)
-logs/
-nagrania/
-config.local.toml
-dane/
+/logs/
+/nagrania/
+/config.local.toml
+/dane/
 
 # Prywatne notatki i dokumenty
 *.docx
 .narzedzia/
+build-log.txt

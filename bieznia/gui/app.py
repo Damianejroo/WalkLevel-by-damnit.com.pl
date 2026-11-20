@@ -12,18 +12,28 @@ import logging
 import os
 import queue
 import signal
-import subprocess
 import sys
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QPoint, QPropertyAnimation, Qt, QTimer
-from PySide6.QtGui import QCloseEvent, QColor, QFont, QIcon, QPainter, QPaintEvent, QPixmap
+from PySide6.QtCore import QPoint, QPropertyAnimation, Qt, QTimer, QUrl
+from PySide6.QtGui import (
+    QCloseEvent,
+    QColor,
+    QDesktopServices,
+    QFont,
+    QIcon,
+    QPainter,
+    QPaintEvent,
+    QPixmap,
+)
 from PySide6.QtWidgets import (
     QApplication,
     QHBoxLayout,
+    QLineEdit,
     QPlainTextEdit,
     QScrollArea,
     QSlider,
@@ -32,7 +42,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bieznia import __version__
+from bieznia import HOMEPAGE, REPOSITORY, __author__, __version__, aktualizacje, zgloszenia
 from bieznia.ble.worker import BleEvent, BleWorker, FoundDevice, Link
 from bieznia.engine import Bridge
 from bieznia.gui import theme as th
@@ -57,7 +67,9 @@ from bieznia.gui.widgets import (
     label,
 )
 from bieznia.hotkeys import Hotkeys
+from bieznia.logs import set_detailed
 from bieznia.mapping import MappingConfig
+from bieznia.paths import FROZEN
 from bieznia.recorder import Recorder
 from bieznia.settings import save_enabled, save_settings
 from bieznia.sources.ble_source import QueueSource
@@ -82,6 +94,9 @@ class QueueLogHandler(logging.Handler):
 
 
 def app_icon(t: Theme) -> QIcon:
+    png = Path(__file__).with_name("ikona.png")
+    if png.exists():
+        return QIcon(str(png))
     pix = QPixmap(64, 64)
     pix.fill(Qt.GlobalColor.transparent)
     p = QPainter(pix)
@@ -172,7 +187,7 @@ def header(title: str, on_back: Any) -> QHBoxLayout:
 
 
 class App:
-    MAIN, DEVICES, SETTINGS, LOG = range(4)
+    MAIN, DEVICES, SETTINGS, LOG, REPORT = range(5)
 
     def __init__(self, qt: QApplication, config: dict[str, Any], enabled: bool) -> None:
         self.qt = qt
@@ -189,7 +204,13 @@ class App:
             "always_on_top": bool(config.get("ui", {}).get("always_on_top", False)),
             "theme": config.get("ui", {}).get("theme", "system"),
             "large_text": bool(config.get("ui", {}).get("large_text", False)),
+            "detailed_logs": bool(config.get("ui", {}).get("detailed_logs", True)),
+            "last_version": config.get("ui", {}).get("last_version", ""),
         }
+        self.report_endpoint = str(config.get("zgloszenia", {}).get("adres", "")).strip()
+        self.tasks: queue.Queue[tuple[str, Any]] = queue.Queue()
+        self.update_busy = False
+        self.report_busy = False
         self.bridge = Bridge(
             MappingConfig.from_dict(config["mapping"]), self.settings["output"], enabled
         )
@@ -217,6 +238,15 @@ class App:
         self.timer.timeout.connect(self.tick)
         self.timer.start()
 
+        previous = self.settings["last_version"]
+        if previous != __version__:
+            if previous:
+                log.info("Zaktualizowano z %s do %s", previous, __version__)
+            self.settings["last_version"] = __version__
+            self.save()
+        if FROZEN:
+            self.run_task(self.check_update_task, False)  # tylko informacja, bez instalowania
+
         if self.settings["device_address"]:
             self.worker.connect(self.settings["device_address"], self.settings["device_name"])
         elif not self.settings["simulator"]:
@@ -241,6 +271,7 @@ class App:
         self.pages.addWidget(self.build_devices())
         self.pages.addWidget(self.build_settings())
         self.pages.addWidget(self.build_log())
+        self.pages.addWidget(self.build_report())
         self.ring = FocusRing(w, self.t)
 
         w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.settings["always_on_top"])
@@ -272,7 +303,7 @@ class App:
 
         # stan połączenia - zawsze w tym miejscu, stała wysokość
         status = card()
-        status.setFixedHeight(76)
+        status.setFixedHeight(68)
         srow = QHBoxLayout(status)
         srow.setContentsMargins(14, 8, 10, 8)
         srow.setSpacing(10)
@@ -347,7 +378,7 @@ class App:
         clay.addWidget(self.output_seg)
         self.output_hint = label("", "muted")
         self.output_hint.setWordWrap(True)
-        self.output_hint.setMinimumHeight(40)
+        self.output_hint.setMinimumHeight(22)
         clay.addWidget(self.output_hint)
         lay.addWidget(control)
         lay.addStretch(1)
@@ -358,10 +389,20 @@ class App:
         settings_btn.clicked.connect(lambda: self.pages.go(self.SETTINGS))
         log_btn = icon_button("log", "Dziennik i raport diagnostyczny")
         log_btn.clicked.connect(lambda: self.pages.go(self.LOG))
+        report_btn = icon_button("report", "Zgłoś problem")
+        report_btn.clicked.connect(lambda: self.pages.go(self.REPORT))
         foot.addWidget(settings_btn)
         foot.addWidget(log_btn)
+        foot.addWidget(report_btn)
         foot.addStretch(1)
-        foot.addWidget(label(f"wersja {self.version()}", "small"))
+        self.update_label = label(f"wersja {__version__}", "small")
+        foot.addWidget(self.update_label)
+        self.update_btn = button("Aktualizuj", "", "Pobierz i zainstaluj najnowszą wersję")
+        self.update_btn.clicked.connect(lambda: self.run_task(self.check_update_task, True))
+        if not FROZEN:
+            self.update_btn.setEnabled(False)
+            self.update_btn.setToolTip("Aktualizacje działają w wersji zainstalowanej")
+        foot.addWidget(self.update_btn)
         lay.addLayout(foot)
         self.render_output_hint()
         return self.scroll(inner)
@@ -463,9 +504,6 @@ class App:
         top = Switch(t, "Zawsze na wierzchu", self.settings["always_on_top"])
         top.toggled.connect(lambda v: self.change("always_on_top", v, rebuild=True))
         self.setting_row(ll, "Zawsze na wierzchu", "Okno nie chowa się pod grą", top)
-        shortcut = button("Utwórz skrót na pulpicie")
-        shortcut.clicked.connect(self.create_shortcut)
-        ll.addWidget(shortcut)
         lay.addWidget(look)
 
         tests = card()
@@ -496,6 +534,113 @@ class App:
         self.forget_btn.confirmed.connect(self.forget_device)
         dl.addWidget(self.forget_btn)
         lay.addWidget(device)
+
+        logs = card()
+        gl = QVBoxLayout(logs)
+        gl.setContentsMargins(14, 12, 14, 14)
+        gl.addWidget(label("Dziennik i zgłoszenia", "section"))
+        detailed = Switch(t, "Szczegółowe logi Bluetooth", self.settings["detailed_logs"])
+        detailed.toggled.connect(self.on_detailed_logs)
+        self.setting_row(
+            gl,
+            "Szczegółowe logi Bluetooth",
+            "Zapisuje surową rozmowę z bieżnią (prędkość, kroki, polecenia)."
+            " Pomaga naprawić połączenie.",
+            detailed,
+        )
+        what = label(
+            "Dziennik zawsze zapisuje zdarzenia aplikacji, błędy i przebieg połączenia z bieżnią. "
+            "Nie zapisuje wciskanych klawiszy, haseł ani niczego z gier. Logi zostają na tym "
+            "komputerze, dopóki sam nie wyślesz zgłoszenia.",
+            "small",
+        )
+        what.setWordWrap(True)
+        gl.addWidget(what)
+        grow = QHBoxLayout()
+        open_logs = button("Otwórz folder logów")
+        open_logs.clicked.connect(lambda: self.open_folder(Path("logs")))
+        report = button("Zgłoś problem")
+        report.clicked.connect(lambda: self.pages.go(self.REPORT))
+        grow.addWidget(open_logs, 1)
+        grow.addWidget(report, 1)
+        gl.addLayout(grow)
+        lay.addWidget(logs)
+
+        about = card()
+        al = QVBoxLayout(about)
+        al.setContentsMargins(14, 12, 14, 14)
+        al.addWidget(label("O aplikacji", "section"))
+        al.addWidget(label(f"Bieżnia {__version__}"))
+        al.addWidget(label(f"© 2026 {__author__}", "small"))
+        self.about_status = label("", "muted")
+        self.about_status.setWordWrap(True)
+        self.about_status.setMinimumHeight(24)
+        al.addWidget(self.about_status)
+        check = button("Sprawdź aktualizacje")
+        check.clicked.connect(lambda: self.run_task(self.check_update_task, True))
+        check.setEnabled(FROZEN)
+        al.addWidget(check)
+        links = QHBoxLayout()
+        for text, url in (
+            ("Strona autora", HOMEPAGE),
+            ("Prywatność", f"https://github.com/{REPOSITORY}/blob/main/POLITYKA-PRYWATNOSCI.md"),
+            ("Kod (GPL-3.0)", f"https://github.com/{REPOSITORY}"),
+        ):
+            b = button(text)
+            b.clicked.connect(lambda _=False, u=url: QDesktopServices.openUrl(QUrl(u)))
+            links.addWidget(b, 1)
+        al.addLayout(links)
+        lay.addWidget(about)
+        lay.addStretch(1)
+        return self.scroll(inner)
+
+    def build_report(self) -> QWidget:
+        inner = QWidget()
+        lay = page_layout(inner)
+        lay.addLayout(header("Zgłoś problem", lambda: self.pages.go(self.MAIN, back=True)))
+        intro = label(
+            "Opisz, co się stało. Razem z opisem trafią logi, żeby autor mógł szybko znaleźć "
+            "przyczynę.",
+            "muted",
+        )
+        intro.setWordWrap(True)
+        lay.addWidget(intro)
+        lay.addWidget(label("Co się stało?"))
+        self.report_text = QPlainTextEdit()
+        self.report_text.setPlaceholderText(
+            "Np. bieżnia rozłącza się po kilku minutach albo postać nie biegnie w grze."
+        )
+        self.report_text.setAccessibleName("Opis problemu")
+        self.report_text.setMinimumHeight(120)
+        lay.addWidget(self.report_text)
+        lay.addWidget(label("Kontakt (opcjonalnie)"))
+        self.report_contact = QLineEdit()
+        self.report_contact.setPlaceholderText("Np. nick na Discordzie albo e-mail")
+        self.report_contact.setAccessibleName("Kontakt")
+        self.report_contact.setFixedHeight(th.CONTROL_H)
+        lay.addWidget(self.report_contact)
+        box = card()
+        bl = QVBoxLayout(box)
+        bl.setContentsMargins(14, 12, 14, 14)
+        bl.addWidget(label("Co zostanie dołączone", "section"))
+        for line in (
+            "- logi aplikacji i Bluetooth (ostatnie wpisy),",
+            "- ostatni raport diagnostyczny, jeśli go zapisano,",
+            "- wersja aplikacji i Windows, ustawienia (progi, wybrana bieżnia).",
+            "Bez haseł, plików z komputera i wciśniętych klawiszy.",
+        ):
+            item = label(line, "small")
+            item.setWordWrap(True)
+            bl.addWidget(item)
+        lay.addWidget(box)
+        self.report_status = label("", "muted")
+        self.report_status.setWordWrap(True)
+        self.report_status.setMinimumHeight(40)
+        lay.addWidget(self.report_status)
+        text = "Wyślij zgłoszenie" if self.report_endpoint else "Przygotuj e-mail z logami"
+        self.report_send = button(text, "primary")
+        self.report_send.clicked.connect(self.send_report)
+        lay.addWidget(self.report_send)
         lay.addStretch(1)
         return self.scroll(inner)
 
@@ -514,9 +659,9 @@ class App:
         self.log_view.setAccessibleName("Dziennik zdarzeń")
         self.log_view.setMaximumBlockCount(500)
         lay.addWidget(self.log_view, 1)
-        self.report_status = label("", "muted")
-        self.report_status.setFixedHeight(24)
-        lay.addWidget(self.report_status)
+        self.diag_status = label("", "muted")
+        self.diag_status.setFixedHeight(24)
+        lay.addWidget(self.diag_status)
         row = QHBoxLayout()
         folder = button("Otwórz folder logów")
         folder.clicked.connect(lambda: self.open_folder(Path("logs")))
@@ -528,21 +673,6 @@ class App:
         return page
 
     # --- akcje --------------------------------------------------------------
-
-    def version(self) -> str:
-        head = Path(".git") / "HEAD"
-        with contextlib.suppress(OSError, subprocess.SubprocessError):
-            if head.exists():
-                out = subprocess.run(
-                    ["git", "rev-parse", "--short", "HEAD"],
-                    capture_output=True,
-                    text=True,
-                    timeout=3,
-                    check=False,
-                ).stdout.strip()
-                if out:
-                    return f"{__version__} ({out})"
-        return __version__
 
     def save(self) -> None:
         with contextlib.suppress(OSError):
@@ -566,9 +696,9 @@ class App:
 
     def render_output_hint(self) -> None:
         if self.settings["output"] == "keys":
-            text = "Chód naciska W, bieg Shift + W w aktywnym oknie. Kliknij w grę, zanim ruszysz."
+            text = "Chód = W, bieg = Shift + W w aktywnym oknie (kliknij w grę)."
         else:
-            text = "Nic nie jest naciskane - sprawdź progi, zanim włączysz klawiaturę."
+            text = "Podgląd: nic nie jest naciskane."
         self.output_hint.setText(text)
 
     def on_thresholds(self) -> None:
@@ -653,7 +783,7 @@ class App:
 
     def diagnose(self) -> None:
         path = Path("logs") / f"diagnostyka-{datetime.now():%Y%m%d-%H%M%S}.txt"
-        self.report_status.setText("Zbieram raport (ok. 30 s)…")
+        self.diag_status.setText("Zbieram raport (ok. 30 s)…")
         self.worker.diagnose(path)
 
     def open_folder(self, path: Path) -> None:
@@ -661,29 +791,116 @@ class App:
         if sys.platform == "win32":
             os.startfile(path.resolve())
 
-    def create_shortcut(self) -> None:
-        target = Path("Uruchom.bat").resolve()
-        if sys.platform != "win32" or not target.exists():
-            log.warning("Skrót działa tylko w wersji uruchamianej przez Uruchom.bat")
+    # --- zadania w tle (sieć) -----------------------------------------------
+
+    def run_task(self, func: Any, *args: Any) -> None:
+        threading.Thread(target=func, args=args, daemon=True, name=func.__name__).start()
+
+    def check_update_task(self, install: bool) -> None:
+        """W wątku: sprawdza (i na żądanie pobiera) aktualizację. Wynik idzie do kolejki."""
+        if install:
+            if self.update_busy:
+                return
+            self.update_busy = True
+            self.tasks.put(("update_status", "Sprawdzam aktualizacje…"))
+        try:
+            release = aktualizacje.fetch_latest()
+            if not aktualizacje.is_newer(release.version):
+                self.tasks.put(("update_current", install))
+                return
+            if not install:
+                self.tasks.put(("update_available", release.version))
+                return
+
+            def progress(done: int, total: int) -> None:
+                if total:
+                    percent = done * 100 // total
+                    self.tasks.put(("update_status", f"Pobieram {release.version}: {percent}%"))
+
+            installer = aktualizacje.download(release, progress=progress)
+            self.tasks.put(("update_ready", (installer, release.version)))
+        except aktualizacje.UpdateError as exc:
+            self.tasks.put(("update_error", (str(exc), install)))
+        finally:
+            if install:
+                self.update_busy = False
+
+    def send_report(self) -> None:
+        if self.report_busy:
             return
-        script = (
-            "$d=[Environment]::GetFolderPath('Desktop');"
-            "$s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d 'Bieżnia.lnk'));"
-            "$s.TargetPath=$env:BZ_TARGET;$s.WorkingDirectory=$env:BZ_DIR;"
-            "$s.WindowStyle=7;$s.Description='Bieżnia - sterowanie w grach';$s.Save()"
-        )
-        env = {**os.environ, "BZ_TARGET": str(target), "BZ_DIR": str(target.parent)}
-        result = subprocess.run(
-            ["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
-            env=env,
-            capture_output=True,
-            timeout=20,
-            check=False,
-        )
-        if result.returncode == 0:
-            log.info("Skrót „Bieżnia” jest na pulpicie")
-        else:
-            log.warning("Nie udało się utworzyć skrótu")
+        description = self.report_text.toPlainText().strip()
+        if len(description) < 5:
+            self.report_status.setText("Napisz w kilku słowach, co się stało.")
+            return
+        self.report_busy = True
+        self.report_send.setEnabled(False)
+        self.report_status.setText("Przygotowuję paczkę z logami…")
+        self.run_task(self.report_task, description, self.report_contact.text())
+
+    def report_task(self, description: str, contact: str) -> None:
+        try:
+            report = zgloszenia.build_report(description, contact)
+            if self.report_endpoint:
+                zgloszenia.send_report(report, self.report_endpoint, description, contact)
+                self.tasks.put(("report_sent", "Wysłano - dziękuję! Autor dostał opis i logi."))
+            else:
+                self.tasks.put(("report_email", report))
+        except zgloszenia.ReportError as exc:
+            self.tasks.put(("report_error", str(exc)))
+        except OSError as exc:
+            self.tasks.put(("report_error", f"Nie udało się przygotować paczki: {exc}"))
+
+    def handle_task(self, kind: str, data: Any) -> None:
+        if kind == "update_status":
+            self.update_label.setText(data)
+            self.about_status.setText(data)
+        elif kind == "update_available":
+            self.update_label.setText(f"Dostępna wersja {data}")
+            self.update_label.setStyleSheet(f"color: {self.t.accent}; font-weight: 600;")
+            self.about_status.setText(f"Dostępna nowa wersja {data} - kliknij Aktualizuj.")
+        elif kind == "update_current":
+            if data:  # tylko po kliknięciu - ciche sprawdzenie przy starcie nic nie mówi
+                self.update_label.setText("Masz najnowszą wersję")
+                self.about_status.setText(f"Masz najnowszą wersję ({__version__}).")
+        elif kind == "update_error":
+            message, clicked = data
+            if clicked:
+                self.update_label.setText("Aktualizacja nieudana")
+                self.about_status.setText(message)
+            log.warning("Aktualizacja: %s", message)
+        elif kind == "update_ready":
+            installer, version = data
+            self.update_label.setText(f"Instaluję {version} - uruchomię się ponownie")
+            log.info("Instaluję wersję %s", version)
+            try:
+                aktualizacje.run_installer(installer)
+            except (aktualizacje.UpdateError, OSError) as exc:
+                self.update_label.setText("Nie udało się uruchomić instalatora")
+                log.error("Instalator: %s", exc)
+                return
+            QTimer.singleShot(400, self.quit)
+        elif kind == "report_sent":
+            self.report_busy = False
+            self.report_send.setEnabled(True)
+            self.report_status.setText(data)
+            self.report_text.clear()
+        elif kind == "report_email":
+            self.report_busy = False
+            self.report_send.setEnabled(True)
+            self.report_status.setText(
+                f"Gotowe: otworzył się e-mail do autora i folder z paczką {data.name}. "
+                "Przeciągnij plik do wiadomości i wyślij."
+            )
+            zgloszenia.open_email(self.report_text.toPlainText(), data)
+        elif kind == "report_error":
+            self.report_busy = False
+            self.report_send.setEnabled(True)
+            self.report_status.setText(data)
+
+    def on_detailed_logs(self, on: bool) -> None:
+        set_detailed(on)
+        self.change("detailed_logs", on)
+        log.info("Szczegółowe logi Bluetooth %s", "włączone" if on else "wyłączone")
 
     # --- stan połączenia ----------------------------------------------------
 
@@ -833,7 +1050,7 @@ class App:
             self.pages.go(self.DEVICES)
             self.devices_status.setText(event.text)
         elif event.kind == "report":
-            self.report_status.setText(f"Raport: {event.text}")
+            self.diag_status.setText(f"Raport: {event.text}")
             log.info("Raport diagnostyczny: %s", event.text)
 
     # --- pętla --------------------------------------------------------------
@@ -853,6 +1070,11 @@ class App:
         while True:
             try:
                 self.handle_event(self.worker.events.get_nowait())
+            except queue.Empty:
+                break
+        while True:
+            try:
+                self.handle_task(*self.tasks.get_nowait())
             except queue.Empty:
                 break
 

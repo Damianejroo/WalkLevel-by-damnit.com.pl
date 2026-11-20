@@ -1,25 +1,23 @@
-# Bieżnia → gra
+# Bieżnia
 
-Aplikacja, która zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie w grach na
-Windows: chód to **W**, bieg to **Shift + W**. Łączy się z bieżnią przez Bluetooth, sama
-ją wyszukuje i sama się aktualizuje.
+Aplikacja na Windows, która zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie
+w grach: chód to **W**, bieg to **Shift + W**. Łączy się z bieżnią przez Bluetooth i sama ją
+wyszukuje.
 
-## Dla testera: uruchomienie bez instalacji
+Twórca: **damnit.com.pl Damian Skrzypiec** · [damnit.com.pl](https://damnit.com.pl) ·
+kontakt@damnit.com.pl
 
-1. Pobierz paczkę: **[bieznia-olek-main.zip](https://github.com/Damianejroo/bieznia-olek/archive/refs/heads/main.zip)**
-2. Rozpakuj ją (prawy przycisk > Wyodrębnij wszystkie) do zwykłego folderu, np. Dokumenty.
-   Nie do OneDrive i nie do Program Files.
-3. Kliknij dwa razy **`Uruchom.bat`**. Jeśli Windows zapyta o niezweryfikowanego wydawcę,
-   wybierz Uruchom (to zwykły skrypt z tej paczki).
+## Instalacja
 
-Pierwsze uruchomienie pobiera narzędzia, Pythona i biblioteki (ok. 150 MB do pobrania, ok.
-0,5 GB na dysku, jednorazowo) do folderu `.narzedzia` obok aplikacji. Pierwsze otwarcie okna
-może potrwać 1-3 minuty, bo Windows sprawdza nowe pliki - kolejne starty trwają kilka sekund. Nic nie jest instalowane w systemie i nie trzeba
-uprawnień administratora. Usunięcie folderu usuwa wszystko.
+1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/Damianejroo/bieznia-olek/releases/latest).
+2. Uruchom instalator. Nie wymaga uprawnień administratora.
+   Windows może pokazać okno „System Windows ochronił ten komputer” (aplikacja nie ma
+   płatnego certyfikatu wydawcy) - kliknij **Więcej informacji > Uruchom mimo to**.
+3. Otwórz **Bieżnię** z menu Start albo ze skrótu na pulpicie.
 
-Potem w ustawieniach aplikacji możesz kliknąć **Utwórz skrót na pulpicie**.
+Wymagania: Windows 10 lub 11 (64-bit), Bluetooth. Instalator ma ok. 20 MB.
 
-### Zanim połączysz bieżnię
+### Pierwsze połączenie z bieżnią
 
 - włącz bieżnię,
 - rozłącz telefon: zamknij KS Fit albo wyłącz w nim Bluetooth (bieżnia przyjmuje jedno
@@ -27,7 +25,7 @@ Potem w ustawieniach aplikacji możesz kliknąć **Utwórz skrót na pulpicie**.
 - włącz Bluetooth w Windows (Start > Ustawienia > Bluetooth i urządzenia).
 
 Aplikacja przy pierwszym starcie sama szuka bieżni. Jeśli znajdzie jedną, łączy się od razu
-i zapamiętuje ją na przyszłość. Jeśli kilka - pokazuje listę do wyboru.
+i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 
 ### Obsługa
 
@@ -42,43 +40,78 @@ i zapamiętuje ją na przyszłość. Jeśli kilka - pokazuje listę do wyboru.
 Sterowanie startuje zawsze **wyłączone**. Gdy bieżnia przestanie wysyłać dane (2 s), postać
 się zatrzymuje. Aplikacja tylko czyta bieżnię - nigdy nie zmienia jej prędkości.
 
+### Aktualizacje
+
+Gdy wyjdzie nowa wersja, kliknij **Aktualizuj** na dole okna (albo Ustawienia > Sprawdź
+aktualizacje). Aplikacja pobierze instalator z GitHuba, sprawdzi jego sumę kontrolną,
+zainstaluje go i uruchomi się ponownie. Ustawienia i logi zostają. Bez kliknięcia nic się
+nie pobiera ani nie instaluje.
+
 ### Gdy coś nie działa
 
-Kliknij ikonę **Dziennik** (na dole okna) > **Zapisz raport diagnostyczny** i wyślij plik
-z folderu `logs` (raport `diagnostyka-…txt` oraz `bluetooth.log`). Raport zawiera listę
-urządzeń Bluetooth w pobliżu i surową rozmowę z bieżnią - to wystarczy do poprawki.
+Kliknij **Zgłoś problem** (ikona na dole okna), opisz, co się stało, i wyślij. Do zgłoszenia
+trafiają logi aplikacji i Bluetooth - okno pokazuje dokładnie, co zostanie dołączone.
+Szczegółowe logi Bluetooth można wyłączyć w Ustawieniach > Dziennik i zgłoszenia.
 
-Aktualizacje przychodzą same, zwykle kilka sekund po wysłaniu poprawki. Aplikacja na chwilę
-się zamknie i otworzy ponownie. Jeśli nowa wersja się wysypie, okno konsoli co 30 s próbuje
-pobrać poprawkę.
+Przy problemach z połączeniem pomaga też **Dziennik > Zapisz raport diagnostyczny**
+(ok. 30 s): lista urządzeń w pobliżu i surowa rozmowa z bieżnią.
 
 ### Gry
 
 - Jeśli gra działa jako administrator, Windows nie pozwoli zwykłej aplikacji naciskać w niej
-  klawiszy. Wtedy daj znać, zamiast uruchamiać wszystko jako administrator.
-- Gry z ochroną przed oszustwami (np. sieciowe strzelanki) mogą traktować sztucznie naciskane
-  klawisze jak automatyzację. Używaj w grach, które na to pozwalają, na własną
-  odpowiedzialność.
+  klawiszy.
+- Gry z ochroną przed oszustwami mogą traktować sztucznie naciskane klawisze jak
+  automatyzację. Używaj w grach, które na to pozwalają, na własną odpowiedzialność.
+
+### Odinstalowanie
+
+Ustawienia Windows > Aplikacje > Bieżnia > Odinstaluj. Ustawienia i logi zostają w
+`%LOCALAPPDATA%\Bieznia` - usuń ten folder, jeśli chcesz pozbyć się wszystkiego.
+
+## Prywatność
+
+Aplikacja nie ma kont, reklam ani analityki. Dane z bieżni i logi zostają na komputerze.
+Z internetem łączy się tylko, żeby sprawdzić i pobrać aktualizację z GitHuba, oraz gdy sam
+wyślesz zgłoszenie. Szczegóły: [Polityka prywatności](POLITYKA-PRYWATNOSCI.md).
 
 ## Dla programisty
 
 ```powershell
 uv sync                                   # środowisko z narzędziami
-uv run python -m bieznia                  # okno
+uv run python -m bieznia                  # okno (z kodu, bez instalacji)
 uv run python -m bieznia --headless       # bez okna (symulator, logi w konsoli)
 uv run python -m bieznia --diagnostyka    # tylko raport Bluetooth
 uv run pytest; uv run ruff check; uv run ruff format; uv run mypy
+uv run python packaging/zbuduj.py 0.2.0   # exe + instalator (instalator wymaga Inno Setup)
 ```
 
-Struktura:
+### Wydanie nowej wersji dla testera
 
-- `bieznia/ble/` - Bluetooth: protokół KingSmith (`kingsmith.py`), FTMS, sterowniki,
-  wątek połączenia z ponawianiem, raport diagnostyczny
-- `bieznia/engine.py` - źródło > mapowanie > wyjście, bezpieczniki, liczniki
-- `bieznia/mapping.py` - prędkość > W / Shift / gałka (wygładzanie, histereza)
-- `bieznia/gui/` - okno PySide6: tokeny i motywy (`theme.py`), kontrolki, widoki
-- `bieznia/supervisor.py` + `updater.py` - nadzorca z auto-aktualizacją u testera
-- `Uruchom.bat` + `narzedzia/bootstrap.ps1` - start bez instalacji
+```powershell
+git tag -a v0.2.1 -m "Poprawione łączenie z bieżnią po wybudzeniu"
+git push origin v0.2.1
+```
+
+GitHub Actions uruchamia testy, buduje `Bieznia.exe` (PyInstaller) i instalator (Inno Setup),
+dodaje poświadczenie pochodzenia i publikuje wydanie z opisem z tagu (ok. 5 min). Potem
+wystarczy powiedzieć testerowi, żeby kliknął **Aktualizuj**.
+
+### Struktura
+
+- `bieznia/ble/` - Bluetooth: protokół KingSmith, FTMS, sterowniki, wątek połączenia
+  z ponawianiem, raport diagnostyczny
+- `bieznia/engine.py`, `mapping.py` - prędkość > W / Shift, bezpieczniki, liczniki
+- `bieznia/gui/` - okno PySide6: tokeny i motywy, kontrolki, widoki
+- `bieznia/aktualizacje.py` - aktualizacja z GitHub Releases (SHA-256, tylko hosty GitHuba)
+- `bieznia/zgloszenia.py` - paczka z logami i wysyłka zgłoszenia
+- `packaging/` - ikona, specyfikacja PyInstaller, instalator Inno Setup, skrypt budowania
+
+### Zgłoszenia prosto do autora
+
+Domyślnie **Zgłoś problem** przygotowuje e-mail na kontakt@damnit.com.pl z paczką logów.
+Żeby zgłoszenia przychodziły automatycznie, ustaw w `config.toml` sekcję `[zgloszenia]`
+`adres` na adres HTTPS, który przyjmuje POST `multipart/form-data` z polami `wersja`, `opis`,
+`kontakt` i plikiem `plik` (ZIP, do 8 MB).
 
 ### Jak działa połączenie z X21
 
@@ -89,40 +122,21 @@ tablicą (7 wariantów) - aplikacja wykrywa ją z odpowiedzi bieżni i nigdy nie
 z niepewnie odszyfrowanej ramki. Prędkość jest odpytywana co 0,75 s, bo przy stałym tempie
 bieżnia sama nic nie wysyła. Zapasowo obsługiwany jest standard FTMS.
 
-### Aktualizacje u testera
-
-Każdy push na `main` trafia do testera w ok. 10 s, więc **na `main` wypychaj tylko kod,
-który się uruchamia**. Eksperymenty rób na innych gałęziach. Force-push na `main` jest
-zablokowany regułą repozytorium.
-
-| Zmienione pliki | Efekt u testera |
-| --- | --- |
-| `bieznia/` (poza nadzorcą), `config.toml` | restart aplikacji (stan F8 zachowany) |
-| kod nadzorcy, `pyproject.toml`, `uv.lock`, `.python-version` | nadzorca od nowa, `uv` synchronizuje środowisko |
-| README, testy, `.github/`, `Uruchom.bat` | nic - zadziała przy następnym starcie |
-
 ## Bezpieczeństwo
 
-Automatyczna aktualizacja oznacza, że **kod z gałęzi `main` uruchamia się na komputerze
-testera**. Dlatego:
-
-- pisać do repo może tylko właściciel (konto z 2FA), force-push i usunięcie `main` są
-  zablokowane, cudze pull requesty nic nie zmieniają, dopóki nie zostaną zmergowane,
-- nadzorca pobiera tylko gałąź `main` i robi wyłącznie fast-forward: nie kasuje lokalnych
-  zmian, nie stosuje przepisanej historii, nie pyta o hasła, przy zerwanym połączeniu sam
-  przerywa pobieranie,
-- narzędzia pobierane przy pierwszym starcie (uv, MinGit) mają przypięte wersje i sumy
-  SHA-256, Python pochodzi z uv (też ze sprawdzaniem sum), biblioteki są przypięte
-  w `uv.lock` z sumami kontrolnymi; projekt niczego nie buduje,
-- CI ma tylko prawo odczytu, bez sekretów, akcje przypięte do konkretnych commitów,
-- aplikacja działa bez administratora, tylko czyta bieżnię, startuje z wyłączonym
-  sterowaniem i puszcza W/Shift po utracie danych, awarii albo zamknięciu (robi to też
-  nadzorca, który w razie potrzeby zabija cały proces razem z dziećmi),
+- aktualizacja tylko po kliknięciu, tylko z wydań tego repozytorium i tylko z hostów GitHuba;
+  instalator jest uruchamiany dopiero po zgodności sumy SHA-256 podanej przez GitHub,
+- wydania budują się w GitHub Actions z przypiętych wersji (akcje po commitach, Inno Setup
+  po sumie SHA-256, biblioteki z `uv.lock` z sumami) i mają poświadczenie pochodzenia
+  (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/bieznia-olek`),
+- instalacja i działanie bez administratora; aplikacja tylko czyta bieżnię, startuje
+  z wyłączonym sterowaniem i puszcza W/Shift po utracie danych, awarii albo zamknięciu,
 - skróty F6-F8 są sprawdzane globalnie, ale program nie czyta ani nie zapisuje innych
   klawiszy.
 
 ## Licencja
 
-GPL-3.0-or-later - zobacz [LICENSE](LICENSE). Protokół KingSmith odtworzony na podstawie
-sterownika z projektu [QZ (qdomyos-zwift)](https://github.com/cagnulein/qdomyos-zwift),
-również na licencji GPL-3.0.
+© 2026 damnit.com.pl Damian Skrzypiec. Licencja GPL-3.0-or-later - zobacz [LICENSE](LICENSE).
+Protokół KingSmith odtworzony na podstawie sterownika z projektu
+[QZ (qdomyos-zwift)](https://github.com/cagnulein/qdomyos-zwift), również na licencji GPL-3.0.
+Ikona przygotowana z pomocą generatora obrazów GPT.

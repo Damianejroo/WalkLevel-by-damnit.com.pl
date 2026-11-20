@@ -1,20 +1,26 @@
 [project]
 name = "bieznia"
-version = "0.1.0"
-description = "Most: bieżnia WalkingPad X21 -> klawiatura / pad w grach na Windows"
+version = "0.2.0"
+description = "Bieżnia WalkingPad X21 jako sterowanie w grach na Windows"
+authors = [{ name = "damnit.com.pl Damian Skrzypiec", email = "kontakt@damnit.com.pl" }]
 readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-# bleak: Bluetooth LE (na Windows przez WinRT), sv-ttk: wygląd okna w stylu Windows 11.
+# bleak: Bluetooth LE (na Windows przez WinRT), PySide6: okno aplikacji.
 dependencies = [
     "bleak>=3.1,<4",
     "pyside6-essentials>=6.12,<7",
 ]
 
+[project.urls]
+Homepage = "https://damnit.com.pl"
+Repository = "https://github.com/Damianejroo/bieznia-olek"
+
 [dependency-groups]
 dev = [
     "mypy>=2.4.1",
+    "pyinstaller>=6",
     "pytest>=8",
     "ruff>=0.8",
 ]

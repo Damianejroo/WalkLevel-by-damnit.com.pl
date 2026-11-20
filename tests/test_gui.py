@@ -118,3 +118,27 @@ def test_theme_rebuild_keeps_working(window: gui.App) -> None:
     window.build()
     window.tick()
     assert window.t.name == "light"
+
+
+def test_report_page_prepares_email_without_endpoint(
+    window: gui.App, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    opened: list[str] = []
+    monkeypatch.setattr(gui.zgloszenia, "open_email", lambda text, path: opened.append(path.name))
+    window.pages.go(window.REPORT)
+    window.send_report()
+    assert "kilku słowach" in window.report_status.text()  # pusty opis nie przechodzi
+    window.report_text.setPlainText("Bieżnia rozłącza się po 2 minutach")
+    window.send_report()
+    for _ in range(100):
+        window.tick()
+        if opened:
+            break
+        __import__("time").sleep(0.02)
+    assert opened and opened[0].startswith("zgloszenie-")
+    assert "e-mail" in window.report_status.text()
+
+
+def test_update_button_disabled_when_running_from_source(window: gui.App) -> None:
+    assert not window.update_btn.isEnabled()
+    assert window.update_label.text().startswith("wersja")

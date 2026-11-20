@@ -38,10 +38,9 @@ sim_faster = "F7"
 enabled = false
 
 [update]
+# skąd przycisk Aktualizuj pobiera nową wersję
 remote = "origin"
 branch = "main"
-# co ile sekund sprawdzać GitHuba
-interval_s = 10
 
 [ble]
 # Zapamiętana bieżnia (ustawia się sama po pierwszym połączeniu w oknie).
@@ -55,3 +54,10 @@ always_on_top = false
 # system | light | dark
 theme = "system"
 large_text = false
+# szczegółowe logi Bluetooth (surowa rozmowa z bieżnią) - do zdalnej diagnozy
+detailed_logs = true
+
+[zgloszenia]
+# Adres HTTPS, na który przycisk Wyślij zgłoszenie wysyła paczkę z logami (POST, multipart).
+# Pusty = paczka trafia do e-maila na adres kontaktowy autora.
+adres = ""

@@ -32,6 +32,8 @@ SECTIONS = {
     "always_on_top": "ui",
     "theme": "ui",
     "large_text": "ui",
+    "detailed_logs": "ui",
+    "last_version": "ui",
 }
 
 
