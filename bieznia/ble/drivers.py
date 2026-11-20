@@ -36,6 +36,9 @@ FRAGMENT_GAP_S = 0.03
 LINE_GAP_S = 0.06
 START_ATTEMPTS = 3
 START_VERDICT_S = 2.5
+# X21 po cichu gubi część poleceń prędkości, najczęściej te wysłane tuż po jego własnej
+# ramce z danymi (log testera: 6 z 12 zgubionych przyszło do 0,3 s po ramce). Czekamy chwilę.
+QUIET_AFTER_PUSH_S = 0.4
 # Kody błędów od producenta (MIoT: -9999..-5000) = odmowa polecenia.
 VENDOR_ERRORS = range(-9999, -4999)
 
@@ -115,6 +118,8 @@ class Driver(Protocol):
     async def stop_belt(self) -> None: ...
 
     async def set_speed(self, kmh: float) -> bool: ...
+
+    def belt_speed(self) -> tuple[float, float] | None: ...
 
 
 class KingSmithDriver:
@@ -210,8 +215,17 @@ class KingSmithDriver:
         await self.send(kingsmith.CMD_STOP)
         log.info("Wysłano stop taśmy")
 
+    def belt_speed(self) -> tuple[float, float] | None:
+        """Prędkość z ostatniej ramki z danymi i czas tej ramki (time.monotonic)."""
+        if self.last_props_at == float("-inf"):
+            return None
+        return self.last_speed, self.last_props_at
+
     async def set_speed(self, kmh: float) -> bool:
         command = kingsmith.speed_command(kmh)
+        since_push = time.monotonic() - self.last_props_at
+        if 0 <= since_push < QUIET_AFTER_PUSH_S:
+            await asyncio.sleep(QUIET_AFTER_PUSH_S - since_push)
         await self.send(command)
         log.info("Prędkość taśmy: %s", command.rsplit(" ", 1)[-1])
         return True
@@ -386,6 +400,9 @@ class FtmsDriver:
 
     async def set_speed(self, kmh: float) -> bool:
         return False
+
+    def belt_speed(self) -> tuple[float, float] | None:
+        return None
 
 
 def make_driver(client: GattClient, device_name: str, on_reading: ReadingCallback) -> Driver:

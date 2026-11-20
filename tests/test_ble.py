@@ -403,13 +403,28 @@ class StubDriver:
         self.calls.append(f"speed {kmh:g}")
         return True
 
+    def belt_speed(self) -> tuple[float, float] | None:
+        return None
 
-def test_worker_stop_cancels_pending_start() -> None:
+
+def bare_worker() -> Any:
+    """BleWorker bez wątku - sama pętla poleceń, uruchamiana w teście."""
     from bieznia.ble.worker import BleWorker
 
-    worker = BleWorker.__new__(BleWorker)  # bez wątku - sama pętla poleceń
+    worker = BleWorker.__new__(BleWorker)
     worker.events = queue.Queue()
     worker._belt_task = None
+    worker._target_speed = None
+    worker._sent_speed = None
+    worker._sent_at = 0.0
+    worker._speed_at_send = 0.0
+    worker._resends = 0
+    worker._speed_confirmed = True
+    return worker
+
+
+def test_worker_stop_cancels_pending_start() -> None:
+    worker = bare_worker()
 
     async def scenario() -> StubDriver:
         driver = StubDriver()
@@ -453,13 +468,7 @@ def test_driver_sends_speed() -> None:
 
 
 def test_worker_sends_only_newest_speed_and_applies_it_after_start() -> None:
-    from bieznia.ble.worker import BleWorker
-
-    worker = BleWorker.__new__(BleWorker)
-    worker.events = queue.Queue()
-    worker._belt_task = None
-    worker._target_speed = None
-    worker._sent_speed = None
+    worker = bare_worker()
 
     async def scenario() -> StubDriver:
         driver = StubDriver()
@@ -483,3 +492,107 @@ def test_worker_sends_only_newest_speed_and_applies_it_after_start() -> None:
     driver = asyncio.run(scenario())
     # po starcie bieżnia jedzie z prędkością startową - docelowa idzie jeszcze raz
     assert driver.calls == ["speed 2.5", "speed 2.5"]
+
+
+class ForgetfulBelt(StubDriver):
+    """Jak X21 z logu testera: część poleceń prędkości przepada bez śladu."""
+
+    def __init__(self, ignore: int) -> None:
+        super().__init__()
+        self.ignore = ignore
+        self.speed = 1.0
+        self.at = 0.0
+
+    async def set_speed(self, kmh: float) -> bool:
+        self.calls.append(f"speed {kmh:g}")
+        if self.ignore > 0:
+            self.ignore -= 1
+        else:
+            self.speed = kmh
+        return True
+
+    def belt_speed(self) -> tuple[float, float] | None:
+        return self.speed, self.at
+
+
+def test_ignored_speed_command_is_resent(monkeypatch: pytest.MonkeyPatch) -> None:
+    from bieznia.ble import worker as worker_mod
+
+    clock = [100.0]
+    monkeypatch.setattr(worker_mod, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    worker = bare_worker()
+    belt = ForgetfulBelt(ignore=1)
+
+    async def step(seconds: float) -> None:
+        clock[0] += seconds
+        belt.at = clock[0]  # świeża ramka z danymi
+        await worker._check_speed(belt)
+
+    async def scenario() -> None:
+        worker._target_speed = 2.5
+        await worker._apply_speed(belt)
+        assert belt.calls == ["speed 2.5"]
+        await step(1.0)
+        assert belt.calls == ["speed 2.5"]  # za wcześnie na ponowienie
+        await step(2.0)
+        assert belt.calls == ["speed 2.5", "speed 2.5"]  # taśma nie drgnęła - ponowione
+        await step(3.0)
+        assert worker._speed_confirmed  # przyjęte - koniec
+        belt.speed = 3.5  # pilot zmienia prędkość - aplikacja z nim nie walczy
+        await step(5.0)
+        assert len(belt.calls) == 2
+
+    asyncio.run(scenario())
+
+
+def test_resending_gives_up(monkeypatch: pytest.MonkeyPatch) -> None:
+    from bieznia.ble import worker as worker_mod
+
+    clock = [100.0]
+    monkeypatch.setattr(worker_mod, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    worker = bare_worker()
+    belt = ForgetfulBelt(ignore=99)
+
+    async def scenario() -> None:
+        worker._target_speed = 2.5
+        await worker._apply_speed(belt)
+        for _ in range(20):
+            clock[0] += 3.0
+            belt.at = clock[0]
+            await worker._check_speed(belt)
+
+    asyncio.run(scenario())
+    assert len(belt.calls) == 1 + worker_mod.SPEED_RESENDS
+
+
+def test_ramping_belt_is_not_hurried(monkeypatch: pytest.MonkeyPatch) -> None:
+    from bieznia.ble import worker as worker_mod
+
+    clock = [100.0]
+    monkeypatch.setattr(worker_mod, "time", SimpleNamespace(monotonic=lambda: clock[0]))
+    worker = bare_worker()
+    belt = ForgetfulBelt(ignore=1)
+
+    async def scenario() -> None:
+        worker._target_speed = 2.5
+        await worker._apply_speed(belt)
+        belt.speed = 1.8  # taśma już przyspiesza
+        clock[0] += 3.0
+        belt.at = clock[0]
+        await worker._check_speed(belt)
+        assert belt.calls == ["speed 2.5"]
+
+    asyncio.run(scenario())
+
+
+def test_speed_waits_after_treadmill_push(monkeypatch: pytest.MonkeyPatch) -> None:
+    slept: list[float] = []
+
+    async def fake_sleep(seconds: float) -> None:
+        slept.append(seconds)
+
+    driver = KingSmithDriver(FakeTreadmill(), [], "KS-X21", lambda s, _st: None)
+    monkeypatch.setattr(drivers.asyncio, "sleep", fake_sleep)
+    driver.last_props_at = drivers.time.monotonic() - 0.1  # ramka przed chwilą
+    asyncio.run(driver.set_speed(2.5))
+    assert slept and 0.25 < slept[0] <= drivers.QUIET_AFTER_PUSH_S

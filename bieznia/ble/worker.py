@@ -26,6 +26,11 @@ from bieznia.sources import Reading
 log = logging.getLogger("bieznia.ble")
 
 POLL_S = 0.75
+# Polecenie prędkości bez reakcji taśmy wysyłamy ponownie (X21 gubi część poleceń).
+SPEED_TOLERANCE = 0.15
+SPEED_RESEND_S = 2.5
+SPEED_RAMP_S = 8.0  # tyle najwyżej czekamy, gdy taśma już zmienia prędkość
+SPEED_RESENDS = 5
 SCAN_S = 6.0
 FIND_S = 10.0
 CONNECT_TIMEOUT_S = 20.0
@@ -87,6 +92,10 @@ class BleWorker:
         self._driver: Driver | None = None
         self._target_speed: float | None = None  # ostatnia prośba z okna
         self._sent_speed: float | None = None  # ostatnia wysłana do bieżni
+        self._sent_at = 0.0
+        self._speed_at_send = 0.0
+        self._resends = 0
+        self._speed_confirmed = True
         self._thread.start()
 
     # --- API dla wątku głównego --------------------------------------------
@@ -285,6 +294,7 @@ class BleWorker:
             if now >= next_poll:
                 next_poll = now + POLL_S
                 await driver.poll()
+                await self._check_speed(driver)
             try:
                 command = await asyncio.wait_for(
                     self._commands.get(), max(0.0, next_poll - time.monotonic())
@@ -315,8 +325,52 @@ class BleWorker:
         target = self._target_speed
         if target is None or target == self._sent_speed:
             return
+        await self._send_speed(driver, target)
+        self._resends = 0
+
+    async def _send_speed(self, driver: Driver, target: float) -> None:
+        reading = driver.belt_speed()
         if await driver.set_speed(target):
             self._sent_speed = target
+            self._sent_at = time.monotonic()
+            self._speed_at_send = reading[0] if reading else 0.0
+            self._speed_confirmed = False
+
+    async def _check_speed(self, driver: Driver) -> None:
+        """Czy taśma posłuchała? Bez reakcji - to samo polecenie jeszcze raz."""
+        target = self._sent_speed
+        if target is None or self._speed_confirmed or target != self._target_speed:
+            return
+        if self._belt_task is not None and not self._belt_task.done():
+            return
+        reading = driver.belt_speed()
+        if reading is None:
+            return
+        speed, at = reading
+        if abs(speed - target) <= SPEED_TOLERANCE:
+            self._speed_confirmed = True  # od teraz pilot może zmieniać prędkość bez walki
+            if self._resends:
+                log.info("Taśma przyjęła %.1f km/h po %d ponowieniu/ach", target, self._resends)
+            return
+        now = time.monotonic()
+        if speed <= 0 or at <= self._sent_at or now - self._sent_at < SPEED_RESEND_S:
+            return  # taśma stoi albo nie ma jeszcze świeżej ramki
+        start = self._speed_at_send
+        moving = (speed - start) * (target - start) > 0
+        if moving and now - self._sent_at < SPEED_RAMP_S:
+            return
+        if self._resends >= SPEED_RESENDS:
+            log.warning("Taśma nie przyjęła %.1f km/h (jedzie %.1f) - poddaję się", target, speed)
+            self._speed_confirmed = True
+            return
+        self._resends += 1
+        log.info(
+            "Taśma nie przyjęła %.1f km/h (jedzie %.1f) - ponawiam (%d)",
+            target,
+            speed,
+            self._resends,
+        )
+        await self._send_speed(driver, target)
 
     async def _diagnose(self, path: Path) -> None:
         from bieznia.ble.diagnostics import run_diagnostics
