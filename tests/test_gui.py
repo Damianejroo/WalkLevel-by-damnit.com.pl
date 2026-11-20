@@ -192,3 +192,62 @@ def test_report_page_prepares_email_without_endpoint(
 def test_update_button_disabled_when_running_from_source(window: gui.App) -> None:
     assert not window.update_btn.isEnabled()
     assert window.update_label.text().startswith("wersja")
+
+
+def test_wheel_over_slider_scrolls_page_instead_of_changing_value(window: gui.App) -> None:
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
+
+    window.pages.go(window.SETTINGS)
+    slider = window.run_slider
+    before = slider.value()
+    event = QWheelEvent(
+        QPointF(5, 5),
+        QPointF(5, 5),
+        QPoint(0, 0),
+        QPoint(0, -120),
+        Qt.MouseButton.NoButton,
+        Qt.KeyboardModifier.NoModifier,
+        Qt.ScrollPhase.NoScrollPhase,
+        False,
+    )
+    slider.wheelEvent(event)
+    assert slider.value() == before
+    assert not event.isAccepted()  # zdarzenie idzie dalej do przewijania strony
+
+
+def test_buttons_keep_size_when_text_changes(window: gui.App) -> None:
+    from PySide6.QtWidgets import QApplication
+
+    assert window.window is not None
+    window.window.resize(460, 840)
+    for _ in range(3):
+        QApplication.processEvents()
+    walk, run = window.walk_btn.width(), window.run_btn.width()
+    window.walk_btn.start()  # "Chód: naciśnij klawisz…"
+    for _ in range(3):
+        QApplication.processEvents()
+    assert (window.walk_btn.width(), window.run_btn.width()) == (walk, run)
+    window.walk_btn.stop()
+    status = window.status_action.width()
+    for text in ("Rozłącz", "Wyłącz symulator", "Szukaj bieżni"):
+        window.status_action.setText(text)
+        QApplication.processEvents()
+        assert window.status_action.width() == status
+
+
+def test_always_on_top_really_sets_topmost(window: gui.App) -> None:
+    import sys
+
+    from PySide6.QtWidgets import QApplication
+
+    from bieznia.winapi import is_topmost
+
+    if sys.platform != "win32" or QApplication.platformName() != "windows":
+        pytest.skip("wymaga prawdziwego okna Windows")
+    assert window.window is not None
+    hwnd = int(window.window.winId())
+    window.on_always_on_top(True)
+    assert is_topmost(hwnd)
+    window.on_always_on_top(False)
+    assert not is_topmost(hwnd)

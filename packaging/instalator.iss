@@ -31,7 +31,8 @@ UninstallDisplayIcon={app}\Bieznia.exe
 UninstallDisplayName=Bieżnia Gamingowa
 WizardStyle=modern
 WizardSmallImageFile=instalator-55.bmp,instalator-64.bmp,instalator-83.bmp,instalator-110.bmp
-Compression=lzma2/ultra64
+; szybka kompresja: ok. 3 s zamiast 14 s przy +4 MB - liczy się czas szybkich poprawek
+Compression=lzma2/fast
 SolidCompression=yes
 CloseApplications=yes
 RestartApplications=no

@@ -30,6 +30,7 @@ from PySide6.QtGui import (
     QPainter,
     QPainterPath,
     QPen,
+    QWheelEvent,
 )
 from PySide6.QtWidgets import (
     QAbstractButton,
@@ -42,6 +43,7 @@ from PySide6.QtWidgets import (
     QLayout,
     QPushButton,
     QSizePolicy,
+    QSlider,
     QVBoxLayout,
     QWidget,
 )
@@ -700,12 +702,19 @@ class ResponsiveRow(QWidget):
         # Układ nie wymusza minimalnej szerokości = sumy przycisków (inaczej okno nie zwęzi się).
         self.box.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
         for w in widgets:
+            # szerokość z podziału wiersza, nie z treści - zmiana napisu nie rusza układu
+            policy = w.sizePolicy()
+            policy.setHorizontalPolicy(QSizePolicy.Policy.Ignored)
+            w.setSizePolicy(policy)
             self.box.addWidget(w, 1)
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
 
     def needed_width(self) -> int:
+        # przyciski dzielą wiersz po równo, więc liczy się najszerszy z nich
         widths = [w.sizeHint().width() for w in self.widgets if not w.isHidden()]
-        return sum(widths) + self.box.spacing() * max(0, len(widths) - 1)
+        if not widths:
+            return 0
+        return max(widths) * len(widths) + self.box.spacing() * (len(widths) - 1)
 
     def minimumSizeHint(self) -> QSize:
         widest = max((w.minimumSizeHint().width() for w in self.widgets), default=0)
@@ -744,6 +753,18 @@ class KeyButton(QPushButton):
         self.setToolTip("Kliknij i naciśnij nowy klawisz (Esc anuluje)")
         self.clicked.connect(self.start)
         self.show_key()
+
+    def sizeHint(self) -> QSize:
+        """Stały rozmiar: najdłuższy z napisów (nasłuchiwanie, typowe nazwy klawiszy)."""
+        samples = (
+            f"{self.role}: naciśnij klawisz…",
+            f"{self.role}: Strzałka w prawo",
+            f"{self.role}: {self.key.name}",
+        )
+        bold = QFont(self.font())
+        bold.setWeight(QFont.Weight.DemiBold)
+        fm = QFontMetricsF(bold)
+        return QSize(round(max(fm.horizontalAdvance(t) for t in samples)) + 40, th.CONTROL_H)
 
     def show_key(self) -> None:
         self.setText(f"{self.role}: {self.key.name}")
@@ -824,3 +845,30 @@ class TileGrid(QWidget):
         many = len(self.tiles)
         self._place(many if self.width() >= self.needed_width(many) else min(2, many))
         super().resizeEvent(e)  # type: ignore[arg-type]
+
+
+class Slider(QSlider):
+    """Suwak, którego nie zmienia przypadkowe kółko myszy przy przewijaniu strony.
+
+    Kółko działa dopiero, gdy suwak ma ostrość (kliknięty albo wybrany klawiaturą);
+    inaczej zdarzenie idzie dalej i przewija ustawienia.
+    """
+
+    def __init__(self, orientation: Qt.Orientation) -> None:
+        super().__init__(orientation)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)  # bez fokusu od samego kółka
+
+    def wheelEvent(self, e: QWheelEvent) -> None:
+        if self.hasFocus():
+            super().wheelEvent(e)
+        else:
+            e.ignore()
+
+
+def fix_width(widget: QPushButton, texts: Iterable[str]) -> None:
+    """Przycisk o stałej szerokości najdłuższego ze swoich napisów (zmienia się tylko treść)."""
+    widget.ensurePolished()
+    bold = QFont(widget.font())
+    bold.setWeight(QFont.Weight.DemiBold)
+    fm = QFontMetricsF(bold)
+    widget.setFixedWidth(round(max(fm.horizontalAdvance(t) for t in texts)) + 40)

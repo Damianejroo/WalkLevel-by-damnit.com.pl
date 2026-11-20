@@ -1,7 +1,9 @@
 name: Wydanie
 
-# Nowa wersja dla testera:  git tag -a v0.2.1 -m "Co się zmieniło"  &&  git push origin v0.2.1
-# Testy -> Bieznia.exe (PyInstaller) -> instalator (Inno Setup) -> poświadczenie -> GitHub Release.
+# Nowa wersja dla testera:  git tag -a v0.2.2 -m "Co się zmieniło"  &&  git push origin v0.2.2
+#
+# Testy i budowa idą równolegle. Budowa tworzy wydanie jako SZKIC (niewidoczny dla przycisku
+# Aktualizuj); publikacja zmienia go w widoczne wydanie dopiero, gdy testy też przeszły.
 on:
   push:
     tags: ["v*.*.*"]
@@ -13,32 +15,22 @@ concurrency:
   group: wydanie
   cancel-in-progress: false
 
+env:
+  TAG: ${{ github.ref_name }}
+
 jobs:
-  wydanie:
+  testy:
     runs-on: windows-latest
-    timeout-minutes: 25
-    permissions:
-      contents: write # utworzenie wydania
-      id-token: write # poświadczenie pochodzenia (Sigstore)
-      attestations: write
+    timeout-minutes: 15
     env:
       QT_QPA_PLATFORM: offscreen
-      TAG: ${{ github.ref_name }}
-      INNO_URL: https://github.com/jrsoftware/issrc/releases/download/is-7_1_1/innosetup-7.1.1-x64.exe
-      INNO_SHA256: 8a5a6711c3766a6e5fb74f280ba0e3551e719ce94538d901fdbd1f8f9920b3f0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0 # potrzebne do treści tagu (opis wydania)
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           version: "0.13.9"
-      - name: Wersja z tagu
-        shell: pwsh
-        run: |
-          if ($env:TAG -notmatch '^v(\d+\.\d+\.\d+)$') { throw "Tag musi mieć postać v1.2.3" }
-          "VERSION=$($Matches[1])" >> $env:GITHUB_ENV
       - name: Zależności (zgodne z uv.lock)
         run: uv sync --locked
       - name: Testy i kontrole
@@ -47,9 +39,34 @@ jobs:
           uv run ruff format --check
           uv run mypy
           uv run pytest -q
-      - name: Inno Setup (przypięta wersja, sprawdzona suma)
+
+  budowa:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # szkic wydania
+      id-token: write # poświadczenie pochodzenia (Sigstore)
+      attestations: write
+    env:
+      INNO_URL: https://github.com/jrsoftware/issrc/releases/download/is-7_1_1/innosetup-7.1.1-x64.exe
+      INNO_SHA256: 8a5a6711c3766a6e5fb74f280ba0e3551e719ce94538d901fdbd1f8f9920b3f0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # treść tagu = opis wydania
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+        with:
+          version: "0.13.9"
+      - name: Wersja z tagu
         shell: pwsh
         run: |
+          if ($env:TAG -notmatch '^v(\d+\.\d+\.\d+)$') { throw "Tag musi mieć postać v1.2.3" }
+          "VERSION=$($Matches[1])" >> $env:GITHUB_ENV
+      - name: Zależności i Inno Setup (przypięta wersja, sprawdzona suma)
+        shell: pwsh
+        run: |
+          uv sync --locked
           $ProgressPreference = 'SilentlyContinue'
           $f = "$env:RUNNER_TEMP\innosetup.exe"
           Invoke-WebRequest -Uri $env:INNO_URL -OutFile $f -UseBasicParsing
@@ -63,13 +80,26 @@ jobs:
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: dist/Bieznia-Setup-*.exe
-      - name: Wydanie na GitHubie
+      - name: Szkic wydania (jeszcze niewidoczny dla aplikacji)
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $notes = git tag -l --format='%(contents)' $env:TAG
-          if (-not $notes) { $notes = "Nowa wersja Bieżni." }
+          if (-not $notes) { $notes = "Nowa wersja Bieżni Gamingowej." }
           $notes += "`n`n**Instalacja:** pobierz Bieznia-Setup-$env:VERSION.exe i uruchom. Masz już aplikację? Kliknij w niej Aktualizuj."
           $notes | Out-File -Encoding utf8 notes.md
-          gh release create $env:TAG dist/Bieznia-Setup-$env:VERSION.exe dist/Bieznia-Setup-$env:VERSION.exe.sha256 --title "Bieżnia $env:VERSION" --notes-file notes.md --verify-tag
+          gh release create $env:TAG dist/Bieznia-Setup-$env:VERSION.exe dist/Bieznia-Setup-$env:VERSION.exe.sha256 --draft --title "Bieżnia Gamingowa $env:VERSION" --notes-file notes.md --verify-tag
+
+  publikacja:
+    needs: [testy, budowa]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Opublikuj wydanie (testy i budowa przeszły)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh release edit "$TAG" --repo "$REPO" --draft=false --latest

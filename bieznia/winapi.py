@@ -85,3 +85,41 @@ def send_scancode(scan: int, down: bool, extended: bool = False) -> None:
     )
     if _user32.SendInput(1, ctypes.byref(event), ctypes.sizeof(INPUT)) != 1:
         raise ctypes.WinError(ctypes.get_last_error())
+
+
+HWND_TOPMOST = -1
+HWND_NOTOPMOST = -2
+SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE = 0x0001, 0x0002, 0x0010
+GWL_EXSTYLE = -20
+WS_EX_TOPMOST = 0x00000008
+
+if IS_WINDOWS:
+    # Pełne typy: bez nich HWND_TOPMOST (-1) trafiał do Windows jako 32-bitowa liczba,
+    # czyli błędny uchwyt, i „zawsze na wierzchu” nic nie robiło.
+    _user32.SetWindowPos.argtypes = (
+        wintypes.HWND,
+        wintypes.HWND,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        wintypes.UINT,
+    )
+    _user32.SetWindowPos.restype = wintypes.BOOL
+    _user32.GetWindowLongPtrW.argtypes = (wintypes.HWND, ctypes.c_int)
+    _user32.GetWindowLongPtrW.restype = ctypes.c_ssize_t
+
+
+def set_topmost(hwnd: int, on: bool) -> bool:
+    """Okno zawsze na wierzchu (albo z powrotem zwykłe) bez ukrywania go."""
+    if not IS_WINDOWS:
+        return False
+    after = wintypes.HWND(HWND_TOPMOST if on else HWND_NOTOPMOST)
+    flags = SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
+    return bool(_user32.SetWindowPos(wintypes.HWND(hwnd), after, 0, 0, 0, 0, flags))
+
+
+def is_topmost(hwnd: int) -> bool:
+    if not IS_WINDOWS:
+        return False
+    return bool(_user32.GetWindowLongPtrW(wintypes.HWND(hwnd), GWL_EXSTYLE) & WS_EX_TOPMOST)

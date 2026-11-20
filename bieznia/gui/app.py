@@ -8,7 +8,6 @@ dwa motywy. Tło okna to materiał systemowy Windows (Mica), treść na pełnych
 from __future__ import annotations
 
 import contextlib
-import ctypes
 import logging
 import os
 import queue
@@ -37,7 +36,6 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPlainTextEdit,
     QScrollArea,
-    QSlider,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -68,6 +66,7 @@ from bieznia.gui.widgets import (
     Motion,
     ResponsiveRow,
     Segmented,
+    Slider,
     Sparkline,
     StatTile,
     StatusDot,
@@ -76,6 +75,7 @@ from bieznia.gui.widgets import (
     button,
     card,
     ease,
+    fix_width,
     fmt_num,
     icon_button,
     label,
@@ -89,9 +89,17 @@ from bieznia.recorder import Recorder
 from bieznia.settings import save_enabled, save_settings
 from bieznia.sources.ble_source import QueueSource
 from bieznia.sources.simulator import SimulatedTreadmill
+from bieznia.winapi import set_topmost
 
 log = logging.getLogger("bieznia")
 
+STATUS_ACTIONS = (
+    "Szukaj bieżni",
+    "Anuluj",
+    "Rozłącz",
+    "Spróbuj ponownie",
+    "Wyłącz symulator",
+)
 TICK_MS = 50
 STARTED = time.monotonic()  # import tego modułu to praktycznie start procesu
 HYSTERESIS = 0.6
@@ -389,6 +397,7 @@ class App:
         srow.addLayout(texts, 1)
         self.status_action = button("Szukaj bieżni", "primary")
         self.status_action.clicked.connect(self.on_status_action)
+        fix_width(self.status_action, STATUS_ACTIONS)
         srow.addWidget(self.status_action)
         lay.addWidget(status)
 
@@ -472,8 +481,8 @@ class App:
         lay.addWidget(rescan)
         return page
 
-    def slider(self, lo: float, hi: float, value: float, name: str) -> tuple[QSlider, Any]:
-        s = QSlider(Qt.Orientation.Horizontal)
+    def slider(self, lo: float, hi: float, value: float, name: str) -> tuple[Slider, Any]:
+        s = Slider(Qt.Orientation.Horizontal)
         s.setRange(round(lo * 10), round(hi * 10))
         s.setValue(round(value * 10))
         s.setAccessibleName(name)
@@ -731,6 +740,9 @@ class App:
             elif hasattr(widget, "t"):
                 widget.t = self.t
                 widget.update()
+        fix_width(self.status_action, STATUS_ACTIONS)  # duży tekst zmienia szerokość napisów
+        for key_button in (self.walk_btn, self.run_btn):
+            key_button.updateGeometry()
         self.render_link()
         self.render_update_label()
 
@@ -747,10 +759,9 @@ class App:
         w = self.window
         if w is None:
             return
-        if sys.platform == "win32":
-            # bez ukrywania okna: SetWindowPos(HWND_TOPMOST / HWND_NOTOPMOST)
-            flags = 0x0001 | 0x0002 | 0x0010  # SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
-            ctypes.windll.user32.SetWindowPos(int(w.winId()), -1 if on else -2, 0, 0, 0, 0, flags)
+        if sys.platform == "win32" and self.qt.platformName() == "windows":
+            if not set_topmost(int(w.winId()), on):
+                log.warning("Nie udało się zmienić ustawienia Zawsze na wierzchu")
         else:
             w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, on)
             w.show()
