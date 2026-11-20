@@ -25,6 +25,7 @@ class FakeWorker:
         self.events: queue.Queue[BleEvent] = queue.Queue()
         self.readings: queue.Queue[Any] = queue.Queue()
         self.calls: list[str] = []
+        self.wakes: list[bool] = []
 
     def scan(self) -> None:
         self.calls.append("scan")
@@ -41,8 +42,9 @@ class FakeWorker:
     def belt(self, command: str) -> None:
         self.calls.append(f"belt {command}")
 
-    def set_speed(self, kmh: float) -> None:
+    def set_speed(self, kmh: float, start_if_stopped: bool = False) -> None:
         self.calls.append(f"speed {kmh:g}")
+        self.wakes.append(start_if_stopped)
 
     def stop_belt_now(self, timeout: float = 1.5) -> bool:
         self.calls.append("stop_belt_now")
@@ -463,7 +465,7 @@ def settle(window: gui.App) -> None:
     import time
 
     window.tick()
-    time.sleep(gui.PAD_SETTLE_S + 0.05)
+    time.sleep(max(gui.PAD_SETTLE_S, gui.PAD_STOP_SETTLE_S) + 0.05)
     window.tick()
 
 
@@ -474,6 +476,7 @@ def test_gamepad_stick_steps_set_belt_speed(window: gui.App) -> None:
     stick = StickSource()
     window.pad = PadReader(lambda: [stick])  # type: ignore[list-item]
     window.direction_seg.changed.emit("gamepad")
+    window.pad_idle_seg.changed.emit("slow")  # gałka puszczona = prędkość skoku 1
     assert window.keys_row.isHidden()  # klawisze chodu i biegu niepotrzebne
     assert window.bridge.output_kind == "dry"
     window.set_control(True)
@@ -514,8 +517,49 @@ def test_gamepad_without_pad_keeps_idle_speed(window: gui.App) -> None:
     worker = fake(window)
     window.pad = PadReader(lambda: [])
     window.direction_seg.changed.emit("gamepad")
+    window.pad_idle_seg.changed.emit("slow")
     window.set_control(True)
     settle(window)
     assert speeds(worker) == ["speed 1"]
     window.render_pad_status()
     assert "Nie widzę pada" in window.pad_status.text()
+
+
+def test_released_stick_stops_belt_and_movement_wakes_it(window: gui.App) -> None:
+    from bieznia.pad import PadReader
+
+    worker = fake(window)
+    assert window.settings["pad_idle"] == "stop"  # domyślnie puszczona gałka = taśma stoi
+    stick = StickSource()
+    window.pad = PadReader(lambda: [stick])  # type: ignore[list-item]
+    window.direction_seg.changed.emit("gamepad")
+    window.set_control(True)
+    assert "belt start" not in worker.calls  # F8 nie rusza taśmy - zrobi to gałka
+    settle(window)
+    assert worker.calls[-1] == "belt stop"
+    settle(window)
+    assert worker.calls.count("belt stop") == 1  # bez powtarzania co klatkę
+    stick.y = 0.4
+    settle(window)
+    assert speeds(worker) == ["speed 1.5"]
+    assert worker.wakes[-1]  # stojąca taśma rusza sama
+    stick.y = 0.0
+    window.tick()
+    assert worker.calls[-1] == "speed 1.5"  # krótko przez środek - jeszcze nie stop
+    settle(window)
+    assert worker.calls[-1] == "belt stop"
+    assert window.pad_idle_speed is not None and not window.pad_idle_speed[0].isEnabled()
+
+
+def test_zero_test_mode_sends_zero_without_stopping(window: gui.App) -> None:
+    from bieznia.pad import PadReader
+
+    worker = fake(window)
+    window.pad = PadReader(lambda: [StickSource()])  # type: ignore[list-item]
+    window.direction_seg.changed.emit("gamepad")
+    window.pad_idle_seg.changed.emit("zero")
+    assert "od 0%: 0 km/h" in window.output_hint.text()
+    window.set_control(True)
+    settle(window)
+    assert speeds(worker) == ["speed 0"]
+    assert "belt stop" not in worker.calls

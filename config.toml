@@ -66,6 +66,9 @@ walk_speed = 1.5
 run_speed = 2.5
 # tryb "Pad -> bieżnia": [wychylenie gałki w %, prędkość km/h], od 2 do 5 skoków
 pad_steps = [[0, 1.0], [25, 1.5], [50, 2.5], [100, 4.0]]
+# gałka puszczona: stop (taśma staje, ruch gałki ją uruchamia) | slow (prędkość skoku 1)
+# | zero (test: polecenie 0 km/h bez zatrzymania)
+pad_idle = "stop"
 
 [ui]
 simulator = false

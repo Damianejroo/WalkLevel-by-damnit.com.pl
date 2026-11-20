@@ -134,6 +134,8 @@ class Driver(Protocol):
 
     def belt_speed(self) -> tuple[float, float] | None: ...
 
+    def belt_running(self) -> bool | None: ...
+
 
 class KingSmithDriver:
     """WalkingPad R2 / X21 / G1 / X23 - szyfrowany protokół tekstowy (patrz kingsmith.py)."""
@@ -263,6 +265,10 @@ class KingSmithDriver:
             log.warning("Bieżnia nie zareagowała na stop (próba %d) - ponawiam", attempt)
             await self._quiet()
         log.warning("Bieżnia nie potwierdziła stopu")
+
+    def belt_running(self) -> bool | None:
+        """Czy taśma jedzie (runState z ramek); None, gdy jeszcze nie wiadomo."""
+        return None if self.run_state is None else self.run_state == 1
 
     def belt_speed(self) -> tuple[float, float] | None:
         """Prędkość z ostatniej ramki z danymi i czas tej ramki (time.monotonic)."""
@@ -447,6 +453,9 @@ class FtmsDriver:
 
     def poll_interval(self) -> float:
         return BUSY_POLL_S
+
+    def belt_running(self) -> bool | None:
+        return None
 
     async def start_belt(self) -> str:
         log.warning("Start taśmy przez FTMS nie jest jeszcze obsługiwany")

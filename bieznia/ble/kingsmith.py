@@ -62,6 +62,9 @@ SPEED_MAX = 12.0
 
 
 def speed_command(kmh: float) -> str:
+    """Prędkość w zakresie bieżni. Dokładnie 0 przechodzi bez zmian (test: 0 km/h bez stopu)."""
+    if kmh <= 0:
+        return "props CurrentSpeed 0"
     value = round(min(SPEED_MAX, max(SPEED_MIN, kmh)), 1)
     return f"props CurrentSpeed {value:g}"
 

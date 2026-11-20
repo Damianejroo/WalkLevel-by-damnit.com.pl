@@ -91,6 +91,7 @@ class BleWorker:
         self._belt_task: asyncio.Task[None] | None = None
         self._belt_kind = ""
         self._driver: Driver | None = None
+        self._auto_start = False
         self._target_speed: float | None = None  # ostatnia prośba z okna
         self._sent_speed: float | None = None  # ostatnia wysłana do bieżni
         self._sent_at = 0.0
@@ -119,12 +120,16 @@ class BleWorker:
             raise ValueError(command)
         self._loop.call_soon_threadsafe(self._queue_command, command)
 
-    def set_speed(self, kmh: float) -> None:
-        """Prędkość docelowa taśmy. Liczy się tylko najnowsza - starsze prośby przepadają."""
-        self._loop.call_soon_threadsafe(self._queue_speed, round(kmh, 1))
+    def set_speed(self, kmh: float, start_if_stopped: bool = False) -> None:
+        """Prędkość docelowa taśmy. Liczy się tylko najnowsza - starsze prośby przepadają.
 
-    def _queue_speed(self, kmh: float) -> None:
+        start_if_stopped: stojącą taśmę najpierw uruchom (pad: ruch gałki budzi bieżnię).
+        """
+        self._loop.call_soon_threadsafe(self._queue_speed, round(kmh, 1), start_if_stopped)
+
+    def _queue_speed(self, kmh: float, start_if_stopped: bool = False) -> None:
         self._target_speed = kmh
+        self._auto_start = start_if_stopped
         if self._commands is not None:
             self._commands.put_nowait("speed")
 
@@ -303,23 +308,38 @@ class BleWorker:
             except TimeoutError:
                 continue
             if command == "speed":
-                starting = self._belt_task is not None and not self._belt_task.done()
-                if not starting:  # w trakcie startu prędkość ustawi _start_belt
+                if self._needs_start(driver):
+                    self._begin_start(driver)
+                elif not self._busy("start"):  # w trakcie startu prędkość ustawi _start_belt
                     await self._apply_speed(driver)
             elif command == "stop":
                 if self._belt_task is not None and not self._belt_task.done():
                     self._belt_task.cancel()  # stop przerywa start w toku
                 self._sent_speed = None
+                self._target_speed = None  # stop kasuje prośby o prędkość i samo-uruchamianie
+                self._auto_start = False
                 self._belt_task = asyncio.create_task(self._stop_belt(driver))
                 self._belt_kind = "stop"
             elif command == "start":
-                busy = self._belt_task is not None and not self._belt_task.done()
-                if busy and self._belt_kind == "start":
-                    continue  # start już w toku
-                if busy and self._belt_task is not None:
-                    self._belt_task.cancel()  # sprawdzanie stopu przerwane nowym startem
-                self._belt_task = asyncio.create_task(self._start_belt(driver))
-                self._belt_kind = "start"
+                self._begin_start(driver)
+
+    def _busy(self, kind: str) -> bool:
+        task = self._belt_task
+        return task is not None and not task.done() and self._belt_kind == kind
+
+    def _begin_start(self, driver: Driver) -> None:
+        if self._busy("start"):
+            return  # start już w toku
+        if self._belt_task is not None and not self._belt_task.done():
+            self._belt_task.cancel()  # sprawdzanie stopu przerwane nowym startem
+        self._belt_task = asyncio.create_task(self._start_belt(driver))
+        self._belt_kind = "start"
+
+    def _needs_start(self, driver: Driver) -> bool:
+        """Pad wychylony, a taśma stoi (albo właśnie ją zatrzymujemy) - trzeba ją uruchomić."""
+        if not self._auto_start or not (self._target_speed or 0) > 0 or self._busy("start"):
+            return False
+        return self._busy("stop") or driver.belt_running() is False
 
     async def _stop_belt(self, driver: Driver) -> None:
         await driver.stop_belt()
@@ -349,6 +369,10 @@ class BleWorker:
 
     async def _check_speed(self, driver: Driver) -> None:
         """Czy taśma posłuchała? Bez reakcji - to samo polecenie jeszcze raz."""
+        if self._needs_start(driver):  # np. taśmę zatrzymał pilot albo zgubiony start
+            log.info("Taśma stoi, a pad chce %.1f km/h - uruchamiam", self._target_speed or 0)
+            self._begin_start(driver)
+            return
         target = self._sent_speed
         if target is None or self._speed_confirmed or target != self._target_speed:
             return

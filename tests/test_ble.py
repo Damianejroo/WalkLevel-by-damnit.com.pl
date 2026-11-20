@@ -412,6 +412,9 @@ class StubDriver:
     def belt_speed(self) -> tuple[float, float] | None:
         return None
 
+    def belt_running(self) -> bool | None:
+        return None
+
 
 def bare_worker() -> Any:
     """BleWorker bez wątku - sama pętla poleceń, uruchamiana w teście."""
@@ -427,6 +430,7 @@ def bare_worker() -> Any:
     worker._resends = 0
     worker._speed_confirmed = True
     worker._belt_kind = ""
+    worker._auto_start = False
     return worker
 
 
@@ -462,7 +466,8 @@ def test_worker_stop_cancels_pending_start() -> None:
 def test_speed_command_format_like_qz() -> None:
     assert kingsmith.speed_command(1.5) == "props CurrentSpeed 1.5"
     assert kingsmith.speed_command(3.0) == "props CurrentSpeed 3"
-    assert kingsmith.speed_command(0.0) == "props CurrentSpeed 0.5"  # 0 nie zatrzymuje taśmy
+    assert kingsmith.speed_command(0.2) == "props CurrentSpeed 0.5"  # minimum bieżni
+    assert kingsmith.speed_command(0.0) == "props CurrentSpeed 0"  # test 0 km/h bez stopu
     assert kingsmith.speed_command(30) == "props CurrentSpeed 12"
 
 
@@ -722,3 +727,81 @@ def test_new_start_interrupts_stop_check() -> None:
         return driver
 
     assert asyncio.run(scenario()).calls == ["stop", "start"]
+
+
+class SleepingBelt(StubDriver):
+    """Taśma zatrzymana; start przyjmuje od razu."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.running = False
+
+    async def start_belt(self) -> str:
+        self.calls.append("start")
+        self.running = True
+        return "started"
+
+    async def stop_belt(self, verify: bool = True) -> None:
+        self.calls.append("stop")
+        self.running = False
+
+    def belt_running(self) -> bool | None:
+        return self.running
+
+
+def run_stream(driver: Any, steps: Any) -> Any:
+    worker = bare_worker()
+
+    async def scenario() -> None:
+        lost = asyncio.Event()
+        worker._commands = asyncio.Queue()
+        stream = asyncio.create_task(worker._stream(driver, lost))
+        for step in steps:
+            step(worker)
+            await asyncio.sleep(0.05)
+        lost.set()
+        await asyncio.wait_for(stream, 2)
+
+    asyncio.run(scenario())
+    return worker
+
+
+def test_moving_stick_wakes_stopped_belt_then_sets_speed() -> None:
+    belt = SleepingBelt()
+    run_stream(belt, [lambda w: w._queue_speed(1.5, True)])
+    assert belt.calls == ["start", "speed 1.5"]
+
+
+def test_speed_without_wake_does_not_start_belt() -> None:
+    belt = SleepingBelt()
+    run_stream(belt, [lambda w: w._queue_speed(1.5, False)])
+    assert belt.calls == ["speed 1.5"]
+
+
+def test_stop_cancels_wake_so_belt_stays_stopped() -> None:
+    belt = SleepingBelt()
+    worker = run_stream(
+        belt,
+        [
+            lambda w: w._queue_speed(1.5, True),
+            lambda w: w._commands.put_nowait("stop"),
+            lambda w: w._commands.put_nowait("speed"),  # spóźniona prośba - bez skutku
+        ],
+    )
+    assert belt.calls == ["start", "speed 1.5", "stop"]
+    assert worker._target_speed is None and not worker._auto_start
+
+
+def test_stick_during_stop_check_restarts_belt() -> None:
+    class SlowStop(SleepingBelt):
+        async def stop_belt(self, verify: bool = True) -> None:
+            self.calls.append("stop")
+            await asyncio.sleep(10)
+
+    belt = SlowStop()
+    belt.running = True
+    run_stream(
+        belt,
+        [lambda w: w._commands.put_nowait("stop"), lambda w: w._queue_speed(2.5, True)],
+    )
+    assert belt.calls[:2] == ["stop", "start"]

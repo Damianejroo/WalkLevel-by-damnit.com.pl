@@ -109,6 +109,8 @@ TICK_MS = 50
 STARTED = time.monotonic()  # import tego modułu to praktycznie start procesu
 HYSTERESIS = 0.6
 PAD_SETTLE_S = 0.15  # gałka w drodze przez skoki - wysyłamy dopiero, gdy się zatrzyma
+PAD_STOP_SETTLE_S = 0.4  # gałka przechodzi przez środek przy zmianie kierunku - to nie stop
+STOPPED = -1.0  # belt_target: taśma zatrzymana przez puszczoną gałkę
 
 
 class QueueLogHandler(logging.Handler):
@@ -254,7 +256,10 @@ class App:
             "walk_speed": float(config.get("ble", {}).get("walk_speed", 1.5)),
             "run_speed": float(config.get("ble", {}).get("run_speed", 2.5)),
             "pad_steps": gamepad.parse_steps(config.get("ble", {}).get("pad_steps")),
+            "pad_idle": config.get("ble", {}).get("pad_idle", "stop"),
         }
+        if self.settings["pad_idle"] not in ("stop", "slow", "zero"):
+            self.settings["pad_idle"] = "stop"
         if self.settings["direction"] not in ("keyboard", "gamepad", "treadmill"):
             self.settings["direction"] = "keyboard"
         self.pad = gamepad.PadReader()
@@ -660,6 +665,14 @@ class App:
         )
         self.pad_count_seg.changed.connect(lambda v: self.on_pad_count(int(v)))
         pl.addWidget(self.pad_count_seg)
+        pl.addWidget(label("Gałka puszczona", "small"))
+        self.pad_idle_seg = Segmented(
+            [("stop", "Taśma staje"), ("slow", "Prędkość skoku 1"), ("zero", "0 km/h (test)")],
+            self.settings["pad_idle"],
+            "Gałka puszczona",
+        )
+        self.pad_idle_seg.changed.connect(self.on_pad_idle)
+        pl.addWidget(self.pad_idle_seg)
         rows = QWidget()
         self.pad_grid = QGridLayout(rows)
         self.pad_grid.setContentsMargins(0, 4, 0, 0)
@@ -676,6 +689,7 @@ class App:
         pl.addWidget(pad_note)
         lay.addWidget(padc)
         self.render_pad_rows()
+        self.render_pad_idle()
 
         look = card()
         ll = QVBoxLayout(look)
@@ -949,15 +963,18 @@ class App:
         self.enable_switch.set_silently(on)
         save_enabled(on)
         self.belt_target = None  # po zmianie prędkość z klawiszy idzie od nowa
-        sets_speed = self.sets_speed() and not self.settings["simulator"]
-        if changed and not on and sets_speed and not self.settings["belt_control"]:
-            self.worker.set_speed(self.idle_target())  # bez stopu: zwolnij
-        if changed and self.belt_commands_possible():
-            if not on:
+        live = not self.settings["simulator"]
+        sets_speed = self.sets_speed() and live
+        pad_stop = self.pad_stops_belt() and live  # taśmę uruchamia dopiero ruch gałki
+        if changed and not on:
+            if self.belt_commands_possible() or pad_stop:
                 self.worker.belt("stop")
-            else:  # czy taśma już jedzie, sprawdza sterownik (stan bieżni, nie prędkość)
-                self.worker.belt("start")
-                self.render_output_hint("Uruchamiam bieżnię…")
+            elif sets_speed:
+                self.worker.set_speed(self.idle_target())  # bez stopu: zwolnij
+        if changed and on and self.belt_commands_possible() and not pad_stop:
+            # czy taśma już jedzie, sprawdza sterownik (stan bieżni, nie prędkość)
+            self.worker.belt("start")
+            self.render_output_hint("Uruchamiam bieżnię…")
 
     def belt_commands_possible(self) -> bool:
         return bool(self.settings["belt_control"]) and not self.settings["simulator"]
@@ -991,6 +1008,8 @@ class App:
 
     def idle_target(self) -> float:
         if self.settings["direction"] == "gamepad":
+            if self.settings["pad_idle"] == "zero":
+                return 0.0
             return float(self.settings["pad_steps"][0][1])
         return float(self.settings["idle_speed"])
 
@@ -1017,6 +1036,7 @@ class App:
             if (w := item.widget()) is not None:
                 w.deleteLater()
         grid.addWidget(label("Wychylenie", "small"), 0, 1, 1, 2)
+        self.pad_idle_speed: tuple[Slider, Any] | None = None
         grid.addWidget(label("Prędkość", "small"), 0, 3, 1, 2)
         self.pad_at_sliders: list[Slider | None] = []
         for i, (at, speed) in enumerate(self.settings["pad_steps"], start=1):
@@ -1042,9 +1062,31 @@ class App:
             sp, sp_value = self.slider(
                 kingsmith.SPEED_MIN, kingsmith.SPEED_MAX, speed, f"Skok {i}: prędkość"
             )
+            if i == 1:
+                self.pad_idle_speed = (sp, sp_value)
             sp.valueChanged.connect(lambda v, n=i - 1: self.on_pad_speed(n, v / 10))
             grid.addWidget(sp, i, 3)
             grid.addWidget(sp_value, i, 4)
+
+    def pad_idle_text(self) -> str | None:
+        """Co robi taśma przy puszczonej gałce, gdy to nie prędkość skoku 1."""
+        return {"stop": "stop", "zero": "0 km/h"}.get(self.settings["pad_idle"])
+
+    def render_pad_idle(self) -> None:
+        if self.pad_idle_speed is None:
+            return
+        slider, value = self.pad_idle_speed
+        idle = self.pad_idle_text()
+        slider.setEnabled(idle is None)
+        value.setText(idle or f"{fmt_num(slider.value() / 10)} km/h")
+
+    def on_pad_idle(self, mode: str) -> None:
+        self.change("pad_idle", mode)
+        self.pad_idle_seg.set_value(mode)
+        log.info("Pad - gałka puszczona: %s", mode)
+        self.belt_target = None
+        self.render_pad_idle()
+        self.render_output_hint()
 
     def on_pad_count(self, count: int) -> None:
         if count == len(self.settings["pad_steps"]):
@@ -1052,6 +1094,7 @@ class App:
         self.change("pad_steps", list(gamepad.PRESETS[count]))
         self.belt_target = None
         self.render_pad_rows()
+        self.render_pad_idle()
         self.render_output_hint()
 
     def on_pad_at(self, index: int, value: int, value_label: Any) -> None:
@@ -1085,16 +1128,33 @@ class App:
         index = self.pad_picker.update(steps, deflection)
         if index != self.pad_step:
             self.pad_step, self.pad_step_since = index, now
-        speed = float(steps[index][1])
+        idle = self.pad_idle_text() if index == 0 else None
+        speed = 0.0 if idle else float(steps[index][1])
         held = "idle" if index == 0 else ("run" if index == len(steps) - 1 else "walk")
+        belt = "taśma stoi" if idle == "stop" else f"taśma {fmt_num(speed)} km/h"
         if self.pad_state is None:
-            caption = f"Brak pada - taśma {fmt_num(speed)} km/h"
+            caption = f"Brak pada - {belt}"
         else:
-            caption = (
-                f"Gałka {round(deflection * 100)}% - skok {index + 1} - taśma {fmt_num(speed)} km/h"
-            )
-        settled = now - self.pad_step_since >= PAD_SETTLE_S
+            caption = f"Gałka {round(deflection * 100)}% - skok {index + 1} - {belt}"
+        wait = PAD_STOP_SETTLE_S if idle == "stop" else PAD_SETTLE_S
+        settled = now - self.pad_step_since >= wait
         return speed, held, caption, settled
+
+    def send_pad(self, target: float) -> None:
+        """Prędkość z pada; puszczona gałka w trybie stop zatrzymuje taśmę, ruch ją budzi."""
+        if self.pad_step == 0 and self.settings["pad_idle"] == "stop":
+            if self.belt_target != STOPPED:
+                self.belt_target = STOPPED
+                self.worker.belt("stop")
+            return
+        if target == self.belt_target:
+            return
+        self.belt_target = target
+        wake = target > 0 and (self.pad_stops_belt() or bool(self.settings["belt_control"]))
+        self.worker.set_speed(target, start_if_stopped=wake)
+
+    def pad_stops_belt(self) -> bool:
+        return bool(self.settings["direction"] == "gamepad" and self.settings["pad_idle"] == "stop")
 
     def render_pad_status(self) -> None:
         state = self.pad_state
@@ -1172,10 +1232,12 @@ class App:
         if problem_text:
             text = problem_text
         elif self.settings["direction"] == "gamepad":
-            steps = ", ".join(
-                f"od {at}%: {fmt_num(speed)}" for at, speed in self.settings["pad_steps"]
-            )
-            text = f"Gałka pada - {steps} km/h."
+            idle = self.pad_idle_text()
+            parts = [
+                f"od {at}%: {idle if i == 0 and idle else fmt_num(speed)}"
+                for i, (at, speed) in enumerate(self.settings["pad_steps"])
+            ]
+            text = f"Gałka pada - {', '.join(parts)} km/h."
         elif self.settings["direction"] == "keyboard":
             s = self.settings
             text = (
@@ -1643,7 +1705,9 @@ class App:
             and not capturing
             and not self.settings["simulator"]
         )
-        if sends and target != self.belt_target:
+        if sends and direction == "gamepad":
+            self.send_pad(target)
+        elif sends and target != self.belt_target:
             self.belt_target = target
             self.worker.set_speed(target)
         if not state.live and not self.settings["simulator"]:
