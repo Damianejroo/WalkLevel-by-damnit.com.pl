@@ -7,7 +7,7 @@ import random
 import shutil
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -430,11 +430,21 @@ class PeopleScreen:
         cl.addLayout(top)
         lay.addWidget(c)
 
+        note = k.SaveNote(t)
+
         def save_name() -> None:
+            if not name.text().strip() or name.text().strip() == person.name:
+                return
             store.rename_person(person.id, name.text())
             avatar.setPixmap(k.avatar_pixmap(t, 52, person.name, person.color))
+            note.saved()
             self.render_header()
 
+        typing = QTimer(page)  # zapis chwilę po ostatniej literze
+        typing.setSingleShot(True)
+        typing.setInterval(500)
+        typing.timeout.connect(save_name)
+        name.textChanged.connect(lambda _t: typing.start())
         name.editingFinished.connect(save_name)
         dice.clicked.connect(save_name)
         c, kl = section("Kolor osoby")
@@ -443,11 +453,13 @@ class PeopleScreen:
         def on_color(col: str) -> None:
             store.rename_person(person.id, person.name, col)
             avatar.setPixmap(k.avatar_pixmap(t, 52, person.name, col))
+            note.saved()
             self.render_header()
 
         pal.picked.connect(on_color)
         kl.addWidget(pal)
         lay.addWidget(c)
+        lay.addWidget(note)
         if len(store.people) > 1:
             lay.addWidget(
                 label(

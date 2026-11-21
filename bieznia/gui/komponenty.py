@@ -18,6 +18,7 @@ from PySide6.QtCore import (
     QRectF,
     QSize,
     Qt,
+    QTimer,
     QVariantAnimation,
     Signal,
 )
@@ -41,6 +42,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLayout,
     QLayoutItem,
+    QLineEdit,
     QPushButton,
     QSizePolicy,
     QVBoxLayout,
@@ -136,13 +138,13 @@ def profile_pixmap(
 def avatar_pixmap(t: Theme, size: int, name: str, color: str) -> QPixmap:
     pix, p = _canvas(size)
     p.setPen(Qt.PenStyle.NoPen)
-    p.setBrush(QColor(paleta.kolor(color).for_theme(t.name)))
+    p.setBrush(QColor(paleta.kolor(color).swatch))
     p.drawEllipse(QRectF(0, 0, size, size))
     f = QFont(p.font())
     f.setPixelSize(int(size * 0.44))
     f.setWeight(QFont.Weight.Bold)
     p.setFont(f)
-    p.setPen(QColor(paleta.ON_DARK_THEME if t.name == "dark" else paleta.ON_LIGHT_THEME))
+    p.setPen(QColor(paleta.ON_DARK_THEME))  # litera na żywym kolorze - zawsze ciemna
     p.drawText(QRectF(0, 0, size, size), Qt.AlignmentFlag.AlignCenter, (name[:1] or "?").upper())
     p.end()
     return pix
@@ -287,9 +289,7 @@ class ZoneGauge(QWidget):
 
 
 class ZoneChips(QWidget):
-    """Strefy jako żetony pod wskaźnikiem - aktywna wypełniona kolorem strefy."""
-
-    clicked = Signal(int)
+    """Strefy jako żetony pod wskaźnikiem - aktywna wypełniona kolorem strefy (tylko informacja)."""
 
     def __init__(self, t: Theme) -> None:
         super().__init__()
@@ -311,15 +311,16 @@ class ZoneChips(QWidget):
             b.hide()
             b.deleteLater()
         self.buttons = []
-        for i, (name, value, _col) in enumerate(self.chips):
+        for name, value, _col in self.chips:
             b = QPushButton(f"{name}\n{value}")
             b.setObjectName("chip")
             b.setFixedHeight(52)
             # żetony dzielą szerokość po równo i nigdy nie rozpychają okna
             b.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
-            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            # tylko informacja: bez klikania, fokusu i kursora rączki
+            b.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+            b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             b.setAccessibleName(f"{name}: {value}")
-            b.clicked.connect(lambda _=False, n=i: self.clicked.emit(n))
             self.lay.addWidget(b, 1)
             self.buttons.append(b)
         self.active = -2
@@ -352,11 +353,20 @@ class ZoneChips(QWidget):
 
 
 class KeyCap(QLabel):
-    """Klawisz jak na klawiaturze (np. F8)."""
+    """Klawisz jak na klawiaturze (np. F8). Klik = zmiana klawisza."""
+
+    clicked = Signal()
 
     def __init__(self, t: Theme, text: str) -> None:
         super().__init__(text)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip("Kliknij, żeby zmienić klawisz")
+        self.setAccessibleName("Klawisz włączania sterowania - kliknij, żeby zmienić")
         self.retheme(t)
+
+    def mousePressEvent(self, e: QMouseEvent) -> None:
+        if e.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit()
 
     def retheme(self, t: Theme) -> None:
         self.setStyleSheet(
@@ -558,9 +568,11 @@ class StepLadder(QWidget):
 
 
 class Stepper(QWidget):
-    """Wartość z przyciskami - / + (krok 0,1 km/h) zamiast suwaka."""
+    """Wartość z - / +: klik zmienia o 0,1, przytrzymanie przyspiesza (potem co 0,5),
+    w wartość można kliknąć i wpisać liczbę (strzałki ±0,1, PageUp/PageDown ±0,5)."""
 
     changed = Signal(float)
+    FAST_AFTER = 6  # tyle powtórzeń przy przytrzymaniu, potem większy krok
 
     def __init__(
         self,
@@ -576,6 +588,8 @@ class Stepper(QWidget):
         super().__init__()
         self.value, self.lo, self.hi, self.step = value, lo, hi, step
         self.fmt = fmt or (lambda v: f"{fmt_num(v)} km/h")
+        self.fixed = fmt is not None
+        self._repeats = 0
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(8)
@@ -591,32 +605,100 @@ class Stepper(QWidget):
         lay.addLayout(texts, 1)
         self.minus = QPushButton(G_MINUS)
         self.plus = QPushButton(G_ADD)
-        for b, tip in ((self.minus, "mniej"), (self.plus, "więcej")):
+        for b, tip, sign in ((self.minus, "mniej", -1), (self.plus, "więcej", 1)):
             b.setObjectName("icon")
             b.setFixedSize(th.CONTROL_H, th.CONTROL_H)
             b.setAccessibleName(f"{title}: {tip}")
             b.setAutoRepeat(True)
-            b.setAutoRepeatDelay(400)
-            b.setAutoRepeatInterval(90)
-        self.minus.clicked.connect(lambda: self.set_value(self.value - self.step, emit=True))
-        self.plus.clicked.connect(lambda: self.set_value(self.value + self.step, emit=True))
-        self.shown = QLabel()
-        self.shown.setMinimumWidth(86)
+            b.setAutoRepeatDelay(350)
+            b.setAutoRepeatInterval(70)
+            b.pressed.connect(self._reset_repeats)
+            b.clicked.connect(lambda _=False, d=sign: self._bump(d))
+        self.shown = QLineEdit()
+        self.shown.setFixedWidth(96)
+        self.shown.setFixedHeight(th.CONTROL_H)
         self.shown.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.shown.setStyleSheet("font-weight: 700; font-size: 15px;")
+        self.shown.setAccessibleName(f"{title}: wpisz wartość")
+        self.shown.setToolTip("Kliknij i wpisz wartość, np. 2,3")
+        self.shown.setReadOnly(fmt is not None)  # tekst zamiast liczby (np. „stop”)
+        self.shown.setStyleSheet(
+            f"QLineEdit {{ font-weight: 700; font-size: 15px; border: 1px solid transparent;"
+            f" border-radius: 8px; background: transparent; color: {t.text}; }}"
+            f" QLineEdit:hover {{ border-color: {t.line}; }}"
+            f" QLineEdit:focus {{ border-color: {t.accent}; background: {t.surface_2}; }}"
+        )
         self.shown.setFont(tabular(self.shown.font()))
+        self.shown.editingFinished.connect(self._typed)
+        self.shown.installEventFilter(self)
         lay.addWidget(self.minus)
         lay.addWidget(self.shown)
         lay.addWidget(self.plus)
         self.set_value(value)
 
+    def _reset_repeats(self) -> None:
+        self._repeats = 0
+
+    def _bump(self, sign: int) -> None:
+        self._repeats += 1
+        big = self._repeats > self.FAST_AFTER and self.step < 0.5
+        step = 0.5 if big else self.step
+        target = self.value + sign * step
+        if big:  # od razu na okrągłe pół km/h, potem co 0,5
+            target = (math.floor if sign > 0 else math.ceil)(self.value * 2 + sign) / 2
+        self.set_value(target, emit=True)
+
+    def _typed(self) -> None:
+        if self.shown.isReadOnly():
+            return
+        text = self.shown.text().lower().replace("km/h", "").replace(",", ".").strip()
+        try:
+            v = float(text)
+        except ValueError:
+            self.set_value(self.value)  # błędny wpis - wraca poprzednia wartość
+            return
+        self.set_value(v, emit=True)
+        self.shown.setText(self.fmt(self.value))
+
+    def eventFilter(self, obj: QObject, e: QEvent) -> bool:
+        if obj is self.shown and not self.shown.isReadOnly():
+            if e.type() == QEvent.Type.FocusIn:
+                self.shown.setText(fmt_num(self.value))  # sama liczba do edycji
+                QTimer.singleShot(0, self.shown.selectAll)
+            elif e.type() == QEvent.Type.KeyPress:
+                key = e.key()  # type: ignore[attr-defined]
+                steps = {
+                    Qt.Key.Key_Up: self.step,
+                    Qt.Key.Key_Down: -self.step,
+                    Qt.Key.Key_PageUp: 0.5,
+                    Qt.Key.Key_PageDown: -0.5,
+                }
+                if key in steps:
+                    self._typed()
+                    self.set_value(self.value + steps[key], emit=True)
+                    self.shown.setText(fmt_num(self.value))
+                    self.shown.selectAll()
+                    return True
+                if key in (Qt.Key.Key_Escape,):
+                    self.set_value(self.value)
+                    self.shown.clearFocus()
+                    return True
+        return False
+
+    def set_format(self, fmt: Callable[[float], str] | None) -> None:
+        """Tekst zamiast liczby (np. „stop”) blokuje zmianę; None - zwykła prędkość."""
+        self.fmt = fmt or (lambda v: f"{fmt_num(v)} km/h")
+        self.fixed = fmt is not None
+        self.shown.setReadOnly(self.fixed)
+        self.set_value(self.value)
+
     def set_value(self, v: float, emit: bool = False) -> None:
         v = round(max(self.lo, min(self.hi, v)), 1)
         changed = v != self.value
         self.value = v
-        self.shown.setText(self.fmt(v))
-        self.minus.setEnabled(v > self.lo)
-        self.plus.setEnabled(v < self.hi)
+        if not self.shown.hasFocus() or self.shown.isReadOnly():
+            self.shown.setText(self.fmt(v))
+        self.minus.setEnabled(v > self.lo and not self.fixed)
+        self.plus.setEnabled(v < self.hi and not self.fixed)
         if emit and changed:
             self.changed.emit(v)
 
@@ -665,13 +747,13 @@ class PalettePicker(QWidget):
 
     def _paint(self) -> None:
         t = self.t
-        on = paleta.ON_DARK_THEME if t.name == "dark" else paleta.ON_LIGHT_THEME
+        on = paleta.ON_DARK_THEME  # znaczek na żywym kolorze - zawsze ciemny
         for name, b in self.buttons.items():
             sel = name == self.selected
             b.setText(G_CHECK if sel else "")
             ring = f"border: 3px solid {t.text};" if sel else "border: none;"
             b.setStyleSheet(
-                f"QPushButton {{ background: {paleta.kolor(name).for_theme(t.name)};"
+                f"QPushButton {{ background: {paleta.kolor(name).swatch};"
                 f" border-radius: 16px; {ring} padding: 0px; font-family: '{th.ICON_FONT}';"
                 f" font-size: 14px; color: {on}; }}"
             )
@@ -701,8 +783,8 @@ class ColorButton(QPushButton):
 
     def retheme(self, t: Theme) -> None:
         self.t = t
-        col = paleta.kolor(self.color).for_theme(t.name)
-        on = paleta.ON_DARK_THEME if t.name == "dark" else paleta.ON_LIGHT_THEME
+        col = paleta.kolor(self.color).swatch
+        on = paleta.ON_DARK_THEME
         self.setAccessibleName(f"Kolor profilu: {self.color}")
         self.setStyleSheet(
             f"QPushButton {{ background: {col}; border: 1px solid {col};"
@@ -1049,3 +1131,34 @@ class FlowLayout(QLayout):
             x += hint.width() + self._gap
             row_h = max(row_h, hint.height())
         return y + row_h - rect.y()
+
+
+class SaveNote(QLabel):
+    """Informacja przy edycji: zmiany zapisują się od razu; po zmianie krótko „Zapisano”."""
+
+    IDLE = "Zmiany zapisują się automatycznie"
+
+    def __init__(self, t: Theme) -> None:
+        super().__init__()
+        self.t = t
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setAccessibleName("Stan zapisu")
+        self._timer = QTimer(self)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self._idle)
+        self._idle()
+
+    def _show(self, text: str, color: str) -> None:
+        self.setText(f"<span style='font-family:\"{th.ICON_FONT}\"'>{G_CHECK}</span>&nbsp; {text}")
+        self.setStyleSheet(f"color: {color}; font-size: 13px; padding: 4px;")
+
+    def _idle(self) -> None:
+        self._show(self.IDLE, self.t.text_2)
+
+    def saved(self) -> None:
+        self._show("Zapisano", self.t.accent)
+        self._timer.start(2000)
+
+    def retheme(self, t: Theme) -> None:
+        self.t = t
+        self._idle()

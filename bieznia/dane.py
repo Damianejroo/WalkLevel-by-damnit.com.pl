@@ -47,6 +47,7 @@ SHARED_KEYS = frozenset(
         "record",
         "detailed_logs",
         "last_version",
+        "window_geometry",
     }
 )
 LOOK_KEYS = frozenset(

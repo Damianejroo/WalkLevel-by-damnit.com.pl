@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLineEdit, QVBoxLayout, QWidget
 
 from bieznia import dane, ikony, paleta
@@ -184,6 +185,7 @@ class ProfileScreen:
             render_game()
             if editing:
                 store.update_profile(editing.id, color=c)
+                note.saved()
                 if editing.id == store.profile.id:
                     self.settings["profile_color"] = c
                     self.apply_look()
@@ -196,8 +198,10 @@ class ProfileScreen:
             render_game()
             if editing:
                 store.update_profile(editing.id, glyph=code, icon_file=None)
+                note.saved()
                 self.render_header()
 
+        note = k.SaveNote(t)
         palette.picked.connect(on_color)
         grid.picked.connect(on_glyph)
         render_game()
@@ -205,10 +209,18 @@ class ProfileScreen:
         if editing:
 
             def save_name() -> None:
-                store.update_profile(editing.id, name=name.text())
-                self.render_header()
+                if name.text().strip() and name.text().strip() != editing.name:
+                    store.update_profile(editing.id, name=name.text())
+                    note.saved()
+                    self.render_header()
 
+            typing = QTimer(page)  # zapis chwilę po ostatniej literze
+            typing.setSingleShot(True)
+            typing.setInterval(500)
+            typing.timeout.connect(save_name)
+            name.textChanged.connect(lambda _t: typing.start())
             name.editingFinished.connect(save_name)
+            lay.addWidget(note)
             row = QHBoxLayout()
             row.setSpacing(8)
             dup = button("Duplikuj")

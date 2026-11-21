@@ -57,9 +57,11 @@ def clear(lay: Any) -> None:
 
 class SettingsScreen:
     belt_target: float | None
+    settings_view: str  # tryb, którego ustawienia widać na karcie (nie musi być aktywny)
 
     def open_settings(self: App) -> None:
         self.close_popups()
+        self.settings_view = self.settings["direction"]
         self.rebuild_settings()
         self.pages.go(self.SETTINGS)
 
@@ -117,8 +119,7 @@ class SettingsScreen:
             cl.addWidget(add)
             lay.addWidget(c)
 
-        mode = MODE_NAMES.get(self.settings["direction"], "")
-        title = f"Sterowanie: {mode}"
+        title = "Sterowanie"
         if store is not None:
             title += f" · {store.profile.name}"
         c, self.control_box = section(title)
@@ -178,11 +179,22 @@ class SettingsScreen:
         c, bl = section("Bieżnia")
         self.device_label = label("", "muted")
         bl.addWidget(self.device_label)
+        self.toggle_btn = KeyButton("Start/stop", self.toggle_key, combos=True)
+        self.toggle_btn.captured.connect(lambda key: self.on_key("toggle", key))
+        bl.addWidget(label("Klawisz włączania sterowania"))
+        bl.addWidget(
+            label(
+                "Kliknij i naciśnij klawisz albo kombinację, np. Ctrl+Shift+F8. Działa też w grze."
+                " Bez skrótów Windows (Win, Alt+Tab, Alt+F4) i nakładek (Shift+Tab, Alt+Z).",
+                "small",
+            )
+        )
+        bl.addWidget(self.toggle_btn)
         self.belt_switch = Switch(t, "Start i stop bieżni", self.settings["belt_control"])
         self.belt_switch.toggled.connect(self.on_belt_control)
         self.setting_row(
             bl,
-            f"{self.toggle_key.name} uruchamia i zatrzymuje taśmę",
+            "Klawisz uruchamia i zatrzymuje taśmę",
             "Wyłącz, jeśli wolisz startować tylko pilotem",
             self.belt_switch,
         )
@@ -223,11 +235,7 @@ class SettingsScreen:
         name = label("Zaawansowane")
         name.setStyleSheet("font-weight: 600;")
         texts.addWidget(name)
-        texts.addWidget(
-            label(
-                "Symulator, nagrywanie, logi, dziennik, klawisz start/stop, aktualizacje", "small"
-            )
-        )
+        texts.addWidget(label("Symulator, nagrywanie, logi, dziennik, aktualizacje", "small"))
         al.addLayout(texts, 1)
         chevron = k.glyph(k.G_CHEVRON_DOWN, t.text_2)
         al.addWidget(chevron)
@@ -238,11 +246,6 @@ class SettingsScreen:
         if not self.advanced_open:
             adv.hide()  # widoczność dopiero po włożeniu do układu
         adv_btn.clicked.connect(lambda: self.toggle_advanced(adv))
-        self.toggle_btn = KeyButton("Start/stop", self.toggle_key)
-        self.toggle_btn.captured.connect(lambda key: self.on_key("toggle", key))
-        self.setting_row(
-            advl, "Klawisz start/stop", "Działa także, gdy gra ma fokus", self.toggle_btn
-        )
         sim = Switch(t, "Symulator bieżni", self.settings["simulator"])
         sim.toggled.connect(self.on_simulator)
         keys = self.config["hotkeys"]
@@ -325,7 +328,35 @@ class SettingsScreen:
             elif (inner := item.layout()) is not None:
                 clear(inner)
         t, s = self.t, self.settings
-        direction = s["direction"]
+        active = s["direction"]
+        if getattr(self, "settings_view", None) not in MODE_NAMES:
+            self.settings_view = active
+        direction = self.settings_view
+        view = Segmented(
+            [(key, name + (" ✓" if key == active else "")) for key, name in MODE_NAMES.items()],
+            direction,
+            "Ustawienia trybu",
+        )
+        view.changed.connect(self.show_mode_settings)
+        box.addWidget(view)
+        if direction == active:
+            box.addWidget(
+                label("✓ to aktywny tryb. Wybierz inny, żeby ustawić go zawczasu.", "small")
+            )
+        else:
+            row = QHBoxLayout()
+            row.addWidget(
+                label(
+                    f"Aktywny jest tryb {MODE_NAMES[active]} - te ustawienia zadziałają po"
+                    " zmianie trybu.",
+                    "small",
+                ),
+                1,
+            )
+            use = button(f"Włącz {MODE_NAMES[direction]}")
+            use.clicked.connect(lambda: self.on_direction(direction))
+            row.addWidget(use)
+            box.addLayout(row)
         self.walk_btn = self.run_btn = None
         self.walk_from_step = self.run_from_step = None
         self.step_ladder = None
@@ -411,16 +442,19 @@ class SettingsScreen:
                 sub = "" if i == 0 else f"od {at}% wychylenia"
                 fmt = (lambda _v, txt=idle: txt) if (i == 0 and idle) else None
                 st = k.Stepper(
-                    t, title, sub, float(speed), kingsmith.SPEED_MIN, kingsmith.SPEED_MAX, fmt=fmt
+                    t, title, sub, float(speed), kingsmith.SPEED_MIN, kingsmith.SPEED_MAX
                 )
-                if i == 0 and idle:
-                    st.minus.setEnabled(False)
-                    st.plus.setEnabled(False)
+                st.set_format(fmt)
                 st.changed.connect(lambda v, n=i: self.on_pad_speed(n, v))
                 box.addWidget(st)
                 self.pad_steppers.append(st)
             self.render_ladder()
         self.render_output_hint()
+
+    def show_mode_settings(self: App, mode: str) -> None:
+        """Podgląd i zmiana ustawień innego trybu - aktywny tryb zostaje."""
+        self.settings_view = mode
+        self.quietly(self.build_control_settings)
 
     def render_ladder(self: App) -> None:
         if self.step_ladder is None:
@@ -509,15 +543,19 @@ class SettingsScreen:
             return
         self.change("pad_steps", list(gamepad.PRESETS[count]))
         self.belt_target = None
-        self.build_control_settings()
+        self.quietly(self.build_control_settings)
         self.render_zones()
 
     def on_pad_idle(self: App, mode: str) -> None:
         self.change("pad_idle", mode)
         log.info("Pad - gałka puszczona: %s", mode)
         self.belt_target = None
-        self.build_control_settings()
+        if self.pad_steppers:  # tylko pierwszy wiersz i oś - bez przebudowy karty
+            idle = self.pad_idle_text()
+            self.pad_steppers[0].set_format((lambda _v, txt=idle: txt) if idle else None)
+            self.render_ladder()
         self.render_zones()
+        self.render_output_hint()
 
     def on_belt_speed(self: App, key: str, kmh: float) -> None:
         self.change(key, round(kmh, 1))

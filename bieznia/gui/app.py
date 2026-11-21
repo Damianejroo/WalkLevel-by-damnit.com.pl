@@ -105,6 +105,8 @@ PAD_SETTLE_S = 0.15  # gałka w drodze przez skoki - wysyłamy dopiero, gdy się
 PAD_STOP_SETTLE_S = 0.4  # gałka przechodzi przez środek przy zmianie kierunku - to nie stop
 STOPPED = -1.0  # belt_target: taśma zatrzymana przez puszczoną gałkę
 TOAST_MS = 4000
+NO_FOCUS_ENV = "BIEZNIA_BEZ_FOKUSU"
+DEFAULT_W, DEFAULT_H = 740, 890  # okno przy pierwszym starcie (potem z ostatniej sesji)
 LOOK_RELOAD = ("theme", "large_text", "profile_color")
 
 
@@ -160,6 +162,7 @@ def defaults_from(config: dict[str, Any]) -> dict[str, Any]:
         "large_text": bool(ui.get("large_text", False)),
         "detailed_logs": bool(ui.get("detailed_logs", True)),
         "last_version": ui.get("last_version", ""),
+        "window_geometry": None,
         "walk_key": output.get("walk_key"),
         "run_key": output.get("run_key"),
         "toggle_key": output.get("toggle_key"),
@@ -204,6 +207,9 @@ class Window(QWidget):
         self.setWindowIcon(app_icon(t))
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setMinimumSize(420, 640)
+        if os.environ.get(NO_FOCUS_ENV) == "1":  # testy i zrzuty: okno nie zabiera fokusu
+            self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+            self.setWindowFlag(Qt.WindowType.WindowDoesNotAcceptFocus)
 
     def retheme(self, t: Theme) -> None:
         self.t = t
@@ -232,8 +238,40 @@ class Window(QWidget):
             e.ignore()
 
 
+TOOLTIP_QSS = (  # podpowiedzi to osobne okna - styl całej aplikacji, jeden dla obu motywów
+    "QToolTip { background: #2b2b2b; color: #f3f3f3; border: 1px solid #5a5a5a;"
+    " border-radius: 6px; padding: 6px 8px; font-size: 13px; }"
+)
+
+
 class Pages(QStackedWidget):
-    """Przejście między widokami: krótki przesuw (panel), bez przenikania."""
+    """Przejście między widokami: krótki przesuw (panel), bez przenikania.
+
+    Styl (motyw) jest na każdym widoku osobno i trafia na widok dopiero, gdy ten się pokazuje -
+    zmiana motywu przestylowuje tylko widoczny ekran (kilkadziesiąt ms zamiast pół sekundy).
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.qss = ""
+        self.qss_version = 0
+        self.qss_scale: object = None
+        self.currentChanged.connect(lambda i: self.style_page(self.widget(i)))
+
+    def set_qss(self, qss: str, everywhere: bool = False) -> None:
+        """everywhere: zmiana wielkości tekstu - układ każdego widoku liczy się od nowa."""
+        self.qss = qss
+        self.qss_version += 1
+        if everywhere:
+            for i in range(self.count()):
+                self.style_page(self.widget(i))
+        else:
+            self.style_page(self.currentWidget())
+
+    def style_page(self, page: QWidget | None) -> None:
+        if page is not None and page.property("qss_version") != self.qss_version:
+            page.setStyleSheet(self.qss)
+            page.setProperty("qss_version", self.qss_version)
 
     def go(self, index: int, back: bool = False) -> None:
         if index == self.currentIndex():
@@ -331,6 +369,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             old = {k: v for k, v in (self.legacy or {}).items() if k in self.defaults}
             self.settings = normalize({**self.defaults, **old})
         self.advanced_open = False
+        self.settings_view = self.settings["direction"]
         self.history_scope = "me"
         self.history_range = "week"
         self.last_toast = ""
@@ -372,6 +411,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         Motion.enabled = not th.system_reduces_motion()
 
         self.window: Window | None = None
+        self.frozen = 0
         self.toast_label: QLabel | None = None
         self.toast_timer = QTimer()
         self.toast_timer.setSingleShot(True)
@@ -466,6 +506,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         if self.settings["floating_button"] != floating:
             self.on_floating_button(bool(self.settings["floating_button"]))
         self.apply_direction()
+        self.settings_view = self.settings["direction"]
         self.render_header()
         self.set_tracker_owner()
         log.info(
@@ -482,20 +523,23 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
 
     # --- budowa okna --------------------------------------------------------
 
+    def page_qss(self) -> str:
+        return th.qss(self.t, 1.15 if self.settings["large_text"] else 1.0)
+
     def make_theme(self) -> Theme:
         base = th.resolve_theme(self.settings["theme"])
         return th.with_color(base, self.settings.get("profile_color"))
 
     def build(self) -> None:
         self.t = self.make_theme()
-        scale = 1.15 if self.settings["large_text"] else 1.0
-        self.qt.setStyleSheet(th.qss(self.t, scale))
+        self.qt.setStyleSheet(TOOLTIP_QSS)
 
         w = Window(self.t, self.on_close)
         self.window = w
         root = QVBoxLayout(w)
         root.setContentsMargins(0, 0, 0, 0)
         self.pages = Pages()
+        self.pages.set_qss(self.page_qss())
         root.addWidget(self.pages)
         self.pages.addWidget(self.build_main())
         self.pages.addWidget(self.build_devices())
@@ -506,11 +550,12 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             placeholder = QWidget()
             placeholder.setObjectName("page")
             self.pages.addWidget(placeholder)
+        self.pages.set_qss(self.page_qss(), everywhere=True)  # szerokości liczone już ze stylem
+        self.pages.qss_scale = self.settings["large_text"]
         self.ring = FocusRing(w, self.t)
 
         w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.settings["always_on_top"])
-        screen = self.qt.primaryScreen().availableGeometry()
-        w.resize(460, min(860, screen.height() - 60))
+        self.place_window(w)
         w.show()
         w.setFocus(Qt.FocusReason.OtherFocusReason)  # nic nie ma ostrości ani obwódki na starcie
         self.apply_direction()
@@ -518,6 +563,24 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.render_link()
         self.render_devices()
         self.log_view.setPlainText("\n".join(self.log_lines))
+
+    def place_window(self, w: QWidget) -> None:
+        """Rozmiar i miejsce z ostatniej sesji (jeśli nadal mieszczą się na ekranie)."""
+        area = self.qt.primaryScreen().availableGeometry()
+        geo = self.settings.get("window_geometry")
+        if isinstance(geo, list) and len(geo) == 4 and all(isinstance(v, int) for v in geo):
+            x, y, width, height = geo
+            if QGuiApplication.screenAt(QPoint(x + width // 2, y + 20)) is not None:
+                w.move(x, y)  # najpierw ekran (inna skala DPI zmieniłaby rozmiar), potem rozmiar
+                w.resize(max(width, w.minimumWidth()), max(height, w.minimumHeight()))
+                return
+        w.resize(min(DEFAULT_W, area.width() - 40), min(DEFAULT_H, area.height() - 60))
+
+    def remember_window(self) -> None:
+        w = self.window
+        if w is None or w.isMinimized() or w.isMaximized():
+            return
+        self.settings["window_geometry"] = [w.x(), w.y(), w.width(), w.height()]
 
     def replace_page(self, index: int, widget: QWidget) -> None:
         """Podmiana widoku (przebudowa po zmianie) z zachowaniem miejsca przewinięcia."""
@@ -528,6 +591,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             area = old.findChild(QScrollArea)
             if area is not None:
                 scroll = area.verticalScrollBar().value()
+        self.pages.style_page(widget)  # styl przed pokazaniem: bez mignięcia, dobre szerokości
         self.pages.insertWidget(index, widget)
         if old is not None:
             self.pages.removeWidget(old)
@@ -535,9 +599,33 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         if current:
             self.pages.setCurrentIndex(index)
             area = widget.findChild(QScrollArea)
-            if area is not None and scroll:
-                bar = area.verticalScrollBar()
-                QTimer.singleShot(0, lambda: bar.setValue(scroll))
+            bar = area.verticalScrollBar() if area is not None else None
+            # nowy widok układa się i przewija, zanim okno odmaluje się raz - bez skoku
+            self.freeze(True)
+
+            def restore() -> None:
+                if bar is not None and scroll:
+                    with contextlib.suppress(RuntimeError):
+                        bar.setValue(scroll)
+                self.freeze(False)
+
+            QTimer.singleShot(0, restore)
+
+    def quietly(self, change: Any) -> None:
+        """Zmiana układu bez mignięcia: okno odmalowuje się raz, po ułożeniu wszystkiego."""
+        self.freeze(True)
+        try:
+            change()
+        finally:
+            QTimer.singleShot(0, lambda: self.freeze(False))
+
+    def freeze(self, on: bool) -> None:
+        """Wstrzymanie odświeżania okna (zagnieżdżane): odmalowanie raz, gdy wszystko gotowe."""
+        self.frozen = max(0, self.frozen + (1 if on else -1))
+        w = self.window
+        if w is not None:
+            with contextlib.suppress(RuntimeError):
+                w.setUpdatesEnabled(self.frozen == 0)
 
     def go_back(self, index: int) -> None:
         if index == self.SETTINGS:
@@ -726,10 +814,13 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
     def apply_look(self) -> None:
         """Motyw, kolor profilu i wielkość tekstu na żywo - bez przebudowy okna."""
         self.t = self.make_theme()
-        scale = 1.15 if self.settings["large_text"] else 1.0
-        self.qt.setStyleSheet(th.qss(self.t, scale))
         if self.window is None:
             return
+        self.freeze(True)  # jedno odmalowanie na końcu zamiast migania w trakcie
+        qss = self.page_qss()
+        # sam kolor: reszta widoków dostanie styl przy wejściu; inna wielkość tekstu: wszystkie
+        self.pages.set_qss(qss, everywhere=self.pages.qss_scale != self.settings["large_text"])
+        self.pages.qss_scale = self.settings["large_text"]
         for widget in [self.window, *self.window.findChildren(QWidget)]:
             if hasattr(widget, "retheme"):
                 widget.retheme(self.t)
@@ -745,6 +836,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.render_zones()
         if self.pages.currentIndex() == self.SETTINGS:
             self.rebuild_settings()  # kolory zapisane w stylach kart
+        self.freeze(False)
 
     def on_look(self, key: str, value: Any) -> None:
         self.change(key, value)
@@ -841,7 +933,8 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.change("direction", kind)
         log.info("Kierunek sterowania: %s", kind)
         self.apply_direction()
-        self.rebuild_settings()  # karta sterowania w Ustawieniach pokazuje tylko bieżący tryb
+        self.settings_view = kind
+        self.rebuild_settings()  # karta sterowania w Ustawieniach pokazuje bieżący tryb
 
     def sets_speed(self) -> bool:
         """Klawisze albo pad ustawiają prędkość taśmy (a nie odwrotnie)."""
@@ -936,7 +1029,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         keys = self.config["hotkeys"]
         return Hotkeys(
             {
-                "toggle": self.toggle_key.vk,
+                "toggle": (self.toggle_key.vk, self.toggle_key.mods),
                 "sim_slower": keys["sim_slower"],
                 "sim_faster": keys["sim_faster"],
             }
@@ -962,7 +1055,8 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             return
         w.showNormal()
         w.raise_()
-        w.activateWindow()
+        if os.environ.get(NO_FOCUS_ENV) != "1":
+            w.activateWindow()
 
     def render_update_label(self) -> None:
         style = f"color: {self.t.accent}; font-weight: 600;" if self.update_available else ""
@@ -1025,7 +1119,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             self.toggle_key = toggle
             self.settings["toggle_key"] = toggle.to_dict()
             self.hotkeys = self.make_hotkeys()  # trzymany właśnie klawisz się nie liczy
-            self.toggle_cap.setText(toggle.name)
+            self.toggle_cap.setText(toggle.label)
         self.render_control_subtitle()
         self.save()
         self.render_zones()
@@ -1420,7 +1514,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         elif sends and target != self.belt_target:
             self.belt_target = target
             self.worker.set_speed(target)
-        off = f"Wyłączone - {self.toggle_key.name} włącza"
+        off = f"Wyłączone - {self.toggle_key.label} włącza"
         zone = {"idle": 0, "walk": 1, "run": 2}
         offline = not state.live and not self.settings["simulator"]
         if offline and direction == "treadmill":
@@ -1501,6 +1595,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         if was_enabled and self.belt_commands_possible() and self.worker.stop_belt_now():
             log.info("Zamykanie: zatrzymano taśmę")
         self.worker.shutdown()
+        self.remember_window()
         self.save()
         self.close_history()
         logging.getLogger().removeHandler(self.log_handler)

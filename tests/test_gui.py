@@ -280,7 +280,7 @@ def clipped(page_widget: Any) -> list[str]:
                 bad.append(f"ucięty {b.text()!r}: {b.width()} < {needed}")
         right = b.mapTo(page_widget, b.rect().topRight()).x()
         if right > page_widget.width():
-            bad.append(f"wystaje {b.text()!r}")
+            bad.append(f"wystaje {b.text()!r} ({right} > {page_widget.width()})")
     return bad
 
 
@@ -290,7 +290,7 @@ def test_narrow_window_clips_no_buttons(window: gui.App) -> None:
     assert window.window is not None
     # offscreen ma zastępczą czcionkę ok. 2x szerszą niż Segoe UI - okno proporcjonalnie szersze
     offscreen = QApplication.platformName() == "offscreen"
-    window.window.resize(560 if offscreen else 420, 760)
+    window.window.resize(640 if offscreen else 420, 760)
     window.open_settings()
     window.open_profile_new()
     window.open_history()
@@ -315,6 +315,20 @@ def test_narrow_window_clips_no_buttons(window: gui.App) -> None:
     for _ in range(3):
         QApplication.processEvents()
     assert clipped(current(window)) == []
+
+
+def test_window_size_is_remembered(make: Any) -> None:
+    dane.Store.create("Tester", "Mięta", {})
+    app: gui.App = make()
+    assert app.window is not None
+    area = app.qt.primaryScreen().availableGeometry()
+    app.window.move(area.x() + 30, area.y() + 40)
+    app.window.resize(520, 700)
+    close(app)
+    again: gui.App = make()
+    assert again.window is not None
+    assert (again.window.width(), again.window.height()) == (520, 700)
+    assert again.window.x() == area.x() + 30
 
 
 def test_report_page_prepares_email_without_endpoint(
@@ -505,6 +519,53 @@ def test_toggle_key_can_be_changed(window: gui.App) -> None:
     assert "Start/stop" in window.output_hint.text()
 
 
+def test_toggle_key_can_be_a_combination(window: gui.App) -> None:
+    from PySide6.QtCore import QEvent, Qt
+    from PySide6.QtGui import QKeyEvent
+
+    from bieznia.hotkeys import Hotkeys
+
+    mods = Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.ShiftModifier
+    btn = window.toggle_btn
+    btn.start()
+    ctrl = QKeyEvent(
+        QEvent.Type.KeyPress,
+        Qt.Key.Key_Control,
+        Qt.KeyboardModifier.ControlModifier,
+        0x1D,
+        0xA2,
+        0,
+        "",
+    )
+    btn.keyPressEvent(ctrl)  # sam Ctrl - czeka na resztę
+    assert btn.capturing and "Ctrl+…" in btn.text()
+    f9 = QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_F9, mods, 0x43, 0x78, 0, "")
+    btn.keyPressEvent(f9)
+    assert window.toggle_key.label == "Ctrl+Shift+F9"
+    assert window.toggle_cap.text() == "Ctrl+Shift+F9"
+    assert window.settings["toggle_key"]["mods"] == ["ctrl", "shift"]
+    # Alt+Tab odrzucone z wyjaśnieniem
+    btn.start()
+    alt_tab = QKeyEvent(
+        QEvent.Type.KeyPress, Qt.Key.Key_Tab, Qt.KeyboardModifier.AltModifier, 0x0F, 0x09, 0, ""
+    )
+    btn.keyPressEvent(alt_tab)
+    assert window.toggle_key.label == "Ctrl+Shift+F9"
+    assert "Alt+Tab" in window.last_toast
+    # skrót globalny działa tylko z modyfikatorami
+    down: set[int] = set()
+    window.hotkeys = Hotkeys({"toggle": (0x78, ("ctrl", "shift"))}, key_down=lambda vk: vk in down)
+    down.add(0x78)
+    window.tick()
+    assert not window.bridge.state.enabled
+    down.clear()
+    window.tick()
+    down.update({0x11, 0x10, 0x78})
+    window.tick()
+    assert window.bridge.state.enabled
+    assert window.make_hotkeys()._mods["toggle"] == (0x11, 0x10)
+
+
 def test_quit_stops_running_belt(window: gui.App) -> None:
     worker = fake(window)
     window.set_control(True)
@@ -554,6 +615,31 @@ def test_held_keys_set_belt_speed(window: gui.App) -> None:
     window.tick()
     assert speeds(worker)[-1] == "speed 1.6"
     assert window.zone_chips.chips[1][1] == "1,6 km/h"
+
+
+def test_speed_can_be_typed_and_held(window: gui.App) -> None:
+    window.open_settings()
+    steppers = window.control_box.parentWidget().findChildren(gui.k.Stepper)
+    walk = steppers[1]
+    walk.shown.setFocus()
+    walk.shown.setText("2,3")
+    walk.shown.editingFinished.emit()
+    assert window.settings["walk_speed"] == 2.3
+    walk.shown.setText("abc")  # błędny wpis - wraca poprzednia wartość
+    walk.shown.editingFinished.emit()
+    assert window.settings["walk_speed"] == 2.3
+    walk.shown.setText("99 km/h")  # ponad zakres - najwyższa dozwolona
+    walk.shown.editingFinished.emit()
+    assert window.settings["walk_speed"] == walk.hi
+    walk.set_value(1.6)
+    walk.plus.pressed.emit()  # przytrzymanie: po kilku powtórzeniach skok o 0,5
+    for _ in range(walk.FAST_AFTER):
+        walk.plus.clicked.emit()
+    assert walk.value == 2.2
+    walk.plus.clicked.emit()
+    assert walk.value == 2.5
+    walk.plus.clicked.emit()
+    assert walk.value == 3.0 and window.settings["walk_speed"] == 3.0
 
 
 def test_treadmill_direction_presses_keys_and_never_sets_speed(window: gui.App) -> None:
@@ -732,18 +818,77 @@ def test_settings_show_only_controls_of_current_mode(window: gui.App) -> None:
     assert window.pages.currentIndex() == window.SETTINGS  # przebudowa nie zmienia widoku
 
 
+def simulator_switch(page: Any) -> Any:
+    return next(
+        w for w in page.findChildren(gui.Switch) if w.accessibleName() == "Symulator bieżni"
+    )
+
+
 def test_advanced_section_is_collapsed(window: gui.App) -> None:
     from PySide6.QtWidgets import QPushButton
 
     window.open_settings()
     page = current(window)
-    assert not window.toggle_btn.isVisibleTo(page)
+    assert not simulator_switch(page).isVisibleTo(page)
+    assert window.toggle_btn.isVisibleTo(page)  # klawisz F8 jest w sekcji Bieżnia, nie ukryty
     adv = [b for b in page.findChildren(QPushButton) if b.accessibleName() == "Zaawansowane"]
     assert len(adv) == 1
     adv[0].click()
-    assert window.advanced_open and window.toggle_btn.isVisibleTo(page)
+    assert window.advanced_open and simulator_switch(page).isVisibleTo(page)
     window.rebuild_settings()  # po przebudowie dalej rozwinięte
-    assert window.toggle_btn.isVisibleTo(current(window))
+    page = current(window)
+    assert simulator_switch(page).isVisibleTo(page)
+
+
+def test_settings_can_show_other_mode_without_switching(window: gui.App) -> None:
+    window.open_settings()
+    assert window.settings["direction"] == "keyboard"
+    window.show_mode_settings("gamepad")  # podgląd ustawień pada - tryb dalej Klawisze
+    assert window.step_ladder is not None and window.walk_btn is None
+    assert window.settings["direction"] == "keyboard"
+    assert "Aktywny jest tryb Klawisze" in texts(current(window))
+    window.pad_count_seg.changed.emit("3")  # zmiana ustawień pada zawczasu
+    assert len(window.settings["pad_steps"]) == 3
+    assert window.settings["direction"] == "keyboard" and window.step_ladder is not None
+    click(current(window), "Włącz Pad")
+    assert window.settings["direction"] == "gamepad" and window.mode_tiles.current == "gamepad"
+    window.open_settings()  # po ponownym wejściu - widok aktywnego trybu
+    assert window.settings_view == "gamepad"
+
+
+def test_clicking_toggle_key_on_card_starts_key_change(
+    window: gui.App, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from PySide6.QtTest import QTest
+
+    started: list[Any] = []
+    monkeypatch.setattr(gui.KeyButton, "start", lambda self: started.append(self))
+    window.toggle_cap.clicked.emit()
+    QTest.qWait(50)
+    assert window.pages.currentIndex() == window.SETTINGS
+    assert started == [window.toggle_btn]  # czeka na klawisz w Ustawieniach > Bieżnia
+
+
+def test_zone_chips_are_information_only(window: gui.App) -> None:
+    from PySide6.QtCore import Qt
+
+    assert window.zone_chips.buttons
+    for b in window.zone_chips.buttons:
+        assert b.testAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        assert b.focusPolicy() == Qt.FocusPolicy.NoFocus
+
+
+def test_theme_change_restyles_only_visible_page(window: gui.App) -> None:
+    window.pages.go(window.MAIN)
+    window.on_look("theme", "light")
+    assert window.qt.styleSheet() == gui.TOOLTIP_QSS  # bez przestylowania całej aplikacji
+    main = window.pages.widget(window.MAIN)
+    log_page = window.pages.widget(window.LOG)
+    assert main.property("qss_version") == window.pages.qss_version
+    assert log_page.property("qss_version") != window.pages.qss_version  # dopiero przy wejściu
+    window.pages.go(window.LOG)
+    assert log_page.property("qss_version") == window.pages.qss_version
+    assert window.window is not None and window.window.updatesEnabled()
 
 
 # --- konfigurator i migracja z 0.2 -----------------------------------------
@@ -789,7 +934,7 @@ def test_wizard_name_suggestions_sit_side_by_side_and_wrap(make: Any) -> None:
     assert app.window is not None
     chips = [b for n in app.wizard.suggestions for b in buttons(current(app), n)]
     assert len(chips) == 3
-    app.window.resize(900, 760)  # szeroko: jeden wiersz
+    app.window.resize(1500, 760)  # szeroko: jeden wiersz (też przy szerokiej czcionce testowej)
     for _ in range(3):
         QApplication.processEvents()
     assert len({c.y() for c in chips}) == 1
@@ -1023,6 +1168,28 @@ def test_edit_duplicate_and_remove_profile(window: gui.App) -> None:
     assert len(store.person.profiles) == 1 and store.profile.name == "Główny"
     window.remove_profile(store.profile.id)  # ostatniego się nie usuwa
     assert len(store.person.profiles) == 1
+
+
+def test_profile_edit_saves_automatically_and_says_so(window: gui.App) -> None:
+    from PySide6.QtTest import QTest
+
+    store = window.store
+    assert store is not None
+    window.open_profile_edit(store.profile.id)
+    page = current(window)
+    note = [n for n in page.findChildren(gui.k.SaveNote)]
+    assert len(note) == 1 and "automatycznie" in note[0].text()
+    line_edit(page, "Nazwa profilu").setText("Bez Entera")  # bez Enter i bez wyjścia z pola
+    QTest.qWait(700)
+    assert store.profile.name == "Bez Entera"
+    assert "Zapisano" in note[0].text()
+    assert window.profile_btn.text() == "Bez Entera"
+    window.open_person_edit(store.person.id)
+    page = current(window)
+    line_edit(page, "Nazwa osoby").setText("Inna Nazwa")
+    QTest.qWait(700)
+    assert store.person.name == "Inna Nazwa"
+    assert "Zapisano" in page.findChildren(gui.k.SaveNote)[0].text()
 
 
 def test_profile_popup_switches_profiles(window: gui.App) -> None:

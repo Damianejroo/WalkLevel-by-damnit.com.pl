@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
+import contextlib
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from bieznia import __version__, dane
 from bieznia.gui import komponenty as k
@@ -110,7 +118,6 @@ class MainScreen:
         self.gauge_status.setStyleSheet("font-weight: 700; font-size: 15px;")
         hlay.addWidget(self.gauge_status)
         self.zone_chips = k.ZoneChips(t)
-        self.zone_chips.clicked.connect(lambda _i: self.open_settings())
         hlay.addWidget(self.zone_chips)
         lay.addWidget(hero)
 
@@ -144,7 +151,8 @@ class MainScreen:
         htexts.addWidget(self.profile_btn)
         sub = QHBoxLayout()
         sub.setSpacing(6)
-        self.toggle_cap = k.KeyCap(t, self.toggle_key.name)
+        self.toggle_cap = k.KeyCap(t, self.toggle_key.label)
+        self.toggle_cap.clicked.connect(self.change_toggle_key)
         sub.addWidget(self.toggle_cap)
         self.control_subtitle = label("", "small")
         sub.addWidget(self.control_subtitle, 1)
@@ -197,7 +205,7 @@ class MainScreen:
             self.profile_icon.setPixmap(k.profile_pixmap(t, 40, "Mięta", k.G_WALK, None))
             self.profile_btn.setText("Sterowanie")
             self.profile_btn.setEnabled(False)
-        self.toggle_cap.setText(self.toggle_key.name)
+        self.toggle_cap.setText(self.toggle_key.label)
         self.render_control_subtitle()
 
     def profile_pixmap(self: App, profile: dane.Profile, size: int) -> QPixmap:
@@ -209,8 +217,9 @@ class MainScreen:
         if store is None or w is None:
             return
         if self.profile_popup is not None:
-            self.profile_popup.deleteLater()
-        pop = k.Popup(self.t, w)
+            with contextlib.suppress(RuntimeError):
+                self.profile_popup.deleteLater()
+        pop = k.Popup(self.t, self.pages.currentWidget() or w)
         for p in store.person.profiles:
             row = pop.add_row(
                 self.profile_pixmap(p, 28), 28, p.name, "", p.id == store.profile.id, self.t.accent
@@ -225,8 +234,9 @@ class MainScreen:
         if store is None or w is None:
             return
         if self.person_popup is not None:
-            self.person_popup.deleteLater()
-        pop = k.Popup(self.t, w)
+            with contextlib.suppress(RuntimeError):
+                self.person_popup.deleteLater()
+        pop = k.Popup(self.t, self.pages.currentWidget() or w)
         for p in store.people:
             today = self.history_today(p.id) if self.history else 0
             row = pop.add_row(
@@ -243,10 +253,27 @@ class MainScreen:
         self.person_popup = pop
         pop.open_under(self.person_chip, 280)
 
+    def change_toggle_key(self: App) -> None:
+        """Klik w klawisz na karcie: Ustawienia > Bieżnia, od razu czeka na nowy klawisz."""
+        self.open_settings()
+        button = self.toggle_btn
+
+        def start() -> None:
+            page = self.pages.currentWidget()
+            area = page.findChild(QScrollArea) if page else None
+            with contextlib.suppress(RuntimeError):
+                if area is not None:
+                    area.ensureWidgetVisible(button, 0, 120)
+                button.setFocus()
+                button.start()
+
+        QTimer.singleShot(0, start)
+
     def close_popups(self: App) -> None:
         for pop in (self.profile_popup, self.person_popup):
             if pop is not None:
-                pop.hide()
+                with contextlib.suppress(RuntimeError):  # usunięta razem z widokiem
+                    pop.hide()
 
     # --- strefy wskaźnika ----------------------------------------------------------------------
 

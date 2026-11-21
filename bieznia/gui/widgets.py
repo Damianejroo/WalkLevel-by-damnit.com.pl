@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import math
 from collections.abc import Iterable
+from dataclasses import replace
 
 from PySide6.QtCore import (
     Property,
@@ -52,7 +53,7 @@ from PySide6.QtWidgets import (
 
 from bieznia.gui import theme as th
 from bieznia.gui.theme import Theme
-from bieznia.klawisze import Key, key_from_native
+from bieznia.klawisze import MOD_NAMES, Key, key_from_native, order_mods
 
 
 def ease(points: tuple[float, float, float, float]) -> QEasingCurve:
@@ -733,6 +734,26 @@ class ResponsiveRow(QWidget):
         super().resizeEvent(e)  # type: ignore[arg-type]
 
 
+MODIFIER_KEYS = frozenset(
+    {Qt.Key.Key_Control, Qt.Key.Key_Shift, Qt.Key.Key_Alt, Qt.Key.Key_Meta, Qt.Key.Key_AltGr}
+)
+
+
+def modifiers_of(event: QKeyEvent) -> tuple[str, ...]:
+    m = event.modifiers()
+    found = [
+        name
+        for name, flag in (
+            ("ctrl", Qt.KeyboardModifier.ControlModifier),
+            ("alt", Qt.KeyboardModifier.AltModifier),
+            ("shift", Qt.KeyboardModifier.ShiftModifier),
+            ("win", Qt.KeyboardModifier.MetaModifier),
+        )
+        if m & flag
+    ]
+    return order_mods(found)
+
+
 def key_label(event: QKeyEvent) -> str:
     """Czytelna nazwa naciśniętego klawisza (litera albo nazwa z Qt)."""
     text = event.text()
@@ -746,10 +767,11 @@ class KeyButton(QPushButton):
 
     captured = Signal(object)  # klawisze.Key
 
-    def __init__(self, role: str, key: Key) -> None:
+    def __init__(self, role: str, key: Key, combos: bool = False) -> None:
         super().__init__()
         self.role = role
         self.key = key
+        self.combos = combos  # Ctrl / Alt / Shift + klawisz (klawisz włączania sterowania)
         self.capturing = False
         self.setFixedHeight(th.CONTROL_H)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -763,7 +785,8 @@ class KeyButton(QPushButton):
         samples = (
             f"{self.role}: naciśnij klawisz…",
             f"{self.role}: Strzałka w prawo",
-            f"{self.role}: {self.key.name}",
+            *([f"{self.role}: Ctrl+Shift+F10"] if self.combos else []),
+            f"{self.role}: {self.key.label}",
         )
         bold = QFont(self.font())
         bold.setWeight(QFont.Weight.DemiBold)
@@ -771,8 +794,8 @@ class KeyButton(QPushButton):
         return QSize(round(max(fm.horizontalAdvance(t) for t in samples)) + 40, th.CONTROL_H)
 
     def show_key(self) -> None:
-        self.setText(f"{self.role}: {self.key.name}")
-        self.setAccessibleName(f"{self.role}: {self.key.name}. Kliknij, żeby zmienić klawisz")
+        self.setText(f"{self.role}: {self.key.label}")
+        self.setAccessibleName(f"{self.role}: {self.key.label}. Kliknij, żeby zmienić klawisz")
 
     def set_key(self, key: Key) -> None:
         self.key = key
@@ -800,10 +823,20 @@ class KeyButton(QPushButton):
         if e.key() == Qt.Key.Key_Escape:
             self.stop()
             return
+        mods = modifiers_of(e) if self.combos else ()
+        if self.combos and e.key() in MODIFIER_KEYS:
+            # sam modyfikator: czekamy na właściwy klawisz, pokazujemy, co już trzymane
+            this = {Qt.Key.Key_Control: "ctrl", Qt.Key.Key_Shift: "shift", Qt.Key.Key_Alt: "alt"}
+            pressed = this.get(Qt.Key(e.key()))  # Qt nie dolicza właśnie wciśniętego modyfikatora
+            held = "+".join(
+                MOD_NAMES[m] for m in order_mods({*mods, *([pressed] if pressed else [])})
+            )
+            self.setText(f"{self.role}: {held}+…" if held else f"{self.role}: naciśnij klawisz…")
+            return
         key = key_from_native(e.nativeScanCode(), key_label(e), e.nativeVirtualKey())
         self.stop()
         if key is not None:
-            self.captured.emit(key)
+            self.captured.emit(replace(key, mods=mods) if mods else key)
 
     def focusOutEvent(self, e: QFocusEvent) -> None:
         self.stop()

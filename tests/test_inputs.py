@@ -95,3 +95,22 @@ def test_bad_recording_line_is_reported(tmp_path: Path) -> None:
 def test_input_struct_matches_windows_abi() -> None:
     # SendInput odrzuca wywołanie, jeśli rozmiar struktury się nie zgadza.
     assert ctypes.sizeof(INPUT) == (40 if ctypes.sizeof(ctypes.c_void_p) == 8 else 28)
+
+
+def test_hotkey_combination_needs_its_modifiers() -> None:
+    kb = FakeKeyboard()
+    hk = Hotkeys({"toggle": (0x77, ("ctrl", "shift"))}, key_down=kb)
+    kb.down = {0x77}
+    assert hk.poll() == set()  # samo F8 nie wystarcza
+    kb.down = set()
+    hk.poll()
+    kb.down = {0x11, 0x10, 0x77}  # Ctrl + Shift + F8
+    assert hk.poll() == {"toggle"}
+    assert hk.poll() == set()  # trzymane - jeden raz
+
+
+def test_single_hotkey_works_while_shift_is_held() -> None:
+    kb = FakeKeyboard()
+    hk = Hotkeys({"toggle": (0x77, ())}, key_down=kb)
+    kb.down = {0x10, 0x77}  # Shift trzymany do biegu + F8
+    assert hk.poll() == {"toggle"}

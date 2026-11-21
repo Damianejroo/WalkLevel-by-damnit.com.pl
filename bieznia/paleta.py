@@ -19,7 +19,14 @@ class Kolor:
     light: str
 
     def for_theme(self, theme_name: str) -> str:
+        """Odcień pod motyw - do tekstu i akcentów (kontrast na tle okna)."""
         return self.dark if theme_name == "dark" else self.light
+
+    @property
+    def swatch(self) -> str:
+        """Żywy kolor do kółek palety, awatarów i wykresów - taki sam w obu motywach,
+        żeby 20 kolorów było naprawdę różnych (jasny motyw przyciemnia je tylko w tekście)."""
+        return self.dark
 
 
 KOLORY: tuple[Kolor, ...] = (

@@ -263,10 +263,10 @@ class HistoryScreen:
             return out
         if key == "person":
             for p in store.people:
-                out[p.name] = paleta.kolor(p.color).for_theme(self.t.name)
+                out[p.name] = paleta.kolor(p.color).swatch
         else:
             for pr in store.person.profiles:
-                out[pr.name] = paleta.kolor(pr.color).for_theme(self.t.name)
+                out[pr.name] = paleta.kolor(pr.color).swatch
         return out
 
     def history_icon(self: App, profile_id: str, name: str, size: int) -> Any:
