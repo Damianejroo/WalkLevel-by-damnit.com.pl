@@ -116,6 +116,8 @@ class FocusRing(QWidget):
             self.hide()
         elif kind in (QEvent.Type.Move, QEvent.Type.Resize) and obj is self.target:
             self.follow()
+        elif kind == QEvent.Type.Hide and obj is self.target:
+            self.hide()  # inny widok albo zamknięta lista - obwódka nie zostaje w powietrzu
         return False
 
     def follow(self) -> None:

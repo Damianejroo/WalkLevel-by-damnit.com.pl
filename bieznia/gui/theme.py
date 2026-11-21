@@ -98,6 +98,7 @@ ICONS = {
     "eye": "",
     "walk": "",
     "download": "",
+    "chart": "",
 }
 
 
@@ -156,6 +157,25 @@ def resolve_theme(choice: str) -> Theme:
     if choice == "dark":
         return DARK
     return LIGHT if system_prefers_light() else DARK
+
+
+def with_color(base: Theme, color_name: str | None) -> Theme:
+    """Motyw w kolorze profilu: akcent z palety (odcień pod motyw), tekst na akcencie.
+
+    Żółty albo pomarańczowy profil zlewałby się z bursztynem biegu - bieg dostaje Malinę.
+    """
+    from dataclasses import replace
+
+    from bieznia import paleta
+
+    k = paleta.kolor(color_name)
+    if k.name == paleta.DOMYSLNY:
+        return base
+    on = paleta.ON_DARK_THEME if base.name == "dark" else paleta.ON_LIGHT_THEME
+    t = replace(base, accent=k.for_theme(base.name), on_accent=on)
+    if paleta.clashes_with_run(k):
+        t = replace(t, run=paleta.RUN_ALT.for_theme(base.name))
+    return t
 
 
 class _Margins(ctypes.Structure):

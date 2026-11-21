@@ -50,3 +50,8 @@ pythonpath = ["."]
 python_version = "3.12"
 strict = true
 packages = ["bieznia"]
+
+[[tool.mypy.overrides]]
+# Ekrany to mixiny klasy App (self: App) - mypy zgłasza to jako "misc", ale sprawdza treść.
+module = "bieznia.gui.ekrany.*"
+disable_error_code = ["misc"]

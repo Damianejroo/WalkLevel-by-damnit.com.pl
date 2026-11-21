@@ -28,30 +28,46 @@ Wymagania: Windows 10 lub 11 (64-bit), Bluetooth. Instalator ma ok. 20 MB.
 Aplikacja przy pierwszym starcie sama szuka bieżni. Jeśli znajdzie jedną, łączy się od razu
 i zapamiętuje ją. Jeśli kilka - pokazuje listę do wyboru.
 
+### Pierwsze uruchomienie 0.3.0
+
+Konfigurator w trzech krokach: nazwa osoby (wylosowana - możesz losować dalej albo wpisać
+swoją) i jej kolor, pierwszy profil gry (folder gry albo profil Domyślny), sposób sterowania.
+Po aktualizacji z 0.2 dotychczasowe ustawienia trafiają do pierwszej osoby (kopia starych
+ustawień: `dane\kopie\ustawienia-0.2.json`).
+
+### Osoby i profile gier
+
+- **Osoba** ma swoje profile gier, wygląd i historię kroków. Dwie osoby na jednej bieżni liczą
+  kroki osobno. Zmiana osoby: awatar na górze okna (widoczny, gdy osób jest więcej niż jedna).
+- **Profil gry** to zestaw ustawień sterowania z nazwą, ikoną i kolorem. Nowy profil:
+  Ustawienia > Profile gier > Nowy profil - wskaż folder gry, a nazwa, ikona i kolor wezmą się
+  z pliku gry (nazwę i kolor zmienisz). Zmiana profilu: nazwa profilu na karcie sterowania.
+- Liczba osób i profili nie jest ograniczona. Przełączniki na ekranie głównym można ukryć
+  w Ustawieniach > Wygląd i okno.
+
 ### Obsługa
 
 | Co | Jak |
 | --- | --- |
-| Włącz / wyłącz sterowanie | przełącznik w oknie albo **F8** (działa też w grze) - razem z tym bieżnia rusza i staje |
-| Kierunek **Klawisze → bieżnia** (domyślny) | trzymasz W - taśma przyspiesza do prędkości chodu, W + Shift - do biegu, puszczasz - zwalnia do prędkości bez klawisza. Aplikacja niczego wtedy nie naciska, W naciskasz sam w grze |
-| Kierunek **Pad → bieżnia** | wychylenie lewej gałki (DualSense albo pad Xbox, kabel lub Bluetooth) ustawia prędkość skokami: domyślnie 0 / 25 / 50 / 100% = 1 / 1,5 / 2,5 / 4 km/h. Liczba skoków (2-5), progi i prędkości w Ustawieniach > Pad → bieżnia. Gałka puszczona: taśma staje (domyślnie, ruch gałki ją uruchamia), prędkość skoku 1 albo 0 km/h (test) |
-| Kierunek **Bieżnia → gra** | chodzenie po bieżni naciska W, szybszy chód W + Shift (jak dotąd) |
-| Prędkości taśmy | Ustawienia > Sterowanie bieżnią: bez klawisza (domyślnie 1 km/h), chód (1,5), bieg (2,5) |
-| Zmiana klawisza F8 | kliknij **Start/stop: F8** i naciśnij nowy klawisz (nie może to być klawisz chodu ani biegu) |
-| Start i stop bieżni | Ustawienia > Sterowanie bieżnią (domyślnie włączone). Taśma rusza z 1 km/h, prędkość dalej zmieniasz pilotem |
-| Podgląd | nic nie jest naciskane, widać tylko, co by się stało |
-| Klawiatura | chód i bieg naciskają wybrane klawisze w aktywnym oknie |
-| Zmiana klawiszy | kliknij **Chód: W** albo **Bieg: Shift** i naciśnij nowy klawisz (np. strzałkę w górę, Ctrl); Esc anuluje |
-| Progi chodu i biegu | Ustawienia > Progi prędkości |
-| Szybkie zatrzymanie | Ustawienia > Progi prędkości: gdy taśma gwałtownie hamuje, postać staje od razu (domyślnie włączone) |
-| Test bez bieżni | Ustawienia > Symulator bieżni, potem **F6** wolniej, **F7** szybciej |
-| Przycisk na ekranie | Ustawienia > Przycisk na ekranie: mały przycisk zawsze na wierzchu - klik włącza i wyłącza sterowanie, prawy przycisk otwiera okno, przeciągnij, żeby przesunąć |
+| Włącz / wyłącz sterowanie | przełącznik na karcie sterowania albo **F8** (działa też w grze) - razem z tym bieżnia rusza i staje |
+| Tryb **Klawisze** (domyślny) | trzymasz W - taśma przyspiesza do prędkości chodu, W + Shift - do biegu, puszczasz - zwalnia do prędkości bez klawisza. Aplikacja niczego wtedy nie naciska, W naciskasz sam w grze |
+| Tryb **Pad** | wychylenie lewej gałki (DualSense albo pad Xbox, kabel lub Bluetooth) ustawia prędkość skokami: domyślnie 0 / 25 / 50 / 100% = 1 / 1,5 / 2,5 / 4 km/h. Liczba skoków (2-5), progi (przeciąganie kółek na osi) i prędkości w Ustawieniach. Gałka puszczona: taśma staje (domyślnie, ruch gałki ją uruchamia), prędkość skoku 1 albo 0 km/h (test) |
+| Tryb **Chodzenie** | chodzenie po bieżni naciska W, szybszy chód W + Shift |
+| Wskaźnik | strefy (stop / chód / bieg albo skoki pada) na łuku i jako żetony pod nim - świeci aktywna |
+| Ustawienia sterowania | Ustawienia pokazują tylko to, co dotyczy trybu bieżącego profilu; zapisują się w profilu |
+| Historia kroków | ikona wykresu na górze okna: dziś / 7 dni / 30 dni / wszystko, moja albo wszystkich osób, podział na profile gier |
+| Kopia danych | Ustawienia > Kopia danych: eksport wybranych osób, profili, ustawień, wyników i logów do pliku `.bieznia`; import z podglądem (połącz albo dodaj jako nową osobę). Przed importem robi się kopia, którą można przywrócić |
+| Zmiana klawisza F8 | Ustawienia > Zaawansowane > Klawisz start/stop (nie może to być klawisz chodu ani biegu) |
+| Start i stop bieżni | Ustawienia > Bieżnia (domyślnie włączone) |
+| Podgląd / Klawiatura | w trybie Chodzenie: podgląd niczego nie naciska, klawiatura naciska wybrane klawisze w aktywnym oknie |
+| Zmiana klawiszy | kliknij **Chód: W** albo **Bieg: Shift** i naciśnij nowy klawisz; Esc anuluje |
+| Test bez bieżni | Ustawienia > Zaawansowane > Symulator bieżni, potem **F6** wolniej, **F7** szybciej |
+| Przycisk na ekranie | Ustawienia > Wygląd i okno: mały przycisk zawsze na wierzchu - klik włącza i wyłącza sterowanie, prawy przycisk otwiera okno |
 
 Sterowanie startuje zawsze **wyłączone**. Gdy bieżnia przestanie wysyłać dane (3 s), postać
 się zatrzymuje. Wyłączenie sterowania najpierw puszcza klawisze (postać staje od razu), potem
 zatrzymuje taśmę. Zamknięcie aplikacji przy włączonym sterowaniu też zatrzymuje taśmę.
-Prędkość zmienia tylko w kierunku Klawisze → bieżnia. Gdy bieżnia nie przyjmie startu, obudź ją pilotem
-albo sprawdź klucz bezpieczeństwa.
+Gdy bieżnia nie przyjmie startu, obudź ją pilotem albo sprawdź klucz bezpieczeństwa.
 
 ### Aktualizacje
 
@@ -64,9 +80,9 @@ nie pobiera ani nie instaluje.
 
 Kliknij **Zgłoś problem** (ikona na górze okna), opisz, co się stało, i wyślij. Do zgłoszenia
 trafiają logi aplikacji i Bluetooth - okno pokazuje dokładnie, co zostanie dołączone.
-Szczegółowe logi Bluetooth można wyłączyć w Ustawieniach > Dziennik i zgłoszenia.
+Szczegółowe logi Bluetooth można wyłączyć w Ustawieniach > Zaawansowane.
 
-Przy problemach z połączeniem pomaga też **Dziennik > Zapisz raport diagnostyczny**
+Przy problemach z połączeniem pomaga też **Ustawienia > Zaawansowane > Dziennik > Zapisz raport diagnostyczny**
 (ok. 30 s): lista urządzeń w pobliżu i surowa rozmowa z bieżnią.
 
 ### Gry
@@ -78,7 +94,7 @@ Przy problemach z połączeniem pomaga też **Dziennik > Zapisz raport diagnosty
 
 ### Odinstalowanie
 
-Ustawienia Windows > Aplikacje > Bieżnia Gamingowa > Odinstaluj. Ustawienia i logi zostają w
+Ustawienia Windows > Aplikacje > Bieżnia Gamingowa > Odinstaluj. Osoby, profile, historia kroków i logi zostają w
 `%LOCALAPPDATA%\Bieznia` - usuń ten folder, jeśli chcesz pozbyć się wszystkiego.
 
 ## Prywatność
@@ -114,7 +130,10 @@ wystarczy powiedzieć testerowi, żeby kliknął **Aktualizuj**.
 - `bieznia/ble/` - Bluetooth: protokół KingSmith, FTMS, sterowniki, wątek połączenia
   z ponawianiem, raport diagnostyczny
 - `bieznia/engine.py`, `mapping.py` - prędkość > W / Shift, bezpieczniki, liczniki
-- `bieznia/gui/` - okno PySide6: tokeny i motywy, kontrolki, widoki
+- `bieznia/gui/` - okno PySide6: tokeny i motywy, kontrolki (`komponenty.py`), kontroler (`app.py`)
+- `bieznia/gui/ekrany/` - ekrany: główny, ustawienia, profil gry, osoby i konfigurator, historia, kopia
+- `bieznia/dane.py`, `historia.py`, `kopia.py` - osoby i profile (`dane/osoby.json`), historia kroków (SQLite `dane/historia.db`), eksport i import `.bieznia`
+- `bieznia/paleta.py`, `nazwy.py`, `ikony.py` - 20 kolorów, losowe nazwy osób, ikona i kolor z pliku gry
 - `bieznia/aktualizacje.py` - aktualizacja z GitHub Releases (SHA-256, tylko hosty GitHuba)
 - `bieznia/zgloszenia.py` - paczka z logami i wysyłka zgłoszenia
 - `packaging/` - ikona, specyfikacja PyInstaller, instalator Inno Setup, skrypt budowania

@@ -1,4 +1,7 @@
-"""Okno aplikacji (PySide6): widok główny, wybór bieżni, ustawienia, dziennik.
+"""Okno aplikacji (PySide6): kontroler, pętla i widoki wspólne (bieżnie, zgłoszenie, dziennik).
+
+Ekrany 0.3.0 są w bieznia/gui/ekrany: główny, ustawienia, profil gry, osoby (konfigurator),
+historia kroków i kopia danych. Każdy to mixin klasy App.
 
 Zasady (Warsztat): jedna główna akcja na widok, stan zawsze w tym samym miejscu,
 kontrolki 44 px z ramką, cyfry o stałej szerokości, animacje tylko z powodem,
@@ -19,11 +22,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QPoint, QPropertyAnimation, Qt, QTimer, QUrl
+from PySide6.QtCore import QPoint, QPropertyAnimation, Qt, QTimer
 from PySide6.QtGui import (
     QCloseEvent,
     QColor,
-    QDesktopServices,
     QFont,
     QGuiApplication,
     QIcon,
@@ -33,8 +35,8 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QApplication,
-    QGridLayout,
     QHBoxLayout,
+    QLabel,
     QLineEdit,
     QPlainTextEdit,
     QScrollArea,
@@ -45,38 +47,35 @@ from PySide6.QtWidgets import (
 
 from bieznia import (
     APP_NAME,
-    HOMEPAGE,
-    REPOSITORY,
     TITLE,
-    __author__,
     __version__,
     aktualizacje,
+    dane,
+    historia,
     zgloszenia,
 )
 from bieznia import pad as gamepad
-from bieznia.ble import kingsmith
 from bieznia.ble.worker import BleEvent, BleWorker, FoundDevice, Link
 from bieznia.engine import Bridge
+from bieznia.gui import komponenty as k
 from bieznia.gui import theme as th
+from bieznia.gui.ekrany.glowny import STATUS_ACTIONS, MainScreen
+from bieznia.gui.ekrany.historia import HistoryScreen
+from bieznia.gui.ekrany.kopia import CopyScreen
+from bieznia.gui.ekrany.osoba import PeopleScreen, Wizard
+from bieznia.gui.ekrany.profil import ProfileScreen
+from bieznia.gui.ekrany.ustawienia import SettingsScreen
 from bieznia.gui.theme import Theme
 from bieznia.gui.widgets import (
-    Belt,
     DeviceRow,
-    ElidedLabel,
     FloatingToggle,
     FocusRing,
-    Gauge,
     HoldButton,
     KeyButton,
     Motion,
     ResponsiveRow,
     Segmented,
-    Slider,
-    Sparkline,
-    StatTile,
-    StatusDot,
     Switch,
-    TileGrid,
     button,
     card,
     ease,
@@ -87,30 +86,26 @@ from bieznia.gui.widgets import (
 )
 from bieznia.hotkeys import Hotkeys
 from bieznia.klawisze import RUN_DEFAULT, TOGGLE_DEFAULT, WALK_DEFAULT, Key, problem
+from bieznia.kopia import Preview
 from bieznia.logs import set_detailed
 from bieznia.mapping import MappingConfig
 from bieznia.paths import FROZEN
 from bieznia.recorder import Recorder
-from bieznia.settings import save_enabled, save_settings
+from bieznia.settings import save_enabled
 from bieznia.sources.ble_source import QueueSource
 from bieznia.sources.simulator import SimulatedTreadmill
 from bieznia.winapi import is_key_down, set_topmost, vk_from_scan
 
 log = logging.getLogger("bieznia")
 
-STATUS_ACTIONS = (
-    "Szukaj bieżni",
-    "Anuluj",
-    "Rozłącz",
-    "Spróbuj ponownie",
-    "Wyłącz symulator",
-)
 TICK_MS = 50
 STARTED = time.monotonic()  # import tego modułu to praktycznie start procesu
 HYSTERESIS = 0.6
 PAD_SETTLE_S = 0.15  # gałka w drodze przez skoki - wysyłamy dopiero, gdy się zatrzyma
 PAD_STOP_SETTLE_S = 0.4  # gałka przechodzi przez środek przy zmianie kierunku - to nie stop
 STOPPED = -1.0  # belt_target: taśma zatrzymana przez puszczoną gałkę
+TOAST_MS = 4000
+LOOK_RELOAD = ("theme", "large_text", "profile_color")
 
 
 class QueueLogHandler(logging.Handler):
@@ -142,6 +137,58 @@ def app_icon(t: Theme) -> QIcon:
     p.drawText(pix.rect(), Qt.AlignmentFlag.AlignCenter, th.ICONS["walk"])
     p.end()
     return QIcon(pix)
+
+
+def defaults_from(config: dict[str, Any]) -> dict[str, Any]:
+    """Ustawienia domyślne z config.toml (to, czego profil albo osoba nie nadpisują)."""
+    mapping, output = config["mapping"], config["output"]
+    ble, ui = config.get("ble", {}), config.get("ui", {})
+    return {
+        "stand_below": mapping["stand_below"],
+        "run_on": mapping["run_on"],
+        "run_off": mapping["run_off"],
+        "quick_stop": bool(mapping.get("quick_stop", True)),
+        "output": output["type"],
+        "device_address": ble.get("device_address", ""),
+        "device_name": ble.get("device_name", ""),
+        "simulator": bool(ui.get("simulator", False)),
+        "record": bool(ui.get("record", False)),
+        "always_on_top": bool(ui.get("always_on_top", False)),
+        "floating_button": bool(ui.get("floating_button", False)),
+        "floating_pos": ui.get("floating_pos"),
+        "theme": ui.get("theme", "system"),
+        "large_text": bool(ui.get("large_text", False)),
+        "detailed_logs": bool(ui.get("detailed_logs", True)),
+        "last_version": ui.get("last_version", ""),
+        "walk_key": output.get("walk_key"),
+        "run_key": output.get("run_key"),
+        "toggle_key": output.get("toggle_key"),
+        "belt_control": bool(ble.get("belt_control", True)),
+        "direction": output.get("direction", "keyboard"),
+        "idle_speed": float(ble.get("idle_speed", 1.0)),
+        "walk_speed": float(ble.get("walk_speed", 1.5)),
+        "run_speed": float(ble.get("run_speed", 2.5)),
+        "pad_steps": gamepad.parse_steps(ble.get("pad_steps")),
+        "pad_idle": ble.get("pad_idle", "stop"),
+        "show_person_switch": True,
+        "show_profile_switch": True,
+    }
+
+
+def normalize(s: dict[str, Any]) -> dict[str, Any]:
+    """Wartości spoza zakresu (stary albo ręcznie zmieniony plik) -> bezpieczne domyślne."""
+    s["pad_steps"] = gamepad.parse_steps(s.get("pad_steps"))
+    if s.get("pad_idle") not in ("stop", "slow", "zero"):
+        s["pad_idle"] = "stop"
+    if s.get("direction") not in ("keyboard", "gamepad", "treadmill"):
+        s["direction"] = "keyboard"
+    if s.get("output") not in ("dry", "keys"):
+        s["output"] = "dry"
+    if s.get("theme") not in ("system", "light", "dark"):
+        s["theme"] = "system"
+    for key in ("stand_below", "run_on", "run_off", "idle_speed", "walk_speed", "run_speed"):
+        s[key] = float(s[key])
+    return s
 
 
 # --- okno ------------------------------------------------------------------
@@ -224,44 +271,69 @@ def header(title: str, on_back: Any) -> QHBoxLayout:
 # --- kontroler -------------------------------------------------------------
 
 
-class App:
-    MAIN, DEVICES, SETTINGS, LOG, REPORT = range(5)
+class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen, CopyScreen):
+    MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT = range(10)
 
-    def __init__(self, qt: QApplication, config: dict[str, Any], enabled: bool) -> None:
+    # atrybuty ustawiane przez ekrany (mixiny)
+    toggle_key: Key
+    bridge: Bridge
+    advanced_open: bool
+    walk_btn: KeyButton | None
+    run_btn: KeyButton | None
+    toggle_btn: KeyButton
+    step_ladder: k.StepLadder | None
+    walk_from_step: k.Stepper | None
+    run_from_step: k.Stepper | None
+    pad_steppers: list[k.Stepper]
+    pad_status: QLabel
+    pad_count_seg: Segmented
+    pad_idle_seg: Segmented
+    output_seg: Segmented
+    control_box: QVBoxLayout
+    palette: k.PalettePicker
+    device_label: QLabel
+    forget_btn: HoldButton
+    belt_switch: Switch
+    about_status: QLabel
+    wizard: Wizard
+    wizard_name: QLineEdit
+    wizard_game_name: QLineEdit
+    export_pick: dict[str, set[str]]
+    export_flags: dict[str, object]
+    import_preview: Preview
+    import_pick: set[str]
+    import_new: set[str]
+    import_flags: dict[str, bool]
+
+    def __init__(
+        self,
+        qt: QApplication,
+        config: dict[str, Any],
+        enabled: bool,
+        store_path: Path = dane.STORE_FILE,
+        history_path: Path = historia.DB_FILE,
+    ) -> None:
         self.qt = qt
         self.config = config
-        self.settings: dict[str, Any] = {
-            "stand_below": config["mapping"]["stand_below"],
-            "run_on": config["mapping"]["run_on"],
-            "run_off": config["mapping"]["run_off"],
-            "quick_stop": bool(config["mapping"].get("quick_stop", True)),
-            "output": config["output"]["type"],
-            "device_address": config.get("ble", {}).get("device_address", ""),
-            "device_name": config.get("ble", {}).get("device_name", ""),
-            "simulator": bool(config.get("ui", {}).get("simulator", False)),
-            "record": bool(config.get("ui", {}).get("record", False)),
-            "always_on_top": bool(config.get("ui", {}).get("always_on_top", False)),
-            "floating_button": bool(config.get("ui", {}).get("floating_button", False)),
-            "floating_pos": config.get("ui", {}).get("floating_pos"),
-            "theme": config.get("ui", {}).get("theme", "system"),
-            "large_text": bool(config.get("ui", {}).get("large_text", False)),
-            "detailed_logs": bool(config.get("ui", {}).get("detailed_logs", True)),
-            "last_version": config.get("ui", {}).get("last_version", ""),
-            "walk_key": config["output"].get("walk_key"),
-            "run_key": config["output"].get("run_key"),
-            "toggle_key": config["output"].get("toggle_key"),
-            "belt_control": bool(config.get("ble", {}).get("belt_control", True)),
-            "direction": config["output"].get("direction", "keyboard"),
-            "idle_speed": float(config.get("ble", {}).get("idle_speed", 1.0)),
-            "walk_speed": float(config.get("ble", {}).get("walk_speed", 1.5)),
-            "run_speed": float(config.get("ble", {}).get("run_speed", 2.5)),
-            "pad_steps": gamepad.parse_steps(config.get("ble", {}).get("pad_steps")),
-            "pad_idle": config.get("ble", {}).get("pad_idle", "stop"),
-        }
-        if self.settings["pad_idle"] not in ("stop", "slow", "zero"):
-            self.settings["pad_idle"] = "stop"
-        if self.settings["direction"] not in ("keyboard", "gamepad", "treadmill"):
-            self.settings["direction"] = "keyboard"
+        self.defaults = normalize(defaults_from(config))
+        self.store_path = store_path
+        self.history_path = history_path
+        self.store: dane.Store | None = dane.Store.load(store_path)
+        self.history: historia.History | None = None
+        self.tracker: historia.SessionTracker | None = None
+        self.open_history_db()
+        # ustawienia 0.2 - tylko do pierwszego uruchomienia 0.3.0 (konfigurator je przenosi)
+        self.legacy: dict[str, Any] | None = None
+        if self.store is not None:
+            self.settings: dict[str, Any] = normalize(self.store.flat(self.defaults))
+        else:
+            self.legacy = dane.legacy_settings()
+            old = {k: v for k, v in (self.legacy or {}).items() if k in self.defaults}
+            self.settings = normalize({**self.defaults, **old})
+        self.advanced_open = False
+        self.history_scope = "me"
+        self.history_range = "week"
+        self.last_toast = ""
         self.pad = gamepad.PadReader(background=True)
         self.pad_picker = gamepad.StepPicker()
         self.pad_state: gamepad.PadState | None = None
@@ -274,13 +346,13 @@ class App:
         self.update_busy = False
         self.update_available = ""
         self.report_busy = False
-        keys = (
-            Key.from_dict(self.settings["walk_key"], WALK_DEFAULT),
-            Key.from_dict(self.settings["run_key"], RUN_DEFAULT),
-        )
         self.bridge = Bridge(
-            MappingConfig.from_dict(config["mapping"]), self.settings["output"], enabled, keys
+            MappingConfig.from_dict(config["mapping"]),
+            self.settings["output"],
+            enabled,
+            self.profile_keys(),
         )
+        self.apply_mapping()
         self.toggle_key = Key.from_dict(self.settings["toggle_key"], TOGGLE_DEFAULT)
         if self.toggle_key.vk == 0:  # zapis sprzed wersji z kodem wirtualnym
             self.toggle_key = TOGGLE_DEFAULT
@@ -300,9 +372,14 @@ class App:
         Motion.enabled = not th.system_reduces_motion()
 
         self.window: Window | None = None
+        self.toast_label: QLabel | None = None
+        self.toast_timer = QTimer()
+        self.toast_timer.setSingleShot(True)
+        self.toast_timer.timeout.connect(self.hide_toast)
         self.build()
         self.apply_source()
         self.apply_recording()
+        self.set_tracker_owner()
 
         self.bubble = FloatingToggle(self.t)
         self.bubble.toggled.connect(self.toggle_from_bubble)
@@ -331,15 +408,86 @@ class App:
         if FROZEN:
             self.run_task(self.check_update_task, False)  # tylko informacja, bez instalowania
 
+        if self.store is None:
+            self.open_wizard_first()  # pierwsze uruchomienie 0.3.0 (nowa instalacja albo z 0.2)
         if self.settings["device_address"]:
             self.worker.connect(self.settings["device_address"], self.settings["device_name"])
         elif not self.settings["simulator"]:
             self.worker.scan()  # pierwszy start: od razu szukamy bieżni
 
+    # --- dane: osoby, profile, historia ---------------------------------------
+
+    def open_history_db(self) -> None:
+        self.close_history()
+        try:
+            self.history = historia.History(self.history_path)
+        except Exception:  # baza zablokowana albo uszkodzona - aplikacja działa bez historii
+            log.exception("Historia kroków niedostępna")
+            self.history = None
+            return
+        self.tracker = historia.SessionTracker(self.history)
+
+    def close_history(self) -> None:
+        if self.tracker is not None:
+            with contextlib.suppress(Exception):
+                self.tracker.finish()
+            self.tracker = None
+        if self.history is not None:
+            with contextlib.suppress(Exception):
+                self.history.close()
+            self.history = None
+
+    def set_tracker_owner(self) -> None:
+        store, tracker = self.store, self.tracker
+        if store is None or tracker is None:
+            return
+        tracker.set_owner(store.person.id, store.person.name, store.profile.id, store.profile.name)
+
+    def profile_keys(self) -> tuple[Key, Key]:
+        return (
+            Key.from_dict(self.settings["walk_key"], WALK_DEFAULT),
+            Key.from_dict(self.settings["run_key"], RUN_DEFAULT),
+        )
+
+    def apply_profile(self) -> None:
+        """Po zmianie osoby albo profilu: ustawienia, klawisze, tryb, wygląd, historia."""
+        store = self.store
+        if store is None:
+            return
+        before = {key: self.settings.get(key) for key in (*LOOK_RELOAD, "always_on_top")}
+        floating = self.settings.get("floating_button")
+        self.settings = normalize(store.flat(self.defaults))
+        self.bridge.set_keys(*self.profile_keys())
+        self.apply_mapping()
+        if any(self.settings.get(key) != before[key] for key in LOOK_RELOAD):
+            self.apply_look()
+        if self.settings["always_on_top"] != before["always_on_top"]:
+            self.on_always_on_top(bool(self.settings["always_on_top"]))
+        if self.settings["floating_button"] != floating:
+            self.on_floating_button(bool(self.settings["floating_button"]))
+        self.apply_direction()
+        self.render_header()
+        self.set_tracker_owner()
+        log.info(
+            "Osoba %s, profil %s (%s)",
+            store.person.name,
+            store.profile.name,
+            self.settings["direction"],
+        )
+
+    def reload_store(self) -> None:
+        self.store = dane.Store.load(self.store_path)
+        self.open_history_db()
+        self.apply_profile()
+
     # --- budowa okna --------------------------------------------------------
 
+    def make_theme(self) -> Theme:
+        base = th.resolve_theme(self.settings["theme"])
+        return th.with_color(base, self.settings.get("profile_color"))
+
     def build(self) -> None:
-        self.t = th.resolve_theme(self.settings["theme"])
+        self.t = self.make_theme()
         scale = 1.15 if self.settings["large_text"] else 1.0
         self.qt.setStyleSheet(th.qss(self.t, scale))
 
@@ -354,20 +502,52 @@ class App:
         self.pages.addWidget(self.build_settings())
         self.pages.addWidget(self.build_log())
         self.pages.addWidget(self.build_report())
+        for _ in range(self.IMPORT - self.REPORT):  # profil, konfigurator, historia, kopia
+            placeholder = QWidget()
+            placeholder.setObjectName("page")
+            self.pages.addWidget(placeholder)
         self.ring = FocusRing(w, self.t)
 
         w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.settings["always_on_top"])
         screen = self.qt.primaryScreen().availableGeometry()
-        w.resize(460, min(840, screen.height() - 60))
+        w.resize(460, min(860, screen.height() - 60))
         w.show()
         w.setFocus(Qt.FocusReason.OtherFocusReason)  # nic nie ma ostrości ani obwódki na starcie
+        self.apply_direction()
+        self.render_header()
         self.render_link()
         self.render_devices()
         self.log_view.setPlainText("\n".join(self.log_lines))
 
-    def sticky_page(self, title: str) -> tuple[QWidget, QVBoxLayout]:
+    def replace_page(self, index: int, widget: QWidget) -> None:
+        """Podmiana widoku (przebudowa po zmianie) z zachowaniem miejsca przewinięcia."""
+        old = self.pages.widget(index)
+        current = self.pages.currentIndex() == index
+        scroll = 0
+        if old is not None and current:
+            area = old.findChild(QScrollArea)
+            if area is not None:
+                scroll = area.verticalScrollBar().value()
+        self.pages.insertWidget(index, widget)
+        if old is not None:
+            self.pages.removeWidget(old)
+            old.deleteLater()
+        if current:
+            self.pages.setCurrentIndex(index)
+            area = widget.findChild(QScrollArea)
+            if area is not None and scroll:
+                bar = area.verticalScrollBar()
+                QTimer.singleShot(0, lambda: bar.setValue(scroll))
+
+    def go_back(self, index: int) -> None:
+        if index == self.SETTINGS:
+            self.rebuild_settings()  # nazwy, kolory i profile mogły się zmienić
+        self.pages.go(index, back=True)
+
+    def sticky_page(self, title: str, back: int | None = None) -> tuple[QWidget, QVBoxLayout]:
         """Podstrona: pasek z Wróć zawsze na górze, przewija się tylko treść pod nim."""
-        return self.framed_page(header(title, lambda: self.pages.go(self.MAIN, back=True)))
+        target = self.MAIN if back is None else back
+        return self.framed_page(header(title, lambda: self.go_back(target)))
 
     def framed_page(self, bar_lay: QHBoxLayout) -> tuple[QWidget, QVBoxLayout]:
         """Widok z paskiem przyklejonym u góry (nawigacja w tym samym miejscu na każdym ekranie)."""
@@ -395,136 +575,6 @@ class App:
         area.setWidget(inner)
         return area
 
-    def build_main(self) -> QWidget:
-        t = self.t
-        bar = QHBoxLayout()
-        bar.setSpacing(4)
-        names = QVBoxLayout()
-        names.setSpacing(0)
-        names.addWidget(ElidedLabel(APP_NAME, "title"))
-        self.update_label = ElidedLabel(f"wersja {__version__}", "small")
-        names.addWidget(self.update_label)
-        bar.addLayout(names, 1)
-        self.update_btn = icon_button("download", "Aktualizuj")
-        self.update_btn.clicked.connect(lambda: self.run_task(self.check_update_task, True))
-        if not FROZEN:
-            self.update_btn.setEnabled(False)
-            self.update_btn.setToolTip("Aktualizacje działają w wersji zainstalowanej")
-        report_btn = icon_button("report", "Zgłoś problem")
-        report_btn.clicked.connect(lambda: self.pages.go(self.REPORT))
-        log_btn = icon_button("log", "Dziennik i raport diagnostyczny")
-        log_btn.clicked.connect(lambda: self.pages.go(self.LOG))
-        settings_btn = icon_button("settings", "Ustawienia")
-        settings_btn.clicked.connect(lambda: self.pages.go(self.SETTINGS))
-        for b in (self.update_btn, report_btn, log_btn, settings_btn):
-            bar.addWidget(b)
-        page, lay = self.framed_page(bar)
-
-        # stan połączenia - zawsze w tym miejscu, stała wysokość
-        status = card()
-        status.setFixedHeight(62)
-        srow = QHBoxLayout(status)
-        srow.setContentsMargins(14, 8, 10, 8)
-        srow.setSpacing(10)
-        self.dot = StatusDot(t)
-        srow.addWidget(self.dot)
-        texts = QVBoxLayout()
-        texts.setSpacing(0)
-        self.status_title = ElidedLabel("", "")
-        self.status_title.setStyleSheet("font-weight: 600;")
-        self.status_sub = ElidedLabel("", "muted")
-        texts.addStretch(1)
-        texts.addWidget(self.status_title)
-        texts.addWidget(self.status_sub)
-        texts.addStretch(1)
-        srow.addLayout(texts, 1)
-        self.status_action = button("Szukaj bieżni", "primary")
-        self.status_action.clicked.connect(self.on_status_action)
-        fix_width(self.status_action, STATUS_ACTIONS)
-        srow.addWidget(self.status_action)
-        lay.addWidget(status)
-
-        # prędkość
-        hero = card()
-        hlay = QVBoxLayout(hero)
-        hlay.setContentsMargins(14, 10, 14, 12)
-        hlay.setSpacing(8)
-        self.gauge = Gauge(t)
-        self.gauge.max_speed = float(self.config["mapping"]["max_speed"])
-        self.gauge.walk_from = float(self.settings["stand_below"])
-        self.gauge.run_from = float(self.settings["run_on"])
-        hlay.addWidget(self.gauge, 1)
-        self.belt = Belt(t)
-        hlay.addWidget(self.belt)
-        self.spark = Sparkline(t)
-        self.spark.max_speed = self.gauge.max_speed
-        self.spark.run_from = self.gauge.run_from
-        hlay.addWidget(self.spark)
-        lay.addWidget(hero)
-
-        # liczby
-        self.stat_steps = StatTile("Kroki")
-        self.stat_cadence = StatTile("Kroki/min")
-        self.stat_distance = StatTile("Dystans")
-        self.stat_time = StatTile("Czas ruchu")
-        lay.addWidget(
-            TileGrid(self.stat_steps, self.stat_cadence, self.stat_distance, self.stat_time)
-        )
-
-        # sterowanie
-        control = card()
-        clay = QVBoxLayout(control)
-        clay.setContentsMargins(14, 10, 14, 14)
-        clay.setSpacing(8)
-        crow = QHBoxLayout()
-        ctexts = QVBoxLayout()
-        ctexts.setSpacing(0)
-        ctexts.addWidget(label("Sterowanie w grze", "title"))
-        self.control_subtitle = label("", "muted")
-        ctexts.addWidget(self.control_subtitle)
-        crow.addLayout(ctexts, 1)
-        self.enable_switch = Switch(t, "Sterowanie w grze", self.bridge.state.enabled)
-        self.enable_switch.toggled.connect(self.on_enable)
-        crow.addWidget(self.enable_switch)
-        clay.addLayout(crow)
-        self.direction_seg = Segmented(
-            [
-                ("keyboard", "Klawisze → bieżnia"),
-                ("gamepad", "Pad → bieżnia"),
-                ("treadmill", "Bieżnia → gra"),
-            ],
-            self.settings["direction"],
-            "Kierunek sterowania",
-        )
-        self.direction_seg.changed.connect(self.on_direction)
-        clay.addWidget(self.direction_seg)
-        self.output_seg = Segmented(
-            [("dry", "Podgląd"), ("keys", "Klawiatura")],
-            self.settings["output"],
-            "Wyjście",
-        )
-        self.output_seg.changed.connect(self.on_output)
-        clay.addWidget(self.output_seg)
-        walk_key, run_key = self.bridge.keys
-        self.walk_btn = KeyButton("Chód", walk_key)
-        self.run_btn = KeyButton("Bieg", run_key)
-        self.toggle_btn = KeyButton("Start/stop", self.toggle_key)
-        self.walk_btn.captured.connect(lambda k: self.on_key("walk", k))
-        self.run_btn.captured.connect(lambda k: self.on_key("run", k))
-        self.toggle_btn.captured.connect(lambda k: self.on_key("toggle", k))
-        self.keys_row = ResponsiveRow(self.walk_btn, self.run_btn)
-        clay.addWidget(self.keys_row)
-        clay.addWidget(self.toggle_btn)
-        self.output_hint = label("", "muted")
-        self.output_hint.setWordWrap(True)
-        self.output_hint.setMinimumHeight(22)
-        clay.addWidget(self.output_hint)
-        lay.addWidget(control)
-        lay.addStretch(1)
-
-        self.apply_direction()
-        return page
-
     def build_devices(self) -> QWidget:
         page = QWidget()
         lay = page_layout(page)
@@ -544,18 +594,6 @@ class App:
         lay.addWidget(rescan)
         return page
 
-    def slider(self, lo: float, hi: float, value: float, name: str) -> tuple[Slider, Any]:
-        s = Slider(Qt.Orientation.Horizontal)
-        s.setRange(round(lo * 10), round(hi * 10))
-        s.setValue(round(value * 10))
-        s.setAccessibleName(name)
-        s.setFixedHeight(th.CONTROL_H)
-        value_label = label(f"{fmt_num(value)} km/h")
-        value_label.setMinimumWidth(80)
-        value_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        s.valueChanged.connect(lambda v: value_label.setText(f"{fmt_num(v / 10)} km/h"))
-        return s, value_label
-
     def setting_row(self, lay: QVBoxLayout, title: str, hint: str, control: QWidget) -> None:
         row = QHBoxLayout()
         texts = QVBoxLayout()
@@ -568,243 +606,6 @@ class App:
         row.addLayout(texts, 1)
         row.addWidget(control)
         lay.addLayout(row)
-
-    def build_settings(self) -> QWidget:
-        t = self.t
-        page, lay = self.sticky_page("Ustawienia")
-
-        speed = card()
-        sl = QVBoxLayout(speed)
-        sl.setContentsMargins(14, 12, 14, 14)
-        sl.addWidget(label("Progi prędkości", "section"))
-        max_kmh = float(self.config["mapping"]["max_speed"])
-        self.walk_slider, walk_value = self.slider(
-            0.0, max_kmh, self.settings["stand_below"], "Chód od"
-        )
-        self.run_slider, run_value = self.slider(0.0, max_kmh, self.settings["run_on"], "Bieg od")
-        for title, s, v in (
-            ("Chód od", self.walk_slider, walk_value),
-            ("Bieg od", self.run_slider, run_value),
-        ):
-            row = QHBoxLayout()
-            name = label(title)
-            name.setMinimumWidth(80)
-            row.addWidget(name)
-            row.addWidget(s, 1)
-            row.addWidget(v)
-            sl.addLayout(row)
-            s.sliderReleased.connect(lambda sl_=s: self.on_thresholds(sl_))
-            s.valueChanged.connect(
-                lambda _v, sl_=s: None if sl_.isSliderDown() else self.on_thresholds(sl_)
-            )
-        note = label(
-            f"Bieg wyłącza się {fmt_num(HYSTERESIS)} km/h niżej, żeby Shift nie migał.", "small"
-        )
-        note.setWordWrap(True)
-        sl.addWidget(note)
-        quick = Switch(t, "Szybkie zatrzymanie", self.settings["quick_stop"])
-        quick.toggled.connect(self.on_quick_stop)
-        self.setting_row(
-            sl,
-            "Szybkie zatrzymanie",
-            "Gdy taśma gwałtownie hamuje, postać staje od razu - bez czekania kilku sekund na"
-            " pełny stop (bieżnia podaje prędkość co 2 s). Wyłącz, jeśli zmieniasz tempo pilotem"
-            " i postać niepotrzebnie się zatrzymuje.",
-            quick,
-        )
-        lay.addWidget(speed)
-
-        belt = card()
-        bl = QVBoxLayout(belt)
-        bl.setContentsMargins(14, 12, 14, 14)
-        bl.addWidget(label("Sterowanie bieżnią", "section"))
-        self.belt_switch = Switch(t, "Start i stop bieżni", self.settings["belt_control"])
-        self.belt_switch.toggled.connect(self.on_belt_control)
-        self.setting_row(
-            bl,
-            "Start i stop bieżni",
-            "Włączenie sterowania uruchamia taśmę, wyłączenie ją zatrzymuje - klawiszem,"
-            " przełącznikiem albo przyciskiem na ekranie. Prędkość dalej zmieniasz pilotem."
-            " Wyłącz, jeśli wolisz startować tylko pilotem.",
-            self.belt_switch,
-        )
-        for title, key in (
-            ("Bez klawisza", "idle_speed"),
-            ("Chód", "walk_speed"),
-            ("Bieg", "run_speed"),
-        ):
-            s, v = self.slider(
-                kingsmith.SPEED_MIN, kingsmith.SPEED_MAX, self.settings[key], f"Prędkość: {title}"
-            )
-            row = QHBoxLayout()
-            name = label(title)
-            name.setMinimumWidth(100)
-            row.addWidget(name)
-            row.addWidget(s, 1)
-            row.addWidget(v)
-            bl.addLayout(row)
-            s.valueChanged.connect(lambda value, k=key: self.on_belt_speed(k, value / 10))
-            setattr(self, f"{key}_slider", s)
-        speeds_note = label(
-            "Prędkości dla trybu Klawisze → bieżnia: bez klawisza, z klawiszem chodu i z chodem"
-            " + biegiem. Taśma przyspiesza i zwalnia sama, płynnie.",
-            "small",
-        )
-        speeds_note.setWordWrap(True)
-        bl.addWidget(speeds_note)
-        lay.addWidget(belt)
-
-        padc = card()
-        pl = QVBoxLayout(padc)
-        pl.setContentsMargins(14, 12, 14, 14)
-        pl.addWidget(label("Pad → bieżnia", "section"))
-        self.pad_status = label("", "small")
-        self.pad_status.setWordWrap(True)
-        pl.addWidget(self.pad_status)
-        counts = [(str(n), f"{n} {'skoki' if n < 5 else 'skoków'}") for n in range(2, 6)]
-        self.pad_count_seg = Segmented(
-            counts, str(len(self.settings["pad_steps"])), "Liczba skoków"
-        )
-        self.pad_count_seg.changed.connect(lambda v: self.on_pad_count(int(v)))
-        pl.addWidget(self.pad_count_seg)
-        pl.addWidget(label("Gałka puszczona", "small"))
-        self.pad_idle_seg = Segmented(
-            [("stop", "Taśma staje"), ("slow", "Prędkość skoku 1"), ("zero", "0 km/h (test)")],
-            self.settings["pad_idle"],
-            "Gałka puszczona",
-        )
-        self.pad_idle_seg.changed.connect(self.on_pad_idle)
-        pl.addWidget(self.pad_idle_seg)
-        rows = QWidget()
-        self.pad_grid = QGridLayout(rows)
-        self.pad_grid.setContentsMargins(0, 4, 0, 0)
-        self.pad_grid.setHorizontalSpacing(8)
-        self.pad_grid.setColumnStretch(1, 1)
-        self.pad_grid.setColumnStretch(3, 1)
-        pl.addWidget(rows)
-        pad_note = label(
-            "Skok obowiązuje od podanego wychylenia lewej gałki (w dowolną stronę). Skok 1 to"
-            " gałka puszczona. DualSense i pady Xbox działają przez kabel albo Bluetooth.",
-            "small",
-        )
-        pad_note.setWordWrap(True)
-        pl.addWidget(pad_note)
-        lay.addWidget(padc)
-        self.render_pad_rows()
-        self.render_pad_idle()
-
-        look = card()
-        ll = QVBoxLayout(look)
-        ll.setContentsMargins(14, 12, 14, 14)
-        ll.addWidget(label("Wygląd i okno", "section"))
-        theme_seg = Segmented(
-            [("system", "Jak Windows"), ("light", "Jasny"), ("dark", "Ciemny")],
-            self.settings["theme"],
-            "Motyw",
-        )
-        theme_seg.changed.connect(lambda v: self.on_look("theme", v))
-        ll.addWidget(theme_seg)
-        big = Switch(t, "Duży tekst", self.settings["large_text"])
-        big.toggled.connect(lambda v: self.on_look("large_text", v))
-        self.setting_row(ll, "Duży tekst", "Wszystkie napisy większe o 15%", big)
-        top = Switch(t, "Zawsze na wierzchu", self.settings["always_on_top"])
-        top.toggled.connect(self.on_always_on_top)
-        self.setting_row(ll, "Zawsze na wierzchu", "Okno nie chowa się pod grą", top)
-        floating = Switch(t, "Przycisk na ekranie", self.settings["floating_button"])
-        floating.toggled.connect(self.on_floating_button)
-        self.setting_row(
-            ll,
-            "Przycisk na ekranie",
-            "Mały przycisk zawsze na wierzchu: klik włącza i wyłącza sterowanie, prawy przycisk"
-            " otwiera to okno. Nie zabiera ostrości grze.",
-            floating,
-        )
-        lay.addWidget(look)
-
-        tests = card()
-        tl = QVBoxLayout(tests)
-        tl.setContentsMargins(14, 12, 14, 14)
-        tl.addWidget(label("Testy", "section"))
-        sim = Switch(t, "Symulator bieżni", self.settings["simulator"])
-        sim.toggled.connect(self.on_simulator)
-        keys = self.config["hotkeys"]
-        self.setting_row(
-            tl,
-            "Symulator bieżni",
-            f"Bez bieżni: {keys['sim_slower']} wolniej, {keys['sim_faster']} szybciej",
-            sim,
-        )
-        rec = Switch(t, "Nagrywaj przejścia", self.settings["record"])
-        rec.toggled.connect(self.on_record)
-        self.setting_row(tl, "Nagrywaj przejścia", "Odczyty trafiają do folderu nagrania", rec)
-        lay.addWidget(tests)
-
-        device = card()
-        dl = QVBoxLayout(device)
-        dl.setContentsMargins(14, 12, 14, 14)
-        dl.addWidget(label("Bieżnia", "section"))
-        self.device_label = label("", "muted")
-        dl.addWidget(self.device_label)
-        self.forget_btn = HoldButton("Zapomnij bieżnię", t)
-        self.forget_btn.confirmed.connect(self.forget_device)
-        dl.addWidget(self.forget_btn)
-        lay.addWidget(device)
-
-        logs = card()
-        gl = QVBoxLayout(logs)
-        gl.setContentsMargins(14, 12, 14, 14)
-        gl.addWidget(label("Dziennik i zgłoszenia", "section"))
-        detailed = Switch(t, "Szczegółowe logi Bluetooth", self.settings["detailed_logs"])
-        detailed.toggled.connect(self.on_detailed_logs)
-        self.setting_row(
-            gl,
-            "Szczegółowe logi Bluetooth",
-            "Zapisuje surową rozmowę z bieżnią (prędkość, kroki, polecenia)."
-            " Pomaga naprawić połączenie.",
-            detailed,
-        )
-        what = label(
-            "Dziennik zawsze zapisuje zdarzenia aplikacji, błędy i przebieg połączenia z bieżnią. "
-            "Nie zapisuje wciskanych klawiszy, haseł ani niczego z gier. Logi zostają na tym "
-            "komputerze, dopóki sam nie wyślesz zgłoszenia.",
-            "small",
-        )
-        what.setWordWrap(True)
-        gl.addWidget(what)
-        open_logs = button("Otwórz folder logów")
-        open_logs.clicked.connect(lambda: self.open_folder(Path("logs")))
-        report = button("Zgłoś problem")
-        report.clicked.connect(lambda: self.pages.go(self.REPORT))
-        gl.addWidget(ResponsiveRow(open_logs, report))
-        lay.addWidget(logs)
-
-        about = card()
-        al = QVBoxLayout(about)
-        al.setContentsMargins(14, 12, 14, 14)
-        al.addWidget(label("O aplikacji", "section"))
-        al.addWidget(label(TITLE))
-        al.addWidget(label(f"© 2026 {__author__}", "small"))
-        self.about_status = label("", "muted")
-        self.about_status.setWordWrap(True)
-        self.about_status.setMinimumHeight(24)
-        al.addWidget(self.about_status)
-        check = button("Sprawdź aktualizacje")
-        check.clicked.connect(lambda: self.run_task(self.check_update_task, True))
-        check.setEnabled(FROZEN)
-        al.addWidget(check)
-        link_buttons = []
-        for text, url in (
-            ("Strona autora", HOMEPAGE),
-            ("Prywatność", f"https://github.com/{REPOSITORY}/blob/main/POLITYKA-PRYWATNOSCI.md"),
-            ("Kod (GPL-3.0)", f"https://github.com/{REPOSITORY}"),
-        ):
-            b = button(text)
-            b.clicked.connect(lambda _=False, u=url: QDesktopServices.openUrl(QUrl(u)))
-            link_buttons.append(b)
-        al.addWidget(ResponsiveRow(*link_buttons))
-        lay.addWidget(about)
-        lay.addStretch(1)
-        return page
 
     def build_report(self) -> QWidget:
         page, lay = self.sticky_page("Zgłoś problem")
@@ -834,10 +635,10 @@ class App:
         bl.setContentsMargins(14, 12, 14, 14)
         bl.addWidget(label("Co zostanie dołączone", "section"))
         for line in (
-            "- logi aplikacji i Bluetooth (ostatnie wpisy),",
+            "- logi aplikacji i Bluetooth z ostatnich 6 godzin i ich podsumowanie,",
             "- ostatni raport diagnostyczny, jeśli go zapisano,",
             "- wersja aplikacji i Windows, ustawienia (progi, wybrana bieżnia).",
-            "Bez haseł, plików z komputera i wciśniętych klawiszy.",
+            "Bez haseł, plików z komputera, wciśniętych klawiszy i historii kroków.",
         ):
             item = label(line, "small")
             item.setWordWrap(True)
@@ -857,7 +658,7 @@ class App:
     def build_log(self) -> QWidget:
         page = QWidget()
         lay = page_layout(page)
-        lay.addLayout(header("Dziennik", lambda: self.pages.go(self.MAIN, back=True)))
+        lay.addLayout(header("Dziennik", lambda: self.pages.go(self.SETTINGS, back=True)))
         hint = label(
             "Gdy coś nie działa: zapisz raport diagnostyczny i wyślij plik z folderu logs.",
             "muted",
@@ -879,19 +680,52 @@ class App:
         lay.addWidget(ResponsiveRow(folder, report))
         return page
 
+    # --- komunikat na dole okna --------------------------------------------------
+
+    def toast(self, text: str) -> None:
+        log.info("Komunikat: %s", text)
+        self.last_toast = text
+        w = self.window
+        if w is None:
+            return
+        if self.toast_label is None:
+            self.toast_label = QLabel(w)
+            self.toast_label.setWordWrap(True)
+            self.toast_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.toast_label.mousePressEvent = lambda _e: self.hide_toast()  # type: ignore[method-assign]
+        lbl, t = self.toast_label, self.t
+        lbl.setStyleSheet(
+            f"background: {t.text}; color: {t.bg}; border-radius: 10px; padding: 10px 14px;"
+            " font-weight: 600;"
+        )
+        lbl.setText(text)
+        lbl.setFixedWidth(min(w.width() - 32, 420))
+        lbl.adjustSize()
+        lbl.move((w.width() - lbl.width()) // 2, w.height() - lbl.height() - 20)
+        lbl.raise_()
+        lbl.show()
+        self.toast_timer.start(TOAST_MS)
+
+    def hide_toast(self) -> None:
+        if self.toast_label is not None:
+            self.toast_label.hide()
+
     # --- akcje --------------------------------------------------------------
 
     def save(self) -> None:
         with contextlib.suppress(OSError):
-            save_settings(self.settings)
+            if self.store is not None:
+                self.store.update_flat(self.settings)
+            # przed konfiguratorem zmiany są tylko w pamięci - trafią do pierwszej osoby,
+            # a plik 0.2 zostaje nietknięty (stara wersja dalej go czyta)
 
     def change(self, key: str, value: Any) -> None:
         self.settings[key] = value
         self.save()
 
     def apply_look(self) -> None:
-        """Motyw i wielkość tekstu na żywo - bez przebudowy okna i bez zmiany widoku."""
-        self.t = th.resolve_theme(self.settings["theme"])
+        """Motyw, kolor profilu i wielkość tekstu na żywo - bez przebudowy okna."""
+        self.t = self.make_theme()
         scale = 1.15 if self.settings["large_text"] else 1.0
         self.qt.setStyleSheet(th.qss(self.t, scale))
         if self.window is None:
@@ -903,11 +737,14 @@ class App:
                 widget.t = self.t
                 widget.update()
         fix_width(self.status_action, STATUS_ACTIONS)  # duży tekst zmienia szerokość napisów
-        for key_button in (self.walk_btn, self.run_btn):
-            key_button.updateGeometry()
-        self.bubble.retheme(self.t)
+        if hasattr(self, "bubble"):
+            self.bubble.retheme(self.t)
         self.render_link()
         self.render_update_label()
+        self.render_header()
+        self.render_zones()
+        if self.pages.currentIndex() == self.SETTINGS:
+            self.rebuild_settings()  # kolory zapisane w stylach kart
 
     def on_look(self, key: str, value: Any) -> None:
         self.change(key, value)
@@ -986,23 +823,25 @@ class App:
         self.render_control_subtitle()
 
     def render_control_subtitle(self) -> None:
-        key = self.toggle_key.name
-        start = "uruchamia i zatrzymuje" if self.settings["belt_control"] else "włącza i wyłącza"
-        if self.settings["direction"] == "keyboard":
-            text = f"{key} {start}, {self.bridge.keys[0].name} przyspiesza taśmę"
-        elif self.settings["direction"] == "gamepad":
-            text = f"{key} {start}, gałka pada ustawia prędkość"
-        elif self.settings["belt_control"]:
-            text = f"{key} uruchamia i zatrzymuje bieżnię - działa też w grze"
+        belt = bool(self.settings["belt_control"])
+        start = "uruchamia i zatrzymuje taśmę" if belt else "włącza i wyłącza sterowanie"
+        direction = self.settings["direction"]
+        if direction == "keyboard":
+            text = f"{start} · {self.bridge.keys[0].name} przyspiesza"
+        elif direction == "gamepad":
+            text = f"{start} · gałka ustawia tempo"
         else:
-            text = f"{key} włącza i wyłącza - działa też w grze"
-        self.control_subtitle.setText(text)
+            text = f"{start} · działa też w grze"
+        if self.control_subtitle.text() != text:
+            self.control_subtitle.setText(text)
 
     def on_direction(self, kind: str) -> None:
+        if kind == self.settings["direction"]:
+            return
         self.change("direction", kind)
-        self.direction_seg.set_value(kind)
         log.info("Kierunek sterowania: %s", kind)
         self.apply_direction()
+        self.rebuild_settings()  # karta sterowania w Ustawieniach pokazuje tylko bieżący tryb
 
     def sets_speed(self) -> bool:
         """Klawisze albo pad ustawiają prędkość taśmy (a nie odwrotnie)."""
@@ -1019,108 +858,17 @@ class App:
         """Klawisze/pad -> bieżnia: aplikacja niczego nie naciska, tylko słucha gracza."""
         sets_speed = self.sets_speed()
         self.bridge.set_output("dry" if sets_speed else self.settings["output"])
-        self.output_seg.setVisible(not sets_speed)
-        self.keys_row.setVisible(self.settings["direction"] != "gamepad")
         self.belt_target = None
+        self.mode_tiles.set_value(self.settings["direction"])
         self.render_control_subtitle()
-        self.render_output_hint()
-
-    def on_belt_speed(self, key: str, kmh: float) -> None:
-        self.change(key, round(kmh, 1))
-        self.belt_target = None  # zmieniona prędkość trafia na taśmę od razu
+        self.render_zones()
         self.render_output_hint()
 
     # --- pad ------------------------------------------------------------------
 
-    def render_pad_rows(self) -> None:
-        grid = self.pad_grid
-        while (item := grid.takeAt(0)) is not None:
-            if (w := item.widget()) is not None:
-                w.deleteLater()
-        grid.addWidget(label("Wychylenie", "small"), 0, 1, 1, 2)
-        self.pad_idle_speed: tuple[Slider, Any] | None = None
-        grid.addWidget(label("Prędkość", "small"), 0, 3, 1, 2)
-        self.pad_at_sliders: list[Slider | None] = []
-        for i, (at, speed) in enumerate(self.settings["pad_steps"], start=1):
-            name = label(f"Skok {i}")
-            name.setMinimumWidth(56)
-            grid.addWidget(name, i, 0)
-            if i == 1:
-                grid.addWidget(label("puszczona", "muted"), i, 1, 1, 2)
-                self.pad_at_sliders.append(None)
-            else:
-                s = Slider(Qt.Orientation.Horizontal)
-                s.setRange(gamepad.MIN_GAP, 100)
-                s.setValue(at)
-                s.setAccessibleName(f"Skok {i}: wychylenie")
-                s.setFixedHeight(th.CONTROL_H)
-                value = label(f"{at}%")
-                value.setMinimumWidth(40)
-                value.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                s.valueChanged.connect(lambda v, n=i - 1, lb=value: self.on_pad_at(n, v, lb))
-                grid.addWidget(s, i, 1)
-                grid.addWidget(value, i, 2)
-                self.pad_at_sliders.append(s)
-            sp, sp_value = self.slider(
-                kingsmith.SPEED_MIN, kingsmith.SPEED_MAX, speed, f"Skok {i}: prędkość"
-            )
-            if i == 1:
-                self.pad_idle_speed = (sp, sp_value)
-            sp.valueChanged.connect(lambda v, n=i - 1: self.on_pad_speed(n, v / 10))
-            grid.addWidget(sp, i, 3)
-            grid.addWidget(sp_value, i, 4)
-
     def pad_idle_text(self) -> str | None:
         """Co robi taśma przy puszczonej gałce, gdy to nie prędkość skoku 1."""
         return {"stop": "stop", "zero": "0 km/h"}.get(self.settings["pad_idle"])
-
-    def render_pad_idle(self) -> None:
-        if self.pad_idle_speed is None:
-            return
-        slider, value = self.pad_idle_speed
-        idle = self.pad_idle_text()
-        slider.setEnabled(idle is None)
-        value.setText(idle or f"{fmt_num(slider.value() / 10)} km/h")
-
-    def on_pad_idle(self, mode: str) -> None:
-        self.change("pad_idle", mode)
-        self.pad_idle_seg.set_value(mode)
-        log.info("Pad - gałka puszczona: %s", mode)
-        self.belt_target = None
-        self.render_pad_idle()
-        self.render_output_hint()
-
-    def on_pad_count(self, count: int) -> None:
-        if count == len(self.settings["pad_steps"]):
-            return
-        self.change("pad_steps", list(gamepad.PRESETS[count]))
-        self.belt_target = None
-        self.render_pad_rows()
-        self.render_pad_idle()
-        self.render_output_hint()
-
-    def on_pad_at(self, index: int, value: int, value_label: Any) -> None:
-        steps = list(self.settings["pad_steps"])
-        lo = steps[index - 1][0] + gamepad.MIN_GAP
-        hi = steps[index + 1][0] - gamepad.MIN_GAP if index + 1 < len(steps) else 100
-        clamped = max(lo, min(hi, value))
-        slider = self.pad_at_sliders[index]
-        if clamped != value and slider is not None:
-            slider.setValue(clamped)  # wraca tu z poprawną wartością
-            return
-        value_label.setText(f"{clamped}%")
-        steps[index] = (clamped, steps[index][1])
-        self.settings["pad_steps"] = steps
-        self.save()
-        self.render_output_hint()
-
-    def on_pad_speed(self, index: int, kmh: float) -> None:
-        steps = list(self.settings["pad_steps"])
-        steps[index] = (steps[index][0], round(kmh, 1))
-        self.settings["pad_steps"] = steps
-        self.save()
-        self.belt_target = None
-        self.render_output_hint()
 
     def pad_target(self, now: float) -> tuple[float, str, str, bool]:
         """Prędkość ze skoku gałki. Ostatnie pole: skok trzyma się już chwilę (można wysłać)."""
@@ -1159,16 +907,19 @@ class App:
         return bool(self.settings["direction"] == "gamepad" and self.settings["pad_idle"] == "stop")
 
     def render_pad_status(self) -> None:
+        """Na karcie pada w Ustawieniach: który pad i gdzie jest gałka (na żywo)."""
+        if self.step_ladder is None or self.pages.currentIndex() != self.SETTINGS:
+            return
         state = self.pad_state
-        if self.settings["direction"] != "gamepad":
-            text = "Wybierz kierunek Pad → bieżnia na ekranie głównym."
-        elif state is None:
+        if state is None:
             text = "Nie widzę pada. Podłącz DualSense albo pada Xbox (kablem albo Bluetooth)."
         else:
             step = self.pad_step + 1
             text = f"{state.name}: wychylenie {round(state.deflection * 100)}%, skok {step}."
-        if self.pad_status.text() != text:
-            self.pad_status.setText(text)
+        with contextlib.suppress(RuntimeError):  # karta właśnie przebudowana
+            if self.pad_status.text() != text:
+                self.pad_status.setText(text)
+            self.step_ladder.set_stick(state.deflection if state else 0.0)
 
     def keyboard_target(self) -> tuple[float, str]:
         """Prędkość taśmy z trzymanych klawiszy: chód + bieg, sam chód albo nic."""
@@ -1193,7 +944,7 @@ class App:
 
     def on_belt_event(self, result: str) -> None:
         messages = {
-            "started": "Bieżnia rusza. Prędkość zmieniasz pilotem.",
+            "started": "Bieżnia rusza.",
             "stopped": "Bieżnia zatrzymana.",
             "refused": "Bieżnia nie przyjęła startu. Obudź ją pilotem albo sprawdź, czy klucz"
             " bezpieczeństwa jest na miejscu, i spróbuj jeszcze raz.",
@@ -1225,32 +976,29 @@ class App:
 
     def on_output(self, kind: str) -> None:
         self.bridge.set_output(kind)
-        self.settings["output"] = kind
-        self.save()
+        self.change("output", kind)
         self.render_output_hint()
 
     def render_output_hint(self, problem_text: str = "") -> None:
         walk, run = self.bridge.keys
+        direction = self.settings["direction"]
         if problem_text:
             text = problem_text
-        elif self.settings["direction"] == "gamepad":
-            idle = self.pad_idle_text()
-            parts = [
-                f"od {at}%: {idle if i == 0 and idle else fmt_num(speed)}"
-                for i, (at, speed) in enumerate(self.settings["pad_steps"])
-            ]
-            text = f"Gałka pada - {', '.join(parts)} km/h."
-        elif self.settings["direction"] == "keyboard":
-            s = self.settings
-            text = (
-                f"{walk.name}: {fmt_num(s['walk_speed'])} km/h, {walk.name} + {run.name}:"
-                f" {fmt_num(s['run_speed'])} km/h, bez klawisza: {fmt_num(s['idle_speed'])} km/h."
-            )
+        elif direction == "gamepad":
+            text = "Wychyl lewą gałkę - im dalej, tym szybciej. Skoki zmienisz w Ustawieniach."
+        elif direction == "keyboard":
+            text = f"Trzymaj {walk.name}, żeby przyspieszyć, {walk.name} + {run.name} - bieg."
         elif self.settings["output"] == "keys":
             text = f"Gra dostaje {walk.name} i {run.name} + {walk.name} (aktywne okno)."
         else:
-            text = "Podgląd: nic nie jest naciskane."
+            text = "Podgląd: nic nie jest naciskane - Klawiatura w Ustawieniach."
         self.output_hint.setText(text)
+
+    def key_buttons(self) -> list[KeyButton]:
+        return [b for b in (self.walk_btn, self.run_btn, self.toggle_btn) if b is not None]
+
+    def capturing(self) -> bool:
+        return any(b.capturing for b in self.key_buttons())
 
     def on_key(self, role: str, key: Key) -> None:
         walk, run = self.bridge.keys
@@ -1264,65 +1012,24 @@ class App:
         error = problem(walk, run, toggle)
         if error:
             self.render_output_hint(error)
+            self.toast(error)
             return
         self.bridge.set_keys(walk, run)
-        self.walk_btn.set_key(walk)
-        self.run_btn.set_key(run)
-        self.toggle_btn.set_key(toggle)
+        with contextlib.suppress(RuntimeError):
+            for b, value in ((self.walk_btn, walk), (self.run_btn, run), (self.toggle_btn, toggle)):
+                if b is not None:
+                    b.set_key(value)
         self.settings["walk_key"] = walk.to_dict()
         self.settings["run_key"] = run.to_dict()
         if toggle != self.toggle_key:
             self.toggle_key = toggle
             self.settings["toggle_key"] = toggle.to_dict()
             self.hotkeys = self.make_hotkeys()  # trzymany właśnie klawisz się nie liczy
+            self.toggle_cap.setText(toggle.name)
         self.render_control_subtitle()
         self.save()
+        self.render_zones()
         self.render_output_hint()
-
-    def on_thresholds(self, moved: Any = None) -> None:
-        """Progi chodu i biegu. Ruszony suwak wygrywa, drugi przesuwa się o odstęp."""
-        top = float(self.config["mapping"]["max_speed"])
-        gap = HYSTERESIS + 0.2  # bieg wyłącza się 0,6 niżej i nadal musi być nad chodem
-        walk = self.walk_slider.value() / 10
-        run = self.run_slider.value() / 10
-        if run < walk + gap:
-            if moved is self.walk_slider:
-                run = min(top, walk + gap)
-                walk = min(walk, run - gap)
-            else:
-                walk = max(0.0, run - gap)
-                run = max(run, walk + gap)
-        walk, run = round(walk, 1), round(run, 1)
-        for slider, value in ((self.walk_slider, walk), (self.run_slider, run)):
-            if slider.value() != round(value * 10):
-                slider.blockSignals(True)
-                slider.setValue(round(value * 10))
-                slider.blockSignals(False)
-                slider.valueChanged.emit(slider.value())  # odśwież napis obok suwaka
-        try:
-            mapping = MappingConfig.from_dict(
-                {
-                    **self.config["mapping"],
-                    "stand_below": walk,
-                    "run_on": run,
-                    "run_off": run - HYSTERESIS,
-                    "quick_stop": self.settings["quick_stop"],
-                }
-            )
-        except ValueError as exc:
-            log.warning("Progi: %s", exc)
-            return
-        self.bridge.set_mapping(mapping)
-        self.settings.update(stand_below=walk, run_on=run, run_off=run - HYSTERESIS)
-        self.gauge.walk_from, self.gauge.run_from = walk, run
-        self.spark.run_from = run
-        self.gauge.update()
-        self.save()
-
-    def on_quick_stop(self, on: bool) -> None:
-        self.settings["quick_stop"] = on
-        self.on_thresholds()
-        log.info("Szybkie zatrzymanie %s", "włączone" if on else "wyłączone")
 
     def apply_source(self) -> None:
         if self.settings["simulator"]:
@@ -1331,8 +1038,7 @@ class App:
             self.bridge.set_source(QueueSource(self.worker.readings))
 
     def on_simulator(self, on: bool) -> None:
-        self.settings["simulator"] = on
-        self.save()
+        self.change("simulator", on)
         self.apply_source()
         log.info("Symulator %s", "włączony" if on else "wyłączony")
         self.render_link()
@@ -1344,8 +1050,7 @@ class App:
             log.info("Nagrywam do %s", recorder.path)
 
     def on_record(self, on: bool) -> None:
-        self.settings["record"] = on
-        self.save()
+        self.change("record", on)
         self.apply_recording()
 
     def scan(self) -> None:
@@ -1359,8 +1064,10 @@ class App:
         self.settings["device_name"] = device.name
         self.save()
         self.worker.connect(device.address, device.name)
-        self.pages.go(self.MAIN, back=True)
+        if self.pages.currentIndex() == self.DEVICES:
+            self.pages.go(self.MAIN, back=True)
         log.info("Wybrano bieżnię %s", device.name)
+        self.render_device_label()
 
     def forget_device(self) -> None:
         self.worker.disconnect()
@@ -1451,24 +1158,28 @@ class App:
         except OSError as exc:
             self.tasks.put(("report_error", f"Nie udało się przygotować paczki: {exc}"))
 
+    def set_about_status(self, text: str) -> None:
+        with contextlib.suppress(RuntimeError):  # Ustawienia mogły się właśnie przebudować
+            self.about_status.setText(text)
+
     def handle_task(self, kind: str, data: Any) -> None:
         if kind == "update_status":
             self.update_label.setText(data)
-            self.about_status.setText(data)
+            self.set_about_status(data)
         elif kind == "update_available":
             self.update_available = data
             self.update_label.setText(f"Dostępna wersja {data}")
             self.render_update_label()
-            self.about_status.setText(f"Dostępna nowa wersja {data} - kliknij Aktualizuj.")
+            self.set_about_status(f"Dostępna nowa wersja {data} - kliknij Aktualizuj.")
         elif kind == "update_current":
             if data:  # tylko po kliknięciu - ciche sprawdzenie przy starcie nic nie mówi
                 self.update_label.setText("Masz najnowszą wersję")
-                self.about_status.setText(f"Masz najnowszą wersję ({__version__}).")
+                self.set_about_status(f"Masz najnowszą wersję ({__version__}).")
         elif kind == "update_error":
             message, clicked = data
             if clicked:
                 self.update_label.setText("Aktualizacja nieudana")
-                self.about_status.setText(message)
+                self.set_about_status(message)
             log.warning("Aktualizacja: %s", message)
         elif kind == "update_ready":
             installer, version = data
@@ -1562,12 +1273,7 @@ class App:
             self.status_action.setObjectName(kind)
             self.status_action.style().unpolish(self.status_action)
             self.status_action.style().polish(self.status_action)
-        self.forget_btn.setEnabled(bool(self.settings["device_address"]))
-        self.device_label.setText(
-            f"Zapamiętana: {self.settings['device_name']}"
-            if self.settings["device_address"]
-            else "Brak zapamiętanej bieżni"
-        )
+        self.render_device_label()
 
     def render_devices(self, scanning: bool = False) -> None:
         while self.devices_box.count():
@@ -1642,14 +1348,16 @@ class App:
             else:
                 self.auto_connect = False
                 self.render_devices()
-                self.pages.go(self.DEVICES)
+                if self.pages.currentIndex() != self.WIZARD:  # konfiguratora nie przerywamy
+                    self.pages.go(self.DEVICES)
         elif event.kind == "scan_failed":
             if event.link is not None:
                 self.link, self.link_text = event.link, event.text
                 self.render_link()
             self.auto_connect = False
             self.render_devices()
-            self.pages.go(self.DEVICES)
+            if self.pages.currentIndex() != self.WIZARD:
+                self.pages.go(self.DEVICES)
             self.devices_status.setText(event.text)
         elif event.kind == "belt":
             self.on_belt_event(event.text)
@@ -1682,16 +1390,16 @@ class App:
             except queue.Empty:
                 break
 
+        capturing = self.capturing()
         actions = self.hotkeys.poll()
         if "toggle" in actions:
             actions.discard("toggle")
-            if not any(b.capturing for b in (self.walk_btn, self.run_btn, self.toggle_btn)):
+            if not capturing:
                 self.set_control(not self.bridge.state.enabled)
         state = self.bridge.tick(time.monotonic(), actions)
 
         c = state.control
         direction = self.settings["direction"]
-        capturing = any(b.capturing for b in (self.walk_btn, self.run_btn, self.toggle_btn))
         settled = True
         speed_caption = ""
         if direction == "gamepad":
@@ -1712,54 +1420,65 @@ class App:
         elif sends and target != self.belt_target:
             self.belt_target = target
             self.worker.set_speed(target)
-        if not state.live and not self.settings["simulator"]:
-            mode, caption = (
-                "offline",
-                "Brak danych" if self.link is not Link.STREAMING else "Czekam na dane",
+        off = f"Wyłączone - {self.toggle_key.name} włącza"
+        zone = {"idle": 0, "walk": 1, "run": 2}
+        offline = not state.live and not self.settings["simulator"]
+        if offline and direction == "treadmill":
+            mode, active = "offline", -1
+            caption = (
+                "Brak danych z bieżni" if self.link is not Link.STREAMING else "Czekam na dane"
             )
         elif direction == "gamepad":
             mode = held if state.enabled else "idle"
-            caption = (
-                speed_caption if state.enabled else f"Wyłączone - {self.toggle_key.name} włącza"
-            )
+            active = self.pad_step if state.enabled else -1
+            caption = speed_caption if state.enabled else off
         elif direction == "keyboard":
             walk_key, run_key = self.bridge.keys
             mode = held if state.enabled else "idle"
+            active = zone[held] if state.enabled else -1
             caption = {
-                "run": f"{walk_key.name} + {run_key.name} - taśma {fmt_num(target)} km/h",
-                "walk": f"{walk_key.name} - taśma {fmt_num(target)} km/h",
-                "idle": f"Bez klawisza - taśma {fmt_num(target)} km/h",
+                "run": f"Bieg · {walk_key.name} + {run_key.name} · taśma {fmt_num(target)} km/h",
+                "walk": f"Chód · {walk_key.name} · taśma {fmt_num(target)} km/h",
+                "idle": f"Bez klawisza · taśma {fmt_num(target)} km/h",
             }[held]
             if not state.enabled:
-                caption = f"Wyłączone - {self.toggle_key.name} włącza"
-        elif c.run:
-            walk_key, run_key = self.bridge.keys
-            mode, caption = "run", f"Bieg - {run_key.name} + {walk_key.name}"
-        elif c.walk:
-            mode, caption = "walk", f"Chód - {self.bridge.keys[0].name}"
+                caption = off
         else:
-            mode, caption = "idle", "Stoisz"
-        if (
-            state.enabled
-            and direction == "treadmill"
-            and self.settings["output"] == "dry"
-            and c.walk
-        ):
-            caption += " (podgląd)"
-        self.gauge.set_speed(c.speed, mode, caption)
+            walk_key, run_key = self.bridge.keys
+            if c.run:
+                mode, caption = "run", f"Bieg · gra dostaje {run_key.name} + {walk_key.name}"
+            elif c.walk:
+                mode, caption = "walk", f"Chód · gra dostaje {walk_key.name}"
+            else:
+                mode, caption = "idle", "Stoisz"
+            active = zone[mode]
+            if not state.enabled:
+                caption = off
+            elif self.settings["output"] == "dry" and c.walk:
+                caption += " (podgląd)"
+        if offline:
+            mode = "offline"  # żeton pokazuje, co wysyłamy; liczba bez danych jest szara
+        self.gauge.set_speed(c.speed, mode, caption, active)
+        if self.gauge_status.text() != caption:
+            self.gauge_status.setText(caption)
+        self.zone_chips.set_active(active)
         self.bubble.set_state(
             state.enabled, mode, c.speed, state.live or self.settings["simulator"]
         )
-        self.belt.set_speed(c.speed)
 
         self.frame += 1
-        if self.frame % 5 == 0:  # liczby i wykres 4x na sekundę wystarczą
+        if self.frame % 5 == 0:  # liczby 4x na sekundę wystarczą
             self.stat_steps.set(str(state.steps) if state.steps is not None else "-")
             self.stat_cadence.set(f"{state.cadence:.0f}" if state.cadence else "-")
             self.stat_distance.set(f"{fmt_num(state.distance_km, 2)} km")
             minutes, seconds = divmod(int(state.active_s), 60)
             self.stat_time.set(f"{minutes}:{seconds:02d}")
-            self.spark.set_points(list(state.history))
+            if self.tracker is not None and (state.live or self.settings["simulator"]):
+                try:
+                    self.tracker.update(c.speed, state.steps, state.distance_km, state.active_s)
+                except Exception:  # historia nie może zatrzymać sterowania
+                    log.exception("Historia kroków")
+                    self.tracker = None
             self.render_link()
             self.render_pad_status()
 
@@ -1775,6 +1494,7 @@ class App:
             return
         self.quitting = True
         self.timer.stop()
+        self.toast_timer.stop()
         self.bubble.close()
         was_enabled = self.bridge.state.enabled
         self.bridge.shutdown()
@@ -1782,6 +1502,7 @@ class App:
             log.info("Zamykanie: zatrzymano taśmę")
         self.worker.shutdown()
         self.save()
+        self.close_history()
         logging.getLogger().removeHandler(self.log_handler)
         hints = getattr(self, "_hints", None)
         if hints is not None:
@@ -1807,3 +1528,6 @@ def run_gui(config: dict[str, Any], enabled: bool) -> int:
         signal.signal(signal.SIGBREAK, app.request_stop)
     qt.exec()
     return 0
+
+
+__all__ = ["App", "run_gui"]

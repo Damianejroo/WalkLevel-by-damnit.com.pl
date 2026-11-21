@@ -131,3 +131,20 @@ def test_legacy_backup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert dane.legacy_settings() == LEGACY
     backup = dane.backup_legacy()
     assert backup is not None and json.loads(backup.read_text(encoding="utf-8")) == LEGACY
+
+
+def test_cli_reads_store_instead_of_old_settings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from bieznia import cli
+
+    monkeypatch.chdir(tmp_path)
+    Path("dane").mkdir()
+    Path("dane/ustawienia.json").write_text('{"walk_speed": 2.0, "theme": "light"}', "utf-8")
+    assert cli.user_settings(False)["walk_speed"] == 2.0  # przed konfiguratorem: 0.2
+    store = dane.Store.create("Ola", "Fiolet", {"walk_speed": 3.0, "device_name": "KS"})
+    window = cli.user_settings(False)
+    assert window == {"device_name": "KS"}  # okno samo czyta profil - do config tylko wspólne
+    assert cli.user_settings(True)["walk_speed"] == 3.0  # bez okna: cały aktywny profil
+    assert "profile_color" not in cli.user_settings(True)
+    assert store.path.exists()

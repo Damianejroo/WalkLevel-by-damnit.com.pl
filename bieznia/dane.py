@@ -292,6 +292,17 @@ class Store:
             return  # klucz tylko na czas działania (np. ścieżki) - nie zapisujemy
         self.save()
 
+    def update_flat(self, flat: dict[str, Any]) -> None:
+        """Zapis płaskich ustawień aplikacji - każdy klucz tam, gdzie należy (jeden zapis)."""
+        for key, value in flat.items():
+            if key in SHARED_KEYS:
+                self.shared[key] = copy.deepcopy(value)
+            elif key in LOOK_KEYS:
+                self.person.look[key] = copy.deepcopy(value)
+            elif key in PROFILE_KEYS:
+                self.profile.settings[key] = copy.deepcopy(value)
+        self.save()
+
     def switch_person(self, person_id: str) -> Person:
         if any(p.id == person_id for p in self.people):
             self.active_person = person_id

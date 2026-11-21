@@ -10,11 +10,17 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from bieznia import __version__
+from bieznia import __version__, dane
 from bieznia.config import load_config
 from bieznia.logs import setup_logging
 from bieznia.paths import FROZEN, enter_data_dir
-from bieznia.settings import apply_settings, load_resumed_enabled, load_settings, save_enabled
+from bieznia.settings import (
+    SECTIONS,
+    apply_settings,
+    load_resumed_enabled,
+    load_settings,
+    save_enabled,
+)
 
 log = logging.getLogger("bieznia")
 
@@ -52,10 +58,24 @@ def report_path() -> Path:
     return Path("logs") / f"diagnostyka-{datetime.now():%Y%m%d-%H%M%S}.txt"
 
 
+def user_settings(headless: bool) -> dict[str, Any]:
+    """Ustawienia z okna, które trafiają do config.
+
+    Od 0.3.0 okno czyta osoby i profile samo (dane/osoby.json) - do config idą wtedy tylko
+    ustawienia wspólne, żeby domyślne nowego profilu były prawdziwie domyślne. Tryb bez okna
+    bierze cały aktywny profil. Bez osoby (pierwsze uruchomienie): ustawienia z 0.2.
+    """
+    store = dane.Store.load()
+    if store is None:
+        return load_settings()
+    flat = store.flat({}) if headless else dict(store.shared)
+    return {k: v for k, v in flat.items() if k in SECTIONS}
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     enter_data_dir()  # exe: %LOCALAPPDATA%\Bieznia, z kodu: bieżący folder
-    user = load_settings()
+    user = user_settings(args.headless)
     setup_logging("bieznia", detailed=bool(user.get("detailed_logs", True)))
     log.info("Bieżnia %s (%s)", __version__, "exe" if FROZEN else "z kodu")
     config = apply_overrides(apply_settings(load_config(), user), args)

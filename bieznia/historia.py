@@ -250,6 +250,11 @@ class SessionTracker:
         if s.end - s.start >= MIN_SESSION_S or s.steps > 0:
             self.history.save(s)
 
+    def flush(self) -> None:
+        """Bieżąca sesja na dysk teraz (np. przed pokazaniem historii)."""
+        if self.current is not None:
+            self._save()
+
     def finish(self) -> None:
         if self.current is not None:
             self._save()
