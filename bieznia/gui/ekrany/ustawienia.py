@@ -3,7 +3,9 @@ zwinięte Zaawansowane. Karta sterowania przebudowuje się przy zmianie trybu i 
 
 from __future__ import annotations
 
+import json
 import logging
+import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -34,6 +36,10 @@ if TYPE_CHECKING:
 
 log = logging.getLogger("bieznia")
 HYSTERESIS = 0.6
+# zmieniają się w tle, a w Ustawieniach albo ich nie widać, albo odświeżają się na żywo
+NOT_IN_SETTINGS_VIEW = frozenset(
+    {"last_version", "window_geometry", "floating_pos", "device_address", "device_name"}
+)
 MODE_NAMES = {"keyboard": "Klawisze", "gamepad": "Pad", "treadmill": "Chodzenie"}
 
 
@@ -58,15 +64,57 @@ def clear(lay: Any) -> None:
 class SettingsScreen:
     belt_target: float | None
     settings_view: str  # tryb, którego ustawienia widać na karcie (nie musi być aktywny)
+    settings_built: str  # stan, z którego zbudowano widok Ustawień
 
     def open_settings(self: App) -> None:
         self.close_popups()
         self.settings_view = self.settings["direction"]
-        self.rebuild_settings()
+        self.refresh_settings()
         self.pages.go(self.SETTINGS)
+
+    def settings_stamp(self: App) -> str:
+        """Wszystko, co widać w Ustawieniach - gdy się nie zmieniło, widok nie jest budowany od
+        nowa (wejście bez opóźnienia). Kroki „dziś” odświeżają się co minutę."""
+        store = self.store
+        return json.dumps(
+            [
+                {k: v for k, v in self.settings.items() if k not in NOT_IN_SETTINGS_VIEW},
+                [
+                    [p.id, p.name, p.color, p.active_profile]
+                    + [
+                        [
+                            q.id,
+                            q.name,
+                            q.color,
+                            q.glyph,
+                            q.icon_file,
+                            self.profile_summary(q.settings),
+                        ]
+                        for q in p.profiles
+                    ]
+                    for p in store.people
+                ]
+                if store
+                else None,
+                store.active_person if store else None,
+                self.t.name,
+                self.t.accent,
+                self.advanced_open,
+                self.settings_view,
+                str(kopia.latest_backup()),
+                int(time.time() // 60),
+            ],
+            sort_keys=True,
+            default=str,
+        )
+
+    def refresh_settings(self: App) -> None:
+        if getattr(self, "settings_built", "") != self.settings_stamp():
+            self.rebuild_settings()
 
     def rebuild_settings(self: App) -> None:
         self.replace_page(self.SETTINGS, self.build_settings())
+        self.settings_built = self.settings_stamp()
 
     def build_settings(self: App) -> QWidget:
         t = self.t

@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QPoint, QPropertyAnimation, Qt, QTimer
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, Qt, QTimer, QVariantAnimation
 from PySide6.QtGui import (
     QCloseEvent,
     QColor,
@@ -40,6 +40,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPlainTextEdit,
     QScrollArea,
+    QScrollBar,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -238,10 +239,106 @@ class Window(QWidget):
             e.ignore()
 
 
+class Cover(QWidget):
+    """Przenikanie między dwoma zrzutami okna na czas zmiany.
+
+    capture() zapamiętuje to, co widać; pod spodem nowy widok buduje się, układa i przewija;
+    reveal() robi zrzut gotowego wyniku i miesza oba obrazy piksel w piksel (z tą samą
+    przezroczystością co okno nad tłem Windows), po czym znika. Żywe widżety nigdy nie jeżdżą
+    po ekranie i nic nie mruga - także odcień półprzezroczystego tła okna.
+    """
+
+    def __init__(self, window: QWidget, area: QWidget) -> None:
+        super().__init__(window)
+        self.area = area  # obszar przykrywany (widoki pod paskiem tytułu)
+        self.old = QPixmap()
+        self.new = QPixmap()
+        self.progress = 0.0
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.anim = QVariantAnimation(self)
+        self.anim.setStartValue(0.0)
+        self.anim.setEndValue(1.0)
+        self.anim.setEasingCurve(ease(th.EASE_IN))
+        self.anim.valueChanged.connect(self._step)
+        self.anim.finished.connect(self._done)
+        self.hide()
+
+    def _grab(self) -> QPixmap:
+        window = self.parentWidget()
+        assert window is not None
+        return window.grab(self.area.geometry())
+
+    def capture(self, _background: str = "") -> None:
+        """Zrzut obecnego wyglądu - razem z ewentualnym trwającym przenikaniem."""
+        self.anim.stop()
+        self.old = self._grab()
+        self.new = QPixmap()
+        self.progress = 0.0
+        self.setGeometry(self.area.geometry())
+        self.raise_()
+        self.show()
+
+    def reveal(self, ms: int, _shift: int = 0) -> None:
+        if not self.isVisible():
+            return
+        if ms <= 0 or not Motion.enabled:
+            self._done()
+            return
+        self.hide()  # zrzut nowego stanu bez przykrycia
+        self.new = self._grab()
+        self.show()
+        self.raise_()
+        self.anim.stop()
+        self.anim.setDuration(ms)
+        self.anim.start()
+
+    def _step(self, value: Any) -> None:
+        self.progress = float(value)
+        self.update()
+
+    def _done(self) -> None:
+        self.anim.stop()
+        self.hide()
+        self.old = QPixmap()
+        self.new = QPixmap()
+
+    def paintEvent(self, _e: QPaintEvent) -> None:
+        if self.old.isNull():
+            return
+        frame = self.old
+        if not self.new.isNull() and self.new.size() == self.old.size():
+            # dokładnie (1-p)*stary + p*nowy, także przezroczystość tła okna (tryb Source
+            # z kryciem to interpolacja; zwykłe nakładanie zgęszczałoby półprzezroczyste tło)
+            frame = QPixmap(self.old)
+            mix = QPainter(frame)
+            mix.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+            mix.setOpacity(self.progress)
+            mix.drawPixmap(0, 0, self.new)
+            mix.end()
+        p = QPainter(self)
+        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)  # zastępuje okno
+        p.drawPixmap(0, 0, frame)
+
+
 TOOLTIP_QSS = (  # podpowiedzi to osobne okna - styl całej aplikacji, jeden dla obu motywów
     "QToolTip { background: #2b2b2b; color: #f3f3f3; border: 1px solid #5a5a5a;"
     " border-radius: 6px; padding: 6px 8px; font-size: 13px; }"
 )
+
+
+class CalmScrollBar(QScrollBar):
+    """Pasek przewijania, który nie rysuje się, gdy nie ma czego przewijać."""
+
+    def paintEvent(self, e: QPaintEvent) -> None:
+        if self.maximum() > self.minimum():
+            super().paintEvent(e)
+
+
+def settle_layout(widget: QWidget) -> None:
+    """Układy (także pola przewijania) przeliczone od razu, a nie przy następnej klatce."""
+    for _ in range(4):
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.LayoutRequest)
+    widget.updateGeometry()
 
 
 class Pages(QStackedWidget):
@@ -253,6 +350,8 @@ class Pages(QStackedWidget):
 
     def __init__(self) -> None:
         super().__init__()
+        self.cover: Cover | None = None
+        self.background = "#000000"  # kolor tła okna pod zrzutem przejścia
         self.qss = ""
         self.qss_version = 0
         self.qss_scale: object = None
@@ -274,18 +373,18 @@ class Pages(QStackedWidget):
             page.setProperty("qss_version", self.qss_version)
 
     def go(self, index: int, back: bool = False) -> None:
+        """Nowy widok od razu na miejscu, stary (zrzut) przenika w niego z lekkim odjazdem."""
         if index == self.currentIndex():
             return
+        cover = self.cover if (Motion.enabled and self.isVisible()) else None
+        if cover is not None:
+            cover.capture(self.background)
         self.setCurrentIndex(index)
-        page = self.currentWidget()
-        if not Motion.enabled or page is None:
-            return
-        anim = QPropertyAnimation(page, b"pos", page)
-        anim.setDuration(th.T_PANEL_IN)
-        anim.setEasingCurve(ease(th.EASE_IN))
-        anim.setStartValue(QPoint(-28 if back else 28, 0))
-        anim.setEndValue(QPoint(0, 0))
-        anim.start(QPropertyAnimation.DeletionPolicy.DeleteWhenStopped)
+        if cover is not None:
+            page = self.currentWidget()
+            if page is not None:
+                settle_layout(page)
+            cover.reveal(th.T_PANEL_IN)
 
 
 def page_layout(widget: QWidget) -> QVBoxLayout:
@@ -411,7 +510,6 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         Motion.enabled = not th.system_reduces_motion()
 
         self.window: Window | None = None
-        self.frozen = 0
         self.toast_label: QLabel | None = None
         self.toast_timer = QTimer()
         self.toast_timer.setSingleShot(True)
@@ -552,6 +650,9 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             self.pages.addWidget(placeholder)
         self.pages.set_qss(self.page_qss(), everywhere=True)  # szerokości liczone już ze stylem
         self.pages.qss_scale = self.settings["large_text"]
+        self.settings_built = self.settings_stamp()  # Ustawienia zbudowane - bez ponownej budowy
+        self.pages.cover = Cover(w, self.pages)
+        self.pages.background = self.t.bg
         self.ring = FocusRing(w, self.t)
 
         w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.settings["always_on_top"])
@@ -626,38 +727,28 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             old.deleteLater()
         if current:
             self.pages.setCurrentIndex(index)
+            settle_layout(widget)  # od razu właściwa wysokość - przewinięcie bez skoku przez 0
             area = widget.findChild(QScrollArea)
-            bar = area.verticalScrollBar() if area is not None else None
-            # nowy widok układa się i przewija, zanim okno odmaluje się raz - bez skoku
-            self.freeze(True)
+            if area is not None and scroll:
+                area.verticalScrollBar().setValue(scroll)
 
-            def restore() -> None:
-                if bar is not None and scroll:
-                    with contextlib.suppress(RuntimeError):
-                        bar.setValue(scroll)
-                self.freeze(False)
-
-            QTimer.singleShot(0, restore)
-
-    def quietly(self, change: Any) -> None:
-        """Zmiana układu bez mignięcia: okno odmalowuje się raz, po ułożeniu wszystkiego."""
-        self.freeze(True)
+    def quietly(self, change: Any, ms: int = th.T_COLOR) -> None:
+        """Zmiana układu bez mrugania: zrzut przed, zmiana i ułożenie pod spodem, przenikanie."""
+        cover = self.pages.cover if (self.window is not None and self.window.isVisible()) else None
+        if cover is not None:
+            cover.capture(self.pages.background)
         try:
             change()
+            current = self.pages.currentWidget()
+            if current is not None:
+                settle_layout(current)
         finally:
-            QTimer.singleShot(0, lambda: self.freeze(False))
-
-    def freeze(self, on: bool) -> None:
-        """Wstrzymanie odświeżania okna (zagnieżdżane): odmalowanie raz, gdy wszystko gotowe."""
-        self.frozen = max(0, self.frozen + (1 if on else -1))
-        w = self.window
-        if w is not None:
-            with contextlib.suppress(RuntimeError):
-                w.setUpdatesEnabled(self.frozen == 0)
+            if cover is not None:
+                cover.reveal(ms)
 
     def go_back(self, index: int) -> None:
         if index == self.SETTINGS:
-            self.rebuild_settings()  # nazwy, kolory i profile mogły się zmienić
+            self.refresh_settings()  # przebudowa tylko, gdy nazwy, kolory, profile się zmieniły
         self.pages.go(index, back=True)
 
     def sticky_page(self, title: str, back: int | None = None) -> tuple[QWidget, QVBoxLayout]:
@@ -688,6 +779,10 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         area.setWidgetResizable(True)
         area.setFrameShape(QScrollArea.Shape.NoFrame)
         area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # miejsce na pasek zawsze zarezerwowane - treść nie przesuwa się w bok, gdy strona
+        # zrobi się dłuższa niż okno; bez czego przewijać - pasek niewidoczny
+        area.setVerticalScrollBar(CalmScrollBar())
+        area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         area.setWidget(inner)
         return area
 
@@ -844,7 +939,10 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.t = self.make_theme()
         if self.window is None:
             return
-        self.freeze(True)  # jedno odmalowanie na końcu zamiast migania w trakcie
+        self.quietly(self._restyle, th.T_PANEL_IN)  # motyw przenika, zamiast przeskakiwać
+
+    def _restyle(self) -> None:
+        assert self.window is not None
         qss = self.page_qss()
         # sam kolor: reszta widoków dostanie styl przy wejściu; inna wielkość tekstu: wszystkie
         self.pages.set_qss(qss, everywhere=self.pages.qss_scale != self.settings["large_text"])
@@ -864,7 +962,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.render_zones()
         if self.pages.currentIndex() == self.SETTINGS:
             self.rebuild_settings()  # kolory zapisane w stylach kart
-        self.freeze(False)
+        self.pages.background = self.t.bg
 
     def on_look(self, key: str, value: Any) -> None:
         self.change(key, value)

@@ -1349,3 +1349,180 @@ def test_import_of_broken_file_shows_message(
     window.open_import()
     assert window.pages.currentIndex() == window.SETTINGS
     assert window.last_toast
+
+
+# --- płynność: bez skoków przewinięcia, pustych klatek i drgania nagłówka ----------------
+
+
+def sample_during(app: gui.App, action: Any, ms: int = 400) -> list[dict[str, Any]]:
+    """Wykonuje akcję i co kilka ms zapisuje stan okna (jak widzi go użytkownik)."""
+    from PySide6.QtCore import QTimer
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QScrollArea
+
+    out: list[dict[str, Any]] = []
+
+    def probe() -> None:
+        page = app.pages.currentWidget()
+        area = page.findChild(QScrollArea) if page else None
+        assert app.window is not None
+        out.append(
+            {
+                "scroll": area.verticalScrollBar().value() if area else 0,
+                "updates": app.window.updatesEnabled(),
+                "page_pos": (page.x(), page.y()) if page else (0, 0),
+            }
+        )
+
+    timer = QTimer()
+    timer.setInterval(5)
+    timer.timeout.connect(probe)
+    timer.start()
+    action()
+    probe()  # stan zaraz po akcji, zanim pętla zdarzeń cokolwiek poprawi
+    QTest.qWait(ms)
+    timer.stop()
+    return out
+
+
+def scroll_settings(app: gui.App, px: int) -> int:
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QScrollArea
+
+    assert app.window is not None
+    app.window.resize(740, 700)
+    app.open_settings()
+    QTest.qWait(50)
+    area = current(app).findChild(QScrollArea)
+    area.verticalScrollBar().setValue(px)
+    return int(area.verticalScrollBar().value())
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda a: a.on_direction("gamepad"),
+        lambda a: a.on_profile_color("Fiolet"),
+        lambda a: a.on_look("theme", "light"),
+        lambda a: a.choose_profile(a.store.person.profiles[1].id),
+        lambda a: a.show_mode_settings("treadmill"),
+    ],
+    ids=["tryb", "kolor", "motyw", "profil", "podglad-trybu"],
+)
+def test_option_change_never_jumps_scroll_or_blanks_window(window: gui.App, change: Any) -> None:
+    assert window.store is not None
+    window.store.add_profile("Gra", activate=False)
+    pos = scroll_settings(window, 500)
+    assert pos > 0
+    samples = sample_during(window, lambda: change(window))
+    assert {s["scroll"] for s in samples} == {pos}  # ani na chwilę na górę strony
+    assert all(s["updates"] for s in samples)  # okno nie przestaje się odmalowywać
+
+
+def test_page_transition_does_not_move_live_page(window: gui.App) -> None:
+    from PySide6.QtTest import QTest
+
+    gui.Motion.enabled = True
+    try:
+        samples = sample_during(window, window.open_settings)
+        assert {s["page_pos"] for s in samples} == {(0, 0)}  # nagłówek nie jeździ
+        samples = sample_during(window, lambda: window.go_back(window.MAIN))
+        assert {s["page_pos"] for s in samples} == {(0, 0)}
+        QTest.qWait(400)
+        assert not [c for c in window.pages.findChildren(gui.Cover) if c.isVisible()]
+    finally:
+        gui.Motion.enabled = False
+
+
+def test_scrollbar_space_is_constant(window: gui.App) -> None:
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QScrollArea
+
+    window.open_settings()
+    window.open_history()  # krótka strona
+    QTest.qWait(50)
+    for i in range(window.pages.count()):
+        for area in window.pages.widget(i).findChildren(QScrollArea):
+            policy = area.verticalScrollBarPolicy()
+            assert policy == Qt.ScrollBarPolicy.ScrollBarAlwaysOn  # szerokość treści stała
+
+
+def test_export_toggle_keeps_scroll(window: gui.App) -> None:
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QScrollArea
+
+    store = window.store
+    assert store is not None and window.window is not None
+    for i in range(6):
+        store.add_profile(f"Gra {i}", activate=False)
+    window.window.resize(740, 600)
+    window.open_export()
+    QTest.qWait(50)
+    area = current(window).findChild(QScrollArea)
+    area.verticalScrollBar().setValue(300)
+    pos = area.verticalScrollBar().value()
+    pid = store.person.profiles[3].id
+    samples = sample_during(
+        window, lambda: window.export_toggle_profile(store.person.id, pid, False)
+    )
+    assert {s["scroll"] for s in samples} == {pos}
+
+
+def test_settings_reopen_is_instant_when_nothing_changed(window: gui.App) -> None:
+    window.open_settings()
+    page = window.pages.widget(window.SETTINGS)
+    window.go_back(window.MAIN)
+    window.open_settings()
+    assert window.pages.widget(window.SETTINGS) is page  # bez przebudowy
+    window.go_back(window.MAIN)
+    window.on_belt_speed("walk_speed", 2.0)  # zmiana - Ustawienia budują się od nowa
+    window.open_settings()
+    assert window.pages.widget(window.SETTINGS) is not page
+
+
+def test_cover_without_changes_is_pixel_identical(window: gui.App) -> None:
+    """Przykrycie przy zmianie, która nic nie zmienia, nie może zmienić ani jednego piksela
+    (żadnego mignięcia odcienia tła ani przesunięcia)."""
+    from PySide6.QtCore import QTimer
+    from PySide6.QtTest import QTest
+
+    assert window.window is not None
+    gui.Motion.enabled = True
+    try:
+        window.open_settings()
+        QTest.qWait(400)
+        w = window.window
+        before = w.grab().toImage()
+        frames: list[Any] = []
+        timer = QTimer()
+        timer.setInterval(15)
+        timer.timeout.connect(lambda: frames.append(w.grab().toImage()))
+        timer.start()
+        window.quietly(lambda: None, 150)
+        QTest.qWait(250)
+        timer.stop()
+        assert frames
+        worst = max(image_difference(before, f) for f in frames)
+        assert worst <= 2, worst  # zaokrąglenia mieszania kolorów - niewidoczne
+    finally:
+        gui.Motion.enabled = False
+
+
+def image_difference(a: Any, b: Any) -> int:
+    """Największa różnica kanału koloru między dwoma obrazami (co 4. piksel)."""
+    from PySide6.QtGui import QColor
+
+    worst = 0
+    for y in range(0, min(a.height(), b.height()), 4):
+        for x in range(0, min(a.width(), b.width()), 4):
+            c1, c2 = QColor.fromRgba(a.pixel(x, y)), QColor.fromRgba(b.pixel(x, y))
+            d = max(
+                abs(c1.red() - c2.red()),
+                abs(c1.green() - c2.green()),
+                abs(c1.blue() - c2.blue()),
+                abs(c1.alpha() - c2.alpha()),
+            )
+            if d > worst:
+                worst = d
+    return worst
