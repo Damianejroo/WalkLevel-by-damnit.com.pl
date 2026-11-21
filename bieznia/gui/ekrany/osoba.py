@@ -159,8 +159,7 @@ class PeopleScreen:
         row.addWidget(dice)
         body.addLayout(row)
         body.addWidget(label("Albo jedna z tych:", "small"))
-        chips = QVBoxLayout()
-        chips.setSpacing(6)
+        chips = k.FlowLayout(6)  # obok siebie, w razie potrzeby w kolejnym wierszu
         for n in wz.suggestions:
             c = QPushButton(n)
             c.setFixedHeight(34)
@@ -171,10 +170,7 @@ class PeopleScreen:
                 f" color: {t.text}; background: transparent; font-size: 13px; }}"
             )
             c.clicked.connect(lambda _=False, v=n: self.wizard_name.setText(v))
-            row_ = QHBoxLayout()  # jedna pod drugą - długie nazwy się nie ucinają
-            row_.addWidget(c)
-            row_.addStretch(1)
-            chips.addLayout(row_)
+            chips.addWidget(c)
         body.addLayout(chips)
         body.addWidget(label("Kolor osoby", "section"))
         pal = k.PalettePicker(t, wz.color)

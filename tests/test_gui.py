@@ -782,6 +782,26 @@ def test_fresh_install_runs_wizard_and_creates_person(make: Any) -> None:
     assert app.profile_btn.text() == "Domyślny"
 
 
+def test_wizard_name_suggestions_sit_side_by_side_and_wrap(make: Any) -> None:
+    from PySide6.QtWidgets import QApplication
+
+    app: gui.App = make()
+    assert app.window is not None
+    chips = [b for n in app.wizard.suggestions for b in buttons(current(app), n)]
+    assert len(chips) == 3
+    app.window.resize(900, 760)  # szeroko: jeden wiersz
+    for _ in range(3):
+        QApplication.processEvents()
+    assert len({c.y() for c in chips}) == 1
+    assert all(c.width() >= c.sizeHint().width() for c in chips)  # bez ucinania
+    app.window.resize(420, 760)  # wąsko: zawijają się, nic nie wystaje
+    for _ in range(3):
+        QApplication.processEvents()
+    page = current(app)
+    for c in chips:
+        assert c.mapTo(page, c.rect().topRight()).x() <= page.width()
+
+
 def test_update_from_02_keeps_settings(make: Any) -> None:
     old = {
         "direction": "keyboard",
