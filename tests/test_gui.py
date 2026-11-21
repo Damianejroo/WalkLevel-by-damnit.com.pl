@@ -12,6 +12,7 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 QtWidgets = pytest.importorskip("PySide6.QtWidgets")
+QtCore = pytest.importorskip("PySide6.QtCore")
 
 from bieznia.ble.worker import BleEvent, FoundDevice, Link  # noqa: E402
 from bieznia.config import load_config  # noqa: E402
@@ -63,6 +64,12 @@ def window(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Iterator[gui.App]
     app = gui.App(qt, config, enabled=False)
     yield app
     app.quit()
+    # okno naprawdę usunięte - inaczej każdy kolejny test przestylowuje wszystkie poprzednie
+    for widget in (app.window, app.bubble):
+        if widget is not None:
+            widget.close()
+            widget.deleteLater()
+    QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.Type.DeferredDelete)
 
 
 def fake(app: gui.App) -> FakeWorker:

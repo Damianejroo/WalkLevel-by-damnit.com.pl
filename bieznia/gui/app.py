@@ -288,7 +288,8 @@ class App:
         self.worker = BleWorker()
         self.logs: queue.Queue[str] = queue.Queue()
         self.log_lines: list[str] = []
-        logging.getLogger().addHandler(QueueLogHandler(self.logs))
+        self.log_handler = QueueLogHandler(self.logs)
+        logging.getLogger().addHandler(self.log_handler)
         self.link = Link.IDLE
         self.link_text = ""
         self.devices: list[FoundDevice] = []
@@ -314,6 +315,7 @@ class App:
         hints = self.qt.styleHints()
         if hasattr(hints, "colorSchemeChanged"):  # motyw Windows zmieniony w trakcie
             hints.colorSchemeChanged.connect(self.on_system_scheme)
+            self._hints = hints
 
         self.timer = QTimer()
         self.timer.setInterval(TICK_MS)
@@ -1780,6 +1782,11 @@ class App:
             log.info("Zamykanie: zatrzymano taśmę")
         self.worker.shutdown()
         self.save()
+        logging.getLogger().removeHandler(self.log_handler)
+        hints = getattr(self, "_hints", None)
+        if hints is not None:
+            with contextlib.suppress(RuntimeError, TypeError):
+                hints.colorSchemeChanged.disconnect(self.on_system_scheme)
         self.qt.quit()
 
 
