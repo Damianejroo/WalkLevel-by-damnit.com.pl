@@ -1526,3 +1526,74 @@ def image_difference(a: Any, b: Any) -> int:
             if d > worst:
                 worst = d
     return worst
+
+
+def test_mode_switch_in_settings_is_animated(window: gui.App) -> None:
+    """Zmiana trybu w Ustawieniach: karta płynnie zmienia wysokość, podświetlenie przełącznika
+    płynnie przesuwa się na nową opcję, nic nie przeskakuje."""
+    from PySide6.QtCore import QTimer
+    from PySide6.QtTest import QTest
+
+    assert window.window is not None
+    window.window.resize(740, 890)
+    gui.Motion.enabled = True
+    try:
+        window.open_settings()
+        QTest.qWait(300)
+        body = window.control_body
+        view = next(
+            s
+            for s in current(window).findChildren(gui.Segmented)
+            if s.accessibleName() == "Ustawienia trybu"
+        )
+        start_h = body.height()
+        heights: list[int] = []
+        pills: list[float] = []
+
+        def probe() -> None:
+            heights.append(body.height())
+            seg = next(
+                s
+                for s in current(window).findChildren(gui.Segmented)
+                if s.accessibleName() == "Ustawienia trybu"
+            )
+            if seg.pill is not None:
+                pills.append(seg.pill.x())
+
+        timer = QTimer()
+        timer.setInterval(10)
+        timer.timeout.connect(probe)
+        timer.start()
+        view.buttons["gamepad"].click()  # klawisze -> pad: karta rośnie
+        QTest.qWait(400)
+        timer.stop()
+        end_h = body.height()
+        assert end_h > start_h
+        middle = {h for h in heights if start_h < h < end_h}
+        assert len(middle) >= 3, heights  # przez wartości pośrednie, nie skokiem
+        assert heights == sorted(heights)  # tylko w jedną stronę - bez drgania
+        assert len({round(x) for x in pills}) >= 3  # podświetlenie jedzie, nie przeskakuje
+        assert body.maximumHeight() > 10000  # po animacji karta znowu dopasowuje się sama
+        assert window.settings["direction"] == "keyboard"  # tylko podgląd innego trybu
+    finally:
+        gui.Motion.enabled = False
+
+
+def test_direction_change_in_settings_updates_in_place(window: gui.App) -> None:
+    store = window.store
+    assert store is not None
+    window.open_settings()
+    page = window.pages.widget(window.SETTINGS)
+    window.on_direction("gamepad")
+    assert window.pages.widget(window.SETTINGS) is page  # bez przebudowy całego widoku
+    assert window.profile_rows[store.profile.id].sub.text().startswith("Pad")
+    assert window.step_ladder is not None
+
+
+def test_settings_after_wizard_show_people_and_profiles(make: Any) -> None:
+    app: gui.App = make()
+    finish_wizard(app)
+    app.on_direction("gamepad")  # zmiana trybu z ekranu głównego, zanim Ustawienia się otworzą
+    app.open_settings()
+    page_texts = texts(current(app))
+    assert "Osoby" in page_texts and "Profile gier" in page_texts

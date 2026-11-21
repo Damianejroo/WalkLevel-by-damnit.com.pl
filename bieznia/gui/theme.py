@@ -239,7 +239,7 @@ QPushButton#row {{ text-align: left; padding: 0 {px(14)}; font-weight: 400; }}
 QPushButton#seg {{ border: none; border-radius: {RADIUS - 3}px; background: transparent;
     color: {t.text_2}; font-weight: 600; padding: 0 {px(10)}; }}
 QPushButton#seg:hover:!checked {{ color: {t.text}; }}
-QPushButton#seg:checked {{ background: {t.accent}; color: {t.on_accent}; }}
+QPushButton#seg:checked {{ background: transparent; color: {t.on_accent}; }}
 QFrame#segbox {{ background: {t.bg}; border: 2px solid {t.control}; border-radius: {RADIUS}px; }}
 QPlainTextEdit {{ background: {t.bg}; border: 2px solid {t.control}; border-radius: {RADIUS}px;
     font-family: "Cascadia Mono", "Consolas"; font-size: {px(13)}; padding: 6px; }}

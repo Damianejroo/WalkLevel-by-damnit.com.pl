@@ -3,6 +3,7 @@ zwinięte Zaawansowane. Karta sterowania przebudowuje się przy zmianie trybu i 
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import time
@@ -119,6 +120,7 @@ class SettingsScreen:
     def build_settings(self: App) -> QWidget:
         t = self.t
         page, lay = self.sticky_page("Ustawienia")
+        self.profile_rows: dict[str, k.ChoiceRow] = {}
         store = self.store
 
         if store is not None:
@@ -161,6 +163,7 @@ class SettingsScreen:
                 )
                 row.clicked.connect(lambda _=False, pid=pr.id: self.choose_profile(pid))
                 row.edit.connect(lambda pid=pr.id: self.open_profile_edit(pid))
+                self.profile_rows[pr.id] = row
                 cl.addWidget(row)
             add = k.AddRow(t, "Nowy profil")
             add.clicked.connect(self.open_profile_new)
@@ -170,7 +173,14 @@ class SettingsScreen:
         title = "Sterowanie"
         if store is not None:
             title += f" · {store.profile.name}"
-        c, self.control_box = section(title)
+        c, cl = section(title)
+        # przełącznik trybów stoi nad przebudowywaną częścią - podświetlenie płynnie jedzie
+        self.mode_view = Segmented(list(MODE_NAMES.items()), self.settings_view, "Ustawienia trybu")
+        self.mode_view.changed.connect(self.show_mode_settings)
+        cl.addWidget(self.mode_view)
+        self.control_body = k.SmoothBox()  # zmiana trybu: karta płynnie rośnie albo maleje
+        self.control_box = self.control_body.lay
+        cl.addWidget(self.control_body)
         lay.addWidget(c)
         self.build_control_settings()
 
@@ -366,8 +376,8 @@ class SettingsScreen:
 
     def build_control_settings(self: App) -> None:
         box = self.control_box
-        while box.count() > 1:  # tytuł karty zostaje
-            item = box.takeAt(1)
+        while box.count():
+            item = box.takeAt(0)
             if item is None:
                 break
             if (w := item.widget()) is not None:
@@ -380,13 +390,7 @@ class SettingsScreen:
         if getattr(self, "settings_view", None) not in MODE_NAMES:
             self.settings_view = active
         direction = self.settings_view
-        view = Segmented(
-            [(key, name + (" ✓" if key == active else "")) for key, name in MODE_NAMES.items()],
-            direction,
-            "Ustawienia trybu",
-        )
-        view.changed.connect(self.show_mode_settings)
-        box.addWidget(view)
+        self.render_mode_view()
         if direction == active:
             box.addWidget(
                 label("✓ to aktywny tryb. Wybierz inny, żeby ustawić go zawczasu.", "small")
@@ -499,10 +503,36 @@ class SettingsScreen:
             self.render_ladder()
         self.render_output_hint()
 
+    def settings_direction_changed(self: App) -> None:
+        """Tryb zmieniony, gdy Ustawienia są na ekranie: karta sterowania płynnie, opis profilu
+        w miejscu - bez przebudowy całego widoku."""
+        store = self.store
+        if store is not None and store.profile.id in self.profile_rows:
+            with contextlib.suppress(RuntimeError):
+                self.profile_rows[store.profile.id].sub.setText(
+                    self.profile_summary(store.profile.settings)
+                )
+        self.settings_view = self.settings["direction"]
+        self.control_body.swap(self.build_control_settings, self.t.surface)
+        if self.pages.currentIndex() == self.SETTINGS:
+            # widoczny widok jest aktualny; ukryty mógł być nieaktualny już wcześniej -
+            # wtedy przebuduje się przy wejściu
+            self.settings_built = self.settings_stamp()
+
+    def render_mode_view(self: App) -> None:
+        """Znaczek ✓ przy aktywnym trybie i zaznaczony tryb, którego ustawienia widać."""
+        active = self.settings["direction"]
+        with contextlib.suppress(RuntimeError):
+            for key, b in self.mode_view.buttons.items():
+                text = MODE_NAMES[key] + (" ✓" if key == active else "")
+                if b.text() != text:
+                    b.setText(text)
+            self.mode_view.set_value(self.settings_view)
+
     def show_mode_settings(self: App, mode: str) -> None:
         """Podgląd i zmiana ustawień innego trybu - aktywny tryb zostaje."""
         self.settings_view = mode
-        self.quietly(self.build_control_settings)
+        self.control_body.swap(self.build_control_settings, self.t.surface)
 
     def render_ladder(self: App) -> None:
         if self.step_ladder is None:
@@ -591,7 +621,7 @@ class SettingsScreen:
             return
         self.change("pad_steps", list(gamepad.PRESETS[count]))
         self.belt_target = None
-        self.quietly(self.build_control_settings)
+        self.control_body.swap(self.build_control_settings, self.t.surface)
         self.render_zones()
 
     def on_pad_idle(self: App, mode: str) -> None:

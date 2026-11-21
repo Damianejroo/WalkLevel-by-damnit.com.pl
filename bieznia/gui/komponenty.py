@@ -877,7 +877,8 @@ class ChoiceRow(QPushButton):
         texts.setSpacing(0)
         name = ElidedLabel(title, "")
         name.setStyleSheet("font-weight: 600;")
-        for w in (name, label(sub, "small")):
+        self.sub = label(sub, "small")
+        for w in (name, self.sub):
             w.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
             texts.addWidget(w)
         lay.addLayout(texts, 1)
@@ -1162,3 +1163,117 @@ class SaveNote(QLabel):
     def retheme(self, t: Theme) -> None:
         self.t = t
         self._idle()
+
+
+def show_pending(layout: QLayout) -> None:
+    """Pokazuje od razu elementy dodane do układu (Qt robi to z opóźnieniem, a do tego czasu
+    układ liczy się bez nich)."""
+    for i in range(layout.count()):
+        item = layout.itemAt(i)
+        if item is None:
+            continue
+        w = item.widget()
+        if w is not None and w.isHidden():
+            if not w.testAttribute(Qt.WidgetAttribute.WA_WState_ExplicitShowHide):
+                w.show()
+        elif (inner := item.layout()) is not None:
+            show_pending(inner)
+
+
+class _Ghost(QWidget):
+    """Zrzut starej zawartości, który gaśnie nad nową."""
+
+    def __init__(self, parent: QWidget) -> None:
+        super().__init__(parent)
+        self.pix = QPixmap()
+        self.opacity = 1.0
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.hide()
+
+    def paintEvent(self, _e: QEvent) -> None:
+        if not self.pix.isNull():
+            p = QPainter(self)
+            p.setOpacity(self.opacity)
+            p.drawPixmap(0, 0, self.pix)
+
+
+class SmoothBox(QWidget):
+    """Kontener, którego zawartość podmienia się płynnie: wysokość rośnie albo maleje
+    (treść pod spodem spływa, a nie skacze), a stara zawartość przenika w nową."""
+
+    DURATION = 220
+
+    def __init__(self, spacing: int = 8) -> None:
+        super().__init__()
+        self.lay = QVBoxLayout(self)
+        self.lay.setContentsMargins(0, 0, 0, 0)
+        self.lay.setSpacing(spacing)
+        self.ghost = _Ghost(self)
+        self.anim = QVariantAnimation(self)
+        self.anim.setEasingCurve(ease(th.EASE_IN))
+        self.anim.valueChanged.connect(self._step)
+        self.anim.finished.connect(self._done)
+        self._from = self._to = 0
+
+    def natural_height(self) -> int:
+        """Wysokość nowej zawartości - po nałożeniu stylu (czcionki, odstępy) na nowe elementy
+        i po tym, jak elementy zależne od szerokości (zawijanie, przełączniki) się ułożą."""
+        show_pending(self.lay)  # nowe elementy Qt pokazuje dopiero w następnej klatce
+        for child in self.findChildren(QWidget):
+            child.ensurePolished()
+        width = max(1, self.width())
+
+        def measure() -> int:
+            self.lay.invalidate()
+            self.lay.activate()
+            if self.lay.hasHeightForWidth():
+                return int(self.lay.totalHeightForWidth(width))
+            return int(self.lay.totalSizeHint().height())
+
+        height = measure()
+        for _ in range(3):  # ułożenie na próbę - elementy dopasowują się do szerokości
+            self.lay.setGeometry(QRect(0, 0, width, height))
+            again = measure()
+            if again == height:
+                break
+            height = again
+        return height
+
+    def swap(self, rebuild: Callable[[], None], background: str) -> None:
+        """rebuild() wypełnia self.lay od nowa (stara zawartość usuwa się sama)."""
+        if not (Motion.enabled and self.isVisible() and self.height() > 0):
+            rebuild()
+            return
+        self.anim.stop()
+        old_h = self.height()
+        shot = self.grab()
+        pix = QPixmap(shot.size())
+        pix.setDevicePixelRatio(shot.devicePixelRatio())
+        pix.fill(QColor(background))  # stara treść na tle karty - nowa nie prześwituje
+        painter = QPainter(pix)
+        painter.drawPixmap(0, 0, shot)
+        painter.end()
+        rebuild()
+        new_h = self.natural_height()
+        self.ghost.pix, self.ghost.opacity = pix, 1.0
+        self.ghost.setGeometry(0, 0, self.width(), old_h)
+        self.ghost.raise_()
+        self.ghost.show()
+        self._from, self._to = old_h, new_h
+        self.setFixedHeight(old_h)
+        self.anim.setStartValue(0.0)
+        self.anim.setEndValue(1.0)
+        self.anim.setDuration(self.DURATION)
+        self.anim.start()
+
+    def _step(self, value: object) -> None:
+        p = float(value)  # type: ignore[arg-type]
+        self.setFixedHeight(round(self._from + (self._to - self._from) * p))
+        self.ghost.opacity = max(0.0, 1.0 - p * 1.6)  # stara treść znika w pierwszej części
+        self.ghost.update()
+
+    def _done(self) -> None:
+        self.ghost.hide()
+        self.ghost.pix = QPixmap()
+        self.setMinimumHeight(0)
+        self.setMaximumHeight(16777215)

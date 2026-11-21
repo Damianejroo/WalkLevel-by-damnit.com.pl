@@ -32,6 +32,7 @@ from PySide6.QtGui import (
     QMouseEvent,
     QPainter,
     QPainterPath,
+    QPaintEvent,
     QPen,
     QWheelEvent,
 )
@@ -249,7 +250,10 @@ class Switch(QAbstractButton):
 
 
 class Segmented(QFrame):
+    """Przełącznik z podświetleniem, które płynnie przesuwa się na wybraną opcję."""
+
     changed = Signal(str)
+    accent = "#8fc2b0"  # kolor podświetlenia - ustawia aplikacja przy zmianie motywu
 
     def __init__(self, options: Iterable[tuple[str, str]], current: str, name: str) -> None:
         super().__init__()
@@ -271,15 +275,56 @@ class Segmented(QFrame):
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.setFixedHeight(th.CONTROL_H - 10)
             b.setAccessibleName(f"{name}: {text}")
-            b.clicked.connect(lambda _=False, k=key: self.changed.emit(k))
+            b.clicked.connect(lambda _=False, k=key: self._clicked(k))
             self.group.addButton(b)
             self.buttons[key] = b
             lay.addWidget(b)
+        self.pill: QRectF | None = None
+        self._pill_anim = QVariantAnimation(self)
+        self._pill_anim.setDuration(th.T_PANEL_IN)
+        self._pill_anim.setEasingCurve(ease(th.EASE_IN))
+        self._pill_anim.valueChanged.connect(self._move_pill)
         self.set_value(current)
 
+    def _clicked(self, key: str) -> None:
+        self.set_value(key)
+        self.changed.emit(key)
+
+    def _target(self) -> QRectF | None:
+        b = self.group.checkedButton()
+        return QRectF(b.geometry()) if b is not None else None
+
+    def _move_pill(self, rect: object) -> None:
+        self.pill = QRectF(rect)  # type: ignore[call-overload]
+        self.update()
+
     def set_value(self, key: str) -> None:
-        if key in self.buttons:
-            self.buttons[key].setChecked(True)
+        if key not in self.buttons:
+            return
+        start = self.pill
+        self.buttons[key].setChecked(True)
+        end = self._target()
+        if start is None or end is None or not Motion.enabled or not self.isVisible():
+            self.pill = end
+            self.update()
+            return
+        self._pill_anim.stop()
+        self._pill_anim.setStartValue(start)
+        self._pill_anim.setEndValue(end)
+        self._pill_anim.start()
+
+    def paintEvent(self, e: QPaintEvent) -> None:
+        super().paintEvent(e)  # ramka i tło z motywu
+        if self._pill_anim.state() != QVariantAnimation.State.Running:
+            self.pill = self._target()  # po zmianie rozmiaru - zawsze pod wybraną opcją
+        if self.pill is None:
+            return
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(QColor(self.accent))
+        radius = th.RADIUS - 3
+        p.drawRoundedRect(self.pill, radius, radius)
 
     def needed_width(self) -> int:
         widths = [b.sizeHint().width() for b in self.buttons.values()]

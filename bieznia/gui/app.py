@@ -427,6 +427,9 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
     pad_idle_seg: Segmented
     output_seg: Segmented
     control_box: QVBoxLayout
+    control_body: k.SmoothBox
+    mode_view: Segmented
+    profile_rows: dict[str, k.ChoiceRow]
     palette: k.PalettePicker
     device_label: QLabel
     forget_btn: HoldButton
@@ -626,7 +629,9 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
 
     def make_theme(self) -> Theme:
         base = th.resolve_theme(self.settings["theme"])
-        return th.with_color(base, self.settings.get("profile_color"))
+        t = th.with_color(base, self.settings.get("profile_color"))
+        Segmented.accent = t.accent  # podświetlenie przełączników rysowane przez nie same
+        return t
 
     def build(self) -> None:
         self.t = self.make_theme()
@@ -1060,7 +1065,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         log.info("Kierunek sterowania: %s", kind)
         self.apply_direction()
         self.settings_view = kind
-        self.rebuild_settings()  # karta sterowania w Ustawieniach pokazuje bieżący tryb
+        self.settings_direction_changed()  # karta w Ustawieniach: płynnie, gdy widać, w miejscu
 
     def sets_speed(self) -> bool:
         """Klawisze albo pad ustawiają prędkość taśmy (a nie odwrotnie)."""
