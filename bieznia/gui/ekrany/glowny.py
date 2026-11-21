@@ -94,7 +94,7 @@ class MainScreen:
         texts = QVBoxLayout()
         texts.setSpacing(0)
         self.status_title = ElidedLabel("", "")
-        self.status_title.setStyleSheet("font-weight: 600;")
+        self.status_title.setObjectName("strong")
         self.status_sub = ElidedLabel("", "muted")
         texts.addStretch(1)
         texts.addWidget(self.status_title)

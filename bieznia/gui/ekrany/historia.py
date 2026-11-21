@@ -115,8 +115,38 @@ class ShareBar(QWidget):
 class HistoryScreen:
     def open_history(self: App) -> None:
         self.close_popups()
-        self.replace_page(self.HISTORY, self.build_history_page())
+        if self.tracker is not None:
+            self.tracker.flush()  # bieżąca sesja też w historii
+        if getattr(self, "history_built", "") != self.history_stamp():
+            self.replace_page(self.HISTORY, self.build_history_page())
+            self.history_built = self.history_stamp()
         self.pages.go(self.HISTORY)
+
+    def history_stamp(self: App) -> str:
+        """Wszystko, co widać w historii - bez zmian widok nie buduje się od nowa."""
+        store = self.store
+        return repr(
+            (
+                self.history.version() if self.history else None,
+                self.history_scope,
+                self.history_range,
+                date.today().isoformat(),
+                self.t.name,
+                self.t.accent,
+                [
+                    (
+                        p.id,
+                        p.name,
+                        p.color,
+                        [(q.id, q.name, q.color, q.icon_file) for q in p.profiles],
+                    )
+                    for p in store.people
+                ]
+                if store
+                else None,
+                store.active_person if store else None,
+            )
+        )
 
     def history_today(self: App, person_id: str) -> int:
         if self.history is None:
@@ -134,8 +164,6 @@ class HistoryScreen:
             lay.addWidget(label("Historia pojawi się po utworzeniu pierwszej osoby.", "muted"))
             lay.addStretch(1)
             return page
-        if self.tracker is not None:
-            self.tracker.flush()
         many = len(store.people) > 1
         if many:
             scope = Segmented(
@@ -234,7 +262,7 @@ class HistoryScreen:
                 texts = QVBoxLayout()
                 texts.setSpacing(0)
                 n = label(f"{day} {when:%H:%M} · {who}{s.profile_name}")
-                n.setStyleSheet("font-weight: 600;")
+                n.setObjectName("strong")
                 texts.addWidget(n)
                 texts.addWidget(
                     label(
@@ -255,6 +283,7 @@ class HistoryScreen:
         if range_:
             self.history_range = range_
         self.replace_page(self.HISTORY, self.build_history_page())
+        self.history_built = self.history_stamp()
 
     def history_colors(self: App, key: str) -> dict[str, str]:
         store = self.store
@@ -304,7 +333,7 @@ class HistoryScreen:
         mid.setSpacing(4)
         top = QHBoxLayout()
         n = label(name)
-        n.setStyleSheet("font-weight: 600;")
+        n.setObjectName("strong")
         top.addWidget(n, 1)
         v = label(f"{steps_text(g.steps)} kroków")
         v.setAlignment(Qt.AlignmentFlag.AlignRight)

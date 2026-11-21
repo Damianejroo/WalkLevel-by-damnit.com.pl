@@ -112,6 +112,14 @@ class History:
             )
         return self.count() - before
 
+    def version(self) -> tuple[int, int, float]:
+        """Krótki odcisk zawartości (liczba sesji, kroki, ostatni koniec) - czy widok historii
+        trzeba zbudować od nowa."""
+        row = self.db.execute(
+            "SELECT COUNT(*), COALESCE(SUM(kroki), 0), COALESCE(MAX(koniec), 0) FROM sesje"
+        ).fetchone()
+        return int(row[0]), int(row[1]), float(row[2])
+
     def count(self) -> int:
         return int(self.db.execute("SELECT COUNT(*) FROM sesje").fetchone()[0])
 

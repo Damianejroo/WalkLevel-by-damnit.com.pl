@@ -196,7 +196,7 @@ class CopyScreen:
         texts = QVBoxLayout()
         texts.setSpacing(0)
         n = label(prev.path.name)
-        n.setStyleSheet("font-weight: 600;")
+        n.setObjectName("strong")
         texts.addWidget(n)
         texts.addWidget(label(kopia.describe(prev), "small"))
         row.addLayout(texts, 1)

@@ -34,7 +34,6 @@ from PySide6.QtGui import (
     QPainterPath,
     QPaintEvent,
     QPen,
-    QWheelEvent,
 )
 from PySide6.QtWidgets import (
     QAbstractButton,
@@ -47,7 +46,6 @@ from PySide6.QtWidgets import (
     QLayout,
     QPushButton,
     QSizePolicy,
-    QSlider,
     QVBoxLayout,
     QWidget,
 )
@@ -85,13 +83,13 @@ class Motion:
 
 
 class FocusRing(QWidget):
-    """Obwódka fokusu 2 px w kolorze akcentu, 2 px od kontrolki. Tylko przy klawiaturze."""
+    """Obwódka fokusu 2 px w kolorze akcentu, 2 px od kontrolki. Tylko przy klawiaturze.
 
-    KEYBOARD = (
-        Qt.FocusReason.TabFocusReason,
-        Qt.FocusReason.BacktabFocusReason,
-        Qt.FocusReason.ShortcutFocusReason,
-    )
+    Bez globalnego filtra zdarzeń (każde zdarzenie aplikacji przechodziłoby przez Pythona i
+    spowalniało animacje): sygnał zmiany fokusu z Qt, a filtr tylko na zaznaczonej kontrolce.
+    Fokus z klawiatury = zmiana bez wciśniętego przycisku myszy na kontrolce, którą da się
+    obsłużyć klawiszem Tab.
+    """
 
     def __init__(self, window: QWidget, t: Theme) -> None:
         super().__init__(window)
@@ -100,26 +98,30 @@ class FocusRing(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.hide()
         app = QApplication.instance()
-        if app is not None:
-            app.installEventFilter(self)
+        if isinstance(app, QApplication):
+            app.focusChanged.connect(self._focus_changed)
+
+    def _focus_changed(self, _old: QWidget | None, new: QWidget | None) -> None:
+        with contextlib.suppress(RuntimeError):
+            if self.target is not None:
+                self.target.removeEventFilter(self)
+            self.target = None
+            keyboard = QApplication.mouseButtons() == Qt.MouseButton.NoButton
+            tab = new is not None and bool(new.focusPolicy() & Qt.FocusPolicy.TabFocus)
+            if not (keyboard and tab and new is not None and new.window() is self.window()):
+                self.hide()
+                return
+            self.target = new
+            new.installEventFilter(self)
+            self.follow()
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         kind = event.type()
-        if (
-            kind == QEvent.Type.FocusIn
-            and isinstance(obj, QWidget)
-            and obj.window() is self.window()
-        ):
-            reason = event.reason()  # type: ignore[attr-defined]
-            if reason in self.KEYBOARD:
-                self.target = obj
+        if obj is self.target:
+            if kind in (QEvent.Type.Move, QEvent.Type.Resize):
                 self.follow()
-        elif kind == QEvent.Type.MouseButtonPress:
-            self.hide()
-        elif kind in (QEvent.Type.Move, QEvent.Type.Resize) and obj is self.target:
-            self.follow()
-        elif kind == QEvent.Type.Hide and obj is self.target:
-            self.hide()  # inny widok albo zamknięta lista - obwódka nie zostaje w powietrzu
+            elif kind in (QEvent.Type.Hide, QEvent.Type.MouseButtonPress):
+                self.hide()  # inny widok, zamknięta lista albo klik - obwódka znika
         return False
 
     def follow(self) -> None:
@@ -449,229 +451,6 @@ class StatusDot(QWidget):
 # --- wizualizacja ruchu -----------------------------------------------------
 
 
-class Gauge(QWidget):
-    """Prędkościomierz: łuk 240°, znaczniki progów chodu i biegu, liczba na środku."""
-
-    def __init__(self, t: Theme) -> None:
-        super().__init__()
-        self.t = t
-        self.setFixedHeight(184)
-        self.setMinimumWidth(260)
-        self.max_speed = 10.0
-        self.walk_from = 0.8
-        self.run_from = 6.3
-        self.mode = "idle"  # idle | walk | run | offline
-        self.caption = "Brak danych"
-        self._value = 0.0
-        self._anim = QVariantAnimation(self)
-        self._anim.setDuration(420)
-        self._anim.setEasingCurve(ease(th.EASE_IN))
-        self._anim.valueChanged.connect(self._set_value)
-        self.setAccessibleName("Prędkość taśmy")
-
-    def _set_value(self, v: float) -> None:
-        self._value = float(v)
-        self.update()
-
-    def set_speed(self, speed: float, mode: str, caption: str) -> None:
-        changed = (mode, caption) != (self.mode, self.caption)
-        self.mode, self.caption = mode, caption
-        self.setAccessibleDescription(f"{fmt_num(speed)} km/h, {caption}")
-        if abs(speed - float(self._anim.endValue() or 0.0)) < 0.05:
-            if changed:
-                self.update()
-            return
-        self._anim.stop()
-        if not Motion.enabled:
-            self._set_value(speed)
-            return
-        self._anim.setStartValue(self._value)
-        self._anim.setEndValue(speed)
-        self._anim.start()
-
-    def _angle(self, speed: float) -> float:
-        frac = max(0.0, min(1.0, speed / self.max_speed))
-        return 210.0 - 240.0 * frac  # stopnie, 0 = godzina 3, przeciwnie do wskazówek
-
-    def paintEvent(self, _e: QEvent) -> None:
-        t = self.t
-        p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        side = min(self.width(), self.height() * 1.12)
-        rect = QRectF((self.width() - side) / 2 + 34, 30, side - 68, side - 68)
-        center = rect.center()
-        radius = rect.width() / 2
-
-        # tor
-        p.setPen(QPen(QColor(t.line), 12, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-        p.drawArc(rect, 210 * 16, -240 * 16)
-        # wartość
-        color = {"walk": t.accent, "run": t.run}.get(self.mode, t.text_2)
-        span = self._angle(self._value) - 210.0
-        if self._value > 0.05:
-            p.setPen(QPen(QColor(color), 12, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-            p.drawArc(rect, 210 * 16, round(span * 16))
-        # znaczniki progów
-        small = QFont(p.font())
-        small.setPixelSize(12)
-        p.setFont(small)
-        for speed, text in ((self.walk_from, "chód"), (self.run_from, "bieg")):
-            a = math.radians(self._angle(speed))
-            inner = QPointF(
-                center.x() + (radius - 16) * math.cos(a), center.y() - (radius - 16) * math.sin(a)
-            )
-            outer = QPointF(
-                center.x() + (radius + 8) * math.cos(a), center.y() - (radius + 8) * math.sin(a)
-            )
-            p.setPen(QPen(QColor(t.text_2), 2))
-            p.drawLine(inner, outer)
-            lbl = QPointF(
-                center.x() + (radius + 24) * math.cos(a), center.y() - (radius + 24) * math.sin(a)
-            )
-            p.drawText(
-                QRectF(lbl.x() - 24, lbl.y() - 9, 48, 18), Qt.AlignmentFlag.AlignCenter, text
-            )
-
-        # liczba
-        big = tabular(QFont(p.font()))
-        big.setPixelSize(round(radius * 0.52))
-        big.setWeight(QFont.Weight.DemiBold)
-        p.setFont(big)
-        p.setPen(QColor(t.text))
-        number = fmt_num(self._value)
-        h = QFontMetricsF(big).height()
-        p.drawText(
-            QRectF(rect.left(), center.y() - h * 0.62, rect.width(), h),
-            Qt.AlignmentFlag.AlignCenter,
-            number,
-        )
-        unit = QFont(p.font())
-        unit.setPixelSize(14)
-        unit.setWeight(QFont.Weight.Normal)
-        p.setFont(unit)
-        p.setPen(QColor(t.text_2))
-        p.drawText(
-            QRectF(rect.left(), center.y() + h * 0.30, rect.width(), 20),
-            Qt.AlignmentFlag.AlignCenter,
-            "km/h",
-        )
-        mode_font = QFont(p.font())
-        mode_font.setPixelSize(16)
-        mode_font.setWeight(QFont.Weight.DemiBold)
-        p.setFont(mode_font)
-        p.setPen(QColor(color if self.mode in ("walk", "run") else t.text_2))
-        p.drawText(
-            QRectF(0, center.y() + radius * 0.52, self.width(), 24),  # cała szerokość karty
-            Qt.AlignmentFlag.AlignCenter,
-            self.caption,
-        )
-
-
-class Belt(QWidget):
-    """Taśma bieżni: paski przesuwają się z prędkością proporcjonalną do taśmy."""
-
-    PX_PER_KMH = 14.0
-
-    def __init__(self, t: Theme) -> None:
-        super().__init__()
-        self.t = t
-        self.setFixedHeight(28)
-        self.speed = 0.0
-        self.offset = 0.0
-        self._timer = QTimer(self)
-        self._timer.setInterval(33)
-        self._timer.timeout.connect(self._tick)
-        self.setAccessibleName("Animacja taśmy")
-
-    def set_speed(self, speed: float) -> None:
-        self.speed = speed
-        running = speed > 0.05 and Motion.enabled
-        if running and not self._timer.isActive():
-            self._timer.start()
-        elif not running and self._timer.isActive():
-            self._timer.stop()
-            self.update()
-
-    def _tick(self) -> None:
-        self.offset = (self.offset + self.speed * self.PX_PER_KMH * 0.033) % 24
-        self.update()
-
-    def paintEvent(self, _e: QEvent) -> None:
-        t = self.t
-        p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        r = QRectF(self.rect()).adjusted(1, 1, -1, -1)
-        path = QPainterPath()
-        path.addRoundedRect(r, r.height() / 2, r.height() / 2)
-        p.setClipPath(path)
-        p.fillRect(r, QColor(t.bg))
-        stripe = QColor(t.control if self.speed > 0.05 else t.line)
-        p.setPen(QPen(stripe, 3))
-        x = -self.offset
-        while x < r.width() + 24:
-            p.drawLine(QPointF(x + 8, r.top() + 6), QPointF(x, r.bottom() - 6))
-            x += 24
-        p.setClipping(False)
-        p.setPen(QPen(QColor(t.control), 2))
-        p.setBrush(Qt.BrushStyle.NoBrush)
-        p.drawPath(path)
-
-
-class Sparkline(QWidget):
-    """Prędkość z ostatniej minuty + linia progu biegu."""
-
-    def __init__(self, t: Theme) -> None:
-        super().__init__()
-        self.t = t
-        self.setFixedHeight(40)
-        self.points: list[tuple[float, float]] = []
-        self.max_speed = 10.0
-        self.run_from = 6.3
-        self.setAccessibleName("Wykres prędkości z ostatniej minuty")
-
-    def set_points(self, points: list[tuple[float, float]]) -> None:
-        self.points = points
-        self.update()
-
-    def paintEvent(self, _e: QEvent) -> None:
-        t = self.t
-        p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        w, h = self.width(), self.height()
-
-        def y(speed: float) -> float:
-            return h - 4 - (h - 8) * max(0.0, min(1.0, speed / self.max_speed))
-
-        p.setPen(QPen(QColor(t.line), 1, Qt.PenStyle.DashLine))
-        p.drawLine(QPointF(0, y(self.run_from)), QPointF(w, y(self.run_from)))
-        small = QFont(p.font())
-        small.setPixelSize(12)
-        p.setFont(small)
-        p.setPen(QColor(t.text_2))
-        p.drawText(
-            QRectF(0, y(self.run_from) - 16, w, 14),
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom,
-            "bieg",
-        )
-        p.drawText(
-            QRectF(0, 0, w, 14),
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
-            "ostatnia minuta",
-        )
-        if len(self.points) < 2:
-            return
-        now = self.points[-1][0]
-        path = QPainterPath()
-        for i, (ts, speed) in enumerate(self.points):
-            x = w - (now - ts) / 60.0 * w
-            if i == 0:
-                path.moveTo(x, y(speed))
-            else:
-                path.lineTo(x, y(speed))
-        p.setPen(QPen(QColor(t.accent), 2))
-        p.drawPath(path)
-
-
 class StatTile(QFrame):
     def __init__(self, title: str) -> None:
         super().__init__()
@@ -938,24 +717,6 @@ class TileGrid(QWidget):
         many = len(self.tiles)
         self._place(many if self.width() >= self.needed_width(many) else min(2, many))
         super().resizeEvent(e)  # type: ignore[arg-type]
-
-
-class Slider(QSlider):
-    """Suwak, którego nie zmienia przypadkowe kółko myszy przy przewijaniu strony.
-
-    Kółko działa dopiero, gdy suwak ma ostrość (kliknięty albo wybrany klawiaturą);
-    inaczej zdarzenie idzie dalej i przewija ustawienia.
-    """
-
-    def __init__(self, orientation: Qt.Orientation) -> None:
-        super().__init__(orientation)
-        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)  # bez fokusu od samego kółka
-
-    def wheelEvent(self, e: QWheelEvent) -> None:
-        if self.hasFocus():
-            super().wheelEvent(e)
-        else:
-            e.ignore()
 
 
 def fix_width(widget: QPushButton, texts: Iterable[str]) -> None:

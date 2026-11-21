@@ -210,7 +210,7 @@ class PeopleScreen:
             texts = QVBoxLayout()
             texts.setSpacing(0)
             exe = label(g.exe.name)
-            exe.setStyleSheet("font-weight: 600;")
+            exe.setObjectName("strong")
             texts.addWidget(exe)
             texts.addWidget(label(f"…\\{g.exe.parent.name}", "small"))
             row.addLayout(texts, 1)
@@ -322,7 +322,7 @@ class PeopleScreen:
         texts = QVBoxLayout()
         texts.setSpacing(0)
         n = label(title)
-        n.setStyleSheet("font-weight: 700;")
+        n.setObjectName("bold")
         texts.addWidget(n)
         texts.addWidget(label(sub, "small"))
         top.addLayout(texts, 1)
@@ -489,9 +489,16 @@ class PeopleScreen:
         if store is None:
             return
         self.close_popups()
-        if person_id != store.person.id:
-            store.switch_person(person_id)
-            log.info("Osoba: %s", store.person.name)
-            self.apply_profile()
+
+        def switch() -> None:
+            if person_id != store.person.id:
+                store.switch_person(person_id)
+                log.info("Osoba: %s", store.person.name)
+                self.apply_profile()
+            if self.pages.currentIndex() == self.SETTINGS:
+                self.refresh_settings()  # raz - motyw mógł już przebudować widok
+
         if self.pages.currentIndex() == self.SETTINGS:
-            self.rebuild_settings()
+            self.quietly(switch, th.T_PANEL_IN)  # w Ustawieniach: przenikanie, bez przeskoku
+        else:
+            switch()

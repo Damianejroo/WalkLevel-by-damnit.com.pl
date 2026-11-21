@@ -291,7 +291,7 @@ class SettingsScreen:
         texts = QVBoxLayout()
         texts.setSpacing(0)
         name = label("Zaawansowane")
-        name.setStyleSheet("font-weight: 600;")
+        name.setObjectName("strong")
         texts.addWidget(name)
         texts.addWidget(label("Symulator, nagrywanie, logi, dziennik, aktualizacje", "small"))
         al.addLayout(texts, 1)

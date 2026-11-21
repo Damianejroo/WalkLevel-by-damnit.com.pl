@@ -107,6 +107,7 @@ PAD_STOP_SETTLE_S = 0.4  # gałka przechodzi przez środek przy zmianie kierunku
 STOPPED = -1.0  # belt_target: taśma zatrzymana przez puszczoną gałkę
 TOAST_MS = 4000
 NO_FOCUS_ENV = "BIEZNIA_BEZ_FOKUSU"
+TEST_SCREEN_ENV = "BIEZNIA_EKRAN_TESTOW"
 DEFAULT_W, DEFAULT_H = 740, 890  # okno przy pierwszym starcie (potem z ostatniej sesji)
 LOOK_RELOAD = ("theme", "large_text", "profile_color")
 
@@ -367,19 +368,15 @@ class Cover(QWidget):
         if self.band is not None and not self.new.isNull():
             self._paint_band(QPainter(self))
             return
-        frame = self.old
-        if not self.new.isNull() and self.new.size() == self.old.size():
-            # dokładnie (1-p)*stary + p*nowy, także przezroczystość tła okna (tryb Source
-            # z kryciem to interpolacja; zwykłe nakładanie zgęszczałoby półprzezroczyste tło)
-            frame = QPixmap(self.old)
-            mix = QPainter(frame)
-            mix.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
-            mix.setOpacity(self.progress)
-            mix.drawPixmap(0, 0, self.new)
-            mix.end()
+        # stary obraz zastępuje okno, nowy na nim z kryciem p: tryb Source z kryciem to
+        # dokładnie (1-p)*stary + p*nowy, także przezroczystość tła okna; rysowane wprost
+        # na ekran - bez tworzenia nowego obrazu w każdej klatce
         p = QPainter(self)
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)  # zastępuje okno
-        p.drawPixmap(0, 0, frame)
+        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+        p.drawPixmap(0, 0, self.old)
+        if not self.new.isNull() and self.new.size() == self.old.size() and self.progress > 0:
+            p.setOpacity(self.progress)
+            p.drawPixmap(0, 0, self.new)
 
 
 TOOLTIP_QSS = (  # podpowiedzi to osobne okna - styl całej aplikacji, jeden dla obu motywów
@@ -492,6 +489,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
     control_body: k.SmoothBox
     mode_view: Segmented
     profile_rows: dict[str, k.ChoiceRow]
+    history_built: str
     palette: k.PalettePicker
     device_label: QLabel
     forget_btn: HoldButton
@@ -743,6 +741,8 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         if isinstance(geo, list) and len(geo) == 4 and all(isinstance(v, int) for v in geo):
             x, y, width, height = geo
             screen = QGuiApplication.screenAt(QPoint(x + width // 2, y + 20))
+            if os.environ.get(TEST_SCREEN_ENV) == "1" and screen is not self.home_screen():
+                screen = None  # testy i pomiary: tylko ekran testowy
             if screen is not None:
                 area = screen.availableGeometry()
                 width = max(w.minimumWidth(), min(width, area.width()))
@@ -754,8 +754,18 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
                 return
         self.center_window(w)
 
+    def home_screen(self) -> Any:
+        """Ekran okna: główny; dla testów i pomiarów (BIEZNIA_EKRAN_TESTOW=1) - inny niż główny,
+        żeby okna testowe nie przeszkadzały w pracy."""
+        primary = self.qt.primaryScreen()
+        if os.environ.get(TEST_SCREEN_ENV) == "1":
+            others = [s for s in self.qt.screens() if s is not primary]
+            if others:
+                return others[0]
+        return primary
+
     def center_window(self, w: QWidget) -> None:
-        area = self.qt.primaryScreen().availableGeometry()
+        area = self.home_screen().availableGeometry()
         width = min(DEFAULT_W, area.width() - 40)
         height = min(DEFAULT_H, area.height() - 60)
         w.move(area.x() + (area.width() - width) // 2, area.y() + (area.height() - height) // 2)
@@ -1105,7 +1115,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             if QGuiApplication.screenAt(point + QPoint(28, 28)) is not None:
                 self.bubble.move(point)
                 return
-        area = self.qt.primaryScreen().availableGeometry()  # domyślnie: prawa krawędź, środek
+        area = self.home_screen().availableGeometry()  # domyślnie: prawa krawędź, środek
         self.bubble.move(area.right() - FloatingToggle.SIZE - 24, area.center().y())
 
     def on_bubble_moved(self, point: QPoint) -> None:

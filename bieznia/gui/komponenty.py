@@ -596,7 +596,7 @@ class Stepper(QWidget):
         texts = QVBoxLayout()
         texts.setSpacing(0)
         name = label(title)
-        name.setStyleSheet("font-weight: 600;")
+        name.setObjectName("strong")
         texts.addWidget(name)
         self.sub_label = label(sub, "small")
         if not sub:
@@ -621,12 +621,7 @@ class Stepper(QWidget):
         self.shown.setAccessibleName(f"{title}: wpisz wartość")
         self.shown.setToolTip("Kliknij i wpisz wartość, np. 2,3")
         self.shown.setReadOnly(fmt is not None)  # tekst zamiast liczby (np. „stop”)
-        self.shown.setStyleSheet(
-            f"QLineEdit {{ font-weight: 700; font-size: 15px; border: 1px solid transparent;"
-            f" border-radius: 8px; background: transparent; color: {t.text}; }}"
-            f" QLineEdit:hover {{ border-color: {t.line}; }}"
-            f" QLineEdit:focus {{ border-color: {t.accent}; background: {t.surface_2}; }}"
-        )
+        self.shown.setObjectName("stepvalue")  # wygląd z arkusza stylów widoku
         self.shown.setFont(tabular(self.shown.font()))
         self.shown.editingFinished.connect(self._typed)
         self.shown.installEventFilter(self)
@@ -862,21 +857,21 @@ class ChoiceRow(QPushButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setAccessibleName(f"{title}{' (wybrany)' if active else ''}. {sub}")
         if active:
-            self.setStyleSheet(f"QPushButton#row {{ border: 2px solid {accent}; }}")
+            self.setProperty("active", True)  # ramka w kolorze akcentu - z arkusza stylów
         lay = QHBoxLayout(self)
         lay.setContentsMargins(10, 6, 8, 6)
         lay.setSpacing(10)
         dot = QLabel()
         dot.setFixedSize(20, 20)
-        ring = f"6px solid {accent}" if active else f"2px solid {t.control}"
-        dot.setStyleSheet(f"border: {ring}; border-radius: 10px;")
+        dot.setObjectName("ring")
+        dot.setProperty("active", active)
         dot.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         lay.addWidget(dot)
         lay.addWidget(picture(pix, pix_size))
         texts = QVBoxLayout()
         texts.setSpacing(0)
         name = ElidedLabel(title, "")
-        name.setStyleSheet("font-weight: 600;")
+        name.setObjectName("strong")
         self.sub = label(sub, "small")
         for w in (name, self.sub):
             w.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
@@ -899,14 +894,14 @@ class AddRow(QPushButton):
         self.setFixedHeight(50)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setAccessibleName(text)
-        self.setStyleSheet("QPushButton#row { border-style: dashed; }")
+        self.setProperty("dashed", True)
         lay = QHBoxLayout(self)
         lay.setContentsMargins(14, 4, 14, 4)
         lay.setSpacing(10)
         icon = glyph(G_ADD, t.accent)
         lay.addWidget(icon)
         txt = label(text)
-        txt.setStyleSheet(f"font-weight: 600; color: {t.accent};")
+        txt.setObjectName("accent")
         lay.addWidget(txt, 1)
         for w in (icon, txt):
             w.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
@@ -948,7 +943,8 @@ class CheckRow(QPushButton):
         texts = QVBoxLayout()
         texts.setSpacing(0)
         name = label(title)
-        name.setStyleSheet("font-weight: 600;" if not indent else "")
+        if not indent:
+            name.setObjectName("strong")
         texts.addWidget(name)
         if sub:
             texts.addWidget(label(sub, "small"))
@@ -990,9 +986,6 @@ class Popup(QFrame):
         self.lay.setContentsMargins(6, 6, 6, 6)
         self.lay.setSpacing(2)
         self.hide()
-        app = QApplication.instance()  # klik gdziekolwiek w oknie (nie tylko w samym tle)
-        if app is not None:
-            app.installEventFilter(self)
 
     def add_row(
         self, pix: QPixmap, size: int, title: str, sub: str, active: bool, accent: str
@@ -1014,7 +1007,7 @@ class Popup(QFrame):
         texts.setSpacing(0)
         name = ElidedLabel(title, "")  # długie nazwy z wielokropkiem, lista się nie rozjeżdża
         if active:
-            name.setStyleSheet("font-weight: 700;")
+            name.setObjectName("bold")
         texts.addWidget(name)
         if sub:
             texts.addWidget(label(sub, "small"))
@@ -1052,6 +1045,9 @@ class Popup(QFrame):
         self.raise_()
         self.show()
         self.setFocus()
+        app = QApplication.instance()  # klik gdziekolwiek - tylko póki lista jest otwarta
+        if app is not None:
+            app.installEventFilter(self)
 
     def eventFilter(self, obj: QObject, e: QEvent) -> bool:
         if self.isVisible() and e.type() == QEvent.Type.MouseButtonPress:
@@ -1061,6 +1057,9 @@ class Popup(QFrame):
         return False
 
     def hideEvent(self, e: QHideEvent) -> None:
+        app = QApplication.instance()
+        if app is not None:
+            app.removeEventFilter(self)
         # fokus wraca do okna bez powodu "z klawiatury" - bez obwódki na sąsiednim przycisku
         parent = self.parentWidget()
         focus = QApplication.focusWidget()
@@ -1180,100 +1179,12 @@ def show_pending(layout: QLayout) -> None:
             show_pending(inner)
 
 
-class _Ghost(QWidget):
-    """Zrzut starej zawartości, który gaśnie nad nową."""
-
-    def __init__(self, parent: QWidget) -> None:
-        super().__init__(parent)
-        self.pix = QPixmap()
-        self.opacity = 1.0
-        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self.hide()
-
-    def paintEvent(self, _e: QEvent) -> None:
-        if not self.pix.isNull():
-            p = QPainter(self)
-            p.setOpacity(self.opacity)
-            p.drawPixmap(0, 0, self.pix)
-
-
 class SmoothBox(QWidget):
-    """Kontener, którego zawartość podmienia się płynnie: wysokość rośnie albo maleje
-    (treść pod spodem spływa, a nie skacze), a stara zawartość przenika w nową."""
-
-    DURATION = 220
+    """Fragment karty przebudowywany w miejscu (np. ustawienia trybu); płynną zmianę
+    wysokości robi animacja na zrzutach (App.morph_card), nie ten kontener."""
 
     def __init__(self, spacing: int = 8) -> None:
         super().__init__()
         self.lay = QVBoxLayout(self)
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(spacing)
-        self.ghost = _Ghost(self)
-        self.anim = QVariantAnimation(self)
-        self.anim.setEasingCurve(ease(th.EASE_IN))
-        self.anim.valueChanged.connect(self._step)
-        self.anim.finished.connect(self._done)
-        self._from = self._to = 0
-
-    def natural_height(self) -> int:
-        """Wysokość nowej zawartości - po nałożeniu stylu (czcionki, odstępy) na nowe elementy
-        i po tym, jak elementy zależne od szerokości (zawijanie, przełączniki) się ułożą."""
-        show_pending(self.lay)  # nowe elementy Qt pokazuje dopiero w następnej klatce
-        for child in self.findChildren(QWidget):
-            child.ensurePolished()
-        width = max(1, self.width())
-
-        def measure() -> int:
-            self.lay.invalidate()
-            self.lay.activate()
-            if self.lay.hasHeightForWidth():
-                return int(self.lay.totalHeightForWidth(width))
-            return int(self.lay.totalSizeHint().height())
-
-        height = measure()
-        for _ in range(3):  # ułożenie na próbę - elementy dopasowują się do szerokości
-            self.lay.setGeometry(QRect(0, 0, width, height))
-            again = measure()
-            if again == height:
-                break
-            height = again
-        return height
-
-    def swap(self, rebuild: Callable[[], None], background: str) -> None:
-        """rebuild() wypełnia self.lay od nowa (stara zawartość usuwa się sama)."""
-        if not (Motion.enabled and self.isVisible() and self.height() > 0):
-            rebuild()
-            return
-        self.anim.stop()
-        old_h = self.height()
-        shot = self.grab()
-        pix = QPixmap(shot.size())
-        pix.setDevicePixelRatio(shot.devicePixelRatio())
-        pix.fill(QColor(background))  # stara treść na tle karty - nowa nie prześwituje
-        painter = QPainter(pix)
-        painter.drawPixmap(0, 0, shot)
-        painter.end()
-        rebuild()
-        new_h = self.natural_height()
-        self.ghost.pix, self.ghost.opacity = pix, 1.0
-        self.ghost.setGeometry(0, 0, self.width(), old_h)
-        self.ghost.raise_()
-        self.ghost.show()
-        self._from, self._to = old_h, new_h
-        self.setFixedHeight(old_h)
-        self.anim.setStartValue(0.0)
-        self.anim.setEndValue(1.0)
-        self.anim.setDuration(self.DURATION)
-        self.anim.start()
-
-    def _step(self, value: object) -> None:
-        p = float(value)  # type: ignore[arg-type]
-        self.setFixedHeight(round(self._from + (self._to - self._from) * p))
-        self.ghost.opacity = max(0.0, 1.0 - p * 1.6)  # stara treść znika w pierwszej części
-        self.ghost.update()
-
-    def _done(self) -> None:
-        self.ghost.hide()
-        self.ghost.pix = QPixmap()
-        self.setMinimumHeight(0)
-        self.setMaximumHeight(16777215)

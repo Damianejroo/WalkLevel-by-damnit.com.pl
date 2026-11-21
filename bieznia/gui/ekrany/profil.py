@@ -128,7 +128,7 @@ class ProfileScreen:
                 texts = QVBoxLayout()
                 texts.setSpacing(0)
                 n = label(Path(str(exe)).name)
-                n.setStyleSheet("font-weight: 600;")
+                n.setObjectName("strong")
                 texts.addWidget(n)
                 texts.addWidget(label(f"…\\{Path(str(exe)).parent.name}", "small"))
                 holder = QWidget()
@@ -283,9 +283,17 @@ class ProfileScreen:
         if self.store is None:
             return
         self.close_popups()
-        if profile_id != self.store.profile.id:
-            self.store.switch_profile(profile_id)
-            log.info("Profil: %s", self.store.profile.name)
-            self.apply_profile()
+        store = self.store
+
+        def switch() -> None:
+            if profile_id != store.profile.id:
+                store.switch_profile(profile_id)
+                log.info("Profil: %s", store.profile.name)
+                self.apply_profile()
+            if self.pages.currentIndex() == self.SETTINGS:
+                self.refresh_settings()  # raz - motyw mógł już przebudować widok
+
         if self.pages.currentIndex() == self.SETTINGS:
-            self.rebuild_settings()
+            self.quietly(switch, th.T_PANEL_IN)  # w Ustawieniach: przenikanie, bez przeskoku
+        else:
+            switch()

@@ -322,7 +322,7 @@ def test_window_size_is_remembered(make: Any) -> None:
     dane.Store.create("Tester", "Mięta", {})
     app: gui.App = make()
     assert app.window is not None
-    area = app.qt.primaryScreen().availableGeometry()
+    area = app.home_screen().availableGeometry()
     app.window.move(area.x() + 30, area.y() + 40)
     app.window.resize(520, 700)
     close(app)
@@ -338,7 +338,7 @@ def test_window_off_screen_comes_back_to_the_middle(make: Any) -> None:
     store.save()
     app: gui.App = make()
     assert app.window is not None
-    area = app.qt.primaryScreen().availableGeometry()
+    area = app.home_screen().availableGeometry()
     assert area.contains(app.window.geometry().center())
 
 
@@ -1602,3 +1602,71 @@ def test_settings_after_wizard_show_people_and_profiles(make: Any) -> None:
     app.open_settings()
     page_texts = texts(current(app))
     assert "Osoby" in page_texts and "Profile gier" in page_texts
+
+
+def test_focus_ring_follows_keyboard_focus_without_global_filter(window: gui.App) -> None:
+    """Obwódka fokusu działa bez globalnego filtra zdarzeń (ten spowalniał animacje)."""
+    from PySide6.QtCore import QEvent, QPointF, Qt
+    from PySide6.QtGui import QMouseEvent
+
+    window.open_settings()
+    btn = window.toggle_btn
+    ring = window.ring
+    ring._focus_changed(None, btn)  # fokus z klawiatury (bez wciśniętej myszy)
+    assert ring.isVisible() and ring.geometry().contains(
+        btn.mapTo(window.window, btn.rect().center())
+    )
+    press = QMouseEvent(
+        QEvent.Type.MouseButtonPress,
+        QPointF(2, 2),
+        QPointF(2, 2),
+        Qt.MouseButton.LeftButton,
+        Qt.MouseButton.LeftButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+    QtWidgets.QApplication.sendEvent(btn, press)  # klik - obwódka znika
+    assert not ring.isVisible()
+    label_only = QtWidgets.QLabel("x", current(window))
+    ring._focus_changed(btn, label_only)  # element bez obsługi Tab - bez obwódki
+    assert not ring.isVisible()
+
+
+def test_popup_closes_on_click_elsewhere(window: gui.App) -> None:
+    from PySide6.QtCore import QEvent, QPointF, Qt
+    from PySide6.QtGui import QMouseEvent
+
+    add_person(window, "Druga")
+    window.open_person_popup()
+    pop = window.person_popup
+    assert pop is not None and pop.isVisible()
+    far = QPointF(5, 5)
+    press = QMouseEvent(
+        QEvent.Type.MouseButtonPress,
+        far,
+        window.status_title.mapToGlobal(far.toPoint()).toPointF(),
+        Qt.MouseButton.LeftButton,
+        Qt.MouseButton.LeftButton,
+        Qt.KeyboardModifier.NoModifier,
+    )
+    QtWidgets.QApplication.sendEvent(window.status_title, press)
+    assert not pop.isVisible()
+
+
+def test_profile_switch_in_settings_is_animated(window: gui.App) -> None:
+    from PySide6.QtTest import QTest
+
+    store = window.store
+    assert store is not None
+    store.add_profile("Gra", activate=False)
+    gui.Motion.enabled = True
+    try:
+        window.open_settings()
+        QTest.qWait(300)
+        cover = window.pages.cover
+        assert cover is not None
+        window.choose_profile(store.person.profiles[1].id)
+        assert cover.isVisible()  # przenikanie, a nie przeskok
+        QTest.qWait(400)
+        assert not cover.isVisible() and store.profile.name == "Gra"
+    finally:
+        gui.Motion.enabled = False

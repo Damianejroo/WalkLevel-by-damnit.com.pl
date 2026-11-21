@@ -224,6 +224,15 @@ QLabel#muted {{ color: {t.text_2}; font-size: {px(14)}; }}
 QLabel#small {{ color: {t.text_2}; font-size: {px(12)}; }}
 QLabel#title {{ font-size: {px(20)}; font-weight: 600; }}
 QLabel#section {{ color: {t.text_2}; font-size: {px(13)}; font-weight: 600; }}
+QLabel#strong {{ font-weight: 600; }}
+QLineEdit#stepvalue {{ font-weight: 700; font-size: {px(15)}; border: 1px solid transparent;
+    border-radius: 8px; background: transparent; color: {t.text}; padding: 0; }}
+QLineEdit#stepvalue:hover {{ border-color: {t.line}; }}
+QLineEdit#stepvalue:focus {{ border-color: {t.accent}; background: {t.surface_2}; }}
+QLabel#bold {{ font-weight: 700; }}
+QLabel#accent {{ font-weight: 600; color: {t.accent}; }}
+QLabel#ring {{ border: 2px solid {t.control}; border-radius: 10px; }}
+QLabel#ring[active="true"] {{ border: 6px solid {t.accent}; }}
 QLabel#statValue {{ font-size: {px(20)}; font-weight: 600; }}
 QLabel#danger {{ color: {t.danger}; font-size: {px(14)}; }}
 QPushButton {{ border-radius: {RADIUS}px; padding: 0 {px(16)}; font-weight: 600;
@@ -239,6 +248,8 @@ QPushButton#icon {{ font-family: "{ICON_FONT}", "{ICON_FALLBACK}"; font-size: {p
     font-weight: 400; padding: 0; border-color: transparent; background: transparent; }}
 QPushButton#icon:hover {{ background: {t.surface_2}; border-color: {t.control}; }}
 QPushButton#row {{ text-align: left; padding: 0 {px(14)}; font-weight: 400; }}
+QPushButton#row[active="true"] {{ border: 2px solid {t.accent}; }}
+QPushButton#row[dashed="true"] {{ border-style: dashed; }}
 QPushButton#seg {{ border: none; border-radius: {RADIUS - 3}px; background: transparent;
     color: {t.text_2}; font-weight: 600; padding: 0 {px(10)}; }}
 QPushButton#seg:hover:!checked {{ color: {t.text}; }}
