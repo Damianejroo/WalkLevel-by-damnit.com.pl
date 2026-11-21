@@ -458,7 +458,7 @@ class SettingsScreen:
                 st.changed.connect(lambda v, r=real: self.on_belt_speed(r, v))
                 box.addWidget(st)
         else:
-            self.pad_status = label("", "small")
+            self.pad_status = label(self.pad_status_text(), "small")  # od razu - bez skoku
             self.pad_status.setWordWrap(True)
             box.addWidget(self.pad_status)
             box.addWidget(
@@ -513,7 +513,7 @@ class SettingsScreen:
                     self.profile_summary(store.profile.settings)
                 )
         self.settings_view = self.settings["direction"]
-        self.control_body.swap(self.build_control_settings, self.t.surface)
+        self.morph_card(self.control_body, self.build_control_settings)
         if self.pages.currentIndex() == self.SETTINGS:
             # widoczny widok jest aktualny; ukryty mógł być nieaktualny już wcześniej -
             # wtedy przebuduje się przy wejściu
@@ -532,7 +532,7 @@ class SettingsScreen:
     def show_mode_settings(self: App, mode: str) -> None:
         """Podgląd i zmiana ustawień innego trybu - aktywny tryb zostaje."""
         self.settings_view = mode
-        self.control_body.swap(self.build_control_settings, self.t.surface)
+        self.morph_card(self.control_body, self.build_control_settings)
 
     def render_ladder(self: App) -> None:
         if self.step_ladder is None:
@@ -621,7 +621,7 @@ class SettingsScreen:
             return
         self.change("pad_steps", list(gamepad.PRESETS[count]))
         self.belt_target = None
-        self.control_body.swap(self.build_control_settings, self.t.surface)
+        self.morph_card(self.control_body, self.build_control_settings)
         self.render_zones()
 
     def on_pad_idle(self: App, mode: str) -> None:

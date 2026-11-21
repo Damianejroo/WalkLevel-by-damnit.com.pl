@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QCoreApplication, QEvent, QPoint, Qt, QTimer, QVariantAnimation
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QRectF, Qt, QTimer, QVariantAnimation
 from PySide6.QtGui import (
     QCloseEvent,
     QColor,
@@ -254,11 +254,12 @@ class Cover(QWidget):
         self.old = QPixmap()
         self.new = QPixmap()
         self.progress = 0.0
+        self.band: tuple[int, int, int] | None = None  # (góra karty, wys. stara, wys. nowa)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.anim = QVariantAnimation(self)
         self.anim.setStartValue(0.0)
         self.anim.setEndValue(1.0)
-        self.anim.setEasingCurve(ease(th.EASE_IN))
+        self.anim.setEasingCurve(ease(th.EASE_SMOOTH))
         self.anim.valueChanged.connect(self._step)
         self.anim.finished.connect(self._done)
         self.hide()
@@ -274,6 +275,7 @@ class Cover(QWidget):
         self.old = self._grab()
         self.new = QPixmap()
         self.progress = 0.0
+        self.band = None
         self.setGeometry(self.area.geometry())
         self.raise_()
         self.show()
@@ -292,18 +294,78 @@ class Cover(QWidget):
         self.anim.setDuration(ms)
         self.anim.start()
 
+    def morph(self, top: int, old_h: int, new_h: int, ms: int) -> None:
+        """Zmiana wysokości fragmentu (np. karty od y=top) bez przeliczania układu w klatkach.
+
+        Nad fragmentem okno zostaje żywe (np. jadące podświetlenie przełącznika); fragment
+        przenika ze starego w nowy i odsłania się do nowej wysokości; wszystko pod nim
+        zjeżdża jako obraz. Każda klatka to tylko kopiowanie obrazów - płynnie także przy
+        dużych widokach.
+        """
+        if not self.isVisible():
+            return
+        if ms <= 0 or not Motion.enabled:
+            self._done()
+            return
+        self.hide()
+        self.new = self._grab()
+        self.band = (top, old_h, new_h)
+        self.show()
+        self.raise_()
+        self.anim.stop()
+        self.anim.setDuration(ms)
+        self.anim.start()
+
     def _step(self, value: Any) -> None:
         self.progress = float(value)
-        self.update()
+        if self.band is not None:
+            self.update(0, self.band[0], self.width(), self.height() - self.band[0])
+        else:
+            self.update()
 
     def _done(self) -> None:
         self.anim.stop()
         self.hide()
         self.old = QPixmap()
         self.new = QPixmap()
+        self.band = None
+
+    def _paint_band(self, p: QPainter) -> None:
+        assert self.band is not None
+        top, h0, h1 = self.band
+        width, height = self.width(), self.height()
+        prog = self.progress
+        h = round(h0 + (h1 - h0) * prog)
+        dpr = self.old.devicePixelRatio()
+
+        def src(y: float, rows: float) -> QRectF:  # wiersze obrazu (piksele urządzenia)
+            return QRectF(0, y * dpr, width * dpr, rows * dpr)
+
+        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+        # tło karty pod fragmentem: wiersz tuż nad nim (sama karta) rozciągnięty w dół
+        p.drawPixmap(QRectF(0, top, width, h), self.new, src(top - 1, 1))
+        # najpierw gaśnie stara treść, potem pojawia się nowa - bez nakładania się napisów
+        new_alpha = min(1.0, max(0.0, (prog - 0.3) / 0.7))
+        old_alpha = min(1.0, max(0.0, 1.0 - prog / 0.4))
+        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+        shown = min(h, h1)
+        p.setOpacity(new_alpha)
+        p.drawPixmap(QRectF(0, top, width, shown), self.new, src(top, shown))
+        old_rows = min(h, h0)
+        p.setOpacity(old_alpha)
+        p.drawPixmap(QRectF(0, top, width, old_rows), self.old, src(top, old_rows))
+        p.setOpacity(1.0)
+        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+        # wszystko pod fragmentem: przesuwa się razem z jego dolną krawędzią
+        below, start = (self.old, top + h0) if h1 > h0 else (self.new, top + h1)
+        rows = height - start
+        p.drawPixmap(QRectF(0, top + h, width, rows), below, src(start, rows))
 
     def paintEvent(self, _e: QPaintEvent) -> None:
         if self.old.isNull():
+            return
+        if self.band is not None and not self.new.isNull():
+            self._paint_band(QPainter(self))
             return
         frame = self.old
         if not self.new.isNull() and self.new.size() == self.old.size():
@@ -737,6 +799,43 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             if area is not None and scroll:
                 area.verticalScrollBar().setValue(scroll)
 
+    def morph_card(self, body: QWidget, rebuild: Any) -> None:
+        """Przebudowa fragmentu ekranu (np. karty sterowania) z płynną zmianą wysokości:
+        układ od razu docelowy, a na ekranie animacja zrzutów (Cover.morph)."""
+        cover = self.pages.cover
+        visible = (
+            cover is not None
+            and Motion.enabled
+            and self.window is not None
+            and self.window.isVisible()
+            and body.isVisible()
+        )
+        if not visible:
+            rebuild()
+            return
+        assert cover is not None
+        top = body.mapTo(self.pages, QPoint(0, 0)).y()
+        old_h = body.height()
+        cover.capture(self.pages.background)
+        rebuild()
+        # nowe elementy Qt pokazuje dopiero w następnej klatce - tu od razu, żeby zrzut
+        # i wysokość były już docelowe
+        lay = body.layout()
+        if lay is not None:
+            k.show_pending(lay)
+        page = self.pages.currentWidget()
+        if page is not None:
+            # do skutku: elementy dopasowujące się do szerokości mogą zmienić wysokość jeszcze
+            # raz - na końcu animacji nic nie może dociągać
+            last = -1
+            for _ in range(6):
+                QCoreApplication.sendPostedEvents()
+                settle_layout(page)
+                if body.height() == last:
+                    break
+                last = body.height()
+        cover.morph(top, old_h, body.height(), th.T_MORPH)
+
     def quietly(self, change: Any, ms: int = th.T_COLOR) -> None:
         """Zmiana układu bez mrugania: zrzut przed, zmiana i ułożenie pod spodem, przenikanie."""
         cover = self.pages.cover if (self.window is not None and self.window.isVisible()) else None
@@ -1135,15 +1234,18 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         if self.step_ladder is None or self.pages.currentIndex() != self.SETTINGS:
             return
         state = self.pad_state
-        if state is None:
-            text = "Nie widzę pada. Podłącz DualSense albo pada Xbox (kablem albo Bluetooth)."
-        else:
-            step = self.pad_step + 1
-            text = f"{state.name}: wychylenie {round(state.deflection * 100)}%, skok {step}."
+        text = self.pad_status_text()
         with contextlib.suppress(RuntimeError):  # karta właśnie przebudowana
             if self.pad_status.text() != text:
                 self.pad_status.setText(text)
             self.step_ladder.set_stick(state.deflection if state else 0.0)
+
+    def pad_status_text(self) -> str:
+        state = self.pad_state
+        if state is None:
+            return "Nie widzę pada. Podłącz DualSense albo pada Xbox (kablem albo Bluetooth)."
+        step = self.pad_step + 1
+        return f"{state.name}: wychylenie {round(state.deflection * 100)}%, skok {step}."
 
     def keyboard_target(self) -> tuple[float, str]:
         """Prędkość taśmy z trzymanych klawiszy: chód + bieg, sam chód albo nic."""

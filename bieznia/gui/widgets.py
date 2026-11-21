@@ -280,9 +280,10 @@ class Segmented(QFrame):
             self.buttons[key] = b
             lay.addWidget(b)
         self.pill: QRectF | None = None
+        self._pending = False
         self._pill_anim = QVariantAnimation(self)
-        self._pill_anim.setDuration(th.T_PANEL_IN)
-        self._pill_anim.setEasingCurve(ease(th.EASE_IN))
+        self._pill_anim.setDuration(th.T_SLIDE)
+        self._pill_anim.setEasingCurve(ease(th.EASE_SMOOTH))
         self._pill_anim.valueChanged.connect(self._move_pill)
         self.set_value(current)
 
@@ -311,11 +312,21 @@ class Segmented(QFrame):
         self._pill_anim.stop()
         self._pill_anim.setStartValue(start)
         self._pill_anim.setEndValue(end)
-        self._pill_anim.start()
+        self.pill = start  # do startu animacji podświetlenie stoi na starym miejscu
+        self._pending = True
+        # start po zakończeniu obsługi kliknięcia: przebudowa widoku po zmianie nie zjada
+        # początku animacji (bez tego podświetlenie przeskakiwało)
+        QTimer.singleShot(0, self._start_pill)
+
+    def _start_pill(self) -> None:
+        with contextlib.suppress(RuntimeError):
+            self._pending = False
+            if self._pill_anim.state() != QVariantAnimation.State.Running:
+                self._pill_anim.start()
 
     def paintEvent(self, e: QPaintEvent) -> None:
         super().paintEvent(e)  # ramka i tło z motywu
-        if self._pill_anim.state() != QVariantAnimation.State.Running:
+        if self._pill_anim.state() != QVariantAnimation.State.Running and not self._pending:
             self.pill = self._target()  # po zmianie rozmiaru - zawsze pod wybraną opcją
         if self.pill is None:
             return

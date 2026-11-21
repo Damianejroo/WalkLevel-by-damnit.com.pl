@@ -24,6 +24,9 @@ T_PANEL_IN = 220
 T_PANEL_OUT = 180
 EASE_IN = (0.2, 0.8, 0.2, 1.0)  # wejście
 EASE_OUT = (0.4, 0.0, 1.0, 1.0)  # wyjście
+EASE_SMOOTH = (0.4, 0.0, 0.2, 1.0)  # zmiana na miejscu: łagodny start i koniec
+T_MORPH = 280  # zmiana wysokości karty, przenikanie
+T_SLIDE = 260  # podświetlenie przełącznika
 
 
 @dataclass(frozen=True)

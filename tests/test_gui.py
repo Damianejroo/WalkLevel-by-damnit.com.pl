@@ -6,6 +6,7 @@ historia kroków, eksport i import, trzy tryby sterowania, kolory profili.
 
 from __future__ import annotations
 
+import itertools
 import json
 import os
 import queue
@@ -1529,8 +1530,11 @@ def image_difference(a: Any, b: Any) -> int:
 
 
 def test_mode_switch_in_settings_is_animated(window: gui.App) -> None:
-    """Zmiana trybu w Ustawieniach: karta płynnie zmienia wysokość, podświetlenie przełącznika
-    płynnie przesuwa się na nową opcję, nic nie przeskakuje."""
+    """Zmiana trybu w Ustawieniach: płynna animacja bez zacięć - każda klatka to tylko obraz
+    (bez przeliczania układu całego ekranu), podświetlenie przełącznika jedzie, karta pod
+    spodem od razu ma docelowy układ."""
+    import time as _time
+
     from PySide6.QtCore import QTimer
     from PySide6.QtTest import QTest
 
@@ -1540,41 +1544,41 @@ def test_mode_switch_in_settings_is_animated(window: gui.App) -> None:
     try:
         window.open_settings()
         QTest.qWait(300)
-        body = window.control_body
-        view = next(
-            s
-            for s in current(window).findChildren(gui.Segmented)
-            if s.accessibleName() == "Ustawienia trybu"
-        )
-        start_h = body.height()
-        heights: list[int] = []
+        view = window.mode_view
+        cover = window.pages.cover
+        assert cover is not None
+        stamps: list[float] = []
         pills: list[float] = []
+        progress: list[float] = []
+        bands: list[tuple[int, int, int]] = []
 
         def probe() -> None:
-            heights.append(body.height())
-            seg = next(
-                s
-                for s in current(window).findChildren(gui.Segmented)
-                if s.accessibleName() == "Ustawienia trybu"
-            )
-            if seg.pill is not None:
-                pills.append(seg.pill.x())
+            stamps.append(_time.perf_counter())
+            if view.pill is not None:
+                pills.append(view.pill.x())
+            if cover.isVisible():
+                progress.append(cover.progress)
+                if cover.band is not None:
+                    bands.append(cover.band)
 
         timer = QTimer()
-        timer.setInterval(10)
+        timer.setInterval(8)
         timer.timeout.connect(probe)
         timer.start()
+        t0 = _time.perf_counter()
         view.buttons["gamepad"].click()  # klawisze -> pad: karta rośnie
-        QTest.qWait(400)
+        handler_ms = (_time.perf_counter() - t0) * 1000
+        QTest.qWait(450)
         timer.stop()
-        end_h = body.height()
-        assert end_h > start_h
-        middle = {h for h in heights if start_h < h < end_h}
-        assert len(middle) >= 3, heights  # przez wartości pośrednie, nie skokiem
-        assert heights == sorted(heights)  # tylko w jedną stronę - bez drgania
-        assert len({round(x) for x in pills}) >= 3  # podświetlenie jedzie, nie przeskakuje
-        assert body.maximumHeight() > 10000  # po animacji karta znowu dopasowuje się sama
-        assert window.settings["direction"] == "keyboard"  # tylko podgląd innego trybu
+        gaps = [(b - a) * 1000 for a, b in itertools.pairwise(stamps)]
+        assert max(gaps) < 45, gaps  # animacja nie stoi w miejscu
+        assert len({round(x) for x in pills}) >= 4  # podświetlenie jedzie, nie przeskakuje
+        assert len({round(v, 2) for v in progress if 0 < v < 1}) >= 4  # zrzuty płynnie
+        assert not cover.isVisible()  # po wszystkim żywy widok, bez przykrycia
+        assert bands and bands[0][2] == window.control_body.height()  # cel = prawdziwa wysokość
+        assert bands[0][2] > bands[0][1] > 0  # pad ma więcej ustawień niż klawisze
+        assert window.step_ladder is not None and window.settings["direction"] == "keyboard"
+        assert handler_ms < 400
     finally:
         gui.Motion.enabled = False
 
