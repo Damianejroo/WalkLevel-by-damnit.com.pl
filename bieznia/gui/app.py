@@ -557,6 +557,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         w.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.settings["always_on_top"])
         self.place_window(w)
         w.show()
+        QTimer.singleShot(300, self.keep_on_screen)
         w.setFocus(Qt.FocusReason.OtherFocusReason)  # nic nie ma ostrości ani obwódki na starcie
         self.apply_direction()
         self.render_header()
@@ -565,21 +566,48 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.log_view.setPlainText("\n".join(self.log_lines))
 
     def place_window(self, w: QWidget) -> None:
-        """Rozmiar i miejsce z ostatniej sesji (jeśli nadal mieszczą się na ekranie)."""
-        area = self.qt.primaryScreen().availableGeometry()
+        """Rozmiar i miejsce z ostatniej sesji, jeśli całe okno mieści się na którymś ekranie.
+
+        Inaczej: wyśrodkowane na ekranie głównym. Zawsze jawne miejsce - przy kilku ekranach
+        z różną skalą okno bez pozycji potrafi skakać między nimi i wylądować poza ekranem.
+        """
         geo = self.settings.get("window_geometry")
         if isinstance(geo, list) and len(geo) == 4 and all(isinstance(v, int) for v in geo):
             x, y, width, height = geo
-            if QGuiApplication.screenAt(QPoint(x + width // 2, y + 20)) is not None:
-                w.move(x, y)  # najpierw ekran (inna skala DPI zmieniłaby rozmiar), potem rozmiar
-                w.resize(max(width, w.minimumWidth()), max(height, w.minimumHeight()))
+            screen = QGuiApplication.screenAt(QPoint(x + width // 2, y + 20))
+            if screen is not None:
+                area = screen.availableGeometry()
+                width = max(w.minimumWidth(), min(width, area.width()))
+                height = max(w.minimumHeight(), min(height, area.height()))
+                x = max(area.left(), min(x, area.right() - width))
+                y = max(area.top(), min(y, area.bottom() - height))
+                w.move(x, y)  # najpierw ekran (inna skala zmieniłaby rozmiar), potem rozmiar
+                w.resize(width, height)
                 return
-        w.resize(min(DEFAULT_W, area.width() - 40), min(DEFAULT_H, area.height() - 60))
+        self.center_window(w)
+
+    def center_window(self, w: QWidget) -> None:
+        area = self.qt.primaryScreen().availableGeometry()
+        width = min(DEFAULT_W, area.width() - 40)
+        height = min(DEFAULT_H, area.height() - 60)
+        w.move(area.x() + (area.width() - width) // 2, area.y() + (area.height() - height) // 2)
+        w.resize(width, height)
+
+    def keep_on_screen(self) -> None:
+        """Po pokazaniu: gdyby okno i tak było poza ekranami - na środek ekranu głównego."""
+        w = self.window
+        if w is None or w.isMinimized():
+            return
+        if QGuiApplication.screenAt(w.frameGeometry().center()) is None:
+            log.warning("Okno poza ekranem (%s) - przenoszę na środek", w.frameGeometry())
+            self.center_window(w)
 
     def remember_window(self) -> None:
         w = self.window
         if w is None or w.isMinimized() or w.isMaximized():
             return
+        if QGuiApplication.screenAt(w.frameGeometry().center()) is None:
+            return  # poza ekranem - nie zapamiętujemy
         self.settings["window_geometry"] = [w.x(), w.y(), w.width(), w.height()]
 
     def replace_page(self, index: int, widget: QWidget) -> None:

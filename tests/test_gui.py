@@ -331,6 +331,16 @@ def test_window_size_is_remembered(make: Any) -> None:
     assert again.window.x() == area.x() + 30
 
 
+def test_window_off_screen_comes_back_to_the_middle(make: Any) -> None:
+    store = dane.Store.create("Tester", "Mięta", {})
+    store.shared["window_geometry"] = [-25600, -25600, 740, 890]  # np. odłączony monitor
+    store.save()
+    app: gui.App = make()
+    assert app.window is not None
+    area = app.qt.primaryScreen().availableGeometry()
+    assert area.contains(app.window.geometry().center())
+
+
 def test_report_page_prepares_email_without_endpoint(
     window: gui.App, monkeypatch: pytest.MonkeyPatch
 ) -> None:
