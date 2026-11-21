@@ -431,6 +431,11 @@ def bare_worker() -> Any:
     worker._speed_confirmed = True
     worker._belt_kind = ""
     worker._auto_start = False
+    worker._requested_at = 0.0
+    worker._rssi = {}
+    from bieznia.ble.worker import SessionStats
+
+    worker._stats = SessionStats()
     return worker
 
 
@@ -805,3 +810,46 @@ def test_stick_during_stop_check_restarts_belt() -> None:
         [lambda w: w._commands.put_nowait("stop"), lambda w: w._queue_speed(2.5, True)],
     )
     assert belt.calls[:2] == ["stop", "start"]
+
+
+# --- logi: zapis szesnastkowy tylko gdy potrzebny -------------------------------------
+
+
+def test_raw_hex_only_at_start_and_for_bad_frames(caplog: pytest.LogCaptureFixture) -> None:
+    import logging
+
+    async def scenario() -> Any:
+        treadmill = FakeTreadmill()
+        driver, _ = await run_driver(treadmill)
+        driver.codec.candidates = ["v1"]
+        driver.raw_budget = 0  # po pierwszych ramkach połączenia
+        caplog.clear()
+        with caplog.at_level(logging.DEBUG, logger="bieznia.ble"):
+            await driver.poll()
+            await asyncio.sleep(0.05)
+            await driver.send(kingsmith.CMD_STOP)
+            await asyncio.sleep(0.05)
+            channel = driver.active
+            driver._on_notify(channel, None, bytearray(b"!!!zepsute!!!\r"))
+        return driver
+
+    driver = asyncio.run(scenario())
+    text = caplog.text
+    assert "servers getProp" not in text  # zapytania tylko jako liczniki
+    assert ">> props runState 0" in text  # polecenia zawsze, bez hex
+    assert "21 21 21" in text  # ramka nie do odszyfrowania z hex
+    assert driver.counts["polls"] >= 1 and driver.counts["undecoded"] == 1
+
+
+def test_session_summary_line(caplog: pytest.LogCaptureFixture) -> None:
+    import logging
+
+    from bieznia.ble.worker import SessionStats
+
+    stats = SessionStats(
+        speed_sent=5, speed_ok=4, speed_failed=1, resends=2, latencies=[1.0, 3.5, 2.0]
+    )
+    with caplog.at_level(logging.INFO, logger="bieznia.ble"):
+        stats.log_summary({"frames": 120, "polls": 60, "undecoded": 0})
+    assert "Podsumowanie sesji" in caplog.text
+    assert "typowo 2.0 s, najdłużej 3.5 s" in caplog.text

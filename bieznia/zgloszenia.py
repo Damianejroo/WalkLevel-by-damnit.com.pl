@@ -3,7 +3,9 @@
 Co trafia do paczki (to samo pokazuje okno przed wysłaniem):
 - opis problemu i opcjonalny kontakt wpisane przez użytkownika,
 - wersja aplikacji, wersja Windows, ustawienia aplikacji (progi, wybrana bieżnia),
-- logi aplikacji i Bluetooth (ostatnie wpisy) oraz ostatni raport diagnostyczny.
+- logi aplikacji i Bluetooth z ostatnich 6 godzin (także starsze pliki logu),
+- podsumowanie.txt: najważniejsze zdarzenia wyciągnięte z logów (polecenia, błędy, sesje),
+- ostatni raport diagnostyczny.
 Nic nie jest wysyłane bez kliknięcia Wyślij.
 """
 
@@ -12,8 +14,10 @@ from __future__ import annotations
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
+import time
 import urllib.parse
 import urllib.request
 import uuid
@@ -23,7 +27,13 @@ from pathlib import Path
 
 from bieznia import APP_NAME, CONTACT, __version__
 
-MAX_LOG_BYTES = 1_000_000  # z każdego logu bierzemy tylko koniec
+MAX_LOG_BYTES = 1_000_000  # z każdego pliku logu bierzemy tylko koniec
+RECENT_S = 6 * 3600  # starsze pliki logu (bluetooth.log.1 ...) z ostatnich 6 godzin
+# Linie, które trafiają do podsumowania - wyniki poleceń, połączenia, błędy.
+SUMMARY_LINE = re.compile(
+    r"Podsumowanie sesji|Start:|Stop:|Prędkość [0-9.]+:|nie przyjęła|nie zareagowała|"
+    r"Połączenie |rozłączyła|Telemetria|Bieżnia \d|Zaktualizowano|WARNING|ERROR|CRITICAL"
+)
 MAX_REPORT_BYTES = 8 * 1024 * 1024
 TIMEOUT_S = 30
 
@@ -40,9 +50,40 @@ def _tail(path: Path, limit: int = MAX_LOG_BYTES) -> bytes:
         return f.read()
 
 
+def recent_logs(logs: Path, now: float | None = None) -> list[Path]:
+    """Bieżące pliki logu i ich starsze części (np. bluetooth.log.1), jeśli są świeże."""
+    if not logs.exists():
+        return []
+    now = time.time() if now is None else now
+    files = sorted(logs.glob("*.log"))
+    for old in sorted(logs.glob("*.log.[0-9]")):
+        if now - old.stat().st_mtime <= RECENT_S:
+            files.append(old)
+    return files
+
+
+def summary_text(logs: list[Path]) -> str:
+    """Najważniejsze linie z logów aplikacji - od najstarszych do najnowszych."""
+    lines: list[str] = []
+    for path in sorted(
+        (p for p in logs if p.name.startswith("bieznia.log")),
+        key=lambda p: p.stat().st_mtime,
+    ):
+        text = _tail(path).decode("utf-8", errors="replace")
+        lines += [line for line in text.splitlines() if SUMMARY_LINE.search(line)]
+    counts = {
+        "polecenia przyjęte": sum("przyjęt" in line for line in lines),
+        "bez reakcji": sum("nie przyjęła" in line or "nie zareagowała" in line for line in lines),
+        "rozłączenia": sum("rozłączyła" in line for line in lines),
+        "błędy": sum(" ERROR " in line or " CRITICAL " in line for line in lines),
+    }
+    head = " · ".join(f"{k}: {v}" for k, v in counts.items())
+    return f"{head}\n\n" + "\n".join(lines[-2000:]) + "\n"
+
+
 def report_files(root: Path = Path()) -> list[Path]:
     logs = root / "logs"
-    files = sorted(logs.glob("*.log")) if logs.exists() else []
+    files = recent_logs(logs)
     reports = sorted(logs.glob("diagnostyka-*.txt")) if logs.exists() else []
     if reports:
         files.append(reports[-1])
@@ -68,7 +109,11 @@ def build_report(description: str, contact: str = "", root: Path = Path()) -> Pa
     }
     with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("zgloszenie.json", json.dumps(info, ensure_ascii=False, indent=2))
-        for file in report_files(root):
+        files = report_files(root)
+        logs = [f for f in files if ".log" in f.name]
+        if logs:
+            zf.writestr("podsumowanie.txt", summary_text(logs))
+        for file in files:
             zf.writestr(f"{file.parent.name}/{file.name}", _tail(file))
     if path.stat().st_size > MAX_REPORT_BYTES:
         path.unlink()

@@ -46,6 +46,9 @@ CONTROL_GAP_S = 0.4
 # Gdy bieżnia sama wysyła dane (subskrypcja KS Fit, co ok. 2 s), odpytujemy rzadziej -
 # KS Fit nie zasypuje jej zapytaniami, a my gubiliśmy ok. 40% poleceń przy pytaniu co 0,75 s.
 CALM_POLL_S = 2.0
+# Surowy zapis szesnastkowy tylko na początku połączenia (wykrywanie tablicy szyfru)
+# i dla ramek nie do odszyfrowania - reszta to powtórzenie odszyfrowanego tekstu.
+RAW_FRAMES_AFTER_CONNECT = 40
 BUSY_POLL_S = 0.75  # ControlMode i runState jedno po drugim - drugie potrafi przepaść
 # X21 po cichu gubi część poleceń prędkości, najczęściej te wysłane tuż po jego własnej
 # ramce z danymi (log testera: 6 z 12 zgubionych przyszło do 0,3 s po ramce). Czekamy chwilę.
@@ -165,6 +168,8 @@ class KingSmithDriver:
         self.props_times: list[float] = []
         self.stats_at = 0.0
         self.write_lock = asyncio.Lock()  # całe wiadomości nie mogą się przeplatać
+        self.raw_budget = RAW_FRAMES_AFTER_CONNECT
+        self.counts = {"polls": 0, "acks": 0, "frames": 0, "undecoded": 0, "commands": 0}
         self.run_state: int | None = None
         self.control_mode: int | None = None
         self.last_error: int | None = None
@@ -189,7 +194,16 @@ class KingSmithDriver:
     async def send(self, text: str) -> None:
         data = self.codec.encode(text)
         async with self.write_lock:
-            log.debug(">> %s  [%s] %s", text or "(pusta)", self.codec.table, data.hex(" "))
+            poll = text.startswith("servers getProp")
+            if poll:
+                self.counts["polls"] += 1
+            else:
+                self.counts["commands"] += 1
+            if self.raw_budget > 0:
+                self.raw_budget -= 1
+                log.debug(">> %s  [%s] %s", text or "(pusta)", self.codec.table, data.hex(" "))
+            elif not poll:
+                log.debug(">> %s", text)
             for channel in [self.active] if self.active else self.channels:
                 await self._write(channel, data)
 
@@ -230,6 +244,7 @@ class KingSmithDriver:
         if self.run_state == 1:
             log.info("Taśma już jedzie - nie wysyłam startu")
             return "started"
+        began = time.monotonic()
         for attempt in range(1, START_ATTEMPTS + 1):
             self.last_error = None
             await self._quiet()
@@ -239,7 +254,7 @@ class KingSmithDriver:
             await self.send(kingsmith.CMD_START)
             verdict = await self._verdict(time.monotonic(), 1)
             if verdict == "ok":
-                log.info("Bieżnia ruszyła (próba %d)", attempt)
+                log.info("Start: przyjęty po %.1f s (próba %d)", time.monotonic() - began, attempt)
                 return "started"
             if verdict == "error":
                 log.warning("Bieżnia odmówiła startu (kod %s), próba %d", self.last_error, attempt)
@@ -252,6 +267,7 @@ class KingSmithDriver:
 
     async def stop_belt(self, verify: bool = True) -> None:
         """Stop od razu; potem sprawdzamy w danych i w razie potrzeby ponawiamy."""
+        began = time.monotonic()
         for attempt in range(1, STOP_ATTEMPTS + 1):
             self.last_error = None
             await self.send(kingsmith.CMD_STOP)
@@ -260,7 +276,7 @@ class KingSmithDriver:
                 return
             verdict = await self._verdict(time.monotonic(), 0)
             if verdict == "ok":
-                log.info("Taśma zatrzymana (próba %d)", attempt)
+                log.info("Stop: przyjęty po %.1f s (próba %d)", time.monotonic() - began, attempt)
                 return
             log.warning("Bieżnia nie zareagowała na stop (próba %d) - ponawiam", attempt)
             await self._quiet()
@@ -294,13 +310,21 @@ class KingSmithDriver:
     # --- odbiór -------------------------------------------------------------
 
     def _on_notify(self, channel: Channel, _char: Any, data: bytearray) -> None:
-        log.debug("<< [%s] %s", channel.label, bytes(data).hex(" "))
-        for frame in channel.frames.feed(bytes(data)):
+        raw = bytes(data)
+        if self.raw_budget > 0:
+            self.raw_budget -= 1
+            log.debug("<< [%s] %s", channel.label, raw.hex(" "))
+        for frame in channel.frames.feed(raw):
             decoded = self.codec.decode(frame)
             if decoded is None:
-                log.debug("   (nie da się odszyfrować ramki)")
+                self.counts["undecoded"] += 1
+                log.debug("   (nie da się odszyfrować ramki) %s", frame.hex(" "))
                 continue
-            log.debug("   %s%s", decoded.text, "" if decoded.trusted else "  (niepewne)")
+            self.counts["frames"] += 1
+            if decoded.text.startswith("servers"):
+                self.counts["acks"] += 1  # odpowiedź na zapytanie - liczona, nie zapisywana
+            else:
+                log.debug("   %s%s", decoded.text, "" if decoded.trusted else "  (niepewne)")
             if self.active is None:
                 self.active = channel
                 log.info("Bieżnia odpowiada: %s", self.describe())
@@ -417,12 +441,16 @@ class KingSmithDriver:
         if len(times) >= 2:
             gaps = sorted(b - a for a, b in itertools.pairwise(times))
             log.info(
-                "Telemetria (%s): %d ramek z danymi w %.0f s, typowo co %.2f s, najdłużej %.2f s",
+                "Telemetria (%s): %d ramek z danymi w %.0f s, typowo co %.2f s, najdłużej %.2f s"
+                " · zapytania %d, odpowiedzi %d, nieodszyfrowane %d",
                 "KS Fit" if self.poll_command == kingsmith.TELEMETRY_PROPS else "QZ",
                 len(times),
                 STATS_EVERY_S,
                 gaps[len(gaps) // 2],
                 gaps[-1],
+                self.counts["polls"],
+                self.counts["acks"],
+                self.counts["undecoded"],
             )
 
 

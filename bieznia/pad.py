@@ -500,17 +500,25 @@ def discover() -> list[Source]:
 
 
 class PadReader:
-    """Pierwszy podłączony pad. Bez pada sprawdza co RESCAN_S, nie co klatkę."""
+    """Pierwszy podłączony pad. Bez pada sprawdza co RESCAN_S, nie co klatkę.
+
+    background=True: szukanie (10-40 ms: SetupAPI, winmm) idzie w osobnym wątku, żeby nie
+    przycinać okna; wynik odbiera następne read().
+    """
 
     def __init__(
         self,
         find: Callable[[], list[Source]] = discover,
         clock: Callable[[], float] = time.monotonic,
+        background: bool = False,
     ) -> None:
         self._find = find
         self._clock = clock
+        self._background = background
         self._source: Source | None = None
         self._next_scan = 0.0
+        self._found: list[Source] | None = None
+        self._scanning = False
 
     @property
     def name(self) -> str | None:
@@ -523,12 +531,31 @@ class PadReader:
                 return state
             log.info("Pad odłączony: %s", self._source.name)
             self._source = None
+        found, self._found = self._found, None
+        if found is not None:
+            return self._choose(found)
         now = self._clock()
-        if now < self._next_scan:
+        if now < self._next_scan or self._scanning:
             return None
         self._next_scan = now + RESCAN_S
+        if self._background:
+            self._scanning = True
+            threading.Thread(target=self._scan, name="pad-szukanie", daemon=True).start()
+            return None
+        return self._choose(self._find())
+
+    def _scan(self) -> None:
+        try:
+            self._found = self._find()
+        except Exception:
+            log.exception("Szukanie pada nie powiodło się")
+            self._found = []
+        finally:
+            self._scanning = False
+
+    def _choose(self, found: list[Source]) -> PadState | None:
         chosen: PadState | None = None
-        for source in self._find():
+        for source in found:
             state = source.read() if chosen is None else None
             if state is not None:
                 self._source, chosen = source, state

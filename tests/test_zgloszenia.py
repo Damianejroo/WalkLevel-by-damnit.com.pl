@@ -35,6 +35,7 @@ def test_report_contains_only_logs_and_settings(tmp_path: Path) -> None:
         "logs/bieznia.log",
         "logs/bluetooth.log",
         "logs/diagnostyka-20260102-100000.txt",  # tylko najnowszy raport
+        "podsumowanie.txt",
         "zgloszenie.json",
     ]
     assert info["opis"] == "Bieżnia się rozłącza" and info["kontakt"] == "nick#1"
@@ -69,3 +70,34 @@ def test_mailto_link_is_encoded(tmp_path: Path) -> None:
     assert link.startswith("mailto:kontakt@damnit.com.pl?subject=")
     assert "&" not in link.split("body=")[1]  # znak & z opisu zakodowany
     assert "zgloszenie-1.zip" in link
+
+
+def test_report_adds_recent_rotated_logs_and_summary(tmp_path: Path) -> None:
+    import os
+    import time
+
+    logs = tmp_path / "logs"
+    logs.mkdir()
+    (logs / "bieznia.log").write_text(
+        "10:00:01 INFO    bieznia.ble: Start: przyjęty po 1.6 s (próba 1)\n"
+        "10:00:02 INFO    bieznia: Okno gotowe po 0.4 s\n"
+        "10:05:00 WARNING bieznia.ble: Taśma nie przyjęła 2.5 km/h (jedzie 1.0) - ponawiam (1)\n"
+        "10:30:00 INFO    bieznia.ble: Podsumowanie sesji: 30 min\n",
+        encoding="utf-8",
+    )
+    (logs / "bluetooth.log").write_text("nowy\n", encoding="utf-8")
+    fresh = logs / "bluetooth.log.1"
+    fresh.write_text("sprzed godziny\n", encoding="utf-8")
+    stale = logs / "bluetooth.log.2"
+    stale.write_text("sprzed tygodnia\n", encoding="utf-8")
+    week_ago = time.time() - 7 * 86400
+    os.utime(stale, (week_ago, week_ago))
+    path = zgloszenia.build_report("test", root=tmp_path)
+    with zipfile.ZipFile(path) as zf:
+        names = set(zf.namelist())
+        summary = zf.read("podsumowanie.txt").decode("utf-8")
+    assert "logs/bluetooth.log.1" in names
+    assert "logs/bluetooth.log.2" not in names  # starszy niż 6 godzin
+    assert "Start: przyjęty" in summary and "Podsumowanie sesji" in summary
+    assert "Okno gotowe" not in summary  # tylko ważne zdarzenia
+    assert "polecenia przyjęte: 1" in summary and "bez reakcji: 1" in summary

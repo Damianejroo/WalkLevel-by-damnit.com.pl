@@ -262,7 +262,7 @@ class App:
             self.settings["pad_idle"] = "stop"
         if self.settings["direction"] not in ("keyboard", "gamepad", "treadmill"):
             self.settings["direction"] = "keyboard"
-        self.pad = gamepad.PadReader()
+        self.pad = gamepad.PadReader(background=True)
         self.pad_picker = gamepad.StepPicker()
         self.pad_state: gamepad.PadState | None = None
         self.pad_step = 0

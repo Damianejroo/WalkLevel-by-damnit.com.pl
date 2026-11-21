@@ -106,3 +106,26 @@ def test_sony_reports_usb_and_bluetooth() -> None:
     assert ds4_bt is not None and ds4_bt == (-1.0, -1.0)
     assert parse_sony(bytes([0x05, 1, 2, 3])) is None  # inne raporty pomijamy
     assert parse_sony(b"") is None
+
+
+def test_background_scan_does_not_block_and_delivers_pad() -> None:
+    import threading
+    import time
+
+    release = threading.Event()
+
+    def slow_find() -> list[FakeSource]:
+        release.wait(2)  # szukanie trwa - okno w tym czasie działa dalej
+        return [FakeSource("DualSense (Bluetooth)")]
+
+    reader = PadReader(slow_find, background=True)  # type: ignore[arg-type]
+    t0 = time.perf_counter()
+    assert reader.read() is None
+    assert time.perf_counter() - t0 < 0.05  # bez czekania na szukanie
+    release.set()
+    for _ in range(100):
+        state = reader.read()
+        if state is not None:
+            break
+        time.sleep(0.01)
+    assert state is not None and reader.name == "DualSense (Bluetooth)"

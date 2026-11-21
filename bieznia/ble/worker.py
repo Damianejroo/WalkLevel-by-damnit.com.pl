@@ -16,6 +16,7 @@ import threading
 import time
 from collections.abc import Coroutine
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,46 @@ from bieznia.ble.drivers import Driver, UnsupportedDevice, looks_like_treadmill,
 from bieznia.sources import Reading
 
 log = logging.getLogger("bieznia.ble")
+
+
+@dataclass
+class SessionStats:
+    """Liczniki jednego połączenia - na koniec jedna linia podsumowania w logu."""
+
+    began: float = field(default_factory=time.monotonic)
+    speed_sent: int = 0
+    speed_ok: int = 0
+    speed_failed: int = 0
+    resends: int = 0
+    latencies: list[float] = field(default_factory=list)
+    starts: int = 0
+    starts_ok: int = 0
+    stops: int = 0
+
+    def log_summary(self, counts: dict[str, int]) -> None:
+        minutes = (time.monotonic() - self.began) / 60
+        lat = sorted(self.latencies)
+        typical = f"{lat[len(lat) // 2]:.1f} s" if lat else "-"
+        worst = f"{lat[-1]:.1f} s" if lat else "-"
+        log.info(
+            "Podsumowanie sesji: %.0f min · prędkość: wysłana %d, przyjęta %d, bez skutku %d,"
+            " ponowienia %d, czas do zmiany typowo %s, najdłużej %s · start %d/%d · stop %d ·"
+            " ramki %d, zapytania %d, nieodszyfrowane %d",
+            minutes,
+            self.speed_sent,
+            self.speed_ok,
+            self.speed_failed,
+            self.resends,
+            typical,
+            worst,
+            self.starts_ok,
+            self.starts,
+            self.stops,
+            counts.get("frames", 0),
+            counts.get("polls", 0),
+            counts.get("undecoded", 0),
+        )
+
 
 POLL_S = 0.75
 # Polecenie prędkości bez reakcji taśmy wysyłamy ponownie (X21 gubi część poleceń).
@@ -92,6 +133,9 @@ class BleWorker:
         self._belt_kind = ""
         self._driver: Driver | None = None
         self._auto_start = False
+        self._requested_at = 0.0  # kiedy okno poprosiło o obecną prędkość
+        self._stats = SessionStats()
+        self._rssi: dict[str, int] = {}
         self._target_speed: float | None = None  # ostatnia prośba z okna
         self._sent_speed: float | None = None  # ostatnia wysłana do bieżni
         self._sent_at = 0.0
@@ -128,6 +172,8 @@ class BleWorker:
         self._loop.call_soon_threadsafe(self._queue_speed, round(kmh, 1), start_if_stopped)
 
     def _queue_speed(self, kmh: float, start_if_stopped: bool = False) -> None:
+        if kmh != self._target_speed:
+            self._requested_at = time.monotonic()
         self._target_speed = kmh
         self._auto_start = start_if_stopped
         if self._commands is not None:
@@ -204,6 +250,7 @@ class BleWorker:
             ),
             key=lambda d: (not d.treadmill, d.name == "(bez nazwy)", -d.rssi),
         )
+        self._rssi = {d.address: d.rssi for d in devices}
         log.info(
             "Skan: %d urządzeń, w tym bieżni: %d", len(devices), sum(d.treadmill for d in devices)
         )
@@ -259,6 +306,13 @@ class BleWorker:
                     winrt={"use_cached_services": False},
                 ) as client:
                     driver = make_driver(client, name, self._on_reading)
+                    log.info(
+                        "Połączenie %s: %s, sygnał %s dBm",
+                        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        name,
+                        self._rssi.get(address, "?"),
+                    )
+                    self._stats = SessionStats()
                     self._link(Link.CONNECTED, f"Połączono: {driver.describe()}")
                     await driver.start()
                     self._link(Link.STREAMING, driver.describe())
@@ -273,6 +327,7 @@ class BleWorker:
                         self._driver = None
                         if self._belt_task is not None:
                             self._belt_task.cancel()
+                        self._stats.log_summary(getattr(driver, "counts", {}))
                 log.warning("Bieżnia się rozłączyła")
                 self._link(Link.RETRYING, "Bieżnia się rozłączyła - łączę ponownie…")
             except asyncio.CancelledError:
@@ -342,11 +397,15 @@ class BleWorker:
         return self._busy("stop") or driver.belt_running() is False
 
     async def _stop_belt(self, driver: Driver) -> None:
+        self._stats.stops += 1
         await driver.stop_belt()
         self.events.put(BleEvent("belt", text="stopped"))
 
     async def _start_belt(self, driver: Driver) -> None:
+        self._stats.starts += 1
         result = await driver.start_belt()
+        if result == "started":
+            self._stats.starts_ok += 1
         self._sent_speed = None  # po starcie taśma jedzie z prędkością startową bieżni
         if result in ("started", "unknown"):
             await self._apply_speed(driver)
@@ -361,6 +420,8 @@ class BleWorker:
 
     async def _send_speed(self, driver: Driver, target: float) -> None:
         reading = driver.belt_speed()
+        if self._sent_speed != target:
+            self._stats.speed_sent += 1
         if await driver.set_speed(target):
             self._sent_speed = target
             self._sent_at = time.monotonic()
@@ -384,8 +445,15 @@ class BleWorker:
         speed, at = reading
         if abs(speed - target) <= SPEED_TOLERANCE:
             self._speed_confirmed = True  # od teraz pilot może zmieniać prędkość bez walki
-            if self._resends:
-                log.info("Taśma przyjęła %.1f km/h po %d ponowieniu/ach", target, self._resends)
+            took = at - self._requested_at
+            self._stats.speed_ok += 1
+            self._stats.latencies.append(took)
+            log.info(
+                "Prędkość %.1f: przyjęta po %.1f s od prośby (ponowienia %d)",
+                target,
+                took,
+                self._resends,
+            )
             return
         now = time.monotonic()
         if speed <= 0 or at <= self._sent_at or now - self._sent_at < SPEED_RESEND_S:
@@ -396,9 +464,11 @@ class BleWorker:
             return
         if self._resends >= SPEED_RESENDS:
             log.warning("Taśma nie przyjęła %.1f km/h (jedzie %.1f) - poddaję się", target, speed)
+            self._stats.speed_failed += 1
             self._speed_confirmed = True
             return
         self._resends += 1
+        self._stats.resends += 1
         log.info(
             "Taśma nie przyjęła %.1f km/h (jedzie %.1f) - ponawiam (%d)",
             target,
