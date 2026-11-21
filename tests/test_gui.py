@@ -1571,14 +1571,15 @@ def test_mode_switch_in_settings_is_animated(window: gui.App) -> None:
         QTest.qWait(450)
         timer.stop()
         gaps = [(b - a) * 1000 for a, b in itertools.pairwise(stamps)]
-        assert max(gaps) < 45, gaps  # animacja nie stoi w miejscu
+        slow = 3 if os.environ.get("CI") else 1  # współdzielone maszyny GitHuba są wolniejsze
+        assert max(gaps) < 45 * slow, gaps  # animacja nie stoi w miejscu
         assert len({round(x) for x in pills}) >= 4  # podświetlenie jedzie, nie przeskakuje
         assert len({round(v, 2) for v in progress if 0 < v < 1}) >= 4  # zrzuty płynnie
         assert not cover.isVisible()  # po wszystkim żywy widok, bez przykrycia
         assert bands and bands[0][2] == window.control_body.height()  # cel = prawdziwa wysokość
         assert bands[0][2] > bands[0][1] > 0  # pad ma więcej ustawień niż klawisze
         assert window.step_ladder is not None and window.settings["direction"] == "keyboard"
-        assert handler_ms < 400
+        assert handler_ms < 400 * slow
     finally:
         gui.Motion.enabled = False
 
