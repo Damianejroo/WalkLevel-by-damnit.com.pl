@@ -298,12 +298,10 @@ class Client:
     def clear_live(self) -> None:
         self.call("DELETE", "/api/bieznia/stan")
 
-    def invite(self) -> dict[str, Any]:
-        return dict(self.call("POST", "/api/bieznia/zaproszenie") or {})
-
-    def accept(self, code: str) -> dict[str, Any]:
-        result = self.call("POST", "/api/bieznia/zaproszenie/przyjmij", {"kod": code.strip()})
-        return dict((result or {}).get("znajomy") or {})
+    def invite_by_name(self, name: str) -> dict[str, Any]:
+        """Zaproszenie do znajomych po pseudonimie -> {stan: oczekuje|przyjeta, osoba}."""
+        result = self.call("POST", "/api/bieznia/zaproszenie", {"name": name.strip()})
+        return dict(result or {})
 
     def friends(self) -> list[dict[str, Any]]:
         return list(self.call("GET", "/api/bieznia/znajomi") or [])
@@ -318,7 +316,8 @@ class Client:
         return list(result.get("miejsca") or [])
 
     def registration_code(self) -> dict[str, Any]:
-        """Kod dla nowej osoby („Zaproś na Bieżnię”): jednorazowy, 14 dni."""
+        """Kod dla nowej osoby („Zaproś na Bieżnię”): jednorazowy, 14 dni. Kto założy z niego
+        konto, od razu jest znajomym zapraszającego."""
         return dict(self.call("POST", "/api/bieznia/kod-rejestracji") or {})
 
     def stats(self, scope: str = "tydzien") -> dict[str, Any]:
@@ -358,8 +357,8 @@ class Client:
         id to identyfikator zaproszenia (do przyjęcia lub odrzucenia)."""
         return dict(self.call("GET", "/api/bieznia/zaproszenia") or {})
 
-    def invite_user(self, user_id: str) -> None:
-        self.call("POST", "/api/bieznia/zaproszenie", {"do": user_id})
+    def invite_user(self, user_id: str) -> dict[str, Any]:
+        return dict(self.call("POST", "/api/bieznia/zaproszenie", {"do": user_id}) or {})
 
     def answer_invitation(self, invitation_id: str, accept: bool) -> None:
         action = "przyjmij" if accept else "odrzuc"  # nadawca: withdraw_invitation

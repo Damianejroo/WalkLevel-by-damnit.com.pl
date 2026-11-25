@@ -181,8 +181,15 @@ class AccountScreen:
             if value and mine and self.pages.currentIndex() == self.ONLINE:
                 self.load_online(self.online_tab)
             return
-        if action == "invite_code":
-            self.online["code"] = value
+        if action in ("invite_name", "invite_user"):
+            who = (value or {}).get("osoba", {}).get("name", "")
+            accepted = (value or {}).get("stan") == "przyjeta"
+            self.toast(
+                f"{who} jest teraz Twoim znajomym."
+                if accepted
+                else f"Wysłano zaproszenie do {who}."
+            )
+            self.load_online("friends", force=True)
         elif action == "reg_code":
             self.online["reg_code"] = value
         elif action == "password":
@@ -192,13 +199,8 @@ class AccountScreen:
             self.replace_page(self.PERSON, self.build_online_person_page())
             self.pages.go(self.PERSON)
             return
-        elif action in ("accept_code", "invite_user", "answer", "remove_friend"):
-            message = {
-                "accept_code": "Dodano znajomego.",
-                "invite_user": "Wysłano zaproszenie.",
-                "answer": "Gotowe.",
-                "remove_friend": "Usunięto ze znajomych.",
-            }[action]
+        elif action in ("answer", "remove_friend"):
+            message = {"answer": "Gotowe.", "remove_friend": "Usunięto ze znajomych."}[action]
             self.toast(message)
             self.load_online("friends", force=True)
         elif action.startswith("load:"):
@@ -544,11 +546,11 @@ class AccountScreen:
         invitations = self.online.get("invitations") or {}
         incoming = list(invitations.get("przychodzace") or [])
         if incoming:
-            c, cl = section("Zaproszenia do znajomych")
+            c, cl = section("Zaproszenia do Ciebie")
             for inv in incoming:
                 row = QHBoxLayout()
-                person = inv.get("osoba") or {}
-                row.addWidget(label(str(person.get("name") or inv.get("name") or "?")), 1)
+                who = (inv.get("osoba") or {}).get("name") or inv.get("name") or "?"
+                row.addWidget(label(str(who)), 1)
                 no = button("Odrzuć")
                 yes = button("Przyjmij", "primary")
                 iid = str(inv.get("id", ""))
@@ -573,26 +575,53 @@ class AccountScreen:
             cl.addWidget(label("Ładuję…", "small"))
         elif not friends:
             cl.addWidget(
-                label("Jeszcze nikogo. Podaj znajomemu swój kod albo wpisz jego kod.", "small")
+                label(
+                    "Jeszcze nikogo. Zaproś znajomego po pseudonimie albo zaproś na Bieżnię"
+                    " kogoś, kto nie ma konta.",
+                    "small",
+                )
             )
         for f in friends or []:
             cl.addWidget(self.friend_row(f))
         lay.addWidget(c)
 
         c, cl = section("Dodaj znajomego")
-        code = self.online.get("code") or {}
-        if code.get("kod"):
-            mine = label(f"Twój kod: {code['kod']}")
-            mine.setObjectName("accent")
-            mine.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            cl.addWidget(mine)
-            cl.addWidget(label("Kod działa przez 24 godziny i tylko raz.", "small"))
-        else:
-            make = button("Pokaż mój kod zaproszenia")
-            make.clicked.connect(
-                lambda: self.account_job("invite_code", self.account.client.invite)
-            )
-            cl.addWidget(make)
+        cl.addWidget(
+            label("Wpisz pseudonim osoby, która ma konto. Zaproszenie musi przyjąć.", "small")
+        )
+        row = QHBoxLayout()
+        other = field("Pseudonim znajomego")
+        add = button("Zaproś", "primary")
+
+        def invite() -> None:
+            name = other.text().strip()
+            if name:
+                self.account_job("invite_name", lambda: self.account.client.invite_by_name(name))
+
+        add.clicked.connect(invite)
+        other.returnPressed.connect(invite)
+        row.addWidget(other, 1)
+        row.addWidget(add)
+        cl.addLayout(row)
+        sent = list(invitations.get("wyslane") or [])
+        if sent:
+            cl.addWidget(label("Wysłane - czekają na odpowiedź", "small"))
+            for inv in sent:
+                line = QHBoxLayout()
+                who = (inv.get("osoba") or {}).get("name") or "?"
+                line.addWidget(label(str(who)), 1)
+                back = button("Wycofaj")
+                iid = str(inv.get("id", ""))
+                back.clicked.connect(
+                    lambda _=False, i=iid: self.account_job(
+                        "answer", lambda: self.account.client.withdraw_invitation(i)
+                    )
+                )
+                line.addWidget(back)
+                cl.addLayout(line)
+        lay.addWidget(c)
+
+        c, cl = section("Zaproś na Bieżnię")
         reg = self.online.get("reg_code") or {}
         if reg.get("kod"):
             new = label(f"Kod na nowe konto: {reg['kod']}")
@@ -600,28 +629,29 @@ class AccountScreen:
             new.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
             cl.addWidget(new)
             cl.addWidget(
-                label("Dla osoby bez konta. Działa raz, przez 14 dni (najwyżej 3 naraz).", "small")
+                label(
+                    "Działa raz, przez 14 dni. Ta osoba od razu będzie Twoim znajomym.",
+                    "small",
+                )
             )
+            more = button("Kolejny kod")
+            more.clicked.connect(
+                lambda: self.account_job("reg_code", self.account.client.registration_code)
+            )
+            cl.addWidget(more)
         else:
-            invite_new = button("Zaproś na Bieżnię (kod na nowe konto)")
+            cl.addWidget(
+                label(
+                    "Dla kogoś bez konta: kod do wpisania przy zakładaniu konta. Ta osoba od"
+                    " razu będzie Twoim znajomym.",
+                    "small",
+                )
+            )
+            invite_new = button("Pokaż kod na nowe konto")
             invite_new.clicked.connect(
                 lambda: self.account_job("reg_code", self.account.client.registration_code)
             )
             cl.addWidget(invite_new)
-        row = QHBoxLayout()
-        other = field("Kod znajomego, np. ABCD-1234")
-        add = button("Dodaj", "primary")
-
-        def accept() -> None:
-            if other.text().strip():
-                text = other.text()
-                self.account_job("accept_code", lambda: self.account.client.accept(text))
-
-        add.clicked.connect(accept)
-        other.returnPressed.connect(accept)
-        row.addWidget(other, 1)
-        row.addWidget(add)
-        cl.addLayout(row)
         lay.addWidget(c)
 
     def friend_row(self: App, f: dict[str, Any]) -> QWidget:

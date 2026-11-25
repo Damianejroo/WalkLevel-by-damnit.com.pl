@@ -2015,3 +2015,27 @@ def test_training_mode_levels_keys_click_and_quick_stop(window: gui.App) -> None
     assert not window.bridge.state.enabled and worker.calls[-1] == "belt stop"
     window.on_direction("keyboard")
     assert not window.training_bar.isVisibleTo(window.window)
+
+
+def test_add_friend_by_nickname_and_invite_new_person(window: gui.App, tmp_path: Path) -> None:
+    server = online_window(window, tmp_path)
+    store = window.store
+    assert store is not None
+    window.account.register(
+        "KOD-START", "ola@example.pl", "dlugie-haslo-123", "Ola_77", store.person.id
+    )
+    window.account_changed()
+    window.open_online()
+    window.tick()
+    page = current(window)
+    assert "Szybka-Ania" in texts(page)  # wysłane zaproszenie - z Wycofaj
+    fill(page, {"Pseudonim znajomego": "Kot Bury"})
+    next(b for b in buttons(page, "Zaproś") if b.objectName() == "primary").click()
+    window.tick()
+    sent = [r for r in server.requests if r[1] == "/api/bieznia/zaproszenie"]
+    assert sent and sent[-1][2] == {"name": "Kot Bury"}
+    page = current(window)
+    next(b for b in buttons(page, "Pokaż kod na nowe konto")).click()
+    window.tick()
+    assert "NOWY-1234" in texts(current(window))
+    assert "od razu będzie Twoim znajomym" in texts(current(window))

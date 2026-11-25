@@ -7,9 +7,10 @@
   DECYZJE DAMIANA:
   1. wiek: 16 lat, młodsi za zgodą rodzica lub opiekuna - ROZSTRZYGNIĘTE,
   2. kto prowadzi: brzmienie jak na damnit.com.pl - ROZSTRZYGNIĘTE,
-  3. zmiany regulaminu - W TOKU (w tekście jeszcze propozycja 7 dni),
+  3. zmiany regulaminu: od razu; ograniczenie praw albo nowe użycie danych - po akceptacji,
   4. konta nieużywane: bez terminu, do usunięcia konta - ROZSTRZYGNIĘTE,
-  5. terminy reklamacji i zamknięcia usługi - W TOKU (w tekście jeszcze 14 dni).
+  5. bez terminów zamknięcia usługi i odpowiedzi na reklamacje (zostaje miesiąc z RODO),
+  6. kody rejestracji bez limitu; kto założy konto z kodu, jest od razu znajomym.
 -->
 <html lang="pl">
 <head>
@@ -71,7 +72,8 @@ footer { color: var(--muted); font-size: 14px; }
 
   <h3>3. Konto</h3>
   <ul>
-    <li>Konto zakładasz kodem zaproszenia od osoby, która już ma konto, albo ode mnie. Każde konto może mieć naraz najwyżej 3 niewykorzystane kody.</li>
+    <li>Konto zakładasz kodem zaproszenia od osoby, która już ma konto, albo ode mnie. Osoba, która założy konto z Twojego kodu, zostaje od razu Twoim znajomym (i Ty jej) - każde z Was może tę znajomość usunąć.</li>
+    <li>Znajomego z kontem zapraszasz po pseudonimie; znajomość powstaje dopiero, gdy druga strona przyjmie zaproszenie. Osoby z profilem ukrytym nie da się znaleźć ani zaprosić.</li>
     <li>Logujesz się e-mailem i hasłem. E-mail służy tylko do logowania (i resetu hasła, gdy ta funkcja ruszy) - nigdy do reklam.</li>
     <li>Konto może założyć osoba, która ma co najmniej 16 lat; osoba młodsza - tylko za zgodą rodzica lub opiekuna.</li>
     <li>Hasło jest tylko Twoje i odpowiadasz za jego udostępnienie. Nigdy nie poproszę Cię o hasło. Dane konta aplikacja wysyła wyłącznie na adres bieznia.damnit-live.pl.</li>
@@ -83,20 +85,20 @@ footer { color: var(--muted); font-size: 14px; }
   <ul>
     <li>Nie podszywaj się pod innych i nie używaj pseudonimu obraźliwego ani z imieniem i nazwiskiem.</li>
     <li>Nie oszukuj wyników. Serwer sprawdza wiarygodność każdej sesji (czy pochodzi z prawdziwej bieżni i czy prędkość, kroki i czas do siebie pasują). Sesja, która nie przejdzie sprawdzenia, zostaje w Twoich prywatnych statystykach, ale nie trafia do rankingu ani do sum widocznych dla innych.</li>
-    <li>Przy naruszeniu zasad mogę usunąć wynik z rankingu albo usunąć konto. Decyzję podejmuje człowiek. Możesz się odwołać e-mailem - odpowiem w 14 dni.</li>
+    <li>Przy naruszeniu zasad mogę usunąć wynik z rankingu albo usunąć konto. Decyzję podejmuje człowiek. Możesz się odwołać e-mailem na kontakt@damnit.com.pl.</li>
   </ul>
 
   <h3>5. Zdrowie i bezpieczeństwo</h3>
   <p>Aplikacja nie jest wyrobem medycznym, a liczby z bieżni (kroki, dystans, prędkość) mogą być niedokładne. Ćwiczysz na własną odpowiedzialność i według swoich możliwości. Nie odpowiadam za urazy ani za sprzęt.</p>
 
   <h3>6. Odpowiedzialność i dostępność</h3>
-  <p>Usługa jest darmowa i może mieć przerwy oraz błędy. Jeśli kiedyś ją zamknę, ogłoszę to w aplikacji co najmniej 14 dni wcześniej, żebyś mógł pobrać swoje dane. Nic w tym regulaminie nie ogranicza Twoich praw konsumenta.</p>
+  <p>Usługa jest darmowa, może mieć przerwy i błędy i mogę ją zamknąć w każdej chwili. Swoje dane pobierzesz w aplikacji przyciskiem „Pobierz moje dane”. Nic w tym regulaminie nie ogranicza Twoich praw konsumenta.</p>
 
   <h3>7. Reklamacje</h3>
-  <p>Reklamację wyślij na kontakt@damnit.com.pl. Odpowiem w ciągu 14 dni.</p>
+  <p>Reklamację wyślij na kontakt@damnit.com.pl - odpowiem, gdy tylko będę mógł.</p>
 
   <h3>8. Zmiany regulaminu</h3>
-  <p>O zmianach informuję w aplikacji. Wchodzą w życie 7 dni po ogłoszeniu; od razu tylko wtedy, gdy wymaga tego prawo, bezpieczeństwo albo gdy zbieram mniej danych. Jeśli zmiana dotyczy Twoich praw albo nowego celu używania danych, aplikacja poprosi o ponowną akceptację.</p>
+  <p>O zmianach informuję w aplikacji i obowiązują od razu. Zmiana, która ogranicza Twoje prawa albo dokłada nowe użycie danych, obowiązuje Cię dopiero po zaakceptowaniu jej w aplikacji; jeśli jej nie chcesz, możesz usunąć konto.</p>
 </section>
 
 <section id="prywatnosc">
@@ -107,10 +109,10 @@ footer { color: var(--muted); font-size: 14px; }
 
   <h3>Jakie dane są na serwerze</h3>
   <ul>
-    <li><strong>Konto:</strong> e-mail, pseudonim, skrót hasła (samego hasła nie przechowuję), widoczność profilu, data założenia, wersja i czas akceptacji regulaminu, a także kto Cię zaprosił i kogo zaprosiłeś (kody zaproszeń).</li>
+    <li><strong>Konto:</strong> e-mail, pseudonim, skrót hasła (samego hasła nie przechowuję), widoczność profilu, data założenia, wersja i czas akceptacji regulaminu, a także kto Cię zaprosił na Bieżnię i kogo zaprosiłeś.</li>
     <li><strong>Sesje chodzenia:</strong> identyfikator sesji, początek i koniec, kroki, dystans, czas ruchu, model i profil bieżni, sterownik, firmware, wersja aplikacji, źródło, widoczność, strefa czasowa, czas ostatniej zmiany, lokalny numer osoby z aplikacji (bez nazwy) oraz znacznik wiarygodności.</li>
     <li><strong>Stan na żywo</strong> (tylko gdy go włączysz): bieżąca prędkość, kroki, czas ruchu, identyfikator bieżącej sesji i czas jej rozpoczęcia w jednym nadpisywanym wpisie - bez historii przebiegu. Znajomi przestają go widzieć 30 s po ostatniej aktualizacji; wpis znika po wyłączeniu udostępniania.</li>
-    <li><strong>Znajomości</strong> i oczekujące zaproszenia.</li>
+    <li><strong>Znajomości</strong> i oczekujące zaproszenia do znajomych.</li>
   </ul>
   <p>Nie zbieram: nazw osób i gier z aplikacji, wagi, wzrostu, wieku, lokalizacji, kontaktów, plików ani awatarów. Nie ma ciasteczek, narzędzi analitycznych ani logowania przez serwisy zewnętrzne. Kroki i dystans to dane o aktywności - nie wyciągam z nich wniosków o zdrowiu.</p>
 

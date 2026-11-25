@@ -128,7 +128,8 @@ class FakeServer:
             )
         if path == "/api/bieznia/zaproszenia":
             invite = {"id": "z1", "osoba": {"id": "u5", "name": "Nowy_Gracz"}, "utworzono_utc_s": 0}
-            return Reply({"przychodzace": [invite], "wyslane": []}, url)
+            sent = {"id": "z2", "osoba": {"id": "u8", "name": "Szybka-Ania"}, "utworzono_utc_s": 0}
+            return Reply({"przychodzace": [invite], "wyslane": [sent]}, url)
         if path == "/api/bieznia/statystyki":
             return Reply({"kroki": 12345, "dystans_km": 8.4, "ruch_s": 7200}, url)
         if path == "/api/bieznia/ranking":
@@ -157,9 +158,12 @@ class FakeServer:
                 url,
             )
         if path == "/api/bieznia/zaproszenie" and method == "POST":
-            if body and body.get("do"):
-                return Reply(None, url, 204)
-            return Reply({"kod": "ABCD-1234", "wygasa_utc_s": 0}, url)
+            if not body or not (body.get("do") or body.get("name")):
+                return self.error(url, 400, "Podaj pseudonim osoby, którą chcesz zaprosić.")
+            if body.get("name") and body["name"].lower() == "nikt":
+                return self.error(url, 404, "Nie ma takiej osoby.")
+            who = body.get("name") or "Maraton_Max"
+            return Reply({"stan": "oczekuje", "osoba": {"id": "u7", "name": who}}, url)
         if path.startswith("/api/bieznia/zaproszenie/"):
             return Reply({"znajomy": {"id": "u9", "name": "Kot_Bury"}}, url)
         if path == "/api/bieznia/profil" and method == "PATCH":
