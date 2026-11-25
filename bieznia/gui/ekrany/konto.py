@@ -39,6 +39,9 @@ log = logging.getLogger("bieznia")
 UPLOAD_EVERY_S = 120.0
 LIVE_EVERY_S = 5.0
 REFRESH_EVERY_S = 24 * 3600.0  # token ważny 7 dni - odświeżany przy starcie i co dobę
+VERIFY_POLL_S = 15.0  # po wysłaniu linku: czy już kliknięty (co tyle sekund)...
+VERIFY_POLL_FOR_S = 600.0  # ...przez tyle czasu
+VERIFY_RECHECK_S = 10.0  # zakładka Konto / powrót okna: najwyżej raz na tyle sekund
 TABS = [("friends", "Znajomi"), ("ranking", "Ranking"), ("people", "Osoby"), ("me", "Konto")]
 VISIBILITY_LABELS = [("prywatna", "Tylko ja"), ("znajomi", "Znajomi"), ("publiczna", "Wszyscy")]
 GAMES_LABELS = [("ja", "Tylko ja"), ("znajomi", "Znajomi"), ("wszyscy", "Wszyscy")]
@@ -68,6 +71,9 @@ class AccountScreen:
     account_mode: str
     account_status: QLabel
     account_busy: set[str]
+    verify_poll_until: float  # do kiedy pytać serwer, czy link potwierdzający kliknięty
+    verify_poll_at: float
+    verify_checked_at: float
 
     # --- start i pętla ---------------------------------------------------------------------
 
@@ -87,8 +93,29 @@ class AccountScreen:
         self.account_live_at = 0.0
         self.account_live_on = False
         self.account_refresh_at = time.monotonic() + REFRESH_EVERY_S
+        self.verify_poll_until = 0.0
+        self.verify_poll_at = 0.0
+        self.verify_checked_at = 0.0
+        with contextlib.suppress(AttributeError, RuntimeError):  # powrót okna na wierzch
+            self.qt.applicationStateChanged.connect(self.on_app_state)
         for acc in self.accounts.logged_in():
             self.account_job("refresh", acc.refresh, quiet=True, person=acc.state.person)
+
+    def check_verified(self: App, force: bool = False) -> None:
+        """Pyta serwer, czy adres już potwierdzony (tylko gdy jeszcze nie jest)."""
+        acc = self.account
+        if not acc.state.logged_in or acc.state.verified:
+            self.verify_poll_until = 0.0
+            return
+        now = time.monotonic()
+        if not force and now - self.verify_checked_at < VERIFY_RECHECK_S:
+            return
+        self.verify_checked_at = now
+        self.account_job("verified", acc.check_verified, quiet=True, person=acc.state.person)
+
+    def on_app_state(self: App, state: Qt.ApplicationState) -> None:
+        if state == Qt.ApplicationState.ApplicationActive:  # wraca z przeglądarki po kliknięciu
+            self.check_verified()
 
     @property
     def account(self: App) -> konto.Account:
@@ -106,6 +133,9 @@ class AccountScreen:
             self.account_refresh_at = now + REFRESH_EVERY_S
             for acc in self.accounts.logged_in():
                 self.account_job("refresh", acc.refresh, quiet=True, person=acc.state.person)
+        if self.verify_poll_until > now >= self.verify_poll_at:
+            self.verify_poll_at = now + VERIFY_POLL_S
+            self.check_verified(force=True)
         if now >= self.account_upload_at and self.history is not None:
             self.account_upload_at = now + UPLOAD_EVERY_S
             self.account_upload_all()
@@ -200,6 +230,16 @@ class AccountScreen:
                     " - kliknij go w wiadomości (sprawdź też spam)."
                 )
                 self.account_message("Wysłano link potwierdzający - sprawdź skrzynkę.")
+                now = time.monotonic()  # aplikacja sama zauważy kliknięcie w przeglądarce
+                self.verify_poll_until = now + VERIFY_POLL_FOR_S
+                self.verify_poll_at = now + VERIFY_POLL_S
+            return
+        if action == "verified":
+            if value and mine:
+                self.verify_poll_until = 0.0
+                self.toast("Adres e-mail potwierdzony - możesz odzyskać hasło, gdy je zapomnisz.")
+                if self.pages.currentIndex() == self.ONLINE:
+                    self.render_online()
             return
         if not mine and action not in ("upload", "delete_session"):
             return  # wynik dla innej osoby (przełączono osobę w trakcie) - bez skutku
@@ -570,6 +610,8 @@ class AccountScreen:
         self.online_tab = tab
         self.render_online()
         self.load_online(tab)
+        if tab == "me":
+            self.check_verified()
 
     def render_online(self: App) -> None:
         if self.pages.currentIndex() != self.ONLINE:

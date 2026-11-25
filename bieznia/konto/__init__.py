@@ -333,6 +333,15 @@ class Account:
             self.save()
         return user
 
+    def check_verified(self) -> bool:
+        """Czy adres jest już potwierdzony. Link z maila otwiera się w przeglądarce, więc
+        aplikacja nie dostaje sygnału - musi zapytać serwer."""
+        profile = self.client.my_profile()
+        if "verified" in profile:
+            self.state.verified = bool(profile["verified"])
+            self.save()
+        return self.state.verified
+
     def _forget(self) -> None:
         self.store.clear()
         self.client.token = ""

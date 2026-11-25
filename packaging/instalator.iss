@@ -28,7 +28,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist
 OutputBaseFilename=Bieznia-Setup-{#AppVersion}
 SetupIconFile=bieznia.ico
-UninstallDisplayIcon={app}\Bieznia.exe
+UninstallDisplayIcon={app}\walklevel.ico
 UninstallDisplayName=WalkLevel
 WizardStyle=modern
 WizardSmallImageFile=instalator-55.bmp,instalator-64.bmp,instalator-83.bmp,instalator-110.bmp
@@ -53,6 +53,9 @@ ReadyLabel2b=Kliknij Instaluj. Nie są potrzebne uprawnienia administratora, a p
 
 [Files]
 Source: "..\build\dist\Bieznia\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; ikona skrótów jako osobny plik o nowej nazwie: Windows trzyma ikonę w pamięci podręcznej po ścieżce
+; pliku, więc skrót wskazujący dalej Bieznia.exe po aktualizacji pokazywał stare logo
+Source: "bieznia.ico"; DestDir: "{app}"; DestName: "walklevel.ico"; Flags: ignoreversion
 
 [InstallDelete]
 ; przy aktualizacji usuń stare biblioteki, żeby nie mieszały się z nowymi
@@ -64,10 +67,10 @@ Type: files; Name: "{autoprograms}\Bieżnia Gamingowa.lnk"
 Type: files; Name: "{autodesktop}\Bieżnia Gamingowa.lnk"
 
 [Icons]
-Name: "{autoprograms}\WalkLevel"; Filename: "{app}\Bieznia.exe"
+Name: "{autoprograms}\WalkLevel"; Filename: "{app}\Bieznia.exe"; IconFilename: "{app}\walklevel.ico"
 ; skrót na pulpicie przy pierwszej instalacji albo w miejsce starego - aktualizacja nie odtworzy
 ; skrótu, który użytkownik sam usunął
-Name: "{autodesktop}\WalkLevel"; Filename: "{app}\Bieznia.exe"; Check: WantDesktopIcon
+Name: "{autodesktop}\WalkLevel"; Filename: "{app}\Bieznia.exe"; IconFilename: "{app}\walklevel.ico"; Check: WantDesktopIcon
 
 [Run]
 ; nowa ikona i nazwa: odśwież pamięć ikon Windows (skróty, pasek zadań, menu Start)

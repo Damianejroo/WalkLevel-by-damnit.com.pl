@@ -2401,3 +2401,33 @@ def test_morph_keeps_unchanged_rows_and_never_dims(window: gui.App) -> None:
     assert QColor(shot.pixel(50, 40)).lightness() == QColor("#303030").lightness()  # bez zmian
     mid = QColor(shot.pixel(50, 160)).lightness()
     assert QColor("#303030").lightness() <= mid  # w połowie: między starym a nowym, nie ciemniej
+
+
+def test_app_notices_email_confirmed_in_browser(window: gui.App, tmp_path: Path) -> None:
+    """Link z maila otwiera się w przeglądarce - aplikacja sama pyta serwer, aż zobaczy
+    potwierdzenie (po wysłaniu linku co kilkanaście sekund, przy zakładce Konto)."""
+    import time as _time
+
+    from PySide6.QtCore import Qt
+
+    server = online_window(window, tmp_path)
+    store = window.store
+    assert store is not None
+    window.account.register(
+        "KOD-START", "ola@example.pl", "dlugie-haslo-123", "Ola_77", store.person.id
+    )
+    window.account_changed()
+    window.tick()
+    assert not window.account.state.verified
+    window.account_job("verify", window.account.client.send_verification)
+    window.tick()
+    assert window.verify_poll_until > _time.monotonic()  # czeka na kliknięcie
+    next(iter(server.users.values()))["verified"] = True  # kliknięto link w przeglądarce
+    window.account_tick(window.verify_poll_at + 0.1, 0.0, None, 0.0)
+    window.tick()
+    assert window.account.state.verified and window.verify_poll_until == 0.0
+    window.account.state.verified = False  # zakładka Konto i powrót okna też sprawdzają
+    window.verify_checked_at = 0.0
+    window.on_app_state(Qt.ApplicationState.ApplicationActive)
+    window.tick()
+    assert window.account.state.verified

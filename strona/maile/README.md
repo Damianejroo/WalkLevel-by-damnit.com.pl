@@ -41,6 +41,6 @@ Pola w podwójnych klamrach; wartości od użytkownika escapować jako HTML (w `
 
 - Obrazki: `logo.png` (96×96) i `odznaka.png` (96×96) pod `https://bieznia.damnit-live.pl/maile/`,
   publicznie, z długim cache. Bez obrazków maile dalej są czytelne (puste `alt`, nazwa jest tekstem).
-- Nazwa nadawcy: „WalkLevel” (adres `no-reply@damnit-live.pl` bez zmian) - razem z nową wersją
-  regulaminu, w której też pojawia się nazwa WalkLevel.
+- Nazwa nadawcy: „WalkLevel · damnit” (ustawiona przez HUB 26.11.2026, adres `no-reply@damnit-live.pl`
+  bez zmian; celowo bez domeny w nazwie - inna domena niż adres to sygnał dla filtrów antyspamowych).
 - Do decyzji Damiana: nagłówek „Odpowiedz do: kontakt@damnit.com.pl”.
