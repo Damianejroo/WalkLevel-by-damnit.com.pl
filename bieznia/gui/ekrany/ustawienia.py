@@ -30,6 +30,7 @@ from bieznia.gui.widgets import (
 )
 from bieznia.mapping import MappingConfig
 from bieznia.paths import FROZEN
+from bieznia.sterowniki import model_name
 
 if TYPE_CHECKING:
     from bieznia.gui.app import App
@@ -670,9 +671,24 @@ class SettingsScreen:
             return
         name = self.settings.get("device_name") or ""
         address = self.settings.get("device_address") or ""
-        text = f"{name} · {address}" if address else "Brak zapamiętanej bieżni"
+        caps, device = self.caps, self.device
+        speeds = f"{fmt_num(caps.speed_min)}-{fmt_num(caps.speed_max)} km/h"
+        if self.settings["simulator"]:
+            text = f"Symulator bieżni · {speeds}"
+        elif address:
+            model = device.model if device is not None else model_name(name)
+            first = model if model == name else f"{model} ({name})"
+            details = [speeds]
+            if caps.start_delay_s >= 1:
+                details.append(f"rozruch ok. {caps.start_delay_s:.0f} s")
+            if device is not None and device.firmware:
+                details.append(f"firmware {device.firmware}")
+            text = "\n".join((first, " · ".join(details)))
+        else:
+            text = "Brak zapamiętanej bieżni"
         try:
-            self.device_label.setText(text)
+            if self.device_label.text() != text:  # wołane 4x na sekundę - bez zbędnego układu
+                self.device_label.setText(text)
             self.forget_btn.setEnabled(bool(address))
         except RuntimeError:
             pass  # karta właśnie przebudowana
