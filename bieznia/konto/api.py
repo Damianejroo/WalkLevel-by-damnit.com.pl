@@ -245,22 +245,22 @@ class Client:
     def refresh(self) -> Auth:
         return self._auth(self.call("POST", "/api/collections/users/auth-refresh"))
 
-    def request_password_reset(self, email: str) -> None:
-        self.call(
+    def change_password(self, old: str, new: str) -> Auth:
+        """Nowe hasło unieważnia wszystkie tokeny konta - zapisujemy nowy z odpowiedzi."""
+        payload = self.call(
             "POST",
-            "/api/collections/users/request-password-reset",
-            {"email": email},
-            auth=False,
+            "/api/bieznia/haslo",
+            {"oldPassword": old, "password": new, "passwordConfirm": new},
         )
+        return self._auth(payload)
 
-    def resend_verification(self, email: str) -> None:
-        self.call(
-            "POST", "/api/collections/users/request-verification", {"email": email}, auth=False
-        )
-
-    def delete_account(self, user_id: str) -> None:
-        self.call("DELETE", f"/api/collections/users/records/{quote(user_id, safe='')}")
+    def delete_account(self, password: str) -> None:
+        """Hasło sprawdza serwer - sam token (np. skradziony) nie skasuje konta."""
+        self.call("DELETE", "/api/bieznia/konto", {"password": password})
         self.token = ""
+
+    def my_profile(self) -> dict[str, Any]:
+        return dict(self.call("GET", "/api/bieznia/profil") or {})
 
     # --- dane ------------------------------------------------------------------------------
 
@@ -274,6 +274,14 @@ class Client:
                 if isinstance(item, dict):
                     rejected[str(item.get("uuid", ""))] = str(item.get("powod", ""))[:120]
         return rejected
+
+    def delete_session(self, uuid: str) -> None:
+        """Sesja usunięta z konta (404 = serwer jej nie miał - też dobrze)."""
+        try:
+            self.call("DELETE", f"/api/bieznia/sesje/{quote(uuid, safe='')}")
+        except KontoError as exc:
+            if exc.status != 404:
+                raise
 
     def put_live(self, kmh: float, steps: int, active_s: float, session_uuid: str) -> None:
         self.call(
@@ -304,7 +312,14 @@ class Client:
         self.call("DELETE", f"/api/bieznia/znajomi/{quote(friend_id, safe='')}")
 
     def ranking(self, scope: str = "tydzien") -> list[dict[str, Any]]:
-        return list(self.call("GET", "/api/bieznia/ranking", query={"zakres": scope}) or [])
+        result = self.call("GET", "/api/bieznia/ranking", query={"zakres": scope}) or {}
+        if isinstance(result, list):
+            return result
+        return list(result.get("miejsca") or [])
+
+    def registration_code(self) -> dict[str, Any]:
+        """Kod dla nowej osoby („Zaproś na Bieżnię”): jednorazowy, 14 dni."""
+        return dict(self.call("POST", "/api/bieznia/kod-rejestracji") or {})
 
     def stats(self, scope: str = "tydzien") -> dict[str, Any]:
         return dict(self.call("GET", "/api/bieznia/statystyki", query={"zakres": scope}) or {})
@@ -313,6 +328,9 @@ class Client:
         return self.call("GET", "/api/bieznia/moje-dane")
 
     # --- profile, osoby, zaproszenia -------------------------------------------------------
+
+    def withdraw_invitation(self, invitation_id: str) -> None:
+        self.call("POST", f"/api/bieznia/zaproszenie/{quote(invitation_id, safe='')}/wycofaj")
 
     def profile(self, user_id: str) -> dict[str, Any]:
         return dict(self.call("GET", f"/api/bieznia/profil/{quote(user_id, safe='')}") or {})
@@ -326,24 +344,25 @@ class Client:
         return User.from_record(dict(self.call("PATCH", "/api/bieznia/profil", body) or {}))
 
     def people(self, search: str = "", page: int = 1) -> dict[str, Any]:
-        """Osoby z kontem (tylko profile publiczne): {"osoby": [...], "strony": n}."""
+        """Osoby z kontem (tylko profile publiczne): {"strona", "nastepna", "osoby"}."""
         query = {"strona": str(max(1, page))}
         if search.strip():
             query["szukaj"] = search.strip()[:24]
         result = self.call("GET", "/api/bieznia/osoby", query=query) or {}
         if isinstance(result, list):  # serwer może zwrócić samą listę
-            return {"osoby": result, "strony": 1}
+            return {"osoby": result, "strona": page, "nastepna": False}
         return dict(result)
 
     def invitations(self) -> dict[str, Any]:
-        """{"przychodzace": [...], "wyslane": [...]}"""
+        """{"przychodzace": [{id, osoba: {id, name}, utworzono_utc_s}], "wyslane": [...]};
+        id to identyfikator zaproszenia (do przyjęcia lub odrzucenia)."""
         return dict(self.call("GET", "/api/bieznia/zaproszenia") or {})
 
     def invite_user(self, user_id: str) -> None:
         self.call("POST", "/api/bieznia/zaproszenie", {"do": user_id})
 
     def answer_invitation(self, invitation_id: str, accept: bool) -> None:
-        action = "przyjmij" if accept else "odrzuc"
+        action = "przyjmij" if accept else "odrzuc"  # nadawca: withdraw_invitation
         self.call("POST", f"/api/bieznia/zaproszenie/{quote(invitation_id, safe='')}/{action}")
 
 

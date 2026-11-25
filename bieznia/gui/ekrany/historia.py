@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
@@ -13,8 +14,18 @@ from bieznia import paleta
 from bieznia.gui import komponenty as k
 from bieznia.gui.ekrany.ustawienia import section
 from bieznia.gui.theme import Theme
-from bieznia.gui.widgets import Segmented, StatTile, TileGrid, fmt_num, icon_button, label
+from bieznia.gui.widgets import (
+    HoldButton,
+    Segmented,
+    StatTile,
+    TileGrid,
+    fmt_num,
+    icon_button,
+    label,
+)
 from bieznia.historia import Totals
+
+log = logging.getLogger("bieznia")
 
 if TYPE_CHECKING:
     from bieznia.gui.app import App
@@ -259,7 +270,14 @@ class HistoryScreen:
                     )
                 )
                 who = f"{s.person_name} · " if everyone else ""
-                row = QHBoxLayout()
+                holder = QPushButton()
+                holder.setObjectName("row")
+                holder.setCursor(Qt.CursorShape.PointingHandCursor)
+                holder.setAccessibleName(f"Sesja {day} {when:%H:%M} - szczegóły")
+                holder.setToolTip("Szczegóły sesji")
+                holder.clicked.connect(lambda _=False, sid=s.id: self.open_session(sid))
+                row = QHBoxLayout(holder)
+                row.setContentsMargins(8, 6, 8, 6)
                 row.setSpacing(10)
                 row.addWidget(k.picture(self.history_icon(s.profile, s.profile_name, 32), 32))
                 texts = QVBoxLayout()
@@ -277,10 +295,106 @@ class HistoryScreen:
                 row.addLayout(texts, 1)
                 if online and s.person == linked and s.source == "bieznia":
                     row.addWidget(self.online_toggle(s.id, s.id in hidden))
-                sl.addLayout(row)
+                for child in holder.findChildren(QLabel):
+                    child.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+                holder.setMinimumHeight(56)
+                sl.addWidget(holder)
             lay.addWidget(c)
         lay.addStretch(1)
         return page
+
+    # --- szczegóły sesji -------------------------------------------------------------------
+
+    def open_session(self: App, session_id: str) -> None:
+        self.session_open = session_id
+        self.replace_page(self.SESSION, self.build_session_page())
+        self.pages.go(self.SESSION)
+
+    def build_session_page(self: App) -> QWidget:
+        s = self.history.session(self.session_open) if self.history else None
+        page, lay = self.sticky_page("Sesja", back=self.HISTORY)
+        if s is None:
+            lay.addWidget(label("Tej sesji już nie ma.", "muted"))
+            lay.addStretch(1)
+            return page
+        start, end = datetime.fromtimestamp(s.start), datetime.fromtimestamp(s.end)
+        c, cl = section(f"{start:%d.%m.%Y} · {start:%H:%M}-{end:%H:%M}")
+        cl.addWidget(label(f"{s.person_name} · {s.profile_name}", "small"))
+        cadence = s.steps / (s.active_s / 60) if s.active_s >= 30 else 0.0
+        values = (
+            ("Kroki", steps_text(s.steps)),
+            ("Dystans", f"{fmt_num(s.distance_km, 2)} km"),
+            ("Czas ruchu", time_text(s.active_s)),
+            ("Średnio", f"{fmt_num(s.avg_kmh)} km/h"),
+            ("Kroki/min", f"{cadence:.0f}" if cadence else "-"),
+            ("Cała sesja", time_text(max(0.0, s.end - s.start))),
+        )
+        tiles = []
+        for title, value in values:
+            tile = StatTile(title)
+            tile.set(value)
+            tiles.append(tile)
+        cl.addWidget(TileGrid(*tiles[:3]))
+        cl.addWidget(TileGrid(*tiles[3:]))
+        lay.addWidget(c)
+
+        c, cl = section("Skąd")
+        source = "Symulator bieżni" if s.source == "symulator" else (s.device_model or "Bieżnia")
+        details = [source]
+        if s.firmware:
+            details.append(f"firmware {s.firmware}")
+        if s.app_version:
+            details.append(f"aplikacja {s.app_version}")
+        cl.addWidget(label(" · ".join(details), "small"))
+        online = self.online_visible() and self.history is not None
+        if online and s.person == self.account.state.person and s.source == "bieznia":
+            assert self.history is not None
+            hidden = s.id in self.history.hidden_online()
+            sent = self.history.was_sent(s.id)
+            state = (
+                "ukryta (tylko u Ciebie)"
+                if hidden
+                else ("na koncie" if sent else "czeka na wysyłkę")
+            )
+            row = QHBoxLayout()
+            row.addWidget(label(f"Konto online: {state}", "small"), 1)
+            row.addWidget(self.online_toggle(s.id, hidden))
+            cl.addLayout(row)
+        elif s.source == "symulator":
+            cl.addWidget(label("Sesje z symulatora nie idą na konto online.", "small"))
+        lay.addWidget(c)
+
+        c, cl = section("Usuń")
+        cl.addWidget(
+            label(
+                "Usuwa sesję z historii na tym komputerze"
+                + (" i z konta online." if online else ".")
+                + " Tego nie da się cofnąć - przytrzymaj przycisk.",
+                "small",
+            )
+        )
+        delete = HoldButton("Usuń sesję", self.t)
+        delete.confirmed.connect(lambda: self.delete_session(s.id))
+        cl.addWidget(delete)
+        lay.addWidget(c)
+        lay.addStretch(1)
+        return page
+
+    def delete_session(self: App, session_id: str) -> None:
+        history = self.history
+        if history is None:
+            return
+        tracker = self.tracker
+        if tracker is not None and tracker.current is not None and tracker.current.id == session_id:
+            tracker.current = None  # trwająca sesja - kończymy bez zapisu
+        history.delete(session_id)
+        if self.online_visible():
+            self.account_job("delete_session", lambda: self.account.delete_session(session_id))
+        log.info("Usunięto sesję z historii")
+        self.toast("Sesja usunięta.")
+        self.replace_page(self.HISTORY, self.build_history_page())
+        self.history_built = self.history_stamp()
+        self.go_back(self.HISTORY)
 
     def online_toggle(self: App, session_id: str, hidden: bool) -> QPushButton:
         """Oko przy sesji: ukryta zostaje u Ciebie, a na koncie online nikt jej nie widzi."""

@@ -91,3 +91,5 @@ adres = ""
 # Konto online jest opcjonalne: bez logowania aplikacja działa w całości lokalnie i nic nie
 # wysyła. Adres serwera kont (tylko HTTPS). Pusty = sekcji konta w ogóle nie widać.
 adres = "https://bieznia.damnit-live.pl"
+# Regulamin i polityka prywatności konta online (link w formularzu zakładania konta).
+regulamin = "https://bieznia.damnit-live.pl/bieznia"

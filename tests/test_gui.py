@@ -1810,7 +1810,15 @@ def test_register_then_login_shows_friends_ranking_and_people(
     assert window.pages.currentIndex() == window.ONLINE
     assert not window.online_btn.isHidden()
     shown = texts(current(window))
-    assert "Kot_Bury" in shown and "idzie teraz 3,2 km/h" in shown and "Nowy_Gracz" in shown
+    names = [b.text() for b in current(window).findChildren(QtWidgets.QPushButton)]
+    assert "Kot_Bury" in names and "idzie teraz 3,2 km/h" in shown and "Nowy_Gracz" in shown
+    next(
+        b for b in current(window).findChildren(QtWidgets.QPushButton) if b.text() == "Kot_Bury"
+    ).click()
+    window.tick()
+    assert window.pages.currentIndex() == window.PERSON
+    assert "Urevo SpaceWalk 5L" in texts(current(window))  # profil znajomego
+    window.open_online()
     window.set_online_tab("ranking")
     window.tick()
     assert "Ola_77" in texts(current(window))
@@ -1848,3 +1856,38 @@ def test_sessions_go_to_account_and_logout_hides_online(window: gui.App, tmp_pat
     window.account_job("logout", window.account.logout)
     window.tick()
     assert not window.account.state.logged_in and window.online_btn.isHidden()
+
+
+def test_session_details_and_delete_also_from_account(window: gui.App, tmp_path: Path) -> None:
+    server = online_window(window, tmp_path)
+    store = window.store
+    assert store is not None
+    window.account.register(
+        "KOD-START", "ola@example.pl", "dlugie-haslo-123", "Ola_77", store.person.id
+    )
+    window.account_changed()
+    walk_session(window, 700)
+    window.account_upload_now()
+    window.tick()
+    assert len(server.sessions) == 1
+    window.open_history()
+    row = next(
+        b
+        for b in current(window).findChildren(QtWidgets.QPushButton)
+        if b.accessibleName().endswith("szczegóły")
+    )
+    row.click()
+    assert window.pages.currentIndex() == window.SESSION
+    shown = texts(current(window))
+    assert "700" in shown and "Konto online: na koncie" in shown
+    deleted: list[str] = []
+    server_delete = window.account.client.delete_session
+    window.account.client.delete_session = lambda uuid: (  # type: ignore[method-assign]
+        deleted.append(uuid),
+        server_delete(uuid),
+    )
+    window.delete_session(window.session_open)
+    window.tick()
+    assert window.history is not None and window.history.count() == 0
+    assert deleted and len(deleted[0]) == 36  # usunięta też z konta (uuid z myślnikami)
+    assert window.pages.currentIndex() == window.HISTORY

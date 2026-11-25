@@ -317,6 +317,20 @@ class History:
         ]
         return sorted(rows, key=lambda r: -r[1].steps)
 
+    def session(self, session_id: str) -> Session | None:
+        row = self.db.execute(f"{_SELECT} WHERE id = ?", (session_id,)).fetchone()
+        return Session.from_row(row) if row else None
+
+    def delete(self, session_id: str) -> None:
+        """Usuwa sesję z historii (i ślady wysyłki - nic po niej nie zostaje)."""
+        with self.db:
+            self.db.execute("DELETE FROM sesje WHERE id = ?", (session_id,))
+            self.db.execute("DELETE FROM wyslane WHERE id = ?", (session_id,))
+            self.db.execute("DELETE FROM ukryte_online WHERE id = ?", (session_id,))
+
+    def was_sent(self, session_id: str) -> bool:
+        return bool(self.db.execute("SELECT 1 FROM wyslane WHERE id = ?", (session_id,)).fetchone())
+
     def forget_person(self, person: str) -> None:
         """Usunięta osoba: jej wyniki zostają, podpisane jako „Usunięte osoby”."""
         with self.db:

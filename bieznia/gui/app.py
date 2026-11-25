@@ -197,7 +197,7 @@ class App(
     AccountScreen,
 ):
     (MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT) = range(10)
-    MODELS, ACCOUNT, ONLINE = range(10, 13)
+    MODELS, ACCOUNT, ONLINE, PERSON, SESSION = range(10, 15)
 
     # atrybuty ustawiane przez ekrany (mixiny)
     toggle_key: Key
@@ -453,7 +453,7 @@ class App(
         self.pages.addWidget(self.build_settings())
         self.pages.addWidget(self.build_log())
         self.pages.addWidget(self.build_report())
-        for _ in range(self.ONLINE - self.REPORT):  # profil, konfigurator, historia, kopia…
+        for _ in range(self.SESSION - self.REPORT):  # profil, konfigurator, historia, kopia…
             placeholder = QWidget()
             placeholder.setObjectName("page")
             self.pages.addWidget(placeholder)

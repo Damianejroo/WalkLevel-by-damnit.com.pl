@@ -38,6 +38,7 @@ class FakeServer:
         self.sessions: dict[str, dict[str, Any]] = {}
         self.requests: list[tuple[str, str, Any, dict[str, str]]] = []
         self.too_old = False
+        self.issued = 0
 
     def __call__(self, request: Any, _timeout: float) -> Reply:
         url = request.full_url
@@ -71,9 +72,28 @@ class FakeServer:
             return self.error(url, 401, "brak tokenu")
         if path == "/api/collections/users/auth-refresh":
             return self.auth(url, user)
-        if path.startswith("/api/collections/users/records/") and method == "DELETE":
-            self.users.pop(path.rsplit("/", 1)[-1], None)
+        if path == "/api/bieznia/konto" and method == "DELETE":
+            if body.get("password") != user["password"]:
+                return self.error(url, 400, "Nieprawidłowe hasło.")
+            self.users.pop(user["id"], None)
             return Reply(None, url, 204)
+        if path == "/api/bieznia/haslo":
+            if body.get("oldPassword") != user["password"]:
+                return self.error(url, 400, "Nieprawidłowe obecne hasło.")
+            user["password"] = body["password"]
+            self.tokens.clear()  # zmiana hasła unieważnia wszystkie tokeny
+            return self.auth(url, user)
+        if path == "/api/bieznia/profil" and method == "GET":
+            mine = {k: user[k] for k in ("id", "email", "name", "verified")}
+            return Reply({**mine, "widocznosc_profilu": "publiczny"}, url)
+        if path == "/api/bieznia/kod-rejestracji":
+            return Reply({"kod": "NOWY-1234", "wygasa_utc_s": 0}, url)
+        if path.startswith("/api/bieznia/profil/"):
+            week = {"kroki": 15200, "dystans_km": 10.1, "ruch_s": 9000, "sesje": 6}
+            total = {"kroki": 99000, "dystans_km": 66.0, "ruch_s": 60000, "sesje": 40}
+            friend = {"id": "u9", "name": "Kot_Bury", "od_utc_s": 1.7e9, "znajomy": True}
+            model = {"bieznia_model": "Urevo SpaceWalk 5L"}
+            return Reply({**friend, **model, "tydzien": week, "razem": total}, url)
         if path == "/api/bieznia/sesje":
             assert len(body["sesje"]) <= 100
             rejected = []
@@ -107,21 +127,17 @@ class FakeServer:
                 url,
             )
         if path == "/api/bieznia/zaproszenia":
-            return Reply({"przychodzace": [{"id": "z1", "name": "Nowy_Gracz"}], "wyslane": []}, url)
+            invite = {"id": "z1", "osoba": {"id": "u5", "name": "Nowy_Gracz"}, "utworzono_utc_s": 0}
+            return Reply({"przychodzace": [invite], "wyslane": []}, url)
         if path == "/api/bieznia/statystyki":
             return Reply({"kroki": 12345, "dystans_km": 8.4, "ruch_s": 7200}, url)
         if path == "/api/bieznia/ranking":
+            places = [
+                {"miejsce": 1, "name": "Kot_Bury", "kroki": 15200, "dystans_km": 10.1},
+                {"miejsce": 2, "name": user["name"], "kroki": 12345, "dystans_km": 8.4, "ja": True},
+            ]
             return Reply(
-                [
-                    {"miejsce": 1, "name": "Kot_Bury", "kroki": 15200, "dystans_km": 10.1},
-                    {
-                        "miejsce": 2,
-                        "name": user["name"],
-                        "kroki": 12345,
-                        "dystans_km": 8.4,
-                        "ja": True,
-                    },
-                ],
+                {"zakres": "tydzien", "miejsca": places},
                 url,
             )
         if path == "/api/bieznia/osoby":
@@ -135,7 +151,8 @@ class FakeServer:
                             "miejsce": 1,
                         }
                     ],
-                    "strony": 1,
+                    "strona": 1,
+                    "nastepna": False,
                 },
                 url,
             )
@@ -156,7 +173,8 @@ class FakeServer:
         return self.users.get(uid) if uid else None
 
     def auth(self, url: str, user: dict[str, Any]) -> Reply:
-        token = f"tok-{user['id']}-{len(self.tokens)}"
+        self.issued += 1
+        token = f"tok-{user['id']}-{self.issued}"
         self.tokens[token] = user["id"]
         record = {k: user[k] for k in ("id", "email", "name", "verified")}
         return Reply({"token": token, "record": record}, url)
@@ -388,3 +406,21 @@ def test_wrong_invitation_code_is_refused(account: konto.Account) -> None:
     with pytest.raises(KontoError, match="Kod zaproszenia"):
         account.register("ZLY-KOD", "ola@example.pl", "dlugie-haslo-123", "Ola_77", "p1")
     assert not account.state.logged_in
+
+
+def test_change_password_keeps_session_with_new_token(
+    account: konto.Account, server: FakeServer
+) -> None:
+    signed_in(account)
+    old_token = account.store.get()
+    account.change_password("dlugie-haslo-123", "nowe-dlugie-haslo-9")
+    assert account.store.get() != old_token and account.client.token == account.store.get()
+    assert account.client.friends()  # nowy token działa
+    with pytest.raises(KontoError, match="Hasło"):
+        account.change_password("nowe-dlugie-haslo-9", "krotkie")
+
+
+def test_refresh_takes_profile_visibility_from_server(account: konto.Account) -> None:
+    signed_in(account)
+    account.refresh()
+    assert account.state.profile_visibility == "publiczny"

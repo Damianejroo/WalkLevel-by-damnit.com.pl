@@ -204,15 +204,6 @@ class Account:
         auth = self.client.login(email.strip(), password)
         return self._signed_in(auth, person)
 
-    def refresh(self) -> User:
-        """Przy starcie: czy token jeszcze ważny (i świeży token na kolejne dni)."""
-        try:
-            auth = self.client.refresh()
-        except LoggedOut:
-            self._forget()
-            raise
-        return self._signed_in(auth, "")
-
     def logout(self) -> None:
         if self.state.live and self.client.token:
             with contextlib.suppress(KontoError):
@@ -221,9 +212,33 @@ class Account:
 
     def delete_account(self, password: str) -> None:
         """Usunięcie wymaga hasła - sam token (np. skradziony) nie skasuje konta."""
-        auth = self.client.login(self.state.email, password)
-        self.client.delete_account(auth.user.id)
+        if not password:
+            raise KontoError("Wpisz hasło, żeby usunąć konto.")
+        self.client.delete_account(password)
         self._forget()
+
+    def change_password(self, old: str, new: str) -> None:
+        problem = check_password(new)
+        if problem:
+            raise KontoError(problem)
+        auth = self.client.change_password(old, new)
+        self.store.set(auth.token)  # stary token przestał działać
+
+    def refresh(self) -> User:
+        """Przy starcie i co dobę: świeży token i ustawienia profilu z serwera."""
+        try:
+            auth = self.client.refresh()
+        except LoggedOut:
+            self._forget()
+            raise
+        user = self._signed_in(auth, "")
+        with contextlib.suppress(KontoError):
+            profile = self.client.my_profile()
+            visibility = profile.get("widocznosc_profilu")
+            if visibility in PROFILE_VISIBILITY:
+                self.state.profile_visibility = str(visibility)
+                self.save()
+        return user
 
     def _forget(self) -> None:
         self.store.clear()
@@ -262,6 +277,10 @@ class Account:
             return len(pending) - len(rejected)
         finally:
             self.lock.release()
+
+    def delete_session(self, session_id: str) -> None:
+        if self.state.logged_in:
+            self.client.delete_session(canonical_uuid(session_id))
 
     def set_visibility(self, history: History, visibility: str) -> None:
         if visibility not in VISIBILITY:

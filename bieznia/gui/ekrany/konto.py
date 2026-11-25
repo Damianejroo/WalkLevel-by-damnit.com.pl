@@ -14,7 +14,8 @@ import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
 from bieznia import konto
@@ -169,6 +170,15 @@ class AccountScreen:
             return
         if action == "invite_code":
             self.online["code"] = value
+        elif action == "reg_code":
+            self.online["reg_code"] = value
+        elif action == "password":
+            self.account_message("Hasło zmienione - inne urządzenia zostały wylogowane.")
+        elif action == "person":
+            self.online["person"] = value
+            self.replace_page(self.PERSON, self.build_online_person_page())
+            self.pages.go(self.PERSON)
+            return
         elif action in ("accept_code", "invite_user", "answer", "remove_friend"):
             message = {
                 "accept_code": "Dodano znajomego.",
@@ -284,19 +294,6 @@ class AccountScreen:
         email = field("E-mail")
         email.setText(self.account.state.email)
         cl.addWidget(email)
-        if mode == "reset":
-            cl.addWidget(label("Wyślemy link do ustawienia nowego hasła.", "small"))
-            send = button("Wyślij link", "primary")
-            send.clicked.connect(
-                lambda: self.account_job(
-                    "reset", lambda: self.account.client.request_password_reset(email.text())
-                )
-            )
-            cl.addWidget(send)
-            cl.addWidget(self.account_status)
-            lay.addWidget(c)
-            lay.addStretch(1)
-            return page
         name = field("Pseudonim (widzą go znajomi)")
         password = field("Hasło", secret=True)
         repeat = field("Powtórz hasło", secret=True)
@@ -326,9 +323,13 @@ class AccountScreen:
             self.setting_row(
                 cl,
                 "Akceptuję regulamin i politykę prywatności",
-                "Treść: damnit.com.pl/bieznia/regulamin",
+                f"Wersja z {konto.TERMS_VERSION}",
                 terms,
             )
+            read = button("Przeczytaj regulamin i politykę prywatności")
+            read.setToolTip(self.terms_url())
+            read.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.terms_url())))
+            cl.addWidget(read)
         cl.addWidget(self.account_status)
         submit = button("Zaloguj się" if mode == "login" else "Załóż konto", "primary")
         cl.addWidget(submit)
@@ -387,6 +388,11 @@ class AccountScreen:
         lay.addStretch(1)
         return page
 
+    def terms_url(self: App) -> str:
+        return str(
+            self.config.get("konto", {}).get("regulamin", "https://bieznia.damnit-live.pl/bieznia")
+        )
+
     # --- konto online: znajomi, ranking, osoby, ustawienia ---------------------------------
 
     def open_online(self: App) -> None:
@@ -406,7 +412,14 @@ class AccountScreen:
                 ("stats", lambda: client.stats("tydzien")),
             ],
             "ranking": [("ranking", lambda: client.ranking(self.online.get("scope", "tydzien")))],
-            "people": [("people", lambda: client.people(self.online.get("search", "")))],
+            "people": [
+                (
+                    "people",
+                    lambda: client.people(
+                        self.online.get("search", ""), int(self.online.get("people_page", 1))
+                    ),
+                )
+            ],
             "me": [],
         }
         for key, func in loaders.get(tab, []):
@@ -465,7 +478,8 @@ class AccountScreen:
             c, cl = section("Zaproszenia do znajomych")
             for inv in incoming:
                 row = QHBoxLayout()
-                row.addWidget(label(str(inv.get("name", "?"))), 1)
+                person = inv.get("osoba") or {}
+                row.addWidget(label(str(person.get("name") or inv.get("name") or "?")), 1)
                 no = button("Odrzuć")
                 yes = button("Przyjmij", "primary")
                 iid = str(inv.get("id", ""))
@@ -510,6 +524,21 @@ class AccountScreen:
                 lambda: self.account_job("invite_code", self.account.client.invite)
             )
             cl.addWidget(make)
+        reg = self.online.get("reg_code") or {}
+        if reg.get("kod"):
+            new = label(f"Kod na nowe konto: {reg['kod']}")
+            new.setObjectName("accent")
+            new.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            cl.addWidget(new)
+            cl.addWidget(
+                label("Dla osoby bez konta. Działa raz, przez 14 dni (najwyżej 3 naraz).", "small")
+            )
+        else:
+            invite_new = button("Zaproś na Bieżnię (kod na nowe konto)")
+            invite_new.clicked.connect(
+                lambda: self.account_job("reg_code", self.account.client.registration_code)
+            )
+            cl.addWidget(invite_new)
         row = QHBoxLayout()
         other = field("Kod znajomego, np. ABCD-1234")
         add = button("Dodaj", "primary")
@@ -533,8 +562,16 @@ class AccountScreen:
         texts = QVBoxLayout()
         texts.setSpacing(0)
         live = f.get("na_zywo") or None
-        name = label(str(f.get("name", "?")))
-        name.setObjectName("accent" if live else "strong")
+        fid = str(f.get("id", ""))
+        name = button(str(f.get("name", "?")))
+        name.setObjectName("link")
+        name.setFlat(True)
+        name.setStyleSheet(
+            f"text-align: left; padding: 0; border: 0; font-weight: 600;"
+            f" color: {self.t.accent if live else self.t.text};"
+        )
+        name.setToolTip("Pokaż profil")
+        name.clicked.connect(lambda: self.open_person(fid))
         texts.addWidget(name)
         week = f.get("tydzien") or {}
         if live:
@@ -546,7 +583,6 @@ class AccountScreen:
         texts.addWidget(label(sub, "small"))
         rl.addLayout(texts, 1)
         remove = HoldButton("Usuń", self.t)
-        fid = str(f.get("id", ""))
         remove.confirmed.connect(
             lambda: self.account_job(
                 "remove_friend", lambda: self.account.client.remove_friend(fid)
@@ -554,6 +590,49 @@ class AccountScreen:
         )
         rl.addWidget(remove)
         return row
+
+    def open_person(self: App, user_id: str) -> None:
+        if user_id:
+            self.account_job("person", lambda: self.account.client.profile(user_id))
+
+    def people_page(self: App, page_no: int) -> None:
+        self.online["people_page"] = max(1, page_no)
+        self.online.pop("people", None)
+        self.render_online()
+        self.load_online("people", force=True)
+
+    def build_online_person_page(self: App) -> QWidget:
+        p = self.online.get("person") or {}
+        page, lay = self.sticky_page(str(p.get("name", "Profil")), back=self.ONLINE)
+        c, cl = section("Profil")
+        since = p.get("od_utc_s")
+        if since:
+            import datetime as dt
+
+            day = dt.datetime.fromtimestamp(float(since)).strftime("%d.%m.%Y")
+            cl.addWidget(label(f"Na Bieżni od {day}", "small"))
+        if p.get("bieznia_model"):
+            cl.addWidget(label(f"Bieżnia: {p['bieznia_model']}", "small"))
+        cl.addWidget(label("Znajomy" if p.get("znajomy") else "Nie jesteście znajomymi", "small"))
+        lay.addWidget(c)
+        for key, title in (("tydzien", "Ostatnie 7 dni"), ("razem", "Razem")):
+            totals = p.get(key) or {}
+            c, cl = section(title)
+            cl.addWidget(
+                label(
+                    f"{steps_text(int(totals.get('kroki', 0)))} kroków · "
+                    f"{fmt_num(float(totals.get('dystans_km', 0.0)), 2)} km · "
+                    f"{time_text(float(totals.get('ruch_s', 0)))}",
+                )
+            )
+            if totals.get("sesje") is not None:
+                cl.addWidget(label(f"sesje: {int(totals['sesje'])}", "small"))
+            lay.addWidget(c)
+        lay.addWidget(
+            label("Widać tylko sesje, które ta osoba pokazuje Tobie (bez ukrytych).", "small")
+        )
+        lay.addStretch(1)
+        return page
 
     def online_ranking(self: App, lay: QVBoxLayout) -> None:
         scope = self.online.get("scope", "tydzien")
@@ -606,6 +685,7 @@ class AccountScreen:
 
         def go() -> None:
             self.online["search"] = search.text()
+            self.online["people_page"] = 1
             self.online.pop("people", None)
             self.render_online()
             self.load_online("people", force=True)
@@ -621,6 +701,19 @@ class AccountScreen:
             cl.addWidget(label("Ładuję…", "small"))
         else:
             items = list(people.get("osoby") or [])
+            if people.get("nastepna") or int(people.get("strona", 1)) > 1:
+                pager = QHBoxLayout()
+                page_no = int(people.get("strona", 1))
+                prev = button("Poprzednie")
+                prev.setEnabled(page_no > 1)
+                prev.clicked.connect(lambda: self.people_page(page_no - 1))
+                nxt = button("Następne")
+                nxt.setEnabled(bool(people.get("nastepna")))
+                nxt.clicked.connect(lambda: self.people_page(page_no + 1))
+                pager.addWidget(prev)
+                pager.addWidget(label(f"strona {page_no}", "small"), 1)
+                pager.addWidget(nxt)
+                lay.addLayout(pager)
             if not items:
                 cl.addWidget(label("Nikogo nie znaleziono.", "small"))
             for p in items:
@@ -717,6 +810,31 @@ class AccountScreen:
         prof = Segmented(PROFILE_LABELS, state.profile_visibility, "Widoczność profilu")
         prof.changed.connect(self.on_profile_visibility)
         cl.addWidget(prof)
+        lay.addWidget(c)
+
+        c, cl = section("Hasło")
+        old = field("Obecne hasło", secret=True)
+        new = field("Nowe hasło", secret=True)
+        again = field("Powtórz nowe hasło", secret=True)
+        for edit in (old, new, again):
+            cl.addWidget(edit)
+        change = button("Zmień hasło")
+
+        def change_password() -> None:
+            if new.text() != again.text():
+                self.account_status.setText("Nowe hasła różnią się.")
+                return
+            values = (old.text(), new.text())
+            self.account_job("password", lambda: self.account.change_password(*values))
+
+        change.clicked.connect(change_password)
+        cl.addWidget(change)
+        cl.addWidget(
+            label(
+                "Zmiana hasła wylogowuje Cię na innych komputerach (jak „wyloguj wszędzie”).",
+                "small",
+            )
+        )
         lay.addWidget(c)
 
         c, cl = section("Konto")
