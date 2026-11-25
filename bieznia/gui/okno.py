@@ -63,6 +63,15 @@ def app_icon(t: Theme) -> QIcon:
     return QIcon(pix)
 
 
+def tab_pressed() -> bool:
+    """Czy klawisz Tab jest teraz wciśnięty (poza Windows: zakładamy, że tak)."""
+    if sys.platform != "win32":
+        return True
+    from bieznia.winapi import is_key_down
+
+    return bool(is_key_down(0x09))
+
+
 class Window(QWidget):
     def __init__(self, t: Theme, on_close: Any) -> None:
         super().__init__()
@@ -80,8 +89,10 @@ class Window(QWidget):
 
     def focusNextPrevChild(self, next: bool) -> bool:
         """Tab i Shift+Tab z każdej kontrolki dochodzą tutaj - stąd obwódka fokusu wie, że
-        fokus zmieniła klawiatura, a nie klik ani powrót na stronę."""
-        self.tab_at = time.monotonic()
+        fokus zmieniła klawiatura. Qt woła to samo, gdy chowa widok z fokusem (zmiana strony
+        po kliknięciu) - wtedy Tab nie jest wciśnięty i obwódki nie ma."""
+        if tab_pressed():
+            self.tab_at = time.monotonic()
         return super().focusNextPrevChild(next)
 
     def retheme(self, t: Theme) -> None:

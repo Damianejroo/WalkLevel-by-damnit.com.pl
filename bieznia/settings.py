@@ -29,6 +29,7 @@ SECTIONS = {
     "walk_key": "output",
     "run_key": "output",
     "toggle_key": "output",
+    "toggle_pad": "output",
     "direction": "output",
     "belt_control": "ble",
     "idle_speed": "ble",

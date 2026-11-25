@@ -1704,11 +1704,21 @@ def test_profile_switch_in_settings_is_animated(window: gui.App) -> None:
         gui.Motion.enabled = False
 
 
-def test_tab_key_shows_focus_ring_but_returning_focus_does_not(window: gui.App) -> None:
+def test_tab_key_shows_focus_ring_but_returning_focus_does_not(
+    window: gui.App, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Obwódka tylko po Tab - po kliknięciu i powrocie na stronę nie zostaje na przycisku."""
     from PySide6.QtCore import Qt
     from PySide6.QtTest import QTest
 
+    from bieznia.gui import okno
+
+    # klik „Szukaj bieżni”: widok z fokusem się chowa, Qt przenosi fokus jak Tabem - bez Tab
+    monkeypatch.setattr(okno, "tab_pressed", lambda: False)
+    window.window.tab_at = float("-inf")
+    window.window.focusNextPrevChild(True)
+    assert window.window.tab_at == float("-inf") and not window.ring.isVisible()
+    monkeypatch.setattr(okno, "tab_pressed", lambda: True)
     window.open_settings()
     btn = window.toggle_btn
     window.window.tab_at = float("-inf")
@@ -1891,3 +1901,48 @@ def test_session_details_and_delete_also_from_account(window: gui.App, tmp_path:
     assert window.history is not None and window.history.count() == 0
     assert deleted and len(deleted[0]) == 36  # usunięta też z konta (uuid z myślnikami)
     assert window.pages.currentIndex() == window.HISTORY
+
+
+class ButtonPad:
+    name = "DualSense (USB)"
+
+    def __init__(self) -> None:
+        self.pressed: frozenset[str] = frozenset()
+
+    def read(self) -> Any:
+        from bieznia.pad import PadState
+
+        return PadState(self.name, 0.0, 0.0, self.pressed)
+
+
+def test_pad_button_can_toggle_control_like_f8(window: gui.App) -> None:
+    from bieznia.pad import PadReader
+
+    worker = fake(window)
+    pad = ButtonPad()
+    window.pad = PadReader(lambda: [pad])  # type: ignore[list-item]
+    window.open_settings()
+    assert window.pad_toggle_btn.text() == "Przypisz przycisk pada"
+    window.pad_toggle_btn.click()
+    window.tick()
+    assert window.pad_toggle_btn.text() == "Naciśnij przycisk na padzie…"
+    pad.pressed = frozenset({"touchpad"})
+    window.tick()
+    assert window.settings["toggle_pad"] == "touchpad"
+    assert window.pad_toggle_btn.text() == "Panel dotykowy"
+    pad.pressed = frozenset()
+    window.tick()
+    assert not window.bridge.state.enabled
+    pad.pressed = frozenset({"touchpad"})  # wciśnięcie = jak F8
+    window.tick()
+    assert window.bridge.state.enabled and "belt start" in worker.calls
+    window.tick()  # trzymany przycisk nie przełącza drugi raz
+    assert window.bridge.state.enabled
+    pad.pressed = frozenset()
+    window.tick()
+    pad.pressed = frozenset({"touchpad"})
+    window.tick()
+    assert not window.bridge.state.enabled
+    assert "albo pad: Panel dotykowy" in window.control_subtitle.text()
+    window.set_toggle_pad("")
+    assert window.settings["toggle_pad"] == ""

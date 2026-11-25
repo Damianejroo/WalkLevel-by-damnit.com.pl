@@ -129,3 +129,37 @@ def test_background_scan_does_not_block_and_delivers_pad() -> None:
             break
         time.sleep(0.01)
     assert state is not None and reader.name == "DualSense (Bluetooth)"
+
+
+def test_sony_buttons_in_every_report_layout() -> None:
+    from bieznia.pad import parse_sony_buttons
+
+    # DualSense USB (64 bajty): przyciski w bajtach 8-10, hat 8 = strzałki puszczone
+    usb = bytearray(64)
+    usb[0], usb[8], usb[10] = 0x01, 0x08 | 0x20, 0x02  # krzyżyk + panel dotykowy
+    assert parse_sony_buttons(bytes(usb), dualsense=True) == {"south", "touchpad"}
+    # DualSense Bluetooth, pełny raport 0x31 (o bajt dalej)
+    bt = bytearray(78)
+    bt[0], bt[9], bt[10] = 0x31, 0x08, 0x10  # Create
+    assert parse_sony_buttons(bytes(bt), dualsense=True) == {"select"}
+    # DualShock 4 USB: przyciski zaraz za gałkami (bajty 5-7), strzałka w górę = hat 0
+    ds4 = bytearray(64)
+    ds4[0], ds4[5], ds4[6] = 0x01, 0x00 | 0x80, 0x01  # góra + trójkąt, L1
+    assert parse_sony_buttons(bytes(ds4), dualsense=False) == {"up", "north", "l1"}
+    # DualSense przez Bluetooth w trybie podstawowym (krótki raport) - układ jak DS4
+    short = bytes([0x01, 128, 128, 128, 128, 0x08 | 0x40, 0x00, 0x01, 0, 0])
+    assert parse_sony_buttons(short, dualsense=True) == {"east", "home"}
+    assert parse_sony_buttons(b"", dualsense=True) == frozenset()
+
+
+def test_xinput_buttons_and_labels() -> None:
+    from types import SimpleNamespace
+
+    from bieznia.pad import button_label, xinput_buttons
+
+    g = SimpleNamespace(wButtons=0x1000 | 0x0020, bLeftTrigger=200, bRightTrigger=10)
+    assert xinput_buttons(g) == {"south", "select", "l2"}
+    assert button_label("south", "DualSense (USB)") == "Krzyżyk"
+    assert button_label("south", "Pad Xbox (XInput 1)") == "A"
+    assert button_label("touchpad", None) == "Panel dotykowy"
+    assert button_label("b5", "Gamepad") == "Przycisk 5"

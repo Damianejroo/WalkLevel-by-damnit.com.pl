@@ -1,0 +1,157 @@
+<!doctype html>
+<!--
+  Regulamin i polityka prywatności konta online Bieżni - strona statyczna dla
+  https://bieznia.damnit-live.pl/bieznia (bez skryptów, czcionek i zasobów z zewnątrz).
+  Wersja = data zapisywana przy koncie (bieznia/konto/__init__.py: TERMS_VERSION).
+
+  DO DECYZJI DAMIANA przed publikacją (w szkicu wpisane propozycje):
+  1. minimalny wiek: 16 lat (młodsi za zgodą rodzica),
+  2. dane administratora: imię, nazwisko, strona i e-mail - czy wystarczą,
+  3. okno zmian regulaminu: 7 dni,
+  4. konta nieużywane: dziś bez terminu (propozycja do rozważenia: 24 miesiące bez logowania).
+-->
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bieżnia - regulamin i prywatność konta</title>
+<style>
+:root { --bg: #f3f6f5; --panel: #ffffff; --fg: #1d2422; --muted: #5a6662; --accent: #2b7563; --line: #d5dedb; color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #232726; --panel: #1b1e1d; --fg: #e8edeb; --muted: #a3aeab; --accent: #8fc4b3; --line: #3a413f; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  padding: 24px max(16px, env(safe-area-inset-left)) 48px max(16px, env(safe-area-inset-right)); }
+main { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+header p { color: var(--muted); margin: 6px 0 0; }
+h1 { font-size: 1.7rem; margin: 0; line-height: 1.25; }
+h2 { font-size: 1.25rem; margin: 0 0 4px; }
+h3 { font-size: 1rem; margin: 14px 0 2px; }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+p, li { max-width: 68ch; }
+p { margin: 6px 0; }
+ul { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+a { color: var(--accent); }
+nav { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 15px; }
+.short { border-left: 3px solid var(--accent); padding-left: 12px; }
+footer { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Bieżnia - regulamin i prywatność konta online</h1>
+  <p>Wersja z 2026-11-25. Dotyczy tylko konta online w aplikacji Bieżnia Gamingowa.</p>
+  <nav><a href="#w-skrocie">W skrócie</a><a href="#regulamin">Regulamin</a><a href="#prywatnosc">Prywatność</a></nav>
+</header>
+
+<section id="w-skrocie">
+  <h2>W skrócie</h2>
+  <ul class="short">
+    <li>Aplikacja działa w całości bez konta, na Twoim komputerze. Bez konta nic nie wychodzi z komputera.</li>
+    <li>Konto jest dobrowolne i darmowe. Daje wyniki online, znajomych, ranking i listę osób.</li>
+    <li>Na serwer trafia: e-mail, pseudonim, skrót hasła i sesje chodzenia jednej osoby z aplikacji. Nie trafiają nazwy osób i gier, waga, wzrost ani wiek.</li>
+    <li>Ty decydujesz, kto widzi Twoje sesje: tylko Ty, znajomi albo wszyscy. Pojedynczych sesji nikt poza Tobą nie widzi - inni widzą tylko sumy.</li>
+    <li>Konto usuniesz sam w aplikacji. Dane pobierzesz przyciskiem „Pobierz moje dane”.</li>
+  </ul>
+</section>
+
+<section id="regulamin">
+  <h2>Regulamin</h2>
+
+  <h3>1. Kto prowadzi</h3>
+  <p>Konto online prowadzi Damian Skrzypiec (osoba prywatna, <a href="https://damnit.com.pl">damnit.com.pl</a>). We wszystkich sprawach - pytania, reklamacje, dane, odwołania - pisz na <strong>kontakt@damnit.com.pl</strong>.</p>
+
+  <h3>2. Usługa</h3>
+  <p>Konto jest darmowe, bez reklam i płatności, i służy tylko funkcjom online aplikacji: wynikom na koncie, znajomym, rankingowi, liście osób i stanowi „na żywo” dla znajomych. Aplikacja działa w pełni bez konta.</p>
+
+  <h3>3. Konto</h3>
+  <ul>
+    <li>Konto zakładasz kodem zaproszenia od osoby, która już ma konto. Każde konto może mieć naraz najwyżej 3 niewykorzystane kody.</li>
+    <li>Logujesz się e-mailem i hasłem. E-mail służy tylko do logowania (i resetu hasła, gdy ta funkcja ruszy) - nigdy do reklam.</li>
+    <li>Konto może założyć osoba, która ma co najmniej 16 lat; osoba młodsza - tylko za zgodą rodzica lub opiekuna.</li>
+    <li>Hasło jest tylko Twoje i odpowiadasz za jego udostępnienie. Nigdy nie poproszę Cię o hasło. Aplikacja łączy się tylko z adresem bieznia.damnit-live.pl.</li>
+    <li>Przy zakładaniu konta akceptujesz ten regulamin; przy koncie zapisuje się jego wersja i czas akceptacji.</li>
+  </ul>
+
+  <h3>4. Zasady</h3>
+  <ul>
+    <li>Nie podszywaj się pod innych i nie używaj pseudonimu obraźliwego ani z imieniem i nazwiskiem.</li>
+    <li>Nie oszukuj wyników. Serwer sprawdza wiarygodność każdej sesji (czy pochodzi z prawdziwej bieżni i czy prędkość, kroki i czas do siebie pasują). Sesja, która nie przejdzie sprawdzenia, zostaje w Twoich prywatnych statystykach, ale nie trafia do rankingu ani do sum widocznych dla innych.</li>
+    <li>Przy naruszeniu zasad mogę usunąć wynik z rankingu albo usunąć konto. Decyzję podejmuje człowiek. Możesz się odwołać e-mailem - odpowiem w 14 dni.</li>
+  </ul>
+
+  <h3>5. Zdrowie i bezpieczeństwo</h3>
+  <p>Aplikacja nie jest wyrobem medycznym, a liczby z bieżni (kroki, dystans, prędkość) mogą być niedokładne. Ćwiczysz na własną odpowiedzialność i według swoich możliwości. Nie odpowiadam za urazy ani za sprzęt.</p>
+
+  <h3>6. Odpowiedzialność i dostępność</h3>
+  <p>Usługa jest darmowa i może mieć przerwy oraz błędy. Jeśli kiedyś ją zamknę, ogłoszę to w aplikacji co najmniej 14 dni wcześniej, żebyś mógł pobrać swoje dane. Nic w tym regulaminie nie ogranicza Twoich praw konsumenta.</p>
+
+  <h3>7. Reklamacje</h3>
+  <p>Reklamację wyślij na kontakt@damnit.com.pl. Odpowiem w ciągu 14 dni.</p>
+
+  <h3>8. Zmiany regulaminu</h3>
+  <p>O zmianach informuję w aplikacji. Wchodzą w życie 7 dni po ogłoszeniu; od razu tylko wtedy, gdy wymaga tego prawo, bezpieczeństwo albo gdy zbieram mniej danych. Jeśli zmiana dotyczy Twoich praw albo nowego celu używania danych, aplikacja poprosi o ponowną akceptację.</p>
+</section>
+
+<section id="prywatnosc">
+  <h2>Prywatność konta</h2>
+
+  <h3>Administrator</h3>
+  <p>Administratorem danych konta jest Damian Skrzypiec, kontakt@damnit.com.pl. Prywatność samej aplikacji (bez konta) opisuje osobna polityka aplikacji.</p>
+
+  <h3>Jakie dane są na serwerze</h3>
+  <ul>
+    <li><strong>Konto:</strong> e-mail, pseudonim, skrót hasła (samego hasła nie przechowuję), widoczność profilu, data założenia, wersja i czas akceptacji regulaminu, a także kto Cię zaprosił i kogo zaprosiłeś (kody zaproszeń).</li>
+    <li><strong>Sesje chodzenia:</strong> początek i koniec, kroki, dystans, czas ruchu, model bieżni, sterownik, firmware, wersja aplikacji, źródło, widoczność, strefa czasowa i lokalny numer osoby z aplikacji (bez nazwy) oraz znacznik wiarygodności.</li>
+    <li><strong>Stan na żywo</strong> (tylko gdy go włączysz): bieżąca prędkość, kroki i czas ruchu w jednym nadpisywanym wpisie - bez historii przebiegu. Znajomi przestają go widzieć 30 s po ostatniej aktualizacji; wpis znika po wyłączeniu udostępniania.</li>
+    <li><strong>Znajomości</strong> i oczekujące zaproszenia.</li>
+  </ul>
+  <p>Nie zbieram: nazw osób i gier z aplikacji, wagi, wzrostu, wieku, lokalizacji, kontaktów, plików ani awatarów. Nie ma ciasteczek, narzędzi analitycznych ani logowania przez serwisy zewnętrzne. Kroki i dystans to dane o aktywności - nie wyciągam z nich wniosków o zdrowiu.</p>
+
+  <h3>Kto co widzi</h3>
+  <ul>
+    <li><strong>Ty:</strong> wszystkie swoje sesje i statystyki.</li>
+    <li><strong>Znajomi:</strong> sumy z Twoich sesji ustawionych na „Znajomi” i „Wszyscy” (ostatnie 7 dni i łącznie), pseudonim, datę założenia konta i model bieżni.</li>
+    <li><strong>Pozostali:</strong> tylko sumy z sesji „Wszyscy” i tylko wtedy, gdy Twój profil jest publiczny. Na liście osób z kontem są wyłącznie profile publiczne (domyślnie profil widzą tylko znajomi).</li>
+    <li>Pojedynczych sesji (dat, godzin) nie widzi nikt poza Tobą. Twój e-mail nie jest pokazywany nikomu.</li>
+    <li>„Tylko ja” znaczy: niewidoczne dla innych użytkowników. Administrator serwera ma techniczny dostęp do całej bazy.</li>
+  </ul>
+
+  <h3>Po co i na jakiej podstawie</h3>
+  <ul>
+    <li>Prowadzenie konta i funkcji online - bo o nie prosisz (art. 6 ust. 1 lit. b RODO). Ranking i lista osób to część usługi, którą włączasz ustawieniem widoczności.</li>
+    <li>Bezpieczeństwo, limity prób logowania i sprawdzanie wiarygodności wyników - mój prawnie uzasadniony interes (art. 6 ust. 1 lit. f RODO); możesz wnieść sprzeciw.</li>
+  </ul>
+
+  <h3>Adres IP i dzienniki</h3>
+  <p>Adres IP nie jest zapisywany w bazie ani w dzienniku usługi (dziennik trzyma tylko ostrzeżenia i błędy przez 3 dni, bez adresów). Adres jest używany w pamięci do limitów prób (logowanie, rejestracja) i znika przy restarcie. Gdy na serwerze wystąpi błąd albo żądanie zostanie przerwane, oprogramowanie serwera może zapisać wpis z adresem IP w dzienniku systemowym o ograniczonym rozmiarze, który nadpisuje się w ciągu kilku tygodni.</p>
+
+  <h3>Gdzie i jak długo</h3>
+  <ul>
+    <li>Serwer: VPS w OVHcloud, centrum danych w Polsce.</li>
+    <li>Kopie zapasowe: szyfrowane na serwerze przed wysłaniem i przechowywane w OneDrive (Microsoft); Microsoft nie ma klucza. Kopie bazy kont są trzymane 30 dni.</li>
+    <li>OVHcloud i Microsoft przetwarzają dane na moje zlecenie. Danych nie sprzedaję ani nie udostępniam nikomu innemu.</li>
+    <li>Dane konta są przechowywane do usunięcia konta.</li>
+  </ul>
+
+  <h3>Usunięcie konta i Twoje prawa</h3>
+  <ul>
+    <li>Konto usuniesz w aplikacji (Konto online > Konto > Usuń konto, z hasłem) albo e-mailem. Od razu znika konto, sesje, stan na żywo, znajomości, zaproszenia i Twoje niewykorzystane kody. Z kopii zapasowych dane znikają najpóźniej po 30 dniach. Wyniki na Twoim komputerze zostają.</li>
+    <li>Kopię swoich danych pobierzesz przyciskiem „Pobierz moje dane” (konto, wszystkie sesje, znajomości).</li>
+    <li>Masz prawo do dostępu, sprostowania, usunięcia, ograniczenia i przeniesienia danych oraz do sprzeciwu wobec przetwarzania na podstawie uzasadnionego interesu. Odpowiadam w ciągu miesiąca.</li>
+    <li>Możesz złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych (ul. Stawki 2, 00-193 Warszawa).</li>
+  </ul>
+
+  <h3>Na Twoim komputerze</h3>
+  <p>Aplikacja trzyma token logowania w Menedżerze poświadczeń Windows (zaszyfrowany dla Twojego konta Windows), a nie w zwykłym pliku. Hasło nie jest zapisywane nigdzie. Token wygasa po 7 dniach bez odświeżenia, a zmiana hasła wylogowuje wszystkie urządzenia.</p>
+</section>
+
+<footer>
+  <p>Obowiązuje prawo polskie. Jeśli któryś punkt okaże się nieważny, pozostałe obowiązują dalej. Ostatnia zmiana: 2026-11-25.</p>
+</footer>
+</main>
+</body>
+</html>

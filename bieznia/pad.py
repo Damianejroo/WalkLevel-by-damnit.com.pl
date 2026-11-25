@@ -5,7 +5,7 @@ Odczyt bez dodatkowych bibliotek i bez fokusu (gra może być na wierzchu):
   Bluetooth, gdy Steam przełączy pada w pełny raport 0x31, winmm widzi zamrożoną gałkę),
 - XInput - pady Xbox i wszystko, co Steam/DS4Windows udaje jako pad Xbox,
 - winmm (DirectInput) - pozostałe pady HID.
-Program tylko czyta pozycję gałki, niczego nie wysyła do gry.
+Program tylko czyta pozycję gałki i przyciski, niczego nie wysyła do gry.
 """
 
 from __future__ import annotations
@@ -41,11 +41,82 @@ PRESETS: dict[int, list[tuple[int, float]]] = {
 MIN_GAP = 5  # skoki muszą różnić się co najmniej o tyle punktów procentowych
 
 
+# Przyciski pod wspólnymi nazwami (układ jak na padach: dół/prawo/lewo/góra) i ich podpisy.
+BUTTONS_SONY = {
+    "south": "Krzyżyk",
+    "east": "Kółko",
+    "west": "Kwadrat",
+    "north": "Trójkąt",
+    "l1": "L1",
+    "r1": "R1",
+    "l2": "L2",
+    "r2": "R2",
+    "select": "Create",
+    "start": "Options",
+    "l3": "L3 (lewa gałka)",
+    "r3": "R3 (prawa gałka)",
+    "home": "PS",
+    "touchpad": "Panel dotykowy",
+    "up": "Strzałka w górę",
+    "down": "Strzałka w dół",
+    "left": "Strzałka w lewo",
+    "right": "Strzałka w prawo",
+}
+BUTTONS_XBOX = {
+    **BUTTONS_SONY,
+    "south": "A",
+    "east": "B",
+    "west": "X",
+    "north": "Y",
+    "l1": "LB",
+    "r1": "RB",
+    "l2": "LT",
+    "r2": "RT",
+    "select": "View",
+    "start": "Menu",
+    "l3": "LS (lewa gałka)",
+    "r3": "RS (prawa gałka)",
+    "home": "Xbox",
+}
+# Kolejność przy przypisywaniu (gdy naraz kilka): najpierw te rzadko używane w grach.
+BUTTON_ORDER = (
+    "touchpad",
+    "select",
+    "home",
+    "l3",
+    "r3",
+    "start",
+    *(f"b{i}" for i in range(1, 33)),
+    "up",
+    "down",
+    "left",
+    "right",
+    "l1",
+    "r1",
+    "l2",
+    "r2",
+    "west",
+    "north",
+    "east",
+    "south",
+)
+
+
+def button_label(button: str, pad_name: str | None = None) -> str:
+    """Podpis przycisku jak na padzie (Krzyżyk na DualSense, A na padzie Xbox)."""
+    if button.startswith("b") and button[1:].isdigit():
+        return f"Przycisk {button[1:]}"
+    sony = pad_name is None or any(w in pad_name for w in ("DualSense", "DualShock", "PlayStation"))
+    names = BUTTONS_SONY if sony else BUTTONS_XBOX
+    return names.get(button, button)
+
+
 @dataclass(frozen=True)
 class PadState:
     name: str
     x: float  # -1..1, w prawo dodatnie
     y: float  # -1..1, do przodu dodatnie
+    buttons: frozenset[str] = frozenset()  # wciśnięte teraz (nazwy jak w BUTTONS_SONY)
 
     @property
     def deflection(self) -> float:
@@ -170,6 +241,7 @@ class JOYCAPSW(ctypes.Structure):
 
 JOY_RETURNX = 0x01
 JOY_RETURNY = 0x02
+JOY_RETURNBUTTONS = 0x80
 SONY = 0x054C
 DUALSENSE = {0x0CE6: "DualSense", 0x0DF2: "DualSense Edge"}
 DUALSHOCK = {0x05C4: "DualShock 4", 0x09CC: "DualShock 4"}
@@ -216,7 +288,7 @@ class XInputSource:
         if _xinput.XInputGetState(self.slot, ctypes.byref(state)) != 0:
             return None
         g = state.Gamepad
-        return PadState(self.name, g.sThumbLX / 32767, g.sThumbLY / 32767)
+        return PadState(self.name, g.sThumbLX / 32767, g.sThumbLY / 32767, xinput_buttons(g))
 
 
 class WinmmSource:
@@ -234,13 +306,14 @@ class WinmmSource:
             return None
         info = JOYINFOEX()
         info.dwSize = ctypes.sizeof(JOYINFOEX)
-        info.dwFlags = JOY_RETURNX | JOY_RETURNY
+        info.dwFlags = JOY_RETURNX | JOY_RETURNY | JOY_RETURNBUTTONS
         if _winmm.joyGetPosEx(self.joy_id, ctypes.byref(info)) != 0:
             return None
         c = self.caps
         x = _axis(info.dwXpos, c.wXmin, c.wXmax)
         y = -_axis(info.dwYpos, c.wYmin, c.wYmax)  # w DirectInput oś Y rośnie w dół
-        return PadState(self.name, x, y)
+        pressed = frozenset(f"b{i + 1}" for i in range(32) if info.dwButtons & (1 << i))
+        return PadState(self.name, x, y, pressed)
 
 
 # --- pady Sony wprost przez HID -------------------------------------------------
@@ -264,6 +337,82 @@ def parse_sony(report: bytes) -> tuple[float, float] | None:
     x = max(-1.0, min(1.0, (lx - 127.5) / 127.5))
     y = max(-1.0, min(1.0, (127.5 - ly) / 127.5))  # w raporcie oś Y rośnie w dół
     return x, y
+
+
+_HAT = {
+    0: ("up",),
+    1: ("up", "right"),
+    2: ("right",),
+    3: ("down", "right"),
+    4: ("down",),
+    5: ("down", "left"),
+    6: ("left",),
+    7: ("up", "left"),
+}
+_SONY_B0 = ((0x10, "west"), (0x20, "south"), (0x40, "east"), (0x80, "north"))
+_SONY_B1 = (
+    (0x01, "l1"),
+    (0x02, "r1"),
+    (0x04, "l2"),
+    (0x08, "r2"),
+    (0x10, "select"),
+    (0x20, "start"),
+    (0x40, "l3"),
+    (0x80, "r3"),
+)
+_SONY_B2 = ((0x01, "home"), (0x02, "touchpad"))
+
+
+def parse_sony_buttons(report: bytes, dualsense: bool) -> frozenset[str]:
+    """Przyciski z raportu DualSense/DualShock 4. Układ bajtów zależy od modelu i trybu:
+    DualSense USB i Bluetooth (pełny raport) mają przyciski za spustami, DualShock 4 i
+    podstawowy raport Bluetooth - zaraz za gałkami."""
+    if not report:
+        return frozenset()
+    rid = report[0]
+    if rid == 0x01:
+        start = 8 if dualsense and len(report) > 20 else 5
+    elif rid == 0x31:
+        start = 9
+    elif rid == 0x11:
+        start = 8
+    else:
+        return frozenset()
+    if len(report) < start + 3:
+        return frozenset()
+    b0, b1, b2 = report[start], report[start + 1], report[start + 2]
+    pressed = list(_HAT.get(b0 & 0x0F, ()))
+    pressed += [name for bit, name in _SONY_B0 if b0 & bit]
+    pressed += [name for bit, name in _SONY_B1 if b1 & bit]
+    pressed += [name for bit, name in _SONY_B2 if b2 & bit]
+    return frozenset(pressed)
+
+
+_XINPUT_BITS = (
+    (0x0001, "up"),
+    (0x0002, "down"),
+    (0x0004, "left"),
+    (0x0008, "right"),
+    (0x0010, "start"),
+    (0x0020, "select"),
+    (0x0040, "l3"),
+    (0x0080, "r3"),
+    (0x0100, "l1"),
+    (0x0200, "r1"),
+    (0x1000, "south"),
+    (0x2000, "east"),
+    (0x4000, "west"),
+    (0x8000, "north"),
+)
+
+
+def xinput_buttons(g: Any) -> frozenset[str]:
+    pressed = [name for bit, name in _XINPUT_BITS if g.wButtons & bit]
+    if (g.bLeftTrigger & 0xFF) > 128:
+        pressed.append("l2")
+    if (g.bRightTrigger & 0xFF) > 128:
+        pressed.append("r2")
+    return frozenset(pressed)
 
 
 class GUID(ctypes.Structure):
@@ -419,8 +568,10 @@ class HidSource:
         self.path = path
         model = DUALSENSE.get(pid) or DUALSHOCK.get(pid) or "Pad PlayStation"
         self.name = f"{model} ({'Bluetooth' if BT_HID in path.lower() else 'USB'})"
+        self.dualsense = pid in DUALSENSE
         self._lock = threading.Lock()
         self._xy: tuple[float, float] | None = None
+        self._buttons: frozenset[str] = frozenset()
         self._at = float("-inf")
         self._first = threading.Event()
         self._stop = False
@@ -452,11 +603,13 @@ class HidSource:
             while not self._stop:
                 if not _k32.ReadFile(self._handle, buf, len(buf), ctypes.byref(got), None):
                     break  # pad odłączony albo odczyt przerwany
-                xy = parse_sony(buf.raw[: got.value])
+                report = buf.raw[: got.value]
+                xy = parse_sony(report)
                 if xy is None:
                     continue
+                buttons = parse_sony_buttons(report, self.dualsense)
                 with self._lock:
-                    self._xy, self._at = xy, time.monotonic()
+                    self._xy, self._buttons, self._at = xy, buttons, time.monotonic()
                 self._first.set()
         finally:
             _k32.CloseHandle(self._handle)
@@ -465,10 +618,10 @@ class HidSource:
 
     def read(self) -> PadState | None:
         with self._lock:
-            xy, at = self._xy, self._at
+            xy, buttons, at = self._xy, self._buttons, self._at
         if xy is None or time.monotonic() - at > self.STALE_S:
             return None
-        return PadState(self.name, *xy)
+        return PadState(self.name, xy[0], xy[1], buttons)
 
 
 def discover() -> list[Source]:

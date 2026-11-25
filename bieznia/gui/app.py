@@ -144,6 +144,7 @@ def defaults_from(config: dict[str, Any]) -> dict[str, Any]:
         "walk_key": output.get("walk_key"),
         "run_key": output.get("run_key"),
         "toggle_key": output.get("toggle_key"),
+        "toggle_pad": str(output.get("toggle_pad", "")),  # przycisk pada (np. "touchpad")
         "belt_control": bool(ble.get("belt_control", True)),
         "direction": output.get("direction", "keyboard"),
         "idle_speed": float(ble.get("idle_speed", 1.0)),
@@ -163,6 +164,8 @@ def normalize(s: dict[str, Any]) -> dict[str, Any]:
         s["pad_idle"] = "stop"
     if s.get("direction") not in ("keyboard", "gamepad", "treadmill"):
         s["direction"] = "keyboard"
+    if not isinstance(s.get("toggle_pad"), str):
+        s["toggle_pad"] = ""
     if s.get("output") not in ("dry", "keys"):
         s["output"] = "dry"
     if s.get("theme") not in ("system", "light", "dark"):
@@ -272,6 +275,8 @@ class App(
         self.pad = gamepad.PadReader(background=True)
         self.pad_picker = gamepad.StepPicker()
         self.pad_state: gamepad.PadState | None = None
+        self.pad_buttons: frozenset[str] = frozenset()
+        self.pad_capture_until = 0.0  # przypisywanie przycisku pada do włączania
         self.pad_step = 0
         self.pad_step_since = 0.0
         self.key_down = is_key_down  # podmieniane w testach
@@ -1097,6 +1102,7 @@ class App(
                 break
 
         capturing = self.capturing()
+        self.read_pad(capturing)
         actions = self.hotkeys.poll()
         for action, step in (("sim_faster", 1), ("sim_slower", -1)):
             if action in actions:

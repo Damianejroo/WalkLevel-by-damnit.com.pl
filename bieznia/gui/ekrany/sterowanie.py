@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import contextlib
 import logging
+import time
 from typing import TYPE_CHECKING
 
+from bieznia import pad as gamepad
 from bieznia.gui.widgets import (
     fmt_num,
 )
@@ -21,10 +23,15 @@ log = logging.getLogger("bieznia")
 HYSTERESIS = 0.6
 PAD_SETTLE_S = 0.15  # gałka w drodze przez skoki - wysyłamy dopiero, gdy się zatrzyma
 PAD_STOP_SETTLE_S = 0.4  # gałka przechodzi przez środek przy zmianie kierunku - to nie stop
+PAD_CAPTURE_S = 10.0  # tyle czekamy na przycisk przy przypisywaniu
 STOPPED = -1.0  # belt_target: taśma zatrzymana przez puszczoną gałkę
 
 
 class ControlScreen:
+    pad_state: gamepad.PadState | None
+    pad_buttons: frozenset[str]
+    pad_capture_until: float
+
     def toggle_from_bubble(self: App) -> None:
         self.set_control(not self.bridge.state.enabled)
 
@@ -61,9 +68,78 @@ class ControlScreen:
         self.change("belt_control", on)
         self.render_control_subtitle()
 
+    # --- przycisk pada zamiast (albo obok) klawisza włączania ------------------------------
+
+    def read_pad(self: App, capturing_keys: bool) -> None:
+        """Pad czytany raz na klatkę - gdy steruje gałką, ma przypisany przycisk albo właśnie
+        przypisujemy przycisk. Wciśnięcie przypisanego przycisku działa jak klawisz F8."""
+        wanted = (
+            self.settings["direction"] == "gamepad"
+            or bool(self.settings["toggle_pad"])
+            or self.pad_capture_until > 0
+        )
+        if not wanted:
+            self.pad_state, self.pad_buttons = None, frozenset()
+            return
+        self.pad_state = self.pad.read()
+        buttons = self.pad_state.buttons if self.pad_state else frozenset()
+        pressed = buttons - self.pad_buttons
+        self.pad_buttons = buttons
+        if self.pad_capture_until > 0:
+            if pressed:
+                button = next((b for b in gamepad.BUTTON_ORDER if b in pressed), sorted(pressed)[0])
+                self.set_toggle_pad(button)
+            elif time.monotonic() > self.pad_capture_until:
+                self.pad_capture_until = 0.0
+                self.render_pad_button()
+            return
+        toggle = self.settings["toggle_pad"]
+        if toggle and toggle in pressed and not capturing_keys:
+            self.set_control(not self.bridge.state.enabled)
+
+    def pad_button_label(self: App) -> str:
+        button = self.settings["toggle_pad"]
+        if not button:
+            return ""
+        name = self.pad_state.name if self.pad_state else self.pad.name
+        return gamepad.button_label(button, name)
+
+    def capture_pad_button(self: App) -> None:
+        self.pad_capture_until = time.monotonic() + PAD_CAPTURE_S
+        self.pad_buttons = frozenset(self.pad_state.buttons) if self.pad_state else frozenset()
+        self.render_pad_button()
+
+    def set_toggle_pad(self: App, button: str) -> None:
+        self.pad_capture_until = 0.0
+        self.change("toggle_pad", button)
+        label_text = self.pad_button_label() or "brak"
+        log.info("Przycisk pada włączający sterowanie: %s", button or "brak")
+        if button in ("south", "east"):
+            self.toast(f"{label_text} to w wielu grach skok albo akcja - rozważ inny przycisk.")
+        self.render_pad_button()
+        self.render_control_subtitle()
+
+    def render_pad_button(self: App) -> None:
+        btn = getattr(self, "pad_toggle_btn", None)
+        if btn is None:
+            return
+        if self.pad_capture_until > 0:
+            text = "Naciśnij przycisk na padzie…"
+        else:
+            text = self.pad_button_label() or "Przypisz przycisk pada"
+        with contextlib.suppress(RuntimeError):
+            if btn.text() != text:
+                btn.setText(text)
+            clear = getattr(self, "pad_clear_btn", None)
+            if clear is not None:
+                clear.setVisible(bool(self.settings["toggle_pad"]) and self.pad_capture_until == 0)
+
     def render_control_subtitle(self: App) -> None:
         belt = bool(self.settings["belt_control"])
         start = "uruchamia i zatrzymuje taśmę" if belt else "włącza i wyłącza sterowanie"
+        pad_button = self.pad_button_label()
+        if pad_button:
+            start = f"(albo pad: {pad_button}) {start}"
         direction = self.settings["direction"]
         if direction == "keyboard":
             text = f"{start} · {self.bridge.keys[0].name} przyspiesza"
@@ -111,7 +187,6 @@ class ControlScreen:
     def pad_target(self: App, now: float) -> tuple[float, str, str, bool]:
         """Prędkość ze skoku gałki. Ostatnie pole: skok trzyma się już chwilę (można wysłać)."""
         steps = self.settings["pad_steps"]
-        self.pad_state = self.pad.read()
         deflection = self.pad_state.deflection if self.pad_state else 0.0
         index = self.pad_picker.update(steps, deflection)
         if index != self.pad_step:

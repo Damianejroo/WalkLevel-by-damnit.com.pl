@@ -250,6 +250,20 @@ class SettingsScreen:
             )
         )
         bl.addWidget(self.toggle_btn)
+        pad_row = QHBoxLayout()
+        self.pad_toggle_btn = button("")
+        self.pad_toggle_btn.setToolTip(
+            "Przycisk pada działa jak klawisz włączania - też w grze. Najlepiej taki, którego"
+            " gra nie używa: panel dotykowy, Create albo kliknięcie gałki."
+        )
+        self.pad_toggle_btn.clicked.connect(self.capture_pad_button)
+        self.pad_clear_btn = button("Usuń")
+        self.pad_clear_btn.clicked.connect(lambda: self.set_toggle_pad(""))
+        pad_row.addWidget(self.pad_toggle_btn, 1)
+        pad_row.addWidget(self.pad_clear_btn)
+        bl.addWidget(label("Albo przycisk na padzie (DualSense, DualShock, Xbox)", "small"))
+        bl.addLayout(pad_row)
+        self.render_pad_button()
         self.belt_switch = Switch(t, "Start i stop bieżni", self.settings["belt_control"])
         self.belt_switch.toggled.connect(self.on_belt_control)
         self.setting_row(

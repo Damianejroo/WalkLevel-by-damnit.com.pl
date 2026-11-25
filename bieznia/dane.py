@@ -43,6 +43,7 @@ SHARED_KEYS = frozenset(
         "belt_control",
         "quick_stop",
         "toggle_key",
+        "toggle_pad",
         "simulator",
         "record",
         "detailed_logs",
