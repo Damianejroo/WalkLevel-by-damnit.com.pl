@@ -97,6 +97,7 @@ class Profile:
     icon_file: str | None = None  # ikona z gry: plik PNG w dane/ikony
     exe: str | None = None
     settings: dict[str, Any] = field(default_factory=dict)
+    online: bool = True  # nazwa gry przy sesjach na koncie online (gdy konto pozwala)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -108,6 +109,7 @@ class Profile:
             "ikona": self.icon_file,
             "exe": self.exe,
             "ustawienia": self.settings,
+            "gra_online": self.online,
         }
 
     @classmethod
@@ -123,6 +125,7 @@ class Profile:
             settings={
                 k: v for k, v in dict(d.get("ustawienia") or {}).items() if k in PROFILE_KEYS
             },
+            online=bool(d.get("gra_online", True)),
         )
 
 

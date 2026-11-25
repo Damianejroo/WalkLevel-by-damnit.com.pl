@@ -2075,3 +2075,27 @@ def test_register_sends_verification_and_password_reminder_works(
     window.tick()
     assert server.requests[-1][1] == "/api/bieznia/przypomnij-haslo"
     assert "Jeśli konto z tym adresem istnieje" in window.account_status.text()
+
+
+def test_games_breakdown_and_new_terms_card(window: gui.App, tmp_path: Path) -> None:
+    server = online_window(window, tmp_path)
+    store = window.store
+    assert store is not None
+    window.account.register(
+        "KOD-START", "ola@example.pl", "dlugie-haslo-123", "Ola_77", store.person.id
+    )
+    server.terms_current = "2026-11-27"
+    window.account.refresh()
+    window.account_changed()
+    window.open_online()
+    window.tick()
+    page = current(window)
+    assert "Zaktualizowaliśmy regulamin konta" in texts(page)
+    next(b for b in buttons(page, "Pokaż podział na gry")).click()
+    window.tick()
+    shown = texts(current(window))
+    assert "Cyberpunk 2077" in shown and "bez gry" in shown
+    next(b for b in buttons(current(window), "Akceptuję")).click()
+    window.tick()
+    assert window.account.state.games_allowed
+    assert "Zaktualizowaliśmy regulamin konta" not in texts(current(window))

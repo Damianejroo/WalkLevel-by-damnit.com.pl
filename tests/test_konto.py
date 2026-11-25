@@ -38,6 +38,7 @@ class FakeServer:
         self.sessions: dict[str, dict[str, Any]] = {}
         self.requests: list[tuple[str, str, Any, dict[str, str]]] = []
         self.too_old = False
+        self.terms_current = ""  # serwer bez mechanizmu wersji regulaminu (jak dziś)
         self.issued = 0
 
     def __call__(self, request: Any, _timeout: float) -> Reply:
@@ -87,7 +88,13 @@ class FakeServer:
             return self.auth(url, user)
         if path == "/api/bieznia/profil" and method == "GET":
             mine = {k: user[k] for k in ("id", "email", "name", "verified")}
-            return Reply({**mine, "widocznosc_profilu": "publiczny"}, url)
+            extra = {"widocznosc_profilu": "publiczny", "widocznosc_gier": "znajomi"}
+            if self.terms_current:
+                extra |= {
+                    "regulamin": user.get("regulamin"),
+                    "regulamin_aktualny": self.terms_current,
+                }
+            return Reply({**mine, **extra}, url)
         if path == "/api/bieznia/kod-rejestracji":
             return Reply({"kod": "NOWY-1234", "wygasa_utc_s": 0}, url)
         if path.startswith("/api/bieznia/profil/"):
@@ -135,7 +142,25 @@ class FakeServer:
             sent = {"id": "z2", "osoba": {"id": "u8", "name": "Szybka-Ania"}, "utworzono_utc_s": 0}
             return Reply({"przychodzace": [invite], "wyslane": [sent]}, url)
         if path == "/api/bieznia/statystyki":
-            return Reply({"kroki": 12345, "dystans_km": 8.4, "ruch_s": 7200}, url)
+            games = [
+                {
+                    "gra_id": "aaaaaaaaaa",
+                    "gra": "Cyberpunk 2077",
+                    "kroki": 10000,
+                    "dystans_km": 6.9,
+                    "ruch_s": 6000,
+                    "sesje": 3,
+                },
+                {
+                    "gra_id": "",
+                    "gra": "",
+                    "kroki": 2345,
+                    "dystans_km": 1.5,
+                    "ruch_s": 1200,
+                    "sesje": 1,
+                },
+            ]
+            return Reply({"kroki": 12345, "dystans_km": 8.4, "ruch_s": 7200, "gry": games}, url)
         if path == "/api/bieznia/ranking":
             places = [
                 {"miejsce": 1, "name": "Kot_Bury", "kroki": 15200, "dystans_km": 10.1},
@@ -173,6 +198,10 @@ class FakeServer:
         if path == "/api/bieznia/profil" and method == "PATCH":
             if body.get("name"):
                 user["name"] = body["name"]
+            if "regulamin" in body:
+                if body["regulamin"] != self.terms_current:
+                    return self.error(url, 400, "Nieaktualna wersja regulaminu.")
+                user["regulamin"] = body["regulamin"]
             return Reply({k: user[k] for k in ("id", "email", "name", "verified")}, url)
         return self.error(url, 404, "nie ma")
 
@@ -491,3 +520,28 @@ def test_single_account_file_from_previous_version_moves_over(
     accounts = konto.Accounts(BASE, path, opener=server, store_for=store_for, legacy_store=legacy)
     assert [a.state.name for a in accounts.logged_in()] == ["Ala"]
     assert vault["p1"].get() == "tok-stary" and legacy.get() == ""
+
+
+def test_game_names_go_only_after_accepting_current_terms_and_per_profile(
+    account: konto.Account, server: FakeServer, tmp_path: Path
+) -> None:
+    history = History(tmp_path / "h.db")
+    s1 = session("a")
+    s1.profile, s1.profile_name = "aaaaaaaaaa", "  Cyberpunk   2077 "
+    history.save(s1)
+    s2 = session("b")
+    s2.profile, s2.profile_name = "bbbbbbbbbb", "Tajna gra"
+    history.save(s2)
+    signed_in(account)
+    shared = {"aaaaaaaaaa": True, "bbbbbbbbbb": False}.get
+    account.upload(history, lambda pid: bool(shared(pid)))
+    assert "gra" not in server.sessions[uuid_of("a")]  # serwer bez wersji - nie wysyłamy gier
+    server.terms_current = "2026-11-27"
+    account.refresh()
+    assert account.state.terms_outdated and not account.state.games_allowed
+    account.accept_terms(history)
+    assert account.state.games_allowed
+    account.upload(history, lambda pid: bool(shared(pid)))
+    assert server.sessions[uuid_of("a")]["gra"] == "Cyberpunk 2077"
+    assert server.sessions[uuid_of("a")]["gra_id"] == "aaaaaaaaaa"
+    assert "gra" not in server.sessions[uuid_of("b")]  # gra ukryta w profilu

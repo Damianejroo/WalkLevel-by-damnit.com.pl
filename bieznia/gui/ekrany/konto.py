@@ -34,6 +34,7 @@ LIVE_EVERY_S = 5.0
 REFRESH_EVERY_S = 24 * 3600.0  # token ważny 7 dni - odświeżany przy starcie i co dobę
 TABS = [("friends", "Znajomi"), ("ranking", "Ranking"), ("people", "Osoby"), ("me", "Konto")]
 VISIBILITY_LABELS = [("prywatna", "Tylko ja"), ("znajomi", "Znajomi"), ("publiczna", "Wszyscy")]
+GAMES_LABELS = [("ja", "Tylko ja"), ("znajomi", "Znajomi"), ("wszyscy", "Wszyscy")]
 PROFILE_LABELS = [("ukryty", "Ukryty"), ("znajomi", "Znajomi"), ("publiczny", "Wszyscy")]
 SENT_TEXT = (
     "Na serwer trafia: e-mail, pseudonim i sesje jednej osoby z tego komputera (data, kroki,"
@@ -234,6 +235,9 @@ class AccountScreen:
             self.online[action[5:]] = value
         elif action == "profile":
             self.account_message("Zapisano.")
+        elif action == "terms":
+            self.toast("Dziękujemy - regulamin zaakceptowany.")
+            self.account_upload_now()
         elif action == "export":
             self.account_message(f"Zapisano Twoje dane z serwera: {value}")
         if self.pages.currentIndex() == self.ONLINE and not action.startswith("live"):
@@ -571,6 +575,28 @@ class AccountScreen:
         tabs = Segmented(TABS, self.online_tab, "Konto online")
         tabs.changed.connect(self.set_online_tab)
         lay.addWidget(tabs)
+        if state.terms_outdated:
+            c, cl = section("Zaktualizowaliśmy regulamin konta")
+            cl.addWidget(
+                label(
+                    "Przeczytaj zmiany i zaakceptuj, żeby korzystać z nowych funkcji (np. podziału"
+                    " wyników na gry). Do tego czasu nowe dane nie są wysyłane.",
+                    "small",
+                )
+            )
+            row = QHBoxLayout()
+            read = button("Przeczytaj")
+            read.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.terms_url())))
+            accept = button("Akceptuję", "primary")
+            history = self.history
+            if history is not None:
+                accept.clicked.connect(
+                    lambda: self.account_job("terms", lambda: self.account.accept_terms(history))
+                )
+            row.addWidget(read)
+            row.addWidget(accept, 1)
+            cl.addLayout(row)
+            lay.addWidget(c)
         self.account_status = label("", "small")
         builder = {
             "friends": self.online_friends,
@@ -599,6 +625,14 @@ class AccountScreen:
                     f"{time_text(float(stats.get('ruch_s', 0)))}",
                 )
             )
+        games = stats.get("gry")
+        if isinstance(games, list) and games:
+            showing = bool(self.online.get("show_games"))
+            toggle = button("Ukryj podział na gry" if showing else "Pokaż podział na gry")
+            toggle.clicked.connect(self.toggle_games)
+            cl.addWidget(toggle)
+            if showing:
+                self.add_games(cl, games)
         lay.addWidget(c)
 
         invitations = self.online.get("invitations") or {}
@@ -785,11 +819,42 @@ class AccountScreen:
             if totals.get("sesje") is not None:
                 cl.addWidget(label(f"sesje: {int(totals['sesje'])}", "small"))
             lay.addWidget(c)
+        c, cl = section("Gry · razem")
+        games = p.get("gry")
+        if isinstance(games, list) and games:
+            self.add_games(cl, games)
+        elif games is None and "gry" in p:
+            cl.addWidget(label("Ta osoba nie pokazuje podziału na gry.", "small"))
+        else:
+            cl.addWidget(label("Brak danych o grach.", "small"))
+        lay.addWidget(c)
         lay.addWidget(
             label("Widać tylko sesje, które ta osoba pokazuje Tobie (bez ukrytych).", "small")
         )
         lay.addStretch(1)
         return page
+
+    def toggle_games(self: App) -> None:
+        self.online["show_games"] = not self.online.get("show_games")
+        self.render_online()
+
+    def add_games(self: App, lay: QVBoxLayout, games: list[Any]) -> None:
+        """Wiersze: gra - kroki, dystans, czas (od największej liczby kroków)."""
+        for g in games:
+            if not isinstance(g, dict):
+                continue
+            row = QHBoxLayout()
+            name = str(g.get("gra") or "").strip() or "bez gry"
+            row.addWidget(label(name), 1)
+            row.addWidget(
+                label(
+                    f"{steps_text(int(g.get('kroki', 0)))} kroków · "
+                    f"{fmt_num(float(g.get('dystans_km', 0.0)), 1)} km · "
+                    f"{time_text(float(g.get('ruch_s', 0)))}",
+                    "small",
+                )
+            )
+            lay.addLayout(row)
 
     def online_ranking(self: App, lay: QVBoxLayout) -> None:
         scope = self.online.get("scope", "tydzien")
@@ -959,6 +1024,17 @@ class AccountScreen:
         prof = Segmented(PROFILE_LABELS, state.profile_visibility, "Widoczność profilu")
         prof.changed.connect(self.on_profile_visibility)
         cl.addWidget(prof)
+        cl.addWidget(label("Podział wyników na gry widzą", "small"))
+        games_seg = Segmented(GAMES_LABELS, state.games_visibility, "Podział na gry widzą")
+        games_seg.changed.connect(self.on_games_visibility)
+        cl.addWidget(games_seg)
+        cl.addWidget(
+            label(
+                "Domyślnie inni widzą sumę kroków, a po kliknięciu - wyniki w poszczególnych grach."
+                " Pojedynczą grę ukryjesz w jej profilu (Pokazuj tę grę na koncie online).",
+                "small",
+            )
+        )
         lay.addWidget(c)
 
         c, cl = section("Hasło")
@@ -1046,6 +1122,10 @@ class AccountScreen:
             self.account_live_on = False
             self.account_job("live", self.account.clear_live, quiet=True)
 
+    def on_games_visibility(self: App, value: str) -> None:
+        acc = self.account
+        self.account_job("profile", lambda: acc.set_games_visibility(value))
+
     def on_profile_visibility(self: App, value: str) -> None:
         def work() -> Any:
             self.account.client.update_profile(visibility=value)
@@ -1067,9 +1147,21 @@ class AccountScreen:
             return
         if self.tracker is not None:
             self.tracker.flush()
+        shared = (
+            {pr.id: pr.online for p in self.store.people for pr in p.profiles}
+            if self.store is not None
+            else {}
+        )
+
+        def shared_game(profile_id: str) -> bool:
+            return shared.get(profile_id, False)
+
         for acc in self.accounts.logged_in():
             self.account_job(
-                "upload", lambda a=acc: a.upload(history), quiet=True, person=acc.state.person
+                "upload",
+                lambda a=acc: a.upload(history, shared_game),
+                quiet=True,
+                person=acc.state.person,
             )
 
     def account_export(self: App) -> None:

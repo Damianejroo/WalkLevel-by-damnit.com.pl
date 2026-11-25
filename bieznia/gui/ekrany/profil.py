@@ -16,7 +16,7 @@ from bieznia import dane, ikony, paleta
 from bieznia.gui import komponenty as k
 from bieznia.gui import theme as th
 from bieznia.gui.ekrany.ustawienia import section
-from bieznia.gui.widgets import HoldButton, Segmented, button, label
+from bieznia.gui.widgets import HoldButton, Segmented, Switch, button, label
 
 if TYPE_CHECKING:
     from bieznia.gui.app import App
@@ -101,6 +101,22 @@ class ProfileScreen:
         name.setFixedHeight(th.CONTROL_H)
         name.setAccessibleName("Nazwa profilu")
         nl.addWidget(name)
+        if editing is not None:
+            online = Switch(t, "Pokazuj tę grę na koncie online", editing.online)
+
+            def on_online(on: bool) -> None:
+                store.update_profile(editing.id, online=on)
+                if self.history is not None:
+                    self.history.forget_sent()  # sesje tej gry pójdą jeszcze raz (z grą albo bez)
+                note.saved()
+
+            online.toggled.connect(on_online)
+            self.setting_row(
+                nl,
+                "Pokazuj tę grę na koncie online",
+                "Gdy wyłączone, sesje idą na konto bez nazwy gry",
+                online,
+            )
         lay.addWidget(name_card)
         color_card, cl = section("Kolor")
         palette = k.PalettePicker(t, str(state["color"]), state["icon_color"])  # type: ignore[arg-type]

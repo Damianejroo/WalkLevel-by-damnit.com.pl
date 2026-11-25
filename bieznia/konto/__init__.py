@@ -41,6 +41,8 @@ log = logging.getLogger("bieznia")
 STATE_FILE = Path("dane") / "konto.json"
 VISIBILITY = ("prywatna", "znajomi", "publiczna")
 PROFILE_VISIBILITY = ("ukryty", "znajomi", "publiczny")
+GAMES_VISIBILITY = ("ja", "znajomi", "wszyscy")
+GAME_NAME_MAX = 40
 TERMS_VERSION = "2026-11-25"  # data regulaminu i polityki prywatności konta online
 NAME_MIN, NAME_MAX = 3, 24
 # Pseudonim jak na serwerze: łacinka z polskimi literami, cyfry, spacja, _, - i kropka, bez
@@ -129,6 +131,19 @@ class AccountState:
     profile_visibility: str = "znajomi"  # czy jestem na liście osób z kontem
     terms: str = ""  # wersja zaakceptowanego regulaminu
     remember: bool = True  # token w Menedżerze poświadczeń (inaczej tylko do zamknięcia)
+    terms_current: str = ""  # obowiązująca wersja regulaminu (z serwera)
+    games_visibility: str = "znajomi"  # kto widzi podział wyników na gry
+
+    @property
+    def terms_outdated(self) -> bool:
+        """Serwer ma nowszy regulamin niż ten zaakceptowany - karta „zaakceptuj”."""
+        return bool(self.terms_current) and self.terms != self.terms_current
+
+    @property
+    def games_allowed(self) -> bool:
+        """Nazwy gier wychodzą dopiero po akceptacji wersji regulaminu, która je opisuje
+        (serwer zna mechanizm wersji, a konto ma wersję aktualną)."""
+        return bool(self.terms_current) and self.terms == self.terms_current
 
     @property
     def logged_in(self) -> bool:
@@ -183,11 +198,15 @@ def vault_target(person: str) -> str:
     return f"{TARGET}/{person}" if person else TARGET
 
 
-def session_payload(s: Session, visibility: str) -> dict[str, Any]:
+def session_payload(s: Session, visibility: str, game: bool = False) -> dict[str, Any]:
+    """Sesja do wysłania. game=True: z nazwą gry (profilu) i jej stałym identyfikatorem."""
     row = dict(zip(COLUMN_NAMES, s.row(), strict=True))
     out = {k: row[k] for k in UPLOAD_FIELDS}
     out["uuid"] = canonical_uuid(s.id)
     out["widocznosc"] = visibility
+    if game and re.fullmatch(r"[0-9a-f]{10}", s.profile or "") and s.profile_name.strip():
+        out["gra"] = " ".join(s.profile_name.split())[:GAME_NAME_MAX]
+        out["gra_id"] = s.profile
     return out
 
 
@@ -250,8 +269,9 @@ class Account:
         for problem in checks:
             if problem:
                 raise KontoError(problem)
-        auth = self.client.register(code, email.strip(), password, name, TERMS_VERSION)
-        self.state.terms = TERMS_VERSION
+        version = self.client.terms_version() or TERMS_VERSION  # obowiązująca z serwera
+        auth = self.client.register(code, email.strip(), password, name, version)
+        self.state.terms = version
         return self._signed_in(auth, person)
 
     def login(self, email: str, password: str, person: str) -> User:
@@ -291,6 +311,12 @@ class Account:
             visibility = profile.get("widocznosc_profilu")
             if visibility in PROFILE_VISIBILITY:
                 self.state.profile_visibility = str(visibility)
+            if profile.get("widocznosc_gier") in GAMES_VISIBILITY:
+                self.state.games_visibility = str(profile["widocznosc_gier"])
+            if profile.get("regulamin_aktualny"):
+                self.state.terms_current = str(profile["regulamin_aktualny"])
+            if profile.get("regulamin"):
+                self.state.terms = str(profile["regulamin"])
             if "verified" in profile:  # po kliknięciu linku z maila
                 self.state.verified = bool(profile["verified"])
             self.save()
@@ -311,8 +337,9 @@ class Account:
 
     # --- wysyłka ---------------------------------------------------------------------------
 
-    def upload(self, history: History) -> int:
-        """Nowe i zmienione sesje powiązanej osoby. Przerwana wysyłka - dokończy następna."""
+    def upload(self, history: History, shared_games: Callable[[str], bool] | None = None) -> int:
+        """Nowe i zmienione sesje powiązanej osoby. Przerwana wysyłka - dokończy następna.
+        shared_games(profil_id): czy nazwę tej gry wolno pokazać (przełącznik przy profilu)."""
         state = self.state
         if not (state.logged_in and state.upload and state.person):
             return 0
@@ -323,8 +350,13 @@ class Account:
             if not pending:
                 return 0
             hidden = history.hidden_online()
+            games = state.games_allowed and shared_games is not None
             payload = [
-                session_payload(s, "prywatna" if s.id in hidden else state.visibility)
+                session_payload(
+                    s,
+                    "prywatna" if s.id in hidden else state.visibility,
+                    game=games and shared_games is not None and shared_games(s.profile),
+                )
                 for s in pending
             ]
             rejected = self.client.upload_sessions(payload)
@@ -340,6 +372,23 @@ class Account:
     def delete_session(self, session_id: str) -> None:
         if self.state.logged_in:
             self.client.delete_session(canonical_uuid(session_id))
+
+    def accept_terms(self, history: History) -> None:
+        """Akceptacja obowiązującego regulaminu; sesje idą jeszcze raz (np. z nazwami gier)."""
+        version = self.state.terms_current
+        if not version:
+            return
+        self.client.update_profile(terms=version)
+        self.state.terms = version
+        self.save()
+        history.forget_sent()
+
+    def set_games_visibility(self, value: str) -> None:
+        if value not in GAMES_VISIBILITY:
+            raise ValueError(value)
+        self.client.update_profile(games_visibility=value)
+        self.state.games_visibility = value
+        self.save()
 
     def set_visibility(self, history: History, visibility: str) -> None:
         if visibility not in VISIBILITY:

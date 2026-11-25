@@ -262,6 +262,14 @@ class Client:
     def my_profile(self) -> dict[str, Any]:
         return dict(self.call("GET", "/api/bieznia/profil") or {})
 
+    def terms_version(self) -> str:
+        """Obowiązująca wersja regulaminu (trasa publiczna); "" gdy serwer jej jeszcze nie ma."""
+        try:
+            result = self.call("GET", "/api/bieznia/regulamin", auth=False)
+        except KontoError:
+            return ""
+        return str((result or {}).get("wersja") or "")
+
     def send_verification(self) -> str:
         """Link potwierdzający na adres konta -> "wyslano" albo "potwierdzony" (już był)."""
         result = self.call("POST", "/api/bieznia/wyslij-potwierdzenie")
@@ -344,12 +352,22 @@ class Client:
     def profile(self, user_id: str) -> dict[str, Any]:
         return dict(self.call("GET", f"/api/bieznia/profil/{quote(user_id, safe='')}") or {})
 
-    def update_profile(self, name: str | None = None, visibility: str | None = None) -> User:
+    def update_profile(
+        self,
+        name: str | None = None,
+        visibility: str | None = None,
+        terms: str | None = None,
+        games_visibility: str | None = None,
+    ) -> User:
         body: dict[str, str] = {}
         if name is not None:
             body["name"] = name
         if visibility is not None:
             body["widocznosc_profilu"] = visibility
+        if terms is not None:
+            body["regulamin"] = terms
+        if games_visibility is not None:
+            body["widocznosc_gier"] = games_visibility
         return User.from_record(dict(self.call("PATCH", "/api/bieznia/profil", body) or {}))
 
     def people(self, search: str = "", page: int = 1) -> dict[str, Any]:
