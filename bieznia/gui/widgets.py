@@ -301,6 +301,10 @@ class Segmented(QFrame):
         self.set_value(key)
         self.changed.emit(key)
 
+    def value(self) -> str:
+        """Klucz wybranej opcji."""
+        return next((k for k, b in self.buttons.items() if b.isChecked()), "")
+
     def _target(self) -> QRectF | None:
         b = self.group.checkedButton()
         return QRectF(b.geometry()) if b is not None else None

@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
 from bieznia import paleta
 from bieznia.gui import komponenty as k
 from bieznia.gui.ekrany.ustawienia import section
 from bieznia.gui.theme import Theme
-from bieznia.gui.widgets import Segmented, StatTile, TileGrid, fmt_num, label
+from bieznia.gui.widgets import Segmented, StatTile, TileGrid, fmt_num, icon_button, label
 from bieznia.historia import Totals
 
 if TYPE_CHECKING:
@@ -244,6 +244,9 @@ class HistoryScreen:
         recent = history.sessions(since, person, limit=8)
         if recent:
             c, sl = section("Ostatnie sesje")
+            online = self.online_visible() and self.history is not None
+            hidden = self.history.hidden_online() if online and self.history else set()
+            linked = self.account.state.person if online else ""
             for s in recent:
                 when = datetime.fromtimestamp(s.start)
                 day = (
@@ -272,10 +275,36 @@ class HistoryScreen:
                     )
                 )
                 row.addLayout(texts, 1)
+                if online and s.person == linked and s.source == "bieznia":
+                    row.addWidget(self.online_toggle(s.id, s.id in hidden))
                 sl.addLayout(row)
             lay.addWidget(c)
         lay.addStretch(1)
         return page
+
+    def online_toggle(self: App, session_id: str, hidden: bool) -> QPushButton:
+        """Oko przy sesji: ukryta zostaje u Ciebie, a na koncie online nikt jej nie widzi."""
+        btn = icon_button("eye", "")
+        btn.setCheckable(True)
+
+        def show(is_hidden: bool) -> None:
+            btn.setChecked(is_hidden)
+            text = "Ukryta online - kliknij, żeby pokazać" if is_hidden else "Ukryj online"
+            btn.setToolTip(text)
+            btn.setAccessibleName(text)
+            btn.setStyleSheet("" if is_hidden else f"color: {self.t.accent};")
+
+        def flip() -> None:
+            if self.history is None:
+                return
+            now_hidden = session_id not in self.history.hidden_online()
+            self.history.set_hidden_online(session_id, now_hidden)
+            show(now_hidden)
+            self.account_upload_now()  # zmiana widoczności od razu na serwerze
+
+        show(hidden)
+        btn.clicked.connect(flip)
+        return btn
 
     def set_history(self: App, scope: str | None = None, range_: str | None = None) -> None:
         if scope:

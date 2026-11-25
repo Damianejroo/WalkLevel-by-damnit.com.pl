@@ -1741,3 +1741,110 @@ def test_models_page_lists_profiles_and_shows_download_result(
     window.tick()
     assert "Nowe modele: Nowa Bieżnia 9." in window.models_status.text()
     window.go_back(window.SETTINGS)
+
+
+# --- konto online (opcjonalne) -----------------------------------------------------------
+
+
+def online_window(window: gui.App, tmp_path: Path) -> Any:
+    """Okno z kontem na wirtualnym serwerze; zadania sieciowe od razu (bez wątków)."""
+    from test_konto import BASE, FakeServer
+
+    from bieznia import konto
+    from bieznia.konto.sejf import MemoryStore
+
+    server = FakeServer()
+    window.account = konto.Account(BASE, MemoryStore(), tmp_path / "konto.json", opener=server)
+    window.run_task = lambda func, *args: func(*args)  # type: ignore[method-assign]
+    return server
+
+
+def fill(page: Any, values: dict[str, str]) -> None:
+    for edit in page.findChildren(QtWidgets.QLineEdit):
+        if edit.placeholderText() in values:
+            edit.setText(values[edit.placeholderText()])
+
+
+def test_online_features_are_invisible_without_account(window: gui.App) -> None:
+    assert window.online_btn.isHidden()
+    window.open_settings()
+    page = current(window)
+    assert "Konto online (opcjonalne)" in texts(page)
+    window.open_online()  # bez konta - zamiast funkcji online logowanie
+    assert window.pages.currentIndex() == window.ACCOUNT
+
+
+def test_register_then_login_shows_friends_ranking_and_people(
+    window: gui.App, tmp_path: Path
+) -> None:
+    server = online_window(window, tmp_path)
+    window.open_account("register")
+    page = current(window)
+    fill(
+        page,
+        {
+            "Kod zaproszenia": "KOD-START",
+            "E-mail": "ola@example.pl",
+            "Pseudonim (widzą go znajomi)": "x",
+        },
+    )
+    submit = next(b for b in buttons(page, "Załóż konto") if b.objectName() == "primary")
+    submit.click()
+    assert "Pseudonim" in window.account_status.text() and not server.requests  # bez sieci
+    fill(
+        page,
+        {
+            "Pseudonim (widzą go znajomi)": "Ola_77",
+            "Hasło": "dlugie-haslo-123",
+            "Powtórz hasło": "dlugie-haslo-123",
+        },
+    )
+    submit.click()
+    assert "regulamin" in window.account_status.text()  # bez akceptacji nic nie idzie
+    page.findChildren(gui.Switch)[0].setChecked(True)
+    submit.click()
+    window.tick()
+    window.tick()
+    assert "u1" in server.users  # konto na kod zaproszenia - od razu zalogowane
+    assert window.account.state.logged_in
+    assert window.pages.currentIndex() == window.ONLINE
+    assert not window.online_btn.isHidden()
+    shown = texts(current(window))
+    assert "Kot_Bury" in shown and "idzie teraz 3,2 km/h" in shown and "Nowy_Gracz" in shown
+    window.set_online_tab("ranking")
+    window.tick()
+    assert "Ola_77" in texts(current(window))
+    window.set_online_tab("people")
+    window.tick()
+    assert "Maraton_Max" in texts(current(window))
+    window.set_online_tab("me")
+    assert "Usuń konto" in [b.text() for b in current(window).findChildren(QtWidgets.QPushButton)]
+
+
+def test_sessions_go_to_account_and_logout_hides_online(window: gui.App, tmp_path: Path) -> None:
+    server = online_window(window, tmp_path)
+    store = window.store
+    assert store is not None
+    window.account.register(
+        "KOD-START", "ola@example.pl", "dlugie-haslo-123", "Ola_77", store.person.id
+    )
+    window.account_changed()
+    walk_session(window, 500)
+    window.account_upload_now()
+    window.tick()
+    assert len(server.sessions) == 1
+    sent = next(iter(server.sessions.values()))
+    assert sent["kroki"] == 500 and sent["widocznosc"] == "znajomi"
+    window.open_history()
+    eye = [
+        b
+        for b in current(window).findChildren(QtWidgets.QPushButton)
+        if b.toolTip() == "Ukryj online"
+    ]
+    assert eye  # przy sesji: ukryj online
+    eye[0].click()
+    window.tick()
+    assert next(iter(server.sessions.values()))["widocznosc"] == "prywatna"
+    window.account_job("logout", window.account.logout)
+    window.tick()
+    assert not window.account.state.logged_in and window.online_btn.isHidden()

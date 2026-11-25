@@ -76,11 +76,14 @@ class MainScreen:
             self.update_btn.setToolTip("Aktualizacje działają w wersji zainstalowanej")
         report_btn = icon_button("report", "Zgłoś problem")
         report_btn.clicked.connect(lambda: self.pages.go(self.REPORT))
+        self.online_btn = icon_button("people", "Znajomi i ranking")
+        self.online_btn.clicked.connect(self.open_online)
+        self.online_btn.setVisible(self.online_visible())  # bez konta funkcji online nie widać
         history_btn = icon_button("chart", "Historia kroków")
         history_btn.clicked.connect(self.open_history)
         settings_btn = icon_button("settings", "Ustawienia")
         settings_btn.clicked.connect(self.open_settings)
-        for b in (self.update_btn, report_btn, history_btn, settings_btn):
+        for b in (self.update_btn, report_btn, self.online_btn, history_btn, settings_btn):
             bar.addWidget(b)
         page, lay = self.framed_page(bar)
 

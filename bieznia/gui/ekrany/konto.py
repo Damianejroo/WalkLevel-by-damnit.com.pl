@@ -1,0 +1,802 @@
+"""Konto online (opcjonalne): logowanie, zakładanie konta, znajomi, ranking, osoby z kontem.
+
+Bez logowania funkcji online nie widać - w Ustawieniach jest tylko krótka karta z opisem.
+Wszystko sieciowe idzie w wątku w tle (run_task), wynik wraca do kolejki zadań okna, więc
+okno nie zamiera przy wolnym internecie. Ostatnie dane z serwera trzymamy w pamięci - widok
+pokazuje je od razu, a świeże podmienia po chwili.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import logging
+import time
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
+
+from bieznia import konto
+from bieznia.gui import theme as th
+from bieznia.gui.ekrany.historia import steps_text, time_text
+from bieznia.gui.ekrany.ustawienia import section
+from bieznia.gui.widgets import HoldButton, Segmented, Switch, button, fmt_num, label
+
+if TYPE_CHECKING:
+    from bieznia.gui.app import App
+
+log = logging.getLogger("bieznia")
+
+UPLOAD_EVERY_S = 120.0
+LIVE_EVERY_S = 5.0
+REFRESH_EVERY_S = 24 * 3600.0  # token ważny 7 dni - odświeżany przy starcie i co dobę
+TABS = [("friends", "Znajomi"), ("ranking", "Ranking"), ("people", "Osoby"), ("me", "Konto")]
+VISIBILITY_LABELS = [("prywatna", "Tylko ja"), ("znajomi", "Znajomi"), ("publiczna", "Wszyscy")]
+PROFILE_LABELS = [("ukryty", "Ukryty"), ("znajomi", "Znajomi"), ("publiczny", "Wszyscy")]
+SENT_TEXT = (
+    "Na serwer trafia: e-mail, pseudonim i sesje jednej osoby z tego komputera (data, kroki,"
+    " dystans, czas ruchu, model bieżni). Nie trafia: nazwy osób i gier, ustawienia, kolory,"
+    " sesje z symulatora. Bez konta nic nie jest wysyłane."
+)
+
+
+def field(placeholder: str, secret: bool = False) -> QLineEdit:
+    edit = QLineEdit()
+    edit.setPlaceholderText(placeholder)
+    edit.setAccessibleName(placeholder)
+    edit.setFixedHeight(th.CONTROL_H)
+    if secret:
+        edit.setEchoMode(QLineEdit.EchoMode.Password)
+    return edit
+
+
+class AccountScreen:
+    account: konto.Account
+    online: dict[str, Any]
+    online_tab: str
+    account_mode: str
+    account_status: QLabel
+    account_busy: set[str]
+
+    # --- start i pętla ---------------------------------------------------------------------
+
+    def init_account(self: App) -> None:
+        adres = str(self.config.get("konto", {}).get("adres", ""))
+        try:
+            self.account = konto.Account(adres)
+        except konto.KontoError as exc:
+            log.warning("Konto online wyłączone: %s", exc)
+            self.account = konto.Account("")
+        self.online = {}
+        self.online_tab = "friends"
+        self.account_mode = "login"
+        self.account_busy = set()
+        self.account_upload_at = time.monotonic() + 20  # pierwsza wysyłka chwilę po starcie
+        self.account_live_at = 0.0
+        self.account_live_on = False
+        self.account_refresh_at = time.monotonic() + REFRESH_EVERY_S
+        if self.account.enabled and self.account.state.logged_in:
+            self.account_job("refresh", self.account.refresh, quiet=True)
+
+    def online_visible(self: App) -> bool:
+        return self.account.enabled and self.account.state.logged_in
+
+    def account_tick(self: App, now: float, speed: float, steps: int | None, active: float) -> None:
+        if not self.online_visible():
+            return
+        if now >= self.account_refresh_at:
+            self.account_refresh_at = now + REFRESH_EVERY_S
+            self.account_job("refresh", self.account.refresh, quiet=True)
+        if now >= self.account_upload_at and self.history is not None:
+            self.account_upload_at = now + UPLOAD_EVERY_S
+            if self.tracker is not None:
+                self.tracker.flush()
+            history = self.history
+            self.account_job("upload", lambda: self.account.upload(history))
+        if not self.account.state.live or now < self.account_live_at:
+            return
+        self.account_live_at = now + LIVE_EVERY_S
+        current = self.tracker.current if self.tracker is not None else None
+        moving = current is not None and speed > 0.05
+        if moving and current is not None:
+            self.account_live_on = True
+            sid = current.id
+            self.account_job(
+                "live", lambda: self.account.live(speed, steps or 0, active, sid), quiet=True
+            )
+        elif self.account_live_on:
+            self.account_live_on = False
+            self.account_job("live", self.account.clear_live, quiet=True)
+
+    def account_job(self: App, action: str, func: Callable[[], Any], quiet: bool = False) -> None:
+        """Zadanie sieciowe w tle; to samo zadanie nie idzie drugi raz, zanim skończy."""
+        if action in self.account_busy:
+            return
+        self.account_busy.add(action)
+
+        def work() -> None:
+            try:
+                self.tasks.put(("konto", (action, True, func(), quiet)))
+            except konto.KontoError as exc:
+                self.tasks.put(("konto", (action, False, exc, quiet)))
+            except Exception as exc:
+                log.exception("Konto: %s", action)
+                self.tasks.put(("konto", (action, False, konto.KontoError(str(exc)), quiet)))
+
+        self.run_task(work)
+
+    def on_account_result(self: App, data: tuple[str, bool, Any, bool]) -> None:
+        action, ok, value, quiet = data
+        self.account_busy.discard(action)
+        if not ok:
+            error: konto.KontoError = value
+            if isinstance(error, konto.LoggedOut):
+                if self.account.state.logged_in:
+                    self.account.logout()
+                self.online = {}
+                self.toast("Sesja konta wygasła - zaloguj się ponownie (Ustawienia > Konto).")
+                self.account_changed()
+                return
+            if not quiet:
+                self.account_message(str(error))
+            return
+        if action in ("login", "register"):
+            self.online = {}
+            self.toast(f"Zalogowano jako {self.account.state.name}.")
+            self.account_upload_at = time.monotonic()  # wyniki od razu na konto
+            self.account_changed()
+            self.open_online()
+            return
+        if action == "reset":
+            self.account_message("Wysłaliśmy e-mail z linkiem do zmiany hasła (sprawdź też spam).")
+            return
+        if action == "verify":
+            self.account_message("Wysłaliśmy ponownie e-mail z linkiem potwierdzającym.")
+            return
+        if action in ("delete", "logout"):
+            self.online = {}
+            self.toast("Konto usunięte." if action == "delete" else "Wylogowano.")
+            self.account_changed()
+            self.go_back(self.SETTINGS)
+            return
+        if action == "refresh":
+            self.account_changed(rebuild_page=False)
+            return
+        if action == "upload":
+            if value and self.pages.currentIndex() == self.ONLINE:
+                self.load_online(self.online_tab)
+            return
+        if action == "invite_code":
+            self.online["code"] = value
+        elif action in ("accept_code", "invite_user", "answer", "remove_friend"):
+            message = {
+                "accept_code": "Dodano znajomego.",
+                "invite_user": "Wysłano zaproszenie.",
+                "answer": "Gotowe.",
+                "remove_friend": "Usunięto ze znajomych.",
+            }[action]
+            self.toast(message)
+            self.load_online("friends", force=True)
+        elif action.startswith("load:"):
+            self.online[action[5:]] = value
+        elif action == "profile":
+            self.account_message("Zapisano.")
+        elif action == "export":
+            self.account_message(f"Zapisano Twoje dane z serwera: {value}")
+        if self.pages.currentIndex() == self.ONLINE and not action.startswith("live"):
+            self.render_online()
+
+    def account_message(self: App, text: str) -> None:
+        with contextlib.suppress(RuntimeError, AttributeError):
+            self.account_status.setText(text)
+            return
+        self.toast(text)
+
+    def account_changed(self: App, rebuild_page: bool = True) -> None:
+        """Logowanie, wylogowanie albo nowe dane konta: Ustawienia i ikona na głównym ekranie."""
+        self.render_online_button()
+        self.refresh_settings()
+        if rebuild_page and self.pages.currentIndex() == self.ACCOUNT:
+            self.replace_page(self.ACCOUNT, self.build_account_page())
+
+    def render_online_button(self: App) -> None:
+        btn = getattr(self, "online_btn", None)
+        if btn is not None:
+            with contextlib.suppress(RuntimeError):
+                btn.setVisible(self.online_visible())
+
+    # --- karta w Ustawieniach --------------------------------------------------------------
+
+    def build_account_card(self: App) -> QWidget | None:
+        if not self.account.enabled:
+            return None
+        state = self.account.state
+        c, cl = section("Konto online (opcjonalne)")
+        if not state.logged_in:
+            cl.addWidget(
+                label(
+                    "Bez konta wszystko działa na tym komputerze i nic nie jest wysyłane."
+                    " Z kontem: Twoje wyniki online, znajomi, ranking i lista osób.",
+                    "small",
+                )
+            )
+            row = QHBoxLayout()
+            register = button("Załóż konto")
+            register.clicked.connect(lambda: self.open_account("register"))
+            login = button("Zaloguj się", "primary")
+            login.clicked.connect(lambda: self.open_account("login"))
+            row.addWidget(register)
+            row.addWidget(login, 1)
+            cl.addLayout(row)
+            return c
+        who = label(state.name)
+        who.setObjectName("strong")
+        cl.addWidget(who)
+        cl.addWidget(label(state.email, "small"))
+        open_btn = button("Znajomi, ranking i ustawienia konta", "primary")
+        open_btn.clicked.connect(self.open_online)
+        cl.addWidget(open_btn)
+        return c
+
+    # --- logowanie i zakładanie konta ------------------------------------------------------
+
+    def open_account(self: App, mode: str = "login") -> None:
+        self.account_mode = mode
+        self.replace_page(self.ACCOUNT, self.build_account_page())
+        self.pages.go(self.ACCOUNT)
+
+    def build_account_page(self: App) -> QWidget:
+        mode = self.account_mode
+        titles = {
+            "login": "Logowanie",
+            "register": "Nowe konto",
+            "reset": "Nie pamiętam hasła",
+            "registered": "Potwierdź e-mail",
+        }
+        page, lay = self.sticky_page(titles.get(mode, "Konto"), back=self.SETTINGS)
+        self.account_status = label("", "small")
+        self.account_status.setWordWrap(True)
+        c, cl = section({"login": "Zaloguj się", "register": "Załóż konto"}.get(mode, titles[mode]))
+        if mode == "registered":
+            cl.addWidget(
+                label(
+                    "Konto założone. Kliknij link w e-mailu, który właśnie wysłaliśmy (sprawdź też"
+                    " spam), a potem zaloguj się. Bez potwierdzenia funkcje online są zablokowane.",
+                    "small",
+                )
+            )
+            to_login = button("Przejdź do logowania", "primary")
+            to_login.clicked.connect(lambda: self.open_account("login"))
+            cl.addWidget(to_login)
+            lay.addWidget(c)
+            lay.addStretch(1)
+            return page
+        code = field("Kod zaproszenia")
+        if mode == "register":
+            cl.addWidget(
+                label(
+                    "Konta zakładamy na zaproszenie: kod dostaniesz od kogoś, kto już ma konto.",
+                    "small",
+                )
+            )
+            cl.addWidget(code)
+        email = field("E-mail")
+        email.setText(self.account.state.email)
+        cl.addWidget(email)
+        if mode == "reset":
+            cl.addWidget(label("Wyślemy link do ustawienia nowego hasła.", "small"))
+            send = button("Wyślij link", "primary")
+            send.clicked.connect(
+                lambda: self.account_job(
+                    "reset", lambda: self.account.client.request_password_reset(email.text())
+                )
+            )
+            cl.addWidget(send)
+            cl.addWidget(self.account_status)
+            lay.addWidget(c)
+            lay.addStretch(1)
+            return page
+        name = field("Pseudonim (widzą go znajomi)")
+        password = field("Hasło", secret=True)
+        repeat = field("Powtórz hasło", secret=True)
+        if mode == "register":
+            cl.addWidget(name)
+            cl.addWidget(
+                label(
+                    "Pseudonim: 3-24 znaki - litery, cyfry, spacja, _, - i kropka."
+                    " Nie wpisuj imienia i nazwiska.",
+                    "small",
+                )
+            )
+        cl.addWidget(password)
+        person_seg: Segmented | None = None
+        terms: Switch | None = None
+        if mode == "register":
+            cl.addWidget(repeat)
+            cl.addWidget(label(f"Hasło: co najmniej {konto.PASSWORD_MIN} znaków.", "small"))
+        store = self.store
+        if store is not None and len(store.people) > 1:
+            cl.addWidget(label("Czyje wyniki idą na to konto", "small"))
+            options = [(p.id, p.name) for p in store.people[:4]]
+            person_seg = Segmented(options, store.person.id, "Osoba na koncie")
+            cl.addWidget(person_seg)
+        if mode == "register":
+            terms = Switch(self.t, "Akceptuję regulamin i politykę prywatności")
+            self.setting_row(
+                cl,
+                "Akceptuję regulamin i politykę prywatności",
+                "Treść: damnit.com.pl/bieznia/regulamin",
+                terms,
+            )
+        cl.addWidget(self.account_status)
+        submit = button("Zaloguj się" if mode == "login" else "Załóż konto", "primary")
+        cl.addWidget(submit)
+
+        def person_id() -> str:
+            if person_seg is not None:
+                return person_seg.value()
+            return store.person.id if store is not None else ""
+
+        def go() -> None:
+            if mode == "login":
+                self.account_job(
+                    "login",
+                    lambda: self.account.login(email.text(), password.text(), person_id()),
+                )
+                self.account_status.setText("Loguję…")
+                return
+            problem = (
+                konto.check_code(code.text())
+                or konto.check_name(name.text())
+                or konto.check_email(email.text())
+                or konto.check_password(password.text())
+            )
+            if not problem and password.text() != repeat.text():
+                problem = "Hasła różnią się."
+            if not problem and terms is not None and not terms.isChecked():
+                problem = "Zaakceptuj regulamin, żeby założyć konto."
+            if problem:
+                self.account_status.setText(problem)
+                return
+            values = (code.text(), email.text(), password.text(), name.text(), person_id())
+            self.account_job("register", lambda: self.account.register(*values))
+            self.account_status.setText("Zakładam konto…")
+
+        submit.clicked.connect(go)
+        for edit in (code, email, password, repeat, name):
+            edit.returnPressed.connect(go)
+        lay.addWidget(c)
+        links = QHBoxLayout()
+        if mode == "login":
+            forgot = button("Nie pamiętam hasła")
+            forgot.setEnabled(False)  # reset mailem ruszy, gdy serwer dostanie skrzynkę nadawczą
+            forgot.setToolTip("Wkrótce - reset hasła e-mailem jeszcze nie działa")
+            new = button("Załóż konto")
+            new.clicked.connect(lambda: self.open_account("register"))
+            links.addWidget(forgot)
+            links.addWidget(new)
+        else:
+            have = button("Mam już konto - zaloguj się")
+            have.clicked.connect(lambda: self.open_account("login"))
+            links.addWidget(have)
+        lay.addLayout(links)
+        c2, c2l = section("Co trafia na serwer")
+        c2l.addWidget(label(SENT_TEXT, "small"))
+        lay.addWidget(c2)
+        lay.addStretch(1)
+        return page
+
+    # --- konto online: znajomi, ranking, osoby, ustawienia ---------------------------------
+
+    def open_online(self: App) -> None:
+        if not self.online_visible():
+            self.open_account("login")
+            return
+        self.replace_page(self.ONLINE, self.build_online_page())
+        self.pages.go(self.ONLINE)
+        self.load_online(self.online_tab)
+
+    def load_online(self: App, tab: str, force: bool = False) -> None:
+        client = self.account.client
+        loaders: dict[str, list[tuple[str, Callable[[], Any]]]] = {
+            "friends": [
+                ("friends", client.friends),
+                ("invitations", client.invitations),
+                ("stats", lambda: client.stats("tydzien")),
+            ],
+            "ranking": [("ranking", lambda: client.ranking(self.online.get("scope", "tydzien")))],
+            "people": [("people", lambda: client.people(self.online.get("search", "")))],
+            "me": [],
+        }
+        for key, func in loaders.get(tab, []):
+            if force or key not in self.online or tab == self.online_tab:
+                self.account_job(f"load:{key}", func, quiet=key in self.online)
+
+    def set_online_tab(self: App, tab: str) -> None:
+        self.online_tab = tab
+        self.render_online()
+        self.load_online(tab)
+
+    def render_online(self: App) -> None:
+        if self.pages.currentIndex() != self.ONLINE:
+            return
+        self.quietly(lambda: self.replace_page(self.ONLINE, self.build_online_page()))
+
+    def build_online_page(self: App) -> QWidget:
+        state = self.account.state
+        page, lay = self.sticky_page(f"Konto online · {state.name}", back=self.MAIN)
+        tabs = Segmented(TABS, self.online_tab, "Konto online")
+        tabs.changed.connect(self.set_online_tab)
+        lay.addWidget(tabs)
+        self.account_status = label("", "small")
+        builder = {
+            "friends": self.online_friends,
+            "ranking": self.online_ranking,
+            "people": self.online_people,
+            "me": self.online_me,
+        }[self.online_tab]
+        builder(lay)
+        lay.addWidget(self.account_status)
+        lay.addStretch(1)
+        return page
+
+    def loading(self: App, key: str) -> bool:
+        return key not in self.online
+
+    def online_friends(self: App, lay: QVBoxLayout) -> None:
+        stats = self.online.get("stats") or {}
+        c, cl = section("Moje wyniki online · ten tydzień")
+        if self.loading("stats"):
+            cl.addWidget(label("Ładuję…", "small"))
+        else:
+            cl.addWidget(
+                label(
+                    f"{steps_text(int(stats.get('kroki', 0)))} kroków · "
+                    f"{fmt_num(float(stats.get('dystans_km', 0.0)), 2)} km · "
+                    f"{time_text(float(stats.get('ruch_s', 0)))}",
+                )
+            )
+        lay.addWidget(c)
+
+        invitations = self.online.get("invitations") or {}
+        incoming = list(invitations.get("przychodzace") or [])
+        if incoming:
+            c, cl = section("Zaproszenia do znajomych")
+            for inv in incoming:
+                row = QHBoxLayout()
+                row.addWidget(label(str(inv.get("name", "?"))), 1)
+                no = button("Odrzuć")
+                yes = button("Przyjmij", "primary")
+                iid = str(inv.get("id", ""))
+                no.clicked.connect(
+                    lambda _=False, i=iid: self.account_job(
+                        "answer", lambda: self.account.client.answer_invitation(i, False)
+                    )
+                )
+                yes.clicked.connect(
+                    lambda _=False, i=iid: self.account_job(
+                        "answer", lambda: self.account.client.answer_invitation(i, True)
+                    )
+                )
+                row.addWidget(no)
+                row.addWidget(yes)
+                cl.addLayout(row)
+            lay.addWidget(c)
+
+        c, cl = section("Znajomi")
+        friends = self.online.get("friends")
+        if friends is None:
+            cl.addWidget(label("Ładuję…", "small"))
+        elif not friends:
+            cl.addWidget(
+                label("Jeszcze nikogo. Podaj znajomemu swój kod albo wpisz jego kod.", "small")
+            )
+        for f in friends or []:
+            cl.addWidget(self.friend_row(f))
+        lay.addWidget(c)
+
+        c, cl = section("Dodaj znajomego")
+        code = self.online.get("code") or {}
+        if code.get("kod"):
+            mine = label(f"Twój kod: {code['kod']}")
+            mine.setObjectName("accent")
+            mine.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            cl.addWidget(mine)
+            cl.addWidget(label("Kod działa przez 24 godziny i tylko raz.", "small"))
+        else:
+            make = button("Pokaż mój kod zaproszenia")
+            make.clicked.connect(
+                lambda: self.account_job("invite_code", self.account.client.invite)
+            )
+            cl.addWidget(make)
+        row = QHBoxLayout()
+        other = field("Kod znajomego, np. ABCD-1234")
+        add = button("Dodaj", "primary")
+
+        def accept() -> None:
+            if other.text().strip():
+                text = other.text()
+                self.account_job("accept_code", lambda: self.account.client.accept(text))
+
+        add.clicked.connect(accept)
+        other.returnPressed.connect(accept)
+        row.addWidget(other, 1)
+        row.addWidget(add)
+        cl.addLayout(row)
+        lay.addWidget(c)
+
+    def friend_row(self: App, f: dict[str, Any]) -> QWidget:
+        row = QWidget()
+        rl = QHBoxLayout(row)
+        rl.setContentsMargins(0, 2, 0, 2)
+        texts = QVBoxLayout()
+        texts.setSpacing(0)
+        live = f.get("na_zywo") or None
+        name = label(str(f.get("name", "?")))
+        name.setObjectName("accent" if live else "strong")
+        texts.addWidget(name)
+        week = f.get("tydzien") or {}
+        if live:
+            sub = f"idzie teraz {fmt_num(float(live.get('kmh', 0)))} km/h"
+            sub += f" · {steps_text(int(live.get('kroki', 0)))} kroków"
+        else:
+            sub = f"tydzień: {steps_text(int(week.get('kroki', 0)))} kroków"
+            sub += f" · {time_text(float(week.get('ruch_s', 0)))}"
+        texts.addWidget(label(sub, "small"))
+        rl.addLayout(texts, 1)
+        remove = HoldButton("Usuń", self.t)
+        fid = str(f.get("id", ""))
+        remove.confirmed.connect(
+            lambda: self.account_job(
+                "remove_friend", lambda: self.account.client.remove_friend(fid)
+            )
+        )
+        rl.addWidget(remove)
+        return row
+
+    def online_ranking(self: App, lay: QVBoxLayout) -> None:
+        scope = self.online.get("scope", "tydzien")
+        seg = Segmented([("tydzien", "Tydzień"), ("miesiac", "Miesiąc")], scope, "Zakres rankingu")
+
+        def change(value: str) -> None:
+            self.online["scope"] = value
+            self.online.pop("ranking", None)
+            self.render_online()
+            self.load_online("ranking", force=True)
+
+        seg.changed.connect(change)
+        lay.addWidget(seg)
+        c, cl = section("Ranking kroków")
+        rows = self.online.get("ranking")
+        if rows is None:
+            cl.addWidget(label("Ładuję…", "small"))
+        elif not rows:
+            cl.addWidget(label("Na razie nikt nie ma wyników w tym okresie.", "small"))
+        for r in rows or []:
+            line = QHBoxLayout()
+            place = label(f"{int(r.get('miejsce', 0))}.")
+            place.setFixedWidth(34)
+            who = label(str(r.get("name", "?")))
+            who.setObjectName("accent" if r.get("ja") else "strong")
+            line.addWidget(place)
+            line.addWidget(who, 1)
+            line.addWidget(
+                label(
+                    f"{steps_text(int(r.get('kroki', 0)))} kroków · "
+                    f"{fmt_num(float(r.get('dystans_km', 0.0)), 1)} km",
+                    "small",
+                )
+            )
+            cl.addLayout(line)
+        lay.addWidget(c)
+        lay.addWidget(
+            label(
+                "W rankingu są tylko sesje z bieżni (bez symulatora) widoczne dla wszystkich"
+                " albo dla znajomych. Ukryte sesje i profil ukryty nie wchodzą do rankingu.",
+                "small",
+            )
+        )
+
+    def online_people(self: App, lay: QVBoxLayout) -> None:
+        row = QHBoxLayout()
+        search = field("Szukaj po pseudonimie")
+        search.setText(self.online.get("search", ""))
+        find = button("Szukaj")
+
+        def go() -> None:
+            self.online["search"] = search.text()
+            self.online.pop("people", None)
+            self.render_online()
+            self.load_online("people", force=True)
+
+        find.clicked.connect(go)
+        search.returnPressed.connect(go)
+        row.addWidget(search, 1)
+        row.addWidget(find)
+        lay.addLayout(row)
+        c, cl = section("Osoby z kontem")
+        people = self.online.get("people")
+        if people is None:
+            cl.addWidget(label("Ładuję…", "small"))
+        else:
+            items = list(people.get("osoby") or [])
+            if not items:
+                cl.addWidget(label("Nikogo nie znaleziono.", "small"))
+            for p in items:
+                line = QHBoxLayout()
+                texts = QVBoxLayout()
+                texts.setSpacing(0)
+                who = label(str(p.get("name", "?")))
+                who.setObjectName("strong")
+                texts.addWidget(who)
+                week = p.get("tydzien") or {}
+                sub = f"tydzień: {steps_text(int(week.get('kroki', 0)))} kroków"
+                if p.get("miejsce"):
+                    sub += f" · {int(p['miejsce'])}. miejsce"
+                texts.addWidget(label(sub, "small"))
+                line.addLayout(texts, 1)
+                if p.get("znajomy"):
+                    line.addWidget(label("znajomy", "small"))
+                elif p.get("id") != self.account.state.user_id:
+                    invite = button("Zaproś")
+                    uid = str(p.get("id", ""))
+                    invite.clicked.connect(
+                        lambda _=False, u=uid: self.account_job(
+                            "invite_user", lambda: self.account.client.invite_user(u)
+                        )
+                    )
+                    line.addWidget(invite)
+                cl.addLayout(line)
+        lay.addWidget(c)
+        lay.addWidget(
+            label(
+                "Na liście są tylko osoby, które same ustawiły profil jako widoczny dla"
+                " wszystkich. E-maili nikt nie widzi.",
+                "small",
+            )
+        )
+
+    def online_me(self: App, lay: QVBoxLayout) -> None:
+        state, t = self.account.state, self.t
+        c, cl = section("Moje wyniki na koncie")
+        store = self.store
+        if store is not None and len(store.people) > 1:
+            cl.addWidget(label("Czyje wyniki idą na konto", "small"))
+            options = [(p.id, p.name) for p in store.people[:4]]
+            current = state.person if any(p.id == state.person for p in store.people) else ""
+            who = Segmented(options, current or store.person.id, "Osoba na koncie")
+            who.changed.connect(self.on_account_person)
+            cl.addWidget(who)
+        upload = Switch(t, "Wysyłaj moje sesje", state.upload)
+        upload.toggled.connect(self.on_account_upload)
+        self.setting_row(cl, "Wysyłaj moje sesje", "Co 2 minuty i po każdej sesji", upload)
+        cl.addWidget(label("Kto widzi moje sesje", "small"))
+        vis = Segmented(VISIBILITY_LABELS, state.visibility, "Kto widzi moje sesje")
+        vis.changed.connect(self.on_account_visibility)
+        cl.addWidget(vis)
+        cl.addWidget(
+            label("Pojedynczą sesję ukryjesz w Historii kroków (zostaje tylko u Ciebie).", "small")
+        )
+        live = Switch(t, "Na żywo dla znajomych", state.live)
+        live.toggled.connect(self.on_account_live)
+        self.setting_row(
+            cl, "Na żywo dla znajomych", "Znajomi widzą, że idziesz, i Twoje tempo", live
+        )
+        send = button("Wyślij teraz")
+        send.clicked.connect(self.account_upload_now)
+        cl.addWidget(send)
+        lay.addWidget(c)
+
+        c, cl = section("Profil")
+        name = field("Pseudonim")
+        name.setText(state.name)
+        save = button("Zapisz pseudonim")
+
+        def rename() -> None:
+            problem = konto.check_name(name.text())
+            if problem:
+                self.account_status.setText(problem)
+                return
+            new = name.text().strip()
+
+            def work() -> Any:
+                user = self.account.client.update_profile(name=new)
+                self.account.state.name = user.name or new
+                self.account.save()
+                return user
+
+            self.account_job("profile", work)
+
+        save.clicked.connect(rename)
+        row = QHBoxLayout()
+        row.addWidget(name, 1)
+        row.addWidget(save)
+        cl.addLayout(row)
+        cl.addWidget(label("Mój profil na liście osób z kontem", "small"))
+        prof = Segmented(PROFILE_LABELS, state.profile_visibility, "Widoczność profilu")
+        prof.changed.connect(self.on_profile_visibility)
+        cl.addWidget(prof)
+        lay.addWidget(c)
+
+        c, cl = section("Konto")
+        cl.addWidget(label(f"{state.email}", "small"))
+        row = QHBoxLayout()
+        data = button("Pobierz moje dane")
+        data.clicked.connect(self.account_export)
+        out = button("Wyloguj")
+        out.clicked.connect(lambda: self.account_job("logout", self.account.logout))
+        row.addWidget(data)
+        row.addWidget(out)
+        cl.addLayout(row)
+        cl.addWidget(
+            label(
+                "Usunięcie konta kasuje je z serwera razem z wynikami i znajomościami."
+                " Wyniki na tym komputerze zostają. Wpisz hasło i przytrzymaj przycisk.",
+                "small",
+            )
+        )
+        password = field("Hasło", secret=True)
+        cl.addWidget(password)
+        delete = HoldButton("Usuń konto", t)
+        delete.confirmed.connect(
+            lambda: self.account_job("delete", lambda: self.account.delete_account(password.text()))
+        )
+        cl.addWidget(delete)
+        lay.addWidget(c)
+
+    # --- akcje ustawień konta --------------------------------------------------------------
+
+    def on_account_person(self: App, person: str) -> None:
+        self.account.state.person = person
+        self.account.save()
+        if self.history is not None:
+            self.history.forget_sent()
+
+    def on_account_upload(self: App, on: bool) -> None:
+        self.account.state.upload = on
+        self.account.save()
+
+    def on_account_visibility(self: App, value: str) -> None:
+        if self.history is not None:
+            self.account.set_visibility(self.history, value)
+            self.account_upload_now()
+
+    def on_account_live(self: App, on: bool) -> None:
+        self.account.state.live = on
+        self.account.save()
+        if not on and self.account_live_on:
+            self.account_live_on = False
+            self.account_job("live", self.account.clear_live, quiet=True)
+
+    def on_profile_visibility(self: App, value: str) -> None:
+        def work() -> Any:
+            self.account.client.update_profile(visibility=value)
+            self.account.state.profile_visibility = value
+            self.account.save()
+
+        self.account_job("profile", work)
+
+    def account_upload_now(self: App) -> None:
+        history = self.history
+        if history is None:
+            return
+        if self.tracker is not None:
+            self.tracker.flush()
+        self.account_upload_at = time.monotonic() + UPLOAD_EVERY_S
+        self.account_job("upload", lambda: self.account.upload(history))
+
+    def account_export(self: App) -> None:
+        from pathlib import Path
+
+        target = Path("dane") / f"moje-dane-konto-{time.strftime('%Y%m%d-%H%M%S')}.json"
+
+        def work() -> Any:
+            import json
+
+            data = self.account.client.my_data()
+            target.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+            return str(target)
+
+        self.account_job("export", work)
+        self.account_message(f"Pobieram do {target}…")

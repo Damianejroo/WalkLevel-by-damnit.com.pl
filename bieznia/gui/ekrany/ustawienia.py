@@ -103,6 +103,7 @@ class SettingsScreen:
                 self.advanced_open,
                 self.settings_view,
                 [self.caps.speed_min, self.caps.speed_max, self.caps.start_delay_s],
+                vars(self.account.state) if hasattr(self, "account") else None,
                 str(kopia.latest_backup()),
                 int(time.time() // 60),
             ],
@@ -265,6 +266,10 @@ class SettingsScreen:
         self.forget_btn.confirmed.connect(self.forget_device)
         bl.addWidget(self.forget_btn)
         lay.addWidget(c)
+
+        account_card = self.build_account_card()
+        if account_card is not None:
+            lay.addWidget(account_card)
 
         if store is not None:
             c, kl = section("Kopia danych")

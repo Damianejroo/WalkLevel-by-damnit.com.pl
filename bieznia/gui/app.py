@@ -53,6 +53,7 @@ from bieznia.gui import theme as th
 from bieznia.gui.ekrany.bieznia import TreadmillScreen
 from bieznia.gui.ekrany.glowny import STATUS_ACTIONS, MainScreen
 from bieznia.gui.ekrany.historia import HistoryScreen
+from bieznia.gui.ekrany.konto import AccountScreen
 from bieznia.gui.ekrany.kopia import CopyScreen
 from bieznia.gui.ekrany.modele import ModelsScreen
 from bieznia.gui.ekrany.osoba import PeopleScreen, Wizard
@@ -193,10 +194,10 @@ class App(
     TreadmillScreen,
     ControlScreen,
     ModelsScreen,
+    AccountScreen,
 ):
-    MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT, MODELS = range(
-        11
-    )
+    (MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT) = range(10)
+    MODELS, ACCOUNT, ONLINE = range(10, 13)
 
     # atrybuty ustawiane przez ekrany (mixiny)
     toggle_key: Key
@@ -316,6 +317,7 @@ class App(
         self.toast_timer = QTimer()
         self.toast_timer.setSingleShot(True)
         self.toast_timer.timeout.connect(self.hide_toast)
+        self.init_account()  # przed budową okna - karta konta w Ustawieniach
         self.build()
         self.apply_source()
         self.apply_recording()
@@ -451,7 +453,7 @@ class App(
         self.pages.addWidget(self.build_settings())
         self.pages.addWidget(self.build_log())
         self.pages.addWidget(self.build_report())
-        for _ in range(self.MODELS - self.REPORT):  # profil, konfigurator, historia, kopia, modele
+        for _ in range(self.ONLINE - self.REPORT):  # profil, konfigurator, historia, kopia…
             placeholder = QWidget()
             placeholder.setObjectName("page")
             self.pages.addWidget(placeholder)
@@ -1011,7 +1013,9 @@ class App(
             self.about_status.setText(text)
 
     def handle_task(self, kind: str, data: Any) -> None:
-        if kind == "models":
+        if kind == "konto":
+            self.on_account_result(data)
+        elif kind == "models":
             self.on_models_result(data)
         elif kind == "update_status":
             self.update_label.setText(data)
@@ -1180,6 +1184,7 @@ class App(
                     self.tracker = None
             self.render_link()
             self.render_pad_status()
+            self.account_tick(time.monotonic(), c.speed, state.steps, state.active_s)
 
     def request_stop(self, *_args: Any) -> None:
         self.stop_requested = True  # wywoływane z obsługi sygnału - właściwe zamknięcie w tick()

@@ -29,7 +29,7 @@ SAVE_EVERY_S = 60.0
 MIN_SESSION_S = 10.0  # krótsze nie trafiają do historii (przypadkowy ruch taśmy)
 DELETED_PERSON = "Usunięte osoby"
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3  # 3: wysłane na konto online i sesje ukryte online
 VISIBILITY = ("prywatna", "znajomi", "publiczna")
 SOURCES = ("bieznia", "symulator")
 
@@ -66,6 +66,13 @@ CREATE TABLE IF NOT EXISTS sesje (
     {", ".join(f"{name} {kind}" for name, kind in COLUMNS)}
 );
 CREATE INDEX IF NOT EXISTS sesje_osoba_start ON sesje (osoba, start_utc_s);
+CREATE TABLE IF NOT EXISTS wyslane (
+    id TEXT PRIMARY KEY,
+    zmieniono_utc_s REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS ukryte_online (
+    id TEXT PRIMARY KEY
+);
 """
 
 
@@ -196,6 +203,42 @@ class History:
                 [s.row() for s in sessions],
             )
         return self.count() - before
+
+    # --- konto online (opcjonalne) ---------------------------------------------------------
+
+    def unsent(self, person: str) -> list[Session]:
+        """Sesje osoby powiązanej z kontem, których serwer jeszcze nie ma albo które się
+        zmieniły od wysyłki. Bez sesji z symulatora (nie idą do rankingu ani statystyk)."""
+        sql = (
+            f"{_SELECT} WHERE osoba = ? AND zrodlo = 'bieznia' AND NOT EXISTS ("
+            "SELECT 1 FROM wyslane w WHERE w.id = sesje.id"
+            " AND w.zmieniono_utc_s >= sesje.zmieniono_utc_s) ORDER BY start_utc_s"
+        )
+        return [Session.from_row(r) for r in self.db.execute(sql, (person,))]
+
+    def mark_sent(self, sessions: list[Session]) -> None:
+        with self.db:
+            self.db.executemany(
+                "INSERT OR REPLACE INTO wyslane VALUES (?, ?)",
+                [(s.id, s.updated) for s in sessions],
+            )
+
+    def forget_sent(self) -> None:
+        """Inne konto, wylogowanie albo zmiana widoczności - wszystko pójdzie od nowa."""
+        with self.db:
+            self.db.execute("DELETE FROM wyslane")
+
+    def hidden_online(self) -> set[str]:
+        return {r[0] for r in self.db.execute("SELECT id FROM ukryte_online")}
+
+    def set_hidden_online(self, session_id: str, hidden: bool) -> None:
+        """Ukryta sesja zostaje u Ciebie, a online jest prywatna (nikt jej nie widzi)."""
+        with self.db:
+            if hidden:
+                self.db.execute("INSERT OR IGNORE INTO ukryte_online VALUES (?)", (session_id,))
+            else:
+                self.db.execute("DELETE FROM ukryte_online WHERE id = ?", (session_id,))
+            self.db.execute("DELETE FROM wyslane WHERE id = ?", (session_id,))
 
     def schema_version(self) -> int:
         return int(self.db.execute("PRAGMA user_version").fetchone()[0])

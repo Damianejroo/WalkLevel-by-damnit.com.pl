@@ -86,3 +86,8 @@ detailed_logs = true
 # Adres HTTPS, na który przycisk Wyślij zgłoszenie wysyła paczkę z logami (POST, multipart).
 # Pusty = paczka trafia do e-maila na adres kontaktowy autora.
 adres = ""
+
+[konto]
+# Konto online jest opcjonalne: bez logowania aplikacja działa w całości lokalnie i nic nie
+# wysyła. Adres serwera kont (tylko HTTPS). Pusty = sekcji konta w ogóle nie widać.
+adres = "https://bieznia.damnit-live.pl"

@@ -102,6 +102,7 @@ ICONS = {
     "walk": "",
     "download": "",
     "chart": "",
+    "people": "",
 }
 
 
