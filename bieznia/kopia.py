@@ -19,14 +19,15 @@ import zipfile
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from bieznia import __version__, dane
-from bieznia.historia import History, Session
+from bieznia.historia import COLUMN_NAMES, VISIBILITY, History, Session
 
 log = logging.getLogger("bieznia")
 
 FORMAT = "bieznia-kopia"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2  # 2: sesje z bieżnią, źródłem i widocznością, czasy *_utc_s
 SUFFIX = ".bieznia"
 MAX_FILE_BYTES = 50 * 1024 * 1024
 MAX_LOG_BYTES = 2_000_000
@@ -128,7 +129,7 @@ def export(
             for p in people:
                 ids = {pr.id for pr in p.profiles}
                 for s in history.sessions(choice.since, p.id, ids):
-                    lines.append(json.dumps(dict(zip(_SESSION_FIELDS, s.row(), strict=True))))
+                    lines.append(json.dumps(dict(zip(COLUMN_NAMES, s.row(), strict=True))))
             zf.writestr("historia.jsonl", "\n".join(lines) + ("\n" if lines else ""))
         if choice.logs and logs_dir.exists():
             for f in sorted(logs_dir.glob("*.log")):
@@ -145,18 +146,27 @@ def export(
     return summary
 
 
-_SESSION_FIELDS = (
-    "id",
-    "osoba",
-    "osoba_nazwa",
-    "profil",
-    "profil_nazwa",
-    "start",
-    "koniec",
-    "kroki",
-    "dystans_km",
-    "ruch_s",
-)
+# Wersja 1 (0.3.x): dziesięć pól, czasy pod nazwami start / koniec.
+_V1_NAMES = {"start": "start_utc_s", "koniec": "koniec_utc_s"}
+
+
+def session_from_json(d: dict[str, Any]) -> Session:
+    """Sesja z historia.jsonl dowolnej wersji kopii (brakujące pola - domyślne)."""
+    for old, new in _V1_NAMES.items():
+        if old in d and new not in d:
+            d[new] = d.pop(old)
+    for required in COLUMN_NAMES[:7]:
+        if required not in d:
+            raise KeyError(required)
+    defaults = Session("", "", "", "", "", 0.0, 0.0)
+    pairs = zip(COLUMN_NAMES, _FIELDS, strict=True)
+    session = Session(**{f: d.get(name, getattr(defaults, f)) for name, f in pairs})
+    if session.visibility not in VISIBILITY:
+        session.visibility = "prywatna"
+    return session
+
+
+_FIELDS = tuple(Session.__dataclass_fields__)
 
 
 # --- import ---------------------------------------------------------------------------------
@@ -198,7 +208,7 @@ def read(path: Path) -> Preview:
                 for line in zf.read("historia.jsonl").decode("utf-8").splitlines():
                     if line.strip():
                         d = json.loads(line)
-                        sessions.append(Session(*(d[k] for k in _SESSION_FIELDS)))
+                        sessions.append(session_from_json(d))
             icons = {}
             for n in names:
                 if n.startswith("ikony/"):

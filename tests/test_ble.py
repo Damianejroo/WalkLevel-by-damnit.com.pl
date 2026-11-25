@@ -11,14 +11,28 @@ from typing import Any
 
 import pytest
 
-from bieznia.ble import drivers, ftms, kingsmith
-from bieznia.ble.drivers import (
+from bieznia.sterowniki import (
     FtmsDriver,
     KingSmithDriver,
     UnsupportedDevice,
     looks_like_treadmill,
     make_driver,
+    pilnowanie,
 )
+from bieznia.sterowniki.ftms import protokol as ftms
+from bieznia.sterowniki.kingsmith import protokol as kingsmith
+from bieznia.sterowniki.kingsmith import sterownik as drivers
+from bieznia.sterowniki.kontrakt import Capabilities, DeviceInfo
+from bieznia.sterowniki.pilnowanie import SpeedGuard, SpeedStats
+
+
+@pytest.fixture(autouse=True)
+def no_write_gaps(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Odstępy między fragmentami zapisu (jak w KS Fit) są dla prawdziwej bieżni -
+    wirtualna ich nie potrzebuje, a testy byłyby kilkadziesiąt sekund dłuższe."""
+    monkeypatch.setattr(drivers, "FRAGMENT_GAP_S", 0.0)
+    monkeypatch.setattr(drivers, "LINE_GAP_S", 0.0)
+
 
 # --- kodowanie --------------------------------------------------------------
 
@@ -379,10 +393,16 @@ def test_stop_belt_stops() -> None:
 
 class StubDriver:
     protocol = "stub"
+    capabilities = Capabilities()
+    info = DeviceInfo("stub", "stub")
 
     def __init__(self) -> None:
         self.calls: list[str] = []
+        self.counts: dict[str, int] = {}
         self.started = asyncio.Event()
+
+    def busy(self) -> bool:
+        return False
 
     async def start(self) -> None:
         pass
@@ -426,9 +446,9 @@ def bare_worker() -> Any:
     worker._target_speed = None
     worker._sent_speed = None
     worker._sent_at = 0.0
-    worker._speed_at_send = 0.0
-    worker._resends = 0
-    worker._speed_confirmed = True
+    worker._speed_later = False
+    worker._speed_failures = 0
+    worker._caps = StubDriver.capabilities
     worker._belt_kind = ""
     worker._auto_start = False
     worker._requested_at = 0.0
@@ -513,16 +533,16 @@ def test_worker_sends_only_newest_speed_and_applies_it_after_start() -> None:
     assert driver.calls == ["speed 2.5", "speed 2.5"]
 
 
-class ForgetfulBelt(StubDriver):
+class ForgetfulBelt:
     """Jak X21 z logu testera: część poleceń prędkości przepada bez śladu."""
 
     def __init__(self, ignore: int) -> None:
-        super().__init__()
+        self.calls: list[str] = []
         self.ignore = ignore
         self.speed = 1.0
         self.at = 0.0
 
-    async def set_speed(self, kmh: float) -> bool:
+    async def send(self, kmh: float) -> bool:
         self.calls.append(f"speed {kmh:g}")
         if self.ignore > 0:
             self.ignore -= 1
@@ -530,78 +550,120 @@ class ForgetfulBelt(StubDriver):
             self.speed = kmh
         return True
 
-    def belt_speed(self) -> tuple[float, float] | None:
+    def reading(self) -> tuple[float, float] | None:
         return self.speed, self.at
 
 
-def test_ignored_speed_command_is_resent(monkeypatch: pytest.MonkeyPatch) -> None:
-    from bieznia.ble import worker as worker_mod
+def guarded(belt: ForgetfulBelt, clock: list[float]) -> SpeedGuard:
+    return SpeedGuard(belt.send, belt.reading, clock=lambda: clock[0])
 
+
+def test_ignored_speed_command_is_resent() -> None:
     clock = [100.0]
-    monkeypatch.setattr(worker_mod, "time", SimpleNamespace(monotonic=lambda: clock[0]))
-    worker = bare_worker()
     belt = ForgetfulBelt(ignore=1)
+    guard = guarded(belt, clock)
 
     async def step(seconds: float) -> None:
         clock[0] += seconds
         belt.at = clock[0]  # świeża ramka z danymi
-        await worker._check_speed(belt)
+        await guard.check()
 
     async def scenario() -> None:
-        worker._target_speed = 2.5
-        await worker._apply_speed(belt)
+        await guard.set(2.5)
         assert belt.calls == ["speed 2.5"]
         await step(1.0)
         assert belt.calls == ["speed 2.5"]  # za wcześnie na ponowienie
         await step(2.0)
         assert belt.calls == ["speed 2.5", "speed 2.5"]  # taśma nie drgnęła - ponowione
         await step(3.0)
-        assert worker._speed_confirmed  # przyjęte - koniec
+        assert guard.confirmed  # przyjęte - koniec
         belt.speed = 3.5  # pilot zmienia prędkość - aplikacja z nim nie walczy
         await step(5.0)
         assert len(belt.calls) == 2
 
     asyncio.run(scenario())
+    assert guard.stats.ok == 1 and guard.stats.resends == 1
 
 
-def test_resending_gives_up(monkeypatch: pytest.MonkeyPatch) -> None:
-    from bieznia.ble import worker as worker_mod
-
+def test_resending_gives_up() -> None:
     clock = [100.0]
-    monkeypatch.setattr(worker_mod, "time", SimpleNamespace(monotonic=lambda: clock[0]))
-    worker = bare_worker()
     belt = ForgetfulBelt(ignore=99)
+    guard = guarded(belt, clock)
 
     async def scenario() -> None:
-        worker._target_speed = 2.5
-        await worker._apply_speed(belt)
+        await guard.set(2.5)
         for _ in range(20):
             clock[0] += 3.0
             belt.at = clock[0]
-            await worker._check_speed(belt)
+            await guard.check()
 
     asyncio.run(scenario())
-    assert len(belt.calls) == 1 + worker_mod.SPEED_RESENDS
+    assert len(belt.calls) == 1 + pilnowanie.RESENDS
+    assert guard.stats.failed == 1
 
 
-def test_ramping_belt_is_not_hurried(monkeypatch: pytest.MonkeyPatch) -> None:
-    from bieznia.ble import worker as worker_mod
-
+def test_ramping_belt_is_not_hurried() -> None:
     clock = [100.0]
-    monkeypatch.setattr(worker_mod, "time", SimpleNamespace(monotonic=lambda: clock[0]))
-    worker = bare_worker()
     belt = ForgetfulBelt(ignore=1)
+    guard = guarded(belt, clock)
 
     async def scenario() -> None:
-        worker._target_speed = 2.5
-        await worker._apply_speed(belt)
+        await guard.set(2.5)
         belt.speed = 1.8  # taśma już przyspiesza
         clock[0] += 3.0
         belt.at = clock[0]
-        await worker._check_speed(belt)
+        await guard.check()
         assert belt.calls == ["speed 2.5"]
 
     asyncio.run(scenario())
+
+
+def test_stop_ends_speed_guarding() -> None:
+    clock = [100.0]
+    belt = ForgetfulBelt(ignore=99)
+    guard = guarded(belt, clock)
+
+    async def scenario() -> None:
+        await guard.set(2.5)
+        guard.reset()  # stop taśmy
+        clock[0] += 10.0
+        belt.at = clock[0]
+        await guard.check()
+
+    asyncio.run(scenario())
+    assert belt.calls == ["speed 2.5"]
+
+
+def test_x21_driver_resends_lost_speed_while_polling(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Sterownik X21 sam pilnuje prędkości - worker niczego już nie ponawia."""
+    monkeypatch.setattr(drivers, "QUIET_AFTER_PUSH_S", 0.0)
+    monkeypatch.setattr(pilnowanie, "RESEND_S", 0.0)
+
+    class LosesFirstSpeed(FakeTreadmill):
+        lost: bool = False
+
+        def _on_command(self, prefix: str, frame: bytes) -> None:
+            text = kingsmith.decode(frame, self.table) or ""
+            if text.startswith("props CurrentSpeed") and not self.lost:
+                self.lost = True
+                self.received.append(text)
+                return  # przepada bez śladu
+            if text.startswith("props CurrentSpeed"):
+                self.speed = float(text.rsplit(" ", 1)[-1])
+            super()._on_command(prefix, frame)
+
+    async def scenario() -> list[str]:
+        treadmill = LosesFirstSpeed(speed=1.0)
+        driver, _ = await run_driver(treadmill)
+        driver.codec.candidates = ["v1"]
+        await driver.set_speed(2.5)
+        for _ in range(6):
+            await driver.poll()
+            await asyncio.sleep(0.02)
+        return [t for t in treadmill.received if t.startswith("props CurrentSpeed")]
+
+    sent = asyncio.run(scenario())
+    assert sent[:2] == ["props CurrentSpeed 2.5", "props CurrentSpeed 2.5"]
 
 
 def test_speed_waits_after_treadmill_push(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -846,10 +908,8 @@ def test_session_summary_line(caplog: pytest.LogCaptureFixture) -> None:
 
     from bieznia.ble.worker import SessionStats
 
-    stats = SessionStats(
-        speed_sent=5, speed_ok=4, speed_failed=1, resends=2, latencies=[1.0, 3.5, 2.0]
-    )
+    speed = SpeedStats(sent=5, ok=4, failed=1, resends=2, latencies=[1.0, 3.5, 2.0])
     with caplog.at_level(logging.INFO, logger="bieznia.ble"):
-        stats.log_summary({"frames": 120, "polls": 60, "undecoded": 0})
+        SessionStats().log_summary({"frames": 120, "polls": 60, "undecoded": 0}, speed)
     assert "Podsumowanie sesji" in caplog.text
     assert "typowo 2.0 s, najdłużej 3.5 s" in caplog.text

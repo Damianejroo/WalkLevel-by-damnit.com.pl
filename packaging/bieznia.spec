@@ -53,6 +53,8 @@ a = Analysis(
         (str(ROOT / "config.toml"), "."),
         (str(ROOT / "build" / "wersja.txt"), "."),
         (str(ROOT / "bieznia" / "gui" / "ikona.png"), "bieznia/gui"),
+        # profile modeli bieżni (dane JSON - zakresy prędkości, odliczanie, nazwy)
+        (str(ROOT / "bieznia" / "sterowniki" / "profile" / "*.json"), "bieznia/sterowniki/profile"),
     ],
     hiddenimports=["bleak.backends.winrt.scanner", "bleak.backends.winrt.client"],
     excludes=EXCLUDES,

@@ -25,8 +25,9 @@ from bieznia import dane, kopia, paleta  # noqa: E402
 from bieznia.ble.worker import BleEvent, FoundDevice, Link  # noqa: E402
 from bieznia.config import load_config  # noqa: E402
 from bieznia.gui import app as gui  # noqa: E402
-from bieznia.gui.ekrany import osoba  # noqa: E402
+from bieznia.gui.ekrany import osoba, sterowanie  # noqa: E402
 from bieznia.gui.ekrany.profil import GamePick  # noqa: E402
+from bieznia.sources import Reading  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -46,6 +47,16 @@ class FakeWorker:
 
     def disconnect(self) -> None:
         self.calls.append("disconnect")
+
+    def connect_simulator(self) -> None:
+        self.calls.append("simulator")
+
+    def sim_remote(self, steps: int) -> None:
+        self.calls.append(f"remote {steps:+d}")
+
+    def push(self, speed: float, steps: int | None = None) -> None:
+        """Odczyt jak z wątku Bluetooth (prawdziwa bieżnia albo symulator)."""
+        self.readings.put(Reading(t=time.monotonic(), speed_kmh=speed, steps=steps))
 
     def diagnose(self, path: Path) -> None:
         self.calls.append("diagnose")
@@ -165,7 +176,7 @@ def test_first_start_scans_and_auto_connects_single_treadmill(window: gui.App) -
     worker.events.put(BleEvent("link", link=Link.STREAMING, text="KingSmith"))
     window.tick()
     assert "connect KS-HDSY-X21C" in worker.calls
-    assert window.status_title.text() == "Połączono: KS-HDSY-X21C"
+    assert window.status_title.text() == "Połączono: KingSmith WalkingPad X21"  # model z profilu
     assert window.settings["device_address"] == "AA"
     assert window.store is not None and window.store.shared["device_address"] == "AA"
 
@@ -207,11 +218,12 @@ def test_pages_switch_and_controls(window: gui.App) -> None:
 
 def test_simulator_drives_gauge_and_chips(window: gui.App) -> None:
     window.on_direction("treadmill")  # chodzenie naciska klawisze
+    worker = fake(window)
     window.on_simulator(True)
+    assert "simulator" in worker.calls  # symulator to sterownik w wątku Bluetooth
     window.set_control(True)
-    source: Any = window.bridge.source
-    source.target = source.speed = 5.0
     for _ in range(30):
+        worker.push(5.0)
         window.tick()
     assert window.gauge.mode == "walk"
     assert window.gauge.active == 1 and window.zone_chips.active == 1
@@ -478,11 +490,26 @@ def test_belt_control_can_be_turned_off(window: gui.App) -> None:
     assert not [c for c in worker.calls if c.startswith("belt")]
 
 
-def test_simulator_never_sends_belt_commands(window: gui.App) -> None:
+def test_simulator_is_driven_like_a_treadmill(window: gui.App) -> None:
+    """Symulator przyjmuje te same polecenia co bieżnia - sterowanie da się sprawdzić bez
+    bieżni. F6/F7 to jego pilot, a wyłączenie wraca do zapamiętanej bieżni."""
     worker = fake(window)
+    window.settings["device_address"], window.settings["device_name"] = "AA", "URTM054"
     window.on_simulator(True)
+    assert window.caps.speed_max == 6.0 and window.caps.start_delay_s == 1.0
+    window.on_belt_control(True)
     window.set_control(True)
-    assert not [c for c in worker.calls if c.startswith("belt")]
+    assert "belt start" in worker.calls
+    down: set[int] = set()
+    from bieznia.hotkeys import Hotkeys
+
+    window.hotkeys = Hotkeys({"sim_faster": "F7"}, key_down=lambda vk: vk in down)
+    down.add(0x76)  # F7
+    window.tick()
+    assert "remote +1" in worker.calls
+    window.on_simulator(False)
+    assert worker.calls[-1] == "connect URTM054"
+    assert window.caps.start_delay_s == 4.0  # profil Urevo SpaceWalk 5L
 
 
 def test_hotkey_toggles_control_and_belt_but_not_while_capturing(window: gui.App) -> None:
@@ -696,7 +723,7 @@ class StickSource:
 
 def settle(window: gui.App) -> None:
     window.tick()
-    time.sleep(max(gui.PAD_SETTLE_S, gui.PAD_STOP_SETTLE_S) + 0.05)
+    time.sleep(max(sterowanie.PAD_SETTLE_S, sterowanie.PAD_STOP_SETTLE_S) + 0.05)
     window.tick()
 
 
@@ -1261,11 +1288,12 @@ def test_history_records_ticks_from_simulator(window: gui.App) -> None:
     window.on_simulator(True)
     tracker = window.tracker
     assert tracker is not None
-    source: Any = window.bridge.source
-    source.target = source.speed = 4.0
-    for _ in range(40):
+    worker = fake(window)
+    for i in range(40):
+        worker.push(4.0, i * 2)
         window.tick()
     assert tracker.current is not None and tracker.current.profile_name == "Domyślny"
+    assert tracker.current.source == "symulator"  # nie miesza się z wynikami z bieżni
 
 
 def test_history_survives_profile_switch(window: gui.App) -> None:

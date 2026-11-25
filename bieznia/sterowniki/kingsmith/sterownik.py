@@ -1,6 +1,7 @@
-"""Sterowniki bieżni: wybór protokołu po usługach GATT i odczyt prędkości.
+"""Moduł KingSmith (WalkingPad R2 / X21 / G1 / X23): szyfrowany protokół tekstowy.
 
-Tylko ODCZYT: żaden sterownik nie wysyła poleceń zmiany prędkości ani startu taśmy.
+Bieżnia nie potwierdza poleceń - czy posłuchała, widać w ramkach z danymi. Dlatego start
+i stop sprawdzamy w danych i ponawiamy, a zadanej prędkości pilnuje SpeedGuard.
 """
 
 from __future__ import annotations
@@ -11,19 +12,37 @@ import itertools
 import logging
 import re
 import time
-from collections.abc import Callable, Iterable
-from dataclasses import dataclass, field
-from typing import Any, Protocol
+from collections.abc import Iterable
+from dataclasses import dataclass, field, replace
+from typing import Any
 
-from bieznia.ble import ftms, kingsmith
+from bieznia.sterowniki.kingsmith import protokol as kingsmith
+from bieznia.sterowniki.kontrakt import (
+    Capabilities,
+    DeviceInfo,
+    GattClient,
+    ReadingCallback,
+)
+from bieznia.sterowniki.pilnowanie import SpeedGuard, SpeedStats
+from bieznia.sterowniki.profile import ModelProfile
 
 log = logging.getLogger("bieznia.ble")
-
-ReadingCallback = Callable[[float, int | None], None]  # (km/h, kroki albo None)
 
 # UUID KingSmith: 0000fed7-…, 0001fed7-…, 0002fed7-… (zależnie od wersji firmware X21)
 _KS_UUID = re.compile(r"^000[0-2](fed7|fed8|1234)-0000-1000-8000-00805f9b34fb$")
 _SERVICE_PREFERENCE = ("0002", "0001", "0000")
+
+# Domyślne możliwości modułu - profil modelu (np. kingsmith-x21.json) je uzupełnia.
+DEFAULT_CAPS = Capabilities(
+    speed_min=kingsmith.SPEED_MIN,
+    speed_max=kingsmith.SPEED_MAX,
+    speed_step=0.1,
+    start_speed=1.0,
+    acks_commands=False,
+    pause=False,
+    steps=True,
+    telemetry_s=2.0,
+)
 
 
 # Najdłuższa przerwa między ramkami z prędkością, przy której potwierdzenia odpytywania
@@ -62,23 +81,6 @@ TELEMETRY_FALLBACK_S = 5.0
 STATS_EVERY_S = 30.0
 
 
-class UnsupportedDevice(Exception):
-    """Urządzenie nie ma żadnej znanej usługi bieżni."""
-
-
-class GattClient(Protocol):
-    """Podzbiór BleakClient, którego używamy (ułatwia testy na wirtualnej bieżni)."""
-
-    @property
-    def services(self) -> Iterable[Any]: ...
-
-    async def start_notify(self, char_specifier: Any, callback: Any) -> None: ...
-
-    async def write_gatt_char(
-        self, char_specifier: Any, data: bytes, response: bool | None = None
-    ) -> None: ...
-
-
 def _short(uuid: str) -> str | None:
     match = _KS_UUID.match(uuid.lower())
     return match.group(1) if match else None
@@ -96,7 +98,11 @@ class Channel:
         return self.service_uuid[:8]
 
 
-def find_kingsmith_channels(services: Iterable[Any]) -> list[Channel]:
+def is_kingsmith_service(uuid: str) -> bool:
+    return _short(uuid) == "1234"
+
+
+def find_channels(services: Iterable[Any]) -> list[Channel]:
     channels: list[Channel] = []
     for service in services:
         chars = {_short(c.uuid): c for c in service.characteristics if _short(c.uuid)}
@@ -108,36 +114,6 @@ def find_kingsmith_channels(services: Iterable[Any]) -> list[Channel]:
         return _SERVICE_PREFERENCE.index(prefix) if prefix in _SERVICE_PREFERENCE else 9
 
     return sorted(channels, key=rank)
-
-
-def find_ftms_char(services: Iterable[Any]) -> Any | None:
-    for service in services:
-        for char in service.characteristics:
-            if char.uuid.lower() == ftms.TREADMILL_DATA:
-                return char
-    return None
-
-
-class Driver(Protocol):
-    protocol: str
-
-    async def start(self) -> None: ...
-
-    async def poll(self) -> None: ...
-
-    def poll_interval(self) -> float: ...
-
-    def describe(self) -> str: ...
-
-    async def start_belt(self) -> str: ...
-
-    async def stop_belt(self, verify: bool = True) -> None: ...
-
-    async def set_speed(self, kmh: float) -> bool: ...
-
-    def belt_speed(self) -> tuple[float, float] | None: ...
-
-    def belt_running(self) -> bool | None: ...
 
 
 class KingSmithDriver:
@@ -152,11 +128,24 @@ class KingSmithDriver:
         channels: list[Channel],
         device_name: str,
         on_reading: ReadingCallback,
+        profile: ModelProfile | None = None,
     ) -> None:
         self.client = client
         self.channels = channels
         self.on_reading = on_reading
-        self.codec = kingsmith.Codec(kingsmith.table_order(device_name))
+        self.capabilities = profile.apply(DEFAULT_CAPS) if profile else DEFAULT_CAPS
+        self.info = DeviceInfo(
+            model=profile.name if profile else (device_name or "KingSmith"),
+            driver="kingsmith",
+            profile=profile.id if profile else "",
+            name=device_name,
+        )
+        order = kingsmith.table_order(device_name)
+        table = profile.option("table") if profile else None
+        if table in order:
+            order.remove(table)
+            order.insert(0, table)
+        self.codec = kingsmith.Codec(order)
         self.active: Channel | None = None
         self.last_speed = 0.0
         self.last_steps: int | None = None
@@ -175,11 +164,20 @@ class KingSmithDriver:
         self.last_error: int | None = None
         self._state_event = asyncio.Event()
         self._reply = asyncio.Event()
+        self._belt_busy = 0
+        self.guard = SpeedGuard(self._send_speed, self.belt_speed, self.capabilities.clamp)
+
+    @property
+    def speed_stats(self) -> SpeedStats:
+        return self.guard.stats
+
+    def busy(self) -> bool:
+        return self._belt_busy > 0
 
     def describe(self) -> str:
         table = self.codec.describe()
         channel = self.active.label if self.active else "?"
-        return f"KingSmith (usługa {channel}, tablica {table})"
+        return f"{self.info.model} (KingSmith, usługa {channel}, tablica {table})"
 
     # --- wysyłanie ----------------------------------------------------------
 
@@ -236,6 +234,21 @@ class KingSmithDriver:
             await self._wait_state(remaining)
 
     async def start_belt(self) -> str:
+        self._belt_busy += 1
+        try:
+            return await self._start_belt()
+        finally:
+            self._belt_busy -= 1
+
+    async def stop_belt(self, verify: bool = True) -> None:
+        self.guard.reset()
+        self._belt_busy += 1
+        try:
+            await self._stop_belt(verify)
+        finally:
+            self._belt_busy -= 1
+
+    async def _start_belt(self) -> str:
         """Uruchamia taśmę. Zwraca 'started', 'refused' albo 'unknown'.
 
         Bieżnia potrafi odmówić (błąd -5000, np. w trybie czuwania albo bez klucza) albo
@@ -265,7 +278,7 @@ class KingSmithDriver:
             return "refused"
         return "unknown"  # brak odpowiedzi - prędkość pokaże, czy taśma jedzie
 
-    async def stop_belt(self, verify: bool = True) -> None:
+    async def _stop_belt(self, verify: bool) -> None:
         """Stop od razu; potem sprawdzamy w danych i w razie potrzeby ponawiamy."""
         began = time.monotonic()
         for attempt in range(1, STOP_ATTEMPTS + 1):
@@ -293,6 +306,10 @@ class KingSmithDriver:
         return self.last_speed, self.last_props_at
 
     async def set_speed(self, kmh: float) -> bool:
+        """Prędkość docelowa - wysyłana od razu, a w poll() pilnowana (X21 gubi polecenia)."""
+        return await self.guard.set(kmh)
+
+    async def _send_speed(self, kmh: float) -> bool:
         command = kingsmith.speed_command(kmh)
         await self._quiet()
         await self.send(command)
@@ -361,6 +378,8 @@ class KingSmithDriver:
     def _track_state(self, text: str) -> None:
         """Stan taśmy i odpowiedzi na polecenia (start/stop, odmowa)."""
         parts = text.split()
+        if len(parts) == 2 and parts[0] == "version" and not self.info.firmware:
+            self.info = replace(self.info, firmware=parts[1])
         if len(parts) >= 3 and parts[0] == "props" and parts[1] == "Error":
             with contextlib.suppress(ValueError):
                 self.last_error = int(parts[-1])
@@ -424,6 +443,8 @@ class KingSmithDriver:
             self.poll_command = kingsmith.GET_PROPS
         self._log_stats(now)
         await self.send(self.poll_command)
+        if not self.busy():
+            await self.guard.check()
 
     def poll_interval(self) -> float:
         pushing = time.monotonic() - self.last_props_at < PROPS_TIMEOUT_S / 2
@@ -452,70 +473,3 @@ class KingSmithDriver:
                 self.counts["acks"],
                 self.counts["undecoded"],
             )
-
-
-class FtmsDriver:
-    """Standard FTMS: bieżnia sama wysyła Treadmill Data co ok. sekundę."""
-
-    protocol = "FTMS"
-
-    def __init__(self, client: GattClient, char: Any, on_reading: ReadingCallback) -> None:
-        self.client = client
-        self.char = char
-        self.on_reading = on_reading
-
-    def describe(self) -> str:
-        return "FTMS (standard Bluetooth)"
-
-    def _on_notify(self, _char: Any, data: bytearray) -> None:
-        log.debug("<< FTMS %s", bytes(data).hex(" "))
-        speed = ftms.parse_treadmill_data(bytes(data))
-        if speed is not None:
-            self.on_reading(speed, None)
-
-    async def start(self) -> None:
-        await self.client.start_notify(self.char, self._on_notify)
-
-    async def poll(self) -> None:
-        pass
-
-    def poll_interval(self) -> float:
-        return BUSY_POLL_S
-
-    def belt_running(self) -> bool | None:
-        return None
-
-    async def start_belt(self) -> str:
-        log.warning("Start taśmy przez FTMS nie jest jeszcze obsługiwany")
-        return "unsupported"
-
-    async def stop_belt(self, verify: bool = True) -> None:
-        log.warning("Stop taśmy przez FTMS nie jest jeszcze obsługiwany")
-
-    async def set_speed(self, kmh: float) -> bool:
-        return False
-
-    def belt_speed(self) -> tuple[float, float] | None:
-        return None
-
-
-def make_driver(client: GattClient, device_name: str, on_reading: ReadingCallback) -> Driver:
-    services = list(client.services)
-    channels = find_kingsmith_channels(services)
-    if channels:
-        return KingSmithDriver(client, channels, device_name, on_reading)
-    char = find_ftms_char(services)
-    if char is not None:
-        return FtmsDriver(client, char, on_reading)
-    raise UnsupportedDevice(
-        "To urządzenie nie wygląda na bieżnię (brak usługi KingSmith ani FTMS). "
-        "Zapisz raport diagnostyczny i wyślij go."
-    )
-
-
-def looks_like_treadmill(name: str | None, service_uuids: Iterable[str] = ()) -> bool:
-    """Do sortowania wyników skanowania: KingSmith/WalkingPad albo usługa FTMS."""
-    upper = (name or "").upper()
-    if upper.startswith(("KS-", "WALKINGPAD")):
-        return True
-    return any(u.lower() == ftms.FTMS_SERVICE or _short(u) == "1234" for u in service_uuids)

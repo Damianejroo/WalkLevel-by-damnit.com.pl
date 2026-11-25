@@ -3,6 +3,9 @@
 Interfejs (wątek główny) wywołuje metody BleWorker i odbiera zdarzenia z kolejki
 `events`, a odczyty prędkości z kolejki `readings`. Cała komunikacja z bleak
 odbywa się w jednej pętli asyncio w wątku "bluetooth".
+
+Worker nie zna modeli bieżni: rozmawia ze sterownikiem przez kontrakt
+(bieznia.sterowniki.kontrakt). Symulator to taki sam sterownik - bez Bluetooth.
 """
 
 from __future__ import annotations
@@ -21,8 +24,17 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from bieznia.ble.drivers import Driver, UnsupportedDevice, looks_like_treadmill, make_driver
 from bieznia.sources import Reading
+from bieznia.sterowniki import (
+    Capabilities,
+    DeviceInfo,
+    Driver,
+    SimulatorDriver,
+    UnsupportedDevice,
+    looks_like_treadmill,
+    make_driver,
+)
+from bieznia.sterowniki.pilnowanie import SpeedStats
 
 log = logging.getLogger("bieznia.ble")
 
@@ -32,18 +44,14 @@ class SessionStats:
     """Liczniki jednego połączenia - na koniec jedna linia podsumowania w logu."""
 
     began: float = field(default_factory=time.monotonic)
-    speed_sent: int = 0
-    speed_ok: int = 0
-    speed_failed: int = 0
-    resends: int = 0
-    latencies: list[float] = field(default_factory=list)
     starts: int = 0
     starts_ok: int = 0
     stops: int = 0
 
-    def log_summary(self, counts: dict[str, int]) -> None:
+    def log_summary(self, counts: dict[str, int], speed: SpeedStats | None = None) -> None:
         minutes = (time.monotonic() - self.began) / 60
-        lat = sorted(self.latencies)
+        speed = speed or SpeedStats()
+        lat = sorted(speed.latencies)
         typical = f"{lat[len(lat) // 2]:.1f} s" if lat else "-"
         worst = f"{lat[-1]:.1f} s" if lat else "-"
         log.info(
@@ -51,10 +59,10 @@ class SessionStats:
             " ponowienia %d, czas do zmiany typowo %s, najdłużej %s · start %d/%d · stop %d ·"
             " ramki %d, zapytania %d, nieodszyfrowane %d",
             minutes,
-            self.speed_sent,
-            self.speed_ok,
-            self.speed_failed,
-            self.resends,
+            speed.sent,
+            speed.ok,
+            speed.failed,
+            speed.resends,
             typical,
             worst,
             self.starts_ok,
@@ -67,11 +75,7 @@ class SessionStats:
 
 
 POLL_S = 0.75
-# Polecenie prędkości bez reakcji taśmy wysyłamy ponownie (X21 gubi część poleceń).
-SPEED_TOLERANCE = 0.15
-SPEED_RESEND_S = 2.5
-SPEED_RAMP_S = 8.0  # tyle najwyżej czekamy, gdy taśma już zmienia prędkość
-SPEED_RESENDS = 5
+SPEED_ATTEMPTS = 3  # tyle razy prędkość bez potwierdzenia idzie od nowa (co odpytanie)
 SCAN_S = 6.0
 FIND_S = 10.0
 CONNECT_TIMEOUT_S = 20.0
@@ -100,10 +104,12 @@ class FoundDevice:
 
 @dataclass(frozen=True)
 class BleEvent:
-    kind: str  # "link" | "devices" | "scan_failed" | "report"
+    kind: str  # "link" | "devices" | "scan_failed" | "report" | "belt" | "device"
     link: Link | None = None
     text: str = ""
     devices: tuple[FoundDevice, ...] = field(default_factory=tuple)
+    device: DeviceInfo | None = None  # "device": co to za bieżnia i co potrafi
+    caps: Capabilities | None = None
 
 
 def friendly_error(exc: BaseException) -> tuple[Link, str]:
@@ -139,9 +145,9 @@ class BleWorker:
         self._target_speed: float | None = None  # ostatnia prośba z okna
         self._sent_speed: float | None = None  # ostatnia wysłana do bieżni
         self._sent_at = 0.0
-        self._speed_at_send = 0.0
-        self._resends = 0
-        self._speed_confirmed = True
+        self._speed_later = False
+        self._speed_failures = 0
+        self._caps: Capabilities | None = None
         self._thread.start()
 
     # --- API dla wątku głównego --------------------------------------------
@@ -151,6 +157,19 @@ class BleWorker:
 
     def connect(self, address: str, name: str) -> None:
         self._submit(self._start_session(address, name))
+
+    def connect_simulator(self) -> None:
+        """Symulator bieżni zamiast Bluetooth - ten sam kontrakt i to samo sterowanie."""
+        self._submit(self._start_simulator())
+
+    def sim_remote(self, steps: int) -> None:
+        """Pilot symulatora (F6/F7): prędkość zmienia sama bieżnia."""
+
+        def press() -> None:
+            if isinstance(self._driver, SimulatorDriver):
+                self._driver.remote(steps)
+
+        self._loop.call_soon_threadsafe(press)
 
     def disconnect(self) -> None:
         self._submit(self._stop_session(forget=True))
@@ -199,7 +218,9 @@ class BleWorker:
             return False
         if self._belt_task is not None and not self._belt_task.done():
             self._belt_task.cancel()
-        await driver.stop_belt(verify=False)  # zamykanie: bez czekania na potwierdzenie
+        if driver.belt_running() is False:
+            return False  # taśma stoi - nic nie wysyłamy
+        await driver.stop_belt(verify=False)  # zamykanie: pełny stop
         return True
 
     def shutdown(self, timeout: float = 4.0) -> None:
@@ -280,6 +301,34 @@ class BleWorker:
         self._target = (address, name)
         self._session = asyncio.create_task(self._session_loop(address, name))
 
+    async def _start_simulator(self) -> None:
+        await self._stop_session(forget=True)
+        self._session = asyncio.create_task(self._simulator_loop())
+
+    async def _simulator_loop(self) -> None:
+        driver = SimulatorDriver(self._on_reading)
+        await self._drive(driver, asyncio.Event())
+
+    async def _drive(self, driver: Driver, lost: asyncio.Event) -> None:
+        """Wspólne dla bieżni i symulatora: start sterownika, polecenia, podsumowanie."""
+        self._stats = SessionStats()
+        self._link(Link.CONNECTED, f"Połączono: {driver.describe()}")
+        await driver.start()
+        self._caps = driver.capabilities
+        self.events.put(BleEvent("device", device=driver.info, caps=driver.capabilities))
+        self._link(Link.STREAMING, driver.describe())
+        self._commands = asyncio.Queue()
+        self._driver = driver
+        self._sent_speed = None
+        try:
+            await self._stream(driver, lost)
+        finally:
+            self._commands = None
+            self._driver = None
+            if self._belt_task is not None:
+                self._belt_task.cancel()
+            self._stats.log_summary(driver.counts, getattr(driver, "speed_stats", None))
+
     async def _session_loop(self, address: str, name: str) -> None:
         from bleak import BleakClient, BleakScanner
 
@@ -312,22 +361,8 @@ class BleWorker:
                         name,
                         self._rssi.get(address, "?"),
                     )
-                    self._stats = SessionStats()
-                    self._link(Link.CONNECTED, f"Połączono: {driver.describe()}")
-                    await driver.start()
-                    self._link(Link.STREAMING, driver.describe())
                     attempt = 0
-                    self._commands = asyncio.Queue()
-                    self._driver = driver
-                    self._sent_speed = None
-                    try:
-                        await self._stream(driver, lost)
-                    finally:
-                        self._commands = None
-                        self._driver = None
-                        if self._belt_task is not None:
-                            self._belt_task.cancel()
-                        self._stats.log_summary(getattr(driver, "counts", {}))
+                    await self._drive(driver, lost)
                 log.warning("Bieżnia się rozłączyła")
                 self._link(Link.RETRYING, "Bieżnia się rozłączyła - łączę ponownie…")
             except asyncio.CancelledError:
@@ -337,7 +372,7 @@ class BleWorker:
                 if isinstance(exc, TimeoutError) and str(exc) == "not found":
                     link, text = (
                         Link.RETRYING,
-                        "Nie widzę bieżni - włącz ją i rozłącz telefon (KS Fit)",
+                        "Nie widzę bieżni - włącz ją i zamknij aplikację bieżni w telefonie",
                     )
                 log.warning("Połączenie: %s (%s)", text, type(exc).__name__)
                 self._link(link, text)
@@ -355,6 +390,7 @@ class BleWorker:
             if now >= next_poll:
                 next_poll = now + driver.poll_interval()
                 await driver.poll()
+                self._watch_caps(driver)
                 await self._check_speed(driver)
             try:
                 command = await asyncio.wait_for(
@@ -377,6 +413,12 @@ class BleWorker:
                 self._belt_kind = "stop"
             elif command == "start":
                 self._begin_start(driver)
+
+    def _watch_caps(self, driver: Driver) -> None:
+        """Bieżnia potrafi zdradzić więcej w trakcie (np. Urevo: kroki w danych)."""
+        if driver.capabilities != self._caps:
+            self._caps = driver.capabilities
+            self.events.put(BleEvent("device", device=driver.info, caps=driver.capabilities))
 
     def _busy(self, kind: str) -> bool:
         task = self._belt_task
@@ -407,6 +449,7 @@ class BleWorker:
         if result == "started":
             self._stats.starts_ok += 1
         self._sent_speed = None  # po starcie taśma jedzie z prędkością startową bieżni
+        self._sent_at = 0.0  # prędkość po starcie od razu, bez odstępu
         if result in ("started", "unknown"):
             await self._apply_speed(driver)
         self.events.put(BleEvent("belt", text=result))
@@ -415,67 +458,40 @@ class BleWorker:
         target = self._target_speed
         if target is None or target == self._sent_speed:
             return
-        await self._send_speed(driver, target)
-        self._resends = 0
-
-    async def _send_speed(self, driver: Driver, target: float) -> None:
-        reading = driver.belt_speed()
-        if self._sent_speed != target:
-            self._stats.speed_sent += 1
+        gap = driver.capabilities.min_command_gap_s
+        wait = gap - (time.monotonic() - self._sent_at)
+        if wait > 0:  # za szybko po poprzednim - wyślemy najnowszą prędkość za chwilę
+            if not self._speed_later:
+                self._speed_later = True
+                asyncio.get_running_loop().call_later(wait, self._speed_due)
+            return
+        self._sent_at = time.monotonic()
         if await driver.set_speed(target):
-            self._sent_speed = target
-            self._sent_at = time.monotonic()
-            self._speed_at_send = reading[0] if reading else 0.0
-            self._speed_confirmed = False
+            self._sent_speed, self._speed_failures = target, 0
+            return
+        self._speed_failures += 1
+        if self._speed_failures >= SPEED_ATTEMPTS:  # dalej nie walczymy - nowa prośba spróbuje
+            log.warning("Bieżnia nie przyjęła %.1f km/h po %d próbach", target, SPEED_ATTEMPTS)
+            self._sent_speed, self._speed_failures = target, 0
+
+    def _speed_due(self) -> None:
+        self._speed_later = False
+        if self._commands is not None:
+            self._commands.put_nowait("speed")
 
     async def _check_speed(self, driver: Driver) -> None:
-        """Czy taśma posłuchała? Bez reakcji - to samo polecenie jeszcze raz."""
+        """Co odpytanie: stojąca taśma przy wychylonej gałce rusza, a prędkość, której
+        bieżnia nie przyjęła (brak odpowiedzi), idzie jeszcze raz. Czy taśma posłuchała,
+        pilnuje już sam sterownik."""
         if self._needs_start(driver):  # np. taśmę zatrzymał pilot albo zgubiony start
             log.info("Taśma stoi, a pad chce %.1f km/h - uruchamiam", self._target_speed or 0)
             self._begin_start(driver)
             return
-        target = self._sent_speed
-        if target is None or self._speed_confirmed or target != self._target_speed:
-            return
         if self._belt_task is not None and not self._belt_task.done():
             return
-        reading = driver.belt_speed()
-        if reading is None:
-            return
-        speed, at = reading
-        if abs(speed - target) <= SPEED_TOLERANCE:
-            self._speed_confirmed = True  # od teraz pilot może zmieniać prędkość bez walki
-            took = at - self._requested_at
-            self._stats.speed_ok += 1
-            self._stats.latencies.append(took)
-            log.info(
-                "Prędkość %.1f: przyjęta po %.1f s od prośby (ponowienia %d)",
-                target,
-                took,
-                self._resends,
-            )
-            return
-        now = time.monotonic()
-        if speed <= 0 or at <= self._sent_at or now - self._sent_at < SPEED_RESEND_S:
-            return  # taśma stoi albo nie ma jeszcze świeżej ramki
-        start = self._speed_at_send
-        moving = (speed - start) * (target - start) > 0
-        if moving and now - self._sent_at < SPEED_RAMP_S:
-            return
-        if self._resends >= SPEED_RESENDS:
-            log.warning("Taśma nie przyjęła %.1f km/h (jedzie %.1f) - poddaję się", target, speed)
-            self._stats.speed_failed += 1
-            self._speed_confirmed = True
-            return
-        self._resends += 1
-        self._stats.resends += 1
-        log.info(
-            "Taśma nie przyjęła %.1f km/h (jedzie %.1f) - ponawiam (%d)",
-            target,
-            speed,
-            self._resends,
-        )
-        await self._send_speed(driver, target)
+        target = self._target_speed
+        if target is not None and target != self._sent_speed and self._sent_at > 0:
+            await self._apply_speed(driver)  # poprzednia próba nie dostała potwierdzenia
 
     async def _diagnose(self, path: Path) -> None:
         from bieznia.ble.diagnostics import run_diagnostics

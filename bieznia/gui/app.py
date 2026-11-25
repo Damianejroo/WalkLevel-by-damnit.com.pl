@@ -18,20 +18,12 @@ import signal
 import sys
 import threading
 import time
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QRectF, Qt, QTimer, QVariantAnimation
+from PySide6.QtCore import QCoreApplication, QPoint, Qt, QTimer
 from PySide6.QtGui import (
-    QCloseEvent,
-    QColor,
-    QFont,
     QGuiApplication,
-    QIcon,
-    QPainter,
-    QPaintEvent,
-    QPixmap,
 )
 from PySide6.QtWidgets import (
     QApplication,
@@ -40,8 +32,6 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPlainTextEdit,
     QScrollArea,
-    QScrollBar,
-    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -56,19 +46,33 @@ from bieznia import (
     zgloszenia,
 )
 from bieznia import pad as gamepad
-from bieznia.ble.worker import BleEvent, BleWorker, FoundDevice, Link
+from bieznia.ble.worker import BleWorker, FoundDevice, Link
 from bieznia.engine import Bridge
 from bieznia.gui import komponenty as k
 from bieznia.gui import theme as th
+from bieznia.gui.ekrany.bieznia import TreadmillScreen
 from bieznia.gui.ekrany.glowny import STATUS_ACTIONS, MainScreen
 from bieznia.gui.ekrany.historia import HistoryScreen
 from bieznia.gui.ekrany.kopia import CopyScreen
 from bieznia.gui.ekrany.osoba import PeopleScreen, Wizard
 from bieznia.gui.ekrany.profil import ProfileScreen
+from bieznia.gui.ekrany.sterowanie import (
+    ControlScreen,
+)
 from bieznia.gui.ekrany.ustawienia import SettingsScreen
+from bieznia.gui.okno import (
+    NO_FOCUS_ENV,
+    TEST_SCREEN_ENV,
+    CalmScrollBar,
+    Cover,
+    Pages,
+    Window,
+    header,
+    page_layout,
+    settle_layout,
+)
 from bieznia.gui.theme import Theme
 from bieznia.gui.widgets import (
-    DeviceRow,
     FloatingToggle,
     FocusRing,
     HoldButton,
@@ -79,10 +83,8 @@ from bieznia.gui.widgets import (
     Switch,
     button,
     card,
-    ease,
     fix_width,
     fmt_num,
-    icon_button,
     label,
 )
 from bieznia.hotkeys import Hotkeys
@@ -92,22 +94,14 @@ from bieznia.logs import set_detailed
 from bieznia.mapping import MappingConfig
 from bieznia.paths import FROZEN
 from bieznia.recorder import Recorder
-from bieznia.settings import save_enabled
-from bieznia.sources.ble_source import QueueSource
-from bieznia.sources.simulator import SimulatedTreadmill
-from bieznia.winapi import is_key_down, set_topmost, vk_from_scan
+from bieznia.sterowniki import Capabilities, DeviceInfo, known_capabilities
+from bieznia.winapi import is_key_down, set_topmost
 
 log = logging.getLogger("bieznia")
 
 TICK_MS = 50
 STARTED = time.monotonic()  # import tego modułu to praktycznie start procesu
-HYSTERESIS = 0.6
-PAD_SETTLE_S = 0.15  # gałka w drodze przez skoki - wysyłamy dopiero, gdy się zatrzyma
-PAD_STOP_SETTLE_S = 0.4  # gałka przechodzi przez środek przy zmianie kierunku - to nie stop
-STOPPED = -1.0  # belt_target: taśma zatrzymana przez puszczoną gałkę
 TOAST_MS = 4000
-NO_FOCUS_ENV = "BIEZNIA_BEZ_FOKUSU"
-TEST_SCREEN_ENV = "BIEZNIA_EKRAN_TESTOW"
 DEFAULT_W, DEFAULT_H = 740, 890  # okno przy pierwszym starcie (potem z ostatniej sesji)
 LOOK_RELOAD = ("theme", "large_text", "profile_color")
 
@@ -121,26 +115,6 @@ class QueueLogHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         with contextlib.suppress(Exception):
             self.target.put_nowait(self.format(record))
-
-
-def app_icon(t: Theme) -> QIcon:
-    png = Path(__file__).with_name("ikona.png")
-    if png.exists():
-        return QIcon(str(png))
-    pix = QPixmap(64, 64)
-    pix.fill(Qt.GlobalColor.transparent)
-    p = QPainter(pix)
-    p.setRenderHint(QPainter.RenderHint.Antialiasing)
-    p.setBrush(QColor(t.accent))
-    p.setPen(Qt.PenStyle.NoPen)
-    p.drawRoundedRect(0, 0, 64, 64, 14, 14)
-    font = QFont(th.ICON_FONT)
-    font.setPixelSize(38)
-    p.setFont(font)
-    p.setPen(QColor(t.on_accent))
-    p.drawText(pix.rect(), Qt.AlignmentFlag.AlignCenter, th.ICONS["walk"])
-    p.end()
-    return QIcon(pix)
 
 
 def defaults_from(config: dict[str, Any]) -> dict[str, Any]:
@@ -199,280 +173,35 @@ def normalize(s: dict[str, Any]) -> dict[str, Any]:
 # --- okno ------------------------------------------------------------------
 
 
-class Window(QWidget):
-    def __init__(self, t: Theme, on_close: Any) -> None:
-        super().__init__()
-        self.t = t
-        self.on_close = on_close
-        self.backdrop = False
-        self.setWindowTitle(TITLE)
-        self.setWindowIcon(app_icon(t))
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setMinimumSize(420, 640)
-        if os.environ.get(NO_FOCUS_ENV) == "1":  # testy i zrzuty: okno nie zabiera fokusu
-            self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
-            self.setWindowFlag(Qt.WindowType.WindowDoesNotAcceptFocus)
-
-    def retheme(self, t: Theme) -> None:
-        self.t = t
-        if sys.platform == "win32" and self.isVisible():
-            ok = th.apply_backdrop(int(self.winId()), t.name == "dark")  # pasek tytułu też
-            self.backdrop = self.backdrop or ok
-        self.update()
-
-    def showEvent(self, e: Any) -> None:
-        if not self.backdrop:
-            self.backdrop = th.apply_backdrop(int(self.winId()), self.t.name == "dark")
-            self.update()
-        super().showEvent(e)
-
-    def paintEvent(self, _e: QPaintEvent) -> None:
-        p = QPainter(self)
-        bg = QColor(self.t.bg)
-        if self.backdrop:
-            bg.setAlphaF(self.t.backdrop_alpha)  # przez tło prześwituje materiał Windows
-        p.fillRect(self.rect(), bg)
-
-    def closeEvent(self, e: QCloseEvent) -> None:
-        if self.on_close():
-            e.accept()
-        else:
-            e.ignore()
-
-
-class Cover(QWidget):
-    """Przenikanie między dwoma zrzutami okna na czas zmiany.
-
-    capture() zapamiętuje to, co widać; pod spodem nowy widok buduje się, układa i przewija;
-    reveal() robi zrzut gotowego wyniku i miesza oba obrazy piksel w piksel (z tą samą
-    przezroczystością co okno nad tłem Windows), po czym znika. Żywe widżety nigdy nie jeżdżą
-    po ekranie i nic nie mruga - także odcień półprzezroczystego tła okna.
-    """
-
-    def __init__(self, window: QWidget, area: QWidget) -> None:
-        super().__init__(window)
-        self.area = area  # obszar przykrywany (widoki pod paskiem tytułu)
-        self.old = QPixmap()
-        self.new = QPixmap()
-        self.progress = 0.0
-        self.band: tuple[int, int, int] | None = None  # (góra karty, wys. stara, wys. nowa)
-        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self.anim = QVariantAnimation(self)
-        self.anim.setStartValue(0.0)
-        self.anim.setEndValue(1.0)
-        self.anim.setEasingCurve(ease(th.EASE_SMOOTH))
-        self.anim.valueChanged.connect(self._step)
-        self.anim.finished.connect(self._done)
-        self.hide()
-
-    def _grab(self) -> QPixmap:
-        window = self.parentWidget()
-        assert window is not None
-        return window.grab(self.area.geometry())
-
-    def capture(self, _background: str = "") -> None:
-        """Zrzut obecnego wyglądu - razem z ewentualnym trwającym przenikaniem."""
-        self.anim.stop()
-        self.old = self._grab()
-        self.new = QPixmap()
-        self.progress = 0.0
-        self.band = None
-        self.setGeometry(self.area.geometry())
-        self.raise_()
-        self.show()
-
-    def reveal(self, ms: int, _shift: int = 0) -> None:
-        if not self.isVisible():
-            return
-        if ms <= 0 or not Motion.enabled:
-            self._done()
-            return
-        self.hide()  # zrzut nowego stanu bez przykrycia
-        self.new = self._grab()
-        self.show()
-        self.raise_()
-        self.anim.stop()
-        self.anim.setDuration(ms)
-        self.anim.start()
-
-    def morph(self, top: int, old_h: int, new_h: int, ms: int) -> None:
-        """Zmiana wysokości fragmentu (np. karty od y=top) bez przeliczania układu w klatkach.
-
-        Nad fragmentem okno zostaje żywe (np. jadące podświetlenie przełącznika); fragment
-        przenika ze starego w nowy i odsłania się do nowej wysokości; wszystko pod nim
-        zjeżdża jako obraz. Każda klatka to tylko kopiowanie obrazów - płynnie także przy
-        dużych widokach.
-        """
-        if not self.isVisible():
-            return
-        if ms <= 0 or not Motion.enabled:
-            self._done()
-            return
-        self.hide()
-        self.new = self._grab()
-        self.band = (top, old_h, new_h)
-        self.show()
-        self.raise_()
-        self.anim.stop()
-        self.anim.setDuration(ms)
-        self.anim.start()
-
-    def _step(self, value: Any) -> None:
-        self.progress = float(value)
-        if self.band is not None:
-            self.update(0, self.band[0], self.width(), self.height() - self.band[0])
-        else:
-            self.update()
-
-    def _done(self) -> None:
-        self.anim.stop()
-        self.hide()
-        self.old = QPixmap()
-        self.new = QPixmap()
-        self.band = None
-
-    def _paint_band(self, p: QPainter) -> None:
-        assert self.band is not None
-        top, h0, h1 = self.band
-        width, height = self.width(), self.height()
-        prog = self.progress
-        h = round(h0 + (h1 - h0) * prog)
-        dpr = self.old.devicePixelRatio()
-
-        def src(y: float, rows: float) -> QRectF:  # wiersze obrazu (piksele urządzenia)
-            return QRectF(0, y * dpr, width * dpr, rows * dpr)
-
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
-        # tło karty pod fragmentem: wiersz tuż nad nim (sama karta) rozciągnięty w dół
-        p.drawPixmap(QRectF(0, top, width, h), self.new, src(top - 1, 1))
-        # najpierw gaśnie stara treść, potem pojawia się nowa - bez nakładania się napisów
-        new_alpha = min(1.0, max(0.0, (prog - 0.3) / 0.7))
-        old_alpha = min(1.0, max(0.0, 1.0 - prog / 0.4))
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
-        shown = min(h, h1)
-        p.setOpacity(new_alpha)
-        p.drawPixmap(QRectF(0, top, width, shown), self.new, src(top, shown))
-        old_rows = min(h, h0)
-        p.setOpacity(old_alpha)
-        p.drawPixmap(QRectF(0, top, width, old_rows), self.old, src(top, old_rows))
-        p.setOpacity(1.0)
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
-        # wszystko pod fragmentem: przesuwa się razem z jego dolną krawędzią
-        below, start = (self.old, top + h0) if h1 > h0 else (self.new, top + h1)
-        rows = height - start
-        p.drawPixmap(QRectF(0, top + h, width, rows), below, src(start, rows))
-
-    def paintEvent(self, _e: QPaintEvent) -> None:
-        if self.old.isNull():
-            return
-        if self.band is not None and not self.new.isNull():
-            self._paint_band(QPainter(self))
-            return
-        # stary obraz zastępuje okno, nowy na nim z kryciem p: tryb Source z kryciem to
-        # dokładnie (1-p)*stary + p*nowy, także przezroczystość tła okna; rysowane wprost
-        # na ekran - bez tworzenia nowego obrazu w każdej klatce
-        p = QPainter(self)
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
-        p.drawPixmap(0, 0, self.old)
-        if not self.new.isNull() and self.new.size() == self.old.size() and self.progress > 0:
-            p.setOpacity(self.progress)
-            p.drawPixmap(0, 0, self.new)
-
-
 TOOLTIP_QSS = (  # podpowiedzi to osobne okna - styl całej aplikacji, jeden dla obu motywów
     "QToolTip { background: #2b2b2b; color: #f3f3f3; border: 1px solid #5a5a5a;"
     " border-radius: 6px; padding: 6px 8px; font-size: 13px; }"
 )
 
 
-class CalmScrollBar(QScrollBar):
-    """Pasek przewijania, który nie rysuje się, gdy nie ma czego przewijać."""
-
-    def paintEvent(self, e: QPaintEvent) -> None:
-        if self.maximum() > self.minimum():
-            super().paintEvent(e)
-
-
-def settle_layout(widget: QWidget) -> None:
-    """Układy (także pola przewijania) przeliczone od razu, a nie przy następnej klatce."""
-    for _ in range(4):
-        QCoreApplication.sendPostedEvents(None, QEvent.Type.LayoutRequest)
-    widget.updateGeometry()
-
-
-class Pages(QStackedWidget):
-    """Przejście między widokami: krótki przesuw (panel), bez przenikania.
-
-    Styl (motyw) jest na każdym widoku osobno i trafia na widok dopiero, gdy ten się pokazuje -
-    zmiana motywu przestylowuje tylko widoczny ekran (kilkadziesiąt ms zamiast pół sekundy).
-    """
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.cover: Cover | None = None
-        self.background = "#000000"  # kolor tła okna pod zrzutem przejścia
-        self.qss = ""
-        self.qss_version = 0
-        self.qss_scale: object = None
-        self.currentChanged.connect(lambda i: self.style_page(self.widget(i)))
-
-    def set_qss(self, qss: str, everywhere: bool = False) -> None:
-        """everywhere: zmiana wielkości tekstu - układ każdego widoku liczy się od nowa."""
-        self.qss = qss
-        self.qss_version += 1
-        if everywhere:
-            for i in range(self.count()):
-                self.style_page(self.widget(i))
-        else:
-            self.style_page(self.currentWidget())
-
-    def style_page(self, page: QWidget | None) -> None:
-        if page is not None and page.property("qss_version") != self.qss_version:
-            page.setStyleSheet(self.qss)
-            page.setProperty("qss_version", self.qss_version)
-
-    def go(self, index: int, back: bool = False) -> None:
-        """Nowy widok od razu na miejscu, stary (zrzut) przenika w niego z lekkim odjazdem."""
-        if index == self.currentIndex():
-            return
-        cover = self.cover if (Motion.enabled and self.isVisible()) else None
-        if cover is not None:
-            cover.capture(self.background)
-        self.setCurrentIndex(index)
-        if cover is not None:
-            page = self.currentWidget()
-            if page is not None:
-                settle_layout(page)
-            cover.reveal(th.T_PANEL_IN)
-
-
-def page_layout(widget: QWidget) -> QVBoxLayout:
-    widget.setObjectName("page")
-    lay = QVBoxLayout(widget)
-    lay.setContentsMargins(th.PAD, th.PAD, th.PAD, th.PAD)
-    lay.setSpacing(th.GAP)
-    return lay
-
-
-def header(title: str, on_back: Any) -> QHBoxLayout:
-    row = QHBoxLayout()
-    back = icon_button("back", "Wróć")
-    back.clicked.connect(on_back)
-    row.addWidget(back)
-    row.addWidget(label(title, "title"))
-    row.addStretch(1)
-    return row
-
-
 # --- kontroler -------------------------------------------------------------
 
 
-class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen, CopyScreen):
+class App(
+    MainScreen,
+    SettingsScreen,
+    ProfileScreen,
+    PeopleScreen,
+    HistoryScreen,
+    CopyScreen,
+    TreadmillScreen,
+    ControlScreen,
+):
     MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT = range(10)
 
     # atrybuty ustawiane przez ekrany (mixiny)
     toggle_key: Key
     bridge: Bridge
+    worker: BleWorker
+    pad_step: int
+    belt_target: float | None
+    device: DeviceInfo | None
+    devices: list[FoundDevice]
     advanced_open: bool
     walk_btn: KeyButton | None
     run_btn: KeyButton | None
@@ -565,6 +294,12 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         logging.getLogger().addHandler(self.log_handler)
         self.link = Link.IDLE
         self.link_text = ""
+        # co to za bieżnia i co potrafi: od razu z profilu zapamiętanej, potem od niej samej
+        self.device: DeviceInfo | None = None
+        self.caps: Capabilities = known_capabilities(
+            self.settings["device_name"], self.settings["simulator"]
+        )
+        self.set_tracker_source()
         self.devices: list[FoundDevice] = []
         self.auto_connect = not self.settings["device_address"]
         self.stop_requested = False
@@ -611,9 +346,11 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
 
         if self.store is None:
             self.open_wizard_first()  # pierwsze uruchomienie 0.3.0 (nowa instalacja albo z 0.2)
-        if self.settings["device_address"]:
+        if self.settings["simulator"]:
+            self.worker.connect_simulator()
+        elif self.settings["device_address"]:
             self.worker.connect(self.settings["device_address"], self.settings["device_name"])
-        elif not self.settings["simulator"]:
+        else:
             self.worker.scan()  # pierwszy start: od razu szukamy bieżni
 
     # --- dane: osoby, profile, historia ---------------------------------------
@@ -627,6 +364,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             self.history = None
             return
         self.tracker = historia.SessionTracker(self.history)
+        self.set_tracker_source()
 
     def close_history(self) -> None:
         if self.tracker is not None:
@@ -900,25 +638,6 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         area.setWidget(inner)
         return area
 
-    def build_devices(self) -> QWidget:
-        page = QWidget()
-        lay = page_layout(page)
-        lay.addLayout(header("Wybierz bieżnię", lambda: self.pages.go(self.MAIN, back=True)))
-        self.devices_status = label("", "muted")
-        self.devices_status.setFixedHeight(24)
-        lay.addWidget(self.devices_status)
-        self.devices_box = QVBoxLayout()
-        self.devices_box.setSpacing(8)
-        self.devices_box.setContentsMargins(0, 0, 0, 0)
-        holder = QWidget()
-        holder.setObjectName("page")
-        holder.setLayout(self.devices_box)
-        lay.addWidget(self.scroll(holder), 1)
-        rescan = button("Szukaj ponownie", "primary")
-        rescan.clicked.connect(self.scan)
-        lay.addWidget(rescan)
-        return page
-
     def setting_row(self, lay: QVBoxLayout, title: str, hint: str, control: QWidget) -> None:
         row = QHBoxLayout()
         texts = QVBoxLayout()
@@ -1121,152 +840,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
     def on_bubble_moved(self, point: QPoint) -> None:
         self.change("floating_pos", [point.x(), point.y()])
 
-    def toggle_from_bubble(self) -> None:
-        self.set_control(not self.bridge.state.enabled)
-
-    def set_control(self, on: bool) -> None:
-        """Jedno miejsce dla skrótu, przełącznika i przycisku na ekranie.
-
-        Wyłączenie najpierw puszcza klawisze (postać staje od razu), potem zatrzymuje taśmę.
-        """
-        changed = on != self.bridge.state.enabled
-        self.bridge.set_enabled(on)
-        self.enable_switch.set_silently(on)
-        save_enabled(on)
-        self.belt_target = None  # po zmianie prędkość z klawiszy idzie od nowa
-        live = not self.settings["simulator"]
-        sets_speed = self.sets_speed() and live
-        pad_stop = self.pad_stops_belt() and live  # taśmę uruchamia dopiero ruch gałki
-        if changed and not on:
-            if self.belt_commands_possible() or pad_stop:
-                self.worker.belt("stop")
-            elif sets_speed:
-                self.worker.set_speed(self.idle_target())  # bez stopu: zwolnij
-        if changed and on and self.belt_commands_possible() and not pad_stop:
-            # czy taśma już jedzie, sprawdza sterownik (stan bieżni, nie prędkość)
-            self.worker.belt("start")
-            self.render_output_hint("Uruchamiam bieżnię…")
-
-    def belt_commands_possible(self) -> bool:
-        return bool(self.settings["belt_control"]) and not self.settings["simulator"]
-
-    def on_belt_control(self, on: bool) -> None:
-        self.change("belt_control", on)
-        self.render_control_subtitle()
-
-    def render_control_subtitle(self) -> None:
-        belt = bool(self.settings["belt_control"])
-        start = "uruchamia i zatrzymuje taśmę" if belt else "włącza i wyłącza sterowanie"
-        direction = self.settings["direction"]
-        if direction == "keyboard":
-            text = f"{start} · {self.bridge.keys[0].name} przyspiesza"
-        elif direction == "gamepad":
-            text = f"{start} · gałka ustawia tempo"
-        else:
-            text = f"{start} · działa też w grze"
-        if self.control_subtitle.text() != text:
-            self.control_subtitle.setText(text)
-
-    def on_direction(self, kind: str) -> None:
-        if kind == self.settings["direction"]:
-            return
-        self.change("direction", kind)
-        log.info("Kierunek sterowania: %s", kind)
-        self.apply_direction()
-        self.settings_view = kind
-        self.settings_direction_changed()  # karta w Ustawieniach: płynnie, gdy widać, w miejscu
-
-    def sets_speed(self) -> bool:
-        """Klawisze albo pad ustawiają prędkość taśmy (a nie odwrotnie)."""
-        return self.settings["direction"] in ("keyboard", "gamepad")
-
-    def idle_target(self) -> float:
-        if self.settings["direction"] == "gamepad":
-            if self.settings["pad_idle"] == "zero":
-                return 0.0
-            return float(self.settings["pad_steps"][0][1])
-        return float(self.settings["idle_speed"])
-
-    def apply_direction(self) -> None:
-        """Klawisze/pad -> bieżnia: aplikacja niczego nie naciska, tylko słucha gracza."""
-        sets_speed = self.sets_speed()
-        self.bridge.set_output("dry" if sets_speed else self.settings["output"])
-        self.belt_target = None
-        self.mode_tiles.set_value(self.settings["direction"])
-        self.render_control_subtitle()
-        self.render_zones()
-        self.render_output_hint()
-
     # --- pad ------------------------------------------------------------------
-
-    def pad_idle_text(self) -> str | None:
-        """Co robi taśma przy puszczonej gałce, gdy to nie prędkość skoku 1."""
-        return {"stop": "stop", "zero": "0 km/h"}.get(self.settings["pad_idle"])
-
-    def pad_target(self, now: float) -> tuple[float, str, str, bool]:
-        """Prędkość ze skoku gałki. Ostatnie pole: skok trzyma się już chwilę (można wysłać)."""
-        steps = self.settings["pad_steps"]
-        self.pad_state = self.pad.read()
-        deflection = self.pad_state.deflection if self.pad_state else 0.0
-        index = self.pad_picker.update(steps, deflection)
-        if index != self.pad_step:
-            self.pad_step, self.pad_step_since = index, now
-        idle = self.pad_idle_text() if index == 0 else None
-        speed = 0.0 if idle else float(steps[index][1])
-        held = "idle" if index == 0 else ("run" if index == len(steps) - 1 else "walk")
-        belt = "taśma stoi" if idle == "stop" else f"taśma {fmt_num(speed)} km/h"
-        if self.pad_state is None:
-            caption = f"Brak pada - {belt}"
-        else:
-            caption = f"Gałka {round(deflection * 100)}% - skok {index + 1} - {belt}"
-        wait = PAD_STOP_SETTLE_S if idle == "stop" else PAD_SETTLE_S
-        settled = now - self.pad_step_since >= wait
-        return speed, held, caption, settled
-
-    def send_pad(self, target: float) -> None:
-        """Prędkość z pada; puszczona gałka w trybie stop zatrzymuje taśmę, ruch ją budzi."""
-        if self.pad_step == 0 and self.settings["pad_idle"] == "stop":
-            if self.belt_target != STOPPED:
-                self.belt_target = STOPPED
-                self.worker.belt("stop")
-            return
-        if target == self.belt_target:
-            return
-        self.belt_target = target
-        wake = target > 0 and (self.pad_stops_belt() or bool(self.settings["belt_control"]))
-        self.worker.set_speed(target, start_if_stopped=wake)
-
-    def pad_stops_belt(self) -> bool:
-        return bool(self.settings["direction"] == "gamepad" and self.settings["pad_idle"] == "stop")
-
-    def render_pad_status(self) -> None:
-        """Na karcie pada w Ustawieniach: który pad i gdzie jest gałka (na żywo)."""
-        if self.step_ladder is None or self.pages.currentIndex() != self.SETTINGS:
-            return
-        state = self.pad_state
-        text = self.pad_status_text()
-        with contextlib.suppress(RuntimeError):  # karta właśnie przebudowana
-            if self.pad_status.text() != text:
-                self.pad_status.setText(text)
-            self.step_ladder.set_stick(state.deflection if state else 0.0)
-
-    def pad_status_text(self) -> str:
-        state = self.pad_state
-        if state is None:
-            return "Nie widzę pada. Podłącz DualSense albo pada Xbox (kablem albo Bluetooth)."
-        step = self.pad_step + 1
-        return f"{state.name}: wychylenie {round(state.deflection * 100)}%, skok {step}."
-
-    def keyboard_target(self) -> tuple[float, str]:
-        """Prędkość taśmy z trzymanych klawiszy: chód + bieg, sam chód albo nic."""
-        walk, run = self.bridge.keys
-        walk_down = self.key_down(walk.vk or vk_from_scan(walk.scan, walk.extended))
-        run_down = self.key_down(run.vk or vk_from_scan(run.scan, run.extended))
-        if walk_down and run_down:
-            return self.settings["run_speed"], "run"
-        if walk_down:
-            return self.settings["walk_speed"], "walk"
-        return self.settings["idle_speed"], "idle"
 
     def make_hotkeys(self) -> Hotkeys:
         keys = self.config["hotkeys"]
@@ -1277,20 +851,6 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
                 "sim_faster": keys["sim_faster"],
             }
         )
-
-    def on_belt_event(self, result: str) -> None:
-        messages = {
-            "started": "Bieżnia rusza.",
-            "stopped": "Bieżnia zatrzymana.",
-            "refused": "Bieżnia nie przyjęła startu. Obudź ją pilotem albo sprawdź, czy klucz"
-            " bezpieczeństwa jest na miejscu, i spróbuj jeszcze raz.",
-            "unknown": "Wysłano start, ale bieżnia nie odpowiedziała. Jeśli taśma nie rusza,"
-            " uruchom ją pilotem.",
-            "unsupported": "Ta bieżnia nie obsługuje startu z aplikacji - użyj pilota.",
-            "not_connected": "Brak połączenia z bieżnią - start i stop tylko pilotem.",
-        }
-        log.info("Taśma: %s", result)
-        self.render_output_hint(messages.get(result, ""))
 
     def show_main(self) -> None:
         w = self.window
@@ -1368,18 +928,6 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.render_zones()
         self.render_output_hint()
 
-    def apply_source(self) -> None:
-        if self.settings["simulator"]:
-            self.bridge.set_source(SimulatedTreadmill())
-        else:
-            self.bridge.set_source(QueueSource(self.worker.readings))
-
-    def on_simulator(self, on: bool) -> None:
-        self.change("simulator", on)
-        self.apply_source()
-        log.info("Symulator %s", "włączony" if on else "wyłączony")
-        self.render_link()
-
     def apply_recording(self) -> None:
         recorder = Recorder(Path("nagrania")) if self.settings["record"] else None
         self.bridge.set_recording(recorder)
@@ -1389,47 +937,6 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
     def on_record(self, on: bool) -> None:
         self.change("record", on)
         self.apply_recording()
-
-    def scan(self) -> None:
-        self.devices = []
-        self.render_devices(scanning=True)
-        self.pages.go(self.DEVICES)
-        self.worker.scan()
-
-    def connect_device(self, device: FoundDevice) -> None:
-        self.settings["device_address"] = device.address
-        self.settings["device_name"] = device.name
-        self.save()
-        self.worker.connect(device.address, device.name)
-        if self.pages.currentIndex() == self.DEVICES:
-            self.pages.go(self.MAIN, back=True)
-        log.info("Wybrano bieżnię %s", device.name)
-        self.render_device_label()
-
-    def forget_device(self) -> None:
-        self.worker.disconnect()
-        self.settings["device_address"] = self.settings["device_name"] = ""
-        self.save()
-        self.auto_connect = True
-        log.info("Bieżnia zapomniana")
-        self.render_link()
-
-    def on_status_action(self) -> None:
-        if self.settings["simulator"]:
-            self.on_simulator(False)
-        elif self.link in (Link.STREAMING, Link.CONNECTED, Link.CONNECTING, Link.RETRYING) or (
-            self.link is Link.SEARCHING and self.settings["device_address"]
-        ):
-            self.worker.disconnect()
-        elif self.settings["device_address"] and self.link is Link.BLUETOOTH_OFF:
-            self.worker.connect(self.settings["device_address"], self.settings["device_name"])
-        else:
-            self.scan()
-
-    def diagnose(self) -> None:
-        path = Path("logs") / f"diagnostyka-{datetime.now():%Y%m%d-%H%M%S}.txt"
-        self.diag_status.setText("Zbieram raport (ok. 30 s)…")
-        self.worker.diagnose(path)
 
     def open_folder(self, path: Path) -> None:
         path.mkdir(exist_ok=True)
@@ -1554,154 +1061,6 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
 
     # --- stan połączenia ----------------------------------------------------
 
-    def render_link(self) -> None:
-        if self.window is None:
-            return
-        t, name = self.t, self.settings["device_name"] or "bieżnia"
-        primary = False
-        if self.settings["simulator"]:
-            keys = self.config["hotkeys"]
-            color, busy, title = t.accent, False, "Symulator bieżni"
-            sub, action = (
-                f"{keys['sim_slower']} wolniej, {keys['sim_faster']} szybciej",
-                "Wyłącz symulator",
-            )
-        elif self.link is Link.STREAMING:
-            stale = not self.bridge.state.live
-            color, busy = (t.run if stale else t.accent), stale
-            title = f"Połączono: {name}"
-            sub = "Czekam na dane z bieżni" if stale else self.link_text
-            action = "Rozłącz"
-        elif self.link in (Link.SEARCHING, Link.CONNECTING, Link.CONNECTED):
-            color, busy, title, sub = (
-                t.accent,
-                True,
-                self.link_text,
-                "Bieżnia włączona, telefon rozłączony",
-            )
-            action = "Anuluj" if self.settings["device_address"] else "Szukaj bieżni"
-        elif self.link is Link.RETRYING:
-            color, busy, title, sub, action = (
-                t.run,
-                True,
-                "Ponawiam połączenie",
-                self.link_text,
-                "Rozłącz",
-            )
-        elif self.link is Link.BLUETOOTH_OFF:
-            color, busy, title = t.danger, False, "Bluetooth wyłączony"
-            sub, action, primary = "Włącz Bluetooth w Windows", "Spróbuj ponownie", True
-        elif self.link is Link.UNSUPPORTED:
-            color, busy, title = t.danger, False, "To urządzenie nie jest bieżnią"
-            sub, action, primary = "Wybierz inne albo zapisz raport", "Szukaj bieżni", True
-        else:
-            color, busy, title = t.text_2, False, "Bieżnia nie połączona"
-            sub, action, primary = "Włącz bieżnię i kliknij Szukaj bieżni", "Szukaj bieżni", True
-        self.dot.set_state(color, busy)
-        if self.status_title.text() != title:
-            self.status_title.setText(title)
-        if self.status_sub.text() != sub:
-            self.status_sub.setText(sub)
-        if self.status_action.text() != action:
-            self.status_action.setText(action)
-            self.status_action.setAccessibleName(action)
-        kind = "primary" if primary else ""
-        if self.status_action.objectName() != kind:
-            self.status_action.setObjectName(kind)
-            self.status_action.style().unpolish(self.status_action)
-            self.status_action.style().polish(self.status_action)
-        self.render_device_label()
-
-    def render_devices(self, scanning: bool = False) -> None:
-        while self.devices_box.count():
-            item = self.devices_box.takeAt(0)
-            if item is not None and item.widget() is not None:
-                item.widget().deleteLater()  # type: ignore[union-attr]
-        if scanning:
-            self.devices_status.setText("Szukam urządzeń Bluetooth (ok. 6 s)…")
-            self.devices_box.addStretch(1)
-            return
-        treadmills = [d for d in self.devices if d.treadmill]
-        others = [d for d in self.devices if not d.treadmill]
-        self.devices_status.setText(
-            f"Znalezione bieżnie: {len(treadmills)}, inne urządzenia: {len(others)}"
-            if self.devices
-            else ""
-        )
-        if not treadmills:
-            empty = card()
-            el = QVBoxLayout(empty)
-            el.setContentsMargins(14, 12, 14, 14)
-            steps: tuple[str, ...]
-            if self.link is Link.BLUETOOTH_OFF:
-                title, steps = (
-                    "Bluetooth jest wyłączony",
-                    (
-                        "1. Otwórz Start > Ustawienia > Bluetooth i urządzenia.",
-                        "2. Włącz Bluetooth.",
-                        "3. Wróć tutaj i kliknij Szukaj ponownie.",
-                    ),
-                )
-            else:
-                title, steps = (
-                    "Nie widzę bieżni",
-                    (
-                        "1. Włącz bieżnię (pilotem albo przyciskiem).",
-                        "2. Rozłącz telefon: zamknij KS Fit albo wyłącz w nim Bluetooth."
-                        " Bieżnia przyjmuje jedno połączenie naraz.",
-                        "3. Sprawdź, czy Bluetooth w Windows jest włączony.",
-                        "4. Kliknij Szukaj ponownie.",
-                    ),
-                )
-            el.addWidget(label(title, "title"))
-            for line in steps:
-                step = label(line, "muted")
-                step.setWordWrap(True)
-                el.addWidget(step)
-            self.devices_box.addWidget(empty)
-        for device in treadmills:
-            row = DeviceRow(device.name, f"Bieżnia · sygnał {device.rssi} dBm", self.t)
-            row.clicked.connect(lambda _=False, d=device: self.connect_device(d))
-            self.devices_box.addWidget(row)
-        if others:
-            self.devices_box.addWidget(label("Inne urządzenia w pobliżu", "section"))
-            for device in others[:12]:
-                row = DeviceRow(device.name, f"sygnał {device.rssi} dBm", self.t)
-                row.clicked.connect(lambda _=False, d=device: self.connect_device(d))
-                self.devices_box.addWidget(row)
-        self.devices_box.addStretch(1)
-
-    def handle_event(self, event: BleEvent) -> None:
-        if event.kind == "link" and event.link is not None:
-            self.link, self.link_text = event.link, event.text
-            self.render_link()
-        elif event.kind == "devices":
-            self.devices = list(event.devices)
-            treadmills = [d for d in self.devices if d.treadmill]
-            if self.auto_connect and len(treadmills) == 1:
-                self.auto_connect = False
-                log.info("Znaleziono jedną bieżnię - łączę automatycznie")
-                self.connect_device(treadmills[0])
-            else:
-                self.auto_connect = False
-                self.render_devices()
-                if self.pages.currentIndex() != self.WIZARD:  # konfiguratora nie przerywamy
-                    self.pages.go(self.DEVICES)
-        elif event.kind == "scan_failed":
-            if event.link is not None:
-                self.link, self.link_text = event.link, event.text
-                self.render_link()
-            self.auto_connect = False
-            self.render_devices()
-            if self.pages.currentIndex() != self.WIZARD:
-                self.pages.go(self.DEVICES)
-            self.devices_status.setText(event.text)
-        elif event.kind == "belt":
-            self.on_belt_event(event.text)
-        elif event.kind == "report":
-            self.diag_status.setText(f"Raport: {event.text}")
-            log.info("Raport diagnostyczny: %s", event.text)
-
     # --- pętla --------------------------------------------------------------
 
     def tick(self) -> None:
@@ -1729,6 +1088,11 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
 
         capturing = self.capturing()
         actions = self.hotkeys.poll()
+        for action, step in (("sim_faster", 1), ("sim_slower", -1)):
+            if action in actions:
+                actions.discard(action)
+                if self.settings["simulator"] and not capturing:
+                    self.worker.sim_remote(step)  # pilot symulowanej bieżni
         if "toggle" in actions:
             actions.discard("toggle")
             if not capturing:
@@ -1745,13 +1109,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             target, held = self.keyboard_target()
         else:
             target, held = 0.0, "idle"
-        sends = (
-            direction != "treadmill"
-            and state.enabled
-            and settled
-            and not capturing
-            and not self.settings["simulator"]
-        )
+        sends = direction != "treadmill" and state.enabled and settled and not capturing
         if sends and direction == "gamepad":
             self.send_pad(target)
         elif sends and target != self.belt_target:
@@ -1759,7 +1117,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             self.worker.set_speed(target)
         off = f"Wyłączone - {self.toggle_key.label} włącza"
         zone = {"idle": 0, "walk": 1, "run": 2}
-        offline = not state.live and not self.settings["simulator"]
+        offline = not state.live
         if offline and direction == "treadmill":
             mode, active = "offline", -1
             caption = (
@@ -1799,9 +1157,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         if self.gauge_status.text() != caption:
             self.gauge_status.setText(caption)
         self.zone_chips.set_active(active)
-        self.bubble.set_state(
-            state.enabled, mode, c.speed, state.live or self.settings["simulator"]
-        )
+        self.bubble.set_state(state.enabled, mode, c.speed, state.live)
 
         self.frame += 1
         if self.frame % 5 == 0:  # liczby 4x na sekundę wystarczą
@@ -1810,7 +1166,7 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
             self.stat_distance.set(f"{fmt_num(state.distance_km, 2)} km")
             minutes, seconds = divmod(int(state.active_s), 60)
             self.stat_time.set(f"{minutes}:{seconds:02d}")
-            if self.tracker is not None and (state.live or self.settings["simulator"]):
+            if self.tracker is not None and state.live:
                 try:
                     self.tracker.update(c.speed, state.steps, state.distance_km, state.active_s)
                 except Exception:  # historia nie może zatrzymać sterowania
@@ -1833,9 +1189,12 @@ class App(MainScreen, SettingsScreen, ProfileScreen, PeopleScreen, HistoryScreen
         self.timer.stop()
         self.toast_timer.stop()
         self.bubble.close()
-        was_enabled = self.bridge.state.enabled
+        if self.window is not None:
+            self.window.hide()  # okno znika od razu; stop taśmy może chwilę potrwać
         self.bridge.shutdown()
-        if was_enabled and self.belt_commands_possible() and self.worker.stop_belt_now():
+        # zamknięcie zawsze zatrzymuje jadącą taśmę (także gdy sterowanie już wyłączone,
+        # a bieżnia zgubiła pauzę) - worker sprawdza, czy taśma w ogóle jedzie
+        if self.worker.stop_belt_now(timeout=8.0):
             log.info("Zamykanie: zatrzymano taśmę")
         self.worker.shutdown()
         self.remember_window()

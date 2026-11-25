@@ -16,7 +16,6 @@ from PySide6.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QWidget
 
 from bieznia import HOMEPAGE, REPOSITORY, __author__, kopia
 from bieznia import pad as gamepad
-from bieznia.ble import kingsmith
 from bieznia.gui import komponenty as k
 from bieznia.gui.widgets import (
     HoldButton,
@@ -102,6 +101,7 @@ class SettingsScreen:
                 self.t.accent,
                 self.advanced_open,
                 self.settings_view,
+                [self.caps.speed_min, self.caps.speed_max, self.caps.start_delay_s],
                 str(kopia.latest_backup()),
                 int(time.time() // 60),
             ],
@@ -453,7 +453,7 @@ class SettingsScreen:
             ):
                 real = "run_speed" if key == "walk_speed_run" else key
                 st = k.Stepper(
-                    t, title, sub, float(s[real]), kingsmith.SPEED_MIN, kingsmith.SPEED_MAX
+                    t, title, sub, float(s[real]), self.caps.speed_min, self.caps.speed_max
                 )
                 st.changed.connect(lambda v, r=real: self.on_belt_speed(r, v))
                 box.addWidget(st)
@@ -488,13 +488,22 @@ class SettingsScreen:
             )
             self.pad_idle_seg.changed.connect(self.on_pad_idle)
             box.addWidget(self.pad_idle_seg)
+            delay = self.caps.start_delay_s
+            if delay >= 2 and s["pad_idle"] == "stop":
+                tip = label(
+                    f"Ta bieżnia po zatrzymaniu rusza dopiero po ok. {delay:.0f} s odliczania."
+                    " „Skok 1” trzyma taśmę w ruchu - gałka działa od razu.",
+                    "small",
+                )
+                tip.setWordWrap(True)
+                box.addWidget(tip)
             idle = self.pad_idle_text()
             for i, (at, speed) in enumerate(s["pad_steps"]):
                 title = "Gałka puszczona" if i == 0 else f"Skok {i + 1}"
                 sub = "" if i == 0 else f"od {at}% wychylenia"
                 fmt = (lambda _v, txt=idle: txt) if (i == 0 and idle) else None
                 st = k.Stepper(
-                    t, title, sub, float(speed), kingsmith.SPEED_MIN, kingsmith.SPEED_MAX
+                    t, title, sub, float(speed), self.caps.speed_min, self.caps.speed_max
                 )
                 st.set_format(fmt)
                 st.changed.connect(lambda v, n=i: self.on_pad_speed(n, v))

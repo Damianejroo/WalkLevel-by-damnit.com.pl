@@ -3,15 +3,20 @@
 Sesja trwa od pierwszego ruchu taśmy do 2 minut bez ruchu (albo zmiany osoby/profilu,
 albo zamknięcia aplikacji). Kroki liczone z licznika bieżni (z obsługą jego zerowania),
 dystans i czas ruchu - jak w kafelkach na ekranie głównym. Zapis co minutę.
+
+Pod przyszłą synchronizację (etap 2): id to UUIDv7 (sortuje się po czasie, ponowna wysyłka
+nie dubluje), czasy w sekundach UTC (`*_utc_s`), jednostki w nazwach kolumn, wersja schematu
+w PRAGMA user_version (migracje poniżej). Przy sesji: model bieżni, sterownik, firmware,
+wersja aplikacji, źródło (bieżnia / symulator) i widoczność - domyślnie prywatna.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import sqlite3
 import time
-import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -24,21 +29,95 @@ SAVE_EVERY_S = 60.0
 MIN_SESSION_S = 10.0  # krótsze nie trafiają do historii (przypadkowy ruch taśmy)
 DELETED_PERSON = "Usunięte osoby"
 
-SCHEMA = """
+SCHEMA_VERSION = 2
+VISIBILITY = ("prywatna", "znajomi", "publiczna")
+SOURCES = ("bieznia", "symulator")
+
+# Kolumny w kolejności pól Session (nazwa kolumny, definicja). Wersja 1 (0.3.x) miała
+# pierwsze dziesięć, a czasy nazywały się start / koniec.
+COLUMNS: tuple[tuple[str, str], ...] = (
+    ("id", "TEXT PRIMARY KEY"),
+    ("osoba", "TEXT NOT NULL"),
+    ("osoba_nazwa", "TEXT NOT NULL"),
+    ("profil", "TEXT NOT NULL"),
+    ("profil_nazwa", "TEXT NOT NULL"),
+    ("start_utc_s", "REAL NOT NULL"),
+    ("koniec_utc_s", "REAL NOT NULL"),
+    ("kroki", "INTEGER NOT NULL DEFAULT 0"),
+    ("dystans_km", "REAL NOT NULL DEFAULT 0"),
+    ("ruch_s", "REAL NOT NULL DEFAULT 0"),
+    ("bieznia_model", "TEXT NOT NULL DEFAULT ''"),
+    ("sterownik", "TEXT NOT NULL DEFAULT ''"),
+    ("bieznia_profil", "TEXT NOT NULL DEFAULT ''"),
+    ("firmware", "TEXT NOT NULL DEFAULT ''"),
+    ("wersja_aplikacji", "TEXT NOT NULL DEFAULT ''"),
+    ("zrodlo", "TEXT NOT NULL DEFAULT 'bieznia'"),
+    ("widocznosc", "TEXT NOT NULL DEFAULT 'prywatna'"),
+    ("strefa_min", "INTEGER NOT NULL DEFAULT 0"),
+    ("zmieniono_utc_s", "REAL NOT NULL DEFAULT 0"),
+)
+COLUMN_NAMES = tuple(name for name, _ in COLUMNS)
+_SELECT = f"SELECT {', '.join(COLUMN_NAMES)} FROM sesje"
+_PLACEHOLDERS = ",".join("?" * len(COLUMNS))
+_INSERT = f"INTO sesje ({', '.join(COLUMN_NAMES)}) VALUES ({_PLACEHOLDERS})"
+
+SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS sesje (
-    id TEXT PRIMARY KEY,
-    osoba TEXT NOT NULL,
-    osoba_nazwa TEXT NOT NULL,
-    profil TEXT NOT NULL,
-    profil_nazwa TEXT NOT NULL,
-    start REAL NOT NULL,
-    koniec REAL NOT NULL,
-    kroki INTEGER NOT NULL DEFAULT 0,
-    dystans_km REAL NOT NULL DEFAULT 0,
-    ruch_s REAL NOT NULL DEFAULT 0
+    {", ".join(f"{name} {kind}" for name, kind in COLUMNS)}
 );
-CREATE INDEX IF NOT EXISTS sesje_osoba_start ON sesje (osoba, start);
+CREATE INDEX IF NOT EXISTS sesje_osoba_start ON sesje (osoba, start_utc_s);
 """
+
+
+def uuid7() -> str:
+    """UUID wersji 7 (RFC 9562) jako 32 znaki hex: najpierw milisekundy, potem losowe bity."""
+    value = (int(time.time() * 1000) << 80) | int.from_bytes(os.urandom(10), "big")
+    value = (value & ~(0xF << 76)) | (0x7 << 76)  # wersja 7
+    value = (value & ~(0x3 << 62)) | (0x2 << 62)  # wariant RFC
+    return f"{value:032x}"
+
+
+def utc_offset_min(at: float) -> int:
+    """Strefa czasowa w chwili startu sesji (minuty od UTC) - dni liczone jak u użytkownika."""
+    local = datetime.fromtimestamp(at).astimezone()
+    offset = local.utcoffset()
+    return int(offset.total_seconds() // 60) if offset else 0
+
+
+def migrate(db: sqlite3.Connection) -> None:
+    """Schemat bazy do SCHEMA_VERSION. Baza z 0.3.x (bez wersji) zachowuje wszystkie sesje."""
+    version = int(db.execute("PRAGMA user_version").fetchone()[0])
+    exists = db.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sesje'"
+    ).fetchone()
+    if version >= SCHEMA_VERSION:
+        return
+    with db:
+        if exists and version < 2:
+            have = {row[1] for row in db.execute("PRAGMA table_info(sesje)")}
+            if "start" in have:
+                db.execute("ALTER TABLE sesje RENAME COLUMN start TO start_utc_s")
+                db.execute("ALTER TABLE sesje RENAME COLUMN koniec TO koniec_utc_s")
+                have |= {"start_utc_s", "koniec_utc_s"}
+            for name, kind in COLUMNS:
+                if name not in have:
+                    db.execute(f"ALTER TABLE sesje ADD COLUMN {name} {kind}")
+            db.execute("UPDATE sesje SET zmieniono_utc_s = koniec_utc_s WHERE zmieniono_utc_s = 0")
+            log.info("Historia: baza przeniesiona do wersji %d", SCHEMA_VERSION)
+        db.executescript(SCHEMA)
+        db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+
+
+@dataclass(frozen=True)
+class SessionSource:
+    """Skąd sesja: bieżnia (model, sterownik, firmware) albo symulator."""
+
+    model: str = ""
+    driver: str = ""
+    profile: str = ""
+    firmware: str = ""
+    app_version: str = ""
+    source: str = "bieznia"
 
 
 @dataclass
@@ -48,33 +127,35 @@ class Session:
     person_name: str
     profile: str
     profile_name: str
-    start: float  # czas uniksowy
+    start: float  # czas uniksowy (UTC)
     end: float
     steps: int = 0
     distance_km: float = 0.0
     active_s: float = 0.0
+    device_model: str = ""
+    driver: str = ""
+    device_profile: str = ""
+    firmware: str = ""
+    app_version: str = ""
+    source: str = "bieznia"
+    visibility: str = "prywatna"
+    tz_offset_min: int = 0
+    updated: float = 0.0
 
     @property
     def avg_kmh(self) -> float:
         return self.distance_km / (self.active_s / 3600) if self.active_s > 0 else 0.0
 
     def row(self) -> tuple[Any, ...]:
-        return (
-            self.id,
-            self.person,
-            self.person_name,
-            self.profile,
-            self.profile_name,
-            self.start,
-            self.end,
-            self.steps,
-            self.distance_km,
-            self.active_s,
-        )
+        return tuple(getattr(self, f.name) for f in fields(self))
 
     @classmethod
     def from_row(cls, r: tuple[Any, ...]) -> Session:
         return cls(*r)
+
+    def with_source(self, src: SessionSource) -> None:
+        self.device_model, self.driver, self.device_profile = src.model, src.driver, src.profile
+        self.firmware, self.app_version, self.source = src.firmware, src.app_version, src.source
 
 
 @dataclass(frozen=True)
@@ -92,31 +173,38 @@ class History:
     def __init__(self, path: Path = DB_FILE) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(str(path), check_same_thread=False)
-        self.db.executescript(SCHEMA)
+        migrate(self.db)
         self.db.execute("PRAGMA journal_mode=WAL")
 
     def close(self) -> None:
         self.db.close()
 
     def save(self, s: Session) -> None:
+        s.updated = time.time()
         with self.db:
-            self.db.execute("INSERT OR REPLACE INTO sesje VALUES (?,?,?,?,?,?,?,?,?,?)", s.row())
+            self.db.execute(
+                f"INSERT OR REPLACE {_INSERT}",
+                s.row(),
+            )
 
     def merge(self, sessions: list[Session]) -> int:
         """Import: dodaje sesje, których jeszcze nie ma (po id). Zwraca liczbę nowych."""
         before = self.count()
         with self.db:
             self.db.executemany(
-                "INSERT OR IGNORE INTO sesje VALUES (?,?,?,?,?,?,?,?,?,?)",
+                f"INSERT OR IGNORE {_INSERT}",
                 [s.row() for s in sessions],
             )
         return self.count() - before
+
+    def schema_version(self) -> int:
+        return int(self.db.execute("PRAGMA user_version").fetchone()[0])
 
     def version(self) -> tuple[int, int, float]:
         """Krótki odcisk zawartości (liczba sesji, kroki, ostatni koniec) - czy widok historii
         trzeba zbudować od nowa."""
         row = self.db.execute(
-            "SELECT COUNT(*), COALESCE(SUM(kroki), 0), COALESCE(MAX(koniec), 0) FROM sesje"
+            "SELECT COUNT(*), COALESCE(SUM(kroki), 0), COALESCE(MAX(koniec_utc_s), 0) FROM sesje"
         ).fetchone()
         return int(row[0]), int(row[1]), float(row[2])
 
@@ -130,12 +218,12 @@ class History:
         profiles: set[str] | None = None,
         limit: int | None = None,
     ) -> list[Session]:
-        sql = "SELECT * FROM sesje WHERE start >= ?"
+        sql = f"{_SELECT} WHERE start_utc_s >= ?"
         args: list[Any] = [since]
         if person is not None:
             sql += " AND osoba = ?"
             args.append(person)
-        sql += " ORDER BY start DESC"
+        sql += " ORDER BY start_utc_s DESC"
         if limit:
             sql += f" LIMIT {int(limit)}"
         out = [Session.from_row(r) for r in self.db.execute(sql, args)]
@@ -214,6 +302,7 @@ class SessionTracker:
         self._last_move = 0.0
         self._saved_at = 0.0
         self.owner: tuple[str, str, str, str] = ("", "", "", "")  # osoba, nazwa, profil, nazwa
+        self.origin = SessionSource()
 
     def set_owner(self, person: str, person_name: str, profile: str, profile_name: str) -> None:
         """Zmiana osoby albo profilu kończy sesję poprzedniego."""
@@ -221,6 +310,18 @@ class SessionTracker:
         if new != self.owner:
             self.finish()
             self.owner = new
+
+    def set_source(self, origin: SessionSource) -> None:
+        """Inna bieżnia (albo symulator) to nowa sesja - wyniki nie mieszają się między nimi."""
+        if (origin.model, origin.driver, origin.source) != (
+            self.origin.model,
+            self.origin.driver,
+            self.origin.source,
+        ):
+            self.finish()
+        self.origin = origin
+        if self.current is not None and not self.current.firmware and origin.firmware:
+            self.current.firmware = origin.firmware
 
     def update(self, speed: float, steps: int | None, distance_km: float, active_s: float) -> None:
         """Wywoływane z pętli okna. distance_km i active_s to liczniki narastające aplikacji."""
@@ -238,7 +339,9 @@ class SessionTracker:
             self._last_move = now
             if self.current is None:
                 person, pname, profile, prname = self.owner
-                self.current = Session(uuid.uuid4().hex, person, pname, profile, prname, now, now)
+                self.current = Session(uuid7(), person, pname, profile, prname, now, now)
+                self.current.with_source(self.origin)
+                self.current.tz_offset_min = utc_offset_min(now)
         if self.current is None:
             return
         self.current.steps += max(0, d_steps)

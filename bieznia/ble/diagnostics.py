@@ -1,7 +1,8 @@
 """Raport diagnostyczny Bluetooth - jeden plik tekstowy do wysłania, gdy coś nie działa.
 
 Zawiera: listę urządzeń z okolicy, usługi i charakterystyki bieżni, surowe
-powiadomienia (hex) i próbę rozmowy protokołem KingSmith. Bez danych osobowych
+powiadomienia (hex), odczyt charakterystyk (zakresy prędkości, firmware) i próbę
+rozmowy protokołem KingSmith. Bez danych osobowych
 poza nazwami i adresami urządzeń Bluetooth w pobliżu.
 """
 
@@ -17,7 +18,8 @@ from pathlib import Path
 from typing import Any
 
 from bieznia import __version__
-from bieznia.ble.drivers import KingSmithDriver, find_kingsmith_channels, looks_like_treadmill
+from bieznia.sterowniki import KingSmithDriver, looks_like_treadmill
+from bieznia.sterowniki.kingsmith.sterownik import find_channels
 
 LISTEN_S = 12.0
 
@@ -76,12 +78,26 @@ async def run_diagnostics(path: Path, address: str | None) -> Path:
                 for char in service.characteristics:
                     out(f"    char {char.uuid}  [{', '.join(char.properties)}]  {char.description}")
             out()
+            out("== Odczyt charakterystyk (zakresy, firmware - do profilu modelu) ==")
+            for service in client.services:
+                for char in service.characteristics:
+                    if "read" not in char.properties:
+                        continue
+                    try:
+                        value = bytes(await client.read_gatt_char(char))
+                    except Exception as exc:
+                        out(f"    {char.uuid[:8]}  nie da się odczytać: {type(exc).__name__}")
+                        continue
+                    text = value.decode("ascii", "replace") if value.isascii() else ""
+                    shown = f"  '{text.strip()}'" if text.strip().isprintable() and text else ""
+                    out(f"    {char.uuid[:8]}  {value.hex(' ')}{shown}")
+            out()
             out(f"== Powiadomienia przez {LISTEN_S:.0f} s ==")
 
             def raw(char: Any, data: bytearray) -> None:
                 out(f"{stamp()} << {char.uuid[:8]}  {bytes(data).hex(' ')}")
 
-            channels = find_kingsmith_channels(client.services)
+            channels = find_channels(client.services)
             channel_notify = {id(ch.notify) for ch in channels}
             for service in client.services:
                 for char in service.characteristics:
