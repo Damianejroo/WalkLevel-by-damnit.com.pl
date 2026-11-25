@@ -122,6 +122,8 @@ def _load_dir(directory: Path, source: str) -> dict[str, ModelProfile]:
     if not directory.is_dir():
         return found
     for path in sorted(directory.glob("*.json")):
+        if path.name == "indeks.json":  # lista do pobierania, nie profil
+            continue
         try:
             profile = parse_profile(json.loads(path.read_text(encoding="utf-8")), source)
         except (OSError, ValueError) as exc:

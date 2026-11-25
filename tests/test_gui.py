@@ -1640,7 +1640,10 @@ def test_focus_ring_follows_keyboard_focus_without_global_filter(window: gui.App
     window.open_settings()
     btn = window.toggle_btn
     ring = window.ring
-    ring._focus_changed(None, btn)  # fokus z klawiatury (bez wciśniętej myszy)
+    ring._focus_changed(None, btn)  # fokus wrócił po kliknięciu / zmianie strony - bez obwódki
+    assert not ring.isVisible()
+    window.window.tab_at = time.monotonic()  # Tab - fokus z klawiatury
+    ring._focus_changed(None, btn)
     assert ring.isVisible() and ring.geometry().contains(
         btn.mapTo(window.window, btn.rect().center())
     )
@@ -1655,6 +1658,7 @@ def test_focus_ring_follows_keyboard_focus_without_global_filter(window: gui.App
     QtWidgets.QApplication.sendEvent(btn, press)  # klik - obwódka znika
     assert not ring.isVisible()
     label_only = QtWidgets.QLabel("x", current(window))
+    window.window.tab_at = time.monotonic()
     ring._focus_changed(btn, label_only)  # element bez obsługi Tab - bez obwódki
     assert not ring.isVisible()
 
@@ -1698,3 +1702,42 @@ def test_profile_switch_in_settings_is_animated(window: gui.App) -> None:
         assert not cover.isVisible() and store.profile.name == "Gra"
     finally:
         gui.Motion.enabled = False
+
+
+def test_tab_key_shows_focus_ring_but_returning_focus_does_not(window: gui.App) -> None:
+    """Obwódka tylko po Tab - po kliknięciu i powrocie na stronę nie zostaje na przycisku."""
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    window.open_settings()
+    btn = window.toggle_btn
+    window.window.tab_at = float("-inf")
+    btn.setFocus(Qt.FocusReason.OtherFocusReason)  # jak powrót fokusu po zmianie strony
+    assert not window.ring.isVisible()
+    QTest.keyClick(btn, Qt.Key.Key_Tab)
+    focused = QtWidgets.QApplication.focusWidget()
+    if focused is not None and focused is not btn and focused.window() is window.window:
+        assert window.window.tab_at > 0  # Tab przeszedł przez okno
+
+
+def test_models_page_lists_profiles_and_shows_download_result(
+    window: gui.App, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from bieznia.sterowniki import pobieranie
+
+    window.settings["device_name"] = "URTM054"
+    window.open_settings()
+    window.open_models()
+    assert window.pages.currentIndex() == window.MODELS
+    shown = texts(current(window))
+    assert "Urevo SpaceWalk 5L · Twoja bieżnia" in shown
+    assert "KingSmith WalkingPad X21" in shown
+    monkeypatch.setattr(
+        pobieranie,
+        "download_profiles",
+        lambda: pobieranie.DownloadResult(added=["Nowa Bieżnia 9"]),
+    )
+    window.fetch_models_task()  # zwykle w wątku - tu od razu
+    window.tick()
+    assert "Nowe modele: Nowa Bieżnia 9." in window.models_status.text()
+    window.go_back(window.SETTINGS)

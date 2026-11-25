@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +76,13 @@ class Window(QWidget):
         if os.environ.get(NO_FOCUS_ENV) == "1":  # testy i zrzuty: okno nie zabiera fokusu
             self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
             self.setWindowFlag(Qt.WindowType.WindowDoesNotAcceptFocus)
+        self.tab_at = float("-inf")  # kiedy ostatnio fokus przeszedł klawiszem Tab
+
+    def focusNextPrevChild(self, next: bool) -> bool:
+        """Tab i Shift+Tab z każdej kontrolki dochodzą tutaj - stąd obwódka fokusu wie, że
+        fokus zmieniła klawiatura, a nie klik ani powrót na stronę."""
+        self.tab_at = time.monotonic()
+        return super().focusNextPrevChild(next)
 
     def retheme(self, t: Theme) -> None:
         self.t = t

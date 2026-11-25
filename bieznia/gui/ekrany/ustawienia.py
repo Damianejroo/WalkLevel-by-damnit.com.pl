@@ -257,6 +257,10 @@ class SettingsScreen:
             "Wyłącz, jeśli wolisz startować tylko pilotem",
             self.belt_switch,
         )
+        models = button("Obsługiwane bieżnie…")
+        models.setToolTip("Lista modeli, pobieranie nowych i dodawanie profilu z pliku")
+        models.clicked.connect(self.open_models)
+        bl.addWidget(models)
         self.forget_btn = HoldButton("Zapomnij bieżnię", t)
         self.forget_btn.confirmed.connect(self.forget_device)
         bl.addWidget(self.forget_btn)

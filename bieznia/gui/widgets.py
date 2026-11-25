@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import math
+import time
 from collections.abc import Iterable
 from dataclasses import replace
 
@@ -87,9 +88,12 @@ class FocusRing(QWidget):
 
     Bez globalnego filtra zdarzeń (każde zdarzenie aplikacji przechodziłoby przez Pythona i
     spowalniało animacje): sygnał zmiany fokusu z Qt, a filtr tylko na zaznaczonej kontrolce.
-    Fokus z klawiatury = zmiana bez wciśniętego przycisku myszy na kontrolce, którą da się
-    obsłużyć klawiszem Tab.
+    Fokus z klawiatury = zmiana tuż po klawiszu Tab (okno to zapisuje) na kontrolce, którą
+    da się obsłużyć klawiszem Tab. Powrót fokusu po kliknięciu i zmianie strony to nie
+    klawiatura - wtedy obwódki nie ma (zostawała na przycisku po kliknięciu).
     """
+
+    TAB_WINDOW_S = 0.5
 
     def __init__(self, window: QWidget, t: Theme) -> None:
         super().__init__(window)
@@ -106,7 +110,11 @@ class FocusRing(QWidget):
             if self.target is not None:
                 self.target.removeEventFilter(self)
             self.target = None
-            keyboard = QApplication.mouseButtons() == Qt.MouseButton.NoButton
+            tab_at = getattr(self.window(), "tab_at", None)
+            if tab_at is None:  # okno bez zapisu Tab - jak dawniej: bez wciśniętej myszy
+                keyboard = QApplication.mouseButtons() == Qt.MouseButton.NoButton
+            else:
+                keyboard = time.monotonic() - tab_at <= self.TAB_WINDOW_S
             tab = new is not None and bool(new.focusPolicy() & Qt.FocusPolicy.TabFocus)
             if not (keyboard and tab and new is not None and new.window() is self.window()):
                 self.hide()

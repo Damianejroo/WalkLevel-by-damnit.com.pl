@@ -81,6 +81,9 @@ def looks_like_treadmill(name: str | None, service_uuids: Iterable[str] = ()) ->
 
 
 __all__ = [
+    "FTMS_CAPS",
+    "KINGSMITH_CAPS",
+    "SIMULATOR_CAPS",
     "Capabilities",
     "DeviceInfo",
     "Driver",

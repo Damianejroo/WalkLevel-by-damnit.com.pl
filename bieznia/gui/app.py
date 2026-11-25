@@ -54,6 +54,7 @@ from bieznia.gui.ekrany.bieznia import TreadmillScreen
 from bieznia.gui.ekrany.glowny import STATUS_ACTIONS, MainScreen
 from bieznia.gui.ekrany.historia import HistoryScreen
 from bieznia.gui.ekrany.kopia import CopyScreen
+from bieznia.gui.ekrany.modele import ModelsScreen
 from bieznia.gui.ekrany.osoba import PeopleScreen, Wizard
 from bieznia.gui.ekrany.profil import ProfileScreen
 from bieznia.gui.ekrany.sterowanie import (
@@ -191,8 +192,11 @@ class App(
     CopyScreen,
     TreadmillScreen,
     ControlScreen,
+    ModelsScreen,
 ):
-    MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT = range(10)
+    MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT, MODELS = range(
+        11
+    )
 
     # atrybuty ustawiane przez ekrany (mixiny)
     toggle_key: Key
@@ -447,7 +451,7 @@ class App(
         self.pages.addWidget(self.build_settings())
         self.pages.addWidget(self.build_log())
         self.pages.addWidget(self.build_report())
-        for _ in range(self.IMPORT - self.REPORT):  # profil, konfigurator, historia, kopia
+        for _ in range(self.MODELS - self.REPORT):  # profil, konfigurator, historia, kopia, modele
             placeholder = QWidget()
             placeholder.setObjectName("page")
             self.pages.addWidget(placeholder)
@@ -1007,7 +1011,9 @@ class App(
             self.about_status.setText(text)
 
     def handle_task(self, kind: str, data: Any) -> None:
-        if kind == "update_status":
+        if kind == "models":
+            self.on_models_result(data)
+        elif kind == "update_status":
             self.update_label.setText(data)
             self.set_about_status(data)
         elif kind == "update_available":
