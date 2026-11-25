@@ -86,8 +86,9 @@ detailed_logs = true
 
 [zgloszenia]
 # Adres HTTPS, na który przycisk Wyślij zgłoszenie wysyła paczkę z logami (POST, multipart).
+# Serwer przekazuje zgłoszenie mailem do autora i go nie przechowuje.
 # Pusty = paczka trafia do e-maila na adres kontaktowy autora.
-adres = ""
+adres = "https://bieznia.damnit-live.pl/api/bieznia/zgloszenie"
 
 [konto]
 # Konto online jest opcjonalne: bez logowania aplikacja działa w całości lokalnie i nic nie

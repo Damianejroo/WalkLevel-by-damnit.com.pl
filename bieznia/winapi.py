@@ -143,3 +143,42 @@ def is_topmost(hwnd: int) -> bool:
     if not IS_WINDOWS:
         return False
     return bool(_user32.GetWindowLongPtrW(wintypes.HWND(hwnd), GWL_EXSTYLE) & WS_EX_TOPMOST)
+
+
+WS_EX_TRANSPARENT = 0x00000020
+WS_EX_TOOLWINDOW = 0x00000080
+WS_EX_LAYERED = 0x00080000
+WS_EX_NOACTIVATE = 0x08000000
+
+if IS_WINDOWS:
+    _user32.SetWindowLongPtrW.argtypes = (wintypes.HWND, ctypes.c_int, ctypes.c_ssize_t)
+    _user32.SetWindowLongPtrW.restype = ctypes.c_ssize_t
+    _user32.GetForegroundWindow.restype = wintypes.HWND
+    _user32.GetWindowRect.argtypes = (wintypes.HWND, ctypes.POINTER(wintypes.RECT))
+    _user32.GetWindowRect.restype = wintypes.BOOL
+
+
+def make_overlay(hwnd: int) -> bool:
+    """Okno-nakładka nad grą: nie zabiera fokusu, kliknięcia przechodzą do okna pod spodem,
+    nie ma go na pasku zadań. Zwraca True, gdy Windows przyjął styl."""
+    if not IS_WINDOWS:
+        return False
+    h = wintypes.HWND(hwnd)
+    style = _user32.GetWindowLongPtrW(h, GWL_EXSTYLE)
+    style |= WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW
+    _user32.SetWindowLongPtrW(h, GWL_EXSTYLE, style)
+    return set_topmost(hwnd, True)
+
+
+def foreground_center() -> tuple[int, int] | None:
+    """Środek okna na pierwszym planie (zwykle gra) w pikselach ekranu - żeby popup pokazał się
+    na tym samym monitorze. None poza Windows albo gdy nie ma takiego okna."""
+    if not IS_WINDOWS:
+        return None
+    hwnd = _user32.GetForegroundWindow()
+    if not hwnd:
+        return None
+    rect = wintypes.RECT()
+    if not _user32.GetWindowRect(hwnd, ctypes.byref(rect)):
+        return None
+    return (rect.left + rect.right) // 2, (rect.top + rect.bottom) // 2

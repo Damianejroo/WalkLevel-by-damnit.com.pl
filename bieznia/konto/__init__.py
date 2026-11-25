@@ -198,15 +198,26 @@ def vault_target(person: str) -> str:
     return f"{TARGET}/{person}" if person else TARGET
 
 
-def session_payload(s: Session, visibility: str, game: bool = False) -> dict[str, Any]:
-    """Sesja do wysłania. game=True: z nazwą gry (profilu) i jej stałym identyfikatorem."""
+def session_payload(
+    s: Session, visibility: str, game: bool = False, details: bool | None = None
+) -> dict[str, Any]:
+    """Sesja do wysłania.
+
+    details=True (zaakceptowana wersja regulaminu z grami i poziomami): tryb (gra/trening)
+    i stały identyfikator gry - zawsze, bo liczą się z nich osiągnięcia za gry.
+    game=True: do tego czytelna nazwa gry (przełącznik „Pokazuj tę grę na koncie online”)."""
+    if details is None:
+        details = game
     row = dict(zip(COLUMN_NAMES, s.row(), strict=True))
     out = {k: row[k] for k in UPLOAD_FIELDS}
     out["uuid"] = canonical_uuid(s.id)
     out["widocznosc"] = visibility
-    if game and re.fullmatch(r"[0-9a-f]{10}", s.profile or "") and s.profile_name.strip():
-        out["gra"] = " ".join(s.profile_name.split())[:GAME_NAME_MAX]
-        out["gra_id"] = s.profile
+    if details:
+        out["tryb"] = s.mode if s.mode in ("gra", "trening") else "gra"
+        if re.fullmatch(r"[0-9a-f]{10}", s.profile or ""):
+            out["gra_id"] = s.profile
+            if game and s.profile_name.strip():
+                out["gra"] = " ".join(s.profile_name.split())[:GAME_NAME_MAX]
     return out
 
 
@@ -356,6 +367,7 @@ class Account:
                     s,
                     "prywatna" if s.id in hidden else state.visibility,
                     game=games and shared_games is not None and shared_games(s.profile),
+                    details=games,
                 )
                 for s in pending
             ]

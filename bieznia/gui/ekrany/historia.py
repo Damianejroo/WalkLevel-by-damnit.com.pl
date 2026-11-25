@@ -43,16 +43,38 @@ def time_text(seconds: float) -> str:
     return f"{m // 60} h {m % 60:02d} min" if m >= 60 else f"{m} min"
 
 
+def axis_step(peak: float) -> tuple[int, int]:
+    """Okrągła podziałka osi (1, 2, 5 x 10^n), najwyżej 5 przedziałów -> (krok, przedziały)."""
+    peak = max(peak, 100)
+    base = 1
+    while True:
+        for m in (1, 2, 5):
+            step = m * base
+            lines = -(-int(peak) // step)
+            if lines <= 5:
+                return step, max(lines, 2)
+        base *= 10
+
+
+def thousands(v: float) -> str:
+    """5000 -> "5", 1500 -> "1,5" (bez zbędnego ",0")."""
+    return f"{v / 1000:.0f}" if v % 1000 == 0 else fmt_num(v / 1000)
+
+
 class DayBars(QWidget):
     """Kroki dziennie: słupki ułożone z kolorów profili (albo osób)."""
 
     def __init__(
-        self, t: Theme, days: list[tuple[str, dict[str, int]]], colors: dict[str, str]
+        self,
+        t: Theme,
+        days: list[tuple[str, dict[str, int]]],
+        colors: dict[str, str],
+        hourly: bool = False,
     ) -> None:
         super().__init__()
-        self.t, self.days, self.colors = t, days, colors
+        self.t, self.days, self.colors, self.hourly = t, days, colors, hourly
         self.setFixedHeight(190)
-        self.setAccessibleName("Kroki dziennie")
+        self.setAccessibleName("Kroki w ciągu dnia" if hourly else "Kroki dziennie")
 
     def paintEvent(self, _e: Any) -> None:
         t = self.t
@@ -62,18 +84,18 @@ class DayBars(QWidget):
         left, bottom, top = 46, 22, 8
         ph = h - bottom - top
         peak = max([sum(v.values()) for _d, v in self.days] + [1])
-        unit = 1000 if peak > 2000 else 500 if peak > 800 else 100
-        top_val = max(unit, ((peak + unit - 1) // unit) * unit)
+        step, lines = axis_step(peak)
+        top_val = step * lines
         small = QFont(self.font())
         small.setPixelSize(11)
         p.setFont(small)
-        for i in range(5):
-            v = top_val * i / 4
+        for i in range(lines + 1):
+            v = step * i
             y = top + ph * (1 - v / top_val)
             p.setPen(QColor(t.line))
             p.drawLine(QPointF(left, y), QPointF(w, y))
             p.setPen(QColor(t.text_2))
-            text = "0" if v == 0 else (f"{fmt_num(v / 1000)} tys." if v >= 1000 else f"{v:.0f}")
+            text = "0" if v == 0 else (f"{thousands(v)} tys." if v >= 1000 else f"{v:.0f}")
             p.drawText(
                 QRectF(0, y - 8, left - 8, 16),
                 Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
@@ -82,7 +104,7 @@ class DayBars(QWidget):
         n = len(self.days)
         slot = (w - left) / max(1, n)
         bar_w = min(30.0, slot * 0.6)
-        today = date.today().isoformat()
+        today = f"{datetime.now().hour:02d}" if self.hourly else date.today().isoformat()
         for i, (day, parts) in enumerate(self.days):
             x = left + slot * i + (slot - bar_w) / 2
             y = top + ph
@@ -92,6 +114,16 @@ class DayBars(QWidget):
                 p.setBrush(QColor(self.colors.get(name, t.accent)))
                 p.drawRoundedRect(QRectF(x, y - hh, bar_w, max(1.0, hh - 1.5)), 3, 3)
                 y -= hh
+            if self.hourly:
+                now_hour = int(today)
+                if day == today or (i % 3 == 0 and abs(i - now_hour) > 1):
+                    p.setPen(QColor(t.text if day == today else t.text_2))
+                    p.drawText(
+                        QRectF(left + slot * i - 12, h - bottom + 4, slot + 24, 16),
+                        Qt.AlignmentFlag.AlignCenter,
+                        "teraz" if day == today else f"{int(day)}:00",
+                    )
+                continue
             if n <= 14 or i % max(1, n // 7) == 0:
                 d = datetime.fromisoformat(day)
                 txt = (
@@ -220,10 +252,11 @@ class HistoryScreen:
         chart_days = days if days > 1 else 7
         if self.history_range == "all":
             chart_days = 30
-        c, cl = section("Kroki dziennie")
-        series = history.by_day(chart_days, person, key)
+        hourly = self.history_range == "day"
+        c, cl = section("Kroki w ciągu dnia" if hourly else "Kroki dziennie")
+        series = history.by_hour(person, key) if hourly else history.by_day(chart_days, person, key)
         if any(parts for _d, parts in series):
-            cl.addWidget(DayBars(t, series, colors))
+            cl.addWidget(DayBars(t, series, colors, hourly=hourly))
             legend = QHBoxLayout()
             legend.setSpacing(10)
             names = sorted({n for _d, parts in series for n in parts})

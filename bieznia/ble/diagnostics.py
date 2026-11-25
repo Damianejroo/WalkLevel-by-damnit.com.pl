@@ -36,7 +36,7 @@ async def run_diagnostics(path: Path, address: str | None) -> Path:
     def stamp() -> str:
         return f"{time.monotonic() - t0:7.2f}s"
 
-    out(f"Raport Bieżnia {__version__} - {datetime.now():%Y-%m-%d %H:%M:%S}")
+    out(f"Raport WalkLevel {__version__} - {datetime.now():%Y-%m-%d %H:%M:%S}")
     out(
         f"Windows {platform.version()} | Python {sys.version.split()[0]}"
         f" | bleak {metadata.version('bleak')}"

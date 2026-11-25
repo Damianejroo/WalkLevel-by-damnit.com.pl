@@ -16,7 +16,14 @@ from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
 from bieznia import konto
 from bieznia.gui import theme as th
@@ -613,6 +620,13 @@ class AccountScreen:
         return key not in self.online
 
     def online_friends(self: App, lay: QVBoxLayout) -> None:
+        status = self.levels_status
+        if status is not None:
+            mine = self.level_panel(status.level, status.xp, len(status.earned))
+            if self.account.state.user_id:  # klik: mój profil tak, jak widzą go inni
+                mine.make_clickable("Mój profil - jak widzą mnie inni")
+                mine.clicked.connect(self.open_my_profile)
+            lay.addWidget(mine)
         stats = self.online.get("stats") or {}
         c, cl = section("Moje wyniki online · ten tydzień")
         if self.loading("stats"):
@@ -668,7 +682,7 @@ class AccountScreen:
         elif not friends:
             cl.addWidget(
                 label(
-                    "Jeszcze nikogo. Zaproś znajomego po pseudonimie albo zaproś na Bieżnię"
+                    "Jeszcze nikogo. Zaproś znajomego po pseudonimie albo zaproś do WalkLevel"
                     " kogoś, kto nie ma konta.",
                     "small",
                 )
@@ -713,7 +727,7 @@ class AccountScreen:
                 cl.addLayout(line)
         lay.addWidget(c)
 
-        c, cl = section("Zaproś na Bieżnię")
+        c, cl = section("Zaproś do WalkLevel")
         reg = self.online.get("reg_code") or {}
         if reg.get("kod"):
             new = label(f"Kod na nowe konto: {reg['kod']}")
@@ -754,16 +768,13 @@ class AccountScreen:
         texts.setSpacing(0)
         live = f.get("na_zywo") or None
         fid = str(f.get("id", ""))
-        name = button(str(f.get("name", "?")))
-        name.setObjectName("link")
-        name.setFlat(True)
-        name.setStyleSheet(
-            f"text-align: left; padding: 0; border: 0; font-weight: 600;"
-            f" color: {self.t.accent if live else self.t.text};"
-        )
-        name.setToolTip("Pokaż profil")
-        name.clicked.connect(lambda: self.open_person(fid))
+        name = self.person_link(str(f.get("name", "?")), fid, accent=bool(live))
+        level = self.row_level(f)
+        if level is not None:
+            rl.addWidget(self.level_chip(level))
         texts.addWidget(name)
+        if level is not None:
+            texts.addWidget(self.rank_caption(level))
         week = f.get("tydzien") or {}
         if live:
             sub = f"idzie teraz {fmt_num(float(live.get('kmh', 0)))} km/h"
@@ -786,6 +797,27 @@ class AccountScreen:
         if user_id:
             self.account_job("person", lambda: self.account.client.profile(user_id))
 
+    def open_my_profile(self: App) -> None:
+        """Własny profil w tym samym widoku co cudzy („jak widzą mnie inni”)."""
+        self.open_person(self.account.state.user_id)
+
+    def person_link(self: App, name: str, user_id: str, accent: bool = False) -> QWidget:
+        """Pseudonim jako link do profilu; bez identyfikatora - zwykły podpis."""
+        if not user_id:
+            who = label(name)
+            who.setObjectName("accent" if accent else "strong")
+            return who
+        link = button(name, "link")
+        link.setProperty("me", accent)
+        # tylko szerokość i wysokość tekstu - podświetlenie nie rozlewa się na cały wiersz
+        link.setMinimumHeight(0)
+        link.setMaximumHeight(16777215)
+        link.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+        mine = user_id == self.account.state.user_id
+        link.setToolTip("Mój profil - tak widzą mnie inni" if mine else "Pokaż profil")
+        link.clicked.connect(lambda: self.open_person(user_id))
+        return link
+
     def people_page(self: App, page_no: int) -> None:
         self.online["people_page"] = max(1, page_no)
         self.online.pop("people", None)
@@ -795,16 +827,43 @@ class AccountScreen:
     def build_online_person_page(self: App) -> QWidget:
         p = self.online.get("person") or {}
         page, lay = self.sticky_page(str(p.get("name", "Profil")), back=self.ONLINE)
+        mine = bool(p.get("id")) and p.get("id") == self.account.state.user_id
+        if mine:
+            lay.addWidget(
+                label(
+                    "To Twój profil w takim widoku, jaki dostają inni. Kto go widzi, ustawiasz"
+                    " w zakładce Ja (widoczność profilu i sesji).",
+                    "small",
+                )
+            )
+        level = self.row_level(p, mine=mine)
+        if level is not None:
+            xp = p.get("xp")
+            got = p.get("osiagniecia")
+            status = self.levels_status
+            if mine and status is not None and not isinstance(xp, (int, float)):
+                xp, got = status.xp, len(status.earned)
+            lay.addWidget(
+                self.level_panel(
+                    level,
+                    int(xp) if isinstance(xp, (int, float)) else None,
+                    int(got) if isinstance(got, (int, float)) else None,
+                )
+            )
+        self.person_achievements(lay, p, mine)
         c, cl = section("Profil")
         since = p.get("od_utc_s")
         if since:
             import datetime as dt
 
             day = dt.datetime.fromtimestamp(float(since)).strftime("%d.%m.%Y")
-            cl.addWidget(label(f"Na Bieżni od {day}", "small"))
+            cl.addWidget(label(f"W WalkLevel od {day}", "small"))
         if p.get("bieznia_model"):
             cl.addWidget(label(f"Bieżnia: {p['bieznia_model']}", "small"))
-        cl.addWidget(label("Znajomy" if p.get("znajomy") else "Nie jesteście znajomymi", "small"))
+        if not mine:
+            cl.addWidget(
+                label("Znajomy" if p.get("znajomy") else "Nie jesteście znajomymi", "small")
+            )
         lay.addWidget(c)
         for key, title in (("tydzien", "Ostatnie 7 dni"), ("razem", "Razem")):
             totals = p.get(key) or {}
@@ -829,7 +888,12 @@ class AccountScreen:
             cl.addWidget(label("Brak danych o grach.", "small"))
         lay.addWidget(c)
         lay.addWidget(
-            label("Widać tylko sesje, które ta osoba pokazuje Tobie (bez ukrytych).", "small")
+            label(
+                "Sesje ukryte („Tylko ja”) nie wchodzą do wyników widocznych dla innych."
+                if mine
+                else "Widać tylko sesje, które ta osoba pokazuje Tobie (bez ukrytych).",
+                "small",
+            )
         )
         lay.addStretch(1)
         return page
@@ -858,7 +922,16 @@ class AccountScreen:
 
     def online_ranking(self: App, lay: QVBoxLayout) -> None:
         scope = self.online.get("scope", "tydzien")
-        seg = Segmented([("tydzien", "Tydzień"), ("miesiac", "Miesiąc")], scope, "Zakres rankingu")
+        seg = Segmented(
+            [
+                ("tydzien", "Tydzień"),
+                ("miesiac", "Miesiąc"),
+                ("razem", "Od początku"),
+                ("poziom", "Poziomy"),
+            ],
+            scope,
+            "Zakres rankingu",
+        )
 
         def change(value: str) -> None:
             self.online["scope"] = value
@@ -868,32 +941,53 @@ class AccountScreen:
 
         seg.changed.connect(change)
         lay.addWidget(seg)
-        c, cl = section("Ranking kroków")
+        levels = scope == "poziom"
+        titles = {"poziom": "Ranking poziomów", "razem": "Ranking kroków · od początku"}
+        c, cl = section(titles.get(scope, "Ranking kroków"))
         rows = self.online.get("ranking")
         if rows is None:
             cl.addWidget(label("Ładuję…", "small"))
         elif not rows:
             cl.addWidget(label("Na razie nikt nie ma wyników w tym okresie.", "small"))
+        # serwer nie odsyła id w rankingu - znajomych rozpoznajemy po pseudonimie (unikalny)
+        known = {
+            str(f.get("name", "")): str(f.get("id", ""))
+            for f in self.online.get("friends") or []
+            if isinstance(f, dict) and f.get("id")
+        }
         for r in rows or []:
             line = QHBoxLayout()
+            line.setSpacing(10)
             place = label(f"{int(r.get('miejsce', 0))}.")
             place.setFixedWidth(34)
-            who = label(str(r.get("name", "?")))
-            who.setObjectName("accent" if r.get("ja") else "strong")
             line.addWidget(place)
-            line.addWidget(who, 1)
-            line.addWidget(
-                label(
+            level = self.row_level(r, mine=bool(r.get("ja")))
+            names = QVBoxLayout()
+            names.setSpacing(0)
+            uid = self.account.state.user_id if r.get("ja") else str(r.get("id") or "")
+            uid = uid or known.get(str(r.get("name", "")), "")
+            names.addWidget(self.person_link(str(r.get("name", "?")), uid, bool(r.get("ja"))))
+            if level is not None:
+                line.addWidget(self.level_chip(level))
+                names.addWidget(self.rank_caption(level))
+            line.addLayout(names, 1)
+            if levels:
+                stats = f"{fmt_num(float(r.get('dystans_km', 0.0)), 0)} km łącznie"
+            else:
+                stats = (
                     f"{steps_text(int(r.get('kroki', 0)))} kroków · "
-                    f"{fmt_num(float(r.get('dystans_km', 0.0)), 1)} km",
-                    "small",
+                    f"{fmt_num(float(r.get('dystans_km', 0.0)), 1)} km"
                 )
-            )
+            line.addWidget(label(stats, "small"))
             cl.addLayout(line)
         lay.addWidget(c)
         lay.addWidget(
             label(
-                "W rankingu są tylko sesje z bieżni (bez symulatora) widoczne dla wszystkich"
+                "Ranking poziomów liczy wszystko od początku konta"
+                " (tylko sesje wysłane na bieżąco)."
+                " Tydzień i miesiąc to rankingi „na teraz”."
+                if levels
+                else "W rankingu są tylko sesje z bieżni (bez symulatora) widoczne dla wszystkich"
                 " albo dla znajomych. Ukryte sesje i profil ukryty nie wchodzą do rankingu.",
                 "small",
             )
@@ -942,9 +1036,13 @@ class AccountScreen:
                 line = QHBoxLayout()
                 texts = QVBoxLayout()
                 texts.setSpacing(0)
-                who = label(str(p.get("name", "?")))
-                who.setObjectName("strong")
+                who = self.person_link(str(p.get("name", "?")), str(p.get("id") or ""))
+                level = self.row_level(p, mine=p.get("id") == self.account.state.user_id)
+                if level is not None:
+                    line.addWidget(self.level_chip(level))
                 texts.addWidget(who)
+                if level is not None:
+                    texts.addWidget(self.rank_caption(level))
                 week = p.get("tydzien") or {}
                 sub = f"tydzień: {steps_text(int(week.get('kroki', 0)))} kroków"
                 if p.get("miejsce"):
@@ -990,9 +1088,16 @@ class AccountScreen:
         self.setting_row(
             cl, "Na żywo dla znajomych", "Znajomi widzą, że idziesz, i Twoje tempo", live
         )
+        buttons = QHBoxLayout()
         send = button("Wyślij teraz")
         send.clicked.connect(self.account_upload_now)
-        cl.addWidget(send)
+        buttons.addWidget(send)
+        me = button("Mój profil - jak widzą mnie inni")
+        me.clicked.connect(self.open_my_profile)
+        me.setEnabled(bool(state.user_id))
+        buttons.addWidget(me)
+        buttons.addStretch(1)
+        cl.addLayout(buttons)
         lay.addWidget(c)
 
         c, cl = section("Profil")

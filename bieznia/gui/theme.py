@@ -27,6 +27,7 @@ EASE_OUT = (0.4, 0.0, 1.0, 1.0)  # wyjście
 EASE_SMOOTH = (0.4, 0.0, 0.2, 1.0)  # zmiana na miejscu: łagodny start i koniec
 T_MORPH = 280  # zmiana wysokości karty, przenikanie
 T_SLIDE = 260  # podświetlenie przełącznika
+T_THEME = 160  # zmiana motywu: szybko, większość zmiany od razu (EASE_IN), bez długiej szarości
 
 
 @dataclass(frozen=True)
@@ -224,7 +225,8 @@ QLabel {{ background: transparent; }}
 QLabel#muted {{ color: {t.text_2}; font-size: {px(14)}; }}
 QLabel#small {{ color: {t.text_2}; font-size: {px(12)}; }}
 QLabel#title {{ font-size: {px(20)}; font-weight: 600; }}
-QLabel#section {{ color: {t.text_2}; font-size: {px(13)}; font-weight: 600; }}
+QLabel#section {{ color: {t.text}; font-size: {px(16)}; font-weight: 700;
+    border-left: 3px solid {t.accent}; padding-left: 8px; }}
 QLabel#strong {{ font-weight: 600; }}
 QLineEdit#stepvalue {{ font-weight: 700; font-size: {px(15)}; border: 1px solid transparent;
     border-radius: 8px; background: transparent; color: {t.text}; padding: 0; }}
@@ -241,6 +243,12 @@ QPushButton {{ border-radius: {RADIUS}px; padding: 0 {px(16)}; font-weight: 600;
 QPushButton:hover {{ background: {t.surface_2}; }}
 QPushButton:pressed {{ background: {t.line}; }}
 QPushButton:disabled {{ color: {t.text_2}; border-color: {t.line}; }}
+QPushButton#link {{ background: transparent; border: none; padding: 0; text-align: left;
+    color: {t.text}; }}
+QPushButton#link[me="true"] {{ color: {t.accent}; }}
+QPushButton#link:hover, QPushButton#link:focus {{ background: transparent; color: {t.accent};
+    text-decoration: underline; }}
+QPushButton#link:pressed {{ background: transparent; color: {t.text_2}; }}
 QPushButton#primary {{ background: {t.accent}; border-color: {t.accent}; color: {t.on_accent}; }}
 QPushButton#primary:hover {{ background: {t.text}; border-color: {t.text}; color: {t.bg}; }}
 QPushButton#contrast {{ background: {t.contrast_bg}; border-color: {t.contrast_bg};
@@ -263,6 +271,8 @@ QPushButton#seg:checked {{ background: transparent; color: {t.on_accent}; }}
 QFrame#segbox {{ background: {t.bg}; border: 2px solid {t.control}; border-radius: {RADIUS}px; }}
 QPlainTextEdit {{ background: {t.bg}; border: 2px solid {t.control}; border-radius: {RADIUS}px;
     font-family: "Cascadia Mono", "Consolas"; font-size: {px(13)}; padding: 6px; }}
+QPlainTextEdit#prose {{ font-family: "{FONT}", "{FONT_FALLBACK}"; font-size: {px(15)};
+    padding: 8px; }}
 QSlider {{ min-height: {CONTROL_H}px; }}
 QSlider::groove:horizontal {{ height: 6px; background: {t.line}; border: 1px solid {t.control};
     border-radius: 3px; }}

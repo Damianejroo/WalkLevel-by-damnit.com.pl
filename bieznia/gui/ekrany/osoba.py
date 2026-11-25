@@ -119,7 +119,7 @@ class PeopleScreen:
     def wizard_step_name(self: App, body: QVBoxLayout) -> None:
         wz, t = self.wizard, self.t
         updated = wz.mode == "first" and self.legacy is not None
-        title = label("Bieżnia ma teraz osoby" if updated else "Jak się nazywasz?", "title")
+        title = label("WalkLevel ma teraz osoby" if updated else "Jak się nazywasz?", "title")
         title.setStyleSheet("font-size: 24px;")
         body.addWidget(title)
         body.addWidget(

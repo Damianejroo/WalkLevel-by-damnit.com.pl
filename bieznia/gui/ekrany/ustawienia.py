@@ -1,5 +1,5 @@
-"""Ustawienia: osoby, profile gier, sterowanie tylko dla trybu profilu, wygląd, bieżnia, kopia,
-zwinięte Zaawansowane. Karta sterowania przebudowuje się przy zmianie trybu i profilu."""
+"""Ustawienia: 7 kategorii rozwijanych w miejscu (akordeon, otwarta najwyżej jedna).
+Karta sterowania przebudowuje się przy zmianie trybu i profilu."""
 
 from __future__ import annotations
 
@@ -10,16 +10,33 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import (
+    QAbstractAnimation,
+    QEasingCurve,
+    QPoint,
+    QPropertyAnimation,
+    Qt,
+    QTimer,
+    QUrl,
+)
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
-from bieznia import HOMEPAGE, REPOSITORY, __author__, kopia
+from bieznia import HOMEPAGE, REPOSITORY, __author__, __version__, kopia
 from bieznia import pad as gamepad
 from bieznia.gui import komponenty as k
+from bieznia.gui import theme as th
 from bieznia.gui.widgets import (
     HoldButton,
     KeyButton,
+    Motion,
     ResponsiveRow,
     Segmented,
     Switch,
@@ -47,6 +64,16 @@ MODE_NAMES = {
     "treadmill": "Chodzenie",
     "training": "Trening",
 }
+# kategorie Ustawień: klucz, ikona (Segoe Fluent), nazwa, opis
+CATEGORIES = (
+    ("people", "\ue77b", "Konto i osoby", "Osoby, konto online, kto widzi wyniki"),
+    ("control", "\ue7fc", "Gry i sterowanie", "Profile gier, tryb sterowania, klawisz włączania"),
+    ("treadmill", k.G_WALK, "Bieżnia", "Start i stop taśmy, symulator, obsługiwane modele"),
+    ("levels", "\ue734", "Poziomy i powiadomienia", "Popupy osiągnięć nad grą, dźwięk"),
+    ("look", "\ue771", "Wygląd i okno", "Motyw, kolor, tekst, okno, przycisk na ekranie"),
+    ("data", "\ue74e", "Dane i kopia", "Eksport, import, folder danych"),
+    ("help", "\ue9d9", "Pomoc i diagnostyka", "Zgłoś problem, logi, aktualizacje"),
+)
 
 
 def section(title: str) -> tuple[QWidget, QVBoxLayout]:
@@ -71,6 +98,9 @@ class SettingsScreen:
     belt_target: float | None
     settings_view: str  # tryb, którego ustawienia widać na karcie (nie musi być aktywny)
     settings_built: str  # stan, z którego zbudowano widok Ustawień
+    settings_category: str | None  # rozwinięta kategoria (najwyżej jedna)
+    settings_fold_token: int  # numer kliknięcia - opóźnione rozwinięcie po nowszym przepada
+    settings_building = ""  # kategoria, której nagłówek właśnie powstaje
 
     def open_settings(self: App) -> None:
         self.close_popups()
@@ -105,7 +135,6 @@ class SettingsScreen:
                 store.active_person if store else None,
                 self.t.name,
                 self.t.accent,
-                self.advanced_open,
                 self.settings_view,
                 [self.caps.speed_min, self.caps.speed_max, self.caps.start_delay_s],
                 [vars(a.state) for a in self.accounts.logged_in()]
@@ -131,7 +160,9 @@ class SettingsScreen:
         page, lay = self.sticky_page("Ustawienia")
         self.profile_rows: dict[str, k.ChoiceRow] = {}
         store = self.store
+        folds: dict[str, QVBoxLayout] = {key: QVBoxLayout() for key, *_ in CATEGORIES}
 
+        # --- Konto i osoby --------------------------------------------------------------------
         if store is not None:
             c, cl = section("Osoby")
             cl.addWidget(
@@ -162,8 +193,13 @@ class SettingsScreen:
                 add_online = k.AddRow(t, "Dodaj osobę z kontem online")
                 add_online.clicked.connect(lambda: self.open_account("login", new_person=True))
                 cl.addWidget(add_online)
-            lay.addWidget(c)
+            folds["people"].addWidget(c)
+        account_card = self.build_account_card()
+        if account_card is not None:
+            folds["people"].addWidget(account_card)
 
+        # --- Gry i sterowanie -----------------------------------------------------------------
+        if store is not None:
             c, cl = section(f"Profile gier · {store.person.name}")
             cl.addWidget(
                 label("Ustawienia sterowania i kolor zapisują się w zaznaczonym profilu.", "small")
@@ -185,7 +221,7 @@ class SettingsScreen:
             add = k.AddRow(t, "Nowy profil")
             add.clicked.connect(self.open_profile_new)
             cl.addWidget(add)
-            lay.addWidget(c)
+            folds["control"].addWidget(c)
 
         title = "Sterowanie"
         if store is not None:
@@ -198,10 +234,97 @@ class SettingsScreen:
         self.control_body = k.SmoothBox()  # zmiana trybu: karta płynnie rośnie albo maleje
         self.control_box = self.control_body.lay
         cl.addWidget(self.control_body)
-        lay.addWidget(c)
+        folds["control"].addWidget(c)
         self.build_control_settings()
 
-        c, wl = section("Wygląd i okno")
+        c, cl = section("Klawisz włączania sterowania")
+        self.toggle_btn = KeyButton("Start/stop", self.toggle_key, combos=True)
+        self.toggle_btn.captured.connect(lambda key: self.on_key("toggle", key))
+        cl.addWidget(
+            label(
+                "Kliknij i naciśnij klawisz albo kombinację, np. Ctrl+Shift+F8. Działa też w grze."
+                " Bez skrótów Windows (Win, Alt+Tab, Alt+F4) i nakładek (Shift+Tab, Alt+Z).",
+                "small",
+            )
+        )
+        cl.addWidget(self.toggle_btn)
+        pad_row = QHBoxLayout()
+        self.pad_toggle_btn = button("")
+        self.pad_toggle_btn.setToolTip(
+            "Przycisk pada działa jak klawisz włączania - też w grze. Najlepiej taki, którego"
+            " gra nie używa: panel dotykowy, Create albo kliknięcie gałki."
+        )
+        self.pad_toggle_btn.clicked.connect(self.capture_pad_button)
+        self.pad_clear_btn = button("Usuń")
+        self.pad_clear_btn.clicked.connect(lambda: self.set_toggle_pad(""))
+        pad_row.addWidget(self.pad_toggle_btn, 1)
+        pad_row.addWidget(self.pad_clear_btn)
+        cl.addWidget(label("Albo przycisk na padzie (DualSense, DualShock, Xbox)", "small"))
+        cl.addLayout(pad_row)
+        self.render_pad_button()
+        sw = Switch(
+            t, "Zmiana profilu na karcie sterowania", bool(self.settings["show_profile_switch"])
+        )
+        sw.toggled.connect(lambda v: self.on_switch_visibility("show_profile_switch", v))
+        self.setting_row(
+            cl,
+            "Zmiana profilu na karcie sterowania",
+            "Lista profili po kliknięciu nazwy (przy jednym profilu i tak jej nie ma)",
+            sw,
+        )
+        folds["control"].addWidget(c)
+
+        # --- Bieżnia ------------------------------------------------------------------------
+        c, bl = section("Taśma i połączenie")
+        self.device_label = label("", "muted")
+        bl.addWidget(self.device_label)
+        self.belt_switch = Switch(t, "Start i stop bieżni", self.settings["belt_control"])
+        self.belt_switch.toggled.connect(self.on_belt_control)
+        self.setting_row(
+            bl,
+            "Klawisz uruchamia i zatrzymuje taśmę",
+            "Wyłącz, jeśli wolisz startować tylko pilotem",
+            self.belt_switch,
+        )
+        sim = Switch(t, "Symulator bieżni", self.settings["simulator"])
+        sim.toggled.connect(self.on_simulator)
+        keys = self.config["hotkeys"]
+        self.setting_row(
+            bl,
+            "Symulator bieżni",
+            f"Bez bieżni: {keys['sim_slower']} wolniej, {keys['sim_faster']} szybciej",
+            sim,
+        )
+        models = button("Obsługiwane bieżnie…")
+        models.setToolTip("Lista modeli, pobieranie nowych i dodawanie profilu z pliku")
+        models.clicked.connect(self.open_models)
+        self.forget_btn = HoldButton("Zapomnij bieżnię", t)
+        self.forget_btn.confirmed.connect(self.forget_device)
+        bl.addWidget(ResponsiveRow(models, self.forget_btn))
+        folds["treadmill"].addWidget(c)
+
+        # --- Poziomy i powiadomienia --------------------------------------------------------
+        c, ll = section("Popupy osiągnięć i awansów")
+        for key, title_, hint, default in (
+            (
+                "achievement_popups",
+                "Popupy na ekranie",
+                "Osiągnięcia i awanse w prawym dolnym rogu, także nad grą."
+                " Nie zabierają fokusu, kliknięcia przechodzą do gry",
+                True,
+            ),
+            ("achievement_sound", "Dźwięk przy popupie", "Krótki dźwięk przy zdobyciu", False),
+        ):
+            sw = Switch(t, title_, bool(self.settings.get(key, default)))
+            sw.toggled.connect(lambda v, k=key: self.change(k, v))
+            self.setting_row(ll, title_, hint, sw)
+        preview = button("Pokaż przykładowy popup")
+        preview.clicked.connect(self.show_sample_popup)
+        ll.addWidget(preview)
+        folds["levels"].addWidget(c)
+
+        # --- Wygląd i okno ------------------------------------------------------------------
+        c, wl = section("Motyw i okno")
         if store is not None:
             wl.addWidget(label(f"Kolor · zapisuje się w profilu {store.profile.name}"))
             self.palette = k.PalettePicker(t, store.profile.color, store.profile.icon_color)
@@ -239,67 +362,13 @@ class SettingsScreen:
                 "Awatar z listą osób (przy jednej osobie i tak go nie ma)",
                 lambda v: self.on_switch_visibility("show_person_switch", v),
             ),
-            (
-                "show_profile_switch",
-                "Zmiana profilu na karcie sterowania",
-                "Lista profili po kliknięciu nazwy (przy jednym profilu i tak jej nie ma)",
-                lambda v: self.on_switch_visibility("show_profile_switch", v),
-            ),
         ):
             sw = Switch(t, title_, bool(self.settings.get(key, False)))
             sw.toggled.connect(handler)
             self.setting_row(wl, title_, hint, sw)
-        lay.addWidget(c)
+        folds["look"].addWidget(c)
 
-        c, bl = section("Bieżnia")
-        self.device_label = label("", "muted")
-        bl.addWidget(self.device_label)
-        self.toggle_btn = KeyButton("Start/stop", self.toggle_key, combos=True)
-        self.toggle_btn.captured.connect(lambda key: self.on_key("toggle", key))
-        bl.addWidget(label("Klawisz włączania sterowania"))
-        bl.addWidget(
-            label(
-                "Kliknij i naciśnij klawisz albo kombinację, np. Ctrl+Shift+F8. Działa też w grze."
-                " Bez skrótów Windows (Win, Alt+Tab, Alt+F4) i nakładek (Shift+Tab, Alt+Z).",
-                "small",
-            )
-        )
-        bl.addWidget(self.toggle_btn)
-        pad_row = QHBoxLayout()
-        self.pad_toggle_btn = button("")
-        self.pad_toggle_btn.setToolTip(
-            "Przycisk pada działa jak klawisz włączania - też w grze. Najlepiej taki, którego"
-            " gra nie używa: panel dotykowy, Create albo kliknięcie gałki."
-        )
-        self.pad_toggle_btn.clicked.connect(self.capture_pad_button)
-        self.pad_clear_btn = button("Usuń")
-        self.pad_clear_btn.clicked.connect(lambda: self.set_toggle_pad(""))
-        pad_row.addWidget(self.pad_toggle_btn, 1)
-        pad_row.addWidget(self.pad_clear_btn)
-        bl.addWidget(label("Albo przycisk na padzie (DualSense, DualShock, Xbox)", "small"))
-        bl.addLayout(pad_row)
-        self.render_pad_button()
-        self.belt_switch = Switch(t, "Start i stop bieżni", self.settings["belt_control"])
-        self.belt_switch.toggled.connect(self.on_belt_control)
-        self.setting_row(
-            bl,
-            "Klawisz uruchamia i zatrzymuje taśmę",
-            "Wyłącz, jeśli wolisz startować tylko pilotem",
-            self.belt_switch,
-        )
-        models = button("Obsługiwane bieżnie…")
-        models.setToolTip("Lista modeli, pobieranie nowych i dodawanie profilu z pliku")
-        models.clicked.connect(self.open_models)
-        bl.addWidget(models)
-        self.forget_btn = HoldButton("Zapomnij bieżnię", t)
-        self.forget_btn.confirmed.connect(self.forget_device)
-        bl.addWidget(self.forget_btn)
-        lay.addWidget(c)
-
-        account_card = self.build_account_card()
-        if account_card is not None:
-            lay.addWidget(account_card)
-
+        # --- Dane i kopia ------------------------------------------------------------------
         if store is not None:
             c, kl = section("Kopia danych")
             kl.addWidget(
@@ -318,66 +387,43 @@ class SettingsScreen:
                 restore = HoldButton("Przywróć dane sprzed ostatniego importu", t)
                 restore.confirmed.connect(lambda b=backup: self.restore_backup(b))
                 kl.addWidget(restore)
-            lay.addWidget(c)
+            data_btn = button("Folder danych")
+            data_btn.setToolTip("Osoby, profile, historia i ustawienia na tym komputerze")
+            data_btn.clicked.connect(lambda: self.open_folder(Path("dane")))
+            kl.addWidget(data_btn)
+            folds["data"].addWidget(c)
 
-        adv_btn = QPushButton()
-        adv_btn.setObjectName("row")
-        adv_btn.setFixedHeight(60)
-        adv_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        adv_btn.setAccessibleName("Zaawansowane")
-        al = QHBoxLayout(adv_btn)
-        al.setContentsMargins(14, 6, 14, 6)
-        texts = QVBoxLayout()
-        texts.setSpacing(0)
-        name = label("Zaawansowane")
-        name.setObjectName("strong")
-        texts.addWidget(name)
-        texts.addWidget(label("Symulator, nagrywanie, logi, dziennik, aktualizacje", "small"))
-        al.addLayout(texts, 1)
-        chevron = k.glyph(k.G_CHEVRON_DOWN, t.text_2)
-        al.addWidget(chevron)
-        for w in (name, chevron):
-            w.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        lay.addWidget(adv_btn)
-        adv, advl = section("Zaawansowane")
-        if not self.advanced_open:
-            adv.hide()  # widoczność dopiero po włożeniu do układu
-        adv_btn.clicked.connect(lambda: self.toggle_advanced(adv))
-        sim = Switch(t, "Symulator bieżni", self.settings["simulator"])
-        sim.toggled.connect(self.on_simulator)
-        keys = self.config["hotkeys"]
-        self.setting_row(
-            advl,
-            "Symulator bieżni",
-            f"Bez bieżni: {keys['sim_slower']} wolniej, {keys['sim_faster']} szybciej",
-            sim,
-        )
-        rec = Switch(t, "Nagrywaj przejścia", self.settings["record"])
-        rec.toggled.connect(self.on_record)
-        self.setting_row(advl, "Nagrywaj przejścia", "Odczyty trafiają do folderu nagrania", rec)
+        # --- Pomoc i diagnostyka ----------------------------------------------------------
+        c, hl = section("Diagnostyka")
+        report = button("Zgłoś problem…", "primary")
+        report.clicked.connect(lambda: self.pages.go(self.REPORT))
+        hl.addWidget(report)
         detailed = Switch(t, "Szczegółowe logi Bluetooth", self.settings["detailed_logs"])
         detailed.toggled.connect(self.on_detailed_logs)
         self.setting_row(
-            advl,
+            hl,
             "Szczegółowe logi Bluetooth",
             "Rozmowa z bieżnią w logach - pomaga naprawić połączenie."
             " Bez klawiszy i danych z gier.",
             detailed,
         )
+        rec = Switch(t, "Nagrywaj przejścia", self.settings["record"])
+        rec.toggled.connect(self.on_record)
+        self.setting_row(hl, "Nagrywaj przejścia", "Odczyty trafiają do folderu nagrania", rec)
         journal = button("Dziennik")
         journal.clicked.connect(lambda: self.pages.go(self.LOG))
         folder = button("Folder logów")
         folder.clicked.connect(lambda: self.open_folder(Path("logs")))
-        advl.addWidget(ResponsiveRow(journal, folder))
+        hl.addWidget(ResponsiveRow(journal, folder))
+        folds["help"].addWidget(c)
+        c, ul = section("Aktualizacje i o aplikacji")
         self.about_status = label("", "muted")
         self.about_status.setWordWrap(True)
-        advl.addWidget(self.about_status)
+        ul.addWidget(self.about_status)
         check = button("Sprawdź aktualizacje")
         check.clicked.connect(lambda: self.run_task(self.check_update_task, True))
         check.setEnabled(FROZEN)
-        advl.addWidget(check)
-        lay.addWidget(adv)
-
+        ul.addWidget(check)
         links = []
         for text, url in (
             ("Strona autora", HOMEPAGE),
@@ -385,18 +431,211 @@ class SettingsScreen:
             ("Kod", f"https://github.com/{REPOSITORY}"),
         ):
             links.append(f"<a style='color:{t.accent}' href='{url}'>{text}</a>")
-        about = label(f"Bieżnia Gamingowa · © 2026 {__author__}<br>" + " · ".join(links), "small")
-        about.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        about = label(
+            f"WalkLevel {__version__} (dawniej Bieżnia Gamingowa) · © 2026 {__author__}<br>"
+            + " · ".join(links),
+            "small",
+        )
         about.setOpenExternalLinks(False)
         about.linkActivated.connect(lambda url: QDesktopServices.openUrl(QUrl(url)))
-        lay.addWidget(about)
+        ul.addWidget(about)
+        folds["help"].addWidget(c)
+
+        # --- akordeon: kategorie rozwijane w miejscu, otwarta najwyżej jedna ---------------
+        self.settings_folds: dict[str, tuple[QWidget, QLabel, QPushButton]] = {}
+        self.settings_value_labels: dict[str, QLabel] = {}
+        container = QWidget()
+        cont = QVBoxLayout(container)
+        cont.setContentsMargins(0, 0, 0, 0)
+        cont.setSpacing(th.GAP)
+        values = self.settings_values()
+        for key, icon, name, hint in CATEGORIES:
+            if folds[key].count() == 0:
+                continue
+            open_now = key == self.settings_category
+            self.settings_building = key
+            header, chevron = self.category_header(icon, name, hint, values.get(key, ""), open_now)
+            header.clicked.connect(lambda _=False, cat=key: self.toggle_settings_category(cat))
+            cont.addWidget(header)
+            body = QWidget()
+            folds[key].setContentsMargins(0, 0, 0, 6)
+            folds[key].setSpacing(th.GAP)
+            body.setLayout(folds[key])
+            cont.addWidget(body)
+            if not open_now:
+                body.hide()  # widoczność dopiero po włożeniu do układu
+            self.settings_folds[key] = (body, chevron, header)
+        self.settings_container = container
+        lay.addWidget(container)
         lay.addStretch(1)
         self.render_device_label()
         return page
 
-    def toggle_advanced(self: App, box: QWidget) -> None:
-        self.advanced_open = not self.advanced_open
-        box.setVisible(self.advanced_open)
+    def settings_values(self: App) -> dict[str, str]:
+        """Bieżąca wartość przy nagłówku kategorii - często nie trzeba nawet rozwijać."""
+        store = self.store
+        out: dict[str, str] = {}
+        if store is not None:
+            account = ""
+            if hasattr(self, "account") and self.account.enabled and self.account.state.logged_in:
+                account = f" · konto {self.account.state.name}"
+            out["people"] = f"{store.person.name}{account}"
+            out["control"] = (
+                f"{store.profile.name} · {MODE_NAMES.get(self.settings['direction'], '')}"
+                f" · {self.toggle_key.label}"
+            )
+        out["treadmill"] = (
+            "symulator"
+            if self.settings.get("simulator")
+            else str(self.settings.get("device_name") or "nie wybrano")
+        )
+        out["levels"] = (
+            "popupy włączone" if self.settings.get("achievement_popups", True) else "bez popupów"
+        )
+        out["look"] = {"system": "jak Windows", "light": "jasny", "dark": "ciemny"}.get(
+            str(self.settings.get("theme")), ""
+        )
+        out["help"] = f"wersja {__version__}"
+        return out
+
+    def render_settings_values(self: App) -> None:
+        labels = getattr(self, "settings_value_labels", {})
+        if not labels:
+            return
+        values = self.settings_values()
+        for key, lbl in labels.items():
+            with contextlib.suppress(RuntimeError):
+                value = values.get(key, "")
+                lbl.setText(lbl.fontMetrics().elidedText(value, Qt.TextElideMode.ElideRight, 200))
+                lbl.setToolTip(value)
+                lbl.setFixedWidth(min(lbl.fontMetrics().horizontalAdvance(value) + 6, 206))
+
+    def category_header(
+        self: App, icon: str, name: str, hint: str, value: str, open_now: bool
+    ) -> tuple[QPushButton, QLabel]:
+        t = self.t
+        btn = QPushButton()
+        btn.setObjectName("row")
+        btn.setMinimumHeight(64)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setAccessibleName(name)
+        lay = QHBoxLayout(btn)
+        lay.setContentsMargins(14, 6, 14, 6)
+        lay.setSpacing(14)
+        box = QLabel(icon)
+        box.setFixedSize(40, 40)
+        box.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        box.setStyleSheet(
+            f"background: {t.surface_2}; border-radius: 10px; color: {t.accent};"
+            f" font-family: '{th.ICON_FONT}'; font-size: 20px;"
+        )
+        lay.addWidget(box)
+        texts = QVBoxLayout()
+        texts.setSpacing(0)
+        title = label(name)
+        title.setObjectName("strong")
+        texts.addWidget(title)
+        sub = label(hint, "small")
+        sub.setWordWrap(True)
+        texts.addWidget(sub)
+        lay.addLayout(texts, 1)
+        if value:
+            val = label("", "small")
+            val.setWordWrap(False)
+            val.ensurePolished()
+            metrics = val.fontMetrics()
+            val.setText(metrics.elidedText(value, Qt.TextElideMode.ElideRight, 200))
+            val.setToolTip(value)
+            val.setFixedWidth(min(metrics.horizontalAdvance(value) + 6, 206))
+            lay.addWidget(val)
+            self.settings_value_labels[self.settings_building] = val
+        chevron = k.glyph(k.G_CHEVRON_DOWN if open_now else k.G_CHEVRON_RIGHT, t.text_2)
+        lay.addWidget(chevron)
+        for w in btn.findChildren(QWidget):
+            w.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        btn.setProperty("active", open_now)  # otwarta kategoria z akcentem
+        return btn, chevron
+
+    def toggle_settings_category(self: App, key: str) -> None:
+        self.show_settings_category(None if key == self.settings_category else key)
+
+    def show_settings_category(self: App, key: str | None, animated: bool = True) -> None:
+        """Rozwija kategorię (zwija pozostałe) płynną zmianą wysokości.
+
+        Nagłówki (podświetlenie, strzałka) zmieniają się od razu, poza animacją - animowana
+        jest tylko treść: przy otwarciu wysuwa się, a karty pod nią zjeżdżają; przy zmianie
+        kategorii najpierw krótko zwija się stara, potem rozwija nowa (bez przenikania
+        przesuniętych wierszy jeden w drugi)."""
+        previous = getattr(self, "settings_category", None)
+        self.settings_category = key
+        self.settings_fold_token = getattr(self, "settings_fold_token", 0) + 1
+        token = self.settings_fold_token
+        folds = getattr(self, "settings_folds", {})
+        for cat, (_body, chevron, header) in folds.items():
+            with contextlib.suppress(RuntimeError):
+                chevron.setText(k.G_CHEVRON_DOWN if cat == key else k.G_CHEVRON_RIGHT)
+                header.setProperty("active", cat == key)
+                header.style().unpolish(header)
+                header.style().polish(header)
+
+        def show_only(open_key: str | None) -> None:
+            for cat, (body, _chevron, _header) in folds.items():
+                with contextlib.suppress(RuntimeError):
+                    body.setVisible(cat == open_key)
+
+        container = getattr(self, "settings_container", None)
+        on_screen = (
+            container is not None
+            and self.window is not None
+            and self.window.isVisible()
+            and self.pages.currentIndex() == self.SETTINGS
+        )
+        if not (animated and Motion.enabled and on_screen):
+            show_only(key)
+            return
+        assert container is not None
+        if previous is not None and key is not None and previous != key:
+            fold_ms = th.T_MORPH * 2 // 3
+            self.morph_card(container, lambda: show_only(None), fold_ms)
+
+            def unfold() -> None:
+                if getattr(self, "settings_fold_token", 0) != token:
+                    return  # w międzyczasie kolejny klik - ten krok już nieaktualny
+                self.morph_card(container, lambda: show_only(key))
+                QTimer.singleShot(th.T_MORPH + 20, lambda: self.scroll_to_category(key))
+
+            QTimer.singleShot(fold_ms + 10, unfold)
+            return
+        self.morph_card(container, lambda: show_only(key))
+        if key is not None:  # po animacji: treść otwartej kategorii w widoku
+            QTimer.singleShot(th.T_MORPH + 20, lambda: self.scroll_to_category(key))
+
+    def scroll_to_category(self: App, key: str) -> None:
+        """Gdy treść rozwiniętej kategorii wychodzi poza okno - płynny przewin w dół, tak by
+        nagłówek został na górze (albo cała treść się zmieściła). Nigdy w górę."""
+        fold = getattr(self, "settings_folds", {}).get(key)
+        page = self.pages.widget(self.SETTINGS)
+        area = page.findChild(QScrollArea) if page is not None else None
+        if fold is None or area is None or area.widget() is None:
+            return
+        body, _chevron, header = fold
+        with contextlib.suppress(RuntimeError):
+            inner = area.widget()
+            top = header.mapTo(inner, QPoint(0, 0)).y() - 8
+            bottom = body.mapTo(inner, QPoint(0, 0)).y() + body.height() + 8
+            bar = area.verticalScrollBar()
+            view = area.viewport().height()
+            if bottom <= bar.value() + view:
+                return  # wszystko widać
+            target = min(top, bottom - view)
+            if target <= bar.value():
+                return
+            anim = QPropertyAnimation(bar, b"value", area)
+            anim.setDuration(th.T_PANEL_IN)
+            anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+            anim.setStartValue(bar.value())
+            anim.setEndValue(min(target, bar.maximum()))
+            anim.start(QAbstractAnimation.DeletionPolicy.DeleteWhenStopped)
 
     def profile_summary(self: App, s: dict[str, Any]) -> str:
         merged = {**self.defaults, **s}

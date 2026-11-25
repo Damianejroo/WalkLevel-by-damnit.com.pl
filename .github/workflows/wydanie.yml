@@ -86,10 +86,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $notes = git tag -l --format='%(contents)' $env:TAG
-          if (-not $notes) { $notes = "Nowa wersja Bieżni Gamingowej." }
+          if (-not $notes) { $notes = "Nowa wersja WalkLevel." }
           $notes += "`n`n**Instalacja:** pobierz Bieznia-Setup-$env:VERSION.exe i uruchom. Masz już aplikację? Kliknij w niej Aktualizuj."
           $notes | Out-File -Encoding utf8 notes.md
-          gh release create $env:TAG dist/Bieznia-Setup-$env:VERSION.exe dist/Bieznia-Setup-$env:VERSION.exe.sha256 --draft --title "Bieżnia Gamingowa $env:VERSION" --notes-file notes.md --verify-tag
+          gh release create $env:TAG dist/Bieznia-Setup-$env:VERSION.exe dist/Bieznia-Setup-$env:VERSION.exe.sha256 --draft --title "WalkLevel $env:VERSION" --notes-file notes.md --verify-tag
 
   publikacja:
     needs: [testy, budowa]

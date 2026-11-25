@@ -1,12 +1,12 @@
-# Polityka prywatności aplikacji Bieżnia
+# Polityka prywatności aplikacji WalkLevel (dawniej Bieżnia)
 
 Administratorem danych jestem ja, Damian Skrzypiec - prowadzę damnit.com.pl prywatnie.
 We wszystkich sprawach dotyczących danych pisz na kontakt@damnit.com.pl.
 
 ## W skrócie
 
-Bieżnia działa na Twoim komputerze. Nie ma reklam ani analityki. Dane z bieżni, ustawienia,
-historia kroków i logi zostają u Ciebie. Konto online jest dobrowolne: bez niego nic nie
+WalkLevel działa na Twoim komputerze. Nie ma reklam ani analityki. Dane z bieżni, ustawienia,
+historia kroków, poziom, osiągnięcia i logi zostają u Ciebie. Konto online jest dobrowolne: bez niego nic nie
 wychodzi z komputera poza sprawdzaniem aktualizacji. Do mnie trafia coś tylko wtedy, gdy
 założysz konto online albo sam wyślesz zgłoszenie problemu.
 
@@ -52,7 +52,12 @@ Bez konta aplikacja nie łączy się z tym serwerem.
 **Zgłoszenie problemu.** Gdy klikniesz Wyślij zgłoszenie (albo wyślesz mi e-mail
 z przygotowaną paczką), dostaję: Twój opis, kontakt (jeśli go podasz), logi aplikacji
 i Bluetooth, ostatni raport diagnostyczny, ustawienia aplikacji, wersję aplikacji i Windows.
-Okno zgłoszenia pokazuje to przed wysłaniem. Cel: znalezienie i naprawienie błędu.
+Okno zgłoszenia pokazuje to przed wysłaniem. Z logów i ustawień aplikacja usuwa ścieżki
+z nazwą użytkownika Windows i adresy innych urządzeń Bluetooth niż wybrana bieżnia.
+Zgłoszenie trafia przez serwer bieznia.damnit-live.pl (OVHcloud) prosto na moją skrzynkę
+kontakt@damnit.com.pl; serwer nie zachowuje treści ani paczki, tylko numer zgłoszenia,
+czas, wersję aplikacji i rozmiar przez 30 dni (ochrona przed nadużyciami). Możesz też
+zapisać paczkę na dysk i wysłać ją sam. Cel: znalezienie i naprawienie błędu.
 Podstawa: mój prawnie uzasadniony interes - pomoc w rozwiązaniu zgłoszonego problemu
 (art. 6 ust. 1 lit. f RODO). Zgłoszenie przechowuję do czasu rozwiązania problemu, a potem
 je usuwam.

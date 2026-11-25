@@ -118,3 +118,15 @@ def test_import_merge_skips_duplicates_and_deleted_person_keeps_results(history:
     assert {x.person_name for x in history.sessions()} == {"Usunięte osoby"}
     history.clear("p1")
     assert history.count() == 0
+
+
+def test_today_by_hour_splits_long_sessions(history: History) -> None:
+    from datetime import datetime
+
+    day = datetime(2026, 11, 25)
+    start = datetime(2026, 11, 25, 18, 30).timestamp()
+    history.save(Session("h1", "p", "P", "g", "Gra", start, start + 3600, 1200, 1.0, 3600))
+    hours = dict(history.by_hour(now=datetime(2026, 11, 25, 21, 0).timestamp()))
+    assert len(hours) == 24 and day.day == 25
+    assert hours["18"] == {"Gra": 600} and hours["19"] == {"Gra": 600}
+    assert hours["20"] == {}

@@ -55,6 +55,10 @@ a = Analysis(
         (str(ROOT / "bieznia" / "gui" / "ikona.png"), "bieznia/gui"),
         # profile modeli bieżni (dane JSON - zakresy prędkości, odliczanie, nazwy)
         (str(ROOT / "bieznia" / "sterowniki" / "profile" / "*.json"), "bieznia/sterowniki/profile"),
+        # poziomy, rangi i osiągnięcia (definicje z wersją, wspólne z serwerem)
+        (str(ROOT / "bieznia" / "poziomy" / "definicje.json"), "bieznia/poziomy"),
+        # dźwięki popupów (osiągnięcie, awans) - generuje packaging/dzwieki.py
+        (str(ROOT / "bieznia" / "gui" / "dzwieki" / "*.wav"), "bieznia/gui/dzwieki"),
     ],
     hiddenimports=["bleak.backends.winrt.scanner", "bleak.backends.winrt.client"],
     excludes=EXCLUDES,
@@ -70,12 +74,12 @@ version_info = VSVersionInfo(
         StringFileInfo([
             StringTable("041504B0", [
                 StringStruct("CompanyName", "damnit.com.pl Damian Skrzypiec"),
-                StringStruct("FileDescription", "Bieżnia Gamingowa by damnit.com.pl"),
+                StringStruct("FileDescription", "WalkLevel by damnit.com.pl"),
                 StringStruct("FileVersion", VERSION),
                 StringStruct("InternalName", "Bieznia"),
                 StringStruct("LegalCopyright", "© 2026 damnit.com.pl Damian Skrzypiec, GPL-3.0"),
                 StringStruct("OriginalFilename", "Bieznia.exe"),
-                StringStruct("ProductName", "Bieżnia Gamingowa"),
+                StringStruct("ProductName", "WalkLevel"),
                 StringStruct("ProductVersion", VERSION),
             ])
         ]),

@@ -15,9 +15,11 @@ from PySide6.QtGui import (
     QColor,
     QFont,
     QIcon,
+    QImage,
     QPainter,
     QPaintEvent,
     QPixmap,
+    QWheelEvent,
 )
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -163,9 +165,12 @@ class Cover(QWidget):
         self.raise_()
         self.show()
 
-    def reveal(self, ms: int, _shift: int = 0) -> None:
+    def reveal(self, ms: int, _shift: int = 0, snappy: bool = False) -> None:
+        """snappy: krzywa „wejścia” - większość zmiany od razu (np. motyw), zamiast łagodnego
+        startu, przy którym całe okno długo wisi w pół drogi między starym a nowym."""
         if not self.isVisible():
             return
+        self.anim.setEasingCurve(ease(th.EASE_IN if snappy else th.EASE_SMOOTH))
         if ms <= 0 or not Motion.enabled:
             self._done()
             return
@@ -177,7 +182,9 @@ class Cover(QWidget):
         self.anim.setDuration(ms)
         self.anim.start()
 
-    def morph(self, top: int, old_h: int, new_h: int, ms: int) -> None:
+    def morph(
+        self, top: int, old_h: int, new_h: int, ms: int, span: tuple[int, int] | None = None
+    ) -> None:
         """Zmiana wysokości fragmentu (np. karty od y=top) bez przeliczania układu w klatkach.
 
         Nad fragmentem okno zostaje żywe (np. jadące podświetlenie przełącznika); fragment
@@ -185,6 +192,7 @@ class Cover(QWidget):
         zjeżdża jako obraz. Każda klatka to tylko kopiowanie obrazów - płynnie także przy
         dużych widokach.
         """
+        self.anim.setEasingCurve(ease(th.EASE_SMOOTH))
         if not self.isVisible():
             return
         if ms <= 0 or not Motion.enabled:
@@ -192,7 +200,15 @@ class Cover(QWidget):
             return
         self.hide()
         self.new = self._grab()
-        self.band = (top, old_h, new_h)
+        # wiersze, które się nie zmieniły, zostają żywe (bez przenikania) - animacja dotyczy
+        # dopiero pierwszego wiersza, który wygląda inaczej
+        # wiersze pod zmianą (np. kolejne karty) tylko zjeżdżają - liczą się do części „pod
+        # fragmentem”, nie do przenikania (inaczej stare i nowe położenie nakładają się)
+        rows = RowCompare(self.old, self.new, span)
+        same = rows.head(top, min(old_h, new_h))
+        top, old_h, new_h = top + same, old_h - same, new_h - same
+        tail = rows.tail(top, old_h, new_h)
+        self.band = (top, old_h - tail, new_h - tail)
         self.show()
         self.raise_()
         self.anim.stop()
@@ -227,18 +243,21 @@ class Cover(QWidget):
         p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
         # tło karty pod fragmentem: wiersz tuż nad nim (sama karta) rozciągnięty w dół
         p.drawPixmap(QRectF(0, top, width, h), self.new, src(top - 1, 1))
-        # najpierw gaśnie stara treść, potem pojawia się nowa - bez nakładania się napisów
-        new_alpha = min(1.0, max(0.0, (prog - 0.3) / 0.7))
-        old_alpha = min(1.0, max(0.0, 1.0 - prog / 0.4))
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+        # stary obraz w pełni, nowy na nim z kryciem p (tryb Source = (1-p)*stary + p*nowy):
+        # jasność nigdy nie spada w połowie - wcześniej stary gasł, zanim pojawił się nowy,
+        # i cały fragment na chwilę ciemniał (mignięcie przy każdym kliknięciu)
+        # wiersze wspólne dla obu wysokości: stary w pełni, nowy z kryciem p; wiersze, które
+        # znikają (zwijanie) - stary gaśnie do tła karty; wiersze, które dochodzą - nowy z tła
+        both = min(h, h0, h1)
+        p.drawPixmap(QRectF(0, top, width, both), self.old, src(top, both))
+        if h0 > both and h > both:
+            gone = min(h, h0) - both
+            p.setOpacity(1.0 - prog)
+            p.drawPixmap(QRectF(0, top + both, width, gone), self.old, src(top + both, gone))
         shown = min(h, h1)
-        p.setOpacity(new_alpha)
+        p.setOpacity(prog)
         p.drawPixmap(QRectF(0, top, width, shown), self.new, src(top, shown))
-        old_rows = min(h, h0)
-        p.setOpacity(old_alpha)
-        p.drawPixmap(QRectF(0, top, width, old_rows), self.old, src(top, old_rows))
         p.setOpacity(1.0)
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
         # wszystko pod fragmentem: przesuwa się razem z jego dolną krawędzią
         below, start = (self.old, top + h0) if h1 > h0 else (self.new, top + h1)
         rows = height - start
@@ -262,11 +281,86 @@ class Cover(QWidget):
 
 
 class CalmScrollBar(QScrollBar):
-    """Pasek przewijania, który nie rysuje się, gdy nie ma czego przewijać."""
+    """Pasek przewijania, który nie rysuje się, gdy nie ma czego przewijać - także gdy do
+    przewinięcia zostaje tylko dolny margines (cała treść jest już widoczna)."""
+
+    MARGIN_ONLY = 16
+
+    def margin_only(self) -> bool:
+        return self.maximum() - self.minimum() <= self.MARGIN_ONLY
 
     def paintEvent(self, e: QPaintEvent) -> None:
-        if self.maximum() > self.minimum():
+        if not self.margin_only():
             super().paintEvent(e)
+
+    def wheelEvent(self, e: QWheelEvent) -> None:
+        """Kółko nie przesuwa strony o sam margines (treść cała widać, pasek się nie rysuje)."""
+        if self.margin_only():
+            self.setValue(self.minimum())
+            e.accept()
+            return
+        super().wheelEvent(e)
+
+
+class RowCompare:
+    """Porównanie wierszy dwóch zrzutów (w zakresie kolumn span - bez paska przewijania, który
+    zmienia się razem z wysokością strony). Wyniki w px logicznych, z 1 px zapasu."""
+
+    def __init__(self, old: QPixmap, new: QPixmap, span: tuple[int, int] | None = None) -> None:
+        self.ok = not old.isNull() and not new.isNull() and old.size() == new.size()
+        self.dpr = old.devicePixelRatio() or 1.0
+        if not self.ok:
+            return
+        a = old.toImage().convertToFormat(QImage.Format.Format_ARGB32)
+        b = new.toImage().convertToFormat(QImage.Format.Format_ARGB32)
+        self.rows = a.height()
+        self.line = a.bytesPerLine()
+        x0, x1 = (0, a.width()) if span is None else span
+        self.x0 = max(0, int(x0 * self.dpr)) * 4  # ARGB32: 4 bajty na piksel
+        self.x1 = min(a.width(), int(x1 * self.dpr)) * 4
+        self.a, self.b = a, b  # obrazy żyją, póki żyją widoki bajtów
+        self.bits_a = memoryview(a.constBits())
+        self.bits_b = memoryview(b.constBits())
+
+    def equal(self, ya: int, yb: int) -> bool:
+        ra = slice(ya * self.line + self.x0, ya * self.line + self.x1)
+        rb = slice(yb * self.line + self.x0, yb * self.line + self.x1)
+        return self.bits_a[ra] == self.bits_b[rb]
+
+    def head(self, top: int, limit: int) -> int:
+        """Ile wierszy od y=top jest takich samych na obu zrzutach."""
+        if not self.ok or limit <= 0:
+            return 0
+        first = max(0, int(top * self.dpr))
+        last = min(self.rows, int((top + limit) * self.dpr))
+        y = first
+        while y < last and self.equal(y, y):
+            y += 1
+        return max(0, int((y - first) / self.dpr) - 1)
+
+    def tail(self, top: int, old_h: int, new_h: int) -> int:
+        """Ile wierszy na dole fragmentu jest takich samych, licząc od dołu: stara część
+        kończy się na top+old_h, nowa na top+new_h (wiersze pod zmianą tylko się przesunęły)."""
+        if not self.ok:
+            return 0
+        end_a = int((top + old_h) * self.dpr)
+        end_b = int((top + new_h) * self.dpr)
+        limit = int(min(old_h, new_h) * self.dpr)
+        n = 0
+        while n < limit:
+            ya, yb = end_a - 1 - n, end_b - 1 - n
+            # wiersz poza oknem na którymś zrzucie: nie widać go, więc tylko się przesuwa
+            if ya < self.rows and yb < self.rows and not self.equal(ya, yb):
+                break
+            n += 1
+        return max(0, int(n / self.dpr) - 1)
+
+
+def same_rows(
+    old: QPixmap, new: QPixmap, top: int, limit: int, span: tuple[int, int] | None = None
+) -> int:
+    """Ile wierszy (px logicznych) od y=top jest identycznych na obu zrzutach."""
+    return RowCompare(old, new, span).head(top, limit)
 
 
 def settle_layout(widget: QWidget) -> None:

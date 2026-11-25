@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from bieznia import __version__, dane
+from bieznia import APP_NAME, __version__, dane
 from bieznia.gui import komponenty as k
 from bieznia.gui import theme as th
 from bieznia.gui.widgets import (
@@ -47,7 +47,7 @@ class MainScreen:
         bar.setSpacing(4)
         names = QVBoxLayout()
         names.setSpacing(0)
-        names.addWidget(ElidedLabel("Bieżnia Gamingowa", "title"))
+        names.addWidget(ElidedLabel(APP_NAME, "title"))
         self.update_label = ElidedLabel(f"wersja {__version__}", "small")
         names.addWidget(self.update_label)
         bar.addLayout(names, 1)
@@ -109,6 +109,7 @@ class MainScreen:
         fix_width(self.status_action, STATUS_ACTIONS)
         srow.addWidget(self.status_action)
         lay.addWidget(status)
+        lay.addWidget(self.build_level_card())  # poziom, ranga i osiągnięcia
 
         hero = card()
         hlay = QVBoxLayout(hero)
@@ -261,8 +262,9 @@ class MainScreen:
         pop.open_under(self.person_chip, 280)
 
     def change_toggle_key(self: App) -> None:
-        """Klik w klawisz na karcie: Ustawienia > Bieżnia, od razu czeka na nowy klawisz."""
+        """Klik w klawisz na karcie: Ustawienia > Gry i sterowanie, od razu czeka na klawisz."""
         self.open_settings()
+        self.show_settings_category("control", animated=False)
         button = self.toggle_btn
 
         def start() -> None:

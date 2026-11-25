@@ -102,7 +102,7 @@ class WindowsStore:
         cred = _Credential()
         cred.Type = CRED_TYPE_GENERIC
         cred.TargetName = self.target
-        cred.Comment = "Bieżnia Gamingowa - logowanie do konta online"
+        cred.Comment = "WalkLevel - logowanie do konta online"
         cred.CredentialBlobSize = len(data)
         cred.CredentialBlob = ctypes.cast(blob, ctypes.POINTER(ctypes.c_ubyte))
         cred.Persist = CRED_PERSIST_LOCAL_MACHINE

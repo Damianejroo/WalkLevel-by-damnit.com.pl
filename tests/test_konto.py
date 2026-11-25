@@ -12,7 +12,7 @@ from typing import Any
 import pytest
 
 from bieznia import konto
-from bieznia.historia import History, Session
+from bieznia.historia import SCHEMA_VERSION, History, Session
 from bieznia.konto.api import Client, KontoError, LoggedOut, UpdateRequired, check_base_url
 from bieznia.konto.sejf import MemoryStore
 
@@ -100,6 +100,12 @@ class FakeServer:
         if path.startswith("/api/bieznia/profil/"):
             week = {"kroki": 15200, "dystans_km": 10.1, "ruch_s": 9000, "sesje": 6}
             total = {"kroki": 99000, "dystans_km": 66.0, "ruch_s": 60000, "sesje": 40}
+            uid = path.rsplit("/", 1)[1]
+            if uid in self.users:  # własny profil - jak widzą go inni
+                me = {"id": uid, "name": self.users[uid]["name"], "od_utc_s": 1.7e9}
+                got = [{"id": "km1", "zdobyte_utc_s": 1.7e9}, {"id": "z-nowszej-wersji"}]
+                levels = {"poziom": 2, "xp": 150, "osiagniecia": 1, "osiagniecia_lista": got}
+                return Reply({**me, **levels, "tydzien": week, "razem": total}, url)
             friend = {"id": "u9", "name": "Kot_Bury", "od_utc_s": 1.7e9, "znajomy": True}
             model = {"bieznia_model": "Urevo SpaceWalk 5L"}
             return Reply({**friend, **model, "tydzien": week, "razem": total}, url)
@@ -403,7 +409,7 @@ def test_request_bodies_are_not_logged(
 
 def test_history_v3_keeps_sent_and_hidden_tables(tmp_path: Path) -> None:
     history = History(tmp_path / "h.db")
-    assert history.schema_version() == 3
+    assert history.schema_version() == SCHEMA_VERSION
     history.save(session("a"))
     history.set_hidden_online("a", True)
     assert history.hidden_online() == {"a"}
@@ -536,6 +542,10 @@ def test_game_names_go_only_after_accepting_current_terms_and_per_profile(
     shared = {"aaaaaaaaaa": True, "bbbbbbbbbb": False}.get
     account.upload(history, lambda pid: bool(shared(pid)))
     assert "gra" not in server.sessions[uuid_of("a")]  # serwer bez wersji - nie wysyłamy gier
+    assert (
+        "gra_id" not in server.sessions[uuid_of("a")]
+        and "tryb" not in server.sessions[uuid_of("a")]
+    )
     server.terms_current = "2026-11-27"
     account.refresh()
     assert account.state.terms_outdated and not account.state.games_allowed
@@ -544,4 +554,6 @@ def test_game_names_go_only_after_accepting_current_terms_and_per_profile(
     account.upload(history, lambda pid: bool(shared(pid)))
     assert server.sessions[uuid_of("a")]["gra"] == "Cyberpunk 2077"
     assert server.sessions[uuid_of("a")]["gra_id"] == "aaaaaaaaaa"
-    assert "gra" not in server.sessions[uuid_of("b")]  # gra ukryta w profilu
+    assert server.sessions[uuid_of("a")]["tryb"] == "gra"
+    assert "gra" not in server.sessions[uuid_of("b")]  # nazwa gry ukryta w profilu
+    assert server.sessions[uuid_of("b")]["gra_id"] == "bbbbbbbbbb"  # do osiągnięć za gry

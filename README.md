@@ -1,6 +1,6 @@
 # WalkingPad X21 PC Gaming by damnit.com.pl
 
-**Bieżnia Gamingowa** to aplikacja na Windows, która zamienia chodzenie po bieżni na sterowanie
+**WalkLevel** (dawniej Bieżnia Gamingowa) to aplikacja na Windows, która zamienia chodzenie po bieżni na sterowanie
 w grach: chód to **W**, bieg to **Shift + W** (oba klawisze można zmienić). Łączy się z bieżnią przez Bluetooth i sama ją
 wyszukuje. Obsługiwane bieżnie: **KingSmith WalkingPad** (np. X21, X23) i bieżnie ze standardem **Bluetooth FTMS**
 (np. **Urevo SpaceWalk 5L**); model rozpoznaje sama. Jest też tryb **Trening** (zwykłe sterowanie bieżnią z komputera)
@@ -82,6 +82,8 @@ nie pobiera ani nie instaluje.
 
 Kliknij **Zgłoś problem** (ikona na górze okna), opisz, co się stało, i wyślij. Do zgłoszenia
 trafiają logi aplikacji i Bluetooth - okno pokazuje dokładnie, co zostanie dołączone.
+Zgłoszenie idzie przez serwer prosto na skrzynkę autora (serwer go nie przechowuje),
+a w odpowiedzi dostajesz numer zgłoszenia. Paczkę można też zapisać na dysk.
 Szczegółowe logi Bluetooth można wyłączyć w Ustawieniach > Zaawansowane.
 
 Przy problemach z połączeniem pomaga też **Ustawienia > Zaawansowane > Dziennik > Zapisz raport diagnostyczny**
@@ -96,8 +98,24 @@ Przy problemach z połączeniem pomaga też **Ustawienia > Zaawansowane > Dzienn
 
 ### Odinstalowanie
 
-Ustawienia Windows > Aplikacje > Bieżnia Gamingowa > Odinstaluj. Osoby, profile, historia kroków i logi zostają w
+Ustawienia Windows > Aplikacje > WalkLevel > Odinstaluj. Osoby, profile, historia kroków i logi zostają w
 `%LOCALAPPDATA%\Bieznia` - usuń ten folder, jeśli chcesz pozbyć się wszystkiego.
+
+## Poziomy i osiągnięcia
+
+Każdy kilometr na bieżni to 100 XP. Poziomy 1-100 mają 39 rang - postaci z gier i książek,
+od tych, które chodziły najmniej, po te, które przeszły najwięcej. Poziom 100 wypada po ok. 5 latach
+przy 5 km dziennie. Osiągnięcia (61) w pięciu stopniach: pospolite, rzadkie, epickie, heroiczne
+i legendarne - szlak dystansu przez światy z gier i książek, serie dni (jeden dzień wolny na 7 nie
+przerywa serii), różne gry, tryb Trening. Liczą się sesje z bieżni, bez symulatora, także wstecz
+z całej historii. Raz zdobytego osiągnięcia aplikacja nie odbiera.
+
+Nowe osiągnięcia i awanse wyskakują w prawym dolnym rogu ekranu, także nad grą - nie zabierają
+fokusu, a kliknięcia przechodzą do gry. Wyłączysz je w Ustawieniach (Poziomy i osiągnięcia).
+Gra w trybie wyłącznego pełnego ekranu może je przykryć; wtedy zdobycz czeka na liście osiągnięć.
+
+Aktualizacja ze starszej wersji przechodzi bez zmian: osoby, profile i cała historia zostają,
+a poziom i osiągnięcia liczą się z niej przy pierwszym uruchomieniu.
 
 ## Prywatność
 
@@ -144,10 +162,11 @@ wystarczy powiedzieć testerowi, żeby kliknął **Aktualizuj**.
 
 ### Zgłoszenia prosto do autora
 
-Domyślnie **Zgłoś problem** przygotowuje e-mail na kontakt@damnit.com.pl z paczką logów.
-Żeby zgłoszenia przychodziły automatycznie, ustaw w `config.toml` sekcję `[zgloszenia]`
-`adres` na adres HTTPS, który przyjmuje POST `multipart/form-data` z polami `wersja`, `opis`,
-`kontakt` i plikiem `plik` (ZIP, do 8 MB).
+**Zgłoś problem** wysyła na adres z `config.toml` (sekcja `[zgloszenia]`, `adres`):
+POST `multipart/form-data` z polami `wersja`, `opis` (do 4000 znaków), `kontakt` (do 200)
+i plikiem `paczka` (ZIP, do 2 MB), nagłówek User-Agent `Bieznia/<wersja>`. Odpowiedź
+`{"id": "..."}` to numer zgłoszenia. Pusty adres = e-mail na kontakt@damnit.com.pl
+z paczką logów.
 
 ### Jak działa połączenie z X21
 

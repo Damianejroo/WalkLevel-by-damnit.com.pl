@@ -359,6 +359,7 @@ def test_report_page_prepares_email_without_endpoint(
 ) -> None:
     opened: list[str] = []
     monkeypatch.setattr(gui.zgloszenia, "open_email", lambda text, path: opened.append(path.name))
+    window.report_endpoint = ""  # bez adresu serwera: e-mail z paczką
     window.pages.go(window.REPORT)
     window.send_report()
     assert "kilku słowach" in window.report_status.text()  # pusty opis nie przechodzi
@@ -685,6 +686,7 @@ def test_treadmill_direction_presses_keys_and_never_sets_speed(window: gui.App) 
     window.mode_tiles.changed.emit("treadmill")
     assert window.settings["direction"] == "treadmill"
     window.open_settings()
+    window.show_settings_category("control", animated=False)
     assert window.output_seg.isVisibleTo(current(window))
     window.key_down = lambda vk: True
     window.set_control(True)
@@ -862,20 +864,45 @@ def simulator_switch(page: Any) -> Any:
     )
 
 
-def test_advanced_section_is_collapsed(window: gui.App) -> None:
+def test_settings_categories_open_one_at_a_time(window: gui.App) -> None:
+    from PySide6.QtTest import QTest
     from PySide6.QtWidgets import QPushButton
 
     window.open_settings()
     page = current(window)
-    assert not simulator_switch(page).isVisibleTo(page)
-    assert window.toggle_btn.isVisibleTo(page)  # klawisz F8 jest w sekcji Bieżnia, nie ukryty
-    adv = [b for b in page.findChildren(QPushButton) if b.accessibleName() == "Zaawansowane"]
-    assert len(adv) == 1
-    adv[0].click()
-    assert window.advanced_open and simulator_switch(page).isVisibleTo(page)
-    window.rebuild_settings()  # po przebudowie dalej rozwinięte
-    page = current(window)
-    assert simulator_switch(page).isVisibleTo(page)
+    assert not simulator_switch(page).isVisibleTo(page)  # wszystko zwinięte
+    headers = {
+        b.accessibleName(): b for b in page.findChildren(QPushButton) if b.objectName() == "row"
+    }
+    for name in ("Konto i osoby", "Gry i sterowanie", "Bieżnia", "Pomoc i diagnostyka"):
+        assert name in headers
+    headers["Bieżnia"].click()
+    assert window.settings_category == "treadmill" and simulator_switch(page).isVisibleTo(page)
+    headers["Gry i sterowanie"].click()  # inna kategoria - najpierw zwija się poprzednia
+    assert window.settings_category == "control" and not simulator_switch(page).isVisibleTo(page)
+    QTest.qWait(gui.th.T_MORPH * 2)  # ...potem rozwija nowa
+    assert window.toggle_btn.isVisibleTo(page)
+    window.rebuild_settings()  # po przebudowie dalej ta sama kategoria
+    assert window.toggle_btn.isVisibleTo(current(window))
+    window.toggle_settings_category("control")  # drugi klik - zwija
+    assert window.settings_category is None
+
+
+def test_toggle_key_shortcut_opens_control_category(
+    window: gui.App, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from PySide6.QtTest import QTest
+
+    started: list[Any] = []
+    monkeypatch.setattr(gui.KeyButton, "start", lambda self: started.append(self))
+    window.change_toggle_key()
+    assert window.settings_category == "control"
+    assert window.toggle_btn.isVisibleTo(current(window))
+    for _ in range(50):  # zaplanowane czekanie na klawisz kończy się w tym teście
+        QTest.qWait(20)
+        if started:
+            break
+    assert started == [window.toggle_btn]
 
 
 def test_settings_can_show_other_mode_without_switching(window: gui.App) -> None:
@@ -902,9 +929,12 @@ def test_clicking_toggle_key_on_card_starts_key_change(
     started: list[Any] = []
     monkeypatch.setattr(gui.KeyButton, "start", lambda self: started.append(self))
     window.toggle_cap.clicked.emit()
-    QTest.qWait(50)
+    for _ in range(50):
+        QTest.qWait(20)
+        if started:
+            break
     assert window.pages.currentIndex() == window.SETTINGS
-    assert started == [window.toggle_btn]  # czeka na klawisz w Ustawieniach > Bieżnia
+    assert started == [window.toggle_btn]  # czeka na klawisz w Ustawieniach > Gry i sterowanie
 
 
 def test_zone_chips_are_information_only(window: gui.App) -> None:
@@ -998,7 +1028,7 @@ def test_update_from_02_keeps_settings(make: Any) -> None:
     Path("dane/ustawienia.json").write_text(json.dumps(old), encoding="utf-8")
     app: gui.App = make()
     assert app.pages.currentIndex() == app.WIZARD
-    assert "Bieżnia ma teraz osoby" in texts(current(app))
+    assert "WalkLevel ma teraz osoby" in texts(current(app))
     assert app.settings["walk_speed"] == 2.0  # przed konfiguratorem działa jak w 0.2
     click(current(app), "Dalej")
     assert "Zostaw moje obecne ustawienia" in texts(current(app))
@@ -1421,6 +1451,7 @@ def scroll_settings(app: gui.App, px: int) -> int:
     assert app.window is not None
     app.window.resize(740, 700)
     app.open_settings()
+    app.show_settings_category("control", animated=False)
     QTest.qWait(50)
     area = current(app).findChild(QScrollArea)
     area.verticalScrollBar().setValue(px)
@@ -1571,6 +1602,7 @@ def test_mode_switch_in_settings_is_animated(window: gui.App) -> None:
     gui.Motion.enabled = True
     try:
         window.open_settings()
+        window.show_settings_category("control", animated=False)
         QTest.qWait(300)
         view = window.mode_view
         cover = window.pages.cover
@@ -1604,8 +1636,10 @@ def test_mode_switch_in_settings_is_animated(window: gui.App) -> None:
         assert len({round(x) for x in pills}) >= 4  # podświetlenie jedzie, nie przeskakuje
         assert len({round(v, 2) for v in progress if 0 < v < 1}) >= 4  # zrzuty płynnie
         assert not cover.isVisible()  # po wszystkim żywy widok, bez przykrycia
-        assert bands and bands[0][2] == window.control_body.height()  # cel = prawdziwa wysokość
-        assert bands[0][2] > bands[0][1] > 0  # pad ma więcej ustawień niż klawisze
+        # przenika tylko część, która się zmienia (wiersze bez zmian i te, które tylko
+        # zjeżdżają, zostają poza pasem) - nigdy więcej niż cała karta
+        assert bands and 0 < bands[0][2] <= window.control_body.height()
+        assert bands[0][2] > bands[0][1] >= 0  # pad ma więcej ustawień niż klawisze
         assert window.step_ladder is not None and window.settings["direction"] == "keyboard"
         assert handler_ms < 400 * slow
     finally:
@@ -1638,6 +1672,7 @@ def test_focus_ring_follows_keyboard_focus_without_global_filter(window: gui.App
     from PySide6.QtGui import QMouseEvent
 
     window.open_settings()
+    window.show_settings_category("control", animated=False)
     btn = window.toggle_btn
     ring = window.ring
     ring._focus_changed(None, btn)  # fokus wrócił po kliknięciu / zmianie strony - bez obwódki
@@ -1840,7 +1875,7 @@ def test_register_then_login_shows_friends_ranking_and_people(
     assert "Ola_77" in texts(current(window))
     window.set_online_tab("people")
     window.tick()
-    assert "Maraton_Max" in texts(current(window))
+    assert buttons(current(window), "Maraton_Max")  # pseudonim = link do profilu
     window.set_online_tab("me")
     assert "Usuń konto" in [b.text() for b in current(window).findChildren(QtWidgets.QPushButton)]
 
@@ -2099,3 +2134,270 @@ def test_games_breakdown_and_new_terms_card(window: gui.App, tmp_path: Path) -> 
     window.tick()
     assert window.account.state.games_allowed
     assert "Zaktualizowaliśmy regulamin konta" not in texts(current(window))
+
+
+def test_levels_card_achievements_trail_and_popups(
+    window: gui.App, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from bieznia.gui.popupy import PopupData, PopupStack
+    from bieznia.historia import Session
+
+    store, history = window.store, window.history
+    assert store is not None and history is not None
+    pushed: list[PopupData] = []
+
+    class Stack:
+        def push(self, data: PopupData) -> None:
+            pushed.append(data)
+
+    monkeypatch.setattr(window, "popup_stack", lambda: Stack())
+    person, profile = store.person.id, store.profile.id
+    t0 = time.time() - 3 * 86400
+    for i in range(3):
+        start = t0 + i * 86400
+        history.save(
+            Session(
+                f"s{i}", person, "Tester", profile, "Domyślny", start, start + 3600, 6000, 4.0, 3600
+            )
+        )
+    window.levels_tick()
+    status = window.levels_status
+    assert status is not None and abs(status.km - 12.0) < 1e-9 and status.level > 1
+    assert window.level_card is not None and not window.level_card.isHidden()
+    assert [p.kicker for p in pushed] == ["Z TWOJEJ HISTORII"]  # historia: jedno podsumowanie
+    assert {"km1", "km2", "km57", "km113"} <= set(history.earned(person))
+
+    start = time.time() - 3600
+    history.save(
+        Session("s9", person, "Tester", profile, "Domyślny", start, start + 3000, 12000, 13.0, 3000)
+    )
+    window.levels_tick()
+    assert any(p.title == "Skrót przez Nether" for p in pushed)  # 25 km: nowy przystanek
+    window.levels_tick()  # bez zmian w historii - bez nowych popupów
+    count = len(pushed)
+    window.levels_tick()
+    assert len(pushed) == count
+
+    window.open_achievements()
+    assert window.pages.currentIndex() == window.ACHIEVEMENTS
+    window.open_trail()
+    assert window.pages.currentIndex() == window.TRAIL
+    assert "TU JESTEŚ" in texts(current(window))
+
+    real = PopupStack(window.t)  # prawdziwe okienko (offscreen) też się buduje i zamyka
+    real.push(pushed[-1])
+    assert len(real.visible) == 1
+    real.clear()
+
+
+def test_online_rows_show_level_from_server_or_own(window: gui.App) -> None:
+    assert window.row_level({"poziom": 12}) == 12
+    assert window.row_level({"poziom": 999}) == 100  # ponad tabelę - najwyższy
+    assert window.row_level({"poziom": True}) is None  # nie liczba
+    assert window.row_level({}) is None
+    window.levels_status = None
+    assert window.row_level({}, mine=True) is None
+    window.refresh_levels(popups=False)
+    status = window.levels_status
+    assert status is not None
+    assert window.row_level({}, mine=True) == status.level  # mój wiersz: poziom z aplikacji
+    panel = window.level_panel(12, xp=None, earned=3)
+    assert window.level_chip(12).text == "12" and panel is not None
+
+
+def test_settings_category_values_update_live(window: gui.App) -> None:
+    window.open_settings()
+    window.show_settings_category("levels", animated=False)
+    assert window.settings_value_labels["levels"].text() == "popupy włączone"
+    window.change("achievement_popups", False)
+    assert window.settings_value_labels["levels"].text() == "bez popupów"
+
+
+def test_tile_grid_min_height_follows_current_layout(window: gui.App) -> None:
+    """Jeden rząd kafelków nie może żądać wysokości dwóch - inaczej zbędny pasek przewijania."""
+    from PySide6.QtWidgets import QApplication
+
+    from bieznia.gui.widgets import StatTile, TileGrid
+
+    tiles = TileGrid(*(StatTile(n) for n in ("Kroki", "Kadencja", "Dystans", "Czas")))
+    tile_h = tiles.tiles[0].minimumSizeHint().height()
+    tiles.resize(tiles.needed_width(4) + 50, 200)
+    tiles.show()
+    QApplication.processEvents()
+    assert tiles.columns == 4
+    assert tiles.minimumSizeHint().height() == tile_h
+    tiles.resize(tiles.needed_width(2), 200)  # wąsko: 2 x 2
+    QApplication.processEvents()
+    assert tiles.columns == 2
+    assert tiles.minimumSizeHint().height() == tile_h * 2 + tiles.grid.spacing()
+    tiles.close()
+
+
+def test_own_name_opens_own_profile_like_others_see_it(window: gui.App, tmp_path: Path) -> None:
+    server = online_window(window, tmp_path)
+    store = window.store
+    assert store is not None
+    window.account.register(
+        "KOD-START", "ola@example.pl", "dlugie-haslo-123", "Ola_77", store.person.id
+    )
+    window.account_changed()
+    window.open_online()
+    window.set_online_tab("ranking")
+    window.tick()
+    own = [b for b in current(window).findChildren(QtWidgets.QPushButton) if b.text() == "Ola_77"]
+    assert own and "Mój profil" in own[0].toolTip()
+    own[0].click()
+    window.tick()
+    assert window.pages.currentIndex() == window.PERSON
+    shown = texts(current(window))
+    assert "To Twój profil" in shown and "Nie jesteście znajomymi" not in shown
+    assert "Osiągnięcia · 1 z" in shown  # nieznane id z nowszej wersji - pominięte
+    assert "POZIOM 2" in shown
+    assert server.users
+    window.open_online()
+    window.set_online_tab("friends")
+    window.tick()
+    card = [
+        w
+        for w in current(window).findChildren(QtWidgets.QWidget)
+        if w.accessibleName() == "Mój profil - jak widzą mnie inni"
+    ]
+    assert card  # karta poziomu w Znajomych też prowadzi do mojego profilu
+    me = buttons(current(window), "Mój profil - jak widzą mnie inni")
+    assert not me or me[0].isEnabled()
+    window.set_online_tab("ranking")
+    window.tick()
+    assert buttons(current(window), "Kot_Bury")  # znajomy w rankingu też klikalny
+
+
+def test_wheel_does_not_scroll_page_by_margin_only(window: gui.App) -> None:
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
+
+    from bieznia.gui.okno import CalmScrollBar
+
+    def wheel(bar: CalmScrollBar) -> None:
+        e = QWheelEvent(
+            QPointF(5, 5),
+            QPointF(5, 5),
+            QPoint(0, 0),
+            QPoint(0, -120),
+            Qt.MouseButton.NoButton,
+            Qt.KeyboardModifier.NoModifier,
+            Qt.ScrollPhase.NoScrollPhase,
+            False,
+        )
+        bar.wheelEvent(e)
+
+    bar = CalmScrollBar()
+    bar.setRange(0, 10)  # tylko dolny margines
+    wheel(bar)
+    assert bar.value() == 0
+    bar.setRange(0, 400)  # prawdziwa treść do przewinięcia
+    wheel(bar)
+    assert bar.value() > 0
+
+
+def test_step_chart_axis_uses_round_values() -> None:
+    from bieznia.gui.ekrany.historia import axis_step
+
+    assert axis_step(4800) == (1000, 5)  # 0, 1, 2, 3, 4, 5 tys. - bez 1,2 i 3,8 tys.
+    assert axis_step(1200) == (500, 3)
+    assert axis_step(15600) == (5000, 4)
+    assert axis_step(0) == (20, 5)
+    for peak in (1, 77, 999, 4321, 87654):
+        step, lines = axis_step(peak)
+        assert 2 <= lines <= 5 and step * lines >= peak
+        assert str(step).rstrip("0") in ("1", "2", "5")
+
+
+def test_axis_thousands_and_caps_keep_accents(window: gui.App) -> None:
+    from bieznia.gui.ekrany.historia import thousands
+    from bieznia.gui.odznaki import caps
+
+    assert (thousands(5000), thousands(1500)) == ("5", "1,5")
+    assert caps("15 600 / 20 000 KROKÓW", "#fff").contentsMargins().top() > 0  # kreska nad Ó
+    assert caps("329 / 377 KM", "#fff").contentsMargins().top() == 0
+
+
+def test_popup_sounds_are_own_short_files(window: gui.App, no_real_sound: list[Any]) -> None:
+    import sys
+    import wave
+
+    from bieznia.gui import popupy
+
+    for kind, longest in (("achievement", 1.0), ("level", 1.3)):
+        path = popupy.sound_path(kind)
+        with wave.open(str(path)) as w:
+            assert w.getframerate() == 44100 and w.getnchannels() == 1
+            assert 0.4 < w.getnframes() / w.getframerate() <= longest  # krótki
+    assert popupy.sound_path("achievement") != popupy.sound_path("level")
+    window.change("achievement_sound", True)  # włączenie = od razu próbka
+    if sys.platform == "win32":
+        assert no_real_sound and str(no_real_sound[-1][0]).endswith("osiagniecie.wav")
+    window.change("achievement_sound", False)
+
+
+def test_person_page_opens_no_stray_windows(window: gui.App) -> None:
+    """Wiersze osiągnięć ukryte za „Pokaż wszystkie” nie mogą mignąć jako osobne okienka."""
+    from PySide6.QtCore import QEvent, QObject
+    from PySide6.QtWidgets import QApplication, QWidget
+
+    shown: list[str] = []
+
+    class Spy(QObject):
+        def eventFilter(self, obj: QObject, e: QEvent) -> bool:
+            if e.type() == QEvent.Type.Show and isinstance(obj, QWidget) and obj.isWindow():
+                shown.append(type(obj).__name__)
+            return False
+
+    spy = Spy()
+    app = QApplication.instance()
+    assert app is not None
+    app.installEventFilter(spy)
+    window.account.state.user_id = "me1"
+    ids = ["km1", "km2", "s3", "seria3", "d7", "rano"]
+    window.online["person"] = {
+        "id": "me1",
+        "name": "Ola_77",
+        "osiagniecia_lista": [{"id": i, "zdobyte_utc_s": 1.7e9 + n} for n, i in enumerate(ids)],
+    }
+    try:
+        page = window.build_online_person_page()
+    finally:
+        app.removeEventFilter(spy)
+    assert shown == []
+    assert "Pokaż wszystkie (6)" in [b.text() for b in page.findChildren(QtWidgets.QPushButton)]
+    page.deleteLater()
+
+
+def test_morph_keeps_unchanged_rows_and_never_dims(window: gui.App) -> None:
+    """Przenikanie karty: wiersze bez zmian zostają żywe, w połowie animacji obraz nie ciemnieje
+    (dawniej stary gasł, zanim pojawił się nowy - mignięcie przy każdym kliknięciu)."""
+    from PySide6.QtGui import QColor, QImage, QPainter, QPixmap
+    from PySide6.QtWidgets import QWidget
+
+    from bieznia.gui.okno import Cover, same_rows
+
+    old, new = QPixmap(100, 200), QPixmap(100, 200)
+    old.fill(QColor("#303030"))
+    new.fill(QColor("#303030"))
+    with QPainter(new) as p:
+        p.fillRect(0, 120, 100, 80, QColor("#303030").lighter(160))
+    assert 110 <= same_rows(old, new, 0, 200) < 120  # identyczne do zmienionego wiersza
+    assert same_rows(old, old, 0, 200) >= 198
+
+    host = QWidget()
+    host.resize(100, 200)
+    cover = Cover(host, host)
+    cover.resize(100, 200)
+    cover.old, cover.new = old, new
+    cover.band = (0, 200, 200)
+    cover.progress = 0.5
+    shot = QImage(100, 200, QImage.Format.Format_ARGB32)
+    shot.fill(QColor("black"))
+    with QPainter(shot) as p:
+        cover._paint_band(p)
+    assert QColor(shot.pixel(50, 40)).lightness() == QColor("#303030").lightness()  # bez zmian
+    mid = QColor(shot.pixel(50, 160)).lightness()
+    assert QColor("#303030").lightness() <= mid  # w połowie: między starym a nowym, nie ciemniej

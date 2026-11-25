@@ -19,3 +19,6 @@ dist/
 *.docx
 .narzedzia/
 build-log.txt
+
+# podgląd maili (generuje strona/maile/zbuduj.py)
+/strona/maile/podglad/

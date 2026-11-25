@@ -29,7 +29,7 @@ SAVE_EVERY_S = 60.0
 MIN_SESSION_S = 10.0  # krótsze nie trafiają do historii (przypadkowy ruch taśmy)
 DELETED_PERSON = "Usunięte osoby"
 
-SCHEMA_VERSION = 3  # 3: wysłane na konto online i sesje ukryte online
+SCHEMA_VERSION = 4  # 3: wysłane i ukryte online; 4: tryb sesji, osiągnięcia i poziom osoby
 VISIBILITY = ("prywatna", "znajomi", "publiczna")
 SOURCES = ("bieznia", "symulator")
 
@@ -55,6 +55,7 @@ COLUMNS: tuple[tuple[str, str], ...] = (
     ("widocznosc", "TEXT NOT NULL DEFAULT 'prywatna'"),
     ("strefa_min", "INTEGER NOT NULL DEFAULT 0"),
     ("zmieniono_utc_s", "REAL NOT NULL DEFAULT 0"),
+    ("tryb", "TEXT NOT NULL DEFAULT 'gra'"),  # gra albo trening (tryb Trening, bez gry)
 )
 COLUMN_NAMES = tuple(name for name, _ in COLUMNS)
 _SELECT = f"SELECT {', '.join(COLUMN_NAMES)} FROM sesje"
@@ -72,6 +73,17 @@ CREATE TABLE IF NOT EXISTS wyslane (
 );
 CREATE TABLE IF NOT EXISTS ukryte_online (
     id TEXT PRIMARY KEY
+);
+CREATE TABLE IF NOT EXISTS osiagniecia (
+    osoba TEXT NOT NULL,
+    id TEXT NOT NULL,
+    zdobyte_utc_s REAL NOT NULL,
+    wersja INTEGER NOT NULL,
+    PRIMARY KEY (osoba, id)
+);
+CREATE TABLE IF NOT EXISTS poziom_osoby (
+    osoba TEXT PRIMARY KEY,
+    poziom INTEGER NOT NULL
 );
 """
 
@@ -100,7 +112,7 @@ def migrate(db: sqlite3.Connection) -> None:
     if version >= SCHEMA_VERSION:
         return
     with db:
-        if exists and version < 2:
+        if exists:
             have = {row[1] for row in db.execute("PRAGMA table_info(sesje)")}
             if "start" in have:
                 db.execute("ALTER TABLE sesje RENAME COLUMN start TO start_utc_s")
@@ -109,8 +121,11 @@ def migrate(db: sqlite3.Connection) -> None:
             for name, kind in COLUMNS:
                 if name not in have:
                     db.execute(f"ALTER TABLE sesje ADD COLUMN {name} {kind}")
-            db.execute("UPDATE sesje SET zmieniono_utc_s = koniec_utc_s WHERE zmieniono_utc_s = 0")
-            log.info("Historia: baza przeniesiona do wersji %d", SCHEMA_VERSION)
+            if version < 2:
+                db.execute(
+                    "UPDATE sesje SET zmieniono_utc_s = koniec_utc_s WHERE zmieniono_utc_s = 0"
+                )
+            log.info("Historia: baza z wersji %d przeniesiona do %d", version, SCHEMA_VERSION)
         db.executescript(SCHEMA)
         db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
 
@@ -148,6 +163,7 @@ class Session:
     visibility: str = "prywatna"
     tz_offset_min: int = 0
     updated: float = 0.0
+    mode: str = "gra"  # gra albo trening
 
     @property
     def avg_kmh(self) -> float:
@@ -240,6 +256,33 @@ class History:
                 self.db.execute("DELETE FROM ukryte_online WHERE id = ?", (session_id,))
             self.db.execute("DELETE FROM wyslane WHERE id = ?", (session_id,))
 
+    # --- poziomy i osiągnięcia -----------------------------------------------------------
+
+    def earned(self, person: str) -> dict[str, float]:
+        """Zdobyte osiągnięcia osoby (id -> czas zdobycia). Raz zapisanych nie usuwamy."""
+        rows = self.db.execute(
+            "SELECT id, zdobyte_utc_s FROM osiagniecia WHERE osoba = ?", (person,)
+        )
+        return {str(r[0]): float(r[1]) for r in rows}
+
+    def add_earned(self, person: str, items: dict[str, float], version: int) -> None:
+        with self.db:
+            self.db.executemany(
+                "INSERT OR IGNORE INTO osiagniecia VALUES (?, ?, ?, ?)",
+                [(person, k, at, version) for k, at in items.items()],
+            )
+
+    def shown_level(self, person: str) -> int | None:
+        """Ostatni poziom pokazany osobie (None - jeszcze nigdy: pierwsze liczenie z historii)."""
+        row = self.db.execute(
+            "SELECT poziom FROM poziom_osoby WHERE osoba = ?", (person,)
+        ).fetchone()
+        return int(row[0]) if row else None
+
+    def set_shown_level(self, person: str, level: int) -> None:
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO poziom_osoby VALUES (?, ?)", (person, level))
+
     def schema_version(self) -> int:
         return int(self.db.execute("PRAGMA user_version").fetchone()[0])
 
@@ -297,6 +340,28 @@ class History:
                 out[day][name] = out[day].get(name, 0) + s.steps
         return list(out.items())
 
+    def by_hour(
+        self, person: str | None = None, key: str = "profile", now: float | None = None
+    ) -> list[tuple[str, dict[str, int]]]:
+        """Kroki dzisiaj godzina po godzinie: [("HH", {profil_lub_osoba: kroki})]. Sesja
+        przez kilka godzin dzieli kroki proporcjonalnie do czasu w każdej godzinie."""
+        today = datetime.fromtimestamp(now or time.time()).date()
+        day_start = datetime.combine(today, datetime.min.time()).timestamp()
+        out: list[dict[str, int]] = [{} for _ in range(24)]
+        for s in self.sessions(day_start - 86400, person):
+            name = s.profile_name if key == "profile" else s.person_name
+            start, end = max(s.start, day_start), max(s.end, s.start)
+            span = max(end - s.start, 1.0)
+            for hour in range(24):
+                h0 = day_start + hour * 3600
+                overlap = min(end, h0 + 3600) - max(start, h0)
+                if overlap <= 0:
+                    continue
+                share = s.steps if end - s.start < 1.0 else round(s.steps * overlap / span)
+                if share:
+                    out[hour][name] = out[hour].get(name, 0) + int(share)
+        return [(f"{hour:02d}", parts) for hour, parts in enumerate(out)]
+
     def by_group(
         self, since: float, person: str | None = None, key: str = "profile"
     ) -> list[tuple[str, Totals]]:
@@ -342,8 +407,12 @@ class History:
         with self.db:
             if person is None:
                 self.db.execute("DELETE FROM sesje")
+                self.db.execute("DELETE FROM osiagniecia")
+                self.db.execute("DELETE FROM poziom_osoby")
             else:
                 self.db.execute("DELETE FROM sesje WHERE osoba = ?", (person,))
+                self.db.execute("DELETE FROM osiagniecia WHERE osoba = ?", (person,))
+                self.db.execute("DELETE FROM poziom_osoby WHERE osoba = ?", (person,))
 
 
 class SessionTracker:
@@ -360,6 +429,7 @@ class SessionTracker:
         self._saved_at = 0.0
         self.owner: tuple[str, str, str, str] = ("", "", "", "")  # osoba, nazwa, profil, nazwa
         self.origin = SessionSource()
+        self.mode = "gra"
 
     def set_owner(self, person: str, person_name: str, profile: str, profile_name: str) -> None:
         """Zmiana osoby albo profilu kończy sesję poprzedniego."""
@@ -367,6 +437,12 @@ class SessionTracker:
         if new != self.owner:
             self.finish()
             self.owner = new
+
+    def set_mode(self, mode: str) -> None:
+        """Gra albo trening (tryb Trening) - zmiana kończy bieżącą sesję."""
+        if mode != self.mode:
+            self.finish()
+            self.mode = mode
 
     def set_source(self, origin: SessionSource) -> None:
         """Inna bieżnia (albo symulator) to nowa sesja - wyniki nie mieszają się między nimi."""
@@ -399,6 +475,7 @@ class SessionTracker:
                 self.current = Session(uuid7(), person, pname, profile, prname, now, now)
                 self.current.with_source(self.origin)
                 self.current.tz_offset_min = utc_offset_min(now)
+                self.current.mode = self.mode
         if self.current is None:
             return
         self.current.steps += max(0, d_steps)

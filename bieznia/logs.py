@@ -14,6 +14,7 @@ from pathlib import Path
 from types import TracebackType
 
 FORMAT = "%(asctime)s %(levelname)-7s %(name)s: %(message)s"
+FILE_DATEFMT = "%Y-%m-%d %H:%M:%S"  # w pliku z datą: zgłoszenie bierze dokładnie wybrany okres
 
 
 def _file(path: Path, level: int) -> RotatingFileHandler:
@@ -31,7 +32,9 @@ def setup_logging(
     global _raw_handler
     log_dir = (root or Path.cwd()) / "logs"
     log_dir.mkdir(exist_ok=True)
-    handlers: list[logging.Handler] = [_file(log_dir / f"{name}.log", logging.INFO)]
+    main_file = _file(log_dir / f"{name}.log", logging.INFO)
+    main_file.setFormatter(logging.Formatter(FORMAT, FILE_DATEFMT))
+    handlers: list[logging.Handler] = [main_file]
     if console and sys.stderr is not None:  # exe bez konsoli nie ma stderr
         stream = logging.StreamHandler()
         stream.setLevel(logging.INFO)
@@ -46,7 +49,7 @@ def setup_logging(
             ble.removeHandler(_raw_handler)
         _raw_handler = _file(log_dir / "bluetooth.log", logging.DEBUG)
         _raw_handler.setFormatter(
-            logging.Formatter("%(asctime)s.%(msecs)03d %(message)s", "%H:%M:%S")
+            logging.Formatter("%(asctime)s.%(msecs)03d %(message)s", FILE_DATEFMT)
         )
         ble.addHandler(_raw_handler)
         set_detailed(detailed)

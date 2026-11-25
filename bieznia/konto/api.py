@@ -334,7 +334,7 @@ class Client:
         return list(result.get("miejsca") or [])
 
     def registration_code(self) -> dict[str, Any]:
-        """Kod dla nowej osoby („Zaproś na Bieżnię”): jednorazowy, 14 dni. Kto założy z niego
+        """Kod dla nowej osoby („Zaproś do WalkLevel”): jednorazowy, 14 dni. Kto założy z niego
         konto, od razu jest znajomym zapraszającego."""
         return dict(self.call("POST", "/api/bieznia/kod-rejestracji") or {})
 

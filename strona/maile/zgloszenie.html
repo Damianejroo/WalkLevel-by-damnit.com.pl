@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>Zgłoszenie {{NUMER}}</title>
+<style>
+  @media (max-width: 600px) {
+    .wrap { width: 100% !important; }
+    .pad { padding-left: 24px !important; padding-right: 24px !important; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .outer { background: #0e0e0d !important; }
+    .letter { background: #1b1b19 !important; }
+    .t1 { color: #ecebe6 !important; }
+    .t2 { color: #a5a29a !important; }
+    .t3 { color: #77756e !important; }
+    .ln { color: #8fc2b0 !important; }
+    .rule { background: #2e2d2a !important; }
+    .popup { background: #262624 !important; }
+  }
+</style>
+</head>
+<body class="outer" style="margin:0;padding:0;background:#f3f2ee;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+  Nowe zgłoszenie z aplikacji WalkLevel.&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+<table role="presentation" class="outer" width="100%" cellpadding="0" cellspacing="0"
+       border="0" bgcolor="#f3f2ee" style="background:#f3f2ee;">
+  <tr><td align="center" style="padding:36px 12px 28px;">
+    <table role="presentation" class="wrap letter" width="560" cellpadding="0" cellspacing="0"
+           border="0" bgcolor="#ffffff"
+           style="width:560px;max-width:560px;background:#ffffff;border-radius:12px;">
+      <tr><td class="pad" align="left" style="padding:28px 40px 0;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td valign="middle"><img src="https://bieznia.damnit-live.pl/maile/logo.png" width="36" height="36" alt=""
+                style="display:block;border:0;border-radius:7px;"></td>
+            <td valign="middle" style="padding-left:10px;">
+              <div class="t1" style="font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:17px;line-height:20px;
+                   font-weight:700;color:#1b1b19;">WalkLevel</div>
+              <div class="t3" style="font-family:Bahnschrift,'Segoe UI', Helvetica, Arial, sans-serif;font-size:11px;
+                   line-height:15px;letter-spacing:1.5px;color:#8a877e;">CHODZISZ W REALU, IDZIESZ W GRZE</div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+      <tr><td class="pad" align="left" style="padding:28px 40px 32px;"><h1 class="t1" style="margin:0 0 16px;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:24px;line-height:30px;font-weight:700;color:#1b1b19;">Nowe zgłoszenie</h1><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 8px;">
+<tr>
+  <td class="t2" width="110" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size:14px;color:#5c5951;">Numer</td>
+  <td class="t1" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:15px;
+      color:#1b1b19;"><span style="font-family:Consolas, 'Courier New', monospace;">{{NUMER}}</span></td>
+</tr>
+<tr>
+  <td class="t2" width="110" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size:14px;color:#5c5951;">Wersja</td>
+  <td class="t1" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:15px;
+      color:#1b1b19;">{{WERSJA}}</td>
+</tr>
+<tr>
+  <td class="t2" width="110" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size:14px;color:#5c5951;">Kontakt</td>
+  <td class="t1" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:15px;
+      color:#1b1b19;">{{KONTAKT}}</td>
+</tr>
+<tr>
+  <td class="t2" width="110" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size:14px;color:#5c5951;">Logi</td>
+  <td class="t1" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:15px;
+      color:#1b1b19;">{{OKRES}}</td>
+</tr>
+<tr>
+  <td class="t2" width="110" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size:14px;color:#5c5951;">Paczka</td>
+  <td class="t1" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:15px;
+      color:#1b1b19;">{{ROZMIAR}}, w załączniku</td>
+</tr>
+<tr>
+  <td class="t2" width="110" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size:14px;color:#5c5951;">Wysłano</td>
+  <td class="t1" valign="top" style="padding:7px 0;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:15px;
+      color:#1b1b19;">{{CZAS}}</td>
+</tr></table><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 20px;"><tr><td class="rule" height="1" bgcolor="#e4e1d8" style="background:#e4e1d8;font-size:0;line-height:0;">&nbsp;</td></tr></table><p class="t1" style="margin:0 0 20px;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:16px;line-height:26px;color:#1b1b19;white-space:pre-wrap;">{{OPIS}}</p><p class="t2" style="margin:0 0 0px;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:14px;line-height:22px;color:#5c5951;">Opis i paczka pochodzą od użytkownika, otwieraj załącznik ostrożnie. Serwer nie przechowuje ani treści zgłoszenia, ani paczki.</p></td></tr>
+    </table>
+    <table role="presentation" class="wrap" width="560" cellpadding="0" cellspacing="0"
+           border="0" style="width:560px;max-width:560px;">
+      <tr><td class="pad" align="left" style="padding:18px 40px 0;"><p class="t3" style="margin:0 0 6px;font-family:'Segoe UI', Helvetica, Arial, sans-serif;font-size:12px;line-height:18px;color:#8a877e;">Wysłane z formularza „Zgłoś problem” w aplikacji WalkLevel.</p></td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

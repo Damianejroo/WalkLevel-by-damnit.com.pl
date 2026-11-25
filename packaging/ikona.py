@@ -1,7 +1,7 @@
 """Generuje ikonę aplikacji: packaging/bieznia.ico (16-256 px) i bieznia/gui/ikona.png.
 
 Źródło: packaging/ikona-zrodlo.png (wygenerowana przez GPT image generation na podstawie
-opisu z kolorami aplikacji: prędkościomierz nad taśmą bieżni). Bez źródła ikona jest
+opisu WalkLevel: pad z idącą postacią i szewronem awansu). Bez źródła ikona jest
 rysowana w kodzie (funkcja draw) w tym samym motywie.
 Uruchom: uv run python packaging/ikona.py
 """

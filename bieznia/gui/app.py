@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (
 
 from bieznia import (
     APP_NAME,
+    CONTACT,
     TITLE,
     __version__,
     aktualizacje,
@@ -57,6 +58,7 @@ from bieznia.gui.ekrany.konto import AccountScreen
 from bieznia.gui.ekrany.kopia import CopyScreen
 from bieznia.gui.ekrany.modele import ModelsScreen
 from bieznia.gui.ekrany.osoba import PeopleScreen, Wizard
+from bieznia.gui.ekrany.poziomy import LevelsScreen, OnlineLevels
 from bieznia.gui.ekrany.profil import ProfileScreen
 from bieznia.gui.ekrany.sterowanie import (
     ControlScreen,
@@ -73,6 +75,7 @@ from bieznia.gui.okno import (
     page_layout,
     settle_layout,
 )
+from bieznia.gui.popupy import play_sound
 from bieznia.gui.theme import Theme
 from bieznia.gui.widgets import (
     FloatingToggle,
@@ -170,6 +173,8 @@ def defaults_from(config: dict[str, Any]) -> dict[str, Any]:
         "training_level": 0,
         "show_person_switch": True,
         "show_profile_switch": True,
+        "achievement_popups": bool(ui.get("achievement_popups", True)),
+        "achievement_sound": bool(ui.get("achievement_sound", False)),
     }
 
 
@@ -217,9 +222,12 @@ class App(
     ControlScreen,
     ModelsScreen,
     AccountScreen,
+    LevelsScreen,
+    OnlineLevels,
 ):
     (MAIN, DEVICES, SETTINGS, LOG, REPORT, PROFILE, WIZARD, HISTORY, EXPORT, IMPORT) = range(10)
     MODELS, ACCOUNT, ONLINE, PERSON, SESSION = range(10, 15)
+    ACHIEVEMENTS, TRAIL = 15, 16
 
     # atrybuty ustawiane przez ekrany (mixiny)
     toggle_key: Key
@@ -229,7 +237,7 @@ class App(
     belt_target: float | None
     device: DeviceInfo | None
     devices: list[FoundDevice]
-    advanced_open: bool
+    settings_category: str | None
     walk_btn: KeyButton | None
     run_btn: KeyButton | None
     toggle_btn: KeyButton
@@ -286,7 +294,7 @@ class App(
             self.legacy = dane.legacy_settings()
             old = {k: v for k, v in (self.legacy or {}).items() if k in self.defaults}
             self.settings = normalize({**self.defaults, **old})
-        self.advanced_open = False
+        self.settings_category = None
         self.settings_view = self.settings["direction"]
         self.history_scope = "me"
         self.history_range = "week"
@@ -477,7 +485,7 @@ class App(
         self.pages.addWidget(self.build_settings())
         self.pages.addWidget(self.build_log())
         self.pages.addWidget(self.build_report())
-        for _ in range(self.SESSION - self.REPORT):  # profil, konfigurator, historia, kopia…
+        for _ in range(self.TRAIL - self.REPORT):  # profil, konfigurator, historia, kopia…
             placeholder = QWidget()
             placeholder.setObjectName("page")
             self.pages.addWidget(placeholder)
@@ -577,7 +585,7 @@ class App(
             if area is not None and scroll:
                 area.verticalScrollBar().setValue(scroll)
 
-    def morph_card(self, body: QWidget, rebuild: Any) -> None:
+    def morph_card(self, body: QWidget, rebuild: Any, ms: int = th.T_MORPH) -> None:
         """Przebudowa fragmentu ekranu (np. karty sterowania) z płynną zmianą wysokości:
         układ od razu docelowy, a na ekranie animacja zrzutów (Cover.morph)."""
         cover = self.pages.cover
@@ -592,7 +600,9 @@ class App(
             rebuild()
             return
         assert cover is not None
-        top = body.mapTo(self.pages, QPoint(0, 0)).y()
+        origin = body.mapTo(self.pages, QPoint(0, 0))
+        top = origin.y()
+        span = (origin.x(), origin.x() + body.width())
         old_h = body.height()
         cover.capture(self.pages.background)
         rebuild()
@@ -612,9 +622,9 @@ class App(
                 if body.height() == last:
                     break
                 last = body.height()
-        cover.morph(top, old_h, body.height(), th.T_MORPH)
+        cover.morph(top, old_h, body.height(), ms, span)
 
-    def quietly(self, change: Any, ms: int = th.T_COLOR) -> None:
+    def quietly(self, change: Any, ms: int = th.T_COLOR, snappy: bool = False) -> None:
         """Zmiana układu bez mrugania: zrzut przed, zmiana i ułożenie pod spodem, przenikanie."""
         cover = self.pages.cover if (self.window is not None and self.window.isVisible()) else None
         if cover is not None:
@@ -626,7 +636,7 @@ class App(
                 settle_layout(current)
         finally:
             if cover is not None:
-                cover.reveal(ms)
+                cover.reveal(ms, snappy=snappy)
 
     def go_back(self, index: int) -> None:
         if index == self.SETTINGS:
@@ -696,6 +706,7 @@ class App(
             "Np. bieżnia rozłącza się po kilku minutach albo postać nie biegnie w grze."
         )
         self.report_text.setAccessibleName("Opis problemu")
+        self.report_text.setObjectName("prose")  # zwykłe pismo, nie krój logów
         self.report_text.setMinimumHeight(120)
         lay.addWidget(self.report_text)
         lay.addWidget(label("Kontakt (opcjonalnie)"))
@@ -704,15 +715,32 @@ class App(
         self.report_contact.setAccessibleName("Kontakt")
         self.report_contact.setFixedHeight(th.CONTROL_H)
         lay.addWidget(self.report_contact)
+        lay.addWidget(label("Logi z okresu"))
+        self.report_period = Segmented(
+            [(str(int(s)), name) for s, name in zgloszenia.PERIODS],
+            str(zgloszenia.RECENT_S),
+            "Okres logów w zgłoszeniu",
+        )
+        lay.addWidget(self.report_period)
+        period_hint = label(
+            "Wybierz, kiedy wystąpił problem. Paczka ma najwyżej 2 MB - przy dłuższym okresie"
+            " i dużych logach trafia do niej najnowsza część.",
+            "small",
+        )
+        period_hint.setWordWrap(True)
+        lay.addWidget(period_hint)
         box = card()
         bl = QVBoxLayout(box)
         bl.setContentsMargins(14, 12, 14, 14)
         bl.addWidget(label("Co zostanie dołączone", "section"))
         for line in (
-            "- logi aplikacji i Bluetooth z ostatnich 6 godzin i ich podsumowanie,",
+            "- logi aplikacji i Bluetooth z wybranego okresu i ich podsumowanie,",
             "- ostatni raport diagnostyczny, jeśli go zapisano,",
             "- wersja aplikacji i Windows, ustawienia (progi, wybrana bieżnia).",
-            "Bez haseł, plików z komputera, wciśniętych klawiszy i historii kroków.",
+            "Bez haseł, plików z komputera, wciśniętych klawiszy i historii kroków. Ścieżki"
+            " z nazwą użytkownika Windows i adresy innych urządzeń Bluetooth są usuwane.",
+            "Zgłoszenie idzie przez serwer bieznia.damnit-live.pl prosto na skrzynkę autora;"
+            " serwer nie zachowuje treści ani paczki.",
         ):
             item = label(line, "small")
             item.setWordWrap(True)
@@ -726,6 +754,10 @@ class App(
         self.report_send = button(text, "primary")
         self.report_send.clicked.connect(self.send_report)
         lay.addWidget(self.report_send)
+        self.report_save = button("Zapisz paczkę na dysk")
+        self.report_save.setToolTip("Paczka z logami do wysłania samodzielnie, np. e-mailem")
+        self.report_save.clicked.connect(self.save_report)
+        lay.addWidget(self.report_save)
         lay.addStretch(1)
         return page
 
@@ -796,13 +828,17 @@ class App(
     def change(self, key: str, value: Any) -> None:
         self.settings[key] = value
         self.save()
+        self.render_settings_values()  # wartości przy nagłówkach kategorii na żywo
+        if key == "achievement_sound" and value:
+            play_sound("achievement")  # od razu słychać, jak to brzmi
 
     def apply_look(self) -> None:
         """Motyw, kolor profilu i wielkość tekstu na żywo - bez przebudowy okna."""
         self.t = self.make_theme()
         if self.window is None:
             return
-        self.quietly(self._restyle, th.T_PANEL_IN)  # motyw przenika, zamiast przeskakiwać
+        # motyw przenika, zamiast przeskakiwać - krótko i od razu większość zmiany
+        self.quietly(self._restyle, th.T_THEME, snappy=True)
 
     def _restyle(self) -> None:
         assert self.window is not None
@@ -823,6 +859,7 @@ class App(
         self.render_update_label()
         self.render_header()
         self.render_zones()
+        self.render_level_card()
         if self.pages.currentIndex() == self.SETTINGS:
             self.rebuild_settings()  # kolory zapisane w stylach kart
         self.pages.background = self.t.bg
@@ -1017,14 +1054,44 @@ class App(
         self.report_busy = True
         self.report_send.setEnabled(False)
         self.report_status.setText("Przygotowuję paczkę z logami…")
-        self.run_task(self.report_task, description, self.report_contact.text())
+        self.run_task(
+            self.report_task, description, self.report_contact.text(), False, self.report_period_s()
+        )
 
-    def report_task(self, description: str, contact: str) -> None:
+    def save_report(self) -> None:
+        if self.report_busy:
+            return
+        description = self.report_text.toPlainText().strip() or "(bez opisu)"
+        self.report_busy = True
+        self.report_send.setEnabled(False)
+        self.report_status.setText("Przygotowuję paczkę z logami…")
+        self.run_task(
+            self.report_task, description, self.report_contact.text(), True, self.report_period_s()
+        )
+
+    def report_period_s(self) -> float:
         try:
-            report = zgloszenia.build_report(description, contact)
-            if self.report_endpoint:
-                zgloszenia.send_report(report, self.report_endpoint, description, contact)
-                self.tasks.put(("report_sent", "Wysłano - dziękuję! Autor dostał opis i logi."))
+            return float(self.report_period.value())
+        except (AttributeError, ValueError):
+            return float(zgloszenia.RECENT_S)
+
+    def report_task(
+        self,
+        description: str,
+        contact: str,
+        save_only: bool = False,
+        period_s: float = zgloszenia.RECENT_S,
+    ) -> None:
+        try:
+            report = zgloszenia.build_report(description, contact, period_s=period_s)
+            if save_only:
+                self.tasks.put(("report_saved", report))
+            elif self.report_endpoint:
+                number = zgloszenia.send_report(
+                    report, self.report_endpoint, description, contact, period_s=period_s
+                )
+                done = f"Wysłano zgłoszenie nr {number}" if number else "Wysłano zgłoszenie"
+                self.tasks.put(("report_sent", f"{done} - dziękuję! Autor dostał opis i logi."))
             else:
                 self.tasks.put(("report_email", report))
         except zgloszenia.ReportError as exc:
@@ -1083,6 +1150,14 @@ class App(
                 "Przeciągnij plik do wiadomości i wyślij."
             )
             zgloszenia.open_email(self.report_text.toPlainText(), data)
+        elif kind == "report_saved":
+            self.report_busy = False
+            self.report_send.setEnabled(True)
+            self.report_status.setText(
+                f"Zapisano paczkę {data.name} (folder dane/zgloszenia otworzył się obok)."
+                f" Możesz ją wysłać e-mailem na {CONTACT}."
+            )
+            zgloszenia.show_in_folder(data)
         elif kind == "report_error":
             self.report_busy = False
             self.report_send.setEnabled(True)
@@ -1218,6 +1293,7 @@ class App(
             self.stat_time.set(f"{minutes}:{seconds:02d}")
             if self.tracker is not None and state.live:
                 try:
+                    self.tracker.set_mode("trening" if direction == "training" else "gra")
                     self.tracker.update(c.speed, state.steps, state.distance_km, state.active_s)
                 except Exception:  # historia nie może zatrzymać sterowania
                     log.exception("Historia kroków")
@@ -1225,6 +1301,8 @@ class App(
             self.render_link()
             self.render_pad_status()
             self.account_tick(time.monotonic(), c.speed, state.steps, state.active_s)
+        if self.frame % 40 == 1:  # co ok. 2 s: nowa sesja w historii -> poziom i osiągnięcia
+            self.levels_tick()
 
     def request_stop(self, *_args: Any) -> None:
         self.stop_requested = True  # wywoływane z obsługi sygnału - właściwe zamknięcie w tick()

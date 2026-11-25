@@ -1,0 +1,16 @@
+Temat: [WalkLevel] Zgłoszenie {{NUMER}} · wersja {{WERSJA}}
+
+Nowe zgłoszenie z aplikacji WalkLevel
+
+Numer:    {{NUMER}}
+Wersja:   {{WERSJA}}
+Kontakt:  {{KONTAKT}}
+Logi:     {{OKRES}}
+Paczka:   {{ROZMIAR}}, w załączniku
+Wysłano:  {{CZAS}}
+
+{{OPIS}}
+
+--
+Opis i paczka pochodzą od użytkownika, otwieraj załącznik ostrożnie.
+Serwer nie przechowuje ani treści zgłoszenia, ani paczki.

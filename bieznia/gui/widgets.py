@@ -720,8 +720,11 @@ class TileGrid(QWidget):
         return widest * columns + self.grid.spacing() * (columns - 1)
 
     def minimumSizeHint(self) -> QSize:
+        """Szerokość: najwęższy układ (2 kolumny). Wysokość: dla układu, który jest teraz -
+        inaczej jeden rząd kafelków udaje dwa i strona dostaje zbędny pasek przewijania."""
         two = min(2, len(self.tiles))
-        rows = -(-len(self.tiles) // two)
+        columns = max(1, self.columns or two)
+        rows = -(-len(self.tiles) // columns)
         tile_h = max(t.minimumSizeHint().height() for t in self.tiles)
         return QSize(self.needed_width(two), tile_h * rows + self.grid.spacing() * (rows - 1))
 
@@ -765,7 +768,7 @@ class FloatingToggle(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setFixedSize(self.SIZE, self.SIZE)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setWindowTitle("Bieżnia - sterowanie")
+        self.setWindowTitle("WalkLevel - sterowanie")
         self.enabled = False
         self.mode = "idle"
         self.speed = 0.0

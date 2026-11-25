@@ -37,7 +37,7 @@ ul { margin: 6px 0; padding-left: 20px; }
 li { margin: 3px 0; }
 a { color: var(--accent); }
 nav { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 15px; }
-.short { border-left: 3px solid var(--accent); padding-left: 12px; }
+.short li { margin: 6px 0; }
 footer { color: var(--muted); font-size: 14px; }
 </style>
 </head>
@@ -74,7 +74,7 @@ footer { color: var(--muted); font-size: 14px; }
   <ul>
     <li>Konto zakładasz kodem zaproszenia od osoby, która już ma konto, albo ode mnie. Osoba, która założy konto z Twojego kodu, zostaje od razu Twoim znajomym (i Ty jej) - każde z Was może tę znajomość usunąć.</li>
     <li>Znajomego z kontem zapraszasz po pseudonimie; znajomość powstaje dopiero, gdy druga strona przyjmie zaproszenie. Osoby z profilem ukrytym nie da się znaleźć ani zaprosić.</li>
-    <li>Logujesz się e-mailem i hasłem. E-mail służy tylko do logowania (i resetu hasła, gdy ta funkcja ruszy) - nigdy do reklam.</li>
+    <li>Logujesz się e-mailem i hasłem. E-mail służy tylko do logowania, potwierdzenia adresu i resetu hasła - nigdy do reklam.</li>
     <li>Konto może założyć osoba, która ma co najmniej 16 lat; osoba młodsza - tylko za zgodą rodzica lub opiekuna.</li>
     <li>Hasło jest tylko Twoje i odpowiadasz za jego udostępnienie. Nigdy nie poproszę Cię o hasło. Dane konta aplikacja wysyła wyłącznie na adres bieznia.damnit-live.pl.</li>
     <li>Jedno konto należy do jednej osoby w aplikacji. Na jednym komputerze może być kilka osób z własnymi kontami i osoby bez konta.</li>
@@ -137,8 +137,9 @@ footer { color: var(--muted); font-size: 14px; }
   <h3>Gdzie i jak długo</h3>
   <ul>
     <li>Serwer: VPS w OVHcloud, centrum danych w Polsce.</li>
+    <li>Poczta: wiadomości wysyła skrzynka no-reply@damnit-live.pl w OVHcloud (ten sam dostawca co serwer). Wysyłam wyłącznie wiadomości techniczne: link potwierdzający adres i link do ustawienia nowego hasła.</li>
     <li>Kopie zapasowe: szyfrowane na serwerze przed wysłaniem i przechowywane w OneDrive (Microsoft); Microsoft nie ma klucza. Kopie bazy kont są trzymane 30 dni.</li>
-    <li>OVHcloud i Microsoft przetwarzają dane na moje zlecenie. Danych nie sprzedaję ani nie udostępniam nikomu innemu.</li>
+    <li>OVHcloud (serwer i poczta) i Microsoft (kopie) przetwarzają dane na moje zlecenie. Danych nie sprzedaję ani nie udostępniam nikomu innemu.</li>
     <li>Dane konta są przechowywane do usunięcia konta.</li>
   </ul>
 

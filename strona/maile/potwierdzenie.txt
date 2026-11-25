@@ -1,0 +1,17 @@
+Temat: Potwierdź adres e-mail w WalkLevel
+
+Potwierdź adres e-mail
+
+Ten adres podano przy koncie online w aplikacji WalkLevel. Zostało jedno kliknięcie. Potem odzyskasz przez niego konto, gdyby hasło kiedyś wypadło z głowy.
+
+Potwierdzam adres: {APP_URL}/api/bieznia/potwierdz-email?token={TOKEN}
+
+Link działa przez 3 dni.
+Jeśli to nie Ty, zignoruj tę wiadomość. Bez kliknięcia adres nie zostanie potwierdzony.
+
+Do zobaczenia na bieżni.
+
+--
+Dostajesz tę wiadomość, bo ten adres podano przy koncie w aplikacji WalkLevel.
+Pytania: kontakt@damnit.com.pl · Regulamin i prywatność: https://bieznia.damnit-live.pl/bieznia
+WalkLevel · damnit.com.pl

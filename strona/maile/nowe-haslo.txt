@@ -1,0 +1,15 @@
+Temat: Twój link do nowego hasła w WalkLevel
+
+Ustaw nowe hasło
+
+Ktoś, pewnie Ty, poprosił o nowe hasło do konta WalkLevel powiązanego z tym adresem. Poziom, osiągnięcia i historia zostają tam, gdzie były.
+
+Ustaw nowe hasło: {APP_URL}/api/bieznia/nowe-haslo?token={TOKEN}
+
+Link działa przez 30 minut i tylko raz. Po zmianie hasła inne urządzenia zostaną wylogowane.
+Jeśli to nie Ty, nic nie rób. Hasło zostaje stare, a link sam wygaśnie.
+
+--
+Dostajesz tę wiadomość, bo ten adres podano przy koncie w aplikacji WalkLevel.
+Pytania: kontakt@damnit.com.pl · Regulamin i prywatność: https://bieznia.damnit-live.pl/bieznia
+WalkLevel · damnit.com.pl

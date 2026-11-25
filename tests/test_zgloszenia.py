@@ -101,3 +101,120 @@ def test_report_adds_recent_rotated_logs_and_summary(tmp_path: Path) -> None:
     assert "Start: przyjęty" in summary and "Podsumowanie sesji" in summary
     assert "Okno gotowe" not in summary  # tylko ważne zdarzenia
     assert "polecenia przyjęte: 1" in summary and "bez reakcji: 1" in summary
+
+
+def test_report_hides_profile_path_and_other_bluetooth_devices(tmp_path: Path) -> None:
+    home = str(Path.home())
+    logs = tmp_path / "logs"
+    logs.mkdir()
+    (logs / "bieznia.log").write_text(
+        f"plik {home}/AppData/x.txt\nmoja AA:BB:CC:DD:EE:FF obca 11-22-33-44-55-66\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "dane").mkdir()
+    (tmp_path / "dane" / "ustawienia.json").write_text(
+        '{"device_address": "aa:bb:cc:dd:ee:ff"}', encoding="utf-8"
+    )
+    path = zgloszenia.build_report("x", root=tmp_path)
+    with zipfile.ZipFile(path) as zf:
+        text = zf.read("logs/bieznia.log").decode()
+    assert home not in text and "%USERPROFILE%/AppData" in text
+    assert "AA:BB:CC:DD:EE:FF" in text  # wybrana bieżnia zostaje
+    assert "11-22-33-44-55-66" not in text and "XX:XX:XX:XX:XX:XX" in text
+
+
+def test_too_big_report_uses_shorter_log_tails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import os
+
+    logs = tmp_path / "logs"
+    logs.mkdir()
+    (logs / "bieznia.log").write_bytes(os.urandom(zgloszenia.MAX_LOG_BYTES))  # nie kompresuje się
+    monkeypatch.setattr(zgloszenia, "MAX_REPORT_BYTES", 500_000)
+    path = zgloszenia.build_report("x", root=tmp_path)
+    assert path.stat().st_size <= 500_000
+
+
+class FakeResponse:
+    def __init__(self, body: bytes, status: int = 200) -> None:
+        self.body, self.status = body, status
+
+    def read(self) -> bytes:
+        return self.body
+
+    def __enter__(self) -> FakeResponse:
+        return self
+
+    def __exit__(self, *_a: object) -> None:
+        return None
+
+
+def test_send_report_returns_number_and_maps_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import io
+    import urllib.error
+
+    path = zgloszenia.build_report("x", root=tmp_path)
+    sent: list[object] = []
+
+    def ok(request: object, timeout: float) -> FakeResponse:
+        sent.append(request)
+        return FakeResponse(b'{"id": "42"}')
+
+    monkeypatch.setattr(zgloszenia.urllib.request, "urlopen", ok)
+    assert zgloszenia.send_report(path, "https://example.com/z", "opis") == "42"
+    request = sent[0]
+    assert request.get_header("User-agent").startswith("Bieznia/")  # type: ignore[attr-defined]
+    assert b'name="paczka"' in request.data  # type: ignore[attr-defined]
+    assert b'name="okres"' not in request.data  # type: ignore[attr-defined]
+    zgloszenia.send_report(path, "https://example.com/z", "opis", period_s=6 * 3600)
+    body = sent[-1].data  # type: ignore[attr-defined]
+    crlf = bytes([13, 10])
+    assert b'name="okres"' + crlf + crlf + b"6" + crlf in body  # okres w godzinach
+
+    def fail(code: int, body: bytes) -> None:
+        def raise_(request: object, timeout: float) -> FakeResponse:
+            raise urllib.error.HTTPError("https://example.com/z", code, "x", {}, io.BytesIO(body))  # type: ignore[arg-type]
+
+        monkeypatch.setattr(zgloszenia.urllib.request, "urlopen", raise_)
+
+    fail(400, b'{"message": "Brak opisu."}')
+    with pytest.raises(zgloszenia.ReportError, match="Brak opisu"):
+        zgloszenia.send_report(path, "https://example.com/z", "opis")
+    fail(413, b"<html>too large</html>")
+    with pytest.raises(zgloszenia.ReportError, match="za duża"):
+        zgloszenia.send_report(path, "https://example.com/z", "opis")
+    fail(503, b"{}")
+    with pytest.raises(zgloszenia.ReportError, match="Zapisz paczkę"):
+        zgloszenia.send_report(path, "https://example.com/z", "opis")
+
+
+def test_report_takes_only_the_chosen_period(tmp_path: Path) -> None:
+    import time
+    from datetime import datetime
+
+    logs = tmp_path / "logs"
+    logs.mkdir()
+    now = time.time()
+
+    def stamp(ago_s: float) -> str:
+        return datetime.fromtimestamp(now - ago_s).strftime("%Y-%m-%d %H:%M:%S")
+
+    (logs / "bieznia.log").write_text(
+        f"{stamp(3 * 86400)} INFO  stare\n"
+        f"{stamp(5 * 3600)} INFO  piec godzin temu\n"
+        f"{stamp(1800)} ERROR swieze\nTraceback: dalsza linia\n",
+        encoding="utf-8",
+    )
+    one_hour = zgloszenia.build_report("x", root=tmp_path, period_s=3600)
+    with zipfile.ZipFile(one_hour) as zf:
+        text = zf.read("logs/bieznia.log").decode()
+        info = json.loads(zf.read("zgloszenie.json"))
+    assert "swieze" in text and "Traceback" in text
+    assert "piec godzin" not in text and "stare" not in text
+    assert info["okres_logow_h"] == 1.0
+    week = zgloszenia.build_report("x", root=tmp_path, period_s=7 * 86400)
+    with zipfile.ZipFile(week) as zf:
+        assert "stare" in zf.read("logs/bieznia.log").decode()

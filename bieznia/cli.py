@@ -26,7 +26,9 @@ log = logging.getLogger("bieznia")
 
 
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(prog="bieznia", description="Bieżnia -> sterowanie w grach")
+    p = argparse.ArgumentParser(
+        prog="bieznia", description="WalkLevel: bieżnia -> sterowanie w grach"
+    )
     p.add_argument("--headless", action="store_true", help="bez okna (logi w konsoli)")
     p.add_argument("--source", choices=["sim", "replay"], help="źródło w trybie bez okna")
     p.add_argument("--replay", metavar="PLIK", help="nagranie .jsonl (ustawia --source replay)")
@@ -77,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
     enter_data_dir()  # exe: %LOCALAPPDATA%\Bieznia, z kodu: bieżący folder
     user = user_settings(args.headless)
     setup_logging("bieznia", detailed=bool(user.get("detailed_logs", True)))
-    log.info("Bieżnia %s (%s)", __version__, "exe" if FROZEN else "z kodu")
+    log.info("WalkLevel %s (%s)", __version__, "exe" if FROZEN else "z kodu")
     config = apply_overrides(apply_settings(load_config(), user), args)
     resumed = load_resumed_enabled()
     enabled = bool(config["output"]["start_enabled"]) if resumed is None else resumed
