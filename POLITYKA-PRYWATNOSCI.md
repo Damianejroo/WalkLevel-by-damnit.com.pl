@@ -5,16 +5,20 @@ We wszystkich sprawach dotyczących danych pisz na kontakt@damnit.com.pl.
 
 ## W skrócie
 
-Bieżnia działa na Twoim komputerze. Nie ma kont, reklam ani analityki. Dane z bieżni,
-ustawienia i logi zostają u Ciebie. Do mnie trafia coś tylko wtedy, gdy sam wyślesz
-zgłoszenie problemu.
+Bieżnia działa na Twoim komputerze. Nie ma reklam ani analityki. Dane z bieżni, ustawienia,
+historia kroków i logi zostają u Ciebie. Konto online jest dobrowolne: bez niego nic nie
+wychodzi z komputera poza sprawdzaniem aktualizacji. Do mnie trafia coś tylko wtedy, gdy
+założysz konto online albo sam wyślesz zgłoszenie problemu.
 
 ## Co zostaje na Twoim komputerze
 
 W folderze `%LOCALAPPDATA%\Bieznia`:
 
-- ustawienia aplikacji (progi prędkości, motyw, zapamiętana bieżnia - jej nazwa i adres
-  Bluetooth),
+- osoby i profile gier, ustawienia aplikacji (progi prędkości, motyw, zapamiętana bieżnia -
+  jej nazwa i adres Bluetooth),
+- historia kroków: sesje chodzenia (czas, kroki, dystans, model bieżni),
+- przy koncie online: pseudonim i e-mail konta oraz to, które sesje już wysłano; sam token
+  logowania - w Menedżerze poświadczeń Windows (tylko przy „Zapamiętaj logowanie”),
 - dziennik zdarzeń: start aplikacji, błędy, przebieg połączenia z bieżnią,
 - szczegółowe logi Bluetooth, jeśli są włączone (Ustawienia > Dziennik i zgłoszenia):
   surowa rozmowa z bieżnią, w tym prędkość i liczba kroków,
@@ -22,8 +26,8 @@ W folderze `%LOCALAPPDATA%\Bieznia`:
   i adresy) i rozmowa z bieżnią,
 - nagrania przejść, jeśli włączysz nagrywanie.
 
-Aplikacja nie zapisuje wciskanych klawiszy (sprawdza tylko F6, F7 i F8), haseł ani niczego
-z gier. Wszystko usuniesz, kasując ten folder.
+Aplikacja nie zapisuje wciskanych klawiszy (sprawdza tylko klawisze sterowania), haseł ani
+niczego z gier. Wszystko usuniesz, kasując ten folder (token konta usuniesz, wylogowując się).
 
 ## Kiedy aplikacja łączy się z internetem
 
@@ -33,6 +37,17 @@ z GitHuba instalator. GitHub widzi wtedy adres IP Twojego komputera i wersję ap
 Ja nie dostaję z tego żadnych danych. Cel: dostarczanie poprawek. Podstawa: mój prawnie
 uzasadniony interes - utrzymanie działającej i bezpiecznej aplikacji (art. 6 ust. 1 lit. f
 RODO).
+
+**Profile modeli bieżni.** Po kliknięciu „Sprawdź nowe modele” (Ustawienia > Obsługiwane
+bieżnie) aplikacja pobiera z GitHuba listę i pliki profili bieżni (same dane: zakresy
+prędkości, nazwy modeli). GitHub widzi wtedy adres IP Twojego komputera. Podstawa jak przy
+aktualizacjach.
+
+**Konto online (opcjonalne).** Gdy założysz konto albo się zalogujesz, aplikacja łączy się
+z serwerem bieznia.damnit-live.pl i wysyła tam dane konta oraz sesje chodzenia osoby
+przypiętej do konta. Co dokładnie, po co, kto to widzi i jak długo jest przechowywane -
+opisuje [Regulamin i prywatność konta online](https://bieznia.damnit-live.pl/bieznia).
+Bez konta aplikacja nie łączy się z tym serwerem.
 
 **Zgłoszenie problemu.** Gdy klikniesz Wyślij zgłoszenie (albo wyślesz mi e-mail
 z przygotowaną paczką), dostaję: Twój opis, kontakt (jeśli go podasz), logi aplikacji
@@ -44,8 +59,11 @@ je usuwam.
 
 ## Komu przekazuję dane
 
-- **GitHub, Inc.** - obsługuje sprawdzanie i pobieranie aktualizacji, zgodnie ze swoją
+- **GitHub, Inc.** - obsługuje sprawdzanie i pobieranie aktualizacji oraz profili bieżni,
+  zgodnie ze swoją
   [polityką prywatności](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
+- Konto online: serwer w OVHcloud (Polska) i zaszyfrowane kopie zapasowe - szczegóły
+  w [regulaminie konta](https://bieznia.damnit-live.pl/bieznia).
 
 Zgłoszeń nie przekazuję nikomu.
 
@@ -63,4 +81,4 @@ Prezesa Urzędu Ochrony Danych Osobowych (ul. Stawki 2, 00-193 Warszawa).
 Jeśli aplikacja zacznie wysyłać jakiekolwiek inne dane albo korzystać z narzędzia obcej
 firmy, opiszę to tutaj, zanim to włączę.
 
-Obowiązuje od: 2026-11-20
+Obowiązuje od: 2026-11-25 (dodane: konto online, profile modeli bieżni)

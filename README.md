@@ -1,8 +1,10 @@
 # WalkingPad X21 PC Gaming by damnit.com.pl
 
-**Bieżnia Gamingowa** to aplikacja na Windows, która zamienia chodzenie po bieżni **WalkingPad X21** na sterowanie
+**Bieżnia Gamingowa** to aplikacja na Windows, która zamienia chodzenie po bieżni na sterowanie
 w grach: chód to **W**, bieg to **Shift + W** (oba klawisze można zmienić). Łączy się z bieżnią przez Bluetooth i sama ją
-wyszukuje.
+wyszukuje. Obsługiwane bieżnie: **KingSmith WalkingPad** (np. X21, X23) i bieżnie ze standardem **Bluetooth FTMS**
+(np. **Urevo SpaceWalk 5L**); model rozpoznaje sama. Jest też tryb **Trening** (zwykłe sterowanie bieżnią z komputera)
+i opcjonalne **konto online** (znajomi, ranking, wyniki na koncie).
 
 Twórca: **damnit.com.pl Damian Skrzypiec** · [damnit.com.pl](https://damnit.com.pl) ·
 kontakt@damnit.com.pl
@@ -99,9 +101,11 @@ Ustawienia Windows > Aplikacje > Bieżnia Gamingowa > Odinstaluj. Osoby, profile
 
 ## Prywatność
 
-Aplikacja nie ma kont, reklam ani analityki. Dane z bieżni i logi zostają na komputerze.
-Z internetem łączy się tylko, żeby sprawdzić i pobrać aktualizację z GitHuba, oraz gdy sam
-wyślesz zgłoszenie. Szczegóły: [Polityka prywatności](POLITYKA-PRYWATNOSCI.md).
+Aplikacja nie ma reklam ani analityki. Dane z bieżni, historia kroków i logi zostają na komputerze.
+Z internetem łączy się, żeby sprawdzić i pobrać aktualizację albo profile bieżni z GitHuba, gdy sam
+wyślesz zgłoszenie, oraz - tylko jeśli założysz konto online - z serwerem kont.
+Szczegóły: [Polityka prywatności](POLITYKA-PRYWATNOSCI.md) i
+[Regulamin i prywatność konta online](https://bieznia.damnit-live.pl/bieznia).
 
 ## Dla programisty
 
