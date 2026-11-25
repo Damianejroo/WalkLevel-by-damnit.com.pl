@@ -291,7 +291,9 @@ class Account:
             visibility = profile.get("widocznosc_profilu")
             if visibility in PROFILE_VISIBILITY:
                 self.state.profile_visibility = str(visibility)
-                self.save()
+            if "verified" in profile:  # po kliknięciu linku z maila
+                self.state.verified = bool(profile["verified"])
+            self.save()
         return user
 
     def _forget(self) -> None:

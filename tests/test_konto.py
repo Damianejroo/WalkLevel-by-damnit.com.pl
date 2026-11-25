@@ -63,6 +63,8 @@ class FakeServer:
                 "regulamin": body.get("regulamin"),
             }
             return self.auth(url, self.users[uid])
+        if path == "/api/bieznia/przypomnij-haslo":
+            return Reply({"stan": "wyslano"}, url)  # zawsze tak samo - nie zdradza kont
         if path == "/api/collections/users/auth-with-password":
             for u in self.users.values():
                 if u["email"] == body["identity"] and u["password"] == body["password"]:
@@ -106,6 +108,8 @@ class FakeServer:
                     self.sessions[s["uuid"]] = s
             saved = len(body["sesje"]) - len(rejected)
             return Reply({"zapisane": saved, "pominiete": [], "odrzucone": rejected}, url)
+        if path == "/api/bieznia/wyslij-potwierdzenie":
+            return Reply({"stan": "potwierdzony" if user["verified"] else "wyslano"}, url)
         if path == "/api/bieznia/stan":
             return Reply(None, url, 204)
         if path == "/api/bieznia/znajomi":

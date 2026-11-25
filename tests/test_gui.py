@@ -2039,3 +2039,39 @@ def test_add_friend_by_nickname_and_invite_new_person(window: gui.App, tmp_path:
     window.tick()
     assert "NOWY-1234" in texts(current(window))
     assert "od razu będzie Twoim znajomym" in texts(current(window))
+
+
+def test_register_sends_verification_and_password_reminder_works(
+    window: gui.App, tmp_path: Path
+) -> None:
+    server = online_window(window, tmp_path)
+    window.open_account("register")
+    page = current(window)
+    fill(
+        page,
+        {
+            "Kod zaproszenia": "KOD-START",
+            "E-mail": "ola@example.pl",
+            "Pseudonim (widzą go znajomi)": "Ola_77",
+            "Hasło": "dlugie-haslo-123",
+            "Powtórz hasło": "dlugie-haslo-123",
+        },
+    )
+    terms = next(w for w in page.findChildren(gui.Switch) if "regulamin" in w.accessibleName())
+    terms.setChecked(True)
+    next(b for b in buttons(page, "Załóż konto") if b.objectName() == "primary").click()
+    window.tick()
+    window.tick()
+    paths = [r[1] for r in server.requests]
+    assert "/api/bieznia/wyslij-potwierdzenie" in paths  # link od razu po rejestracji
+    window.set_online_tab("me")
+    assert "Wyślij link potwierdzający" in [
+        b.text() for b in current(window).findChildren(QtWidgets.QPushButton)
+    ]
+    window.open_account("reset")
+    page = current(window)
+    fill(page, {"E-mail": "ktos@example.pl"})
+    next(b for b in buttons(page, "Wyślij link") if b.objectName() == "primary").click()
+    window.tick()
+    assert server.requests[-1][1] == "/api/bieznia/przypomnij-haslo"
+    assert "Jeśli konto z tym adresem istnieje" in window.account_status.text()

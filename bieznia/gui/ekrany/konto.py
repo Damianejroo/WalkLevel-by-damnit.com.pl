@@ -157,14 +157,41 @@ class AccountScreen:
                 if mine:
                     self.online = {}
                 name = self.person_name(person)
-                self.toast(f"Logowanie konta osoby {name} wygasło - zaloguj się ponownie.")
+                self.toast(
+                    f"Logowanie konta osoby {name} wygasło (albo hasło zostało zmienione)"
+                    " - zaloguj się ponownie."
+                )
                 self.account_changed()
                 return
             if not quiet and (mine or action in ("login", "register")):
                 self.account_message(str(error))
             return
+        if action == "reset":
+            self.account_message(
+                "Jeśli konto z tym adresem istnieje, wysłaliśmy wiadomość z linkiem."
+                " Sprawdź też spam."
+            )
+            return
         if action in ("login", "register"):
             self.on_signed_in(value, person)
+            if action == "register":  # od razu link potwierdzający - bez niego nie ma resetu hasła
+                acc = self.accounts.items.get(self.store.person.id if self.store else "")
+                if acc is not None and acc.state.logged_in:
+                    self.account_job(
+                        "verify", acc.client.send_verification, person=acc.state.person
+                    )
+            return
+        if action == "verify":
+            if value == "potwierdzony":
+                self.account.state.verified = True
+                self.account.save()
+                self.account_message("Adres e-mail jest już potwierdzony.")
+            else:
+                self.toast(
+                    f"Wysłaliśmy link potwierdzający na {self.account.state.email}"
+                    " - kliknij go w wiadomości (sprawdź też spam)."
+                )
+                self.account_message("Wysłano link potwierdzający - sprawdź skrzynkę.")
             return
         if not mine and action not in ("upload", "delete_session"):
             return  # wynik dla innej osoby (przełączono osobę w trakcie) - bez skutku
@@ -339,6 +366,38 @@ class AccountScreen:
             lay.addWidget(c)
             lay.addStretch(1)
             return page
+        if mode == "reset":
+            cl.addWidget(
+                label(
+                    "Wyślemy na Twój adres link do ustawienia nowego hasła (ważny 30 minut)."
+                    " Po zmianie hasła zalogujesz się od nowa na każdym komputerze.",
+                    "small",
+                )
+            )
+            reset_email = field("E-mail")
+            reset_email.setText(self.account.state.email)
+            cl.addWidget(reset_email)
+            cl.addWidget(self.account_status)
+            send = button("Wyślij link", "primary")
+
+            def remind() -> None:
+                problem = konto.check_email(reset_email.text())
+                if problem:
+                    self.account_status.setText(problem)
+                    return
+                address = reset_email.text()
+                self.account_job("reset", lambda: self.account.client.remind_password(address))
+                self.account_status.setText("Wysyłam…")
+
+            send.clicked.connect(remind)
+            reset_email.returnPressed.connect(remind)
+            cl.addWidget(send)
+            lay.addWidget(c)
+            back = button("Wróć do logowania")
+            back.clicked.connect(lambda: self.open_account("login"))
+            lay.addWidget(back)
+            lay.addStretch(1)
+            return page
         code = field("Kod zaproszenia")
         if mode == "register":
             cl.addWidget(
@@ -442,8 +501,7 @@ class AccountScreen:
         links = QHBoxLayout()
         if mode == "login":
             forgot = button("Nie pamiętam hasła")
-            forgot.setEnabled(False)  # reset mailem ruszy, gdy serwer dostanie skrzynkę nadawczą
-            forgot.setToolTip("Wkrótce - reset hasła e-mailem jeszcze nie działa")
+            forgot.clicked.connect(lambda: self.open_account("reset"))
             new = button("Załóż konto")
             new.clicked.connect(lambda: self.open_account("register"))
             links.addWidget(forgot)
@@ -930,6 +988,18 @@ class AccountScreen:
 
         c, cl = section("Konto")
         cl.addWidget(label(f"{state.email}", "small"))
+        if not state.verified:
+            cl.addWidget(
+                label(
+                    "Adres niepotwierdzony - bez tego nie odzyskasz hasła, gdy je zapomnisz.",
+                    "small",
+                )
+            )
+            verify = button("Wyślij link potwierdzający")
+            verify.clicked.connect(
+                lambda: self.account_job("verify", self.account.client.send_verification)
+            )
+            cl.addWidget(verify)
         keep = Switch(t, "Zapamiętaj logowanie", state.remember)
         keep.toggled.connect(self.account.set_remember)
         hint = "Wyłączone - wylogowanie przy zamknięciu"

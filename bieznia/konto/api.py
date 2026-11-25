@@ -262,6 +262,16 @@ class Client:
     def my_profile(self) -> dict[str, Any]:
         return dict(self.call("GET", "/api/bieznia/profil") or {})
 
+    def send_verification(self) -> str:
+        """Link potwierdzający na adres konta -> "wyslano" albo "potwierdzony" (już był)."""
+        result = self.call("POST", "/api/bieznia/wyslij-potwierdzenie")
+        return str((result or {}).get("stan", "wyslano"))
+
+    def remind_password(self, email: str) -> None:
+        """Link do nowego hasła. Serwer zawsze odpowiada tak samo - nie zdradza, czy konto
+        z tym adresem istnieje."""
+        self.call("POST", "/api/bieznia/przypomnij-haslo", {"email": email.strip()}, auth=False)
+
     # --- dane ------------------------------------------------------------------------------
 
     def upload_sessions(self, sessions: list[dict[str, Any]]) -> dict[str, str]:
