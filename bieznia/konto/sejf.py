@@ -114,10 +114,10 @@ class WindowsStore:
         self._delete(self.target, CRED_TYPE_GENERIC, 0)
 
 
-def default_store() -> TokenStore:
+def default_store(target: str = TARGET) -> TokenStore:
     if sys.platform == "win32":
         try:
-            return WindowsStore()
+            return WindowsStore(target)
         except (OSError, AttributeError):
             log.warning("Menedżer poświadczeń niedostępny - logowanie tylko do zamknięcia")
     return MemoryStore()

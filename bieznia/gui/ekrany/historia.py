@@ -255,9 +255,9 @@ class HistoryScreen:
         recent = history.sessions(since, person, limit=8)
         if recent:
             c, sl = section("Ostatnie sesje")
-            online = self.online_visible() and self.history is not None
+            linked = {a.state.person for a in self.accounts.logged_in()}
+            online = bool(linked) and self.history is not None
             hidden = self.history.hidden_online() if online and self.history else set()
-            linked = self.account.state.person if online else ""
             for s in recent:
                 when = datetime.fromtimestamp(s.start)
                 day = (
@@ -293,7 +293,7 @@ class HistoryScreen:
                     )
                 )
                 row.addLayout(texts, 1)
-                if online and s.person == linked and s.source == "bieznia":
+                if online and s.person in linked and s.source == "bieznia":
                     row.addWidget(self.online_toggle(s.id, s.id in hidden))
                 for child in holder.findChildren(QLabel):
                     child.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
@@ -346,8 +346,9 @@ class HistoryScreen:
         if s.app_version:
             details.append(f"aplikacja {s.app_version}")
         cl.addWidget(label(" · ".join(details), "small"))
-        online = self.online_visible() and self.history is not None
-        if online and s.person == self.account.state.person and s.source == "bieznia":
+        owner = self.accounts.items.get(s.person)
+        online = owner is not None and owner.state.logged_in and self.history is not None
+        if online and s.source == "bieznia":
             assert self.history is not None
             hidden = s.id in self.history.hidden_online()
             sent = self.history.was_sent(s.id)
@@ -387,9 +388,15 @@ class HistoryScreen:
         tracker = self.tracker
         if tracker is not None and tracker.current is not None and tracker.current.id == session_id:
             tracker.current = None  # trwająca sesja - kończymy bez zapisu
+        gone = history.session(session_id)
         history.delete(session_id)
-        if self.online_visible():
-            self.account_job("delete_session", lambda: self.account.delete_session(session_id))
+        owner = self.accounts.items.get(gone.person) if gone is not None else None
+        if owner is not None and owner.state.logged_in:
+            self.account_job(
+                "delete_session",
+                lambda: owner.delete_session(session_id),
+                person=owner.state.person,
+            )
         log.info("Usunięto sesję z historii")
         self.toast("Sesja usunięta.")
         self.replace_page(self.HISTORY, self.build_history_page())

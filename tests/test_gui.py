@@ -1764,7 +1764,9 @@ def online_window(window: gui.App, tmp_path: Path) -> Any:
     from bieznia.konto.sejf import MemoryStore
 
     server = FakeServer()
-    window.account = konto.Account(BASE, MemoryStore(), tmp_path / "konto.json", opener=server)
+    window.accounts = konto.Accounts(
+        BASE, tmp_path / "konto.json", opener=server, store_for=lambda _person: MemoryStore()
+    )
     window.run_task = lambda func, *args: func(*args)  # type: ignore[method-assign]
     return server
 
@@ -1779,7 +1781,10 @@ def test_online_features_are_invisible_without_account(window: gui.App) -> None:
     assert window.online_btn.isHidden()
     window.open_settings()
     page = current(window)
-    assert "Konto online (opcjonalne)" in texts(page)
+    assert "Konto online · Tester (opcjonalne)" in texts(page)
+    assert "Dodaj osobę z kontem online" in [
+        b.text() for b in page.findChildren(QtWidgets.QPushButton)
+    ] or "Dodaj osobę z kontem online" in texts(page)
     window.open_online()  # bez konta - zamiast funkcji online logowanie
     assert window.pages.currentIndex() == window.ACCOUNT
 
@@ -1811,7 +1816,8 @@ def test_register_then_login_shows_friends_ranking_and_people(
     )
     submit.click()
     assert "regulamin" in window.account_status.text()  # bez akceptacji nic nie idzie
-    page.findChildren(gui.Switch)[0].setChecked(True)
+    terms = next(w for w in page.findChildren(gui.Switch) if "regulamin" in w.accessibleName())
+    terms.setChecked(True)
     submit.click()
     window.tick()
     window.tick()
@@ -1946,3 +1952,36 @@ def test_pad_button_can_toggle_control_like_f8(window: gui.App) -> None:
     assert "albo pad: Panel dotykowy" in window.control_subtitle.text()
     window.set_toggle_pad("")
     assert window.settings["toggle_pad"] == ""
+
+
+def test_online_account_as_new_person_next_to_offline_person(
+    window: gui.App, tmp_path: Path
+) -> None:
+    """Konto = osoba: logowanie „Dodaj osobę z kontem online” tworzy nową osobę, a osoba
+    bez konta zostaje obok. Funkcje online widać tylko przy osobie z kontem."""
+    server = online_window(window, tmp_path)
+    store = window.store
+    assert store is not None
+    offline = store.person.id
+    window.open_account("register", new_person=True)
+    page = current(window)
+    fill(
+        page,
+        {
+            "Kod zaproszenia": "KOD-START",
+            "E-mail": "kot@example.pl",
+            "Pseudonim (widzą go znajomi)": "Kot Bury",
+            "Hasło": "dlugie-haslo-123",
+            "Powtórz hasło": "dlugie-haslo-123",
+        },
+    )
+    terms = next(w for w in page.findChildren(gui.Switch) if "regulamin" in w.accessibleName())
+    terms.setChecked(True)
+    next(b for b in buttons(page, "Załóż konto") if b.objectName() == "primary").click()
+    window.tick()
+    assert len(store.people) == 2 and store.person.name == "Kot Bury"
+    assert window.online_visible() and window.account.state.person == store.person.id
+    window.choose_person(offline)  # osoba bez konta - funkcji online nie widać
+    assert not window.online_visible() and window.online_btn.isHidden()
+    assert window.accounts.person_of("u1") != offline
+    assert server.users["u1"]["name"] == "Kot Bury"

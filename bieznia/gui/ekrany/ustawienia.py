@@ -103,7 +103,9 @@ class SettingsScreen:
                 self.advanced_open,
                 self.settings_view,
                 [self.caps.speed_min, self.caps.speed_max, self.caps.start_delay_s],
-                vars(self.account.state) if hasattr(self, "account") else None,
+                [vars(a.state) for a in self.accounts.logged_in()]
+                if hasattr(self, "accounts")
+                else None,
                 str(kopia.latest_backup()),
                 int(time.time() // 60),
             ],
@@ -132,12 +134,16 @@ class SettingsScreen:
             )
             for p in store.people:
                 today = self.history_today(p.id) if self.history else 0
+                linked = self.accounts.items.get(p.id) if hasattr(self, "accounts") else None
+                online = (
+                    f" · konto {linked.state.name}" if linked and linked.state.logged_in else ""
+                )
                 row = k.ChoiceRow(
                     t,
                     k.avatar_pixmap(t, 38, p.name, p.color),
                     38,
                     p.name,
-                    f"{len(p.profiles)} prof. gier · dziś {fmt_num(today, 0)} kroków",
+                    f"{len(p.profiles)} prof. gier · dziś {fmt_num(today, 0)} kroków{online}",
                     p.id == store.person.id,
                     t.accent,
                 )
@@ -147,6 +153,10 @@ class SettingsScreen:
             add = k.AddRow(t, "Dodaj osobę")
             add.clicked.connect(self.open_wizard_add)
             cl.addWidget(add)
+            if getattr(self, "accounts", None) is not None and self.accounts.enabled:
+                add_online = k.AddRow(t, "Dodaj osobę z kontem online")
+                add_online.clicked.connect(lambda: self.open_account("login", new_person=True))
+                cl.addWidget(add_online)
             lay.addWidget(c)
 
             c, cl = section(f"Profile gier · {store.person.name}")

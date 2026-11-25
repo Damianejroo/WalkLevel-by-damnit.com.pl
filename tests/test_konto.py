@@ -424,3 +424,62 @@ def test_refresh_takes_profile_visibility_from_server(account: konto.Account) ->
     signed_in(account)
     account.refresh()
     assert account.state.profile_visibility == "publiczny"
+
+
+def stores() -> tuple[dict[str, MemoryStore], Any]:
+    made: dict[str, MemoryStore] = {}
+
+    def store_for(person: str) -> MemoryStore:
+        return made.setdefault(person, MemoryStore())
+
+    return made, store_for
+
+
+def test_each_person_has_own_account_and_vault_entry(server: FakeServer, tmp_path: Path) -> None:
+    vault, store_for = stores()
+    path = tmp_path / "konto.json"
+    accounts = konto.Accounts(BASE, path, opener=server, store_for=store_for)
+    accounts.get("p1").register("KOD-START", "a@example.pl", "dlugie-haslo-123", "Ala", "p1")
+    accounts.get("p2").register("KOD-START", "b@example.pl", "dlugie-haslo-123", "Bob", "p2")
+    assert {a.state.name for a in accounts.logged_in()} == {"Ala", "Bob"}
+    assert vault["p1"].get() != vault["p2"].get()  # osobne tokeny
+    assert accounts.person_of(accounts.get("p2").state.user_id) == "p2"
+    again = konto.Accounts(BASE, path, opener=server, store_for=store_for)  # po restarcie
+    assert {a.state.person for a in again.logged_in()} == {"p1", "p2"}
+    again.forget_person("p1")
+    assert [a.state.person for a in again.logged_in()] == ["p2"] and vault["p1"].get() == ""
+
+
+def test_without_remember_login_lasts_until_closing(server: FakeServer, tmp_path: Path) -> None:
+    vault, store_for = stores()
+    path = tmp_path / "konto.json"
+    accounts = konto.Accounts(BASE, path, opener=server, store_for=store_for)
+    acc = accounts.get("p1")
+    acc.state.remember = False
+    acc.register("KOD-START", "a@example.pl", "dlugie-haslo-123", "Ala", "p1")
+    assert acc.client.token and vault["p1"].get() == ""  # token tylko w pamięci
+    assert konto.Accounts(BASE, path, opener=server, store_for=store_for).logged_in() == []
+
+
+def test_new_person_login_attaches_to_new_person(server: FakeServer, tmp_path: Path) -> None:
+    vault, store_for = stores()
+    accounts = konto.Accounts(BASE, tmp_path / "k.json", opener=server, store_for=store_for)
+    temp = accounts.blank()
+    temp.register("KOD-START", "a@example.pl", "dlugie-haslo-123", "Ala", "")
+    attached = accounts.attach(temp, "nowa")
+    assert attached.state.person == "nowa" and attached.client.token == vault["nowa"].get()
+    assert accounts.get("nowa") is attached
+
+
+def test_single_account_file_from_previous_version_moves_over(
+    server: FakeServer, tmp_path: Path
+) -> None:
+    path = tmp_path / "konto.json"
+    old = {"user_id": "u1", "name": "Ala", "email": "a@example.pl", "person": "p1"}
+    path.write_text(json.dumps(old), encoding="utf-8")
+    legacy = MemoryStore()
+    legacy.set("tok-stary")
+    vault, store_for = stores()
+    accounts = konto.Accounts(BASE, path, opener=server, store_for=store_for, legacy_store=legacy)
+    assert [a.state.name for a in accounts.logged_in()] == ["Ala"]
+    assert vault["p1"].get() == "tok-stary" and legacy.get() == ""

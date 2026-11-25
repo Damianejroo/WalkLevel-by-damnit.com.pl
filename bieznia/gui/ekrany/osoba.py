@@ -479,6 +479,7 @@ class PeopleScreen:
         if store is None:
             return
         if store.remove_person(person_id):
+            self.accounts.forget_person(person_id)  # konto zostaje na serwerze, tu wylogowane
             if self.history is not None:
                 self.history.forget_person(person_id)
             self.apply_profile()
@@ -494,7 +495,9 @@ class PeopleScreen:
             if person_id != store.person.id:
                 store.switch_person(person_id)
                 log.info("Osoba: %s", store.person.name)
+                self.online.clear()  # inna osoba - inne konto (albo żadne)
                 self.apply_profile()
+                self.render_online_button()
             if self.pages.currentIndex() == self.SETTINGS:
                 self.refresh_settings()  # raz - motyw mógł już przebudować widok
 

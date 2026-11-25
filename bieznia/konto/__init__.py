@@ -1,6 +1,10 @@
 """Konto online - OPCJONALNY dodatek. Bez logowania aplikacja działa w całości lokalnie, nic
 nie wysyła, a funkcji online w ogóle nie widać.
 
+Konto = osoba w aplikacji (jedno konto, jedna osoba; profile gier dalej dowolne). Zalogowanych
+może być kilka osób naraz, obok osób bez konta. Token każdej osoby osobno w Menedżerze
+poświadczeń - albo tylko w pamięci, gdy „Zapamiętaj logowanie” jest wyłączone.
+
 Po zalogowaniu: statystyki z serwera, znajomi (zaproszenia), lista osób z kontem, ranking,
 stan na żywo dla znajomych (tylko po włączeniu). Na serwer idą wyłącznie sesje JEDNEJ osoby
 powiązanej z kontem - bez nazw osób i profili gier, bez sesji z symulatora. Stan konta
@@ -14,6 +18,7 @@ import json
 import logging
 import re
 import threading
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any
@@ -29,7 +34,7 @@ from bieznia.konto.api import (
     User,
     _default_opener,
 )
-from bieznia.konto.sejf import TokenStore, default_store
+from bieznia.konto.sejf import TARGET, TokenStore, default_store
 
 log = logging.getLogger("bieznia")
 
@@ -123,17 +128,14 @@ class AccountState:
     live: bool = False  # stan na żywo dla znajomych
     profile_visibility: str = "znajomi"  # czy jestem na liście osób z kontem
     terms: str = ""  # wersja zaakceptowanego regulaminu
+    remember: bool = True  # token w Menedżerze poświadczeń (inaczej tylko do zamknięcia)
 
     @property
     def logged_in(self) -> bool:
         return bool(self.user_id)
 
 
-def load_state(path: Path = STATE_FILE) -> AccountState:
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return AccountState()
+def _state_from(raw: dict[str, Any]) -> AccountState:
     known = {f.name for f in fields(AccountState)}
     state = AccountState(**{k: v for k, v in raw.items() if k in known})
     if state.visibility not in VISIBILITY:
@@ -143,11 +145,42 @@ def load_state(path: Path = STATE_FILE) -> AccountState:
     return state
 
 
+def load_state(path: Path = STATE_FILE) -> AccountState:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return AccountState()
+    if "konta" in raw:
+        first = next(iter(raw["konta"]), None)
+        return _state_from(first) if isinstance(first, dict) else AccountState()
+    return _state_from(raw)
+
+
+def load_states(path: Path = STATE_FILE) -> list[AccountState]:
+    """Wszystkie konta z pliku (format 2: lista; format 1 z wcześniejszej wersji: jedno)."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    items = raw.get("konta") if isinstance(raw, dict) and "konta" in raw else [raw]
+    states = [_state_from(r) for r in items or [] if isinstance(r, dict)]
+    return [s for s in states if s.logged_in and s.person]
+
+
 def save_state(state: AccountState, path: Path = STATE_FILE) -> None:
+    save_states([state] if state.logged_in else [], path)
+
+
+def save_states(states: list[AccountState], path: Path = STATE_FILE) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(asdict(state), ensure_ascii=False, indent=1), encoding="utf-8")
+    data = {"wersja": 2, "konta": [asdict(s) for s in states]}
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     tmp.replace(path)
+
+
+def vault_target(person: str) -> str:
+    return f"{TARGET}/{person}" if person else TARGET
 
 
 def session_payload(s: Session, visibility: str) -> dict[str, Any]:
@@ -167,20 +200,41 @@ class Account:
         store: TokenStore | None = None,
         state_path: Path = STATE_FILE,
         opener: Opener = _default_opener,
+        state: AccountState | None = None,
+        saver: Callable[[], None] | None = None,
+        token: str = "",
     ) -> None:
         self.state_path = state_path
-        self.state = load_state(state_path)
+        self.state = state if state is not None else load_state(state_path)
+        self.saver = saver
         self.store = store if store is not None else default_store()
         self.enabled = bool(base_url.strip())
-        self.client = Client(base_url or "https://127.0.0.1", self.store.get(), opener)
+        token = token or (self.store.get() if self.state.remember else "")
+        self.client = Client(base_url or "https://127.0.0.1", token, opener)
         self.lock = threading.Lock()  # wysyłka sesji nie może iść dwa razy naraz
         if self.state.logged_in and not self.client.token:
-            self._forget()  # token zniknął z sejfu (inny użytkownik Windows) - wylogowany
+            self._forget()  # brak tokenu (bez zapamiętania albo inny użytkownik Windows)
+
+    def set_remember(self, on: bool) -> None:
+        """Zapamiętaj logowanie: token do sejfu (albo z niego usunięty - tylko w pamięci)."""
+        self.state.remember = on
+        if on and self.client.token:
+            self.store.set(self.client.token)
+        elif not on:
+            self.store.clear()
+        self.save()
+
+    def _keep_token(self, token: str) -> None:
+        self.client.token = token
+        if self.state.remember:
+            self.store.set(token)
+        else:
+            self.store.clear()
 
     # --- logowanie -------------------------------------------------------------------------
 
     def _signed_in(self, auth: Auth, person: str) -> User:
-        self.store.set(auth.token)
+        self._keep_token(auth.token)
         self.state.user_id = auth.user.id
         self.state.name = auth.user.name
         self.state.email = auth.user.email
@@ -222,7 +276,7 @@ class Account:
         if problem:
             raise KontoError(problem)
         auth = self.client.change_password(old, new)
-        self.store.set(auth.token)  # stary token przestał działać
+        self._keep_token(auth.token)  # stary token przestał działać
 
     def refresh(self) -> User:
         """Przy starcie i co dobę: świeży token i ustawienia profilu z serwera."""
@@ -243,12 +297,15 @@ class Account:
     def _forget(self) -> None:
         self.store.clear()
         self.client.token = ""
-        person = self.state.person
-        self.state = AccountState(person=person)
+        person, remember = self.state.person, self.state.remember
+        self.state = AccountState(person=person, remember=remember)
         self.save()
 
     def save(self) -> None:
-        save_state(self.state, self.state_path)
+        if self.saver is not None:
+            self.saver()
+        else:
+            save_state(self.state, self.state_path)
 
     # --- wysyłka ---------------------------------------------------------------------------
 
@@ -296,3 +353,101 @@ class Account:
     def clear_live(self) -> None:
         if self.state.logged_in:
             self.client.clear_live()
+
+
+class Accounts:
+    """Konta wszystkich osób: osoba -> konto (jedno na osobę). Zapis w dane/konto.json."""
+
+    def __init__(
+        self,
+        base_url: str,
+        path: Path = STATE_FILE,
+        opener: Opener = _default_opener,
+        store_for: Callable[[str], TokenStore] | None = None,
+        legacy_store: TokenStore | None = None,
+    ) -> None:
+        self.base_url = base_url
+        self.path = path
+        self.opener = opener
+        self.store_for = store_for or (lambda person: default_store(vault_target(person)))
+        # token wersji z jednym kontem (wspólna nazwa w sejfie) - tylko przy prawdziwym sejfie
+        if legacy_store is None and store_for is None:
+            legacy_store = default_store()
+        self.enabled = bool(base_url.strip())
+        self.items: dict[str, Account] = {}
+        self._loading = True  # bez zapisu pliku, zanim wszystkie konta są wczytane
+        for state in load_states(path):
+            store = self.store_for(state.person)
+            if state.remember and not store.get() and legacy_store is not None:
+                token = legacy_store.get()  # wersja z jednym kontem: token pod wspólną nazwą
+                if token:
+                    store.set(token)
+                    legacy_store.clear()
+            account = self._make(state, store)
+            if account.state.logged_in:
+                self.items[state.person] = account
+        self._loading = False
+
+    def _make(
+        self, state: AccountState, store: TokenStore | None = None, token: str = ""
+    ) -> Account:
+        return Account(
+            self.base_url,
+            store if store is not None else self.store_for(state.person),
+            self.path,
+            self.opener,
+            state=state,
+            saver=self.save,
+            token=token,
+        )
+
+    def get(self, person: str) -> Account:
+        """Konto osoby (wylogowane, jeśli osoba jeszcze nie ma konta)."""
+        account = self.items.get(person)
+        if account is None:
+            account = self._make(AccountState(person=person))
+            self.items[person] = account
+        return account
+
+    def blank(self) -> Account:
+        """Konto tymczasowe (logowanie jako nowa osoba) - przypinane do osoby po sukcesie."""
+        from bieznia.konto.sejf import MemoryStore
+
+        return Account(
+            self.base_url,
+            MemoryStore(),
+            self.path,
+            self.opener,
+            state=AccountState(),
+            saver=lambda: None,
+        )
+
+    def attach(self, account: Account, person: str) -> Account:
+        """Zalogowane konto tymczasowe -> konto osoby (token do jej miejsca w sejfie)."""
+        state = account.state
+        state.person = person
+        attached = self._make(state, token=account.client.token)
+        attached._keep_token(account.client.token)
+        self.items[person] = attached
+        self.save()
+        return attached
+
+    def logged_in(self) -> list[Account]:
+        return [a for a in self.items.values() if a.state.logged_in]
+
+    def person_of(self, user_id: str) -> str:
+        for person, account in self.items.items():
+            if account.state.logged_in and account.state.user_id == user_id:
+                return person
+        return ""
+
+    def forget_person(self, person: str) -> None:
+        """Osoba usunięta z aplikacji - jej konto zostaje na serwerze, tu wylogowane."""
+        account = self.items.pop(person, None)
+        if account is not None and account.state.logged_in:
+            account.store.clear()
+        self.save()
+
+    def save(self) -> None:
+        if not self._loading:
+            save_states([a.state for a in self.logged_in()], self.path)

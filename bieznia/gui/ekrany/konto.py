@@ -53,7 +53,8 @@ def field(placeholder: str, secret: bool = False) -> QLineEdit:
 
 
 class AccountScreen:
-    account: konto.Account
+    accounts: konto.Accounts
+    account_new_person: bool
     online: dict[str, Any]
     online_tab: str
     account_mode: str
@@ -65,37 +66,43 @@ class AccountScreen:
     def init_account(self: App) -> None:
         adres = str(self.config.get("konto", {}).get("adres", ""))
         try:
-            self.account = konto.Account(adres)
+            self.accounts = konto.Accounts(adres)
         except konto.KontoError as exc:
             log.warning("Konto online wyłączone: %s", exc)
-            self.account = konto.Account("")
+            self.accounts = konto.Accounts("")
         self.online = {}
         self.online_tab = "friends"
         self.account_mode = "login"
+        self.account_new_person = False
         self.account_busy = set()
         self.account_upload_at = time.monotonic() + 20  # pierwsza wysyłka chwilę po starcie
         self.account_live_at = 0.0
         self.account_live_on = False
         self.account_refresh_at = time.monotonic() + REFRESH_EVERY_S
-        if self.account.enabled and self.account.state.logged_in:
-            self.account_job("refresh", self.account.refresh, quiet=True)
+        for acc in self.accounts.logged_in():
+            self.account_job("refresh", acc.refresh, quiet=True, person=acc.state.person)
+
+    @property
+    def account(self: App) -> konto.Account:
+        """Konto wybranej osoby (wylogowane, gdy ta osoba nie ma konta)."""
+        store = self.store
+        return self.accounts.get(store.person.id if store is not None else "")
 
     def online_visible(self: App) -> bool:
-        return self.account.enabled and self.account.state.logged_in
+        return self.accounts.enabled and self.account.state.logged_in
 
     def account_tick(self: App, now: float, speed: float, steps: int | None, active: float) -> None:
-        if not self.online_visible():
+        if not self.accounts.enabled:
             return
         if now >= self.account_refresh_at:
             self.account_refresh_at = now + REFRESH_EVERY_S
-            self.account_job("refresh", self.account.refresh, quiet=True)
+            for acc in self.accounts.logged_in():
+                self.account_job("refresh", acc.refresh, quiet=True, person=acc.state.person)
         if now >= self.account_upload_at and self.history is not None:
             self.account_upload_at = now + UPLOAD_EVERY_S
-            if self.tracker is not None:
-                self.tracker.flush()
-            history = self.history
-            self.account_job("upload", lambda: self.account.upload(history))
-        if not self.account.state.live or now < self.account_live_at:
+            self.account_upload_all()
+        account = self.account  # na żywo - tylko osoba, która teraz idzie
+        if not account.state.logged_in or not account.state.live or now < self.account_live_at:
             return
         self.account_live_at = now + LIVE_EVERY_S
         current = self.tracker.current if self.tracker is not None else None
@@ -104,57 +111,63 @@ class AccountScreen:
             self.account_live_on = True
             sid = current.id
             self.account_job(
-                "live", lambda: self.account.live(speed, steps or 0, active, sid), quiet=True
+                "live", lambda: account.live(speed, steps or 0, active, sid), quiet=True
             )
         elif self.account_live_on:
             self.account_live_on = False
-            self.account_job("live", self.account.clear_live, quiet=True)
+            self.account_job("live", account.clear_live, quiet=True)
 
-    def account_job(self: App, action: str, func: Callable[[], Any], quiet: bool = False) -> None:
-        """Zadanie sieciowe w tle; to samo zadanie nie idzie drugi raz, zanim skończy."""
-        if action in self.account_busy:
+    def account_job(
+        self: App,
+        action: str,
+        func: Callable[[], Any],
+        quiet: bool = False,
+        person: str | None = None,
+    ) -> None:
+        """Zadanie sieciowe w tle; to samo zadanie tej samej osoby nie idzie drugi raz naraz."""
+        if person is None:
+            person = self.store.person.id if self.store is not None else ""
+        key = f"{person}:{action}"
+        if key in self.account_busy:
             return
-        self.account_busy.add(action)
+        self.account_busy.add(key)
 
         def work() -> None:
             try:
-                self.tasks.put(("konto", (action, True, func(), quiet)))
+                self.tasks.put(("konto", (action, True, func(), quiet, person)))
             except konto.KontoError as exc:
-                self.tasks.put(("konto", (action, False, exc, quiet)))
+                self.tasks.put(("konto", (action, False, exc, quiet, person)))
             except Exception as exc:
                 log.exception("Konto: %s", action)
-                self.tasks.put(("konto", (action, False, konto.KontoError(str(exc)), quiet)))
+                error = konto.KontoError(str(exc))
+                self.tasks.put(("konto", (action, False, error, quiet, person)))
 
         self.run_task(work)
 
-    def on_account_result(self: App, data: tuple[str, bool, Any, bool]) -> None:
-        action, ok, value, quiet = data
-        self.account_busy.discard(action)
+    def on_account_result(self: App, data: tuple[str, bool, Any, bool, str]) -> None:
+        action, ok, value, quiet, person = data
+        self.account_busy.discard(f"{person}:{action}")
+        mine = self.store is not None and person == self.store.person.id
         if not ok:
             error: konto.KontoError = value
             if isinstance(error, konto.LoggedOut):
-                if self.account.state.logged_in:
-                    self.account.logout()
-                self.online = {}
-                self.toast("Sesja konta wygasła - zaloguj się ponownie (Ustawienia > Konto).")
+                acc = self.accounts.items.get(person)
+                if acc is not None and acc.state.logged_in:
+                    acc.logout()
+                if mine:
+                    self.online = {}
+                name = self.person_name(person)
+                self.toast(f"Logowanie konta osoby {name} wygasło - zaloguj się ponownie.")
                 self.account_changed()
                 return
-            if not quiet:
+            if not quiet and (mine or action in ("login", "register")):
                 self.account_message(str(error))
             return
         if action in ("login", "register"):
-            self.online = {}
-            self.toast(f"Zalogowano jako {self.account.state.name}.")
-            self.account_upload_at = time.monotonic()  # wyniki od razu na konto
-            self.account_changed()
-            self.open_online()
+            self.on_signed_in(value, person)
             return
-        if action == "reset":
-            self.account_message("Wysłaliśmy e-mail z linkiem do zmiany hasła (sprawdź też spam).")
-            return
-        if action == "verify":
-            self.account_message("Wysłaliśmy ponownie e-mail z linkiem potwierdzającym.")
-            return
+        if not mine and action not in ("upload", "delete_session"):
+            return  # wynik dla innej osoby (przełączono osobę w trakcie) - bez skutku
         if action in ("delete", "logout"):
             self.online = {}
             self.toast("Konto usunięte." if action == "delete" else "Wylogowano.")
@@ -165,7 +178,7 @@ class AccountScreen:
             self.account_changed(rebuild_page=False)
             return
         if action == "upload":
-            if value and self.pages.currentIndex() == self.ONLINE:
+            if value and mine and self.pages.currentIndex() == self.ONLINE:
                 self.load_online(self.online_tab)
             return
         if action == "invite_code":
@@ -197,6 +210,43 @@ class AccountScreen:
         if self.pages.currentIndex() == self.ONLINE and not action.startswith("live"):
             self.render_online()
 
+    def person_name(self: App, person: str) -> str:
+        store = self.store
+        if store is not None:
+            for p in store.people:
+                if p.id == person:
+                    return p.name
+        return "?"
+
+    def on_signed_in(self: App, signed: tuple[konto.Account, Any], person: str) -> None:
+        """Zalogowano: konto przypięte do osoby (nowej albo tej, dla której logowano)."""
+        acc, user = signed
+        store = self.store
+        if store is None:
+            return
+        taken = self.accounts.person_of(user.id)
+        if taken and taken != person:
+            if acc.state.person:  # osoba z innym kontem - to logowanie cofamy
+                acc.logout()
+            self.account_message(
+                f"To konto jest już przypięte do osoby {self.person_name(taken)} - wybierz ją."
+            )
+            return
+        if not person:  # nowa osoba z konta online
+            from bieznia import paleta
+
+            color = paleta.KOLORY[len(store.people) % len(paleta.KOLORY)].name
+            new = store.add_person(user.name, color)
+            acc = self.accounts.attach(acc, new.id)
+            person = new.id
+            self.apply_profile()
+            log.info("Nowa osoba z konta online: %s", new.name)
+        self.online = {}
+        self.toast(f"Zalogowano jako {acc.state.name}.")
+        self.account_upload_at = time.monotonic()  # wyniki od razu na konto
+        self.account_changed()
+        self.open_online()
+
     def account_message(self: App, text: str) -> None:
         with contextlib.suppress(RuntimeError, AttributeError):
             self.account_status.setText(text)
@@ -222,12 +272,14 @@ class AccountScreen:
         if not self.account.enabled:
             return None
         state = self.account.state
-        c, cl = section("Konto online (opcjonalne)")
+        who = self.store.person.name if self.store is not None else ""
+        c, cl = section(f"Konto online · {who} (opcjonalne)")
         if not state.logged_in:
             cl.addWidget(
                 label(
                     "Bez konta wszystko działa na tym komputerze i nic nie jest wysyłane."
-                    " Z kontem: Twoje wyniki online, znajomi, ranking i lista osób.",
+                    " Z kontem: wyniki online, znajomi, ranking i lista osób. Konto należy"
+                    " do jednej osoby - inne osoby mogą mieć swoje konta albo żadnego.",
                     "small",
                 )
             )
@@ -240,9 +292,9 @@ class AccountScreen:
             row.addWidget(login, 1)
             cl.addLayout(row)
             return c
-        who = label(state.name)
-        who.setObjectName("strong")
-        cl.addWidget(who)
+        nick = label(state.name)
+        nick.setObjectName("strong")
+        cl.addWidget(nick)
         cl.addWidget(label(state.email, "small"))
         open_btn = button("Znajomi, ranking i ustawienia konta", "primary")
         open_btn.clicked.connect(self.open_online)
@@ -251,8 +303,11 @@ class AccountScreen:
 
     # --- logowanie i zakładanie konta ------------------------------------------------------
 
-    def open_account(self: App, mode: str = "login") -> None:
+    def open_account(self: App, mode: str = "login", new_person: bool | None = None) -> None:
+        """Logowanie / nowe konto: dla wybranej osoby albo (new_person) jako nowa osoba."""
         self.account_mode = mode
+        if new_person is not None:
+            self.account_new_person = new_person
         self.replace_page(self.ACCOUNT, self.build_account_page())
         self.pages.go(self.ACCOUNT)
 
@@ -291,8 +346,14 @@ class AccountScreen:
                 )
             )
             cl.addWidget(code)
+        target = (
+            "Konto będzie nową osobą w aplikacji (nazwa = pseudonim)."
+            if self.account_new_person
+            else f"Konto dla osoby: {self.store.person.name if self.store else ''}."
+        )
+        cl.insertWidget(1, label(target, "small"))
         email = field("E-mail")
-        email.setText(self.account.state.email)
+        email.setText("" if self.account_new_person else self.account.state.email)
         cl.addWidget(email)
         name = field("Pseudonim (widzą go znajomi)")
         password = field("Hasło", secret=True)
@@ -307,17 +368,17 @@ class AccountScreen:
                 )
             )
         cl.addWidget(password)
-        person_seg: Segmented | None = None
         terms: Switch | None = None
         if mode == "register":
             cl.addWidget(repeat)
             cl.addWidget(label(f"Hasło: co najmniej {konto.PASSWORD_MIN} znaków.", "small"))
-        store = self.store
-        if store is not None and len(store.people) > 1:
-            cl.addWidget(label("Czyje wyniki idą na to konto", "small"))
-            options = [(p.id, p.name) for p in store.people[:4]]
-            person_seg = Segmented(options, store.person.id, "Osoba na koncie")
-            cl.addWidget(person_seg)
+        remember = Switch(self.t, "Zapamiętaj logowanie", True)
+        self.setting_row(
+            cl,
+            "Zapamiętaj logowanie",
+            "Hasła nie zapisujemy - tylko bezpieczny token w Windows",
+            remember,
+        )
         if mode == "register":
             terms = Switch(self.t, "Akceptuję regulamin i politykę prywatności")
             self.setting_row(
@@ -334,16 +395,23 @@ class AccountScreen:
         submit = button("Zaloguj się" if mode == "login" else "Załóż konto", "primary")
         cl.addWidget(submit)
 
-        def person_id() -> str:
-            if person_seg is not None:
-                return person_seg.value()
-            return store.person.id if store is not None else ""
+        new_person = self.account_new_person
+        person = "" if new_person or self.store is None else self.store.person.id
+
+        def target_account() -> konto.Account:
+            """Logujemy na koncie osoby; nowa osoba - konto tymczasowe, przypinane po sukcesie."""
+            acc = self.accounts.blank() if new_person else self.accounts.get(person)
+            acc.state.remember = remember.isChecked()
+            return acc
 
         def go() -> None:
             if mode == "login":
+                acc = target_account()
+                values = (email.text(), password.text())
                 self.account_job(
                     "login",
-                    lambda: self.account.login(email.text(), password.text(), person_id()),
+                    lambda: (acc, acc.login(values[0], values[1], person)),
+                    person=person,
                 )
                 self.account_status.setText("Loguję…")
                 return
@@ -360,8 +428,9 @@ class AccountScreen:
             if problem:
                 self.account_status.setText(problem)
                 return
-            values = (code.text(), email.text(), password.text(), name.text(), person_id())
-            self.account_job("register", lambda: self.account.register(*values))
+            new_acc = target_account()
+            form = (code.text(), email.text(), password.text(), name.text(), person)
+            self.account_job("register", lambda: (new_acc, new_acc.register(*form)), person=person)
             self.account_status.setText("Zakładam konto…")
 
         submit.clicked.connect(go)
@@ -753,14 +822,6 @@ class AccountScreen:
     def online_me(self: App, lay: QVBoxLayout) -> None:
         state, t = self.account.state, self.t
         c, cl = section("Moje wyniki na koncie")
-        store = self.store
-        if store is not None and len(store.people) > 1:
-            cl.addWidget(label("Czyje wyniki idą na konto", "small"))
-            options = [(p.id, p.name) for p in store.people[:4]]
-            current = state.person if any(p.id == state.person for p in store.people) else ""
-            who = Segmented(options, current or store.person.id, "Osoba na koncie")
-            who.changed.connect(self.on_account_person)
-            cl.addWidget(who)
         upload = Switch(t, "Wysyłaj moje sesje", state.upload)
         upload.toggled.connect(self.on_account_upload)
         self.setting_row(cl, "Wysyłaj moje sesje", "Co 2 minuty i po każdej sesji", upload)
@@ -839,6 +900,10 @@ class AccountScreen:
 
         c, cl = section("Konto")
         cl.addWidget(label(f"{state.email}", "small"))
+        keep = Switch(t, "Zapamiętaj logowanie", state.remember)
+        keep.toggled.connect(self.account.set_remember)
+        hint = "Wyłączone - wylogowanie przy zamknięciu"
+        self.setting_row(cl, "Zapamiętaj logowanie", hint, keep)
         row = QHBoxLayout()
         data = button("Pobierz moje dane")
         data.clicked.connect(self.account_export)
@@ -865,12 +930,6 @@ class AccountScreen:
 
     # --- akcje ustawień konta --------------------------------------------------------------
 
-    def on_account_person(self: App, person: str) -> None:
-        self.account.state.person = person
-        self.account.save()
-        if self.history is not None:
-            self.history.forget_sent()
-
     def on_account_upload(self: App, on: bool) -> None:
         self.account.state.upload = on
         self.account.save()
@@ -896,13 +955,22 @@ class AccountScreen:
         self.account_job("profile", work)
 
     def account_upload_now(self: App) -> None:
+        if self.tracker is not None:
+            self.tracker.flush()
+        self.account_upload_at = time.monotonic() + UPLOAD_EVERY_S
+        self.account_upload_all()
+
+    def account_upload_all(self: App) -> None:
+        """Każda zalogowana osoba wysyła swoje sesje (osobno, swoim kontem)."""
         history = self.history
         if history is None:
             return
         if self.tracker is not None:
             self.tracker.flush()
-        self.account_upload_at = time.monotonic() + UPLOAD_EVERY_S
-        self.account_job("upload", lambda: self.account.upload(history))
+        for acc in self.accounts.logged_in():
+            self.account_job(
+                "upload", lambda a=acc: a.upload(history), quiet=True, person=acc.state.person
+            )
 
     def account_export(self: App) -> None:
         from pathlib import Path
