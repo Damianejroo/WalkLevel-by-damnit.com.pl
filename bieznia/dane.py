@@ -76,6 +76,8 @@ PROFILE_KEYS = frozenset(
         "run_speed",
         "pad_steps",
         "pad_idle",
+        "training_levels",
+        "training_level",
     }
 )
 LOOK_DEFAULTS: dict[str, Any] = {"show_person_switch": True, "show_profile_switch": True}

@@ -47,12 +47,14 @@ class ControlScreen:
         self.belt_target = None  # po zmianie prędkość z klawiszy idzie od nowa
         sets_speed = self.sets_speed()
         pad_stop = self.pad_stops_belt()  # taśmę uruchamia dopiero ruch gałki
+        training = self.settings["direction"] == "training"  # trening zawsze steruje taśmą
         if changed and not on:
-            if self.belt_commands_possible() or pad_stop:
+            if self.belt_commands_possible() or pad_stop or training:
                 self.worker.belt("stop")
             elif sets_speed:
                 self.worker.set_speed(self.idle_target())  # bez stopu: zwolnij
-        if changed and on and self.belt_commands_possible() and not pad_stop:
+        self.render_training()
+        if changed and on and (self.belt_commands_possible() or training) and not pad_stop:
             # czy taśma już jedzie, sprawdza sterownik (stan bieżni, nie prędkość)
             self.worker.belt("start")
             delay = self.caps.start_delay_s
@@ -141,7 +143,10 @@ class ControlScreen:
         if pad_button:
             start = f"(albo pad: {pad_button}) {start}"
         direction = self.settings["direction"]
-        if direction == "keyboard":
+        if direction == "training":
+            keys = self.config["hotkeys"]
+            text = f"{start} · {keys['sim_faster']} szybciej, {keys['sim_slower']} wolniej"
+        elif direction == "keyboard":
             text = f"{start} · {self.bridge.keys[0].name} przyspiesza"
         elif direction == "gamepad":
             text = f"{start} · gałka ustawia tempo"
@@ -161,7 +166,7 @@ class ControlScreen:
 
     def sets_speed(self: App) -> bool:
         """Klawisze albo pad ustawiają prędkość taśmy (a nie odwrotnie)."""
-        return self.settings["direction"] in ("keyboard", "gamepad")
+        return self.settings["direction"] in ("keyboard", "gamepad", "training")
 
     def idle_target(self: App) -> float:
         if self.settings["direction"] == "gamepad":
@@ -176,6 +181,7 @@ class ControlScreen:
         self.bridge.set_output("dry" if sets_speed else self.settings["output"])
         self.belt_target = None
         self.mode_tiles.set_value(self.settings["direction"])
+        self.render_training()
         self.render_control_subtitle()
         self.render_zones()
         self.render_output_hint()
@@ -236,6 +242,56 @@ class ControlScreen:
             return "Nie widzę pada. Podłącz DualSense albo pada Xbox (kablem albo Bluetooth)."
         step = self.pad_step + 1
         return f"{state.name}: wychylenie {round(state.deflection * 100)}%, skok {step}."
+
+    # --- trening: zwykłe sterowanie bieżnią z komputera -----------------------------------
+
+    def training_target(self: App) -> tuple[float, str]:
+        """Prędkość z wybranego poziomu (1-4). Kolor wskaźnika: 1-2 chód, 3-4 bieg."""
+        levels = self.settings["training_levels"]
+        level = int(self.settings["training_level"])
+        return float(levels[level]), ("walk" if level < 2 else "run")
+
+    def set_training_level(self: App, level: int) -> None:
+        """Klik w poziom: ustawia go, a gdy sterowanie jest wyłączone - włącza i rusza taśmę."""
+        level = max(0, min(3, level))
+        if level != self.settings["training_level"]:
+            self.change("training_level", level)
+            log.info("Trening: poziom %d", level + 1)
+        if not self.bridge.state.enabled:
+            self.set_control(True)
+        self.render_training()
+
+    def on_training_speed(self: App, index: int, kmh: float) -> None:
+        levels = list(self.settings["training_levels"])
+        levels[index] = round(kmh, 1)
+        self.change("training_levels", levels)
+        self.belt_target = None  # nowa prędkość poziomu od razu na taśmę
+        self.render_zones()
+
+    def change_training_level(self: App, step: int) -> None:
+        level = int(self.settings["training_level"]) + step
+        if 0 <= level <= 3:
+            self.set_training_level(level)
+
+    def training_stop(self: App) -> None:
+        """Szybkie zatrzymanie: sterowanie wyłączone, taśma staje."""
+        if self.bridge.state.enabled:
+            self.set_control(False)
+        else:
+            self.worker.belt("stop")
+
+    def render_training(self: App) -> None:
+        bar = getattr(self, "training_bar", None)
+        if bar is None:
+            return
+        training = self.settings["direction"] == "training"
+        with contextlib.suppress(RuntimeError):
+            bar.setVisible(training)
+            self.zone_chips.setVisible(not training)
+            if training:
+                on = self.bridge.state.enabled
+                bar.set_levels(self.settings["training_levels"])
+                bar.set_active(int(self.settings["training_level"]) if on else -1, on)
 
     def keyboard_target(self: App) -> tuple[float, str]:
         """Prędkość taśmy z trzymanych klawiszy: chód + bieg, sam chód albo nic."""

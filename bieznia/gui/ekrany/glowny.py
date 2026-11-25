@@ -122,6 +122,10 @@ class MainScreen:
         hlay.addWidget(self.gauge_status)
         self.zone_chips = k.ZoneChips(t)
         hlay.addWidget(self.zone_chips)
+        self.training_bar = k.TrainingBar(t)
+        self.training_bar.level.connect(self.set_training_level)
+        self.training_bar.stop.connect(self.training_stop)
+        hlay.addWidget(self.training_bar)
         lay.addWidget(hero)
 
         self.stat_steps = StatTile("Kroki")
@@ -308,6 +312,16 @@ class MainScreen:
                 (walk.name, f"{fmt_num(speeds[1])} km/h", cols[1]),
                 (f"{run.name} + {walk.name}", f"{fmt_num(speeds[2])} km/h", cols[2]),
             ]
+        elif direction == "training":
+            speeds = [float(v) for v in s["training_levels"]]
+            vmax = max(3.0, max(speeds) * 1.25)
+            cols = [t.accent, t.accent, t.run, t.run]
+            cuts = [0.0] + [(speeds[i] + speeds[i + 1]) / 2 for i in range(3)] + [vmax]
+            zones = [(cuts[i], cuts[i + 1], cols[i]) for i in range(4)]
+            ticks = [(v, fmt_num(v), i) for i, v in enumerate(speeds)]
+            chips = [
+                (f"Poziom {n + 1}", f"{fmt_num(v)} km/h", cols[n]) for n, v in enumerate(speeds)
+            ]
         else:
             steps = s["pad_steps"]
             idle = self.pad_idle_text()
@@ -327,3 +341,4 @@ class MainScreen:
                 chips.append((name, value or "", cols[i]))
         self.gauge.configure(zones, ticks, vmax)
         self.zone_chips.set_chips(chips)
+        self.render_training()

@@ -69,6 +69,8 @@ pad_steps = [[0, 1.0], [25, 1.5], [50, 2.5], [100, 4.0]]
 # gałka puszczona: stop (taśma staje, ruch gałki ją uruchamia) | slow (prędkość skoku 1)
 # | zero (test: polecenie 0 km/h bez zatrzymania)
 pad_idle = "stop"
+# tryb "Trening": cztery poziomy prędkości (km/h), zmiana klawiszami albo kliknięciem
+training_levels = [1.5, 2.5, 3.5, 4.5]
 
 [ui]
 simulator = false

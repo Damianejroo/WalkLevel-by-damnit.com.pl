@@ -119,6 +119,20 @@ class QueueLogHandler(logging.Handler):
             self.target.put_nowait(self.format(record))
 
 
+TRAINING_LEVELS = (1.5, 2.5, 3.5, 4.5)
+
+
+def training_levels(data: Any) -> list[float]:
+    """Cztery poziomy treningu w km/h (rosnąco); błędny zapis -> domyślne."""
+    try:
+        levels = [round(float(v), 1) for v in data]
+    except (TypeError, ValueError):
+        return list(TRAINING_LEVELS)
+    if len(levels) != 4 or any(not 0.5 <= v <= 20.0 for v in levels):
+        return list(TRAINING_LEVELS)
+    return levels
+
+
 def defaults_from(config: dict[str, Any]) -> dict[str, Any]:
     """Ustawienia domyślne z config.toml (to, czego profil albo osoba nie nadpisują)."""
     mapping, output = config["mapping"], config["output"]
@@ -152,6 +166,8 @@ def defaults_from(config: dict[str, Any]) -> dict[str, Any]:
         "run_speed": float(ble.get("run_speed", 2.5)),
         "pad_steps": gamepad.parse_steps(ble.get("pad_steps")),
         "pad_idle": ble.get("pad_idle", "stop"),
+        "training_levels": ble.get("training_levels", list(TRAINING_LEVELS)),
+        "training_level": 0,
         "show_person_switch": True,
         "show_profile_switch": True,
     }
@@ -162,7 +178,10 @@ def normalize(s: dict[str, Any]) -> dict[str, Any]:
     s["pad_steps"] = gamepad.parse_steps(s.get("pad_steps"))
     if s.get("pad_idle") not in ("stop", "slow", "zero"):
         s["pad_idle"] = "stop"
-    if s.get("direction") not in ("keyboard", "gamepad", "treadmill"):
+    s["training_levels"] = training_levels(s.get("training_levels"))
+    level = s.get("training_level")
+    s["training_level"] = level if isinstance(level, int) and 0 <= level < 4 else 0
+    if s.get("direction") not in ("keyboard", "gamepad", "treadmill", "training"):
         s["direction"] = "keyboard"
     if not isinstance(s.get("toggle_pad"), str):
         s["toggle_pad"] = ""
@@ -1107,7 +1126,11 @@ class App(
         for action, step in (("sim_faster", 1), ("sim_slower", -1)):
             if action in actions:
                 actions.discard(action)
-                if self.settings["simulator"] and not capturing:
+                if capturing:
+                    continue
+                if self.settings["direction"] == "training":
+                    self.change_training_level(step)  # trening: poziom w górę / w dół
+                elif self.settings["simulator"]:
                     self.worker.sim_remote(step)  # pilot symulowanej bieżni
         if "toggle" in actions:
             actions.discard("toggle")
@@ -1123,6 +1146,8 @@ class App(
             target, held, speed_caption, settled = self.pad_target(time.monotonic())
         elif direction == "keyboard":
             target, held = self.keyboard_target()
+        elif direction == "training":
+            target, held = self.training_target()
         else:
             target, held = 0.0, "idle"
         sends = direction != "treadmill" and state.enabled and settled and not capturing
@@ -1143,6 +1168,15 @@ class App(
             mode = held if state.enabled else "idle"
             active = self.pad_step if state.enabled else -1
             caption = speed_caption if state.enabled else off
+        elif direction == "training":
+            level = int(self.settings["training_level"])
+            mode = held if state.enabled else "idle"
+            active = level if state.enabled else -1
+            caption = (
+                f"Trening · poziom {level + 1} · taśma {fmt_num(target)} km/h"
+                if state.enabled
+                else off
+            )
         elif direction == "keyboard":
             walk_key, run_key = self.bridge.keys
             mode = held if state.enabled else "idle"

@@ -57,6 +57,7 @@ from bieznia.gui.widgets import ElidedLabel, Motion, ease, fmt_num, label, tabul
 # Znaki czcionki Segoe Fluent Icons
 G_PAD = ""
 G_KEYBOARD = ""
+G_TRAINING = "\ue945"  # Segoe: Lightning (tempo)
 G_WALK = ""
 G_CHEVRON_DOWN = ""
 G_CHEVRON_RIGHT = ""
@@ -375,14 +376,61 @@ class KeyCap(QLabel):
         )
 
 
+class TrainingBar(QWidget):
+    """Trening: cztery poziomy prędkości do kliknięcia i duży Stop."""
+
+    level = Signal(int)
+    stop = Signal()
+
+    def __init__(self, t: Theme) -> None:
+        super().__init__()
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(6)
+        self.buttons: list[QPushButton] = []
+        for i in range(4):
+            b = QPushButton()
+            b.setObjectName("level")
+            b.setFixedHeight(54)
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.clicked.connect(lambda _=False, n=i: self.level.emit(n))
+            lay.addWidget(b, 1)
+            self.buttons.append(b)
+        self.stop_btn = QPushButton("Stop")
+        self.stop_btn.setObjectName("stop")
+        self.stop_btn.setFixedHeight(54)
+        self.stop_btn.setMinimumWidth(84)
+        self.stop_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.stop_btn.setAccessibleName("Stop - zatrzymaj taśmę")
+        self.stop_btn.clicked.connect(self.stop.emit)
+        lay.addWidget(self.stop_btn)
+
+    def set_levels(self, levels: Sequence[float]) -> None:
+        for i, (b, kmh) in enumerate(zip(self.buttons, levels, strict=False)):
+            text = f"{i + 1}\n{fmt_num(float(kmh))} km/h"
+            if b.text() != text:
+                b.setText(text)
+                b.setAccessibleName(f"Poziom {i + 1}: {fmt_num(float(kmh))} km/h")
+
+    def set_active(self, index: int, running: bool) -> None:
+        for i, b in enumerate(self.buttons):
+            on = i == index
+            if b.property("active") != on:
+                b.setProperty("active", on)
+                b.style().unpolish(b)
+                b.style().polish(b)
+        self.stop_btn.setEnabled(True)
+
+
 class ModeTiles(QWidget):
-    """Trzy tryby sterowania jako kafelki z ikoną i jednym zdaniem opisu."""
+    """Tryby sterowania jako kafelki z ikoną i jednym zdaniem opisu."""
 
     changed = Signal(str)
     MODES = (
         ("keyboard", G_KEYBOARD, "Klawisze", "W rusza taśmę"),
         ("gamepad", G_PAD, "Pad", "gałka = tempo"),
         ("treadmill", G_WALK, "Chodzenie", "ruch = W w grze"),
+        ("training", G_TRAINING, "Trening", "4 poziomy tempa"),
     )
 
     def __init__(self, t: Theme, current: str) -> None:

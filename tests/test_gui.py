@@ -1985,3 +1985,33 @@ def test_online_account_as_new_person_next_to_offline_person(
     assert not window.online_visible() and window.online_btn.isHidden()
     assert window.accounts.person_of("u1") != offline
     assert server.users["u1"]["name"] == "Kot Bury"
+
+
+def test_training_mode_levels_keys_click_and_quick_stop(window: gui.App) -> None:
+    """Trening: zwykłe sterowanie bieżnią - 4 poziomy (klik albo F6/F7), szybki stop."""
+    from bieznia.hotkeys import Hotkeys
+
+    worker = fake(window)
+    window.mode_tiles.changed.emit("training")
+    assert window.settings["direction"] == "training"
+    assert window.training_bar.isVisibleTo(window.window)
+    assert not window.zone_chips.isVisibleTo(window.window)
+    assert window.bridge.output_kind == "dry"  # gra nie dostaje klawiszy
+    window.training_bar.buttons[1].click()  # klik w poziom 2 włącza i rusza taśmę
+    assert window.bridge.state.enabled and "belt start" in worker.calls
+    window.tick()
+    assert worker.calls[-1] == "speed 2.5"
+    down: set[int] = set()
+    window.hotkeys = Hotkeys(
+        {"sim_faster": "F7", "sim_slower": "F6"}, key_down=lambda vk: vk in down
+    )
+    down.add(0x76)  # F7 - poziom w górę
+    window.tick()
+    down.clear()
+    window.tick()
+    assert window.settings["training_level"] == 2 and worker.calls[-1] == "speed 3.5"
+    assert "poziom 3" in window.gauge_status.text()
+    window.training_bar.stop_btn.click()  # szybki stop
+    assert not window.bridge.state.enabled and worker.calls[-1] == "belt stop"
+    window.on_direction("keyboard")
+    assert not window.training_bar.isVisibleTo(window.window)

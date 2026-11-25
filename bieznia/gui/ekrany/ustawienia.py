@@ -41,7 +41,12 @@ HYSTERESIS = 0.6
 NOT_IN_SETTINGS_VIEW = frozenset(
     {"last_version", "window_geometry", "floating_pos", "device_address", "device_name"}
 )
-MODE_NAMES = {"keyboard": "Klawisze", "gamepad": "Pad", "treadmill": "Chodzenie"}
+MODE_NAMES = {
+    "keyboard": "Klawisze",
+    "gamepad": "Pad",
+    "treadmill": "Chodzenie",
+    "training": "Trening",
+}
 
 
 def section(title: str) -> tuple[QWidget, QVBoxLayout]:
@@ -404,6 +409,9 @@ class SettingsScreen:
                 f"Klawisze · {fmt_num(float(merged['walk_speed']))} /"
                 f" {fmt_num(float(merged['run_speed']))} km/h"
             )
+        if direction == "training":
+            levels = merged.get("training_levels") or [1.5, 2.5, 3.5, 4.5]
+            return f"Trening · {fmt_num(float(levels[0]))}-{fmt_num(float(levels[-1]))} km/h"
         return f"Chodzenie · chód od {fmt_num(float(merged['stand_below']))} km/h"
 
     # --- karta sterowania (tylko bieżący tryb) ---------------------------------------------
@@ -490,6 +498,23 @@ class SettingsScreen:
                     t, title, sub, float(s[real]), self.caps.speed_min, self.caps.speed_max
                 )
                 st.changed.connect(lambda v, r=real: self.on_belt_speed(r, v))
+                box.addWidget(st)
+        elif direction == "training":
+            keys = self.config["hotkeys"]
+            box.addWidget(
+                label(
+                    f"Zwykłe sterowanie bieżnią z komputera. {self.toggle_key.label} rusza i"
+                    f" zatrzymuje, {keys['sim_faster']} i {keys['sim_slower']} zmieniają poziom,"
+                    " a na ekranie głównym poziom wybierzesz kliknięciem."
+                    " Gra nie dostaje klawiszy.",
+                    "small",
+                )
+            )
+            for i, kmh in enumerate(s["training_levels"]):
+                st = k.Stepper(
+                    t, f"Poziom {i + 1}", "", float(kmh), self.caps.speed_min, self.caps.speed_max
+                )
+                st.changed.connect(lambda v, n=i: self.on_training_speed(n, v))
                 box.addWidget(st)
         else:
             self.pad_status = label(self.pad_status_text(), "small")  # od razu - bez skoku

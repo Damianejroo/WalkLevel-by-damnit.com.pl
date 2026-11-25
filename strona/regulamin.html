@@ -4,11 +4,12 @@
   https://bieznia.damnit-live.pl/bieznia (bez skryptów, czcionek i zasobów z zewnątrz).
   Wersja = data zapisywana przy koncie (bieznia/konto/__init__.py: TERMS_VERSION).
 
-  DO DECYZJI DAMIANA przed publikacją (w szkicu wpisane propozycje):
-  1. minimalny wiek: 16 lat (młodsi za zgodą rodzica),
-  2. dane administratora: imię, nazwisko, strona i e-mail - czy wystarczą,
-  3. okno zmian regulaminu: 7 dni,
-  4. konta nieużywane: dziś bez terminu (propozycja do rozważenia: 24 miesiące bez logowania).
+  DECYZJE DAMIANA:
+  1. wiek: 16 lat, młodsi za zgodą rodzica lub opiekuna - ROZSTRZYGNIĘTE,
+  2. kto prowadzi: brzmienie jak na damnit.com.pl - ROZSTRZYGNIĘTE,
+  3. zmiany regulaminu - W TOKU (w tekście jeszcze propozycja 7 dni),
+  4. konta nieużywane: bez terminu, do usunięcia konta - ROZSTRZYGNIĘTE,
+  5. terminy reklamacji i zamknięcia usługi - W TOKU (w tekście jeszcze 14 dni).
 -->
 <html lang="pl">
 <head>
@@ -62,17 +63,19 @@ footer { color: var(--muted); font-size: 14px; }
   <h2>Regulamin</h2>
 
   <h3>1. Kto prowadzi</h3>
-  <p>Konto online prowadzi Damian Skrzypiec (osoba prywatna, <a href="https://damnit.com.pl">damnit.com.pl</a>). We wszystkich sprawach - pytania, reklamacje, dane, odwołania - pisz na <strong>kontakt@damnit.com.pl</strong>.</p>
+  <p>Konto online prowadzę ja, Damian Skrzypiec. Kontakt we wszystkich sprawach, także reklamacjach: <strong>kontakt@damnit.com.pl</strong>.</p>
+  <p>Nie prowadzę tego w ramach działalności gospodarczej ani zawodowej. To projekt prywatny (<a href="https://damnit.com.pl">damnit.com.pl</a>), bez płatnych usług, reklam i przychodów.</p>
 
   <h3>2. Usługa</h3>
   <p>Konto jest darmowe, bez reklam i płatności, i służy tylko funkcjom online aplikacji: wynikom na koncie, znajomym, rankingowi, liście osób i stanowi „na żywo” dla znajomych. Aplikacja działa w pełni bez konta.</p>
 
   <h3>3. Konto</h3>
   <ul>
-    <li>Konto zakładasz kodem zaproszenia od osoby, która już ma konto. Każde konto może mieć naraz najwyżej 3 niewykorzystane kody.</li>
+    <li>Konto zakładasz kodem zaproszenia od osoby, która już ma konto, albo ode mnie. Każde konto może mieć naraz najwyżej 3 niewykorzystane kody.</li>
     <li>Logujesz się e-mailem i hasłem. E-mail służy tylko do logowania (i resetu hasła, gdy ta funkcja ruszy) - nigdy do reklam.</li>
     <li>Konto może założyć osoba, która ma co najmniej 16 lat; osoba młodsza - tylko za zgodą rodzica lub opiekuna.</li>
-    <li>Hasło jest tylko Twoje i odpowiadasz za jego udostępnienie. Nigdy nie poproszę Cię o hasło. Aplikacja łączy się tylko z adresem bieznia.damnit-live.pl.</li>
+    <li>Hasło jest tylko Twoje i odpowiadasz za jego udostępnienie. Nigdy nie poproszę Cię o hasło. Dane konta aplikacja wysyła wyłącznie na adres bieznia.damnit-live.pl.</li>
+    <li>Jedno konto należy do jednej osoby w aplikacji. Na jednym komputerze może być kilka osób z własnymi kontami i osoby bez konta.</li>
     <li>Przy zakładaniu konta akceptujesz ten regulamin; przy koncie zapisuje się jego wersja i czas akceptacji.</li>
   </ul>
 
@@ -100,13 +103,13 @@ footer { color: var(--muted); font-size: 14px; }
   <h2>Prywatność konta</h2>
 
   <h3>Administrator</h3>
-  <p>Administratorem danych konta jest Damian Skrzypiec, kontakt@damnit.com.pl. Prywatność samej aplikacji (bez konta) opisuje osobna polityka aplikacji.</p>
+  <p>Administratorem danych jestem ja, Damian Skrzypiec - prowadzę konto online Bieżni prywatnie. We wszystkich sprawach dotyczących danych pisz na kontakt@damnit.com.pl. Prywatność samej aplikacji (bez konta) opisuje osobna polityka aplikacji.</p>
 
   <h3>Jakie dane są na serwerze</h3>
   <ul>
     <li><strong>Konto:</strong> e-mail, pseudonim, skrót hasła (samego hasła nie przechowuję), widoczność profilu, data założenia, wersja i czas akceptacji regulaminu, a także kto Cię zaprosił i kogo zaprosiłeś (kody zaproszeń).</li>
-    <li><strong>Sesje chodzenia:</strong> początek i koniec, kroki, dystans, czas ruchu, model bieżni, sterownik, firmware, wersja aplikacji, źródło, widoczność, strefa czasowa i lokalny numer osoby z aplikacji (bez nazwy) oraz znacznik wiarygodności.</li>
-    <li><strong>Stan na żywo</strong> (tylko gdy go włączysz): bieżąca prędkość, kroki i czas ruchu w jednym nadpisywanym wpisie - bez historii przebiegu. Znajomi przestają go widzieć 30 s po ostatniej aktualizacji; wpis znika po wyłączeniu udostępniania.</li>
+    <li><strong>Sesje chodzenia:</strong> identyfikator sesji, początek i koniec, kroki, dystans, czas ruchu, model i profil bieżni, sterownik, firmware, wersja aplikacji, źródło, widoczność, strefa czasowa, czas ostatniej zmiany, lokalny numer osoby z aplikacji (bez nazwy) oraz znacznik wiarygodności.</li>
+    <li><strong>Stan na żywo</strong> (tylko gdy go włączysz): bieżąca prędkość, kroki, czas ruchu, identyfikator bieżącej sesji i czas jej rozpoczęcia w jednym nadpisywanym wpisie - bez historii przebiegu. Znajomi przestają go widzieć 30 s po ostatniej aktualizacji; wpis znika po wyłączeniu udostępniania.</li>
     <li><strong>Znajomości</strong> i oczekujące zaproszenia.</li>
   </ul>
   <p>Nie zbieram: nazw osób i gier z aplikacji, wagi, wzrostu, wieku, lokalizacji, kontaktów, plików ani awatarów. Nie ma ciasteczek, narzędzi analitycznych ani logowania przez serwisy zewnętrzne. Kroki i dystans to dane o aktywności - nie wyciągam z nich wniosków o zdrowiu.</p>
@@ -114,8 +117,8 @@ footer { color: var(--muted); font-size: 14px; }
   <h3>Kto co widzi</h3>
   <ul>
     <li><strong>Ty:</strong> wszystkie swoje sesje i statystyki.</li>
-    <li><strong>Znajomi:</strong> sumy z Twoich sesji ustawionych na „Znajomi” i „Wszyscy” (ostatnie 7 dni i łącznie), pseudonim, datę założenia konta i model bieżni.</li>
-    <li><strong>Pozostali:</strong> tylko sumy z sesji „Wszyscy” i tylko wtedy, gdy Twój profil jest publiczny. Na liście osób z kontem są wyłącznie profile publiczne (domyślnie profil widzą tylko znajomi).</li>
+    <li><strong>Znajomi:</strong> sumy z Twoich sesji ustawionych na „Znajomi” i „Wszyscy” (ostatnie 7 dni, ostatnie 30 dni w rankingu miesięcznym i łącznie), pseudonim, datę założenia konta, model bieżni, a gdy go włączysz - stan na żywo.</li>
+    <li><strong>Pozostali:</strong> tylko sumy z sesji „Wszyscy” (te same okresy) i tylko wtedy, gdy Twój profil jest publiczny. Na liście osób z kontem są wyłącznie profile publiczne (domyślnie profil widzą tylko znajomi).</li>
     <li>Pojedynczych sesji (dat, godzin) nie widzi nikt poza Tobą. Twój e-mail nie jest pokazywany nikomu.</li>
     <li>„Tylko ja” znaczy: niewidoczne dla innych użytkowników. Administrator serwera ma techniczny dostęp do całej bazy.</li>
   </ul>
@@ -146,7 +149,7 @@ footer { color: var(--muted); font-size: 14px; }
   </ul>
 
   <h3>Na Twoim komputerze</h3>
-  <p>Aplikacja trzyma token logowania w Menedżerze poświadczeń Windows (zaszyfrowany dla Twojego konta Windows), a nie w zwykłym pliku. Hasło nie jest zapisywane nigdzie. Token wygasa po 7 dniach bez odświeżenia, a zmiana hasła wylogowuje wszystkie urządzenia.</p>
+  <p>Hasło nie jest zapisywane nigdzie. Po zalogowaniu aplikacja dostaje token logowania: przy opcji „Zapamiętaj logowanie” trzyma go w Menedżerze poświadczeń Windows (zaszyfrowany dla Twojego konta Windows, osobno dla każdej osoby), a bez niej tylko w pamięci do zamknięcia aplikacji - nigdy w zwykłym pliku. Token wygasa po 7 dniach bez odświeżenia, a zmiana hasła wylogowuje wszystkie urządzenia.</p>
 </section>
 
 <footer>

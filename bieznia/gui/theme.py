@@ -251,6 +251,11 @@ QPushButton#icon:hover {{ background: {t.surface_2}; border-color: {t.control}; 
 QPushButton#row {{ text-align: left; padding: 0 {px(14)}; font-weight: 400; }}
 QPushButton#row[active="true"] {{ border: 2px solid {t.accent}; }}
 QPushButton#row[dashed="true"] {{ border-style: dashed; }}
+QPushButton#level {{ font-weight: 600; padding: 0 {px(4)}; }}
+QPushButton#level[active="true"] {{ background: {t.accent}; border-color: {t.accent};
+    color: {t.on_accent}; }}
+QPushButton#stop {{ color: {t.danger}; border-color: {t.danger}; font-weight: 700; }}
+QPushButton#stop:hover {{ background: {t.danger}; color: {t.bg}; }}
 QPushButton#seg {{ border: none; border-radius: {RADIUS - 3}px; background: transparent;
     color: {t.text_2}; font-weight: 600; padding: 0 {px(10)}; }}
 QPushButton#seg:hover:!checked {{ color: {t.text}; }}

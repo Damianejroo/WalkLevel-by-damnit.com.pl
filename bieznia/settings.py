@@ -36,6 +36,8 @@ SECTIONS = {
     "walk_speed": "ble",
     "run_speed": "ble",
     "pad_steps": "ble",
+    "training_levels": "ble",
+    "training_level": "ble",
     "pad_idle": "ble",
     "device_address": "ble",
     "device_name": "ble",
