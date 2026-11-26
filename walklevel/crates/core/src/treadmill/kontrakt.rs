@@ -192,15 +192,14 @@ pub struct Counts {
 pub enum DriverError {
     /// Urządzenie nie ma żadnej znanej usługi bieżni.
     #[error(
-        "To urządzenie nie wygląda na bieżnię. Jeśli to bieżnia, zgłoś ją w Ustawienia > \
-         Pomoc i diagnostyka > Zgłoś problem."
+        "{}", crate::teksty::t("ble.powod.nieobslugiwane", &[])
     )]
     UnsupportedDevice,
     /// Błąd Bluetooth (zapis, odczyt, subskrypcja).
-    #[error("Problem z Bluetooth. Łączę ponownie… ({0})")]
+    #[error("{}", crate::teksty::t("ble.powod.inny", &[("szczegoly", .0)]))]
     Gatt(String),
     /// Połączenie zerwane.
-    #[error("Bieżnia się rozłączyła. Łączę ponownie…")]
+    #[error("{}", crate::teksty::t("ble.powod.rozlaczyla", &[]))]
     Disconnected,
 }
 

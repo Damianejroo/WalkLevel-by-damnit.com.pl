@@ -660,31 +660,31 @@ pub fn default_base_url() -> String {
 /// Błąd pobierania albo dodawania profilu - komunikat dla użytkownika.
 #[derive(Debug, thiserror::Error)]
 pub enum DownloadError {
-    #[error("Nieoczekiwany adres - przerwano dla bezpieczeństwa.")]
+    #[error("{}", crate::teksty::t("modele.powod.adres", &[]))]
     UnexpectedAddress,
-    #[error("Serwer przekierował poza GitHub - przerwano.")]
+    #[error("{}", crate::teksty::t("modele.powod.przekierowanie", &[]))]
     Redirected,
-    #[error("Lista modeli nie jest jeszcze opublikowana - spróbuj po aktualizacji aplikacji.")]
+    #[error("{}", crate::teksty::t("modele.powod.brak_listy", &[]))]
     NotPublished,
-    #[error("Serwer odpowiedział błędem {0}.")]
+    #[error("{}", crate::teksty::t("modele.powod.kod", &[("kod", &.0.to_string())]))]
     Status(u16),
-    #[error("Brak internetu albo GitHub nie odpowiada.")]
+    #[error("{}", crate::teksty::t("modele.powod.internet", &[]))]
     Offline,
-    #[error("Plik jest za duży jak na profil bieżni - odrzucono.")]
+    #[error("{}", crate::teksty::t("modele.powod.za_duzy", &[]))]
     TooLarge,
-    #[error("Nieznany format listy modeli - zaktualizuj aplikację.")]
+    #[error("{}", crate::teksty::t("modele.powod.format", &[]))]
     BadIndex,
-    #[error("Lista modeli zawiera niepoprawny wpis - przerwano.")]
+    #[error("{}", crate::teksty::t("modele.powod.zly_wpis", &[]))]
     BadEntry,
-    #[error("Nie da się odczytać pliku.")]
+    #[error("{}", crate::teksty::t("modele.plik.nieczytelny", &[]))]
     Unreadable,
-    #[error("Plik jest za duży jak na profil bieżni.")]
+    #[error("{}", crate::teksty::t("modele.plik.za_duzy", &[]))]
     FileTooLarge,
-    #[error("To nie jest poprawny profil bieżni: {0}")]
+    #[error("{}", crate::teksty::t("modele.plik.zly", &[("szczegoly", .0)]))]
     InvalidProfile(String),
-    #[error("Brak folderu danych na profile bieżni.")]
+    #[error("{}", crate::teksty::t("modele.blad_folder", &[]))]
     NoUserDir,
-    #[error("Nie da się zapisać profilu: {0}")]
+    #[error("{}", crate::teksty::t("modele.blad_zapisu", &[("szczegoly", &.0.to_string())]))]
     Write(std::io::Error),
 }
 
@@ -1003,6 +1003,10 @@ mod tests {
             let mut expected = case.clone();
             if let Some(obj) = expected.as_object_mut() {
                 obj.remove("hex");
+                // komunikat z 0.5.2 w brzmieniu 0.6.0 (docs/teksty.md, modele.*)
+                if let Some(Value::String(e)) = obj.get_mut("error") {
+                    *e = crate::teksty::from_052(e, &["modele."]);
+                }
             }
             assert_eq!(actual, expected, "{}", String::from_utf8_lossy(&raw));
         }

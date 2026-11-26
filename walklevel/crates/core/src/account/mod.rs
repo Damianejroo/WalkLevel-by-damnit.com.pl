@@ -30,6 +30,7 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::history::{History, HistoryError};
+use crate::teksty::t;
 
 pub use api::{
     Auth, ChangesPage, Client, HttpReply, HttpRequest, ProfilePatch, RANKING_SCOPES, RemoteSession,
@@ -68,8 +69,9 @@ pub const RESERVED_NAMES: [&str; 6] = [
     "bieżnia",
 ];
 /// Komunikat po „Przypomnij hasło” (zawsze ten sam - nie zdradza, czy konto istnieje).
-pub const REMIND_MESSAGE: &str =
-    "Jeśli konto z tym adresem istnieje, wysłaliśmy wiadomość z linkiem. Sprawdź też spam.";
+pub fn remind_message() -> String {
+    t("konto.reset.wyslano", &[])
+}
 
 static NAME: LazyLock<Option<Regex>> = LazyLock::new(|| Regex::new(NAME_RE).ok());
 static EMAIL: LazyLock<Option<Regex>> = LazyLock::new(|| Regex::new(EMAIL_RE).ok());
@@ -144,22 +146,14 @@ impl KontoError {
 impl From<HistoryError> for KontoError {
     fn from(e: HistoryError) -> Self {
         log::warn!("Konto: błąd historii: {e}");
-        Self::new(
-            KontoErrorKind::Io,
-            "Nie udało się odczytać albo zapisać historii na tym komputerze.",
-            0,
-        )
+        Self::new(KontoErrorKind::Io, &t("historia.niedostepna", &[]), 0)
     }
 }
 
 impl From<std::io::Error> for KontoError {
     fn from(e: std::io::Error) -> Self {
         log::warn!("Konto: błąd zapisu: {e}");
-        Self::new(
-            KontoErrorKind::Io,
-            "Nie udało się zapisać danych konta na tym komputerze.",
-            0,
-        )
+        Self::new(KontoErrorKind::Io, &t("konto.blad.zapis", &[]), 0)
     }
 }
 
@@ -170,17 +164,23 @@ pub type Result<T> = std::result::Result<T, KontoError>;
 /// Pusty tekst = poprawny; inaczej podpowiedź do pola.
 pub fn check_name(name: &str) -> String {
     if name != name.trim() {
-        return "Pseudonim: bez spacji na początku i na końcu.".into();
+        return t("konto.blad.pseudonim_spacje", &[]);
     }
     let len = name.chars().count();
     if !(NAME_MIN..=NAME_MAX).contains(&len) {
-        return format!("Pseudonim: od {NAME_MIN} do {NAME_MAX} znaków.");
+        return t(
+            "konto.blad.pseudonim_dlugosc",
+            &[
+                ("min", &NAME_MIN.to_string()),
+                ("max", &NAME_MAX.to_string()),
+            ],
+        );
     }
     if !NAME.as_ref().is_some_and(|re| re.is_match(name)) {
-        return "Pseudonim: litery, cyfry, spacja, _, - i kropka.".into();
+        return t("konto.blad.pseudonim_znaki", &[]);
     }
     if RESERVED_NAMES.contains(&name.to_lowercase().as_str()) {
-        return "Ten pseudonim jest zarezerwowany - wybierz inny.".into();
+        return t("konto.blad.pseudonim_zarezerwowany", &[]);
     }
     String::new()
 }
@@ -189,7 +189,7 @@ pub fn check_code(code: &str) -> String {
     if code.trim().chars().count() >= CODE_MIN {
         String::new()
     } else {
-        "Wpisz kod zaproszenia (dostaniesz go od znajomego).".into()
+        t("konto.blad.kod", &[])
     }
 }
 
@@ -197,13 +197,16 @@ pub fn check_email(email: &str) -> String {
     if EMAIL.as_ref().is_some_and(|re| re.is_match(email.trim())) {
         String::new()
     } else {
-        "Wpisz poprawny adres e-mail.".into()
+        t("konto.blad.email", &[])
     }
 }
 
 pub fn check_password(password: &str) -> String {
     if password.chars().count() < PASSWORD_MIN {
-        format!("Hasło: co najmniej {PASSWORD_MIN} znaków.")
+        t(
+            "konto.blad.haslo_krotkie",
+            &[("liczba", &PASSWORD_MIN.to_string())],
+        )
     } else {
         String::new()
     }
@@ -593,7 +596,7 @@ impl Account {
 
     pub fn set_games_visibility(&mut self, value: &str) -> Result<()> {
         if !GAMES_VISIBILITY.contains(&value) {
-            return Err(KontoError::invalid("Nieznana widoczność gier."));
+            return Err(KontoError::invalid(&t("wspolne.blad_nieznany", &[])));
         }
         let patch = ProfilePatch {
             games_visibility: Some(value.to_string()),
@@ -607,7 +610,7 @@ impl Account {
 
     pub fn set_profile_visibility(&mut self, value: &str) -> Result<()> {
         if !PROFILE_VISIBILITY.contains(&value) {
-            return Err(KontoError::invalid("Nieznana widoczność profilu."));
+            return Err(KontoError::invalid(&t("wspolne.blad_nieznany", &[])));
         }
         let patch = ProfilePatch {
             visibility: Some(value.to_string()),
@@ -642,7 +645,7 @@ impl Account {
     /// Widoczność wysyłanych sesji; wszystkie sesje pójdą jeszcze raz - z nową widocznością.
     pub fn set_visibility(&mut self, history: &History, visibility: &str) -> Result<()> {
         if !VISIBILITY.contains(&visibility) {
-            return Err(KontoError::invalid("Nieznana widoczność sesji."));
+            return Err(KontoError::invalid(&t("wspolne.blad_nieznany", &[])));
         }
         self.state.visibility = visibility.to_string();
         self.save()?;
@@ -696,7 +699,7 @@ impl Account {
         let formatter = serde_json::ser::PrettyFormatter::with_indent(b" ");
         let mut ser = serde_json::Serializer::with_formatter(&mut out, formatter);
         data.serialize(&mut ser)
-            .map_err(|_| KontoError::server("Serwer odpowiedział w nieznanym formacie.", 0))?;
+            .map_err(|_| KontoError::server(&t("konto.blad.format", &[]), 0))?;
         std::fs::write(&target, out)?;
         Ok(target)
     }

@@ -75,6 +75,17 @@ fn held_mode(h: Held) -> GaugeMode {
     }
 }
 
+/// Tryb Chodzenie: kolor wskaźnika, strefa i klucz podpisu (glowny.wskaznik.chodzenie.*).
+fn treadmill_caption(run: bool, walk: bool, dry: bool) -> (GaugeMode, i32, &'static str) {
+    match (run, walk, dry) {
+        (true, _, true) => (GaugeMode::Run, 2, "glowny.wskaznik.chodzenie.proba_bieg"),
+        (true, _, false) => (GaugeMode::Run, 2, "glowny.wskaznik.chodzenie.bieg"),
+        (false, true, true) => (GaugeMode::Walk, 1, "glowny.wskaznik.chodzenie.proba"),
+        (false, true, false) => (GaugeMode::Walk, 1, "glowny.wskaznik.chodzenie.chod"),
+        (false, false, _) => (GaugeMode::Idle, 0, "glowny.wskaznik.chodzenie.stoisz"),
+    }
+}
+
 impl App {
     pub fn steering_settings(&self) -> SteeringSettings {
         SteeringSettings {
@@ -150,12 +161,14 @@ impl App {
         {
             if cmd == BeltCommand::Start {
                 let delay = self.caps.start_delay_s;
-                let countdown = if delay >= 2.0 {
-                    format!(" (odliczanie ok. {delay:.0} s)")
+                self.hint_override = Some(if delay >= 2.0 {
+                    teksty::t(
+                        "tasma.uruchamiam_odliczanie",
+                        &[("sekundy", &format!("{delay:.0}"))],
+                    )
                 } else {
-                    String::new()
-                };
-                self.hint_override = Some(format!("Uruchamiam bieżnię{countdown}…"));
+                    teksty::t("tasma.uruchamiam", &[])
+                });
             }
             self.belt(cmd);
         }
@@ -222,7 +235,8 @@ impl App {
     pub fn start_scan(&mut self) {
         self.devices.clear();
         self.scanning = true;
-        self.scan_text = "Szukam urządzeń Bluetooth (ok. 6 s)…".into();
+        self.scan_cancelled = false;
+        self.scan_text = teksty::t("bieznia.lista.szukam", &[]);
         self.bieznia.worker().scan();
         self.mark(&[SliceName::Device]);
     }
@@ -255,15 +269,21 @@ impl App {
                 self.scan_text = if devices.is_empty() {
                     String::new()
                 } else {
-                    format!(
-                        "Znalezione bieżnie: {}, inne urządzenia: {others}",
-                        treadmills.len()
+                    teksty::t(
+                        "bieznia.lista.znalezione",
+                        &[
+                            ("liczba", &treadmills.len().to_string()),
+                            ("razem", &others.to_string()),
+                        ],
                     )
                 };
                 self.devices = devices;
-                if self.auto_connect && treadmills.len() == 1 {
+                if std::mem::take(&mut self.scan_cancelled) {
+                    self.auto_connect = false;
+                } else if self.auto_connect && treadmills.len() == 1 {
                     self.auto_connect = false;
                     log::info!("Znaleziono jedną bieżnię - łączę automatycznie");
+                    self.toast(teksty::t("bieznia.lista.automatycznie", &[]));
                     let d = &treadmills[0];
                     self.connect_device(d.address.clone(), d.name.clone());
                 } else {
@@ -325,7 +345,7 @@ impl App {
             }
             WorkerEvent::Belt(outcome) => {
                 log::info!("Taśma: {}", outcome.as_str());
-                self.hint_override = Some(outcome.message().to_string());
+                self.hint_override = Some(outcome.message());
                 self.mark(&[SliceName::Control]);
             }
             WorkerEvent::Problem(text) => self.toast_error(text),
@@ -334,7 +354,7 @@ impl App {
                 self.diagnostics.text = match result {
                     Ok(path) => {
                         log::info!("Raport diagnostyczny: {}", path.display());
-                        format!("Raport: {}", path.display())
+                        walklevel_core::treadmill::worker::report_done()
                     }
                     Err(text) => text,
                 };
@@ -402,8 +422,9 @@ impl App {
             if button.is_empty() { "brak" } else { &button }
         );
         if button == "south" || button == "east" {
-            self.toast(format!(
-                "{label} to w wielu grach skok albo akcja - rozważ inny przycisk."
+            self.toast(teksty::t(
+                "ustawienia.wlaczanie.pad_ostrzezenie",
+                &[("przycisk_pada", &label)],
             ));
         }
         self.mark(&[SliceName::Control]);
@@ -463,35 +484,48 @@ impl App {
         }
 
         // podpis i kolor wskaźnika (app.py tick)
-        let off = format!("Wyłączone - {} włącza", self.toggle_key.label());
+        let off = teksty::t(
+            "glowny.wskaznik.wylaczone",
+            &[("klawisz_wlaczania", &self.toggle_key.label())],
+        );
         let c = state.control;
         let offline = !state.live;
         let target = frame.target;
         let (mut mode, active, caption) = if offline && direction == "treadmill" {
             let text = if self.link == Link::Streaming {
-                "Czekam na dane"
+                "glowny.wskaznik.czekam"
             } else {
-                "Brak danych z bieżni"
+                "glowny.wskaznik.brak_danych"
             };
-            (GaugeMode::Offline, -1, text.to_string())
+            (GaugeMode::Offline, -1, teksty::t(text, &[]))
         } else if !state.enabled {
             (GaugeMode::Idle, -1, off)
         } else {
+            let kmh = teksty::kmh(target);
+            let (w, r) = (self.walk_key.name.as_str(), self.run_key.name.as_str());
+            let vars = [
+                ("kmh", kmh.as_str()),
+                ("klawisz_chodu", w),
+                ("klawisz_biegu", r),
+            ];
             match direction.as_str() {
                 "gamepad" => {
                     let idle = frame.pad_step == 0 && settings.pad_idle != PadIdle::Slow;
                     let belt = if frame.pad_stopped || (idle && settings.pad_idle == PadIdle::Stop)
                     {
-                        "taśma stoi".to_string()
+                        teksty::t("glowny.wskaznik.tasma_stoi", &[])
                     } else {
-                        format!("taśma {} km/h", teksty::num(target))
+                        teksty::t("glowny.wskaznik.tasma_kmh", &vars)
                     };
                     let caption = match &self.pad_state {
-                        None => format!("Brak pada - {belt}"),
-                        Some(_) => format!(
-                            "Gałka {}% - skok {} - {belt}",
-                            (deflection * 100.0).round(),
-                            frame.pad_step + 1
+                        None => teksty::t("glowny.wskaznik.pad.brak", &[("tasma", &belt)]),
+                        Some(_) => teksty::t(
+                            "glowny.wskaznik.pad.stan",
+                            &[
+                                ("procent", &format!("{}", (deflection * 100.0).round())),
+                                ("stopien", &(frame.pad_step + 1).to_string()),
+                                ("tasma", &belt),
+                            ],
                         ),
                     };
                     (held_mode(frame.held), frame.pad_step as i32, caption)
@@ -499,35 +533,26 @@ impl App {
                 "training" => (
                     held_mode(frame.held),
                     settings.training_level as i32,
-                    format!(
-                        "Trening · poziom {} · taśma {} km/h",
-                        settings.training_level + 1,
-                        teksty::num(target)
+                    teksty::t(
+                        "glowny.wskaznik.trening",
+                        &[
+                            ("poziom", &(settings.training_level + 1).to_string()),
+                            ("kmh", &kmh),
+                        ],
                     ),
                 ),
                 "keyboard" => {
-                    let (w, r) = (&self.walk_key.name, &self.run_key.name);
-                    let t = teksty::num(target);
-                    let (zone, caption) = match frame.held {
-                        Held::Run => (2, format!("Bieg · {w} + {r} · taśma {t} km/h")),
-                        Held::Walk => (1, format!("Chód · {w} · taśma {t} km/h")),
-                        Held::Idle => (0, format!("Bez klawisza · taśma {t} km/h")),
+                    let (zone, key) = match frame.held {
+                        Held::Run => (2, "glowny.wskaznik.klawisze.bieg"),
+                        Held::Walk => (1, "glowny.wskaznik.klawisze.chod"),
+                        Held::Idle => (0, "glowny.wskaznik.klawisze.bez"),
                     };
-                    (held_mode(frame.held), zone, caption)
+                    (held_mode(frame.held), zone, teksty::t(key, &vars))
                 }
                 _ => {
-                    let (w, r) = (&self.walk_key.name, &self.run_key.name);
-                    let (m, zone, mut caption) = if c.run {
-                        (GaugeMode::Run, 2, format!("Bieg · gra dostaje {r} + {w}"))
-                    } else if c.walk {
-                        (GaugeMode::Walk, 1, format!("Chód · gra dostaje {w}"))
-                    } else {
-                        (GaugeMode::Idle, 0, "Stoisz".to_string())
-                    };
-                    if self.s("output") == "dry" && c.walk {
-                        caption.push_str(" (podgląd)");
-                    }
-                    (m, zone, caption)
+                    let (m, zone, key) =
+                        treadmill_caption(c.run, c.walk, self.s("output") == "dry");
+                    (m, zone, teksty::t(key, &vars))
                 }
             }
         };
@@ -659,4 +684,26 @@ pub fn spawn(core: Core) {
                 }
             }
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn treadmill_caption_trial_mode_says_game_gets_nothing() {
+        let vars = [("klawisz_chodu", "W"), ("klawisz_biegu", "Shift")];
+        let text = |run, walk, dry| teksty::t(treadmill_caption(run, walk, dry).2, &vars);
+        assert_eq!(
+            text(false, true, true),
+            "Chód · tryb próbny, gra nic nie dostaje"
+        );
+        assert_eq!(
+            text(true, true, true),
+            "Bieg · tryb próbny, gra nic nie dostaje"
+        );
+        assert_eq!(text(false, true, false), "Chód · gra dostaje W");
+        assert_eq!(text(true, true, false), "Bieg · gra dostaje Shift + W");
+        assert_eq!(text(false, false, true), "Stoisz");
+    }
 }

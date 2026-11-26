@@ -19,6 +19,11 @@ const FIXTURE: &str = concat!(
     "/tests/fixtures/zgloszenia/zgloszenia.json"
 );
 
+/// Komunikat z fixtury 0.5.2 w brzmieniu 0.6.0 (docs/teksty.md, zgloszenie.*).
+fn old(message: &str) -> String {
+    crate::teksty::from_052(message, &["zgloszenie."])
+}
+
 fn fixture() -> Value {
     let text = fs::read_to_string(FIXTURE).expect("fixtura zgłoszeń");
     serde_json::from_str(&text).expect("JSON fixtury")
@@ -338,30 +343,40 @@ fn server_replies_match_python() {
         let status = u16::try_from(case["status"].as_u64().expect("kod")).expect("kod");
         assert_eq!(
             http_error(status, &b64(&case["body"])).to_string(),
-            s(&case["message"]),
+            old(s(&case["message"])),
             "kod {status}"
         );
     }
-    assert_eq!(network_error().to_string(), s(&send["network"]));
+    assert_eq!(network_error().to_string(), old(s(&send["network"])));
     let dir = tempfile::tempdir().expect("tmp");
     let report = dir.path().join("a.zip");
     fs::write(&report, b"PK").expect("zapis");
     let err = send_report(&report, "http://example.com/z", "x", "", None, "0.6.0")
         .expect_err("tylko https");
-    assert_eq!(err.to_string(), s(&send["not_https"]));
+    assert_eq!(err.to_string(), old(s(&send["not_https"])));
 }
 
 #[test]
 fn mailto_matches_python() {
+    // 0.6.0: temat i treść w nowym brzmieniu (zgloszenie.email.*), kodowanie jak w Pythonie
     let fx = fixture();
     for case in fx["mailto"].as_array().expect("linki") {
+        let version = fx["version"].as_str().expect("wersja");
+        let (description, report) = (s(&case["description"]), s(&case["report"]));
+        let subject = crate::teksty::t("zgloszenie.email.temat", &[("wersja", version)]);
+        let body = crate::teksty::t(
+            "zgloszenie.email.tresc",
+            &[("opis", description.trim()), ("plik", report)],
+        ) + "\n";
+        let link = mailto_link(description, report, version);
+        assert!(s(&case["output"]).starts_with(&format!("mailto:{CONTACT}?subject=")));
         assert_eq!(
-            mailto_link(
-                s(&case["description"]),
-                s(&case["report"]),
-                fx["version"].as_str().expect("wersja")
-            ),
-            s(&case["output"])
+            link,
+            format!(
+                "mailto:{CONTACT}?subject={}&body={}",
+                percent_encode(&subject),
+                percent_encode(&body)
+            )
         );
     }
 }
@@ -635,7 +650,7 @@ fn only_https_endpoint() {
         "0.6.0",
     )
     .expect_err("http");
-    assert!(err.to_string().contains("https"));
+    assert!(err.to_string().contains("serwera zgłoszeń"));
     assert!(is_https("HTTPS://example.com"));
     assert!(!is_https("ftp://example.com"));
 }
@@ -890,7 +905,7 @@ fn send_report_returns_number_and_maps_errors() {
     );
     assert_eq!(
         send_local(&url, None, &path).expect_err("307").to_string(),
-        "Serwer odrzucił zgłoszenie (kod 307)."
+        "Serwer nie przyjął zgłoszenia. Zapisz paczkę na dysk i wyślij ją e-mailem. (kod 307)"
     );
 
     // nikt nie słucha na porcie - komunikat o internecie
@@ -909,24 +924,24 @@ fn send_report_returns_number_and_maps_errors() {
 fn short_description_messages() {
     assert_eq!(
         description_problem("   ").as_deref(),
-        Some("Opisz, co się stało - wystarczy jedno zdanie.")
+        Some("Opisz, co się stało. Wystarczy jedno zdanie.")
     );
     assert_eq!(
         description_problem("abcd").as_deref(),
-        Some("Opis jest za krótki - dopisz jeszcze 1 znak, np. co poszło nie tak.")
+        Some("Opis jest za krótki. Dopisz jeszcze 1 znak, np. co poszło nie tak.")
     );
     assert_eq!(
         description_problem(" ab ").as_deref(),
-        Some("Opis jest za krótki - dopisz jeszcze 3 znaki, np. co poszło nie tak.")
+        Some("Opis jest za krótki. Dopisz jeszcze 3 znaki, np. co poszło nie tak.")
     );
     assert_eq!(description_problem("żółć!"), None);
     assert_eq!(
         sent_message("7"),
-        "Wysłano zgłoszenie nr 7 - dziękuję! Autor dostał opis i logi."
+        "Wysłano zgłoszenie nr 7. Dziękujemy, autor dostał opis i dziennik."
     );
     assert_eq!(
         sent_message(""),
-        "Wysłano zgłoszenie - dziękuję! Autor dostał opis i logi."
+        "Wysłano zgłoszenie. Dziękujemy, autor dostał opis i dziennik."
     );
 }
 

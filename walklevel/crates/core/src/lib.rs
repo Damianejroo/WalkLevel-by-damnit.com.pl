@@ -23,6 +23,7 @@ pub mod treadmill; // bieżnia: kontrakt, KingSmith, FTMS, symulator, profile mo
 pub mod account; // konto online: API, stan, wysyłka sesji, sejf (Menedżer poświadczeń)
 pub mod reports; // zgłoszenia problemu: paczka logów, maskowanie, wysyłka
 pub mod backup; // kopia danych .bieznia (eksport/import) - port bieznia/kopia.py
+pub mod teksty; // teksty dla użytkownika ze słownika docs/teksty.md
 pub mod updates; // sprawdzanie i pobieranie aktualizacji (GitHub Releases)
 
 pub fn version() -> &'static str {

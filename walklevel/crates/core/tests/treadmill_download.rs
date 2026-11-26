@@ -178,7 +178,7 @@ fn only_github_over_https() {
     };
     let result = registry.download(&redirected, &base());
     assert!(
-        matches!(&result, Err(e) if e.to_string().contains("przekierował")),
+        matches!(&result, Err(e) if e.to_string().contains("bezpieczeństwa")),
         "{result:?}"
     );
     let result = registry.download(&server(catalog(&[])), "http://raw.githubusercontent.com/x");
@@ -193,7 +193,7 @@ fn missing_catalog_and_huge_file_have_clear_messages() {
     let (_tmp, _user_dir, mut registry) = registry();
     let result = registry.download(&server(BTreeMap::new()), &base());
     assert!(
-        matches!(&result, Err(e) if e.to_string().contains("nie jest jeszcze opublikowana")),
+        matches!(&result, Err(e) if e.to_string().contains("jeszcze niedostępna")),
         "{result:?}"
     );
     let huge = BTreeMap::from([(INDEX.to_string(), vec![b' '; MAX_BYTES + 10])]);

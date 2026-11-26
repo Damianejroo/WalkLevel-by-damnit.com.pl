@@ -48,8 +48,8 @@ const BUTTONS_SONY: &[(&str, &str)] = &[
     ("r2", "R2"),
     ("select", "Create"),
     ("start", "Options"),
-    ("l3", "L3 (lewa gałka)"),
-    ("r3", "R3 (prawa gałka)"),
+    ("l3", "L3 (wciśnięcie lewej gałki)"),
+    ("r3", "R3 (wciśnięcie prawej gałki)"),
     ("home", "PS"),
     ("touchpad", "Panel dotykowy"),
     ("up", "Strzałka w górę"),
@@ -70,8 +70,8 @@ const BUTTONS_XBOX: &[(&str, &str)] = &[
     ("r2", "RT"),
     ("select", "View"),
     ("start", "Menu"),
-    ("l3", "LS (lewa gałka)"),
-    ("r3", "RS (prawa gałka)"),
+    ("l3", "LS (wciśnięcie lewej gałki)"),
+    ("r3", "RS (wciśnięcie prawej gałki)"),
     ("home", "Xbox"),
 ];
 
@@ -104,7 +104,7 @@ pub fn button_label(button: &str, pad_name: Option<&str>) -> String {
         && !num.is_empty()
         && num.chars().all(|c| c.is_ascii_digit())
     {
-        return format!("Przycisk {num}");
+        return crate::teksty::t("pad.przycisk_nr", &[("liczba", num)]);
     }
     let sony = pad_name.is_none_or(|n| {
         ["DualSense", "DualShock", "PlayStation"]

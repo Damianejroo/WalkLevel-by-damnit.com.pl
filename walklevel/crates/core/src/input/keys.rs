@@ -8,6 +8,8 @@
 //! (Steam Shift+Tab, NVIDIA Alt+Z) oraz Ctrl+Alt+litera, czyli AltGr z polskimi znakami.
 
 use serde::{Deserialize, Serialize};
+
+use crate::teksty::t;
 use serde_json::{Map, Value};
 
 /// Modyfikator kombinacji. W JSON małymi literami: "ctrl", "alt", "shift", "win".
@@ -297,45 +299,42 @@ const NAMES: &[((u16, bool), &str)] = &[
     ((0x51, true), "Page Down"),
 ];
 
-/// F6/F7: skróty symulatora, Esc: anulowanie wyboru, F12: debuger Windows, Print Screen.
+/// F6/F7: skróty symulatora, Esc: anulowanie wyboru, F12: debuger Windows, Print Screen
+/// (wartości: klucze powodów w docs/teksty.md).
 const RESERVED: &[((u16, bool), &str)] = &[
-    ((0x40, false), "F6 to skrót symulatora"),
-    ((0x41, false), "F7 to skrót symulatora"),
-    ((0x01, false), "Esc anuluje wybór klawisza"),
-    ((0x58, false), "F12 jest zarezerwowany przez Windows"),
-    ((0x37, true), "Print Screen robi zrzut ekranu w Windows"),
+    ((0x40, false), "klawisz.powod.f6"),
+    ((0x41, false), "klawisz.powod.f7"),
+    ((0x01, false), "klawisz.powod.esc"),
+    ((0x58, false), "klawisz.powod.f12"),
+    ((0x37, true), "klawisz.powod.printscreen"),
 ];
 
-/// Kombinacje zajęte przez Windows, gry i nakładki: (modyfikatory, scan) -> powód.
+/// Kombinacje zajęte przez Windows, gry i nakładki: (modyfikatory, scan) -> klucz powodu.
 const TAKEN_COMBOS: &[(&[Mod], u16, &str)] = &[
-    (&[Mod::Alt], 0x0F, "Alt+Tab przełącza okna"),
-    (&[Mod::Alt], 0x3E, "Alt+F4 zamyka okno"),
-    (&[Mod::Alt], 0x01, "Alt+Esc przełącza okna"),
-    (&[Mod::Alt], 0x39, "Alt+Spacja otwiera menu okna"),
-    (&[Mod::Alt], 0x1C, "Alt+Enter przełącza pełny ekran w grach"),
-    (&[Mod::Alt], 0x2C, "Alt+Z otwiera nakładkę NVIDIA"),
-    (&[Mod::Alt], 0x3B, "Alt+F1 to zrzut ekranu NVIDIA"),
-    (&[Mod::Alt], 0x43, "Alt+F9 nagrywa w NVIDIA"),
-    (&[Mod::Alt], 0x44, "Alt+F10 zapisuje powtórkę NVIDIA"),
-    (&[Mod::Shift], 0x0F, "Shift+Tab otwiera nakładkę Steam"),
-    (&[Mod::Ctrl], 0x01, "Ctrl+Esc otwiera menu Start"),
+    (&[Mod::Alt], 0x0F, "klawisz.powod.alt_tab"),
+    (&[Mod::Alt], 0x3E, "klawisz.powod.alt_f4"),
+    (&[Mod::Alt], 0x01, "klawisz.powod.alt_esc"),
+    (&[Mod::Alt], 0x39, "klawisz.powod.alt_spacja"),
+    (&[Mod::Alt], 0x1C, "klawisz.powod.alt_enter"),
+    (&[Mod::Alt], 0x2C, "klawisz.powod.alt_z"),
+    (&[Mod::Alt], 0x3B, "klawisz.powod.alt_f1"),
+    (&[Mod::Alt], 0x43, "klawisz.powod.alt_f9"),
+    (&[Mod::Alt], 0x44, "klawisz.powod.alt_f10"),
+    (&[Mod::Shift], 0x0F, "klawisz.powod.shift_tab"),
+    (&[Mod::Ctrl], 0x01, "klawisz.powod.ctrl_esc"),
     (
         &[Mod::Ctrl, Mod::Shift],
         0x01,
-        "Ctrl+Shift+Esc otwiera Menedżer zadań",
+        "klawisz.powod.ctrl_shift_esc",
     ),
-    (
-        &[Mod::Ctrl, Mod::Alt],
-        0x53,
-        "Ctrl+Alt+Delete to skrót systemowy",
-    ),
-    (&[Mod::Ctrl], 0x2E, "Ctrl+C kopiuje"),
-    (&[Mod::Ctrl], 0x2F, "Ctrl+V wkleja"),
-    (&[Mod::Ctrl], 0x2D, "Ctrl+X wycina"),
-    (&[Mod::Ctrl], 0x2C, "Ctrl+Z cofa"),
-    (&[Mod::Ctrl], 0x15, "Ctrl+Y ponawia"),
-    (&[Mod::Ctrl], 0x1E, "Ctrl+A zaznacza wszystko"),
-    (&[Mod::Ctrl], 0x1F, "Ctrl+S zapisuje"),
+    (&[Mod::Ctrl, Mod::Alt], 0x53, "klawisz.powod.ctrl_alt_del"),
+    (&[Mod::Ctrl], 0x2E, "klawisz.powod.ctrl_c"),
+    (&[Mod::Ctrl], 0x2F, "klawisz.powod.ctrl_v"),
+    (&[Mod::Ctrl], 0x2D, "klawisz.powod.ctrl_x"),
+    (&[Mod::Ctrl], 0x2C, "klawisz.powod.ctrl_z"),
+    (&[Mod::Ctrl], 0x15, "klawisz.powod.ctrl_y"),
+    (&[Mod::Ctrl], 0x1E, "klawisz.powod.ctrl_a"),
+    (&[Mod::Ctrl], 0x1F, "klawisz.powod.ctrl_s"),
 ];
 
 /// Litery, z których AltGr (= Ctrl+Alt) robi polskie znaki: ą ć ę ł ń ó ś ź ż.
@@ -370,31 +369,26 @@ pub fn polish_name(scan: u16, extended: bool) -> Option<&'static str> {
 /// Czy kombinacja nie koliduje z Windows, grami albo pisaniem. None = w porządku.
 pub fn combo_problem(key: &Key) -> Option<String> {
     if key.mods.contains(&Mod::Win) {
-        return Some("Skróty z klawiszem Windows są zarezerwowane przez system.".into());
+        return Some(t("klawisz.blad.win", &[]));
     }
     if key.mods.is_empty() {
         return None;
     }
     if MODIFIER_SCANS.contains(&(key.scan, key.extended)) {
-        return Some("Wybierz klawisz razem z Ctrl, Alt albo Shift, np. Ctrl+Shift+F8.".into());
+        return Some(t("klawisz.blad.pojedynczy", &[]));
     }
     let taken = TAKEN_COMBOS
         .iter()
         .find(|(mods, scan, _)| *mods == key.mods.as_slice() && *scan == key.scan);
     if let Some((_, _, reason)) = taken {
-        return Some(format!("{reason} - wybierz inną kombinację."));
+        return Some(t("klawisz.blad.zajety", &[("powod", &t(reason, &[]))]));
     }
     let only_ctrl_alt = order_mods(key.mods.iter().copied()) == [Mod::Ctrl, Mod::Alt];
     if only_ctrl_alt && ALTGR_LETTERS.contains(&key.scan) && !key.extended {
-        return Some(format!(
-            "{} to AltGr - pisze polskie znaki. Wybierz inną kombinację.",
-            key.label()
-        ));
+        return Some(t("klawisz.blad.altgr", &[("klawisz", &key.label())]));
     }
     if key.mods == [Mod::Shift] && is_typing_key(key.scan) && !key.extended {
-        return Some(
-            "Shift + litera pisze wielką literę - dodaj Ctrl albo Alt, np. Ctrl+Shift.".into(),
-        );
+        return Some(t("klawisz.blad.shift_litera", &[]));
     }
     None
 }
@@ -410,7 +404,7 @@ pub fn key_from_native(native_scan: u32, fallback_name: &str, vk: i64) -> Option
     let name = match polish_name(scan, extended) {
         Some(n) => n.to_string(),
         None if !fallback_name.trim().is_empty() => fallback_name.trim().to_string(),
-        None => format!("Kod {scan:#04x}"),
+        None => t("klawisz.kod", &[("liczba", &format!("{scan:#04x}"))]),
     };
     Some(Key::new(scan, extended, &name, vk))
 }
@@ -419,21 +413,21 @@ pub fn key_from_native(native_scan: u32, fallback_name: &str, vk: i64) -> Option
 pub fn problem(walk: &Key, run: &Key, toggle: &Key) -> Option<String> {
     for key in [walk, run, toggle] {
         if let Some(reason) = lookup(RESERVED, (key.scan, key.extended)) {
-            return Some(format!("Nie można użyć tego klawisza: {reason}."));
+            return Some(t("klawisz.blad.ogolny", &[("powod", &t(reason, &[]))]));
         }
     }
     if walk.same_key(run) {
-        return Some("Chód i bieg muszą mieć różne klawisze.".into());
+        return Some(t("klawisz.blad.te_same", &[]));
     }
     if toggle.same_key(walk) || toggle.same_key(run) {
         // aplikacja sama naciska klawisze chodu i biegu - skrót wyłączałby sam siebie
-        return Some("Start/stop musi mieć inny klawisz niż chód i bieg.".into());
+        return Some(t("klawisz.blad.wlaczanie_koliduje", &[]));
     }
     if toggle.vk == 0 {
-        return Some("Tego klawisza nie da się użyć jako start/stop - wybierz inny.".into());
+        return Some(t("klawisz.blad.wlaczanie_niedozwolony", &[]));
     }
     if !walk.mods.is_empty() || !run.mods.is_empty() {
-        return Some("Chód i bieg to pojedyncze klawisze - bez Ctrl, Alt i Shift.".into());
+        return Some(t("klawisz.blad.chod_z_modyfikatorem", &[]));
     }
     combo_problem(toggle)
 }
@@ -626,7 +620,7 @@ mod tests {
         assert_eq!(key_from_native(0x00, "?", 0), None);
         assert_eq!(
             key_from_native(0x42, " ", 0).map(|k| k.name),
-            Some("Kod 0x42".into())
+            Some("Klawisz nr 0x42".into())
         );
     }
 
@@ -652,12 +646,12 @@ mod tests {
         assert!(
             problem(&f8, &run, &toggle)
                 .unwrap_or_default()
-                .contains("Start/stop")
+                .contains("Klawisz włączania")
         );
         assert!(
             problem(&walk, &run, &Key::new(0x11, false, "W", 0x57))
                 .unwrap_or_default()
-                .contains("Start/stop")
+                .contains("Klawisz włączania")
         );
         let f9 = Key::new(0x43, false, "F9", 0x78);
         assert_eq!(problem(&f8, &run, &f9), None);
@@ -727,7 +721,7 @@ mod tests {
             (combo(0x10, "Q", 0x51, &[Mod::Shift]), "wielką literę"),
             (combo(0x2E, "C", 0x43, &[Mod::Ctrl]), "kopiuje"),
             (Key::new(0x58, false, "F12", 0x7B), "F12"),
-            (combo(0x1D, "Ctrl", 0xA2, &[Mod::Shift]), "razem z Ctrl"),
+            (combo(0x1D, "Ctrl", 0xA2, &[Mod::Shift]), "tylko z Ctrl"),
         ];
         for (key, reason) in cases {
             let found = problem(&walk, &run, &key);

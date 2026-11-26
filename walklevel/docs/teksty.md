@@ -1569,3 +1569,46 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 |---|---|---|---|
 | `dymek.podpowiedz_wl` | (nowy) | Sterowanie włączone\nKliknij, żeby wyłączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Gotowa forma `dymek.podpowiedz` dla włączonego sterowania (`{wyłączyć/włączyć}` nie jest zmienną słownika). |
 | `dymek.podpowiedz_wyl` | (nowy) | Sterowanie wyłączone\nKliknij, żeby włączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Jw. dla wyłączonego sterowania. |
+
+## Dodatki: rdzeń
+
+Teksty składane w Rust (`walklevel_core::teksty::t`, ten sam słownik co interfejs), które nie miały
+wcześniej wpisu.
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `glowny.wskaznik.chodzenie.proba_bieg` | (nowy) | Bieg · tryb próbny, gra nic nie dostaje | Wariant `glowny.wskaznik.chodzenie.proba` dla biegu. |
+| `zgloszenie.wyslano_bez_numeru` | Wysłano zgłoszenie - dziękuję! Autor dostał opis i logi. | Wysłano zgłoszenie. Dziękujemy, autor dostał opis i dziennik. | `zgloszenie.wyslano`, gdy serwer nie podał numeru. |
+| `zgloszenie.blad.mail_serwer` | {powod} Zapisz paczkę na dysk i wyślij ją e-mailem na {email_autora}. | {powod} Zapisz paczkę na dysk i wyślij ją e-mailem na {email_autora}. | `zgloszenie.blad.mail`, gdy serwer podał własny powód. |
+| `zgloszenie.trwa` | Zgłoszenie już się przygotowuje. | Zgłoszenie już się przygotowuje… | Drugie kliknięcie w trakcie. |
+| `ustawienia.pad.blad.liczba` | Od 2 do 5 skoków. | Liczba stopni pada: od 2 do 5. | Ochrona komendy; interfejs nie pozwala na inne. |
+| `ustawienia.pad.blad.brak` | Nie ma takiego skoku. | Nie ma takiego stopnia pada. | Jw. |
+| `ustawienia.pad.blad.progi` | Skoki: pierwszy od 0%, kolejne co najmniej 5 punktów dalej, najwyżej 100%, prędkość 0,5-12 km/h. | Stopnie pada: pierwszy od 0%, kolejne co najmniej 5 punktów dalej, najwyżej 100%. Prędkość 0,5–12 km/h. | Jw. |
+| `ustawienia.trening.blad_predkosc` | Prędkość poziomu: 0,5-20 km/h. | Prędkość poziomu treningu: 0,5–20 km/h. | Jw. |
+| `klawisz.blad.nieznany` | Tego klawisza nie da się użyć - wybierz inny. | Tego klawisza nie da się użyć. Wybierz inny. | Klawisz bez kodu Windows. |
+| `klawisz.powod.ctrl_v` | Ctrl+V wkleja | Ctrl+V wkleja | Rodzeństwo `klawisz.powod.ctrl_c`. |
+| `klawisz.powod.ctrl_x` | Ctrl+X wycina | Ctrl+X wycina | |
+| `klawisz.powod.ctrl_z` | Ctrl+Z cofa | Ctrl+Z cofa | |
+| `klawisz.powod.ctrl_y` | Ctrl+Y ponawia | Ctrl+Y ponawia | |
+| `klawisz.powod.ctrl_a` | Ctrl+A zaznacza wszystko | Ctrl+A zaznacza wszystko | |
+| `klawisz.powod.ctrl_s` | Ctrl+S zapisuje | Ctrl+S zapisuje | |
+| `aktualizacja.trwa` | Aktualizacja już trwa. | Aktualizacja już trwa. | |
+| `konto.blad.trwa` | To zadanie już trwa - chwilę. | To zadanie konta już trwa. Poczekaj chwilę. | |
+| `konto.blad.zapis` | Nie udało się zapisać danych konta na tym komputerze. | Nie udało się zapisać danych konta na tym komputerze. | |
+| `profil_online.brak_osoby` | Nie znalazłem tej osoby. | Nie ma już tej osoby na liście. Odśwież listę. | |
+| `znajomi.przyjeto_zaproszenie` | Gotowe. | Przyjęto zaproszenie. | Za `znajomi.odpowiedziano` (uwaga tam). |
+| `znajomi.odrzucono_zaproszenie` | Gotowe. | Odrzucono zaproszenie. | |
+| `znajomi.wycofano` | Gotowe. | Wycofano zaproszenie. | |
+| `kopia.blad.brak_wyboru` | Najpierw wskaż plik kopii. | Najpierw wybierz plik kopii. | |
+| `kopia.blad.brak_przed` | Nie ma kopii sprzed importu. | Nie ma danych sprzed wczytania kopii. | |
+| `kopia.blad.brak_danych` | Brak danych do zapisania. | Nie ma jeszcze danych do zapisania. Najpierw dodaj osobę. | |
+| `kopia.blad.polaczenie` | Nie da się połączyć danych z kopią. | Nie udało się połączyć danych z kopią. Spróbuj ponownie. | |
+| `profil.wskaz_folder_okno` | Wskaż folder gry | Wskaż folder gry | Tytuł okna systemowego (`profil.wskaz_folder` to przycisk z „…”). |
+| `profil.wybierz_ponownie` | Wybierz grę jeszcze raz. | Wybierz grę jeszcze raz: wskaż jej folder albo plik. | Wybór gry wygasł. |
+| `osoba.blad.ostatnia` | Ostatniej osoby nie da się usunąć. | Ostatniej osoby nie da się usunąć. | |
+| `osoba.blad.brak` | Najpierw utwórz osobę. | Najpierw dodaj osobę. | |
+| `profil.blad.brak` | Nie ma takiego profilu. | Nie ma takiego profilu gry. | |
+| `profil.blad.ostatni` | Ostatniego profilu nie da się usunąć. | Ostatniego profilu gry nie da się usunąć. | |
+| `modele.blad_folder` | Brak folderu danych na profile bieżni. | Nie da się zapisać profilu bieżni: brak folderu danych. | |
+| `modele.blad_zapisu` | Nie da się zapisać profilu: {szczegoly} | Nie da się zapisać profilu bieżni. ({szczegoly}) | |
+| `wspolne.blad_zapisu` | Błąd zapisu na dysku: {szczegoly} | Nie udało się zapisać na dysku. Sprawdź, czy jest wolne miejsce, i spróbuj ponownie. ({szczegoly}) | |

@@ -734,7 +734,7 @@ fn only_https_and_no_redirect_to_other_hosts() {
     let e = client
         .login("a@b.pl", &"x".repeat(12))
         .expect_err("inny host");
-    assert!(e.message.contains("przekierował"));
+    assert!(e.message.contains("bezpieczeństwa"));
     assert!(client.token().is_empty());
 }
 

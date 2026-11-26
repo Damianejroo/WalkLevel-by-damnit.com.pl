@@ -23,7 +23,7 @@ async fn blocking<T: Send + 'static>(
     let core = core.clone();
     tauri::async_runtime::spawn_blocking(move || f(core))
         .await
-        .map_err(|e| CmdError::new(ErrorCode::Server, format!("Zadanie przerwane: {e}")))?
+        .map_err(|e| CmdError::unexpected(&format!("zadanie przerwane: {e}")))?
 }
 
 fn into_path(p: Option<tauri_plugin_dialog::FilePath>) -> Option<PathBuf> {
@@ -93,7 +93,7 @@ pub async fn open_folder(core: State<'_, Core>, kind: String) -> CmdResult<()> {
         "logi" => data.join("logs"),
         "zgloszenia" => data.join("dane").join("zgloszenia"),
         "nagrania" => data.join("nagrania"),
-        _ => return Err(CmdError::invalid("Nieznany folder.")),
+        _ => return Err(CmdError::unexpected("Nieznany folder.")),
     };
     crate::okna::open_folder(&path);
     Ok(())
@@ -111,7 +111,7 @@ pub async fn open_link(core: State<'_, Core>, kind: String) -> CmdResult<()> {
         "prywatnosc" => "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/blob/main/POLITYKA-PRYWATNOSCI.md".to_string(),
         "kod" => "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl".to_string(),
         "regulamin" => terms,
-        _ => return Err(CmdError::invalid("Nieznany adres.")),
+        _ => return Err(CmdError::unexpected("Nieznany adres.")),
     };
     crate::okna::shell_open(&url);
     Ok(())
@@ -128,12 +128,12 @@ pub async fn diagnostics_run(core: State<'_, Core>) -> CmdResult<String> {
         if app.diagnostics.running {
             return Err(CmdError::new(
                 ErrorCode::Busy,
-                walklevel_core::treadmill::worker::REPORT_BUSY,
+                walklevel_core::treadmill::worker::report_busy(),
             ));
         }
         let path = walklevel_core::reports::diagnostics::report_path(&app.paths.logs());
         app.diagnostics.running = true;
-        app.diagnostics.text = walklevel_core::treadmill::worker::REPORT_BUSY.into();
+        app.diagnostics.text = walklevel_core::treadmill::worker::report_busy();
         app.bieznia.worker().diagnose(path.clone());
         app.mark(&[SliceName::Device]);
         Ok(path.to_string_lossy().into_owned())
@@ -282,7 +282,7 @@ pub async fn models_fetch(core: State<'_, Core>) -> CmdResult<String> {
         let mut registry = {
             let mut app = lock(&c.0.app);
             app.models.busy = true;
-            app.models.status = "Pobieram profile bieżni…".into();
+            app.models.status = crate::teksty::t("modele.sprawdzam", &[]);
             app.mark(&[SliceName::Models]);
             app.registry.clone()
         };
@@ -290,16 +290,31 @@ pub async fn models_fetch(core: State<'_, Core>) -> CmdResult<String> {
         let result = walklevel_core::treadmill::profiles::HttpFetcher::new().and_then(|f| {
             registry.download(&f, &walklevel_core::treadmill::profiles::default_base_url())
         });
+        let t = crate::teksty::t;
         let status = match &result {
-            Ok(r) if r.added.is_empty() && r.updated.is_empty() => {
-                "Masz już wszystkie profile.".to_string()
+            Ok(r) => {
+                let mut parts = Vec::new();
+                if !r.added.is_empty() {
+                    parts.push(t("modele.nowe", &[("lista", &r.added.join(", "))]));
+                }
+                if !r.updated.is_empty() {
+                    parts.push(t(
+                        "modele.zaktualizowane",
+                        &[("lista", &r.updated.join(", "))],
+                    ));
+                }
+                if parts.is_empty() {
+                    parts.push(t("modele.aktualne", &[]));
+                }
+                if !r.rejected.is_empty() {
+                    parts.push(t(
+                        "modele.odrzucone",
+                        &[("liczba", &r.rejected.len().to_string())],
+                    ));
+                }
+                parts.join(" ")
             }
-            Ok(r) => format!(
-                "Pobrano profile: nowe {}, zaktualizowane {}.",
-                r.added.len(),
-                r.updated.len()
-            ),
-            Err(e) => e.to_string(),
+            Err(e) => t("modele.blad", &[("powod", &e.to_string())]),
         };
         c.with(|app| {
             if result.is_ok() {
@@ -320,8 +335,8 @@ pub async fn models_add_file(app: AppHandle, core: State<'_, Core>) -> CmdResult
         let picked = into_path(
             app.dialog()
                 .file()
-                .set_title("Wskaż profil bieżni")
-                .add_filter("Profil bieżni", &["json"])
+                .set_title(crate::teksty::t("modele.dodaj_okno", &[]))
+                .add_filter(crate::teksty::t("modele.dodaj_filtr", &[]), &["json"])
                 .blocking_pick_file(),
         );
         let Some(path) = picked else { return Ok(None) };
@@ -410,12 +425,22 @@ pub async fn game_pick(
         let path = if kind == "file" {
             into_path(
                 dialog
-                    .set_title("Wskaż plik gry")
-                    .add_filter("Gry", &["exe", "lnk"])
+                    .set_title(crate::teksty::t("profil.wskaz_plik_okno", &[]))
+                    .add_filter(
+                        crate::teksty::t("profil.filtr_plikow", &[])
+                            .split(" / ")
+                            .next()
+                            .unwrap_or_default(),
+                        &["exe", "lnk"],
+                    )
                     .blocking_pick_file(),
             )
         } else {
-            into_path(dialog.set_title("Wskaż folder gry").blocking_pick_folder())
+            into_path(
+                dialog
+                    .set_title(crate::teksty::t("profil.wskaz_folder_okno", &[]))
+                    .blocking_pick_folder(),
+            )
         };
         let Some(path) = path else { return Ok(None) };
         c.with(|a| a.game_from(&path)).map(Some)
@@ -697,7 +722,15 @@ pub async fn online_invitation_answer(
     accept: bool,
 ) -> CmdResult<()> {
     blocking(&core, move |c| {
-        konto::friends_action(&c, "answer", "Gotowe.", move |a| {
+        let toast = crate::teksty::t(
+            if accept {
+                "znajomi.przyjeto_zaproszenie"
+            } else {
+                "znajomi.odrzucono_zaproszenie"
+            },
+            &[],
+        );
+        konto::friends_action(&c, "answer", &toast, move |a| {
             a.client_mut().answer_invitation(&invitation_id, accept)
         })
     })
@@ -710,7 +743,8 @@ pub async fn online_invitation_withdraw(
     invitation_id: String,
 ) -> CmdResult<()> {
     blocking(&core, move |c| {
-        konto::friends_action(&c, "answer", "Gotowe.", move |a| {
+        let toast = crate::teksty::t("znajomi.wycofano", &[]);
+        konto::friends_action(&c, "answer", &toast, move |a| {
             a.client_mut().withdraw_invitation(&invitation_id)
         })
     })
@@ -720,7 +754,8 @@ pub async fn online_invitation_withdraw(
 #[tauri::command]
 pub async fn online_friend_remove(core: State<'_, Core>, friend_id: String) -> CmdResult<()> {
     blocking(&core, move |c| {
-        konto::friends_action(&c, "removeFriend", "Usunięto ze znajomych.", move |a| {
+        let toast = crate::teksty::t("znajomi.usunieto", &[]);
+        konto::friends_action(&c, "removeFriend", &toast, move |a| {
             a.client_mut().remove_friend(&friend_id)
         })
     })
@@ -744,7 +779,7 @@ pub async fn backup_export_summary(
         let store = app
             .store
             .as_ref()
-            .ok_or_else(|| CmdError::invalid("Brak danych do zapisania."))?;
+            .ok_or_else(|| CmdError::invalid(crate::teksty::t("kopia.blad.brak_danych", &[])))?;
         backup::summarize(
             store,
             app.history.as_ref(),
@@ -767,9 +802,15 @@ pub async fn backup_export(
             app_handle
                 .dialog()
                 .file()
-                .set_title("Zapisz kopię danych")
+                .set_title(crate::teksty::t("kopia.eksport.okno", &[]))
                 .set_file_name(backup::default_name())
-                .add_filter("Kopia WalkLevel", &["bieznia"])
+                .add_filter(
+                    crate::teksty::t("kopia.filtr", &[])
+                        .split(" (")
+                        .next()
+                        .unwrap_or_default(),
+                    &["bieznia"],
+                )
                 .blocking_save_file(),
         );
         let Some(target) = target else {
@@ -777,10 +818,9 @@ pub async fn backup_export(
         };
         let result = {
             let app = lock(&c.0.app);
-            let store = app
-                .store
-                .as_ref()
-                .ok_or_else(|| CmdError::invalid("Brak danych do zapisania."))?;
+            let store = app.store.as_ref().ok_or_else(|| {
+                CmdError::invalid(crate::teksty::t("kopia.blad.brak_danych", &[]))
+            })?;
             backup::export(
                 store,
                 app.history.as_ref(),
@@ -791,9 +831,13 @@ pub async fn backup_export(
             .map_err(akcje::backup_error)?
         };
         c.with(|a| {
-            a.toast(format!(
-                "Zapisano: {} os., {} profili, {} sesji.",
-                result.people, result.profiles, result.sessions
+            a.toast(crate::teksty::t(
+                "kopia.eksport.gotowe",
+                &[
+                    ("liczba", &result.people.to_string()),
+                    ("profile", &result.profiles.to_string()),
+                    ("sesje", &result.sessions.to_string()),
+                ],
             ))
         });
         Ok(Some(akcje::summary(&result)))
@@ -811,8 +855,14 @@ pub async fn backup_import_open(
             app_handle
                 .dialog()
                 .file()
-                .set_title("Wskaż kopię danych")
-                .add_filter("Kopia WalkLevel", &["bieznia"])
+                .set_title(crate::teksty::t("kopia.import.okno", &[]))
+                .add_filter(
+                    crate::teksty::t("kopia.filtr", &[])
+                        .split(" (")
+                        .next()
+                        .unwrap_or_default(),
+                    &["bieznia"],
+                )
                 .blocking_pick_file(),
         );
         let Some(path) = path else { return Ok(None) };
@@ -837,10 +887,9 @@ pub async fn backup_import_apply(
 ) -> CmdResult<ImportReport> {
     blocking(&core, move |c| {
         c.with(|app| {
-            let preview = app
-                .import_preview
-                .take()
-                .ok_or_else(|| CmdError::invalid("Najpierw wskaż plik kopii."))?;
+            let preview = app.import_preview.take().ok_or_else(|| {
+                CmdError::invalid(crate::teksty::t("kopia.blad.brak_wyboru", &[]))
+            })?;
             let history_path = walklevel_core::history::History::default_path(&app.paths.data);
             let choice = backup::ImportChoice {
                 people: choice.people.into_iter().collect(),
@@ -852,7 +901,7 @@ pub async fn backup_import_apply(
             let (Some(store), Some(history)) = (app.store.as_mut(), app.history.as_ref()) else {
                 return Err(CmdError::new(
                     ErrorCode::Unavailable,
-                    "Historia kroków jest niedostępna.",
+                    crate::teksty::t("historia.niedostepna", &[]),
                 ));
             };
             let r = backup::apply_import(store, history, &preview, &choice, &history_path)
@@ -878,7 +927,10 @@ pub async fn backup_restore_latest(core: State<'_, Core>) -> CmdResult<()> {
     blocking(&core, |c| {
         c.with(|app| {
             let folder = backup::latest_backup(&app.paths.data_files()).ok_or_else(|| {
-                CmdError::new(ErrorCode::NotFound, "Nie ma kopii sprzed importu.")
+                CmdError::new(
+                    ErrorCode::NotFound,
+                    crate::teksty::t("kopia.blad.brak_przed", &[]),
+                )
             })?;
             let store_path = walklevel_core::store::Store::default_path(&app.paths.data_files());
             let history_path = walklevel_core::history::History::default_path(&app.paths.data);
@@ -887,7 +939,7 @@ pub async fn backup_restore_latest(core: State<'_, Core>) -> CmdResult<()> {
             } // baza zamknięta na czas przywracania
             backup::restore(&folder, &store_path, &history_path).map_err(akcje::backup_error)?;
             app.reload_store();
-            app.toast("Przywrócono dane sprzed importu.");
+            app.toast(crate::teksty::t("kopia.import.przywrocono", &[]));
             Ok(())
         })
     })

@@ -48,7 +48,16 @@ impl CmdError {
         Self::new(ErrorCode::Invalid, message)
     }
     pub fn io(e: impl std::fmt::Display) -> Self {
-        Self::new(ErrorCode::Io, format!("Błąd zapisu na dysku: {e}"))
+        Self::new(
+            ErrorCode::Io,
+            crate::teksty::t("wspolne.blad_zapisu", &[("szczegoly", &e.to_string())]),
+        )
+    }
+    /// Polecenie, którego interfejs nie powinien wysłać (nieznana wartość) - szczegół do logu,
+    /// użytkownik dostaje ogólny komunikat (wspolne.blad_nieznany).
+    pub fn unexpected(detail: &str) -> Self {
+        log::warn!("Nieoczekiwane polecenie: {detail}");
+        Self::invalid(crate::teksty::t("wspolne.blad_nieznany", &[]))
     }
 }
 
@@ -79,7 +88,10 @@ impl From<walklevel_core::store::StoreError> for CmdError {
 
 impl From<walklevel_core::history::HistoryError> for CmdError {
     fn from(e: walklevel_core::history::HistoryError) -> Self {
-        Self::new(ErrorCode::Io, format!("Historia kroków niedostępna: {e}"))
+        Self::new(
+            ErrorCode::Io,
+            format!("{} ({e})", crate::teksty::t("historia.niedostepna", &[])),
+        )
     }
 }
 
@@ -394,7 +406,7 @@ pub struct LinkStatus {
     pub title: String,
     pub sub: String,
     pub action: &'static str,
-    pub action_label: &'static str,
+    pub action_label: String,
     pub primary: bool,
 }
 

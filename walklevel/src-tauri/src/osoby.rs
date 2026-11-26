@@ -57,7 +57,7 @@ impl App {
         let Some(found) = icons::resolve(path) else {
             return Err(CmdError::new(
                 ErrorCode::NotFound,
-                "Nie znalazłem pliku gry w tym miejscu.",
+                crate::teksty::t("profil.brak_pliku", &[]),
             ));
         };
         let dir = self.icons_dir();
@@ -123,7 +123,10 @@ impl App {
     /// Tymczasowa ikona wyboru -> `<id profilu>.png` i zapis w profilu.
     fn attach_pick(&mut self, profile_id: &str, pick_id: &str) -> CmdResult<()> {
         let Some(w) = self.picks.remove(pick_id) else {
-            return Err(CmdError::invalid("Wybierz grę jeszcze raz."));
+            return Err(CmdError::invalid(crate::teksty::t(
+                "profil.wybierz_ponownie",
+                &[],
+            )));
         };
         let dir = self.icons_dir();
         let mut changes = ProfileChanges {
@@ -234,7 +237,10 @@ impl App {
             return Ok(false);
         };
         if !store.remove_person(person_id)? {
-            return Err(CmdError::invalid("Ostatniej osoby nie da się usunąć."));
+            return Err(CmdError::invalid(crate::teksty::t(
+                "osoba.blad.ostatnia",
+                &[],
+            )));
         }
         if let Some(h) = self.history.as_ref()
             && let Err(e) = h.forget_person(person_id)
@@ -260,7 +266,7 @@ impl App {
 
     pub fn profile_create(&mut self, d: ProfileDraft) -> CmdResult<String> {
         let Some(store) = self.store.as_mut() else {
-            return Err(CmdError::invalid("Najpierw utwórz osobę."));
+            return Err(CmdError::invalid(crate::teksty::t("osoba.blad.brak", &[])));
         };
         let copy = d.copy_from_active.then(|| store.profile().id.clone());
         let id = store
@@ -333,13 +339,18 @@ impl App {
         let Some(store) = self.store.as_mut() else {
             return Err(CmdError::new(
                 ErrorCode::NotFound,
-                "Nie ma takiego profilu.",
+                crate::teksty::t("profil.blad.brak", &[]),
             ));
         };
         let id = store
             .duplicate_profile(profile_id)?
             .map(|p| p.id.clone())
-            .ok_or_else(|| CmdError::new(ErrorCode::NotFound, "Nie ma takiego profilu."))?;
+            .ok_or_else(|| {
+                CmdError::new(
+                    ErrorCode::NotFound,
+                    crate::teksty::t("profil.blad.brak", &[]),
+                )
+            })?;
         self.people_rev += 1;
         self.mark(&[SliceName::People]);
         Ok(id)
@@ -350,7 +361,10 @@ impl App {
             return Ok(());
         };
         if !store.remove_profile(profile_id)? {
-            return Err(CmdError::invalid("Ostatniego profilu nie da się usunąć."));
+            return Err(CmdError::invalid(crate::teksty::t(
+                "profil.blad.ostatni",
+                &[],
+            )));
         }
         self.apply_profile();
         Ok(())

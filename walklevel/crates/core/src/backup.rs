@@ -31,6 +31,7 @@ use crate::model::Session;
 use crate::store::{
     self, BACKUP_DIR, DEFAULT_GLYPH, ICONS_DIR, Person, Profile, Settings, Store, StoreError,
 };
+use crate::teksty::t;
 
 pub const FORMAT: &str = "bieznia-kopia";
 /// 2: sesje z bieżnią, źródłem i widocznością, czasy *_utc_s
@@ -46,8 +47,6 @@ pub const BEFORE_IMPORT: &str = "przed-importem-";
 /// Ochrona przed „bombą ZIP”: więcej po rozpakowaniu wszystkich czytanych plików razem
 /// (manifest, osoby, historia, ikony) to uszkodzona kopia.
 const MAX_UNPACKED_BYTES: u64 = 256 * 1024 * 1024;
-
-const DAMAGED: &str = "Plik kopii jest uszkodzony.";
 
 /// Jedyne nazwy dozwolone w archiwum (jak SAFE_NAME w 0.5.x).
 /// Wzorce są stałe; gdyby się nie skompilowały, nic nie przechodzi (bezpieczniej).
@@ -88,7 +87,7 @@ fn invalid(message: &str) -> BackupError {
 
 fn damaged<E: std::fmt::Display>(err: E) -> BackupError {
     log::warn!("Kopia: uszkodzony plik ({err})");
-    invalid(DAMAGED)
+    invalid(&t("kopia.blad.uszkodzony", &[]))
 }
 
 // --- eksport ----------------------------------------------------------------------------------
@@ -295,12 +294,10 @@ pub fn export(
 ) -> Result<ExportSummary, BackupError> {
     let people = selected(store, choice);
     if people.is_empty() {
-        return Err(invalid("Zaznacz co najmniej jedną osobę."));
+        return Err(invalid(&t("kopia.blad.brak_osoby", &[])));
     }
     if !(choice.settings || choice.results || choice.logs) {
-        return Err(invalid(
-            "Zaznacz, co zapisać: ustawienia, wyniki albo logi.",
-        ));
+        return Err(invalid(&t("kopia.blad.brak_tresci", &[])));
     }
     let mut summary = summarize(store, history, choice)?;
     if let Some(dir) = out.parent().filter(|d| !d.as_os_str().is_empty()) {
@@ -741,7 +738,7 @@ fn py_str(v: &Value) -> String {
 /// Sprawdza i wczytuje plik kopii (bez zmian w danych). Zły plik - [`BackupError::Invalid`]
 /// z komunikatem dla użytkownika.
 pub fn read(path: &Path) -> Result<Preview, BackupError> {
-    let missing = || invalid("Plik nie istnieje albo jest za duży.");
+    let missing = || invalid(&t("kopia.blad.brak_pliku", &[]));
     let meta = fs::metadata(path).map_err(|_| missing())?;
     if !meta.is_file() || meta.len() > MAX_FILE_BYTES {
         return Err(missing());
@@ -753,23 +750,19 @@ pub fn read(path: &Path) -> Result<Preview, BackupError> {
         .collect::<Result<_, _>>()
         .map_err(damaged)?;
     if names.iter().any(|n| !matches(&SAFE_NAME, n)) {
-        return Err(invalid(
-            "To nie jest plik kopii Bieżni (nieznane pliki w środku).",
-        ));
+        return Err(invalid(&t("kopia.blad.nieznane_pliki", &[])));
     }
     let mut budget = MAX_UNPACKED_BYTES;
     let manifest = json_object(&entry(&mut zip, "manifest.json", &mut budget)?)?;
     if manifest.get("format").and_then(Value::as_str) != Some(FORMAT) {
-        return Err(invalid("To nie jest plik kopii Bieżni."));
+        return Err(invalid(&t("kopia.blad.nie_kopia", &[])));
     }
     let version = match manifest.get("wersja") {
         None => 0,
         Some(v) => json_i64(v).ok_or_else(|| damaged("wersja nie jest liczbą"))?,
     };
     if version > FORMAT_VERSION {
-        return Err(invalid(
-            "Plik pochodzi z nowszej wersji aplikacji - zaktualizuj Bieżnię.",
-        ));
+        return Err(invalid(&t("kopia.blad.nowsza", &[])));
     }
     let raw_people = json_object(&entry(&mut zip, "osoby.json", &mut budget)?)?;
     let people = match raw_people.get("osoby") {
@@ -1043,11 +1036,11 @@ pub fn apply_import(
     }
     let mut data = match store.to_json()? {
         Value::Object(m) => m,
-        _ => return Err(invalid("Nie da się połączyć danych z kopią.")),
+        _ => return Err(invalid(&t("kopia.blad.polaczenie", &[]))),
     };
     data.insert("osoby".into(), serde_json::to_value(&people)?);
     let Some(merged) = Store::from_json(store.path(), &data) else {
-        return Err(invalid("Nie da się połączyć danych z kopią."));
+        return Err(invalid(&t("kopia.blad.polaczenie", &[])));
     };
     *store = merged;
     store.save()?;

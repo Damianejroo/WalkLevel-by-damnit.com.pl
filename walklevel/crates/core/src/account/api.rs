@@ -22,6 +22,7 @@ use serde::Serialize;
 use serde_json::{Map, Value, json};
 
 use super::{KontoError, KontoErrorKind};
+use crate::teksty::t;
 
 /// Limit czasu połączenia i odpowiedzi (sekundy).
 pub const TIMEOUT_S: u64 = 15;
@@ -32,9 +33,15 @@ pub const BATCH: usize = 100;
 /// Zakresy rankingu i statystyk (wartości jak na serwerze).
 pub const RANKING_SCOPES: [&str; 4] = ["tydzien", "miesiac", "razem", "poziom"];
 
-const BAD_FORMAT: &str = "Serwer odpowiedział w nieznanym formacie.";
-const REDIRECTED: &str = "Serwer przekierował na inny adres - przerwano.";
-const OFFLINE: &str = "Brak połączenia z serwerem kont - sprawdź internet.";
+fn bad_format() -> String {
+    t("konto.blad.format", &[])
+}
+fn redirected() -> String {
+    t("konto.blad.przekierowanie", &[])
+}
+fn offline() -> String {
+    t("konto.blad.internet", &[])
+}
 
 // --- transport -------------------------------------------------------------------------------
 
@@ -146,7 +153,7 @@ impl Transport for ReqwestTransport {
 /// i końcowych ukośników.
 pub fn check_base_url(url: &str) -> Result<String, KontoError> {
     let url = url.trim().trim_end_matches('/');
-    let https_only = || KontoError::invalid("Adres serwera kont musi zaczynać się od https://");
+    let https_only = || KontoError::invalid(&t("konto.blad.adres_https", &[]));
     let parsed = reqwest::Url::parse(url).map_err(|_| https_only())?;
     let host = parsed.host_str().unwrap_or("");
     let local = matches!(host, "127.0.0.1" | "localhost");
@@ -159,7 +166,7 @@ pub fn check_base_url(url: &str) -> Result<String, KontoError> {
         || parsed.query().is_some()
         || parsed.fragment().is_some()
     {
-        return Err(KontoError::invalid("Niepoprawny adres serwera kont."));
+        return Err(KontoError::invalid(&t("konto.blad.adres", &[])));
     }
     Ok(url.to_string())
 }
@@ -170,14 +177,15 @@ fn host_of(url: &str) -> Option<String> {
         .and_then(|u| u.host_str().map(str::to_string))
 }
 
-fn standard_message(status: u16) -> Option<&'static str> {
+fn standard_message(status: u16) -> Option<String> {
     Some(match status {
-        0 => OFFLINE,
-        400 => "Serwer nie przyjął danych.",
-        403 => "Brak dostępu - potwierdź adres e-mail (link w wiadomości).",
-        404 => "Nie znaleziono.",
-        413 => "Za dużo danych naraz.",
-        429 => "Za dużo prób - odczekaj chwilę i spróbuj ponownie.",
+        0 => offline(),
+        400 => t("konto.blad.400", &[]),
+        403 => t("konto.blad.403", &[]),
+        404 => t("konto.blad.404", &[]),
+        413 => t("konto.blad.413", &[]),
+        426 => t("konto.blad.aktualizacja", &[]),
+        429 => t("konto.blad.429", &[]),
         _ => return None,
     })
 }
@@ -188,14 +196,14 @@ pub fn friendly(status: u16, body: &Value, path: &str) -> String {
     let mut body = body;
     if !path.starts_with("/api/bieznia/") {
         if status == 400 && path.ends_with("auth-with-password") {
-            return "Nieprawidłowy e-mail lub hasło.".into();
+            return t("konto.blad.logowanie", &[]);
         }
         if status == 429 {
-            return "Za dużo prób - spróbuj za minutę.".into();
+            return t("konto.blad.429_logowanie", &[]);
         }
         body = &Value::Null;
     } else if status == 404 {
-        return "Ta funkcja będzie dostępna wkrótce.".into();
+        return t("konto.blad.404_funkcja", &[]);
     }
     if let Some(message) = body.get("message").and_then(Value::as_str)
         && !message.trim().is_empty()
@@ -204,11 +212,11 @@ pub fn friendly(status: u16, body: &Value, path: &str) -> String {
         return message.trim().to_string();
     }
     if status >= 500 {
-        return "Serwer kont ma chwilowy problem - spróbuj później.".into();
+        return t("konto.blad.500", &[]);
     }
     match standard_message(status) {
-        Some(m) => m.to_string(),
-        None => format!("Serwer odpowiedział błędem {status}."),
+        Some(m) => m,
+        None => t("konto.blad.kod_inny", &[("kod", &status.to_string())]),
     }
 }
 
@@ -463,7 +471,7 @@ impl Client {
         auth: bool,
     ) -> Result<Value, KontoError> {
         let mut url = reqwest::Url::parse(&format!("{}{path}", self.base))
-            .map_err(|_| KontoError::invalid("Niepoprawny adres serwera kont."))?;
+            .map_err(|_| KontoError::invalid(&t("konto.blad.adres", &[])))?;
         if !query.is_empty() {
             url.query_pairs_mut().extend_pairs(query.iter().copied());
         }
@@ -476,7 +484,7 @@ impl Client {
         let data = match body {
             Some(b) => {
                 headers.push(("Content-Type".into(), "application/json".into()));
-                Some(serde_json::to_vec(b).map_err(|_| KontoError::server(BAD_FORMAT, 0))?)
+                Some(serde_json::to_vec(b).map_err(|_| KontoError::server(&bad_format(), 0))?)
             }
             None => None,
         };
@@ -484,7 +492,7 @@ impl Client {
             if self.token.is_empty() {
                 return Err(KontoError::new(
                     KontoErrorKind::LoggedOut,
-                    "Zaloguj się, żeby korzystać z funkcji online.",
+                    &t("konto.blad.niezalogowany", &[]),
                     401,
                 ));
             }
@@ -501,13 +509,13 @@ impl Client {
             Ok(r) => r,
             Err(e) => {
                 log::info!("Konto: {method} {path} -> brak połączenia ({e})");
-                return Err(KontoError::new(KontoErrorKind::Offline, OFFLINE, 0));
+                return Err(KontoError::new(KontoErrorKind::Offline, &offline(), 0));
             }
         };
         let status = reply.status;
         if (300..400).contains(&status) || host_of(&reply.url).as_deref() != Some(&self.host) {
             log::info!("Konto: {method} {path} -> {status} (przekierowanie)");
-            return Err(KontoError::server(REDIRECTED, status));
+            return Err(KontoError::server(&redirected(), status));
         }
         if !(200..300).contains(&status) {
             log::info!("Konto: {method} {path} -> {status}");
@@ -522,7 +530,7 @@ impl Client {
                 self.token.clear();
                 return Err(KontoError::new(
                     KontoErrorKind::LoggedOut,
-                    "Sesja wygasła - zaloguj się ponownie.",
+                    &t("konto.blad.sesja_wygasla", &[]),
                     401,
                 ));
             }
@@ -543,14 +551,14 @@ impl Client {
         );
         if reply.body.len() > MAX_RESPONSE {
             return Err(KontoError::server(
-                "Odpowiedź serwera jest za duża - przerwano.",
+                &t("konto.blad.za_duza_odpowiedz", &[]),
                 status,
             ));
         }
         if reply.body.is_empty() {
             return Ok(Value::Null);
         }
-        serde_json::from_slice(&reply.body).map_err(|_| KontoError::server(BAD_FORMAT, status))
+        serde_json::from_slice(&reply.body).map_err(|_| KontoError::server(&bad_format(), status))
     }
 
     fn get(&mut self, path: &str, query: &[(&str, &str)]) -> Result<Value, KontoError> {
@@ -567,7 +575,7 @@ impl Client {
                 Value::String(s) => s.clone(),
                 other => other.to_string(),
             },
-            _ => return Err(KontoError::server(BAD_FORMAT, 0)),
+            _ => return Err(KontoError::server(&bad_format(), 0)),
         };
         self.token.clone_from(&token);
         let record = payload.get("record").cloned().unwrap_or(Value::Null);
@@ -716,7 +724,7 @@ impl Client {
         }
         let result = self.get("/api/bieznia/sesje", &query)?;
         if !result.is_object() {
-            return Err(KontoError::server(BAD_FORMAT, 200));
+            return Err(KontoError::server(&bad_format(), 200));
         }
         let list = |key: &str| -> Vec<Value> {
             result
@@ -895,6 +903,6 @@ fn check_scope(scope: &str) -> Result<(), KontoError> {
     if RANKING_SCOPES.contains(&scope) {
         Ok(())
     } else {
-        Err(KontoError::invalid("Nieznany zakres rankingu."))
+        Err(KontoError::invalid(&t("wspolne.blad_nieznany", &[])))
     }
 }

@@ -114,6 +114,7 @@ fn build_app(paths: AppPaths, config: Config, clock: treadmill::Clock) -> App {
                 .and_then(Value::as_bool)
                 .unwrap_or(false),
         ),
+        scan_cancelled: false,
         auto_connect: settings
             .get("device_address")
             .and_then(Value::as_str)

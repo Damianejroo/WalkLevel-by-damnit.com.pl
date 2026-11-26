@@ -37,6 +37,11 @@ fn close(a: f64, b: f64) -> bool {
     (a - b).abs() < 1e-12
 }
 
+/// Tekst z fixtury 0.5.2 w brzmieniu 0.6.0 (docs/teksty.md).
+fn old(text: &str) -> String {
+    walklevel_core::teksty::from_052(text, &["klawisz.", "pad."])
+}
+
 #[test]
 fn keys_load_and_save_like_python() {
     let f = load("klawisze");
@@ -66,7 +71,11 @@ fn native_codes_like_python() {
             case["fallback"].as_str().unwrap(),
             case["vk"].as_i64().unwrap(),
         );
-        let want = (!case["key"].is_null()).then(|| key(&case["key"]));
+        let want = (!case["key"].is_null()).then(|| {
+            let mut k = key(&case["key"]);
+            k.name = old(&k.name);
+            k
+        });
         assert_eq!(got, want, "{case}");
     }
 }
@@ -81,7 +90,7 @@ fn key_problems_like_python() {
         let run = case.get("run").map_or_else(Key::run_default, key);
         let toggle = key(&case["toggle"]);
         assert_eq!(toggle.label(), case["label"].as_str().unwrap());
-        let want = case["problem"].as_str().map(String::from);
+        let want = case["problem"].as_str().map(old);
         assert_eq!(problem(&walk, &run, &toggle), want, "{case}");
     }
 }
@@ -151,7 +160,7 @@ fn pad_reports_like_python() {
     }
     for case in f["labels"].as_array().unwrap() {
         let got = button_label(case["button"].as_str().unwrap(), case["pad"].as_str());
-        assert_eq!(got, case["label"].as_str().unwrap(), "{case}");
+        assert_eq!(got, old(case["label"].as_str().unwrap()), "{case}");
     }
 }
 

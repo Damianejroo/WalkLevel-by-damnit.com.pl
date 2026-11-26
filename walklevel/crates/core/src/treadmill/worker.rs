@@ -23,6 +23,7 @@ use super::profiles::ProfileRegistry;
 use super::simulator::{self, SimulatorDriver};
 use super::telemetry::{TelemetryFrame, TelemetrySpec};
 use super::watchdog::SpeedStats;
+use crate::teksty::t;
 
 /// Tyle razy prędkość bez potwierdzenia idzie od nowa (co odpytanie).
 pub const SPEED_ATTEMPTS: u32 = 3;
@@ -94,24 +95,16 @@ impl BeltOutcome {
     }
 
     /// Komunikat dla użytkownika (docs/teksty.md, tasma.*).
-    pub fn message(self) -> &'static str {
-        match self {
-            BeltOutcome::Started => "Taśma rusza.",
-            BeltOutcome::Stopped => "Taśma zatrzymana.",
-            BeltOutcome::Refused => {
-                "Bieżnia nie przyjęła startu. Sprawdź klucz bezpieczeństwa, obudź bieżnię pilotem \
-                 i włącz sterowanie jeszcze raz."
-            }
-            BeltOutcome::Unknown => {
-                "Bieżnia nie odpowiedziała na start. Jeśli taśma stoi, uruchom ją pilotem."
-            }
-            BeltOutcome::Unsupported => {
-                "Ta bieżnia nie pozwala na start z komputera. Uruchom taśmę pilotem."
-            }
-            BeltOutcome::NotConnected => {
-                "Bieżnia nie jest połączona. Taśmę uruchomisz i zatrzymasz tylko pilotem."
-            }
-        }
+    pub fn message(self) -> String {
+        let key = match self {
+            BeltOutcome::Started => "tasma.rusza",
+            BeltOutcome::Stopped => "tasma.zatrzymana",
+            BeltOutcome::Refused => "tasma.odmowa",
+            BeltOutcome::Unknown => "tasma.bez_odpowiedzi",
+            BeltOutcome::Unsupported => "tasma.nieobslugiwane",
+            BeltOutcome::NotConnected => "tasma.brak_polaczenia",
+        };
+        t(key, &[])
     }
 }
 
@@ -127,25 +120,32 @@ impl From<StartResult> for BeltOutcome {
 }
 
 /// Komunikat: bieżnia nie potwierdziła zatrzymania (pokazać, nie tylko w logu).
-pub const STOP_NOT_CONFIRMED: &str = "Bieżnia nie potwierdziła zatrzymania. Zatrzymaj taśmę \
-                                      pilotem albo wyjmij klucz bezpieczeństwa.";
+pub fn stop_not_confirmed() -> String {
+    t("ble.stop_niepotwierdzony", &[])
+}
 
 /// Komunikat: stop przy zamykaniu aplikacji nie zdążył się wysłać ([`BleWorker::stop_belt_now`]
 /// zwróciło `false` przy jadącej taśmie) - powiadomienie systemowe.
-pub const STOP_NOT_SENT: &str = "Nie udało się zatrzymać taśmy. Zatrzymaj ją pilotem.";
+pub fn stop_not_sent() -> String {
+    t("ble.stop_nie_zdazyl", &[])
+}
 
 /// Raport diagnostyczny w toku, zapisany i nieudany (docs/teksty.md, dziennik.raport_*).
-pub const REPORT_BUSY: &str = "Zbieram raport, to potrwa ok. 30 s…";
-pub const REPORT_DONE: &str = "Raport zapisany. Dołączy się sam do następnego zgłoszenia.";
-pub const REPORT_FAILED: &str =
-    "Nie udało się zebrać raportu. Sprawdź, czy Bluetooth jest włączony.";
+pub fn report_busy() -> String {
+    t("dziennik.raport_trwa", &[])
+}
+pub fn report_done() -> String {
+    t("dziennik.raport_gotowy", &[])
+}
+pub fn report_failed() -> String {
+    t("dziennik.raport_blad", &[])
+}
 
 /// Komunikat: bieżnia nie przyjmuje prędkości.
 pub fn speed_refused_text(kmh: f64) -> String {
-    let kmh = format!("{kmh:.1}").replace('.', ",");
-    format!(
-        "Bieżnia nie przyjmuje prędkości {kmh} km/h. Sprawdź, czy taśma jedzie, i spróbuj \
-         jeszcze raz."
+    t(
+        "ble.predkosc_nieprzyjeta",
+        &[("kmh", &crate::teksty::kmh(kmh))],
     )
 }
 
@@ -534,7 +534,7 @@ impl Worker {
             handle.abort();
         }
         *lock(&self.ctx.streaming) = false;
-        self.ctx.link(Link::Idle, "Rozłączono");
+        self.ctx.link(Link::Idle, t("ble.rozlaczono", &[]));
     }
 
     async fn start_session(&mut self, address: String, name: String) {
@@ -593,7 +593,7 @@ impl Worker {
         target
     }
 
-    async fn resume(&mut self, target: Option<(String, String)>, idle_text: &str) {
+    async fn resume(&mut self, target: Option<(String, String)>, idle_text: String) {
         match target {
             Some((address, name)) => self.start_session(address, name).await,
             None => self.ctx.link(Link::Idle, idle_text),
@@ -602,7 +602,8 @@ impl Worker {
 
     async fn scan(&mut self) {
         let resume = self.pause_session().await;
-        self.ctx.link(Link::Searching, "Szukam bieżni w pobliżu…");
+        self.ctx
+            .link(Link::Searching, t("glowny.status.skanowanie.tytul", &[]));
         let found = match self.backend.scan(secs(self.ctx.timing.scan_s)).await {
             Ok(found) => found,
             Err(e) => {
@@ -649,12 +650,12 @@ impl Worker {
             devices.iter().filter(|d| d.treadmill).count()
         );
         self.ctx.emit(WorkerEvent::Devices(devices));
-        self.resume(resume, "Wybierz bieżnię z listy.").await;
+        self.resume(resume, t("ble.wybierz_z_listy", &[])).await;
     }
 
     async fn diagnose(&mut self, path: PathBuf) {
         let resume = self.pause_session().await;
-        self.ctx.link(Link::Searching, REPORT_BUSY);
+        self.ctx.link(Link::Searching, report_busy());
         let address = resume.as_ref().map(|(a, _)| a.clone());
         let result = run_diagnostics(
             self.backend.as_ref(),
@@ -667,12 +668,12 @@ impl Worker {
         .await;
         let report = result.map_err(|e| {
             log::error!("Raport diagnostyczny nie powiódł się: {e}");
-            REPORT_FAILED.to_string()
+            report_failed()
         });
         let idle = if report.is_ok() {
-            REPORT_DONE
+            report_done()
         } else {
-            REPORT_FAILED
+            report_failed()
         };
         self.ctx.emit(WorkerEvent::Report(report));
         self.resume(resume, idle).await;
@@ -770,7 +771,10 @@ async fn connect_once(
     closed: &mut watch::Receiver<bool>,
     attempt: &mut u32,
 ) -> Option<Result<(), BleError>> {
-    ctx.link(Link::Searching, format!("Szukam bieżni {model}…"));
+    ctx.link(
+        Link::Searching,
+        t("glowny.status.szukanie.tytul", &[("model", model)]),
+    );
     let found = unless_closed(
         closed,
         backend.find(address.into(), name.into(), secs(ctx.timing.find_s)),
@@ -787,7 +791,10 @@ async fn connect_once(
             found.address
         );
     }
-    ctx.link(Link::Connecting, format!("Łączę z {model}…"));
+    ctx.link(
+        Link::Connecting,
+        t("glowny.status.laczenie.tytul", &[("model", model)]),
+    );
     let link = match unless_closed(
         closed,
         backend.connect(found.address.clone(), secs(ctx.timing.connect_s)),
@@ -896,7 +903,10 @@ async fn drive(
     let mut stream = Stream::new(ctx.clone(), driver.clone(), sim, session_tx);
     ctx.link(
         Link::Connected,
-        format!("Połączono z {}", driver.info().model),
+        t(
+            "glowny.status.polaczono.tytul",
+            &[("model", &driver.info().model)],
+        ),
     );
     let started = tokio::select! {
         r = driver.start() => Some(r),
@@ -912,7 +922,10 @@ async fn drive(
     stream.announce(address);
     ctx.link(
         Link::Streaming,
-        format!("Połączono z {}", driver.info().model),
+        t(
+            "glowny.status.polaczono.tytul",
+            &[("model", &driver.info().model)],
+        ),
     );
     // polecenia sprzed połączenia nie dotyczą tej taśmy
     while rx.try_recv().is_ok() {}
@@ -1171,13 +1184,10 @@ impl Stream {
                 }
                 match result {
                     Ok(true) => {}
-                    Ok(false) => self
-                        .ctx
-                        .emit(WorkerEvent::Problem(STOP_NOT_CONFIRMED.into())),
+                    Ok(false) => self.ctx.emit(WorkerEvent::Problem(stop_not_confirmed())),
                     Err(e) => {
                         log::warn!("Stop taśmy: {e}");
-                        self.ctx
-                            .emit(WorkerEvent::Problem(STOP_NOT_CONFIRMED.into()));
+                        self.ctx.emit(WorkerEvent::Problem(stop_not_confirmed()));
                     }
                 }
                 self.ctx.emit(WorkerEvent::Belt(BeltOutcome::Stopped));

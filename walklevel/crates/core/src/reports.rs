@@ -23,6 +23,8 @@ use regex::Regex;
 use serde::Serialize;
 use serde_json::Value;
 
+use crate::teksty::t;
+
 /// Nazwa aplikacji w temacie e-maila.
 pub const APP_NAME: &str = "WalkLevel";
 /// Adres kontaktowy autora (e-mail zamiast wysyłki).
@@ -67,7 +69,7 @@ pub enum ReportError {
     #[error("{0}")]
     Message(String),
     /// Błąd dysku przy składaniu albo czytaniu paczki.
-    #[error("Nie udało się przygotować paczki: {0}")]
+    #[error("{}", t("zgloszenie.blad.paczka", &[("szczegoly", &.0.to_string())]))]
     Io(#[from] io::Error),
 }
 
@@ -144,27 +146,19 @@ pub fn description_problem(description: &str) -> Option<String> {
         return None;
     }
     if length == 0 {
-        return Some("Opisz, co się stało - wystarczy jedno zdanie.".to_string());
+        return Some(t("zgloszenie.blad.pusty", &[]));
     }
-    let missing = REPORT_MIN_CHARS - length;
-    let word = match missing {
-        1 => "znak",
-        2..=4 => "znaki",
-        _ => "znaków",
-    };
-    Some(format!(
-        "Opis jest za krótki - dopisz jeszcze {missing} {word}, np. co poszło nie tak."
-    ))
+    let missing = (REPORT_MIN_CHARS - length).to_string();
+    Some(t("zgloszenie.blad.krotki", &[("liczba", &missing)]))
 }
 
 /// Komunikat po udanej wysyłce (numer zgłoszenia z serwera albo pusty).
 pub fn sent_message(number: &str) -> String {
-    let done = if number.is_empty() {
-        "Wysłano zgłoszenie".to_string()
+    if number.is_empty() {
+        t("zgloszenie.wyslano_bez_numeru", &[])
     } else {
-        format!("Wysłano zgłoszenie nr {number}")
-    };
-    format!("{done} - dziękuję! Autor dostał opis i logi.")
+        t("zgloszenie.wyslano", &[("numer", number)])
+    }
 }
 
 // --- logi z okresu ----------------------------------------------------------------------
@@ -667,9 +661,7 @@ fn build_report_at(
         }
     }
     fs::remove_file(&path)?;
-    Err(ReportError::msg(
-        "Paczka z logami jest za duża - usuń stare logi i spróbuj ponownie.",
-    ))
+    Err(ReportError::msg(t("zgloszenie.blad.za_duza", &[])))
 }
 
 // --- wysyłka ----------------------------------------------------------------------------
@@ -731,13 +723,17 @@ fn http_error(status: u16, body: &[u8]) -> ReportError {
         }
     };
     ReportError::Message(match status {
-        413 => "Paczka jest za duża dla serwera - zapisz ją na dysk.".to_string(),
-        429 => or("Za dużo zgłoszeń naraz - spróbuj za godzinę albo zapisz paczkę.".to_string()),
-        503 => format!(
-            "{} Zapisz paczkę na dysk i wyślij ją e-mailem na {CONTACT}.",
-            or("Serwer nie wysłał teraz maila.".to_string())
+        413 => t("zgloszenie.blad.za_duza_serwer", &[]),
+        429 => or(t("zgloszenie.blad.limit", &[])),
+        503 if message.is_empty() => t("zgloszenie.blad.mail", &[("email_autora", CONTACT)]),
+        503 => t(
+            "zgloszenie.blad.mail_serwer",
+            &[("powod", &message), ("email_autora", CONTACT)],
         ),
-        _ => or(format!("Serwer odrzucił zgłoszenie (kod {status}).")),
+        _ => or(t(
+            "zgloszenie.blad.odrzucone",
+            &[("kod", &status.to_string())],
+        )),
     })
 }
 
@@ -755,7 +751,7 @@ fn is_https(endpoint: &str) -> bool {
 }
 
 fn network_error() -> ReportError {
-    ReportError::msg("Nie udało się wysłać - sprawdź internet albo zapisz paczkę.")
+    ReportError::msg(t("zgloszenie.blad.internet", &[]))
 }
 
 fn post(
@@ -811,9 +807,7 @@ pub fn send_report(
 ) -> Result<String, ReportError> {
     let fields = form_fields(description, contact, period_s, version);
     if !is_https(endpoint) {
-        return Err(ReportError::msg(
-            "Adres zgłoszeń musi zaczynać się od https://",
-        ));
+        return Err(ReportError::msg(t("zgloszenie.blad.adres", &[])));
     }
     let file = fs::read(report)?;
     let boundary = uuid::Uuid::new_v4().simple().to_string();
@@ -839,11 +833,11 @@ fn percent_encode(text: &str) -> String {
 /// Link `mailto:` do autora z tematem i treścią (opis + nazwa paczki do dołączenia).
 /// Otwiera go aplikacja (np. opener w Tauri).
 pub fn mailto_link(description: &str, report_name: &str, version: &str) -> String {
-    let subject = format!("{APP_NAME} {version} - zgłoszenie problemu");
-    let body = format!(
-        "{}\n\nPaczka z logami do dołączenia: {report_name}\n(folder otworzył się obok - przeciągnij plik do tej wiadomości)\n",
-        py_strip(description)
-    );
+    let subject = t("zgloszenie.email.temat", &[("wersja", version)]);
+    let body = t(
+        "zgloszenie.email.tresc",
+        &[("opis", py_strip(description)), ("plik", report_name)],
+    ) + "\n";
     format!(
         "mailto:{CONTACT}?subject={}&body={}",
         percent_encode(&subject),

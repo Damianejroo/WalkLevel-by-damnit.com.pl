@@ -150,7 +150,10 @@ pub fn create_windows(app: &AppHandle, webview_dir: &Path) -> tauri::Result<()> 
     harden_webview(&main);
 
     let popup = WebviewWindowBuilder::new(app, POPUP, WebviewUrl::App("popup.html".into()))
-        .title("WalkLevel - osiągnięcia")
+        .title(crate::teksty::t(
+            "powiadomienie.tytul_okna",
+            &[("tytul", &crate::teksty::t("osiagniecia.tytul", &[]))],
+        ))
         .inner_size(POPUP_W, POPUP_H)
         .transparent(true)
         .decorations(false)
@@ -168,7 +171,7 @@ pub fn create_windows(app: &AppHandle, webview_dir: &Path) -> tauri::Result<()> 
     harden_webview(&popup);
 
     let bubble = WebviewWindowBuilder::new(app, BUBBLE, WebviewUrl::App("przycisk.html".into()))
-        .title("WalkLevel - przycisk")
+        .title(crate::teksty::t("dymek.tytul_okna", &[]))
         .inner_size(BUBBLE_SIZE, BUBBLE_SIZE)
         .transparent(true)
         .decorations(false)

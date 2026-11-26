@@ -125,7 +125,7 @@ pub fn job<T>(
         if !app.account_busy.insert(key.clone()) {
             return Err(CmdError::new(
                 ErrorCode::Busy,
-                "To zadanie już trwa - chwilę.",
+                crate::teksty::t("konto.blad.trwa", &[]),
             ));
         }
         app.mark(&[SliceName::Account]);
@@ -148,9 +148,7 @@ pub fn job<T>(
                     app.online = OnlineView::default();
                 }
                 let name = app.person_name(person);
-                app.toast(format!(
-                    "Logowanie konta osoby {name} wygasło (albo hasło zostało zmienione) - zaloguj się ponownie."
-                ));
+                app.toast(crate::teksty::t("konto.wygaslo", &[("osoba", &name)]));
             } else if !quiet && mine {
                 app.account_message = e.message.clone();
             } else if quiet {
@@ -192,7 +190,7 @@ fn account_view(core: &Core) -> AccountView {
 }
 
 fn not_logged_in() -> KontoError {
-    KontoError::invalid("Najpierw zaloguj się na konto online.")
+    KontoError::invalid(&crate::teksty::t("konto.blad.niezalogowany", &[]))
 }
 
 // --- zegary (z pętli co 5 klatek) ------------------------------------------------------------
@@ -376,8 +374,9 @@ fn signed_in(
             ctx.accounts.get(person).logout();
         }
         let name = lock(&core.0.app).person_name(&taken);
-        return Err(KontoError::invalid(&format!(
-            "To konto jest już przypięte do osoby {name} - wybierz ją."
+        return Err(KontoError::invalid(&crate::teksty::t(
+            "konto.przypiete",
+            &[("osoba", &name)],
         )));
     }
     let mut person = person.to_string();
@@ -407,7 +406,10 @@ fn signed_in(
     let mut app = lock(&core.0.app);
     app.online = OnlineView::default();
     app.account_message.clear();
-    app.toast(format!("Zalogowano jako {name}."));
+    app.toast(crate::teksty::t(
+        "konto.zalogowano",
+        &[("pseudonim", &name)],
+    ));
     app.account_timers.signed_in(now);
     app.nav("online", "signedIn", None);
     Ok(())
@@ -475,7 +477,7 @@ pub fn remind(core: &Core, email: String) -> CmdResult<()> {
     job(core, &person, "reset", false, move |ctx| {
         ctx.accounts.blank().remind_password(&email)
     })?;
-    set_message(core, account::REMIND_MESSAGE);
+    set_message(core, account::remind_message());
     core.flush();
     Ok(())
 }
@@ -497,7 +499,7 @@ pub fn logout(core: &Core) -> CmdResult<()> {
         ctx.accounts.get(&p).logout();
         Ok(())
     })?;
-    after_logout(core, "Wylogowano.");
+    after_logout(core, &crate::teksty::t("konto.wylogowano", &[]));
     Ok(())
 }
 
@@ -507,7 +509,7 @@ pub fn delete(core: &Core, password: String) -> CmdResult<()> {
     job(core, &person, "delete", false, move |ctx| {
         ctx.accounts.get(&p).delete_account(&password)
     })?;
-    after_logout(core, "Konto usunięte.");
+    after_logout(core, &crate::teksty::t("konto.usunieto", &[]));
     Ok(())
 }
 
@@ -517,10 +519,7 @@ pub fn change_password(core: &Core, old: String, new: String) -> CmdResult<()> {
     job(core, &person, "password", false, move |ctx| {
         ctx.accounts.get(&p).change_password(&old, &new)
     })?;
-    set_message(
-        core,
-        "Hasło zmienione - inne urządzenia zostały wylogowane.",
-    );
+    set_message(core, crate::teksty::t("moje.haslo.zmienione", &[]));
     core.flush();
     Ok(())
 }
@@ -534,15 +533,18 @@ pub fn send_verification(core: &Core) -> CmdResult<String> {
     let now = core.now();
     let mut app = lock(&core.0.app);
     if answer == "potwierdzony" {
-        app.account_message = "Adres e-mail jest już potwierdzony.".into();
+        app.account_message = crate::teksty::t("konto.email.juz", &[]);
     } else {
         let email = app
             .konta
             .get(&person)
             .map(|k| k.state.email.clone())
             .unwrap_or_default();
-        app.toast(format!("Wysłaliśmy link potwierdzający na {email} - kliknij go w wiadomości (sprawdź też spam)."));
-        app.account_message = "Wysłano link potwierdzający - sprawdź skrzynkę.".into();
+        app.toast(crate::teksty::t(
+            "konto.email.wyslano_toast",
+            &[("email", &email)],
+        ));
+        app.account_message = crate::teksty::t("konto.email.wyslano", &[]);
         app.verify_until = now + account::sync::VERIFY_POLL_FOR_S;
         app.verify_at = now + account::sync::VERIFY_POLL_S;
     }
@@ -579,7 +581,7 @@ pub fn check_verified(core: &Core, force: bool) -> CmdResult<bool> {
     if verified {
         let mut app = lock(&core.0.app);
         if app.verify_until > 0.0 || force {
-            app.toast("Adres e-mail potwierdzony - możesz odzyskać hasło, gdy je zapomnisz.");
+            app.toast(crate::teksty::t("konto.email.potwierdzony", &[]));
         }
         app.verify_until = 0.0;
         app.mark(&[SliceName::Account]);
@@ -630,11 +632,11 @@ pub fn accept_terms(core: &Core) -> CmdResult<()> {
         Some(h) => acc.accept_terms(h),
         None => Err(KontoError::new(
             KontoErrorKind::Io,
-            "Historia kroków niedostępna.",
+            &crate::teksty::t("historia.niedostepna", &[]),
             0,
         )),
     })?;
-    lock(&core.0.app).toast("Dziękujemy - regulamin zaakceptowany.");
+    lock(&core.0.app).toast(crate::teksty::t("konto.regulamin.dziekujemy", &[]));
     core.flush();
     let _ = upload_now(core);
     Ok(())
@@ -649,7 +651,10 @@ pub fn export_my_data(core: &Core) -> CmdResult<String> {
         ctx.accounts.get(&p).export_my_data(&data, &stamp)
     })?;
     let text = path.to_string_lossy().into_owned();
-    set_message(core, format!("Zapisano Twoje dane z serwera: {text}"));
+    set_message(
+        core,
+        crate::teksty::t("moje.konto.pobrano", &[("plik", &text)]),
+    );
     core.flush();
     Ok(text)
 }
@@ -987,13 +992,13 @@ pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
             |app, v| app.online.people = Some(people_page(v)),
         ),
         "me" => Ok(()),
-        _ => Err(CmdError::invalid("Nieznana zakładka.")),
+        _ => Err(CmdError::unexpected("Nieznana zakładka.")),
     }
 }
 
 pub fn ranking_scope(core: &Core, scope: String) -> CmdResult<()> {
     if !account::RANKING_SCOPES.contains(&scope.as_str()) {
-        return Err(CmdError::invalid("Nieznany zakres rankingu."));
+        return Err(CmdError::unexpected("Nieznany zakres rankingu."));
     }
     lock(&core.0.app).ranking_scope = scope;
     online_load(core, "ranking", true)
@@ -1029,11 +1034,12 @@ pub fn person_open(core: &Core, user_id: String) -> CmdResult<OnlinePerson> {
             app.nav("onlinePerson", "personOpened", None);
         },
     )?;
-    lock(&core.0.app)
-        .online
-        .person
-        .clone()
-        .ok_or_else(|| CmdError::new(ErrorCode::NotFound, "Nie znalazłem tej osoby."))
+    lock(&core.0.app).online.person.clone().ok_or_else(|| {
+        CmdError::new(
+            ErrorCode::NotFound,
+            crate::teksty::t("profil_online.brak_osoby", &[]),
+        )
+    })
 }
 
 fn invite(
@@ -1050,9 +1056,9 @@ fn invite(
     let who = v.get("osoba").map(|o| text(o, "name")).unwrap_or_default();
     let state = text(&v, "stan");
     lock(&core.0.app).toast(if state == "przyjeta" {
-        format!("{who} jest teraz Twoim znajomym.")
+        crate::teksty::t("znajomi.przyjeto", &[("pseudonim", &who)])
     } else {
-        format!("Wysłano zaproszenie do {who}.")
+        crate::teksty::t("znajomi.zaproszono", &[("pseudonim", &who)])
     });
     core.flush();
     let _ = online_load(core, "friends", true);
@@ -1138,7 +1144,7 @@ pub fn set_visibility(core: &Core, value: String) -> CmdResult<()> {
         Some(h) => acc.set_visibility(h, &value),
         None => Err(KontoError::new(
             KontoErrorKind::Io,
-            "Historia kroków niedostępna.",
+            &crate::teksty::t("historia.niedostepna", &[]),
             0,
         )),
     })

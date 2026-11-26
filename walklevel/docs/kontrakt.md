@@ -546,7 +546,7 @@ export interface LinkStatus {    // karta statusu na ekranie głównym (render_l
   title: string;
   sub: string;
   action: StatusAction;        // co zrobi device_status_action
-  actionLabel: string;         // 'Szukaj bieżni' | 'Anuluj' | 'Rozłącz' | 'Spróbuj ponownie' | 'Wyłącz symulator'
+  actionLabel: string;         // glowny.status.<stan>.akcja (rozdz. 9.1)
   primary: boolean;            // przycisk wyróżniony
 }
 export interface DeviceView {
@@ -558,7 +558,7 @@ export interface DeviceView {
   remembered: boolean;         // jest zapamiętana bieżnia (przycisk „Zapomnij” aktywny)
   label: string;               // render_device_label (2 linie, '\n')
   scanning: boolean;
-  scanText: string;            // 'Szukam urządzeń Bluetooth (ok. 6 s)…' | 'Znalezione bieżnie: 1, inne urządzenia: 3' | błąd skanowania
+  scanText: string;            // bieznia.lista.szukam | bieznia.lista.znalezione | błąd skanowania (ble.powod.*)
   devices: FoundDevice[];      // bieżnie pierwsze; inne najwyżej 12
   bluetoothOff: boolean;       // pusta lista: instrukcja włączenia Bluetooth zamiast „Nie widzę bieżni”
   diagnostics: { running: boolean; text: string }; // 'Zbieram raport (ok. 30 s)…' / 'Raport: <ścieżka>'
@@ -1875,58 +1875,61 @@ Token nigdy nie trafia do plików, kopii danych ani logów; w żądaniach tylko 
 
 ## 9. Teksty liczone przez rdzeń
 
-Jeśli `docs/teksty.md` podaje inne brzmienie, wygrywa `teksty.md` (jedyne źródło tekstów);
-tu jest logika: który tekst kiedy. Rdzeń składa je 1:1 z 0.5.2 (liczby przez `fmt_num`: przecinek dziesiętny, bez zbędnego
-„,0” - np. `2,5`, `12`). UI tylko je wyświetla.
+Brzmienie: wyłącznie `docs/teksty.md` (kolumna „Nowy tekst”). Rdzeń bierze teksty po kluczu z
+tego samego słownika co interfejs (`walklevel_core::teksty::t(klucz, zmienne)` czyta
+`src/lib/teksty-slownik.ts`, generowany przez `npm run teksty`); test
+`teksty::tests::every_used_key_exists` pilnuje, że każdy użyty w Rust klucz istnieje. Tu jest
+tylko logika: który klucz kiedy. Liczby: `{kmh}` z jednym miejscem po przecinku („2,5”, „6,0”),
+tysiące z wąską twardą spacją. UI tylko wyświetla gotowe teksty.
 
-### 9.1 Karta statusu bieżni (`device.status`, `render_link`)
+### 9.1 Karta statusu bieżni (`device.status`)
 
-| Stan | tone | busy | title | sub | action / label | primary |
-|---|---|---|---|---|---|---|
-| symulator włączony | accent | nie | Symulator bieżni | `F6 wolniej, F7 szybciej` | simulatorOff / Wyłącz symulator | nie |
-| streaming, dane świeże | accent | nie | `Połączono: <model>` | `linkText` | disconnect / Rozłącz | nie |
-| streaming, brak świeżych danych | run | tak | `Połączono: <model>` | Czekam na dane z bieżni | disconnect / Rozłącz | nie |
-| searching / connecting / connected | accent | tak | `linkText` | Bieżnia włączona, telefon rozłączony | cancel / Anuluj (gdy zapamiętana), inaczej scan / Szukaj bieżni | nie |
-| retrying | run | tak | Ponawiam połączenie | `linkText` | disconnect / Rozłącz | nie |
-| bluetoothOff | danger | nie | Bluetooth wyłączony | Włącz Bluetooth w Windows | retry / Spróbuj ponownie | tak |
-| unsupported | danger | nie | To urządzenie nie jest bieżnią | Wybierz inne albo zapisz raport | scan / Szukaj bieżni | tak |
-| idle | muted | nie | Bieżnia nie połączona | Włącz bieżnię i kliknij Szukaj bieżni | scan / Szukaj bieżni | tak |
+Tytuł, podtytuł i napis przycisku: `glowny.status.<stan>.{tytul,podtytul,akcja}`.
 
-`<model>`: `device.model` (prawdziwa bieżnia) albo `model_name(deviceName)` albo „bieżnia”.
+| Stan | tone | busy | `<stan>` | action | primary |
+|---|---|---|---|---|---|
+| symulator włączony | accent | nie | `symulator` | simulatorOff | nie |
+| streaming, dane świeże | accent | nie | `polaczono` | disconnect | nie |
+| streaming, brak świeżych danych | run | tak | `czekam` (przycisk jak `polaczono`) | disconnect | nie |
+| searching, bieżnia zapamiętana | accent | tak | `szukanie` | cancel | nie |
+| searching, bez zapamiętanej (skan) | accent | tak | `skanowanie` | cancel (wynik skanu nie otwiera listy) | nie |
+| searching w trakcie raportu diagnostycznego | accent | tak | tytuł `dziennik.raport_trwa` | cancel | nie |
+| connecting / connected | accent | tak | `laczenie` | cancel | nie |
+| retrying | run | tak | `ponawiam`, podtytuł: powód `ble.powod.*` | disconnect | nie |
+| bluetoothOff | danger | nie | `bt_wylaczony` | retry | tak |
+| unsupported | danger | nie | `nieobslugiwane` | scan | tak |
+| idle, bieżnia zapamiętana | muted | nie | `rozlaczona` | retry (łączy bez skanu) | tak |
+| idle, bez zapamiętanej | muted | nie | `brak` | scan | tak |
+
+`{model}`: `device.model` (prawdziwa bieżnia) albo `model_name(deviceName)` albo „bieżnia”.
 
 ### 9.2 Podpis wskaźnika (`Telemetry.caption`, `mode`, `active`)
 
-`off` = `Wyłączone - <toggleLabel> włącza`.
+Wyłączone sterowanie: `glowny.wskaznik.wylaczone`.
 
 | Tryb | Warunek | mode | active | caption |
 |---|---|---|---|---|
-| treadmill | brak świeżych danych | offline | -1 | `Brak danych z bieżni` (gdy link ≠ streaming) / `Czekam na dane` |
-| gamepad | włączone | idle/walk/run (skok 0 / ostatni / pozostałe) | indeks skoku | `Brak pada - <belt>` albo `Gałka N% - skok K - <belt>`; `<belt>` = `taśma stoi` (padIdle stop na skoku 0) albo `taśma X km/h` |
-| training | włączone | walk (poziom 1-2) / run (3-4) | poziom | `Trening · poziom N · taśma X km/h` |
-| keyboard | włączone | idle/walk/run (trzymane klawisze) | 0/1/2 | `Bieg · W + Shift · taśma X km/h` / `Chód · W · taśma X km/h` / `Bez klawisza · taśma X km/h` |
-| treadmill | włączone | z mapowania | 0/1/2 | `Bieg · gra dostaje Shift + W` / `Chód · gra dostaje W` / `Stoisz`; przy `output = dry` i chodzie dopisek ` (podgląd)` |
-| dowolny | wyłączone | idle | -1 | `off` |
+| treadmill | brak świeżych danych | offline | -1 | `glowny.wskaznik.brak_danych` (link ≠ streaming) / `glowny.wskaznik.czekam` |
+| gamepad | włączone | idle/walk/run (stopień 0 / ostatni / pozostałe) | indeks stopnia | `glowny.wskaznik.pad.brak` albo `glowny.wskaznik.pad.stan`; `{tasma}` = `glowny.wskaznik.tasma_stoi` / `glowny.wskaznik.tasma_kmh` |
+| training | włączone | walk (poziom 1-2) / run (3-4) | poziom | `glowny.wskaznik.trening` |
+| keyboard | włączone | idle/walk/run (trzymane klawisze) | 0/1/2 | `glowny.wskaznik.klawisze.{bez,chod,bieg}` |
+| treadmill | włączone | z mapowania | 0/1/2 | `glowny.wskaznik.chodzenie.{stoisz,chod,bieg}`; przy `output = dry` `glowny.wskaznik.chodzenie.proba` / `proba_bieg` |
+| dowolny | wyłączone | idle | -1 | `glowny.wskaznik.wylaczone` |
 
 Na końcu: brak świeżych danych → `mode = offline` niezależnie od trybu (liczba na wskaźniku szara).
-`PadTelemetry.statusText`: „Nie widzę pada. Podłącz DualSense albo pada Xbox (kablem albo
-Bluetooth).” albo `<nazwa>: wychylenie N%, skok K.`
+`PadTelemetry.statusText`: `ustawienia.pad.brak` albo `ustawienia.pad.stan`.
 
-### 9.3 Podpowiedź pod trybami (`control.hint`, `render_output_hint`) i zdarzenia taśmy
+### 9.3 Podpowiedź pod trybami (`control.hint`) i zdarzenia taśmy
 
-Domyślnie wg trybu:
-- gamepad: „Wychyl lewą gałkę - im dalej, tym szybciej. Skoki zmienisz w Ustawieniach.”
-- keyboard: „Trzymaj W, żeby przyspieszyć, W + Shift - bieg.”
-- treadmill + keys: „Gdy idziesz, aplikacja trzyma W w aktywnym oknie gry, a przy szybszym chodzie Shift + W.”
-- treadmill + dry: „Tryb próbny: aplikacja nie naciska klawiszy w grze. Żeby postać szła, w Ustawieniach > Gry i sterowanie ustaw Wyjście na Klawiatura.”
+Domyślnie wg trybu: gamepad `glowny.podpowiedz.pad`, keyboard `glowny.podpowiedz.klawisze`,
+training `glowny.podpowiedz.trening`, treadmill + keys `glowny.podpowiedz.chodzenie`,
+treadmill + dry `glowny.podpowiedz.chodzenie_proba`.
 
-Zastępowane (do następnej zmiany trybu/klawiszy) przez: błąd klawisza (`klawisze.problem`),
-„Uruchamiam bieżnię (odliczanie ok. N s)…” przy włączaniu (gdy `startDelayS ≥ 2`), oraz
-wynik polecenia taśmy: started „Bieżnia rusza.”, stopped „Bieżnia zatrzymana.”, refused
-„Bieżnia nie przyjęła startu. Obudź ją pilotem albo sprawdź, czy klucz bezpieczeństwa jest
-na miejscu, i spróbuj jeszcze raz.”, unknown „Wysłano start, ale bieżnia nie odpowiedziała.
-Jeśli taśma nie rusza, uruchom ją pilotem.”, unsupported „Ta bieżnia nie obsługuje startu
-z aplikacji - użyj pilota.”, not_connected „Brak połączenia z bieżnią - start i stop tylko
-pilotem.”
+Zastępowane (do następnej zmiany trybu/klawiszy) przez: błąd klawisza (`klawisz.blad.*`),
+`tasma.uruchamiam_odliczanie` (gdy `startDelayS ≥ 2`) albo `tasma.uruchamiam` przy włączaniu,
+oraz wynik polecenia taśmy: started `tasma.rusza`, stopped `tasma.zatrzymana`, refused
+`tasma.odmowa`, unknown `tasma.bez_odpowiedzi`, unsupported `tasma.nieobslugiwane`,
+not_connected `tasma.brak_polaczenia`.
 
 Logika `set_control(on)` (do przeniesienia 1:1): przy wyłączeniu najpierw puszczenie
 klawiszy, potem: `beltCommands || padStop || training` → stop taśmy, w innym razie, gdy tryb
@@ -1936,16 +1939,16 @@ ustawia prędkość → prędkość bezczynna (`idle_target`). Przy włączeniu:
 
 ### 9.4 Podtytuł karty sterowania (`control.subtitle`)
 
-`start` = „uruchamia i zatrzymuje taśmę” (beltControl) albo „włącza i wyłącza sterowanie”;
-z przyciskiem pada: `(albo pad: <przycisk>) <start>`. Dalej wg trybu:
-training `<start> · F7 szybciej, F6 wolniej`; keyboard `<start> · W przyspiesza`; gamepad
-`<start> · gałka ustawia tempo`; treadmill `<start> · działa też w grze`.
+`{opis}` = `glowny.sterowanie.opis.tasma` (beltControl) albo `glowny.sterowanie.opis.bez_tasmy`;
+z przyciskiem pada: `glowny.sterowanie.opis.z_padem`. Dalej wg trybu:
+`glowny.sterowanie.opis.{trening,klawisze,pad,chodzenie}`.
 
 ### 9.5 Etykieta zapamiętanej bieżni (`device.label`)
 
-Symulator: `Symulator bieżni · 0,5-6 km/h`. Zapamiętana: linia 1 `model` albo
-`model (nazwa BT)`, linia 2 `zakres km/h · rozruch ok. N s · firmware X` (części tylko gdy
-są). Brak: `Brak zapamiętanej bieżni`.
+Symulator: `ustawienia.bieznia.symulator_opis`. Zapamiętana: `ustawienia.bieznia.opis` (linia 1
+model, linia 2 części „start ok.” i „oprogramowanie” tylko gdy są). Brak:
+`ustawienia.bieznia.brak`. Nazwa Bluetooth nie jest w treści (UI może ją pokazać w podpowiedzi
+z `device.device.name` albo `settings.deviceName`).
 
 ---
 

@@ -15,8 +15,7 @@ use std::sync::{Arc, Mutex, PoisonError};
 pub const TARGET: &str = "Bieznia/konto";
 /// Najdłuższy token mieszczący się w poświadczeniu (CRED_MAX_CREDENTIAL_BLOB_SIZE = 5 * 512).
 pub const MAX_BLOB: usize = 2560;
-/// Opis i nazwa użytkownika poświadczenia (jak w 0.5.x).
-pub const COMMENT: &str = "WalkLevel - logowanie do konta online";
+/// Nazwa użytkownika poświadczenia (jak w 0.5.x); opis - konto.sejf.opis w docs/teksty.md.
 pub const USER_NAME: &str = "bieznia";
 
 /// Miejsce na token jednego konta.
@@ -159,7 +158,7 @@ impl TokenStore for WindowsStore {
             ));
         }
         let mut target = wide(&self.target);
-        let mut comment = wide(COMMENT);
+        let mut comment = wide(&crate::teksty::t("konto.sejf.opis", &[]));
         let mut user = wide(USER_NAME);
         let cred = CREDENTIALW {
             Type: CRED_TYPE_GENERIC,

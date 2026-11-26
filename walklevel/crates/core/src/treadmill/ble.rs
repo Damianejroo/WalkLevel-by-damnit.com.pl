@@ -8,6 +8,8 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use crate::teksty::t;
+
 use futures::future::BoxFuture;
 use futures::{FutureExt, StreamExt};
 use tokio::sync::mpsc;
@@ -40,16 +42,13 @@ pub struct Notification {
 /// Błędy Bluetooth z komunikatem dla użytkownika (docs/teksty.md, ble.powod.*).
 #[derive(Debug, thiserror::Error)]
 pub enum BleError {
-    #[error(
-        "Bluetooth jest wyłączony albo niedostępny. Włącz go w Start > Ustawienia > \
-         Bluetooth i urządzenia."
-    )]
+    #[error("{}", t("ble.powod.bt_wylaczony", &[]))]
     BluetoothOff,
-    #[error("Nie widać bieżni. Włącz ją i zamknij jej aplikację w telefonie.")]
+    #[error("{}", t("ble.powod.nie_widze", &[]))]
     NotFound,
-    #[error("Bieżnia nie odpowiada. Jeśli to się powtarza, wyłącz ją i włącz ponownie.")]
+    #[error("{}", t("ble.powod.timeout", &[]))]
     Timeout,
-    #[error("Problem z Bluetooth. Łączę ponownie… ({0})")]
+    #[error("{}", t("ble.powod.inny", &[("szczegoly", .0)]))]
     Other(String),
     #[error(transparent)]
     Driver(#[from] DriverError),
@@ -519,7 +518,7 @@ async fn diagnose(
     });
     lines.push(String::new());
     let Some(address) = address else {
-        lines.push("Nie znaleziono bieżni - brak połączenia do zbadania.".into());
+        lines.push(t("dziennik.raport_brak_biezni", &[]));
         return Ok(());
     };
     lines.push(format!("== Połączenie z {address} =="));

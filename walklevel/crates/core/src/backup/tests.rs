@@ -337,7 +337,7 @@ fn read_rejects_foreign_and_broken_files() {
             ("../../windows/system32/x.dll", b"MZ"),
         ],
     );
-    assert!(message(read(&evil)).contains("nieznane"));
+    assert!(message(read(&evil)).contains("nie jest plik kopii"));
     let newer = w.root().join("nowszy.bieznia");
     write_zip(
         &newer,
@@ -358,7 +358,7 @@ fn read_rejects_foreign_and_broken_files() {
             ("osoby.json", b"{}"),
         ],
     );
-    assert_eq!(message(read(&foreign)), "To nie jest plik kopii Bieżni.");
+    assert_eq!(message(read(&foreign)), "To nie jest plik kopii WalkLevel.");
     let no_people = w.root().join("bez-osob.bieznia");
     write_zip(&no_people, &[("manifest.json", manifest(2).as_bytes())]);
     assert!(message(read(&no_people)).contains("uszkodzony"));
@@ -372,7 +372,7 @@ fn read_rejects_foreign_and_broken_files() {
         ],
     );
     assert!(message(read(&bad_session)).contains("uszkodzony"));
-    assert!(message(read(&w.root().join("nie-ma.bieznia"))).contains("nie istnieje"));
+    assert!(message(read(&w.root().join("nie-ma.bieznia"))).contains("Tego pliku nie ma"));
 }
 
 #[test]
@@ -730,7 +730,7 @@ fn unpacked_limit_is_shared_by_all_entries() {
     entry(&mut zip, "a", &mut budget).unwrap();
     assert!(matches!(
         entry(&mut zip, "b", &mut budget),
-        Err(BackupError::Invalid(m)) if m == DAMAGED
+        Err(BackupError::Invalid(m)) if m == crate::teksty::t("kopia.blad.uszkodzony", &[])
     ));
 }
 

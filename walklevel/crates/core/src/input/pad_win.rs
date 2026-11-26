@@ -250,7 +250,7 @@ impl WinmmSource {
         } else {
             let pname = wide_to_string(&caps.pname);
             if pname.trim().is_empty() {
-                format!("Pad {}", joy_id + 1)
+                crate::teksty::t("pad.nazwa.ogolna", &[("liczba", &(joy_id + 1).to_string())])
             } else {
                 pname.trim().to_string()
             }
@@ -572,7 +572,7 @@ pub fn discover() -> Vec<Box<dyn PadSource>> {
     for slot in 0..4 {
         let mut source = XInputSource {
             slot,
-            name: format!("Pad Xbox (XInput {})", slot + 1),
+            name: crate::teksty::t("pad.nazwa.xbox", &[("liczba", &(slot + 1).to_string())]),
         };
         if source.read().is_some() {
             found.push(Box::new(source));

@@ -61,31 +61,31 @@ static VERSION: LazyLock<Option<Regex>> =
 /// Błąd aktualizacji. `Display` to gotowy komunikat dla użytkownika (po polsku).
 #[derive(Debug, thiserror::Error)]
 pub enum UpdateError {
-    #[error("Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.adres", &[]))]
     UnexpectedUrl,
-    #[error("Wydanie na GitHubie nie ma poprawnego numeru wersji.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.numer", &[]))]
     InvalidVersion,
-    #[error("Wydanie nie ma sumy kontrolnej - nie instaluję.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.suma_brak", &[]))]
     MissingChecksum,
-    #[error("Wydanie nie zawiera instalatora.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.brak_instalatora", &[]))]
     MissingInstaller,
-    #[error("Na GitHubie nie ma jeszcze żadnego wydania.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.brak_wydan", &[]))]
     NoReleases,
-    #[error("GitHub odpowiedział błędem {0} - spróbuj później.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.kod", &[("kod", &.0.to_string())]))]
     HttpStatus(u16),
-    #[error("Nie udało się sprawdzić aktualizacji - sprawdź internet.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.internet", &[]))]
     Network,
-    #[error("Nieoczekiwana odpowiedź GitHuba.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.odpowiedz", &[]))]
     UnexpectedResponse,
-    #[error("Plik aktualizacji jest większy niż zapowiadany - przerwano.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.za_duzy", &[]))]
     TooLarge,
-    #[error("Suma kontrolna się nie zgadza - plik odrzucony.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.suma", &[]))]
     ChecksumMismatch,
-    #[error("Pobieranie przerwane - spróbuj ponownie.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.przerwane", &[]))]
     DownloadFailed,
-    #[error("Aktualizacja działa tylko na Windows.")]
+    #[error("{}", crate::teksty::t("aktualizacja.powod.system", &[]))]
     WindowsOnly,
-    #[error("Nie udało się uruchomić instalatora.")]
+    #[error("{}", crate::teksty::t("aktualizacja.instalator_blad", &[]))]
     Launch(#[source] io::Error),
 }
 
@@ -578,7 +578,7 @@ mod tests {
     #[test]
     fn suspicious_releases_are_rejected() {
         let cases = [
-            (serde_json::json!({"digest": null}), "sumy"),
+            (serde_json::json!({"digest": null}), "nie da się sprawdzić"),
             (
                 serde_json::json!({"browser_download_url": "https://zly-serwer.example/Bieznia-Setup-0.3.0.exe"}),
                 "adres",
@@ -633,7 +633,7 @@ mod tests {
     fn no_releases_yet_is_explained() {
         let fake = Fake::new(|_| Err(TransportError::Status(404)));
         let err = fetch_latest(&fake).unwrap_err();
-        assert!(err.to_string().contains("żadnego wydania"));
+        assert_eq!(err.to_string(), "Brak wersji do pobrania.");
     }
 
     #[test]
@@ -642,7 +642,7 @@ mod tests {
         let err = fetch_latest(&fake).unwrap_err();
         assert_eq!(
             err.to_string(),
-            "GitHub odpowiedział błędem 503 - spróbuj później."
+            "Serwer aktualizacji nie odpowiada poprawnie. Spróbuj później. (kod 503)"
         );
     }
 
@@ -697,7 +697,7 @@ mod tests {
             |_, _| {},
         )
         .unwrap_err();
-        assert!(err.to_string().contains("Suma"));
+        assert!(err.to_string().contains("Pobrany plik się nie zgadza"));
         assert_eq!(entries(dir.path()), 0);
     }
 
@@ -722,7 +722,7 @@ mod tests {
             |_, _| {},
         )
         .unwrap_err();
-        assert!(err.to_string().contains("większy"));
+        assert!(err.to_string().contains("Pobrany plik się nie zgadza"));
         assert_eq!(entries(dir.path()), 0);
     }
 
@@ -785,7 +785,10 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let err = run_installer(&dir.path().join("brak.exe")).unwrap_err();
         assert!(matches!(err, UpdateError::Launch(_)));
-        assert_eq!(err.to_string(), "Nie udało się uruchomić instalatora.");
+        assert_eq!(
+            err.to_string(),
+            "Nie udało się uruchomić instalatora. Pobierz go ze strony autora."
+        );
     }
 
     #[test]
@@ -830,9 +833,17 @@ mod tests {
                     assert!(expected.is_object(), "{name}: Python zwrócił błąd");
                     assert_eq!(serde_json::to_value(&r).unwrap(), *expected, "{name}");
                 }
-                Err(e) => assert_eq!(case["error"], e.to_string(), "{name}"),
+                Err(e) => assert_eq!(old_error(case), e.to_string(), "{name}"),
             }
         }
+    }
+
+    /// Błąd z fixtury 0.5.2 w brzmieniu 0.6.0 (docs/teksty.md, aktualizacja.*).
+    fn old_error(case: &Value) -> String {
+        crate::teksty::from_052(
+            case["error"].as_str().unwrap_or_default(),
+            &["aktualizacja."],
+        )
     }
 
     /// Odpowiedź klienta testowego wg opisu przypadku z fixtury (status / brak sieci / treść).
@@ -866,7 +877,7 @@ mod tests {
             });
             match fetch_latest(&fake_for(case, body)) {
                 Ok(r) => assert_eq!(case["version"], r.version, "{name}"),
-                Err(e) => assert_eq!(case["error"], e.to_string(), "{name}"),
+                Err(e) => assert_eq!(old_error(case), e.to_string(), "{name}"),
             }
         }
     }
@@ -902,7 +913,7 @@ mod tests {
                     assert_eq!(case["file"], path.file_name().unwrap().to_str().unwrap());
                     assert_eq!(fs::read(&path).unwrap(), payload, "{name}");
                 }
-                Err(e) => assert_eq!(case["error"], e.to_string(), "{name}"),
+                Err(e) => assert_eq!(old_error(case), e.to_string(), "{name}"),
             }
             let mut files: Vec<String> = fs::read_dir(dir.path())
                 .unwrap()

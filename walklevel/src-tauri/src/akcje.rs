@@ -22,7 +22,7 @@ const HYSTERESIS: f64 = 0.6;
 impl App {
     /// `settings_set` - walidacja jak `normalize()` i skutki uboczne (kontrakt 6.2).
     pub fn settings_set(&mut self, key: &str, value: Value) -> CmdResult<()> {
-        let bad = || CmdError::invalid("Nieprawidłowa wartość ustawienia.");
+        let bad = || CmdError::unexpected("Nieprawidłowa wartość ustawienia.");
         let file_key = match key {
             "beltControl" => "belt_control",
             "quickStop" => "quick_stop",
@@ -44,7 +44,7 @@ impl App {
             "walkSpeed" => "walk_speed",
             "runSpeed" => "run_speed",
             "padIdle" => "pad_idle",
-            _ => return Err(CmdError::invalid("Tego ustawienia nie da się zmienić.")),
+            _ => return Err(CmdError::unexpected("Tego ustawienia nie da się zmienić.")),
         };
         let allowed: Option<&[&str]> = match file_key {
             "theme" => Some(&["system", "light", "dark"]),
@@ -135,7 +135,7 @@ impl App {
                     run = run.max(walk + gap);
                 }
             }
-            _ => return Err(CmdError::invalid("Nieznany próg.")),
+            _ => return Err(CmdError::unexpected("Nieznany próg.")),
         }
         let (walk, run) = (round_tenth(walk), round_tenth(run));
         self.settings.insert("stand_below".into(), json!(walk));
@@ -155,8 +155,9 @@ impl App {
     }
 
     pub fn pad_steps_count(&mut self, count: usize) -> CmdResult<()> {
-        let steps = walklevel_core::mapping::pad_preset(count)
-            .ok_or_else(|| CmdError::invalid("Od 2 do 5 skoków."))?;
+        let steps = walklevel_core::mapping::pad_preset(count).ok_or_else(|| {
+            CmdError::invalid(crate::teksty::t("ustawienia.pad.blad.liczba", &[]))
+        })?;
         if count != self.pad_steps().len() {
             self.change("pad_steps", json!(steps));
             self.belt_target = None;
@@ -173,7 +174,10 @@ impl App {
     ) -> CmdResult<()> {
         let mut steps = self.pad_steps();
         let Some(step) = steps.get_mut(index) else {
-            return Err(CmdError::invalid("Nie ma takiego skoku."));
+            return Err(CmdError::invalid(crate::teksty::t(
+                "ustawienia.pad.blad.brak",
+                &[],
+            )));
         };
         if let Some(at) = at {
             step.0 = at;
@@ -183,9 +187,10 @@ impl App {
         }
         let candidate = json!(steps);
         if walklevel_core::mapping::parse_pad_steps(&candidate) != steps {
-            return Err(CmdError::invalid(
-                "Skoki: pierwszy od 0%, kolejne co najmniej 5 punktów dalej, najwyżej 100%, prędkość 0,5-12 km/h.",
-            ));
+            return Err(CmdError::invalid(crate::teksty::t(
+                "ustawienia.pad.blad.progi",
+                &[],
+            )));
         }
         self.change("pad_steps", candidate);
         if kmh.is_some() {
@@ -197,7 +202,10 @@ impl App {
 
     pub fn training_speed_set(&mut self, index: usize, kmh: f64) -> CmdResult<()> {
         if index > 3 || !(0.5..=20.0).contains(&kmh) {
-            return Err(CmdError::invalid("Prędkość poziomu: 0,5-20 km/h."));
+            return Err(CmdError::invalid(crate::teksty::t(
+                "ustawienia.trening.blad_predkosc",
+                &[],
+            )));
         }
         let mut levels = walklevel_core::mapping::parse_training_levels(
             self.settings.get("training_levels").unwrap_or(&Value::Null),
@@ -225,7 +233,7 @@ impl App {
         let Some(mut key) = input::key_from_code(&cap.code, &cap.key) else {
             return Err(CmdError::new(
                 ErrorCode::Key,
-                "Tego klawisza nie da się użyć - wybierz inny.",
+                crate::teksty::t("klawisz.blad.nieznany", &[]),
             ));
         };
         if role == "toggle" {
@@ -243,7 +251,7 @@ impl App {
             "walk" => walk = key.clone(),
             "run" => run = key.clone(),
             "toggle" => toggle = key.clone(),
-            _ => return Err(CmdError::invalid("Nieznany klawisz.")),
+            _ => return Err(CmdError::unexpected("Nieznany klawisz.")),
         }
         if let Some(problem) = input::problem(&walk, &run, &toggle) {
             self.hint_override = Some(problem.clone());
@@ -300,7 +308,14 @@ impl App {
         ) || (self.link == L::Searching && remembered)
         {
             self.bieznia.worker().disconnect();
-        } else if remembered && self.link == L::BluetoothOff {
+        } else if self.link == L::Searching {
+            // „Anuluj” przy skanowaniu: wynik skanu nie otworzy listy ani nie połączy
+            self.scan_cancelled = true;
+            self.auto_connect = false;
+            self.scanning = false;
+            self.bieznia.worker().disconnect();
+            self.mark(&[SliceName::Device]);
+        } else if remembered && matches!(self.link, L::BluetoothOff | L::Idle) {
             self.bieznia
                 .worker()
                 .connect(self.s("device_address"), self.s("device_name"));
@@ -323,7 +338,7 @@ impl App {
                 driver: p.driver.as_str().into(),
                 driver_name: match p.driver {
                     treadmill::DriverKind::KingSmith => "KingSmith".into(),
-                    treadmill::DriverKind::Ftms => "Bluetooth FTMS".into(),
+                    treadmill::DriverKind::Ftms => crate::teksty::t("modele.rodzaj.ftms", &[]),
                     treadmill::DriverKind::Simulator => "Symulator".into(),
                 },
                 r#match: p.match_prefixes.clone(),
@@ -435,7 +450,7 @@ impl App {
         let Some(h) = self.history.as_ref() else {
             return Err(CmdError::new(
                 ErrorCode::Unavailable,
-                "Historia kroków jest niedostępna.",
+                crate::teksty::t("historia.niedostepna", &[]),
             ));
         };
         let many = self.store.as_ref().is_some_and(|s| s.people().len() > 1);
@@ -447,7 +462,7 @@ impl App {
             "week" => HistoryRange::Week,
             "month" => HistoryRange::Month,
             "all" => HistoryRange::All,
-            _ => return Err(CmdError::invalid("Nieznany zakres.")),
+            _ => return Err(CmdError::unexpected("Nieznany zakres.")),
         };
         let now = now_unix();
         let since = range.since(now)?;
@@ -613,7 +628,7 @@ impl App {
         let gone = h.session(id)?;
         h.delete(id)?;
         log::info!("Usunięto sesję z historii");
-        self.toast("Sesja usunięta.");
+        self.toast(crate::teksty::t("sesja.usunieta", &[]));
         self.levels_key = None;
         self.mark(&[SliceName::History, SliceName::People]);
         Ok(gone
@@ -708,21 +723,19 @@ pub fn report(
     save_only: bool,
 ) -> CmdResult<String> {
     let trimmed = description.trim().to_string();
-    if !save_only && trimmed.chars().count() < walklevel_core::reports::REPORT_MIN_CHARS {
-        return Err(CmdError::invalid(crate::teksty::report_too_short(
-            trimmed.chars().count(),
-        )));
+    if !save_only && let Some(problem) = walklevel_core::reports::description_problem(&trimmed) {
+        return Err(CmdError::invalid(problem));
     }
     let (root, endpoint) = {
         let mut app = lock(&core.0.app);
         if app.report.busy {
             return Err(CmdError::new(
                 ErrorCode::Busy,
-                "Zgłoszenie już się przygotowuje.",
+                crate::teksty::t("zgloszenie.trwa", &[]),
             ));
         }
         app.report.busy = true;
-        app.report.status = "Przygotowuję paczkę z logami…".into();
+        app.report.status = crate::teksty::t("zgloszenie.przygotowuje", &[]);
         app.mark(&[SliceName::Report]);
         (
             app.paths.data.clone(),
@@ -734,7 +747,7 @@ pub fn report(
     };
     core.flush();
     let description = if trimmed.is_empty() {
-        "(bez opisu)".to_string()
+        crate::teksty::t("zgloszenie.bez_opisu", &[])
     } else {
         trimmed
     };
@@ -748,22 +761,49 @@ pub fn report(
     };
     let folders = walklevel_core::reports::ReportFolders::in_root(&root);
     let result = walklevel_core::reports::build_report(&folders, &info).and_then(|path| {
-        let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+        let name = path
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
         if save_only {
             let _ = walklevel_core::reports::show_in_folder(&path);
-            Ok((name.clone(), format!(
-                "Zapisano paczkę {name} (folder dane/zgloszenia otworzył się obok). Możesz ją wysłać e-mailem na {}.",
-                walklevel_core::reports::CONTACT
-            ), None))
+            Ok((
+                name.clone(),
+                crate::teksty::t(
+                    "zgloszenie.zapisano",
+                    &[
+                        ("plik", &name),
+                        ("email_autora", walklevel_core::reports::CONTACT),
+                    ],
+                ),
+                None,
+            ))
         } else if let Some(endpoint) = &endpoint {
-            let number = walklevel_core::reports::send_report(&path, endpoint, &description, &contact, Some(period_s), &version)?;
-            Ok((name, walklevel_core::reports::sent_message(&number), Some(number)))
+            let number = walklevel_core::reports::send_report(
+                &path,
+                endpoint,
+                &description,
+                &contact,
+                Some(period_s),
+                &version,
+            )?;
+            Ok((
+                name,
+                walklevel_core::reports::sent_message(&number),
+                Some(number),
+            ))
         } else {
-            crate::okna::shell_open(&walklevel_core::reports::mailto_link(&description, &name, &version));
+            crate::okna::shell_open(&walklevel_core::reports::mailto_link(
+                &description,
+                &name,
+                &version,
+            ));
             let _ = walklevel_core::reports::show_in_folder(&path);
-            Ok((name.clone(), format!(
-                "Gotowe: otworzył się e-mail do autora i folder z paczką {name}. Przeciągnij plik do wiadomości i wyślij."
-            ), None))
+            Ok((
+                name.clone(),
+                crate::teksty::t("zgloszenie.email_gotowy", &[("plik", &name)]),
+                None,
+            ))
         }
     });
     let mut app = lock(&core.0.app);
@@ -803,7 +843,7 @@ pub fn update_check(core: &Core, install: bool) -> CmdResult<()> {
         if install {
             return Err(CmdError::new(
                 ErrorCode::Unavailable,
-                "Aktualizacje działają tylko w wersji zainstalowanej.",
+                crate::teksty::t("glowny.pasek.aktualizuj_niedostepne", &[]),
             ));
         }
         return Ok(());
@@ -811,10 +851,13 @@ pub fn update_check(core: &Core, install: bool) -> CmdResult<()> {
     if install {
         let mut app = lock(&core.0.app);
         if app.update.busy {
-            return Err(CmdError::new(ErrorCode::Busy, "Aktualizacja już trwa."));
+            return Err(CmdError::new(
+                ErrorCode::Busy,
+                crate::teksty::t("aktualizacja.trwa", &[]),
+            ));
         }
         app.update.busy = true;
-        app.update.status = "Sprawdzam aktualizacje…".into();
+        app.update.status = crate::teksty::t("aktualizacja.sprawdzam", &[]);
         app.mark(&[SliceName::Update]);
     }
     core.flush();
@@ -824,7 +867,10 @@ pub fn update_check(core: &Core, install: bool) -> CmdResult<()> {
         if !updates::is_newer(&release.version, env!("CARGO_PKG_VERSION")) {
             if install {
                 set_update(core, |u| {
-                    u.status = format!("Masz najnowszą wersję ({}).", env!("CARGO_PKG_VERSION"))
+                    u.status = crate::teksty::t(
+                        "aktualizacja.najnowsza",
+                        &[("wersja", env!("CARGO_PKG_VERSION"))],
+                    )
                 });
             }
             return Ok(None);
@@ -841,7 +887,10 @@ pub fn update_check(core: &Core, install: bool) -> CmdResult<()> {
             {
                 last = percent;
                 set_update(core, |u| {
-                    u.status = format!("Pobieram {version}: {percent}%")
+                    u.status = crate::teksty::t(
+                        "aktualizacja.pobieram",
+                        &[("nowa_wersja", &version), ("procent", &percent.to_string())],
+                    )
                 });
             }
         })?;
@@ -849,15 +898,20 @@ pub fn update_check(core: &Core, install: bool) -> CmdResult<()> {
     })();
     match result {
         Ok(Some(installer)) => {
+            let version = lock(&core.0.app)
+                .update
+                .available
+                .clone()
+                .unwrap_or_default();
             set_update(core, |u| {
-                u.status = "Instaluję nową wersję - uruchomię się ponownie".into();
+                u.status = crate::teksty::t("aktualizacja.instaluje", &[("nowa_wersja", &version)]);
                 u.installing = true;
             });
             quit_prepare(core); // zatrzymanie taśmy i zapis stanu przed instalatorem
             if let Err(e) = updates::run_installer(&installer) {
                 log::error!("Instalator: {e}");
                 set_update(core, |u| {
-                    u.status = "Nie udało się uruchomić instalatora".into();
+                    u.status = crate::teksty::t("aktualizacja.instalator_blad", &[]);
                     u.installing = false;
                     u.busy = false;
                 });

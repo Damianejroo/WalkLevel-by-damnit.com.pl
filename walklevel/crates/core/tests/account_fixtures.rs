@@ -25,6 +25,11 @@ fn cases<'a>(data: &'a Value, key: &str) -> &'a Vec<Value> {
     data[key].as_array().expect("lista przypadków")
 }
 
+/// Tekst z fixtury 0.5.2 w brzmieniu 0.6.0 (docs/teksty.md).
+fn old(text: &str) -> String {
+    walklevel_core::teksty::from_052(text, &["konto.blad."])
+}
+
 #[test]
 fn field_checks_match_python() {
     let data = fixture();
@@ -39,7 +44,7 @@ fn field_checks_match_python() {
         for case in cases(&data, key) {
             assert_eq!(
                 check(s(&case["in"])),
-                s(&case["out"]),
+                old(s(&case["out"])),
                 "{key}: {:?}",
                 case["in"]
             );
@@ -64,7 +69,7 @@ fn base_url_rules_match_python() {
             Some(ok) => assert_eq!(got.ok().as_deref(), Some(s(ok)), "{:?}", case["url"]),
             None => assert_eq!(
                 got.err().map(|e| e.message),
-                Some(s(&case["error"]).to_string()),
+                Some(old(s(&case["error"]))),
                 "{:?}",
                 case["url"]
             ),
@@ -78,7 +83,13 @@ fn friendly_messages_and_field_errors_match_python() {
     for case in cases(&data, "friendly") {
         let status = case["status"].as_u64().expect("kod") as u16;
         let got = friendly(status, &case["body"], s(&case["path"]));
-        assert_eq!(got, s(&case["out"]), "{case}");
+        // 426 bez komunikatu serwera: w 0.6.0 tekst zastępczy konto.blad.aktualizacja
+        let want = if status == 426 && s(&case["out"]).contains("426") {
+            walklevel_core::teksty::t("konto.blad.aktualizacja", &[])
+        } else {
+            old(s(&case["out"]))
+        };
+        assert_eq!(got, want, "{case}");
     }
     for case in cases(&data, "fields") {
         let got = serde_json::to_value(field_errors(&case["body"])).expect("json");

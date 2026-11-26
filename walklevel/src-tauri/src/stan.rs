@@ -196,6 +196,8 @@ pub struct App {
     pub scanning: bool,
     pub scan_text: String,
     pub auto_connect: bool,
+    /// skan anulowany z karty stanu - jego wynik nie otwiera listy urządzeń
+    pub scan_cancelled: bool,
     pub diagnostics: Diagnostics,
     pub recorder: Option<crate::petla::Nagrywanie>,
 
@@ -890,135 +892,104 @@ impl App {
 
     pub fn link_status(&self) -> LinkStatus {
         let remembered = !self.s("device_address").is_empty();
-        let name = self.device_model_name();
+        let model = self.device_model_name();
         let hk = section(&self.config, "hotkeys");
         let key = |k: &str, d: &str| hk.get(k).and_then(Value::as_str).unwrap_or(d).to_string();
-        let st = |tone, busy, title: String, sub: String, action, label, primary| LinkStatus {
-            tone,
-            busy,
-            title,
-            sub,
-            action,
-            action_label: label,
-            primary,
+        let slower = key("sim_slower", "F6");
+        let faster = key("sim_faster", "F7");
+        let min_kmh = teksty::kmh(self.caps.speed_min);
+        let max_kmh = teksty::kmh(self.caps.speed_max);
+        let vars: [(&str, &str); 5] = [
+            ("model", &model),
+            ("klawisz_wolniej", &slower),
+            ("klawisz_szybciej", &faster),
+            ("min_kmh", &min_kmh),
+            ("max_kmh", &max_kmh),
+        ];
+        let st = |tone: &'static str, busy, state: &str, action: &'static str, primary| {
+            let (title, sub, action_label) = teksty::status_texts(state, &vars);
+            LinkStatus {
+                tone,
+                busy,
+                title,
+                sub,
+                action,
+                action_label,
+                primary,
+            }
         };
         if self.b("simulator") {
-            return st(
-                "accent",
-                false,
-                "Symulator bieżni".into(),
-                format!(
-                    "{} wolniej, {} szybciej",
-                    key("sim_slower", "F6"),
-                    key("sim_faster", "F7")
-                ),
-                "simulatorOff",
-                "Wyłącz symulator",
-                false,
-            );
+            return st("accent", false, "symulator", "simulatorOff", false);
         }
         match self.link {
-            Link::Streaming => {
-                let stale = !self.bridge.state().live;
-                st(
-                    if stale { "run" } else { "accent" },
-                    stale,
-                    format!("Połączono: {name}"),
-                    if stale {
-                        "Czekam na dane z bieżni".into()
-                    } else {
-                        self.link_text.clone()
-                    },
-                    "disconnect",
-                    "Rozłącz",
-                    false,
-                )
+            Link::Streaming if !self.bridge.state().live => {
+                st("run", true, "czekam", "disconnect", false)
             }
-            Link::Searching | Link::Connecting | Link::Connected => st(
-                "accent",
-                true,
-                self.link_text.clone(),
-                "Bieżnia włączona, telefon rozłączony".into(),
-                if remembered { "cancel" } else { "scan" },
-                if remembered {
-                    "Anuluj"
-                } else {
-                    "Szukaj bieżni"
-                },
-                false,
-            ),
-            Link::Retrying => st(
-                "run",
-                true,
-                "Ponawiam połączenie".into(),
-                self.link_text.clone(),
-                "disconnect",
-                "Rozłącz",
-                false,
-            ),
-            Link::BluetoothOff => st(
-                "danger",
-                false,
-                "Bluetooth wyłączony".into(),
-                "Włącz Bluetooth w Windows".into(),
-                "retry",
-                "Spróbuj ponownie",
-                true,
-            ),
-            Link::Unsupported => st(
-                "danger",
-                false,
-                "To urządzenie nie jest bieżnią".into(),
-                "Wybierz inne albo zapisz raport".into(),
-                "scan",
-                "Szukaj bieżni",
-                true,
-            ),
-            Link::Idle => st(
-                "muted",
-                false,
-                "Bieżnia nie połączona".into(),
-                "Włącz bieżnię i kliknij Szukaj bieżni".into(),
-                "scan",
-                "Szukaj bieżni",
-                true,
-            ),
+            Link::Streaming => st("accent", false, "polaczono", "disconnect", false),
+            // trwa raport diagnostyczny albo inny komunikat pracownika - tytuł z jego tekstu
+            Link::Searching
+                if self.link_text == walklevel_core::treadmill::worker::report_busy() =>
+            {
+                LinkStatus {
+                    title: self.link_text.clone(),
+                    ..st("accent", true, "szukanie", "cancel", false)
+                }
+            }
+            Link::Searching if remembered => st("accent", true, "szukanie", "cancel", false),
+            Link::Searching => st("accent", true, "skanowanie", "cancel", false),
+            Link::Connecting | Link::Connected => st("accent", true, "laczenie", "cancel", false),
+            // podtytuł: powód z pracownika (ble.powod.*)
+            Link::Retrying => LinkStatus {
+                sub: self.link_text.clone(),
+                ..st("run", true, "ponawiam", "disconnect", false)
+            },
+            Link::BluetoothOff => st("danger", false, "bt_wylaczony", "retry", true),
+            Link::Unsupported => st("danger", false, "nieobslugiwane", "scan", true),
+            Link::Idle if remembered => st("muted", false, "rozlaczona", "retry", true),
+            Link::Idle => st("muted", false, "brak", "scan", true),
         }
     }
 
     fn device_label(&self) -> String {
         let caps = &self.caps;
-        let speeds = format!(
-            "{}-{} km/h",
-            teksty::num(caps.speed_min),
-            teksty::num(caps.speed_max)
-        );
+        let min_kmh = teksty::kmh(caps.speed_min);
+        let max_kmh = teksty::kmh(caps.speed_max);
+        let speeds = [("min_kmh", min_kmh.as_str()), ("max_kmh", max_kmh.as_str())];
         if self.b("simulator") {
-            return format!("Symulator bieżni · {speeds}");
+            return teksty::t("ustawienia.bieznia.symulator_opis", &speeds);
         }
         let name = self.s("device_name");
         if self.s("device_address").is_empty() {
-            return "Brak zapamiętanej bieżni".into();
+            return teksty::t("ustawienia.bieznia.brak", &[]);
         }
         let model = match &self.device {
             Some(d) => d.model.clone(),
             None => walklevel_core::treadmill::model_name(&self.registry, &name),
         };
-        let first = if model == name {
-            model
-        } else {
-            format!("{model} ({name})")
-        };
-        let mut details = vec![speeds];
-        if caps.start_delay_s >= 1.0 {
-            details.push(format!("rozruch ok. {:.0} s", caps.start_delay_s));
-        }
-        if let Some(d) = &self.device
-            && !d.firmware.is_empty()
-        {
-            details.push(format!("firmware {}", d.firmware));
-        }
-        format!("{first}\n{}", details.join(" · "))
+        let model = if model.is_empty() { name } else { model };
+        // druga linia: „Taśma 1,0–6,0 km/h · start ok. 3 s · oprogramowanie 1.2”, części tylko gdy są
+        let full = teksty::t("ustawienia.bieznia.opis", &[]);
+        let second = full.split_once('\n').map_or("", |(_, b)| b);
+        let firmware = self
+            .device
+            .as_ref()
+            .map(|d| d.firmware.clone())
+            .unwrap_or_default();
+        let seconds = format!("{:.0}", caps.start_delay_s);
+        let parts: Vec<String> = second
+            .split(" · ")
+            .filter(|p| {
+                (!p.contains("{sekundy}") || caps.start_delay_s >= 1.0)
+                    && (!p.contains("{wersja_bt}") || !firmware.is_empty())
+            })
+            .map(|p| {
+                p.replace("{min_kmh}", &min_kmh)
+                    .replace("{max_kmh}", &max_kmh)
+                    .replace("{sekundy}", &seconds)
+                    .replace("{wersja_bt}", &firmware)
+            })
+            .collect();
+        format!("{model}\n{}", parts.join(" · "))
     }
 
     pub fn device_view(&self) -> DeviceView {
@@ -1084,6 +1055,8 @@ impl App {
                 &self.s("output"),
                 &self.walk_key.name,
                 &self.run_key.name,
+                &key("sim_slower", "F6"),
+                &key("sim_faster", "F7"),
             )
         });
         ControlView {
@@ -1251,7 +1224,15 @@ impl App {
         }
         let periods: Vec<Value> = walklevel_core::reports::PERIODS
             .iter()
-            .map(|(s, l)| json!({"seconds": s, "label": l}))
+            .map(|(s, _)| {
+                let key = match s {
+                    3600 => "zgloszenie.okres.1h",
+                    21600 => "zgloszenie.okres.6h",
+                    86400 => "zgloszenie.okres.24h",
+                    _ => "zgloszenie.okres.7d",
+                };
+                json!({"seconds": s, "label": teksty::t(key, &[])})
+            })
             .collect();
         let defs = self.defs;
         let streak_km = defs

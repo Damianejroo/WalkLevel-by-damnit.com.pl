@@ -98,12 +98,15 @@ impl App {
         let a = &p.achievement;
         let xp = self.defs.rarity_xp.get(&a.rarity).copied().unwrap_or(0) as f64;
         PopupData {
-            kicker: format!(
-                "OSIĄGNIĘCIE · {}",
-                teksty::rarity_name(&a.rarity).to_uppercase()
+            kicker: teksty::t(
+                "powiadomienie.osiagniecie.nad",
+                &[("rzadkosc", &teksty::rarity_name(&a.rarity).to_uppercase())],
             ),
             title: a.name.clone(),
-            line: format!("+{} XP  ·  {}", teksty::int(xp), a.condition),
+            line: teksty::t(
+                "powiadomienie.osiagniecie.linia",
+                &[("xp", &teksty::int(xp)), ("warunek", &a.condition)],
+            ),
             color: teksty::rarity_color(&a.rarity).into(),
             rarity: a.rarity.clone(),
             mark: a.mark.clone(),
@@ -115,18 +118,23 @@ impl App {
     fn level_popup(&self, status: &Status) -> PopupData {
         let new_rank = status.rank.level == status.level;
         let next = teksty::km(status.km_to_next_level);
+        let level = status.level.to_string();
+        let vars = [("poziom", level.as_str()), ("km", next.as_str())];
         PopupData {
-            kicker: format!("AWANS · POZIOM {}", status.level),
+            kicker: teksty::t("powiadomienie.awans.nad", &vars),
             title: if new_rank {
                 status.rank.name.clone()
             } else {
-                format!("Poziom {}", status.level)
+                teksty::t("powiadomienie.awans.tytul", &vars)
             },
-            line: if new_rank {
-                format!("Nowa ranga · następny poziom za {next} km")
-            } else {
-                format!("Następny poziom za {next} km")
-            },
+            line: teksty::t(
+                if new_rank {
+                    "powiadomienie.awans.ranga_linia"
+                } else {
+                    "powiadomienie.awans.linia"
+                },
+                &vars,
+            ),
             color: self.accent(),
             rarity: teksty::rank_rarity(status.level).into(),
             mark: String::new(),
@@ -144,9 +152,12 @@ impl App {
             .collect();
         if !queue.grouped.is_empty() {
             items.push(PopupData {
-                kicker: "OSIĄGNIĘCIA".into(),
-                title: format!("+{} kolejnych", queue.grouped.len()),
-                line: "Wszystkie na liście osiągnięć".into(),
+                kicker: teksty::t("powiadomienie.wiele.nad", &[]),
+                title: teksty::t(
+                    "powiadomienie.wiele.tytul",
+                    &[("liczba", &queue.grouped.len().to_string())],
+                ),
+                line: teksty::t("powiadomienie.wiele.linia", &[]),
                 color: self.accent(),
                 rarity: "rzadkie".into(),
                 mark: "korona".into(),
@@ -170,12 +181,19 @@ impl App {
     }
 
     fn show_history_summary(&mut self, status: &Status) {
-        let n = status.earned().len();
-        let word = teksty::plural(n, "osiągnięcie", "osiągnięcia", "osiągnięć");
+        let n = status.earned().len().to_string();
+        let level = status.level.to_string();
+        let km = teksty::km(status.km);
+        let vars = [
+            ("liczba", n.as_str()),
+            ("poziom", level.as_str()),
+            ("ranga", status.rank.name.as_str()),
+            ("km", km.as_str()),
+        ];
         self.popups.push(PopupData {
-            kicker: "Z TWOJEJ HISTORII".into(),
-            title: format!("Poziom {} · {}", status.level, status.rank.name),
-            line: format!("{n} {word} · {} km przebyte", teksty::km(status.km)),
+            kicker: teksty::t("powiadomienie.historia.nad", &vars),
+            title: teksty::t("powiadomienie.historia.tytul", &vars),
+            line: teksty::t("powiadomienie.historia.linia", &vars),
             color: self.accent(),
             rarity: teksty::rank_rarity(status.level).into(),
             mark: String::new(),
