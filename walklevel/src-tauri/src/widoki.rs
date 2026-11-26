@@ -633,109 +633,10 @@ pub struct AccountView {
     pub pending_uploads: u32,
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PeriodTotals {
-    pub steps: i64,
-    pub distance_km: f64,
-    pub active_s: f64,
-    pub sessions: Option<i64>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct GameTotals {
-    pub game: String,
-    pub game_id: Option<String>,
-    pub steps: i64,
-    pub distance_km: f64,
-    pub active_s: f64,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OnlineStats {
-    #[serde(flatten)]
-    pub totals: PeriodTotals,
-    pub games: Option<Vec<GameTotals>>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct LiveState {
-    pub kmh: f64,
-    pub steps: i64,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Friend {
-    pub id: String,
-    pub name: String,
-    pub level: Option<u32>,
-    pub live: Option<LiveState>,
-    pub week: PeriodTotals,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct InvitationPerson {
-    pub id: String,
-    pub name: String,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Invitation {
-    pub id: String,
-    pub person: InvitationPerson,
-    pub created_at: Option<f64>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Invitations {
-    pub incoming: Vec<Invitation>,
-    pub sent: Vec<Invitation>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RankingRow {
-    pub place: u32,
-    pub id: String,
-    pub name: String,
-    pub me: bool,
-    pub level: Option<u32>,
-    pub steps: i64,
-    pub distance_km: f64,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Ranking {
-    pub scope: String,
-    pub rows: Vec<RankingRow>,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PeopleItem {
-    pub id: String,
-    pub name: String,
-    pub level: Option<u32>,
-    pub week_steps: i64,
-    pub place: Option<u32>,
-    pub friend: bool,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PeoplePage {
-    pub page: u32,
-    pub has_next: bool,
-    pub people: Vec<PeopleItem>,
-}
+// dane online z serwera - typy i ich odczyt w rdzeniu
+pub use walklevel_core::account::online::{
+    Friend, Invitations, OnlinePerson, OnlineStats, PeoplePage, Ranking, RegistrationCode,
+};
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -751,39 +652,6 @@ impl Default for PeopleQuery {
             page: 1,
         }
     }
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct EarnedOnline {
-    pub id: String,
-    pub earned_at: f64,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OnlinePerson {
-    pub id: String,
-    pub name: String,
-    pub me: bool,
-    pub level: Option<u32>,
-    pub xp: Option<i64>,
-    pub achievements_count: Option<u32>,
-    pub achievements: Option<Vec<EarnedOnline>>,
-    pub since: Option<f64>,
-    pub treadmill_model: Option<String>,
-    pub friend: bool,
-    pub week: Option<PeriodTotals>,
-    pub total: Option<PeriodTotals>,
-    pub games: Option<Vec<GameTotals>>,
-    pub games_hidden: bool,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RegistrationCode {
-    pub code: String,
-    pub valid_until: Option<f64>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

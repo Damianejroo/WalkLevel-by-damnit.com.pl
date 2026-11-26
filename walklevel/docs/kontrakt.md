@@ -1153,6 +1153,8 @@ pub struct AccountView {
     pub busy: Vec<String>, pub message: String, pub verify_polling: bool, pub pending_uploads: u32,
 }
 
+// Dane online (PeriodTotals ... RegistrationCode) i ich odczyt z odpowiedzi serwera:
+// walklevel_core::account::online (rdzeń), src-tauri tylko je przekazuje.
 #[derive(Debug, Clone, Default, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct PeriodTotals { pub steps: i64, pub distance_km: f64, pub active_s: f64, pub sessions: Option<i64> }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
@@ -1590,7 +1592,9 @@ Trzy wejścia Vite (`build.rollupOptions.input`): `index.html` (okno główne), 
 
 Odpowiednik `bieznia/gui/popupy.py`. Jedno okno na stos do 3 popupów.
 
-- Tworzone przez rdzeń przy starcie (`WebviewWindowBuilder::new(app, "popup", WebviewUrl::App("popup.html".into()))`):
+- Tworzone przez rdzeń dopiero przy pierwszym powiadomieniu (każde okno to osobny proces
+  WebView2; potem zostaje ukryte do następnego) - strona pobiera stan przez `popup_ready`, więc
+  zdarzenia sprzed jej załadowania nie giną (`WebviewWindowBuilder::new(app, "popup", WebviewUrl::App("popup.html".into()))`):
   `transparent(true)`, `decorations(false)`, `shadow(false)`, `always_on_top(true)`,
   `skip_taskbar(true)`, `resizable(false)`, `focused(false)`, `visible(false)`.
 - Po utworzeniu: `set_ignore_cursor_events(true)` (klik przechodzi do gry) i przez `hwnd()`
@@ -1619,7 +1623,8 @@ Odpowiednik `FloatingToggle`.
 - 56 × 56 px logicznych, `transparent`, bez ramki i cienia, `always_on_top`, `skip_taskbar`,
   `focused(false)` + `WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW` przez `hwnd()` (klik nie zabiera
   fokusu grze), **bez** `ignore_cursor_events` (ma być klikalny).
-- Pokazywany, gdy `settings.floatingButton` (`WindowRequest::BubbleVisible`), w miejscu
+- Okno istnieje tylko, gdy `settings.floatingButton` (`WindowRequest::BubbleVisible`): włączenie
+  je tworzy (stan startowy z `app_snapshot`), wyłączenie zamyka. Pokazywany w miejscu
   `floating_pos` (jeśli punkt + 28 px jest na którymś ekranie), inaczej przy prawej krawędzi
   ekranu głównego, w połowie wysokości, 24 px od brzegu.
 - Rysowanie (SVG w `przycisk.svelte`): koło; włączone - wypełnienie akcentem (bieg: kolor biegu),

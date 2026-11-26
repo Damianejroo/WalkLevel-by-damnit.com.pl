@@ -1170,6 +1170,10 @@ fn each_person_has_own_account_and_vault_entry() {
     assert_ne!(vault_get(&vault, "p1"), vault_get(&vault, "p2")); // osobne tokeny
     let uid = accs.get("p2").state.user_id.clone();
     assert_eq!(accs.person_of(&uid), "p2");
+    // to samo konto dla innej osoby - zajęte przez p2; dla p2 i obcego konta - wolne
+    assert_eq!(accs.taken_by(&uid, "p1").as_deref(), Some("p2"));
+    assert_eq!(accs.taken_by(&uid, "p2"), None);
+    assert_eq!(accs.taken_by("obcy", "p1"), None);
     assert_eq!(account::load_states(&path).len(), 2);
     // po restarcie - te same sejfy
     let shared = vault.clone();

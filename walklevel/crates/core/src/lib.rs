@@ -6,6 +6,7 @@
 //! poświadczeń ("Bieznia/konto"), te same definicje poziomów (poziomy/definicje.json).
 
 pub mod model;
+pub(crate) mod py; // odpowiedniki funkcji Pythona (wyniki bit w bit jak w 0.5.x)
 
 pub mod paths; // foldery danych i zasobów (exe / kod / testy)
 pub mod config; // config.toml (adresy serwera, zgłoszeń)

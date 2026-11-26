@@ -308,7 +308,7 @@ pub fn decode_firmware(raw: &[u8]) -> String {
         })
         .collect();
     text.trim_matches(['\0', ' '])
-        .trim_matches(super::kontrakt::py_is_space)
+        .trim_matches(crate::py::is_space)
         .to_string()
 }
 
@@ -419,7 +419,7 @@ impl Telemetry {
     /// Prędkość, którą bieżnia naprawdę pojedzie (zakres zgłoszony przez bieżnię).
     pub fn reachable_speed(&self, kmh: f64) -> f64 {
         let caps = &self.capabilities;
-        super::kontrakt::py_round1(caps.speed_max.min(caps.speed_min.max(kmh)))
+        crate::py::round_tenth(caps.speed_max.min(caps.speed_min.max(kmh)))
     }
 }
 

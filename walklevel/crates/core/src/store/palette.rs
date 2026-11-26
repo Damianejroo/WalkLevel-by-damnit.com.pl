@@ -18,15 +18,6 @@ pub struct Color {
 }
 
 impl Color {
-    /// Odcień pod motyw ("dark" albo inny = jasny) - do tekstu i akcentów.
-    pub fn for_theme(&self, theme_name: &str) -> &'static str {
-        if theme_name == "dark" {
-            self.dark
-        } else {
-            self.light
-        }
-    }
-
     /// Żywy kolor do kółek palety, awatarów i wykresów - taki sam w obu motywach.
     pub fn swatch(&self) -> &'static str {
         self.dark
@@ -84,6 +75,11 @@ pub fn default_color() -> &'static Color {
 /// Kolor biegu, gdy kolor profilu jest blisko bursztynu biegu (Malina).
 pub fn run_alt() -> &'static Color {
     &COLORS[RUN_ALT_INDEX]
+}
+
+/// Kolor kolejnej osoby, gdy jest ich już `count` (po kolei z palety, w kółko).
+pub fn next_for(count: usize) -> &'static Color {
+    &COLORS[count % COLORS.len()]
 }
 
 /// Kolor po nazwie; nieznana nazwa albo brak - Mięta.

@@ -24,6 +24,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde::Serialize;
 use serde_json::{Map, Value};
 
+use crate::py::truthy;
+
 /// Słownik ustawień (klucz -> dowolna wartość JSON), jak `dict[str, Any]` w Pythonie.
 pub type Settings = Map<String, Value>;
 
@@ -932,18 +934,6 @@ fn backup_corrupted(path: &Path, reason: &str) {
 
 fn clone_kv((k, v): (&String, &Value)) -> (String, Value) {
     (k.clone(), v.clone())
-}
-
-/// Prawdziwość wartości jak `bool(x)` w Pythonie.
-pub(crate) fn truthy(v: &Value) -> bool {
-    match v {
-        Value::Null => false,
-        Value::Bool(b) => *b,
-        Value::Number(n) => n.as_f64().is_some_and(|f| f != 0.0),
-        Value::String(s) => !s.is_empty(),
-        Value::Array(a) => !a.is_empty(),
-        Value::Object(o) => !o.is_empty(),
-    }
 }
 
 /// Tekst wartości jak `str(x)` w Pythonie (dla tekstu, liczb i prawda/fałsz).

@@ -37,7 +37,6 @@ pub const DELETED_PERSON: &str = "Usunięte osoby";
 /// 3: wysłane i ukryte online; 4: tryb, osiągnięcia, poziom; 5: odrzucone.
 pub const SCHEMA_VERSION: i64 = 5;
 pub const VISIBILITY: [&str; 3] = ["prywatna", "znajomi", "publiczna"];
-pub const SOURCES: [&str; 2] = ["bieznia", "symulator"];
 
 /// Kolumny tabeli `sesje` w kolejności pól [`Session`]. Wersja z 0.3.x miała pierwsze
 /// dziesięć, a czasy nazywały się start / koniec.

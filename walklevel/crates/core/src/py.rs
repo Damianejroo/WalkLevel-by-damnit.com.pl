@@ -38,6 +38,42 @@ pub(crate) fn py_float(v: &Value) -> Option<f64> {
     }
 }
 
+/// `bool(v)` z Pythona dla wartości z JSON.
+pub(crate) fn truthy(v: &Value) -> bool {
+    match v {
+        Value::Null => false,
+        Value::Bool(b) => *b,
+        Value::Number(n) => n.as_f64().is_some_and(|f| f != 0.0),
+        Value::String(s) => !s.is_empty(),
+        Value::Array(a) => !a.is_empty(),
+        Value::Object(o) => !o.is_empty(),
+    }
+}
+
+/// Biały znak jak `str.isspace()` w Pythonie: białe znaki Unicode oraz separatory
+/// U+001C..U+001F (Python liczy je jako białe, Rust nie).
+pub(crate) fn is_space(c: char) -> bool {
+    c.is_whitespace() || ('\u{1c}'..='\u{1f}').contains(&c)
+}
+
+/// `str.strip()` z Pythona.
+pub(crate) fn strip(text: &str) -> &str {
+    text.trim_matches(is_space)
+}
+
+/// `urllib.parse.quote(text, safe="")` z Pythona (fragment ścieżki, temat e-maila).
+pub(crate) fn quote(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for &b in text.as_bytes() {
+        if b.is_ascii_alphanumeric() || matches!(b, b'_' | b'.' | b'-' | b'~') {
+            out.push(char::from(b));
+        } else {
+            out.push_str(&format!("%{b:02X}"));
+        }
+    }
+    out
+}
+
 /// `int(v)` z Pythona dla wartości z JSON (ułamek obcinany do zera); `None` = błąd.
 pub(crate) fn py_int(v: &Value) -> Option<i64> {
     match v {
@@ -65,6 +101,7 @@ mod tests {
         assert_eq!(round_tenth(0.25), 0.2);
         assert_eq!(round_tenth(0.35), 0.3);
         assert_eq!(round_tenth(2.45), 2.5);
+        assert_eq!(round_tenth(1.05), 1.1);
         assert_eq!(round_tenth(1.04), 1.0);
         assert_eq!(round_tenth(-0.05), -0.1);
         assert!(round_tenth(f64::INFINITY).is_infinite());

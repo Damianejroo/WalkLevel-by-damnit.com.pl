@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 
 use serde::{Deserialize, Serialize};
 
-use super::py::fsum;
+use crate::py::fsum;
 
 /// Poniżej tej prędkości taśma stoi - postać nigdy nie rusza (nawet przy progu chodu 0).
 pub const STOPPED_KMH: f64 = 0.05;

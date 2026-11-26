@@ -396,11 +396,6 @@ impl Meter {
         self.distance.total()
     }
 
-    /// Czas ostatniej ramki z danymi (zegar ramek).
-    pub fn last_data_at(&self) -> Option<f64> {
-        self.last_data
-    }
-
     /// Nowa sesja: kadencja liczy się od nowa.
     pub fn clear_cadence(&mut self) {
         self.cadence.clear();

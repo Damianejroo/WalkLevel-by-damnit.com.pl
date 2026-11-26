@@ -16,6 +16,7 @@
 //! moduł nie uruchamia własnych wątków.
 
 pub mod api;
+pub mod online;
 pub mod state;
 pub mod sync;
 pub mod upload;
@@ -30,6 +31,7 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::history::{History, HistoryError};
+use crate::py::truthy;
 use crate::teksty::t;
 
 pub use api::{
@@ -38,7 +40,7 @@ pub use api::{
     friendly,
 };
 pub use state::{AccountState, STATE_FILE, load_state, load_states, save_state, save_states};
-pub use sync::{AccountTimers, Every, SyncReport, SyncTarget};
+pub use sync::{AccountTimers, Every, LiveUpdate, SyncReport, SyncTarget, live_update};
 pub use upload::{DELETED_ELSEWHERE, UploadSession, session_payload};
 pub use vault::{MemoryStore, TARGET, TokenStore, default_store, vault_target};
 
@@ -508,15 +510,15 @@ impl Account {
         {
             s.games_visibility = v.to_string();
         }
-        if let Some(v) = profile.get("regulamin_aktualny").filter(|v| api::truthy(v)) {
+        if let Some(v) = profile.get("regulamin_aktualny").filter(|v| truthy(v)) {
             s.terms_current = value_text(v);
         }
-        if let Some(v) = profile.get("regulamin").filter(|v| api::truthy(v)) {
+        if let Some(v) = profile.get("regulamin").filter(|v| truthy(v)) {
             s.terms = value_text(v);
         }
         if let Some(v) = profile.get("verified") {
             // po kliknięciu linku z maila
-            s.verified = api::truthy(v);
+            s.verified = truthy(v);
         }
     }
 
@@ -526,7 +528,7 @@ impl Account {
         let result = self.client.my_profile();
         let profile = self.handle(result)?;
         if let Some(v) = profile.get("verified") {
-            self.state.verified = api::truthy(v);
+            self.state.verified = truthy(v);
             self.save()?;
         }
         Ok(self.state.verified)
@@ -888,16 +890,20 @@ impl Accounts {
         self.items.iter().filter(|a| a.state.logged_in())
     }
 
-    pub fn logged_in_mut(&mut self) -> impl Iterator<Item = &mut Account> {
-        self.items.iter_mut().filter(|a| a.state.logged_in())
-    }
-
     /// Osoba, do której przypięte jest konto użytkownika ("" - żadna).
     pub fn person_of(&self, user_id: &str) -> String {
         self.logged_in()
             .find(|a| a.state.user_id == user_id)
             .map(|a| a.state.person.clone())
             .unwrap_or_default()
+    }
+
+    /// Inna osoba niż `person`, do której jest już przypięte konto `user_id` (jedno konto,
+    /// jedna osoba) - logowanie dla `person` trzeba wtedy odrzucić.
+    pub fn taken_by(&self, user_id: &str, person: &str) -> Option<String> {
+        self.logged_in()
+            .find(|a| a.state.user_id == user_id && a.state.person != person)
+            .map(|a| a.state.person.clone())
     }
 
     /// Osoba usunięta z aplikacji - jej konto zostaje na serwerze, tu wylogowane.

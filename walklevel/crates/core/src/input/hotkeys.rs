@@ -173,9 +173,6 @@ pub struct HotkeyWatcher {
 }
 
 impl HotkeyWatcher {
-    /// Domyślny odstęp odpytywania (jak klatka okna).
-    pub const EVERY: Duration = Duration::from_millis(20);
-
     pub fn spawn<K, F>(
         mut hotkeys: Hotkeys<K>,
         every: Duration,

@@ -10,14 +10,13 @@
 //! Naciskanie klawiszy (SendInput) realizuje moduł `input` przez trait [`Output`].
 
 mod engine;
-mod py;
 mod speed;
 mod steering;
 
 pub use engine::{
     Bridge, DryOutput, HISTORY_LEN, HISTORY_S, Output, OutputKind, Reading, Snapshot,
 };
-pub use py::round_tenth;
+pub use crate::py::round_tenth;
 pub use speed::{Control, MappingConfig, MappingError, STOPPED_KMH, SpeedMapper};
 pub use steering::{
     BeltCommand, BeltSteering, Direction, Frame, FrameInput, Held, PAD_SETTLE_S, PAD_STOP_SETTLE_S,

@@ -374,8 +374,8 @@ fn mailto_matches_python() {
             link,
             format!(
                 "mailto:{CONTACT}?subject={}&body={}",
-                percent_encode(&subject),
-                percent_encode(&body)
+                quote(&subject),
+                quote(&body)
             )
         );
     }
@@ -947,8 +947,8 @@ fn short_description_messages() {
 
 #[test]
 fn python_rounding_and_float_repr() {
-    assert_eq!(round1(5580.0 / 3600.0), 1.6);
-    assert_eq!(round1(0.25), 0.2);
+    assert_eq!(round_tenth(5580.0 / 3600.0), 1.6);
+    assert_eq!(round_tenth(0.25), 0.2);
     assert_eq!(py_float(3.0), "3.0");
     assert_eq!(py_float(2.5), "2.5");
     let hours = |p: f64| form_fields("x", "", Some(p), "v").pop().map(|f| f.1);

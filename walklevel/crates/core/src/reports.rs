@@ -23,10 +23,9 @@ use regex::Regex;
 use serde::Serialize;
 use serde_json::Value;
 
+use crate::py::{quote, round_tenth, strip as py_strip};
 use crate::teksty::t;
 
-/// Nazwa aplikacji w temacie e-maila.
-pub const APP_NAME: &str = "WalkLevel";
 /// Adres kontaktowy autora (e-mail zamiast wysyłki).
 pub const CONTACT: &str = "kontakt@damnit.com.pl";
 /// Z każdego pliku logu bierzemy tylko koniec (bajty).
@@ -284,15 +283,6 @@ pub fn tail_since(path: &Path, since: f64, limit: u64) -> io::Result<Vec<u8>> {
     } else {
         Vec::new()
     })
-}
-
-/// Białe znaki jak `str.isspace()` w Pythonie.
-fn py_space(c: char) -> bool {
-    c.is_whitespace() || ('\u{1c}'..='\u{1f}').contains(&c)
-}
-
-fn py_strip(text: &str) -> &str {
-    text.trim_matches(py_space)
 }
 
 /// Podział na linie jak `str.splitlines()` w Pythonie.
@@ -566,12 +556,8 @@ pub fn scrub(data: &[u8], keep_mac: &str, home: &str) -> Vec<u8> {
 
 // --- paczka ZIP -------------------------------------------------------------------------
 
-/// Zaokrąglenie do 1 miejsca jak `round(x, 1)` w Pythonie.
-fn round1(value: f64) -> f64 {
-    format!("{value:.1}").parse().unwrap_or(value)
-}
-
-fn zip_time() -> zip::DateTime {
+/// Czas pliku w archiwum (lokalny, jak zipfile w Pythonie) - paczka zgłoszenia i kopia danych.
+pub(crate) fn zip_time() -> zip::DateTime {
     let now = Local::now();
     let year = u16::try_from(now.year()).unwrap_or(1980);
     zip::DateTime::from_date_and_time(
@@ -619,7 +605,7 @@ fn build_report_at(
         wersja: &info.version,
         windows: &info.system,
         czas: stamp.format("%Y-%m-%dT%H:%M:%S").to_string(),
-        okres_logow_h: round1(info.period_s / 3600.0),
+        okres_logow_h: round_tenth(info.period_s / 3600.0),
     };
     let info_json = serde_json::to_string_pretty(&json).map_err(io::Error::other)?;
     let keep = device_address(&folders.settings());
@@ -817,19 +803,6 @@ pub fn send_report(
 
 // --- e-mail i folder ----------------------------------------------------------------------
 
-/// Kodowanie jak `urllib.parse.quote(text, safe="")`.
-fn percent_encode(text: &str) -> String {
-    let mut out = String::with_capacity(text.len());
-    for &b in text.as_bytes() {
-        if b.is_ascii_alphanumeric() || matches!(b, b'_' | b'.' | b'-' | b'~') {
-            out.push(char::from(b));
-        } else {
-            out.push_str(&format!("%{b:02X}"));
-        }
-    }
-    out
-}
-
 /// Link `mailto:` do autora z tematem i treścią (opis + nazwa paczki do dołączenia).
 /// Otwiera go aplikacja (np. opener w Tauri).
 pub fn mailto_link(description: &str, report_name: &str, version: &str) -> String {
@@ -840,8 +813,8 @@ pub fn mailto_link(description: &str, report_name: &str, version: &str) -> Strin
     ) + "\n";
     format!(
         "mailto:{CONTACT}?subject={}&body={}",
-        percent_encode(&subject),
-        percent_encode(&body)
+        quote(&subject),
+        quote(&body)
     )
 }
 
