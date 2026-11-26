@@ -53,6 +53,12 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   pusto: { konto: false, historia: false, bieznia: 'brak' },
   pierwsze: { pierwsze: true, konto: false, historia: false, bieznia: 'brak' },
   dlugie: { dlugie: true, tryb: 'training', wlaczone: true },
+  // Ustawienia ze wszystkimi kategoriami otwartymi (src/ekrany/Ustawienia.svelte: stan=ustawienia*)
+  ustawienia: {},
+  'ustawienia-chodzenie': { tryb: 'treadmill' },
+  'ustawienia-trening': { tryb: 'training' },
+  'ustawienia-wylogowany': { konto: false, bieznia: 'brak' },
+  'ustawienia-dlugie': { dlugie: true, tryb: 'gamepad' },
 };
 
 function czytajScenariusz(): Scenariusz {
@@ -517,6 +523,8 @@ export function utworzAtrape(): Silnik {
     firstRun: sc.pierwsze, legacy02: false, updatedFrom: null, latestBackup: null,
     accountsEnabled: true, reportEndpoint: true, windowFocused: true,
   };
+  // najdłuższy wariant Ustawień > Dane i kopia: z przyciskiem „Przywróć dane sprzed…”
+  if (dlugie) app.latestBackup = 'przed-importem-20261126-120000';
   const update: K.UpdateView = { available: dlugie ? '0.6.1' : null, busy: false, status: '', installing: false };
   const report: K.ReportView = { busy: false, status: '', lastFile: null, sentNumber: null };
   const model1 = (id: string, name: string, driver: K.DriverId, match: string[], extra: Partial<K.ModelItem> = {}): K.ModelItem => ({

@@ -8,7 +8,10 @@ export const WYSOKOSC = 900;
 
 export const EKRANY = [
   { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie'] },
-  { ekran: 'settings', scenariusze: ['domyslny'] },
+  {
+    ekran: 'settings',
+    scenariusze: ['domyslny', 'ustawienia', 'ustawienia-chodzenie', 'ustawienia-trening', 'ustawienia-wylogowany', 'ustawienia-dlugie'],
+  },
   { ekran: 'history', scenariusze: ['domyslny'] },
   { ekran: 'achievements', scenariusze: ['domyslny'] },
   { ekran: 'trail', scenariusze: ['domyslny'] },

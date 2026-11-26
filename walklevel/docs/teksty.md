@@ -1437,3 +1437,11 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: Ustawienia
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `ustawienia.osoby.wiersz_bez_konta` | (nowy) | {liczba} {liczba:profil gry/profile gier/profili gier} · dziś {kroki} {kroki:krok/kroki/kroków} | Wiersz osoby bez konta online (`ustawienia.osoby.wiersz` bez części „· konto …”). |
+| `ustawienia.sterowanie.aktywny_tryb` | (nowy) | aktywny tryb | Podpowiedź przy kropce przed nazwą trybu, który działa teraz (zamiast „✓”). |
+| `ustawienia.wlaczanie.pad_rola` | (nowy) | Przycisk pada | Rola przycisku pada: „Przycisk pada: Panel dotykowy”. |
