@@ -50,7 +50,15 @@
 <div class="stos" aria-live="polite">
   {#each items as it (it.id)}
     <div class="miejsce" animate:flip={przesuniecie}>
-      <article class="karta" class:wychodzi={it.leaving} aria-label={t('powiadomienie.dostepnosc')} style:--kolor={it.color}>
+      <!-- „Powiadomienie o osiągnięciu” tylko przy osiągnięciach (bez liczby poziomu); awans
+           i podsumowanie historii czytnik nazywa samą treścią. Wychodząca karta znika też dla czytnika. -->
+      <article
+        class="karta"
+        class:wychodzi={it.leaving}
+        aria-label={it.badgeText === null ? t('powiadomienie.dostepnosc') : undefined}
+        aria-hidden={it.leaving || undefined}
+        style:--kolor={it.color}
+      >
         <OdznakaRzadkosci rzadkosc={it.rarity} znak={it.mark || undefined} liczba={it.badgeText ?? undefined} rozmiar={64} />
         <div class="tresc">
           <p class="nad hud jedna-linia">{it.kicker}</p>

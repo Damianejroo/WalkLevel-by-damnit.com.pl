@@ -100,6 +100,9 @@
 
   function nacisnij(e: PointerEvent) {
     if (e.button !== 0) return;
+    // Poprzednie przeciąganie w Tauri mogło się skończyć bez żadnego zdarzenia (puszczenie
+    // i ponowny klik bez ruchu myszy) - zamknij je, zanim zacznie się nowy klik.
+    zakonczPrzeciaganie();
     nacisk = { x: e.screenX, y: e.screenY };
     start = { x: podgladX, y: podgladY };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -182,11 +185,12 @@
   :global(html.okno-przezroczyste),
   :global(html.okno-przezroczyste body) { background: transparent; }
 
-  /* Podgląd w przeglądarce (?demo=1): przycisk na środku strony */
+  /* Podgląd w przeglądarce (?demo=1): przycisk na środku strony, tło okna motywu (na tle
+     --control znikała ramka wyłączonego przycisku) */
   :global(html.podglad-okna body) {
     display: grid;
     place-items: center;
-    background: var(--control);
+    background: var(--bg);
   }
   :global(html.podglad-okna #app) { width: 56px; height: 56px; }
 
