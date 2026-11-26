@@ -60,6 +60,8 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   'ustawienia-trening': { tryb: 'training' },
   'ustawienia-wylogowany': { konto: false, bieznia: 'brak' },
   'ustawienia-dlugie': { dlugie: true, tryb: 'gamepad' },
+  // Kopia danych: okno wyboru pliku zamknięte bez wyboru, jest kopia sprzed wczytania (utworzAtrape)
+  'kopia-wybor': {},
 };
 
 function czytajScenariusz(): Scenariusz {
@@ -526,6 +528,8 @@ export function utworzAtrape(): Silnik {
   };
   // najdłuższy wariant Ustawień > Dane i kopia: z przyciskiem „Przywróć dane sprzed…”
   if (dlugie) app.latestBackup = 'przed-importem-20261126-120000';
+  const kopiaWybor = p.get('stan') === 'kopia-wybor';
+  if (kopiaWybor) app.latestBackup = 'przed-importem-20261120-180000';
   const update: K.UpdateView = { available: dlugie ? '0.6.1' : null, busy: false, status: '', installing: false };
   const report: K.ReportView = { busy: false, status: '', lastFile: null, sentNumber: null };
   const model1 = (id: string, name: string, driver: K.DriverId, match: string[], extra: Partial<K.ModelItem> = {}): K.ModelItem => ({
@@ -1133,7 +1137,7 @@ export function utworzAtrape(): Silnik {
       toast(t('kopia.eksport.gotowe', { liczba: s.people, profile: s.profiles, sesje: s.sessions }));
       return s;
     },
-    backup_import_open: () => ({
+    backup_import_open: () => kopiaWybor ? null : ({
       file: 'kopia-walklevel-2026-11-20.bieznia', appVersion: '0.5.2', hasSettings: true, hasResults: true,
       description: 'WalkLevel 0.5.2 · 2 osoby · 4 profile gier · 61 sesji',
       people: [
