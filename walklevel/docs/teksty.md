@@ -1480,3 +1480,24 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 | `osiagniecia.lista_rzadkosci` | (nowy) | Zdobyte według rzadkości | Nazwa paska rzadkości dla czytnika ekranu. |
 | `szlak.koniec` | (nowy) | Cały szlak jest już za Tobą. | Wiersz „TU JESTEŚ” po ostatnim przystanku. |
 | `szlak.przystanki` | (nowy) | Przystanki szlaku | Nazwa listy dla czytnika ekranu. |
+## Dodatki: online
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `online.pokaz_haslo` | (nowy) | Pokaż hasło | Przycisk z okiem w polu hasła (logowanie, rejestracja, Moje konto). |
+| `ranking.ty` | (nowy) | (Ty) | Dopisek przy własnym pseudonimie w rankingu i na liście osób. |
+| `ranking.wiersz.kroki_slowo` | (nowy) | {kroki:krok/kroki/kroków} | Słowo pod liczbą kroków w kolumnie statystyk (liczba osobno, krojem liczb). |
+| `ranking.wiersz.km` | (nowy) | {km} km | Druga linia statystyk w wierszu rankingu i gry. |
+| `ranking.wiersz.lacznie` | (nowy) | łącznie | Słowo przy kilometrach w rankingu poziomów. |
+| `znajomi.kod.skopiowano` | (nowy) | Skopiowano kod. | Toast po „Kopiuj kod”. |
+| `osoby_online.pusto_lista` | (nowy) | Na liście nie ma jeszcze nikogo. | Lista osób bez wyszukiwania. |
+| `osoby_online.wiersz_bez_miejsca` | (nowy) | w tym tygodniu: {kroki} {kroki:krok/kroki/kroków} | Osoba bez miejsca w rankingu tygodnia. |
+| `osoby_online.wyslano` | (nowy) | Wysłano | Napis przycisku „Zaproś” po wysłaniu zaproszenia (lista osób, profil). |
+| `moje.wyslano` | (nowy) | Wysłano {liczba} {liczba:sesję/sesje/sesji}. | Toast po „Wyślij teraz”. |
+| `moje.wyslano_nic` | (nowy) | Wszystkie sesje są już na serwerze. | Toast po „Wyślij teraz”, gdy nie było czego wysłać. |
+| `moje.czeka` | (nowy) | Na wysłanie {liczba:czeka/czekają/czeka} {liczba} {liczba:sesja/sesje/sesji}. | Pod „Wyślij teraz”, gdy coś czeka. |
+| `moje.konto.adres` | (nowy) | Adres e-mail: {email} | Karta Konto w zakładce Moje konto. |
+| `moje.konto.regulamin_wersja` | (nowy) | Zaakceptowany regulamin: wersja z {data}. | Karta Konto, obok linku do regulaminu. |
+| `profil_online.brak_osiagniec` | (nowy) | Jeszcze bez osiągnięć. | Profil osoby bez zdobytych osiągnięć. |
+| `profil_online.zdobyte_dzis` | (nowy) | dziś | „zdobyte dziś” w wierszu osiągnięcia na profilu. |
+| `profil_online.zdobyte_wczoraj` | (nowy) | wczoraj | „zdobyte wczoraj” w wierszu osiągnięcia na profilu. |
