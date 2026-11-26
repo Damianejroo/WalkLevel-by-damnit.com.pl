@@ -2,7 +2,7 @@
   // Ekran: Kopia danych - wczytanie (trasa 'import'), docs/teksty.md 17.2, kontrakt 6.10.
   // Etapy: wybór pliku (okno systemowe otwiera się samo przy wejściu) -> podgląd (osoby, co
   // wczytać, osoby, które już są: połącz / dodaj jako nową, zachowanie moich ustawień) -> wynik.
-  // Przy wyborze i po wczytaniu: przywrócenie danych sprzed ostatniego wczytania (przytrzymanie).
+  // Przy wyborze i po wczytaniu: przywrócenie danych sprzed ostatniego wczytania (dwa kliknięcia).
   // Akcent: tylko główna akcja etapu („Wybierz plik kopii…”, „Wczytaj”, „Gotowe”).
   import { tick, untrack } from 'svelte';
   import Strona from '../lib/ui/Strona.svelte';
@@ -254,7 +254,7 @@
       <p class="opis">{t('kopia.import.przed.opis')}</p>
       <div class="prawo">
         <span class="akcja">
-          <Przycisk wariant="przytrzymaj" szeroki napis={t('kopia.import.przed.przywroc')} disabled={przywraca} onclick={przywroc} />
+          <Przycisk wariant="potwierdz" szeroki napis={t('kopia.import.przed.przywroc')} disabled={przywraca} onclick={przywroc} />
         </span>
       </div>
     </Karta>

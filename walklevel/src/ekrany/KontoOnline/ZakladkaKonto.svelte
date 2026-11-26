@@ -230,7 +230,7 @@
         oninput={() => (bladUsuniecia = '')}
       />
       <div class="przyciski">
-        <Przycisk wariant="przytrzymaj" napis={t('moje.konto.usun')} disabled={zajete('delete')} onclick={usunKonto} />
+        <Przycisk wariant="potwierdz" napis={t('moje.konto.usun')} disabled={zajete('delete')} onclick={usunKonto} />
       </div>
     </div>
   </Karta>

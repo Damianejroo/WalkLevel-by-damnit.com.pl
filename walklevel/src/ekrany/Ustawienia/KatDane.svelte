@@ -17,7 +17,7 @@
   {#if stan.app.latestBackup}
     <Przycisk
       szeroki
-      wariant="przytrzymaj"
+      wariant="potwierdz"
       napis={t('ustawienia.dane.przywroc')}
       onclick={() => wykonaj(api.backupRestoreLatest())}
     />

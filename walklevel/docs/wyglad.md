@@ -129,7 +129,6 @@ Proponowany plik: `walklevel/src/lib/styl/tokeny.css` (jedyne źródło wartośc
   --t-slide: 140ms;
   --t-morph: 160ms;
   --t-gauge: 260ms;
-  --t-hold: 1000ms;
   --ease-enter: cubic-bezier(0.25, 1, 0.5, 1);    /* wejście: od razu rusza, krótki dojazd */
   --ease-exit: cubic-bezier(0.5, 0, 0.75, 0);     /* wyjście: przyspiesza i znika */
   --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);   /* zmiana na miejscu: jak wejście */
@@ -425,7 +424,7 @@ U+202F (`12 345`), jednostka po niełamliwej spacji U+00A0 (`2,5 km/h`) – licz
 | Pasek XP po zmianie | `--t-gauge` 260 | `--ease-enter` | `transform: scaleX` |
 | Popup nad grą | wejście 140 / wyjście 100, widoczny 6000 | enter / exit | `opacity`, `translateY(12px→0)` |
 | Toast | wejście 140 / wyjście 100, widoczny 4000 | enter / exit | `opacity`, `translateY(8px→0)` |
-| Przytrzymanie (akcja niebezpieczna) | `--t-hold` 1000 | liniowa | `transform: scaleX` wypełnienia |
+| Potwierdzenie (akcja niebezpieczna) | 4000 | – | napis „Na pewno?” na przycisku, bez animacji |
 | Kropka „szukam” | 1000, pętla | `--ease-smooth` | `opacity` 1↔0.35 |
 
 `@media (prefers-reduced-motion: reduce)` – wszystkie czasy 0 ms, pętle zatrzymane, zmiany
@@ -535,11 +534,11 @@ Każdy komponent: anatomia, wymiary, stany, tokeny, zachowanie w wąskim kontene
   - **link**: bez tła i ramki, `--text`, podkreślenie przy najechaniu i fokusie
     (w 0.5.x akcent – teraz neutralny).
   - **stop**: tekst i ramka `--danger`, 700; najechanie tło `--danger`, tekst `--bg`.
-  - **przytrzymaj** (akcja niebezpieczna, `HoldButton`): jak stop; przy wciśnięciu
-    wypełnienie `--danger` z kryciem 0.22 rośnie `scaleX(0→1)` w 1000 ms liniowo od lewej,
-    puszczenie wcześniej – cofa się w 120 ms; po pełnym czasie `confirm`. `title`
-    „Przytrzymaj, żeby potwierdzić”, nazwa dostępna „… (przytrzymaj)”, z klawiatury
-    przytrzymanie Spacji/Entera.
+  - **potwierdz** (akcja niebezpieczna, dawniej `HoldButton`): jak stop. Pierwsze kliknięcie
+    zamienia napis na „Na pewno? Kliknij jeszcze raz” (tło `--danger`, tekst `--bg`), drugie
+    w ciągu 4 s wykonuje akcję; po 4 s albo utracie fokusu wraca. Szerokość = dłuższy z napisów.
+    26.11: zastąpiło przytrzymanie 1 s, którego nic nie zapowiadało („usuwanie nie ma
+    potwierdzenia”).
 - Wyłączony: tekst `--text-2`, ramka `--line`, `cursor: default`.
 - Fokus: `outline: 2px solid var(--focus); outline-offset: 2px;` tylko `:focus-visible`.
 
@@ -1060,7 +1059,7 @@ obrysowuje na czerwono elementy zwrócone przez `wystaje()`.
 | `FocusRing` | `:focus-visible` z `--focus` |
 | `Switch` | `Przelacznik.svelte` (8.2) |
 | `Segmented` | `Segmenty.svelte` (8.3) |
-| `HoldButton` | `Przycisk` wariant przytrzymaj (8.1) |
+| `HoldButton` | `Przycisk` wariant potwierdz (8.1) |
 | `StatusDot` | kropka w karcie stanu (8.14) |
 | `StatTile`, `TileGrid` | `Kafelek.svelte` + siatka (8.7, 7.3) |
 | `ElidedLabel` | `text-overflow: ellipsis` + `title` |

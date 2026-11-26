@@ -1,7 +1,7 @@
 <script lang="ts">
   // Ekran: Szczegóły sesji (trasa 'session'), docs/teksty.md 20.1. Dane z history_session -
   // przy wejściu i ponownie po zmianie history.stamp (np. ukrycie online). Tytuł „Sesja”, data
-  // i godziny jako podpis. Usunięcie przytrzymaniem, potem powrót do Historii (toast wysyła rdzeń).
+  // i godziny jako podpis. Usunięcie dwoma kliknięciami, potem powrót do Historii (toast wysyła rdzeń).
   // Akcentu brak: jedyna mocna akcja (usuń) ma kolor ostrzeżenia, nie akcent.
   import { untrack } from 'svelte';
   import Strona from '../lib/ui/Strona.svelte';
@@ -153,7 +153,7 @@
     <Karta tytul={t('sesja.usun.tytul')}>
       <p class="opis">{t(sesja.linked && sesja.source === 'bieznia' ? 'sesja.usun.opis' : 'sesja.usun.opis_lokalnie')}</p>
       <div class="akcja">
-        <Przycisk wariant="przytrzymaj" napis={t('sesja.usun.przycisk')} onclick={usun} />
+        <Przycisk wariant="potwierdz" napis={t('sesja.usun.przycisk')} onclick={usun} />
       </div>
     </Karta>
   {:else if wczytana}

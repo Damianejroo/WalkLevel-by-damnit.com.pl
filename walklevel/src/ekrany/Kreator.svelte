@@ -59,7 +59,7 @@
     // jak w 0.5: przy dodawaniu osoby i po aktualizacji z 0.2 obecny tryb, inaczej Klawisze
     const d = stan.settings.direction;
     const zUstawien = m === 'add' || stan.app.legacy02;
-    kierunek = zUstawien && (d === 'keyboard' || d === 'gamepad' || d === 'treadmill') ? d : 'keyboard';
+    kierunek = zUstawien ? d : 'keyboard';
     const seed = await wykonaj(api.wizardSeed(m));
     if (!seed) return;
     nazwa = nazwaStartowa = seed.name;
@@ -113,6 +113,7 @@
     { kierunek: 'keyboard', ikona: 'klawiatura', klucz: 'kreator.tryb.klawisze' },
     { kierunek: 'gamepad', ikona: 'pad', klucz: 'kreator.tryb.pad' },
     { kierunek: 'treadmill', ikona: 'chod', klucz: 'kreator.tryb.chodzenie' },
+    { kierunek: 'training', ikona: 'trening', klucz: 'kreator.tryb.trening' },
   ];
 
   // ---------------- nawigacja ----------------

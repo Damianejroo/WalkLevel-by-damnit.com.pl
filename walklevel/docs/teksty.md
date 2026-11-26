@@ -902,6 +902,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `kreator.tryb.klawisze` | Klawisze / Trzymasz W - taśma przyspiesza, puszczasz - zwalnia | Klawisze / Trzymasz W, a taśma przyspiesza. Puszczasz, a zwalnia. | |
 | `kreator.tryb.pad` | Pad / Wychylenie gałki ustawia prędkość taśmy skokami | Pad / Wychylenie gałki ustawia prędkość taśmy w kilku stopniach. | |
 | `kreator.tryb.chodzenie` | Chodzenie / Chodzisz po bieżni - gra dostaje W, szybciej W + Shift | Chodzenie / Chodzisz po bieżni, a postać idzie w grze. Gra dostaje W, przy szybszym tempie W + Shift. | |
+| `kreator.tryb.trening` | – | Trening / Cztery stałe tempa bez gry. Poziom wybierasz kliknięciem albo F7 i F6. | Nowy (26.11): w 0.5 tryb Trening nie był do wyboru w kreatorze. |
 | `kreator.tryb.wybrane` | {tryb} (wybrane) | {tryb}, wybrany | Dostępność. |
 | `osoba.edycja.tytul` | Edytuj osobę | Edytuj osobę | |
 | `osoba.edycja.nazwa` | Nazwa | Nazwa | |
@@ -1349,8 +1350,8 @@ Trzeba je przejrzeć osobno w kodzie serwera według tych samych zasad.
 
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
-| `wspolne.przytrzymaj` | {tekst} (przytrzymaj) | {tekst} (przytrzymaj) | Przycisk wymagający przytrzymania. |
-| `wspolne.przytrzymaj_podpowiedz` | Przytrzymaj, żeby potwierdzić | Przytrzymaj, żeby potwierdzić | |
+| `wspolne.potwierdz` | – | Na pewno? Kliknij jeszcze raz | Napis groźnego przycisku po pierwszym kliknięciu (26.11: zamiast przytrzymania, które nic nie zapowiadało). Po 4 s wraca. |
+| `wspolne.potwierdz_dostepnosc` | – | {tekst} - kliknij dwa razy, żeby potwierdzić | Nazwa dostępna groźnego przycisku. |
 | `wspolne.zaznaczone` | zaznaczone / niezaznaczone / częściowo | zaznaczone / niezaznaczone / zaznaczone częściowo | Dostępność pola wyboru. |
 | `wspolne.edytuj` | Edytuj | Edytuj | |
 | `wspolne.edytuj_co` | Edytuj: {nazwa} | Edytuj: {nazwa} | |

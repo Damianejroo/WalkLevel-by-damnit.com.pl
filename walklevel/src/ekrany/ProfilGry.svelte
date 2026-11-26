@@ -278,7 +278,7 @@
       <div class="rzad">
         <Przycisk napis={t('profil.duplikuj')} disabled={pracuje} onclick={duplikuj} />
         {#if (wlasciciel?.profiles.length ?? 0) > 1}
-          <Przycisk wariant="przytrzymaj" napis={t('profil.usun')} disabled={pracuje} onclick={usun} />
+          <Przycisk wariant="potwierdz" napis={t('profil.usun')} disabled={pracuje} onclick={usun} />
         {/if}
       </div>
     {/if}

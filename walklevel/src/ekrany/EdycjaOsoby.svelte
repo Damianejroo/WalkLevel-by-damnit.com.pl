@@ -2,7 +2,7 @@
   // Ekran: Edycja osoby (trasa 'person', parametry.personId; bez niego - wybrana osoba).
   // Wg bieznia/gui/ekrany/osoba.py i docs/teksty.md 19: nazwa (zapis 500 ms po ostatniej literze
   // i przy wyjściu z pola, kostka losuje), kolor osoby, konto online tej osoby, usunięcie
-  // (przytrzymanie, nie ostatniej osoby). Wszystko zapisuje się samo - ekran nie ma akcentu.
+  // (dwa kliknięcia, nie ostatniej osoby). Wszystko zapisuje się samo - ekran nie ma akcentu.
   import { untrack } from 'svelte';
   import Strona from '../lib/ui/Strona.svelte';
   import Karta from '../lib/ui/Karta.svelte';
@@ -147,7 +147,7 @@
       <Karta>
         <p class="podpowiedz">{t('osoba.edycja.usun_opis')}</p>
         <div class="rzad">
-          <Przycisk wariant="przytrzymaj" napis={t('osoba.edycja.usun')} disabled={pracuje} onclick={usun} />
+          <Przycisk wariant="potwierdz" napis={t('osoba.edycja.usun')} disabled={pracuje} onclick={usun} />
         </div>
       </Karta>
     {/if}

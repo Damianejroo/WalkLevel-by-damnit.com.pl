@@ -48,7 +48,7 @@
       <Przycisk wariant="glowny" napis={t('zgloszenie.wyslij')} />
       <Przycisk napis={t('ustawienia.dane.eksport')} />
       <Przycisk wariant="stop" napis={t('glowny.trening.stop')} />
-      <Przycisk wariant="przytrzymaj" napis={t('sesja.usun.przycisk')} onclick={() => komunikat(t('sesja.usunieta'))} />
+      <Przycisk wariant="potwierdz" napis={t('sesja.usun.przycisk')} onclick={() => komunikat(t('sesja.usunieta'))} />
       <Przycisk wariant="link" napis={t('app.link.prywatnosc')} />
       <Przycisk disabled napis={t('wspolne.anuluj')} />
       <Przycisk ikona="dodaj" napis={t('ustawienia.osoby.dodaj_z_kontem')} />

@@ -113,7 +113,7 @@
       {#if !osoba.me}
         <div class="przyciski">
           {#if znajomy}
-            <Przycisk wariant="przytrzymaj" napis={t('znajomi.usun')} disabled={zajete('removeFriend')} onclick={() => usun(osoba.id)} />
+            <Przycisk wariant="potwierdz" napis={t('znajomi.usun')} disabled={zajete('removeFriend')} onclick={() => usun(osoba.id)} />
           {:else}
             <Przycisk
               napisy={[t('osoby_online.zapros'), t('osoby_online.wyslano')]}

@@ -1,11 +1,12 @@
 <script lang="ts">
   // Przycisk (docs/wyglad.md 8.1). Warianty: zwykly, glowny (najwyżej jeden na ekranie), ikona,
-  // link, stop, przytrzymaj (akcja niebezpieczna - onclick dopiero po 1 s przytrzymania).
+  // link, stop, potwierdz (akcja niebezpieczna: pierwsze kliknięcie pyta „Na pewno?”, drugie
+  // w ciągu 4 s wykonuje).
   import type { Snippet } from 'svelte';
   import Ikona, { type NazwaIkony } from './Ikona.svelte';
   import { t } from '../teksty';
 
-  type Wariant = 'zwykly' | 'glowny' | 'ikona' | 'link' | 'stop' | 'przytrzymaj';
+  type Wariant = 'zwykly' | 'glowny' | 'ikona' | 'link' | 'stop' | 'potwierdz';
   interface Props {
     wariant?: Wariant;
     /** Bieżący napis (albo children). */
@@ -28,66 +29,53 @@
     szeroki = false, onclick, children,
   }: Props = $props();
 
-  // --- przytrzymaj ---
-  let trzyma = $state(false);
+  // --- potwierdz: dwa kliknięcia ---
+  const CZAS_PYTANIA_MS = 4000;
+  let pyta = $state(false);
   let zegar: ReturnType<typeof setTimeout> | undefined;
-  const czasTrzymania = () =>
-    parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--t-hold')) || 1000;
 
-  function zacznij() {
-    if (disabled || trzyma) return;
-    trzyma = true;
-    zegar = setTimeout(() => {
-      trzyma = false;
-      onclick?.();
-    }, czasTrzymania());
-  }
-  function przerwij() {
+  function klikPotwierdz() {
+    if (disabled) return;
     clearTimeout(zegar);
-    trzyma = false;
+    if (pyta) {
+      pyta = false;
+      onclick?.();
+      return;
+    }
+    pyta = true;
+    zegar = setTimeout(() => (pyta = false), CZAS_PYTANIA_MS);
   }
-  function klawisz(e: KeyboardEvent, wcisniety: boolean) {
-    if (e.key !== ' ' && e.key !== 'Enter') return;
-    e.preventDefault();
-    if (wcisniety && !e.repeat) zacznij();
-    if (!wcisniety) przerwij();
-  }
+  $effect(() => () => clearTimeout(zegar));
 
-  const tekst = $derived(napis ?? '');
-  const przytrzymaj = $derived(wariant === 'przytrzymaj');
+  const potwierdz = $derived(wariant === 'potwierdz');
+  const pytanie = t('wspolne.potwierdz');
+  const tekst = $derived(potwierdz && pyta ? pytanie : (napis ?? ''));
+  // szerokość = dłuższy z napisów, żeby przycisk nie skakał przy pytaniu
+  const wszystkie = $derived(potwierdz && !children ? [napis ?? '', pytanie] : napisy);
   const nazwaDostepna = $derived(
-    przytrzymaj ? t('wspolne.przytrzymaj', { tekst: etykieta ?? tekst }) : (etykieta ?? undefined),
+    potwierdz && !pyta ? t('wspolne.potwierdz_dostepnosc', { tekst: etykieta ?? napis ?? '' }) : (etykieta ?? undefined),
   );
-  const podpowiedz = $derived(
-    title ?? (przytrzymaj ? t('wspolne.przytrzymaj_podpowiedz') : wariant === 'ikona' ? etykieta : tekst || undefined),
-  );
+  const podpowiedz = $derived(title ?? (wariant === 'ikona' ? etykieta : tekst || undefined));
 </script>
 
 <button
   type={typ}
   class="przycisk {wariant}"
   class:szeroki
-  class:trzyma
+  class:pyta
   {disabled}
   aria-label={nazwaDostepna}
   title={podpowiedz}
-  onclick={przytrzymaj ? undefined : onclick}
-  onpointerdown={przytrzymaj ? zacznij : undefined}
-  onpointerup={przytrzymaj ? przerwij : undefined}
-  onpointerleave={przytrzymaj ? przerwij : undefined}
-  onpointercancel={przytrzymaj ? przerwij : undefined}
-  onkeydown={przytrzymaj ? (e) => klawisz(e, true) : undefined}
-  onkeyup={przytrzymaj ? (e) => klawisz(e, false) : undefined}
-  onblur={przytrzymaj ? przerwij : undefined}
+  onclick={potwierdz ? klikPotwierdz : onclick}
+  onblur={potwierdz ? () => { clearTimeout(zegar); pyta = false; } : undefined}
 >
-  {#if przytrzymaj}<span class="wypelnienie" aria-hidden="true"></span>{/if}
   {#if ikona}<Ikona nazwa={ikona} />{/if}
   {#if wariant !== 'ikona'}
     {#if children}
       <span class="napis jedna-linia">{@render children()}</span>
-    {:else if napisy?.length}
+    {:else if wszystkie?.length}
       <span class="napisy">
-        {#each napisy as n (n)}
+        {#each wszystkie as n (n)}
           <span class="napis jedna-linia" class:ukryty={n !== tekst} aria-hidden={n !== tekst}>{n}</span>
         {/each}
       </span>
@@ -160,20 +148,11 @@
   .link:active:not(:disabled) { background: transparent; }
 
   .stop,
-  .przytrzymaj { border-color: var(--danger); color: var(--danger); font-weight: var(--fw-bold); }
+  .potwierdz { border-color: var(--danger); color: var(--danger); font-weight: var(--fw-bold); }
   .stop:hover:not(:disabled) { background: var(--danger); color: var(--bg); }
   .stop:active:not(:disabled) { background: color-mix(in srgb, var(--danger) 80%, var(--text)); color: var(--bg); }
-  .przytrzymaj:hover:not(:disabled) { background: var(--surface-2); }
-
-  .wypelnienie {
-    position: absolute;
-    inset: 0;
-    background: var(--danger);
-    opacity: 0.22;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--t-color) linear;
-    pointer-events: none;
-  }
-  .trzyma .wypelnienie { transform: scaleX(1); transition: transform var(--t-hold) linear; }
+  .potwierdz:hover:not(:disabled) { background: var(--surface-2); }
+  /* pytanie „Na pewno?”: pełne tło ostrzeżenia - drugie kliknięcie usuwa */
+  .potwierdz.pyta,
+  .potwierdz.pyta:hover:not(:disabled) { background: var(--danger); color: var(--bg); }
 </style>

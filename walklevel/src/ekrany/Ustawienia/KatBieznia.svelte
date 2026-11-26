@@ -35,7 +35,7 @@
   <Rzad>
     <Przycisk napis={t('ustawienia.bieznia.modele')} title={t('ustawienia.bieznia.modele_podpowiedz')} onclick={() => idz('models')} />
     <Przycisk
-      wariant="przytrzymaj"
+      wariant="potwierdz"
       napis={t('ustawienia.bieznia.zapomnij')}
       disabled={!stan.device.remembered}
       onclick={() => wykonaj(api.deviceForget())}
