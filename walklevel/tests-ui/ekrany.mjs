@@ -27,3 +27,22 @@ export const EKRANY = [
   { ekran: 'account', scenariusze: ['wylogowany'] },
   { ekran: 'wzornik', scenariusze: ['domyslny', 'dlugie'] },
 ];
+
+// Osobne okna (docs/kontrakt.md 7.2-7.3): strona <strona>?demo=1&<zapytanie>, okno stałego rozmiaru
+// na podglądzie z marginesem 16 px (--ekran=popup / --ekran=przycisk). Zrzuty w skali 2:
+// docs/zrzuty/<ekran>-<scenariusz>-<motyw>.png. Nic nie może wyjść poza prostokąt okna.
+export const OKNA = [
+  {
+    ekran: 'popup', strona: 'popup.html', okno: { szer: 380, wys: 308 },
+    scenariusze: [{ nazwa: 'domyslny', zapytanie: 'stan=domyslny' }, { nazwa: 'dlugie', zapytanie: 'stan=dlugie' }],
+  },
+  {
+    ekran: 'przycisk', strona: 'przycisk.html', okno: { szer: 56, wys: 56 },
+    scenariusze: [
+      { nazwa: 'wylaczony', zapytanie: 'stan=domyslny' },
+      { nazwa: 'chod', zapytanie: 'stan=trening&poziom=1' },
+      { nazwa: 'bieg', zapytanie: 'stan=trening&poziom=4' },
+      { nazwa: 'bez-danych', zapytanie: 'stan=klawisze&bieznia=rozlaczona' },
+    ],
+  },
+];

@@ -972,4 +972,6 @@ export const SLOWNIK = {
   "nazwy.osoba_domyslna": "Gracz",
   "nazwy.profil_domyslny": "Domyślny",
   "nazwy.profil": "Profil",
+  "dymek.podpowiedz_wl": "Sterowanie włączone\nKliknij, żeby wyłączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć",
+  "dymek.podpowiedz_wyl": "Sterowanie wyłączone\nKliknij, żeby włączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć",
 } as const;

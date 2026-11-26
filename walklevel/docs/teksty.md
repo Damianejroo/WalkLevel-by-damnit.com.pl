@@ -1437,3 +1437,10 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: okna
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `dymek.podpowiedz_wl` | (nowy) | Sterowanie włączone\nKliknij, żeby wyłączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Gotowa forma `dymek.podpowiedz` dla włączonego sterowania (`{wyłączyć/włączyć}` nie jest zmienną słownika). |
+| `dymek.podpowiedz_wyl` | (nowy) | Sterowanie wyłączone\nKliknij, żeby włączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Jw. dla wyłączonego sterowania. |
