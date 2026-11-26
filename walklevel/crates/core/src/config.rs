@@ -245,10 +245,11 @@ mod tests {
         serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap()
     }
 
+    /// Katalog walklevel/ z config.toml.
     fn repo_root() -> PathBuf {
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .ancestors()
-            .nth(3)
+            .nth(2)
             .unwrap()
             .to_path_buf()
     }

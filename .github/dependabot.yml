@@ -4,7 +4,11 @@ updates:
     directory: /
     schedule:
       interval: monthly
-  - package-ecosystem: uv
-    directory: /
+  - package-ecosystem: cargo
+    directory: /walklevel
+    schedule:
+      interval: monthly
+  - package-ecosystem: npm
+    directory: /walklevel
     schedule:
       interval: monthly

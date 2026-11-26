@@ -28,11 +28,11 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist-instalator
 OutputBaseFilename=Bieznia-Setup-{#AppVersion}
-SetupIconFile=..\..\packaging\bieznia.ico
+SetupIconFile=bieznia.ico
 UninstallDisplayIcon={app}\walklevel.ico
 UninstallDisplayName=WalkLevel
 WizardStyle=modern
-WizardSmallImageFile=..\..\packaging\instalator-55.bmp,..\..\packaging\instalator-64.bmp,..\..\packaging\instalator-83.bmp,..\..\packaging\instalator-110.bmp
+WizardSmallImageFile=instalator-55.bmp,instalator-64.bmp,instalator-83.bmp,instalator-110.bmp
 Compression=lzma2/max
 SolidCompression=yes
 CloseApplications=yes
@@ -56,10 +56,10 @@ ReadyLabel2b=Kliknij Instaluj. Nie są potrzebne uprawnienia administratora, a p
 ; z 0.5.x wskazują ten plik
 Source: "..\target-release\release\walklevel.exe"; DestDir: "{app}"; DestName: "Bieznia.exe"; Flags: ignoreversion
 ; konfiguracja obok exe (adresy serwera i zgłoszeń, jak w 0.5.x)
-Source: "..\..\config.toml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\config.toml"; DestDir: "{app}"; Flags: ignoreversion
 ; ikona skrótów jako osobny plik o nowej nazwie: Windows trzyma ikonę w pamięci podręcznej po
 ; ścieżce pliku, więc skrót wskazujący Bieznia.exe po aktualizacji mógł pokazywać stare logo
-Source: "..\..\packaging\bieznia.ico"; DestDir: "{app}"; DestName: "walklevel.ico"; Flags: ignoreversion
+Source: "bieznia.ico"; DestDir: "{app}"; DestName: "walklevel.ico"; Flags: ignoreversion
 
 [InstallDelete]
 ; przy aktualizacji z 0.5.x usuń wersję w Pythonie (biblioteki PyInstallera i pliki obok exe)
