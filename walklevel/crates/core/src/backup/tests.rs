@@ -170,7 +170,8 @@ fn zip_names(path: &Path) -> HashSet<String> {
 
 fn zip_text(path: &Path, name: &str) -> String {
     let mut zip = zip::ZipArchive::new(File::open(path).unwrap()).unwrap();
-    String::from_utf8(entry(&mut zip, name).unwrap()).unwrap()
+    let mut budget = MAX_UNPACKED_BYTES;
+    String::from_utf8(entry(&mut zip, name, &mut budget).unwrap()).unwrap()
 }
 
 fn full_export(w: &World, name: &str) -> PathBuf {
@@ -712,4 +713,183 @@ fn names_and_helpers() {
     assert_eq!(icon_key("cp.png"), "cp.png");
     assert_eq!(icon_key("a.b.png"), "a.b.png");
     assert_eq!(icon_key("ikona"), "ikona.png");
+}
+
+#[test]
+fn unpacked_limit_is_shared_by_all_entries() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("k.zip");
+    write_zip(&path, &[("a", b"0123456789"), ("b", b"0123456789")]);
+    let mut zip = zip::ZipArchive::new(File::open(&path).unwrap()).unwrap();
+    let mut budget = 20;
+    entry(&mut zip, "a", &mut budget).unwrap();
+    entry(&mut zip, "b", &mut budget).unwrap();
+    assert_eq!(budget, 0);
+    // limit wspólny: drugi plik już się nie mieści, choć sam jest mały
+    let mut budget = 15;
+    entry(&mut zip, "a", &mut budget).unwrap();
+    assert!(matches!(
+        entry(&mut zip, "b", &mut budget),
+        Err(BackupError::Invalid(m)) if m == DAMAGED
+    ));
+}
+
+#[test]
+fn failed_export_leaves_no_partial_file_and_overwrite_is_whole() {
+    let w = world();
+    let choice = ExportChoice::new(all_people(&w.store));
+    let logs = w.root().join("logs");
+    // pod nazwą pliku jest folder - zapis się nie uda, nie zostaje plik tymczasowy
+    let taken = w.root().join("folder.bieznia");
+    fs::create_dir_all(&taken).unwrap();
+    assert!(export(&w.store, Some(&w.history), &choice, &taken, &logs).is_err());
+    assert!(!w.root().join("folder.bieznia.tmp").exists());
+    assert!(taken.is_dir());
+    // nadpisanie starej kopii pod tą samą nazwą
+    let out = w.root().join("kopia.bieznia");
+    fs::write(&out, b"stara kopia").unwrap();
+    let summary = export(&w.store, Some(&w.history), &choice, &out, &logs).unwrap();
+    assert_eq!(summary.bytes, fs::metadata(&out).unwrap().len());
+    assert_eq!(read(&out).unwrap().sessions.len(), 3);
+    assert!(!w.root().join("kopia.bieznia.tmp").exists());
+}
+
+#[test]
+fn export_skips_log_names_that_read_would_reject() {
+    let w = world();
+    let logs = w.root().join("logs");
+    fs::create_dir_all(&logs).unwrap();
+    fs::write(logs.join("bieznia.log"), "a\n").unwrap();
+    fs::write(logs.join("mój log.log"), "b\n").unwrap();
+    let choice = ExportChoice {
+        logs: true,
+        ..ExportChoice::new(all_people(&w.store))
+    };
+    let out = w.root().join("z-logami.bieznia");
+    export(&w.store, Some(&w.history), &choice, &out, &logs).unwrap();
+    let logs_in: Vec<String> = zip_names(&out)
+        .into_iter()
+        .filter(|n| n.starts_with("logi/"))
+        .collect();
+    assert_eq!(logs_in, ["logi/bieznia.log"]);
+    assert!(read(&out).is_ok());
+}
+
+#[test]
+fn range_since_is_local_midnight_like_python() {
+    let tz = chrono::FixedOffset::east_opt(3600).unwrap();
+    let today = NaiveDate::from_ymd_opt(2026, 11, 26).unwrap();
+    let at = |y, m, d| {
+        tz.with_ymd_and_hms(y, m, d, 0, 0, 0)
+            .single()
+            .unwrap()
+            .timestamp() as f64
+    };
+    assert_eq!(range_since_on("month", today, &tz), at(2026, 10, 27));
+    assert_eq!(range_since_on("year", today, &tz), at(2025, 11, 26));
+    assert_eq!(range_since_on("all", today, &tz), 0.0);
+    assert_eq!(range_since_on("cokolwiek", today, &tz), 0.0);
+    assert!(range_since("month") > range_since("year"));
+}
+
+#[test]
+fn import_report_serializes_like_contract() {
+    let r = ImportReport {
+        people_added: 1,
+        sessions_added: 2,
+        backup: Some(PathBuf::from("kopie").join("przed-importem-x")),
+        ..ImportReport::default()
+    };
+    let v = serde_json::to_value(&r).unwrap();
+    let keys: Vec<&str> = v.as_object().unwrap().keys().map(String::as_str).collect();
+    assert_eq!(
+        keys,
+        [
+            "backup",
+            "peopleAdded",
+            "peopleMerged",
+            "profilesAdded",
+            "profilesUpdated",
+            "sessionsAdded"
+        ]
+    );
+    assert!(v["backup"].as_str().unwrap().ends_with("przed-importem-x"));
+}
+
+/// Podgląd z ręcznie podanymi osobami (bez pliku).
+fn preview_of(people: Value) -> Preview {
+    Preview {
+        path: PathBuf::new(),
+        app_version: "0.5.1".into(),
+        has_settings: true,
+        has_results: true,
+        people: people
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|p| Person::from_json(p.as_object().unwrap()))
+            .collect(),
+        sessions: Vec::new(),
+        icons: BTreeMap::new(),
+    }
+}
+
+#[test]
+fn merge_adds_every_new_profile_even_with_repeated_name() {
+    let mut w = world();
+    let a = w.store.people()[0].clone();
+    let taken_id = a.profiles()[0].id.clone();
+    // dwa profile „Nowa” z pliku: oba dochodzą (po nazwie łączy się tylko z profilami sprzed
+    // importu, jak by_name w 0.5.x), drugi ma zajęte id - dostaje nowe
+    let preview = preview_of(json!([{"id": a.id, "nazwa": "inna nazwa", "profile": [
+        {"id": "n1", "nazwa": "Nowa", "ustawienia": {"walk_speed": 3.0}},
+        {"id": taken_id, "nazwa": "Nowa"},
+    ]}]));
+    let hp = w.history_path();
+    let r = apply_import(
+        &mut w.store,
+        &w.history,
+        &preview,
+        &ImportChoice::new(HashSet::from([a.id.clone(), "nie-ma-w-pliku".into()])),
+        &hp,
+    )
+    .unwrap();
+    assert_eq!(
+        (r.people_merged, r.people_added, r.profiles_added),
+        (1, 0, 2)
+    );
+    let merged = &w.store.people()[0];
+    assert_eq!(merged.name, a.name); // nazwa osoby przy łączeniu bez zmian
+    let new: Vec<&Profile> = merged
+        .profiles()
+        .iter()
+        .filter(|p| p.name == "Nowa")
+        .collect();
+    assert_eq!(new.len(), 2);
+    assert_eq!(new[0].id, "n1");
+    assert_ne!(new[1].id, taken_id);
+    let unique_ids: HashSet<&str> = merged.profiles().iter().map(|p| p.id.as_str()).collect();
+    assert_eq!(unique_ids.len(), merged.profiles().len());
+}
+
+#[test]
+fn as_new_without_conflict_keeps_ids_from_file() {
+    let mut w = world();
+    let preview = preview_of(json!([{"id": "obca", "nazwa": "Szalony Biegacz",
+        "profile": [{"id": "p-obcy", "nazwa": "Gra"}]}]));
+    let hp = w.history_path();
+    let choice = ImportChoice {
+        new_person: HashSet::from(["obca".to_string()]),
+        ..ImportChoice::new(HashSet::from(["obca".to_string()]))
+    };
+    let r = apply_import(&mut w.store, &w.history, &preview, &choice, &hp).unwrap();
+    assert_eq!(r.people_added, 1);
+    let added = w.store.people().last().unwrap();
+    // id wolne - zostaje; nazwa zajęta - „... 2”
+    assert_eq!(
+        (added.id.as_str(), added.name.as_str()),
+        ("obca", "Szalony Biegacz 2")
+    );
+    assert_eq!(added.profiles()[0].id, "p-obcy");
+    assert_eq!(added.active_profile_id(), "p-obcy");
 }

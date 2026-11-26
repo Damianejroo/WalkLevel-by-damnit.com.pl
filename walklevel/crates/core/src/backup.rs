@@ -20,7 +20,7 @@ use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
-use chrono::{Datelike, Local, Timelike};
+use chrono::{Datelike, Local, NaiveDate, NaiveTime, TimeZone, Timelike};
 use regex::Regex;
 use rusqlite::Connection;
 use serde::Serialize;
@@ -43,8 +43,9 @@ pub const MAX_LOG_BYTES: u64 = 2_000_000;
 pub const PNG_MAGIC: &[u8] = b"\x89PNG\r\n\x1a\n";
 /// Folder kopii sprzed importu (w dane/kopie) zaczyna się od tego.
 pub const BEFORE_IMPORT: &str = "przed-importem-";
-/// Ochrona przed „bombą ZIP”: więcej po rozpakowaniu jednego pliku to uszkodzona kopia.
-const MAX_ENTRY_BYTES: u64 = 256 * 1024 * 1024;
+/// Ochrona przed „bombą ZIP”: więcej po rozpakowaniu wszystkich czytanych plików razem
+/// (manifest, osoby, historia, ikony) to uszkodzona kopia.
+const MAX_UNPACKED_BYTES: u64 = 256 * 1024 * 1024;
 
 const DAMAGED: &str = "Plik kopii jest uszkodzony.";
 
@@ -115,6 +116,34 @@ impl ExportChoice {
             logs: false,
             since: 0.0,
         }
+    }
+}
+
+/// Początek zakresu wyników z kontraktu (`ExportRange`: `all` | `year` | `month`) dla
+/// [`ExportChoice::since`]: lokalna północ 365 albo 30 dni temu (jak export_choice w 0.5.x),
+/// inny zakres - wszystkie wyniki (0).
+pub fn range_since(range: &str) -> f64 {
+    range_since_on(range, Local::now().date_naive(), &Local)
+}
+
+fn range_since_on<Tz: TimeZone>(range: &str, today: NaiveDate, tz: &Tz) -> f64 {
+    let days = match range {
+        "year" => 365,
+        "month" => 30,
+        _ => return 0.0,
+    };
+    let Some(day) = today.checked_sub_days(chrono::Days::new(days)) else {
+        return 0.0;
+    };
+    let midnight = day.and_time(NaiveTime::MIN);
+    match tz.from_local_datetime(&midnight).earliest() {
+        Some(t) => t.timestamp() as f64,
+        // północ wypada w przeskoku zegara 00:00 -> 01:00 (rzadkie strefy): chwila zmiany
+        // czasu, czyli 01:00 po zmianie (jak datetime.timestamp() dla fold=0)
+        None => tz
+            .from_local_datetime(&(midnight + chrono::Duration::hours(1)))
+            .earliest()
+            .map_or(0.0, |t| t.timestamp() as f64),
     }
 }
 
@@ -255,6 +284,8 @@ struct Content {
 }
 
 /// Zapis kopii do pliku `out` (ZIP). `logs_dir` - folder logs/ (do zaznaczenia „logi”).
+/// Archiwum powstaje obok jako `<out>.tmp` i dopiero gotowe zastępuje `out` - błąd w trakcie
+/// nie zostawia uciętego pliku kopii (ani nie psuje poprzedniej kopii pod tą nazwą).
 pub fn export(
     store: &Store,
     history: Option<&History>,
@@ -275,10 +306,42 @@ pub fn export(
     if let Some(dir) = out.parent().filter(|d| !d.as_os_str().is_empty()) {
         fs::create_dir_all(dir)?;
     }
+    let mut tmp_name = out.file_name().unwrap_or_default().to_os_string();
+    tmp_name.push(".tmp");
+    let tmp = out.with_file_name(tmp_name);
+    let written = write_archive(store, history, choice, &people, &tmp, logs_dir)
+        .and_then(|()| fs::rename(&tmp, out).map_err(BackupError::from));
+    if let Err(e) = written {
+        // sprzątanie po nieudanym zapisie; brak pliku tymczasowego to nie błąd
+        let _ = fs::remove_file(&tmp);
+        return Err(e);
+    }
+    summary.bytes = fs::metadata(out)?.len();
+    log::info!(
+        "Eksport: {} osób, {} profili, {} sesji -> {}",
+        summary.people,
+        summary.profiles,
+        summary.sessions,
+        out.file_name()
+            .map(|n| n.to_string_lossy())
+            .unwrap_or_default()
+    );
+    Ok(summary)
+}
+
+/// Zawartość kopii zapisana do pliku `path`.
+fn write_archive(
+    store: &Store,
+    history: Option<&History>,
+    choice: &ExportChoice,
+    people: &[Selected],
+    path: &Path,
+    logs_dir: &Path,
+) -> Result<(), BackupError> {
     let options = zip::write::SimpleFileOptions::default()
         .compression_method(zip::CompressionMethod::Deflated)
         .last_modified_time(zip_time());
-    let mut zip = zip::ZipWriter::new(File::create(out)?);
+    let mut zip = zip::ZipWriter::new(File::create(path)?);
 
     let manifest = Manifest {
         format: FORMAT,
@@ -297,7 +360,7 @@ pub fn export(
     let icons_dir = store.icons_dir();
     let mut icons_written = HashSet::new();
     let mut people_out = Vec::new();
-    for sel in &people {
+    for sel in people {
         let profiles = sel
             .profiles
             .iter()
@@ -349,7 +412,7 @@ pub fn export(
         && let Some(history) = history
     {
         let mut text = String::new();
-        for sel in &people {
+        for sel in people {
             for s in selected_sessions(history, choice.since, sel)? {
                 text.push_str(&session_to_json(&s)?);
                 text.push('\n');
@@ -371,22 +434,18 @@ pub fn export(
                 .file_name()
                 .map(|n| n.to_string_lossy().into_owned())
                 .unwrap_or_default();
-            zip.start_file(format!("logi/{name}"), options)?;
+            let name = format!("logi/{name}");
+            // nazwa, której odczyt by nie przyjął (np. ze spacją), zepsułaby całą kopię
+            if !matches(&SAFE_NAME, &name) {
+                log::warn!("Eksport: pomijam log {name}");
+                continue;
+            }
+            zip.start_file(name, options)?;
             zip.write_all(&tail(&file, MAX_LOG_BYTES)?)?;
         }
     }
-    zip.finish()?;
-    summary.bytes = fs::metadata(out)?.len();
-    log::info!(
-        "Eksport: {} osób, {} profili, {} sesji -> {}",
-        summary.people,
-        summary.profiles,
-        summary.sessions,
-        out.file_name()
-            .map(|n| n.to_string_lossy())
-            .unwrap_or_default()
-    );
-    Ok(summary)
+    zip.finish()?.sync_all()?;
+    Ok(())
 }
 
 /// Ostatnie `max` bajtów pliku.
@@ -641,16 +700,23 @@ impl Preview {
     }
 }
 
-/// Jeden plik z archiwum (z limitem rozmiaru po rozpakowaniu).
-fn entry<R: Read + Seek>(zip: &mut zip::ZipArchive<R>, name: &str) -> Result<Vec<u8>, BackupError> {
+/// Jeden plik z archiwum. `budget` - ile bajtów wolno jeszcze rozpakować (wspólny limit
+/// dla całego pliku kopii, zmniejszany o każdy przeczytany plik).
+fn entry<R: Read + Seek>(
+    zip: &mut zip::ZipArchive<R>,
+    name: &str,
+    budget: &mut u64,
+) -> Result<Vec<u8>, BackupError> {
     let file = zip.by_name(name).map_err(damaged)?;
     let mut buf = Vec::new();
-    file.take(MAX_ENTRY_BYTES + 1)
+    file.take(budget.saturating_add(1))
         .read_to_end(&mut buf)
         .map_err(damaged)?;
-    if buf.len() as u64 > MAX_ENTRY_BYTES {
-        return Err(damaged(format!("{name} za duży po rozpakowaniu")));
+    let len = buf.len() as u64;
+    if len > *budget {
+        return Err(damaged(format!("{name}: za dużo danych po rozpakowaniu")));
     }
+    *budget -= len;
     Ok(buf)
 }
 
@@ -691,7 +757,8 @@ pub fn read(path: &Path) -> Result<Preview, BackupError> {
             "To nie jest plik kopii Bieżni (nieznane pliki w środku).",
         ));
     }
-    let manifest = json_object(&entry(&mut zip, "manifest.json")?)?;
+    let mut budget = MAX_UNPACKED_BYTES;
+    let manifest = json_object(&entry(&mut zip, "manifest.json", &mut budget)?)?;
     if manifest.get("format").and_then(Value::as_str) != Some(FORMAT) {
         return Err(invalid("To nie jest plik kopii Bieżni."));
     }
@@ -704,7 +771,7 @@ pub fn read(path: &Path) -> Result<Preview, BackupError> {
             "Plik pochodzi z nowszej wersji aplikacji - zaktualizuj Bieżnię.",
         ));
     }
-    let raw_people = json_object(&entry(&mut zip, "osoby.json")?)?;
+    let raw_people = json_object(&entry(&mut zip, "osoby.json", &mut budget)?)?;
     let people = match raw_people.get("osoby") {
         Some(Value::Array(items)) => items
             .iter()
@@ -715,7 +782,7 @@ pub fn read(path: &Path) -> Result<Preview, BackupError> {
     };
     let mut sessions = Vec::new();
     if names.iter().any(|n| n == "historia.jsonl") {
-        let bytes = entry(&mut zip, "historia.jsonl")?;
+        let bytes = entry(&mut zip, "historia.jsonl", &mut budget)?;
         let text = String::from_utf8(bytes).map_err(damaged)?;
         for line in text.lines().filter(|l| !l.trim().is_empty()) {
             let Value::Object(d) = serde_json::from_str::<Value>(line).map_err(damaged)? else {
@@ -726,7 +793,7 @@ pub fn read(path: &Path) -> Result<Preview, BackupError> {
     }
     let mut icons = BTreeMap::new();
     for name in names.iter().filter(|n| n.starts_with("ikony/")) {
-        let data = entry(&mut zip, name)?;
+        let data = entry(&mut zip, name, &mut budget)?;
         if data.starts_with(PNG_MAGIC) {
             icons.insert(name["ikony/".len()..].to_string(), data);
         }
@@ -778,8 +845,9 @@ impl ImportChoice {
     }
 }
 
-/// Wynik importu.
-#[derive(Debug, Clone, Default, PartialEq)]
+/// Wynik importu (pola jak `ImportReport` w docs/kontrakt.md).
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ImportReport {
     pub people_added: u32,
     pub people_merged: u32,
