@@ -1,4 +1,4 @@
-# Polityka prywatności aplikacji WalkLevel (dawniej Bieżnia)
+# Polityka prywatności aplikacji WalkLevel
 
 Administratorem danych jestem ja, Damian Skrzypiec - prowadzę damnit.com.pl prywatnie.
 We wszystkich sprawach dotyczących danych pisz na kontakt@damnit.com.pl.
