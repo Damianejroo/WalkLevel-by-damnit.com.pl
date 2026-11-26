@@ -1437,3 +1437,18 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: Osiągnięcia i szlak
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `osiagniecia.tytul` | (nowy) | Osiągnięcia | Tytuł ekranu (wyglad.md 9.1: zmienna część w podpisie). |
+| `osiagniecia.podpis` | (nowy) | {liczba} z {razem} zdobytych | Podpis pod tytułem. |
+| `osiagniecia.dzis` | dzisiaj | dziś | Do `poziomy.osiagniecie.zdobyte`. |
+| `osiagniecia.wczoraj` | wczoraj | wczoraj | Do `poziomy.osiagniecie.zdobyte`. |
+| `osiagniecia.zdobyte` | zdobyte | zdobyte | Stan dla czytnika ekranu. |
+| `osiagniecia.dostepnosc` | (nowy) | {nazwa}, {rzadkosc}, {stan}. {warunek} | Nazwa wiersza osiągnięcia dla czytnika ekranu (zastępuje `poziomy.osiagniecie.dostepnosc`). |
+| `osiagniecia.rzadkosc_dostepnosc` | (nowy) | {rzadkosc}: {liczba} z {razem} | Komórka paska rzadkości dla czytnika ekranu. |
+| `osiagniecia.lista_rzadkosci` | (nowy) | Zdobyte według rzadkości | Nazwa paska rzadkości dla czytnika ekranu. |
+| `szlak.koniec` | (nowy) | Cały szlak jest już za Tobą. | Wiersz „TU JESTEŚ” po ostatnim przystanku. |
+| `szlak.przystanki` | (nowy) | Przystanki szlaku | Nazwa listy dla czytnika ekranu. |
