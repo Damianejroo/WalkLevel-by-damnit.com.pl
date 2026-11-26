@@ -13,6 +13,7 @@ import type * as K from './typy';
 import type { Silnik } from './api';
 import { jestKlucz, t } from './teksty';
 import { liczba } from './format';
+import { version } from '../../package.json';
 import definicjeJson from '../../docs/definicje-v2.json';
 
 // ============================================================================
@@ -465,7 +466,9 @@ export function utworzAtrape(): Silnik {
       for (const s of lista) if (s.start >= pocz && s.start < kon) czesci.set(nazwa(s), (czesci.get(nazwa(s)) ?? 0) + s.steps);
       const data = new Date(pocz * 1000);
       bars.push({
-        label: hourly ? String(i).padStart(2, '0') : data.toISOString().slice(0, 10),
+        label: hourly
+          ? String(i).padStart(2, '0')
+          : `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`,
         weekday: hourly ? null : (data.getDay() + 6) % 7,
         parts: [...czesci].map(([name, steps]) => ({ name, steps })).sort((a, b) => b.steps - a.steps),
       });
@@ -599,7 +602,7 @@ export function utworzAtrape(): Silnik {
 
   // ---------------- pozostałe wycinki ----------------
   const app: K.AppInfo = {
-    version: '0.6.0', title: 'WalkLevel 0.6.0 by damnit.com.pl', installed: false, dataDir: 'C:\\Users\\Gracz\\AppData\\Local\\Bieznia',
+    version, title: `WalkLevel ${version} by damnit.com.pl`, installed: false, dataDir: 'C:\\Users\\Gracz\\AppData\\Local\\Bieznia',
     firstRun: sc.pierwsze, legacy02: false, updatedFrom: null, latestBackup: null,
     accountsEnabled: true, reportEndpoint: true, windowFocused: true,
   };

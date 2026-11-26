@@ -1,6 +1,6 @@
 // Zrzuty do README (docs/readme/*.png) z atrapą rdzenia: node tests-ui/zrzuty-readme.mjs [plik ...]
 // Serwer deweloperski Vite (bez budowania, dist/ nietknięte), Microsoft Edge przez playwright-core.
-// Wersja w nagłówku z package.json (atrapa ma swoją), zegar strony przewinięty o `minut`,
+// Zegar strony przewinięty o `minut`,
 // żeby licznik sesji atrapy pokazał kroki, dystans i czas (moment dobrany tak, by wskaźnik był w strefie chodu).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,7 +10,6 @@ import { chromium } from 'playwright-core';
 
 const katalog = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cel = path.join(katalog, 'docs', 'readme');
-const wersja = JSON.parse(fs.readFileSync(path.join(katalog, 'package.json'), 'utf8')).version;
 
 const ZRZUTY = [
   { plik: 'main-window-dark', ekran: 'main', stan: 'chodzenie', motyw: 'ciemny', szer: 720, minut: 17.58 },
@@ -40,11 +39,6 @@ try {
       locale: 'pl-PL',
     });
     const strona = await kontekst.newPage();
-    await strona.route('**/src/lib/atrapa.ts*', async (trasa) => {
-      const odp = await trasa.fetch();
-      const tekst = (await odp.text()).replaceAll('0.6.0', wersja);
-      await trasa.fulfill({ response: odp, body: tekst });
-    });
     await strona.clock.install();
     await strona.goto(`${adres}?ekran=${ekran}&stan=${stan}&motyw=${motyw}`);
     await strona.clock.runFor(1000);
