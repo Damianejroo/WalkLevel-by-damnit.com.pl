@@ -18,7 +18,9 @@ npm run build; if ($LASTEXITCODE) { throw "npm run build" }
 # 2. exe: osobny katalog kompilacji wydania, runtime C++ statycznie (bez vcruntime140.dll)
 $env:CARGO_TARGET_DIR = Join-Path $root 'target-release'
 $env:RUSTFLAGS = '-C target-feature=+crt-static'
-cargo build --release -p walklevel --locked; if ($LASTEXITCODE) { throw "cargo build" }
+# custom-protocol: interfejs z dist/ wbudowany w exe (bez tego exe szuka serwera deweloperskiego
+# Vite i okno nigdy się nie pokazuje) - to samo, co włącza `tauri build`
+cargo build --release -p walklevel --locked --features tauri/custom-protocol; if ($LASTEXITCODE) { throw "cargo build" }
 Remove-Item Env:RUSTFLAGS
 
 # 3. instalator
