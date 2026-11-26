@@ -1501,3 +1501,19 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 | `profil_online.brak_osiagniec` | (nowy) | Jeszcze bez osiągnięć. | Profil osoby bez zdobytych osiągnięć. |
 | `profil_online.zdobyte_dzis` | (nowy) | dziś | „zdobyte dziś” w wierszu osiągnięcia na profilu. |
 | `profil_online.zdobyte_wczoraj` | (nowy) | wczoraj | „zdobyte wczoraj” w wierszu osiągnięcia na profilu. |
+## Dodatki: Zgłoś problem
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `zgloszenie.droga_ogolna` | (nowy) | Zgłoszenie trafia przez serwer WalkLevel prosto na skrzynkę autora. Serwer niczego nie przechowuje. | Zamiast `zgloszenie.droga`, dopóki rdzeń nie podaje adresu serwera zgłoszeń (w `statics` nie ma takiego pola). |
+| `zgloszenie.droga_email` | (nowy) | Otworzy się e-mail do autora i folder z paczką. Wystarczy przeciągnąć plik do wiadomości. | Gdy brak serwera zgłoszeń (`app.reportEndpoint = false`), przy przycisku „Przygotuj e-mail ze zgłoszeniem”. |
+
+## Dodatki: Dziennik zdarzeń
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `dziennik.podpis` | (nowy) | Na żywo · {liczba} {liczba:wpis/wpisy/wpisów} | Podpis tytułu strony; najwyżej 500 ostatnich wpisów. |
+| `dziennik.pusty` | (nowy) | Dziennik jest pusty. Wpisy pojawią się tutaj, gdy coś się wydarzy. | W miejscu listy wpisów. |
+| `dziennik.kopiuj` | (nowy) | Kopiuj dziennik | Przycisk: wszystkie wpisy z listy do schowka. |
+| `dziennik.skopiowano` | (nowy) | Skopiowano dziennik. Możesz go wkleić do wiadomości. | Komunikat na dole okna. |
+| `dziennik.kopiuj_blad` | (nowy) | Nie udało się skopiować dziennika. Zaznacz wpisy myszą i naciśnij Ctrl+C. | Komunikat na dole okna, gdy schowek jest niedostępny. |

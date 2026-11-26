@@ -26,6 +26,8 @@ export const EKRANY = [
   { ekran: 'onlinePerson', scenariusze: ['domyslny', 'dlugie'] },
   { ekran: 'report', scenariusze: ['domyslny'] },
   { ekran: 'log', scenariusze: ['domyslny'] },
+  { ekran: 'report', scenariusze: ['domyslny', 'zgloszenie-wysylanie', 'zgloszenie-wyslano', 'zgloszenie-email'] },
+  { ekran: 'log', scenariusze: ['domyslny', 'dlugie'] },
   { ekran: 'export', scenariusze: ['domyslny'] },
   { ekran: 'import', scenariusze: ['domyslny'] },
   { ekran: 'models', scenariusze: ['domyslny'] },
