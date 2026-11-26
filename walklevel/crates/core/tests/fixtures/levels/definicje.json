@@ -1,0 +1,2068 @@
+{
+ "version": 1,
+ "xpPerKm": 100,
+ "rarityXp": {
+  "pospolite": 20,
+  "rzadkie": 100,
+  "epickie": 500,
+  "heroiczne": 1200,
+  "legendarne": 2500
+ },
+ "rarities": [
+  "pospolite",
+  "rzadkie",
+  "epickie",
+  "heroiczne",
+  "legendarne"
+ ],
+ "levels": [
+  0,
+  961,
+  2719,
+  4996,
+  7691,
+  10749,
+  14130,
+  17806,
+  21755,
+  25960,
+  30404,
+  35077,
+  39968,
+  45066,
+  50365,
+  55857,
+  61535,
+  67393,
+  73426,
+  79629,
+  85997,
+  92527,
+  99214,
+  106055,
+  113047,
+  120185,
+  127468,
+  134892,
+  142455,
+  150155,
+  157988,
+  165953,
+  174047,
+  182269,
+  190616,
+  199088,
+  207681,
+  216394,
+  225225,
+  234174,
+  243238,
+  252417,
+  261707,
+  271110,
+  280622,
+  290243,
+  299971,
+  309806,
+  319745,
+  329789,
+  339936,
+  350185,
+  360535,
+  370985,
+  381534,
+  392181,
+  402925,
+  413766,
+  424702,
+  435733,
+  446858,
+  458076,
+  469386,
+  480788,
+  492280,
+  503863,
+  515535,
+  527296,
+  539146,
+  551082,
+  563105,
+  575215,
+  587410,
+  599690,
+  612055,
+  624503,
+  637035,
+  649649,
+  662346,
+  675124,
+  687983,
+  700923,
+  713943,
+  727043,
+  740221,
+  753479,
+  766815,
+  780228,
+  793719,
+  807287,
+  820931,
+  834651,
+  848447,
+  862318,
+  876263,
+  890283,
+  904377,
+  918545,
+  932786,
+  947100
+ ],
+ "ranks": [
+  {
+   "level": 1,
+   "name": "Hobbit z Shire",
+   "about": "Hobbici rzadko chodzili dalej niż do sąsiedniej wsi."
+  },
+  {
+   "level": 2,
+   "name": "Robinson Crusoe",
+   "about": "Dwadzieścia osiem lat na jednej wyspie. Zna każdą jej ścieżkę."
+  },
+  {
+   "level": 3,
+   "name": "Sim z The Sims",
+   "about": "Najdalsze wyprawy: do lodówki i do skrzynki na listy."
+  },
+  {
+   "level": 4,
+   "name": "Bezimienny",
+   "about": "Cały jego świat mieścił się pod Barierą o średnicy około 2 km."
+  },
+  {
+   "level": 5,
+   "name": "Baron Harkonnen",
+   "about": "Po Arrakis wożą go dryfy i ornitoptery, więc sam chodzi niewiele."
+  },
+  {
+   "level": 6,
+   "name": "Chell",
+   "about": "Przeszła wszystkie komory testowe Aperture, kilometry korytarzy."
+  },
+  {
+   "level": 7,
+   "name": "V z Night City",
+   "about": "Night City zna na pamięć, choć zwykle zza kierownicy."
+  },
+  {
+   "level": 9,
+   "name": "Gordon Freeman",
+   "about": "Z Black Mesa do City 17, prawie cały czas pieszo i z łomem."
+  },
+  {
+   "level": 10,
+   "name": "Nieumarły Wybraniec",
+   "about": "Lordran przeszedł wzdłuż i w dół, ginąc po drodze setki razy."
+  },
+  {
+   "level": 12,
+   "name": "Naznaczony",
+   "about": "Z Kordonu przez całą Zonę aż pod Elektrownię."
+  },
+  {
+   "level": 13,
+   "name": "Bohater Kvatch",
+   "about": "Cyrodiil od bramy do bramy Otchłani."
+  },
+  {
+   "level": 15,
+   "name": "Smocze Dziecię",
+   "about": "Skyrim ma kilka kilometrów wszerz, a zadania wysyłają w każdy jego kąt."
+  },
+  {
+   "level": 17,
+   "name": "Nerevaryjczyk",
+   "about": "Vvardenfell pieszo, od Seyda Neen po Czerwoną Górę."
+  },
+  {
+   "level": 19,
+   "name": "Link",
+   "about": "Obudził się po stu latach i przeszedł Hyrule wzdłuż i wszerz."
+  },
+  {
+   "level": 21,
+   "name": "Minsc i Boo",
+   "about": "Wojownik z Rashemenu i jego chomik przeszli całe Wybrzeże Mieczy, szukając zła do skopania."
+  },
+  {
+   "level": 23,
+   "name": "Master Chief",
+   "about": "Przeszedł spory kawałek pierścienia Halo, metr po metrze."
+  },
+  {
+   "level": 26,
+   "name": "Samotny Wędrowiec",
+   "about": "Wyszedł z Krypty 101 i przeszedł całe Stołeczne Pustkowie."
+  },
+  {
+   "level": 31,
+   "name": "Arthur Morgan",
+   "about": "Pół Dzikiego Zachodu przemierzył z gangiem, choć głównie w siodle."
+  },
+  {
+   "level": 35,
+   "name": "Kurier z Mojave",
+   "about": "Z kulą w głowie przeszedł pustynię od Goodsprings po Zaporę Hoovera."
+  },
+  {
+   "level": 40,
+   "name": "Drużyna z tawerny",
+   "about": "Każda kampania D&D zaczyna się w tawernie, a kończy kilka tysięcy mil dalej."
+  },
+  {
+   "level": 44,
+   "name": "Steve",
+   "about": "Świat Minecrafta ma 60 milionów bloków szerokości, więc zawsze jest dokąd iść."
+  },
+  {
+   "level": 48,
+   "name": "Bohater Azeroth",
+   "about": "W pierwszym WoW-ie wierzchowiec był dopiero od 40 poziomu, więc całe Azeroth trzeba było przejść pieszo."
+  },
+  {
+   "level": 52,
+   "name": "Lara Croft",
+   "about": "Grobowce na wszystkich kontynentach, zwykle na piechotę i z liną."
+  },
+  {
+   "level": 55,
+   "name": "Nathan Drake",
+   "about": "Szukał skarbów od Borneo po Madagaskar."
+  },
+  {
+   "level": 59,
+   "name": "Kratos",
+   "about": "Z synem przez Midgard na najwyższy szczyt wszystkich krain."
+  },
+  {
+   "level": 62,
+   "name": "Geralt z Rivii",
+   "about": "Wiedźmin całe życie na szlaku, choć sporą część drogi zrobiła Płotka."
+  },
+  {
+   "level": 65,
+   "name": "Aloy",
+   "about": "Przemierzyła pieszo cały Zakazany Zachód."
+  },
+  {
+   "level": 69,
+   "name": "Ellie",
+   "about": "Przez zrujnowane Stany, od Bostonu na zachód."
+  },
+  {
+   "level": 72,
+   "name": "Arya Stark",
+   "about": "Z Królewskiej Przystani przez całe Dorzecze, potem do Braavos i z powrotem."
+  },
+  {
+   "level": 75,
+   "name": "Arthas",
+   "about": "Z Lordaeronu przez morze do mroźnego Northrendu."
+  },
+  {
+   "level": 78,
+   "name": "Paul Atryda",
+   "about": "Z Arrakin w głęboką pustynię, a potem z Fremenami przez cały Arrakis."
+  },
+  {
+   "level": 81,
+   "name": "Ciri",
+   "about": "Jaskółka, która wędrowała nie tylko po Kontynencie, ale i między światami."
+  },
+  {
+   "level": 84,
+   "name": "Duncan Idaho",
+   "about": "Mistrz miecza Atrydów, który miesiącami żył z Fremenami na pustyni."
+  },
+  {
+   "level": 87,
+   "name": "Bilbo Baggins",
+   "about": "Włamywacz z Bag End, który wyruszył na wyprawę nawet bez chusteczki do nosa."
+  },
+  {
+   "level": 89,
+   "name": "Frodo Baggins",
+   "about": "Pieszo z Shire do Mordoru, prawie 3 000 km."
+  },
+  {
+   "level": 92,
+   "name": "Sam Porter Bridges",
+   "about": "Tragarz, który pieszo połączył Amerykę od wybrzeża do wybrzeża."
+  },
+  {
+   "level": 95,
+   "name": "Odyseusz",
+   "about": "Dziesięć lat wracał spod Troi na Itakę."
+  },
+  {
+   "level": 97,
+   "name": "Obieżyświat",
+   "about": "Strażnik Północy, który przez dziesiątki lat przemierzał Śródziemie."
+  },
+  {
+   "level": 100,
+   "name": "Szary Pielgrzym",
+   "about": "Gandalf wędrował po Śródziemiu przez dwa tysiące lat."
+  }
+ ],
+ "achievements": [
+  {
+   "id": "km1",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "stopy",
+   "name": "Tutorial ukończony",
+   "flavor": "Postać przeszła pierwszy kilometr i samouczek zniknął z ekranu.",
+   "condition": "Przejdź łącznie 1 km.",
+   "params": {
+    "km": 1
+   },
+   "km": 1.0
+  },
+  {
+   "id": "km2",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "kopula",
+   "name": "Za Barierą",
+   "flavor": "Magiczna kopuła nad Kolonią z Gothica ma około 2 km średnicy. Od ściany do ściany.",
+   "condition": "Przejdź łącznie 2 km.",
+   "params": {
+    "km": 2
+   },
+   "km": 2.0
+  },
+  {
+   "id": "km57",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "helm",
+   "name": "Skyrim na piechotę",
+   "flavor": "Mniej więcej tyle ma Skyrim z zachodu na wschód. Cała prowincja przebyta pieszo.",
+   "condition": "Przejdź łącznie 5,7 km.",
+   "params": {
+    "km": 5.7
+   },
+   "km": 5.7
+  },
+  {
+   "id": "km113",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "celownik",
+   "name": "Erangel po przekątnej",
+   "flavor": "Mapa Erangel z PUBG ma 8 na 8 km, więc z rogu do rogu to ponad 11 km.",
+   "condition": "Przejdź łącznie 11,3 km.",
+   "params": {
+    "km": 11.3
+   },
+   "km": 11.3
+  },
+  {
+   "id": "km24",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "portal",
+   "name": "Skrót przez Nether",
+   "flavor": "W Netherze z Minecrafta każdy blok liczy się za osiem. Tam te 24 km to tylko 3 000 bloków.",
+   "condition": "Przejdź łącznie 24 km.",
+   "params": {
+    "km": 24
+   },
+   "km": 24.0
+  },
+  {
+   "id": "km30",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "radiacja",
+   "name": "Przez Zonę",
+   "flavor": "Zona ze Stalkera ma około 30 km promienia. Z Kordonu pod samą Elektrownię.",
+   "condition": "Przejdź łącznie 30 km.",
+   "params": {
+    "km": 30
+   },
+   "km": 30.0
+  },
+  {
+   "id": "km447",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "cytadela",
+   "name": "Cytadela od końca do końca",
+   "flavor": "Stacja Cytadela z Mass Effect ma 44,7 km długości, od końca do końca.",
+   "condition": "Przejdź łącznie 44,7 km.",
+   "params": {
+    "km": 44.7
+   },
+   "km": 44.7
+  },
+  {
+   "id": "km160",
+   "kind": "dystans",
+   "rarity": "rzadkie",
+   "mark": "gwiazda",
+   "name": "Gwiazda Śmierci na wylot",
+   "flavor": "Pierwsza Gwiazda Śmierci miała 160 km średnicy. Tyle z bieguna na biegun.",
+   "condition": "Przejdź łącznie 160 km.",
+   "params": {
+    "km": 160
+   },
+   "km": 160.0
+  },
+  {
+   "id": "km200",
+   "kind": "dystans",
+   "rarity": "rzadkie",
+   "mark": "czerw",
+   "name": "Z Carthag do Arrakin",
+   "flavor": "Tyle dzieli dwa miasta Arrakis z „Diuny”. Fremeni przeszliby to bez rytmu, żeby nie zwabić czerwia.",
+   "condition": "Przejdź łącznie 200 km.",
+   "params": {
+    "km": 200
+   },
+   "km": 200.0
+  },
+  {
+   "id": "km318",
+   "kind": "dystans",
+   "rarity": "rzadkie",
+   "mark": "pierscien",
+   "name": "Halo w poprzek",
+   "flavor": "Pierścień Halo ma 318 km szerokości. Od jednej ściany do drugiej.",
+   "condition": "Przejdź łącznie 318 km.",
+   "params": {
+    "km": 318
+   },
+   "km": 318.0
+  },
+  {
+   "id": "km377",
+   "kind": "dystans",
+   "rarity": "rzadkie",
+   "mark": "planeta",
+   "name": "Dookoła Minmusa",
+   "flavor": "Miętowy księżyc z Kerbal Space Program ma 377 km obwodu. Okrążony pieszo.",
+   "condition": "Przejdź łącznie 377 km.",
+   "params": {
+    "km": 377
+   },
+   "km": 377.0
+  },
+  {
+   "id": "km483",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "mur",
+   "name": "Patrol na Murze",
+   "flavor": "Mur zamyka północ Westeros od morza do morza. Patrol przez całą długość zaliczony.",
+   "condition": "Przejdź łącznie 483 km.",
+   "params": {
+    "km": 483
+   },
+   "km": 483.0
+  },
+  {
+   "id": "km628",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "gwiazda",
+   "name": "Równik drugiej Gwiazdy Śmierci",
+   "flavor": "Druga Gwiazda Śmierci miała 200 km średnicy, więc jej równik to ponad 600 km.",
+   "condition": "Przejdź łącznie 628 km.",
+   "params": {
+    "km": 628
+   },
+   "km": 628.0
+  },
+  {
+   "id": "km737",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "lisc",
+   "name": "Do Rivendell",
+   "flavor": "Tyle szli hobbici z Hobbitonu do domu Elronda, z Nazgûlami na karku.",
+   "condition": "Przejdź łącznie 737 km.",
+   "params": {
+    "km": 737
+   },
+   "km": 737.0
+  },
+  {
+   "id": "km880",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "gora",
+   "name": "Przełęcz Caradhrasu",
+   "flavor": "Etap wyprawy Drużyny: śnieżna przełęcz, która nie wpuściła ich w góry.",
+   "condition": "Przejdź łącznie 880 km.",
+   "params": {
+    "km": 880
+   },
+   "km": 880.0
+  },
+  {
+   "id": "km950",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "stopy",
+   "name": "Z Bostonu do Pittsburgha",
+   "flavor": "Pierwszy duży etap Joela i Ellie w The Last of Us, przez zarośnięte autostrady.",
+   "condition": "Przejdź łącznie 950 km.",
+   "params": {
+    "km": 950
+   },
+   "km": 950.0
+  },
+  {
+   "id": "km1019",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "brama",
+   "name": "Wrota Morii",
+   "flavor": "Z Rivendell pod zachodnią ścianę Morii, przez śniegi Caradhrasu.",
+   "condition": "Przejdź łącznie 1 019 km.",
+   "params": {
+    "km": 1019
+   },
+   "km": 1019.0
+  },
+  {
+   "id": "km1150",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "wieza",
+   "name": "Fosa Cailin",
+   "flavor": "Etap Drogi Królewskiej: ruiny twierdzy na bagnach Przesmyku, brama Północy.",
+   "condition": "Przejdź łącznie 1 150 km.",
+   "params": {
+    "km": 1150
+   },
+   "km": 1150.0
+  },
+  {
+   "id": "km1257",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "planeta",
+   "name": "Dookoła Muna",
+   "flavor": "Mun z Kerbal Space Program ma 200 km promienia. Okrążony bez rakiety.",
+   "condition": "Przejdź łącznie 1 257 km.",
+   "params": {
+    "km": 1257
+   },
+   "km": 1257.0
+  },
+  {
+   "id": "km1400",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "drzewo",
+   "name": "Mroczna Puszcza",
+   "flavor": "Etap wyprawy Bilba: ścieżka przez las, z której nie wolno było zejść.",
+   "condition": "Przejdź łącznie 1 400 km.",
+   "params": {
+    "km": 1400
+   },
+   "km": 1400.0
+  },
+  {
+   "id": "km1530",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "gora",
+   "name": "Pod Samotną Górę",
+   "flavor": "Droga Bilba i trzynastu krasnoludów z Bag End do Ereboru.",
+   "condition": "Przejdź łącznie 1 530 km.",
+   "params": {
+    "km": 1530
+   },
+   "km": 1530.0
+  },
+  {
+   "id": "km1670",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "wieza",
+   "name": "Bliźniaki",
+   "flavor": "Etap Drogi Królewskiej: dwa zamki Freyów po obu stronach Zielonych Wideł i most między nimi.",
+   "condition": "Przejdź łącznie 1 670 km.",
+   "params": {
+    "km": 1670
+   },
+   "km": 1670.0
+  },
+  {
+   "id": "km1800",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "fala",
+   "name": "Wodogrzmoty Rauros",
+   "flavor": "Wielkie wodogrzmoty na Anduinie, do których Drużyna dopłynęła łodziami elfów.",
+   "condition": "Przejdź łącznie 1 800 km.",
+   "params": {
+    "km": 1800
+   },
+   "km": 1800.0
+  },
+  {
+   "id": "km1940",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "fala",
+   "name": "Rubinowy Bród",
+   "flavor": "Etap Drogi Królewskiej: płytki bród na Tridencie, w którym podobno wciąż leżą rubiny.",
+   "condition": "Przejdź łącznie 1 940 km.",
+   "params": {
+    "km": 1940
+   },
+   "km": 1940.0
+  },
+  {
+   "id": "km2080",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "gora",
+   "name": "Emyn Muil",
+   "flavor": "Etap drogi Froda i Sama: labirynt ostrych skał nad Anduinem.",
+   "condition": "Przejdź łącznie 2 080 km.",
+   "params": {
+    "km": 2080
+   },
+   "km": 2080.0
+  },
+  {
+   "id": "km2220",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "wieza",
+   "name": "Harrenhal",
+   "flavor": "Etap Drogi Królewskiej: największy zamek Westeros, stopiony smoczym ogniem.",
+   "condition": "Przejdź łącznie 2 220 km.",
+   "params": {
+    "km": 2220
+   },
+   "km": 2220.0
+  },
+  {
+   "id": "km2300",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "fala",
+   "name": "Martwe Bagna",
+   "flavor": "Etap drogi Froda i Sama: bagna ze światełkami, za którymi nie wolno iść.",
+   "condition": "Przejdź łącznie 2 300 km.",
+   "params": {
+    "km": 2300
+   },
+   "km": 2300.0
+  },
+  {
+   "id": "km2414",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "korona",
+   "name": "Królewska Przystań",
+   "flavor": "Z Winterfell do stolicy Westeros jest około 1 500 mil. Cała Droga Królewska za tobą.",
+   "condition": "Przejdź łącznie 2 414 km.",
+   "params": {
+    "km": 2414
+   },
+   "km": 2414.0
+  },
+  {
+   "id": "km2565",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "brama",
+   "name": "Czarna Brama",
+   "flavor": "Etap drogi Froda i Sama: zamknięte wrota Mordoru.",
+   "condition": "Przejdź łącznie 2 565 km.",
+   "params": {
+    "km": 2565
+   },
+   "km": 2565.0
+  },
+  {
+   "id": "km2715",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "gora",
+   "name": "Schody Cirith Ungol",
+   "flavor": "Etap drogi Froda i Sama: kręte schody wykute w skałach Ephel Dúath.",
+   "condition": "Przejdź łącznie 2 715 km.",
+   "params": {
+    "km": 2715
+   },
+   "km": 2715.0
+  },
+  {
+   "id": "km2865",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "wulkan",
+   "name": "Z buta do Mordoru",
+   "flavor": "Cała droga Froda i Sama z Shire na zbocze Góry Przeznaczenia.",
+   "condition": "Przejdź łącznie 2 865 km.",
+   "params": {
+    "km": 2865
+   },
+   "km": 2865.0
+  },
+  {
+   "id": "km3060",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "drzwi",
+   "name": "Tam i z powrotem",
+   "flavor": "Cała wyprawa Bilba: do Ereboru i z powrotem do Bag End.",
+   "condition": "Przejdź łącznie 3 060 km.",
+   "params": {
+    "km": 3060
+   },
+   "km": 3060.0
+  },
+  {
+   "id": "km3235",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "planeta",
+   "name": "Do krateru Schiaparelli",
+   "flavor": "Tyle Mark Watney z „Marsjanina” przejechał łazikiem przez Marsa, żeby wrócić do domu.",
+   "condition": "Przejdź łącznie 3 235 km.",
+   "params": {
+    "km": 3235
+   },
+   "km": 3235.0
+  },
+  {
+   "id": "km3490",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "kolo",
+   "name": "Szlak do Oregonu",
+   "flavor": "Cały szlak z gry The Oregon Trail, wozem i pieszo przez prerię.",
+   "condition": "Przejdź łącznie 3 490 km.",
+   "params": {
+    "km": 3490
+   },
+   "km": 3490.0
+  },
+  {
+   "id": "km4500",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "pudlo",
+   "name": "Przesyłka dostarczona",
+   "flavor": "Mniej więcej tyle ma Ameryka z Death Stranding, od wschodniego wybrzeża do zachodniego.",
+   "condition": "Przejdź łącznie 4 500 km.",
+   "params": {
+    "km": 4500
+   },
+   "km": 4500.0
+  },
+  {
+   "id": "km4800",
+   "kind": "dystans",
+   "rarity": "legendarne",
+   "mark": "mur",
+   "name": "Z Muru do Dorne",
+   "flavor": "Westeros od Muru po południowe wybrzeże Dorne, około 3 000 mil.",
+   "condition": "Przejdź łącznie 4 800 km.",
+   "params": {
+    "km": 4800
+   },
+   "km": 4800.0
+  },
+  {
+   "id": "km5200",
+   "kind": "dystans",
+   "rarity": "legendarne",
+   "mark": "kolo",
+   "name": "Kurier carski",
+   "flavor": "Droga Michała Strogowa z powieści Verne’a: z Moskwy do Irkucka przez całą Syberię.",
+   "condition": "Przejdź łącznie 5 200 km.",
+   "params": {
+    "km": 5200
+   },
+   "km": 5200.0
+  },
+  {
+   "id": "km6128",
+   "kind": "dystans",
+   "rarity": "legendarne",
+   "mark": "czerw",
+   "name": "Do serca Arrakis",
+   "flavor": "Według Encyklopedii Diuny promień Arrakis to 6 128 km. Tyle dzieli piasek od środka planety.",
+   "condition": "Przejdź łącznie 6 128 km.",
+   "params": {
+    "km": 6128
+   },
+   "km": 6128.0
+  },
+  {
+   "id": "km7200",
+   "kind": "dystans",
+   "rarity": "legendarne",
+   "mark": "planeta",
+   "name": "Przez Hoth",
+   "flavor": "Lodowa planeta z Gwiezdnych Wojen ma 7 200 km średnicy. Na wylot, w śniegu po kolana.",
+   "condition": "Przejdź łącznie 7 200 km.",
+   "params": {
+    "km": 7200
+   },
+   "km": 7200.0
+  },
+  {
+   "id": "km8047",
+   "kind": "dystans",
+   "rarity": "legendarne",
+   "mark": "dysk",
+   "name": "Od Osi do Krawędzi",
+   "flavor": "Świat Dysku Pratchetta ma około 10 000 mil średnicy. Od środka aż do wodospadu na krawędzi.",
+   "condition": "Przejdź łącznie 8 047 km.",
+   "params": {
+    "km": 8047
+   },
+   "km": 8047.0
+  },
+  {
+   "id": "s3",
+   "kind": "sesja_km",
+   "rarity": "pospolite",
+   "mark": "plomien",
+   "name": "Pierwszy checkpoint",
+   "flavor": "Gra zapisała postęp. Można iść dalej.",
+   "condition": "Przejdź 3 km w jednej sesji.",
+   "params": {
+    "km": 3
+   },
+   "km": null
+  },
+  {
+   "id": "s10",
+   "kind": "sesja_km",
+   "rarity": "rzadkie",
+   "mark": "miecz",
+   "name": "Jeszcze jedna tura",
+   "flavor": "Znany problem graczy strategii przeniósł się na bieżnię.",
+   "condition": "Przejdź 10 km w jednej sesji.",
+   "params": {
+    "km": 10
+   },
+   "km": null
+  },
+  {
+   "id": "s21",
+   "kind": "sesja_km",
+   "rarity": "epickie",
+   "mark": "miecz",
+   "name": "Na jednym życiu",
+   "flavor": "Run jak w roguelike’u: od startu do końca bez zapisu gry.",
+   "condition": "Przejdź 21 km w jednej sesji.",
+   "params": {
+    "km": 21.0
+   },
+   "km": null
+  },
+  {
+   "id": "d7",
+   "kind": "dzien_kroki",
+   "rarity": "pospolite",
+   "mark": "gora",
+   "name": "Siedem tysięcy stopni",
+   "flavor": "Tyle stopni prowadzi na Gardło Świata do Wysokiego Hrothgaru.",
+   "condition": "Zrób 7 000 kroków jednego dnia.",
+   "params": {
+    "kroki": 7000
+   },
+   "km": null
+  },
+  {
+   "id": "d12",
+   "kind": "dzien_kroki",
+   "rarity": "rzadkie",
+   "mark": "slonce",
+   "name": "Dzień farmienia",
+   "flavor": "Licznik kroków nabił dziś tyle, co niejeden przez tydzień.",
+   "condition": "Zrób 12 000 kroków jednego dnia.",
+   "params": {
+    "kroki": 12000
+   },
+   "km": null
+  },
+  {
+   "id": "d20",
+   "kind": "dzien_kroki",
+   "rarity": "epickie",
+   "mark": "slonce",
+   "name": "Poziom trudności: koszmar",
+   "flavor": "Najwyższy poziom trudności w trybie dziennym. Mało kto go wybiera.",
+   "condition": "Zrób 20 000 kroków jednego dnia.",
+   "params": {
+    "kroki": 20000
+   },
+   "km": null
+  },
+  {
+   "id": "seria3",
+   "kind": "seria",
+   "rarity": "pospolite",
+   "mark": "ksiezyc",
+   "name": "Trzy dni do upadku",
+   "flavor": "W Majora’s Mask Termina ma trzy dni, zanim spadnie na nią księżyc. Twoja seria przetrwała pełny cykl.",
+   "condition": "Chodź min. 2 km dziennie przez 3 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+   "params": {
+    "dni": 3,
+    "km_dziennie": 2.0
+   },
+   "km": null
+  },
+  {
+   "id": "seria7",
+   "kind": "seria",
+   "rarity": "rzadkie",
+   "mark": "plomien",
+   "name": "Noc hordy",
+   "flavor": "W 7 Days to Die co siódma noc przychodzi horda. Twoja seria doczekała pierwszej.",
+   "condition": "Chodź min. 2 km dziennie przez 7 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+   "params": {
+    "dni": 7,
+    "km_dziennie": 2.0
+   },
+   "km": null
+  },
+  {
+   "id": "seria28",
+   "kind": "seria",
+   "rarity": "epickie",
+   "mark": "slonce",
+   "name": "Pełna pora roku",
+   "flavor": "Pora roku w Stardew Valley trwa 28 dni. Seria przetrwała całą, od pierwszego do ostatniego dnia.",
+   "condition": "Chodź min. 2 km dziennie przez 28 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+   "params": {
+    "dni": 28,
+    "km_dziennie": 2.0
+   },
+   "km": null
+  },
+  {
+   "id": "seria80",
+   "kind": "seria",
+   "rarity": "heroiczne",
+   "mark": "glob",
+   "name": "W 80 dni dookoła świata",
+   "flavor": "Phileas Fogg z powieści Verne’a okrążył świat w 80 dni. Seria trwa tyle samo.",
+   "condition": "Chodź min. 2 km dziennie przez 80 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+   "params": {
+    "dni": 80,
+    "km_dziennie": 2.0
+   },
+   "km": null
+  },
+  {
+   "id": "seria365",
+   "kind": "seria",
+   "rarity": "legendarne",
+   "mark": "drzwi",
+   "name": "Rok na wyspie",
+   "flavor": "W Animal Crossing czas płynie jak w kalendarzu, więc pełny rok na wyspie trwa naprawdę rok.",
+   "condition": "Chodź min. 2 km dziennie przez 365 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+   "params": {
+    "dni": 365,
+    "km_dziennie": 2.0
+   },
+   "km": null
+  },
+  {
+   "id": "gra1",
+   "kind": "gra_pierwsza",
+   "rarity": "pospolite",
+   "mark": "pad",
+   "name": "Nowa gra",
+   "flavor": "Postać w tej grze pierwszy raz idzie twoimi nogami.",
+   "condition": "Rozegraj pierwszą sesję w profilu gry.",
+   "params": {},
+   "km": null
+  },
+  {
+   "id": "gry3",
+   "kind": "gry_km",
+   "rarity": "rzadkie",
+   "mark": "portale",
+   "name": "Trzy światy",
+   "flavor": "Postacie się zmieniają, zakwasy zostają te same.",
+   "condition": "Przejdź po 10 km w 3 różnych grach.",
+   "params": {
+    "gier": 3,
+    "km": 10.0
+   },
+   "km": null
+  },
+  {
+   "id": "gry5",
+   "kind": "gry_km",
+   "rarity": "epickie",
+   "mark": "portale",
+   "name": "Turysta międzywymiarowy",
+   "flavor": "Pięć światów nosi już twoje ślady.",
+   "condition": "Przejdź po 10 km w 5 różnych grach.",
+   "params": {
+    "gier": 5,
+    "km": 10.0
+   },
+   "km": null
+  },
+  {
+   "id": "gra100",
+   "kind": "gra_km",
+   "rarity": "rzadkie",
+   "mark": "pad",
+   "name": "Mój main",
+   "flavor": "Reszta biblioteki zaczyna być zazdrosna.",
+   "condition": "Przejdź 100 km w jednej grze.",
+   "params": {
+    "km": 100.0
+   },
+   "km": null
+  },
+  {
+   "id": "gra1000",
+   "kind": "gra_km",
+   "rarity": "epickie",
+   "mark": "dom",
+   "name": "Tu mieszkam",
+   "flavor": "Strażnicy w tej grze znają cię z imienia.",
+   "condition": "Przejdź 1 000 km w jednej grze.",
+   "params": {
+    "km": 1000.0
+   },
+   "km": null
+  },
+  {
+   "id": "trening",
+   "kind": "trening",
+   "rarity": "pospolite",
+   "mark": "stopy",
+   "name": "Tryb treningowy",
+   "flavor": "Jak w bijatykach: najpierw trening, potem prawdziwe walki.",
+   "condition": "Ukończ pierwszą sesję w trybie Trening.",
+   "params": {},
+   "km": null
+  },
+  {
+   "id": "rano",
+   "kind": "start_miedzy",
+   "rarity": "pospolite",
+   "mark": "slonce",
+   "name": "Pierwszy na serwerze",
+   "flavor": "Sesja przed siódmą, serwer jeszcze pusty.",
+   "condition": "Rozpocznij sesję między 4:00 a 7:00.",
+   "params": {
+    "od": 4,
+    "do": 7
+   },
+   "km": null
+  },
+  {
+   "id": "noc",
+   "kind": "start_miedzy",
+   "rarity": "pospolite",
+   "mark": "ksiezyc",
+   "name": "Nocny grind",
+   "flavor": "Jeszcze jeden kilometr i spać. Na pewno.",
+   "condition": "Rozpocznij sesję między 23:00 a 4:00.",
+   "params": {
+    "od": 23,
+    "do": 4
+   },
+   "km": null
+  },
+  {
+   "id": "znajomy",
+   "kind": "znajomi",
+   "rarity": "pospolite",
+   "mark": "druzyna",
+   "name": "Party +1",
+   "flavor": "Do drużyny dołączył pierwszy kompan.",
+   "condition": "Dodaj pierwszego znajomego.",
+   "params": {
+    "ile": 1
+   },
+   "km": null
+  },
+  {
+   "id": "polecenie",
+   "kind": "polecenia",
+   "rarity": "rzadkie",
+   "mark": "druzyna",
+   "name": "Werbownik",
+   "flavor": "Ktoś założył konto z twojego zaproszenia i drużyna urosła.",
+   "condition": "Ktoś założy konto z twoim kodem.",
+   "params": {
+    "ile": 1
+   },
+   "km": null
+  }
+ ],
+ "trail": [
+  "km1",
+  "km2",
+  "km57",
+  "km113",
+  "km24",
+  "km30",
+  "km447",
+  "km160",
+  "km200",
+  "km318",
+  "km377",
+  "km483",
+  "km628",
+  "km737",
+  "km880",
+  "km950",
+  "km1019",
+  "km1150",
+  "km1257",
+  "km1400",
+  "km1530",
+  "km1670",
+  "km1800",
+  "km1940",
+  "km2080",
+  "km2220",
+  "km2300",
+  "km2414",
+  "km2565",
+  "km2715",
+  "km2865",
+  "km3060",
+  "km3235",
+  "km3490",
+  "km4500",
+  "km4800",
+  "km5200",
+  "km6128",
+  "km7200",
+  "km8047"
+ ],
+ "maxLevel": 100,
+ "levelOf": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   1
+  ],
+  [
+   960,
+   1
+  ],
+  [
+   961,
+   2
+  ],
+  [
+   962,
+   2
+  ],
+  [
+   4996,
+   4
+  ],
+  [
+   99999,
+   23
+  ],
+  [
+   947099,
+   99
+  ],
+  [
+   947100,
+   100
+  ],
+  [
+   2000000,
+   100
+  ],
+  [
+   -5,
+   1
+  ],
+  [
+   0.5,
+   1
+  ],
+  [
+   960.999,
+   1
+  ]
+ ],
+ "xpFor": [
+  [
+   -3,
+   0
+  ],
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   2,
+   961
+  ],
+  [
+   50,
+   329789
+  ],
+  [
+   100,
+   947100
+  ],
+  [
+   101,
+   947100
+  ],
+  [
+   500,
+   947100
+  ]
+ ],
+ "rankFor": [
+  [
+   0,
+   "Hobbit z Shire"
+  ],
+  [
+   1,
+   "Hobbit z Shire"
+  ],
+  [
+   2,
+   "Robinson Crusoe"
+  ],
+  [
+   3,
+   "Sim z The Sims"
+  ],
+  [
+   4,
+   "Bezimienny"
+  ],
+  [
+   5,
+   "Baron Harkonnen"
+  ],
+  [
+   6,
+   "Chell"
+  ],
+  [
+   7,
+   "V z Night City"
+  ],
+  [
+   8,
+   "V z Night City"
+  ],
+  [
+   9,
+   "Gordon Freeman"
+  ],
+  [
+   10,
+   "Nieumarły Wybraniec"
+  ],
+  [
+   11,
+   "Nieumarły Wybraniec"
+  ],
+  [
+   12,
+   "Naznaczony"
+  ],
+  [
+   13,
+   "Bohater Kvatch"
+  ],
+  [
+   14,
+   "Bohater Kvatch"
+  ],
+  [
+   15,
+   "Smocze Dziecię"
+  ],
+  [
+   16,
+   "Smocze Dziecię"
+  ],
+  [
+   17,
+   "Nerevaryjczyk"
+  ],
+  [
+   18,
+   "Nerevaryjczyk"
+  ],
+  [
+   19,
+   "Link"
+  ],
+  [
+   20,
+   "Link"
+  ],
+  [
+   21,
+   "Minsc i Boo"
+  ],
+  [
+   22,
+   "Minsc i Boo"
+  ],
+  [
+   23,
+   "Master Chief"
+  ],
+  [
+   24,
+   "Master Chief"
+  ],
+  [
+   25,
+   "Master Chief"
+  ],
+  [
+   26,
+   "Samotny Wędrowiec"
+  ],
+  [
+   27,
+   "Samotny Wędrowiec"
+  ],
+  [
+   28,
+   "Samotny Wędrowiec"
+  ],
+  [
+   29,
+   "Samotny Wędrowiec"
+  ],
+  [
+   30,
+   "Samotny Wędrowiec"
+  ],
+  [
+   31,
+   "Arthur Morgan"
+  ],
+  [
+   32,
+   "Arthur Morgan"
+  ],
+  [
+   33,
+   "Arthur Morgan"
+  ],
+  [
+   34,
+   "Arthur Morgan"
+  ],
+  [
+   35,
+   "Kurier z Mojave"
+  ],
+  [
+   36,
+   "Kurier z Mojave"
+  ],
+  [
+   37,
+   "Kurier z Mojave"
+  ],
+  [
+   38,
+   "Kurier z Mojave"
+  ],
+  [
+   39,
+   "Kurier z Mojave"
+  ],
+  [
+   40,
+   "Drużyna z tawerny"
+  ],
+  [
+   41,
+   "Drużyna z tawerny"
+  ],
+  [
+   42,
+   "Drużyna z tawerny"
+  ],
+  [
+   43,
+   "Drużyna z tawerny"
+  ],
+  [
+   44,
+   "Steve"
+  ],
+  [
+   45,
+   "Steve"
+  ],
+  [
+   46,
+   "Steve"
+  ],
+  [
+   47,
+   "Steve"
+  ],
+  [
+   48,
+   "Bohater Azeroth"
+  ],
+  [
+   49,
+   "Bohater Azeroth"
+  ],
+  [
+   50,
+   "Bohater Azeroth"
+  ],
+  [
+   51,
+   "Bohater Azeroth"
+  ],
+  [
+   52,
+   "Lara Croft"
+  ],
+  [
+   53,
+   "Lara Croft"
+  ],
+  [
+   54,
+   "Lara Croft"
+  ],
+  [
+   55,
+   "Nathan Drake"
+  ],
+  [
+   56,
+   "Nathan Drake"
+  ],
+  [
+   57,
+   "Nathan Drake"
+  ],
+  [
+   58,
+   "Nathan Drake"
+  ],
+  [
+   59,
+   "Kratos"
+  ],
+  [
+   60,
+   "Kratos"
+  ],
+  [
+   61,
+   "Kratos"
+  ],
+  [
+   62,
+   "Geralt z Rivii"
+  ],
+  [
+   63,
+   "Geralt z Rivii"
+  ],
+  [
+   64,
+   "Geralt z Rivii"
+  ],
+  [
+   65,
+   "Aloy"
+  ],
+  [
+   66,
+   "Aloy"
+  ],
+  [
+   67,
+   "Aloy"
+  ],
+  [
+   68,
+   "Aloy"
+  ],
+  [
+   69,
+   "Ellie"
+  ],
+  [
+   70,
+   "Ellie"
+  ],
+  [
+   71,
+   "Ellie"
+  ],
+  [
+   72,
+   "Arya Stark"
+  ],
+  [
+   73,
+   "Arya Stark"
+  ],
+  [
+   74,
+   "Arya Stark"
+  ],
+  [
+   75,
+   "Arthas"
+  ],
+  [
+   76,
+   "Arthas"
+  ],
+  [
+   77,
+   "Arthas"
+  ],
+  [
+   78,
+   "Paul Atryda"
+  ],
+  [
+   79,
+   "Paul Atryda"
+  ],
+  [
+   80,
+   "Paul Atryda"
+  ],
+  [
+   81,
+   "Ciri"
+  ],
+  [
+   82,
+   "Ciri"
+  ],
+  [
+   83,
+   "Ciri"
+  ],
+  [
+   84,
+   "Duncan Idaho"
+  ],
+  [
+   85,
+   "Duncan Idaho"
+  ],
+  [
+   86,
+   "Duncan Idaho"
+  ],
+  [
+   87,
+   "Bilbo Baggins"
+  ],
+  [
+   88,
+   "Bilbo Baggins"
+  ],
+  [
+   89,
+   "Frodo Baggins"
+  ],
+  [
+   90,
+   "Frodo Baggins"
+  ],
+  [
+   91,
+   "Frodo Baggins"
+  ],
+  [
+   92,
+   "Sam Porter Bridges"
+  ],
+  [
+   93,
+   "Sam Porter Bridges"
+  ],
+  [
+   94,
+   "Sam Porter Bridges"
+  ],
+  [
+   95,
+   "Odyseusz"
+  ],
+  [
+   96,
+   "Odyseusz"
+  ],
+  [
+   97,
+   "Obieżyświat"
+  ],
+  [
+   98,
+   "Obieżyświat"
+  ],
+  [
+   99,
+   "Obieżyświat"
+  ],
+  [
+   100,
+   "Szary Pielgrzym"
+  ],
+  [
+   101,
+   "Szary Pielgrzym"
+  ]
+ ],
+ "nextRankFor": [
+  [
+   0,
+   "Hobbit z Shire"
+  ],
+  [
+   1,
+   "Robinson Crusoe"
+  ],
+  [
+   2,
+   "Sim z The Sims"
+  ],
+  [
+   3,
+   "Bezimienny"
+  ],
+  [
+   4,
+   "Baron Harkonnen"
+  ],
+  [
+   5,
+   "Chell"
+  ],
+  [
+   6,
+   "V z Night City"
+  ],
+  [
+   7,
+   "Gordon Freeman"
+  ],
+  [
+   8,
+   "Gordon Freeman"
+  ],
+  [
+   9,
+   "Nieumarły Wybraniec"
+  ],
+  [
+   10,
+   "Naznaczony"
+  ],
+  [
+   11,
+   "Naznaczony"
+  ],
+  [
+   12,
+   "Bohater Kvatch"
+  ],
+  [
+   13,
+   "Smocze Dziecię"
+  ],
+  [
+   14,
+   "Smocze Dziecię"
+  ],
+  [
+   15,
+   "Nerevaryjczyk"
+  ],
+  [
+   16,
+   "Nerevaryjczyk"
+  ],
+  [
+   17,
+   "Link"
+  ],
+  [
+   18,
+   "Link"
+  ],
+  [
+   19,
+   "Minsc i Boo"
+  ],
+  [
+   20,
+   "Minsc i Boo"
+  ],
+  [
+   21,
+   "Master Chief"
+  ],
+  [
+   22,
+   "Master Chief"
+  ],
+  [
+   23,
+   "Samotny Wędrowiec"
+  ],
+  [
+   24,
+   "Samotny Wędrowiec"
+  ],
+  [
+   25,
+   "Samotny Wędrowiec"
+  ],
+  [
+   26,
+   "Arthur Morgan"
+  ],
+  [
+   27,
+   "Arthur Morgan"
+  ],
+  [
+   28,
+   "Arthur Morgan"
+  ],
+  [
+   29,
+   "Arthur Morgan"
+  ],
+  [
+   30,
+   "Arthur Morgan"
+  ],
+  [
+   31,
+   "Kurier z Mojave"
+  ],
+  [
+   32,
+   "Kurier z Mojave"
+  ],
+  [
+   33,
+   "Kurier z Mojave"
+  ],
+  [
+   34,
+   "Kurier z Mojave"
+  ],
+  [
+   35,
+   "Drużyna z tawerny"
+  ],
+  [
+   36,
+   "Drużyna z tawerny"
+  ],
+  [
+   37,
+   "Drużyna z tawerny"
+  ],
+  [
+   38,
+   "Drużyna z tawerny"
+  ],
+  [
+   39,
+   "Drużyna z tawerny"
+  ],
+  [
+   40,
+   "Steve"
+  ],
+  [
+   41,
+   "Steve"
+  ],
+  [
+   42,
+   "Steve"
+  ],
+  [
+   43,
+   "Steve"
+  ],
+  [
+   44,
+   "Bohater Azeroth"
+  ],
+  [
+   45,
+   "Bohater Azeroth"
+  ],
+  [
+   46,
+   "Bohater Azeroth"
+  ],
+  [
+   47,
+   "Bohater Azeroth"
+  ],
+  [
+   48,
+   "Lara Croft"
+  ],
+  [
+   49,
+   "Lara Croft"
+  ],
+  [
+   50,
+   "Lara Croft"
+  ],
+  [
+   51,
+   "Lara Croft"
+  ],
+  [
+   52,
+   "Nathan Drake"
+  ],
+  [
+   53,
+   "Nathan Drake"
+  ],
+  [
+   54,
+   "Nathan Drake"
+  ],
+  [
+   55,
+   "Kratos"
+  ],
+  [
+   56,
+   "Kratos"
+  ],
+  [
+   57,
+   "Kratos"
+  ],
+  [
+   58,
+   "Kratos"
+  ],
+  [
+   59,
+   "Geralt z Rivii"
+  ],
+  [
+   60,
+   "Geralt z Rivii"
+  ],
+  [
+   61,
+   "Geralt z Rivii"
+  ],
+  [
+   62,
+   "Aloy"
+  ],
+  [
+   63,
+   "Aloy"
+  ],
+  [
+   64,
+   "Aloy"
+  ],
+  [
+   65,
+   "Ellie"
+  ],
+  [
+   66,
+   "Ellie"
+  ],
+  [
+   67,
+   "Ellie"
+  ],
+  [
+   68,
+   "Ellie"
+  ],
+  [
+   69,
+   "Arya Stark"
+  ],
+  [
+   70,
+   "Arya Stark"
+  ],
+  [
+   71,
+   "Arya Stark"
+  ],
+  [
+   72,
+   "Arthas"
+  ],
+  [
+   73,
+   "Arthas"
+  ],
+  [
+   74,
+   "Arthas"
+  ],
+  [
+   75,
+   "Paul Atryda"
+  ],
+  [
+   76,
+   "Paul Atryda"
+  ],
+  [
+   77,
+   "Paul Atryda"
+  ],
+  [
+   78,
+   "Ciri"
+  ],
+  [
+   79,
+   "Ciri"
+  ],
+  [
+   80,
+   "Ciri"
+  ],
+  [
+   81,
+   "Duncan Idaho"
+  ],
+  [
+   82,
+   "Duncan Idaho"
+  ],
+  [
+   83,
+   "Duncan Idaho"
+  ],
+  [
+   84,
+   "Bilbo Baggins"
+  ],
+  [
+   85,
+   "Bilbo Baggins"
+  ],
+  [
+   86,
+   "Bilbo Baggins"
+  ],
+  [
+   87,
+   "Frodo Baggins"
+  ],
+  [
+   88,
+   "Frodo Baggins"
+  ],
+  [
+   89,
+   "Sam Porter Bridges"
+  ],
+  [
+   90,
+   "Sam Porter Bridges"
+  ],
+  [
+   91,
+   "Sam Porter Bridges"
+  ],
+  [
+   92,
+   "Odyseusz"
+  ],
+  [
+   93,
+   "Odyseusz"
+  ],
+  [
+   94,
+   "Odyseusz"
+  ],
+  [
+   95,
+   "Obieżyświat"
+  ],
+  [
+   96,
+   "Obieżyświat"
+  ],
+  [
+   97,
+   "Szary Pielgrzym"
+  ],
+  [
+   98,
+   "Szary Pielgrzym"
+  ],
+  [
+   99,
+   "Szary Pielgrzym"
+  ],
+  [
+   100,
+   null
+  ],
+  [
+   101,
+   null
+  ]
+ ]
+}
