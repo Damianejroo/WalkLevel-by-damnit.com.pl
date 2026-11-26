@@ -97,7 +97,7 @@ impl Capabilities {
         if kmh <= 0.0 {
             return 0.0;
         }
-        py_round1(self.speed_max.min(self.speed_min.max(kmh)))
+        crate::py::round_tenth(self.speed_max.min(self.speed_min.max(kmh)))
     }
 
     /// Zakres zgłoszony przez samą bieżnię wygrywa z profilem (sprawdzone: Urevo).
@@ -302,36 +302,15 @@ pub trait Driver: Send + Sync {
     fn on_notification(&self, _characteristic_uuid: &str, _data: &[u8]) {}
 }
 
-/// `round(x, 1)` jak w Pythonie (zaokrąglenie dziesiętne, remis do parzystej).
-pub(crate) fn py_round1(x: f64) -> f64 {
-    if !x.is_finite() {
-        return x;
-    }
-    format!("{x:.1}").parse().unwrap_or(x)
-}
-
-/// Białe znaki jak w `str.split()` Pythona (Rust nie liczy do nich \x1c-\x1f).
-pub(crate) fn py_is_space(c: char) -> bool {
-    c.is_whitespace() || ('\x1c'..='\x1f').contains(&c)
-}
-
 /// `str.split()` bez argumentów.
 pub(crate) fn py_split(text: &str) -> impl Iterator<Item = &str> {
-    text.split(py_is_space).filter(|part| !part.is_empty())
+    text.split(crate::py::is_space)
+        .filter(|part| !part.is_empty())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn py_round_is_decimal_half_even() {
-        assert_eq!(py_round1(0.25), 0.2);
-        assert_eq!(py_round1(0.35), 0.3);
-        assert_eq!(py_round1(1.05), 1.1);
-        assert_eq!(py_round1(0.15), 0.1);
-        assert_eq!(py_round1(2.45), 2.5);
-    }
 
     #[test]
     fn driver_kind_names() {

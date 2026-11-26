@@ -27,6 +27,8 @@ use serde::Serialize;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
+use crate::py::{strip as py_strip, truthy};
+
 /// Repozytorium z wydaniami (to samo co w wersji 0.5.x).
 pub const REPOSITORY: &str = "Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl";
 /// Adres API z najnowszym wydaniem.
@@ -171,12 +173,6 @@ pub struct Release {
     pub name: String,
 }
 
-/// Odpowiednik `str.strip()` z Pythona: białe znaki Unicode oraz separatory U+001C..U+001F
-/// (Python liczy je jako białe, Rust nie).
-fn py_strip(text: &str) -> &str {
-    text.trim_matches(|c: char| c.is_whitespace() || ('\u{1c}'..='\u{1f}').contains(&c))
-}
-
 /// "v1.2.3" / "1.2.3" -> (1, 2, 3). Wszystko inne (np. "dev") to (0, 0, 0), czyli najstarsza.
 pub fn parse_version(text: &str) -> (u64, u64, u64) {
     let Some(re) = VERSION.as_ref() else {
@@ -218,15 +214,11 @@ fn py_get_str(obj: &Value, key: &str) -> String {
 
 /// Odpowiednik `str(x or "")`: wartość "fałszywa" daje pusty tekst.
 fn py_str_or_empty(value: Option<&Value>) -> String {
-    let falsy = match value {
-        None | Some(Value::Null) => true,
-        Some(Value::Bool(b)) => !b,
-        Some(Value::String(s)) => s.is_empty(),
-        Some(Value::Number(n)) => n.as_f64() == Some(0.0),
-        Some(Value::Array(a)) => a.is_empty(),
-        Some(Value::Object(o)) => o.is_empty(),
-    };
-    if falsy { String::new() } else { py_str(value) }
+    if value.is_some_and(truthy) {
+        py_str(value)
+    } else {
+        String::new()
+    }
 }
 
 /// Odpowiednik `int(x or 0)`; ujemne i nieczytelne wartości dają 0 (rozmiar nieznany).

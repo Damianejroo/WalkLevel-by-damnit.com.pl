@@ -18,15 +18,6 @@ pub struct Color {
 }
 
 impl Color {
-    /// Odcień pod motyw ("dark" albo inny = jasny) - do tekstu i akcentów.
-    pub fn for_theme(&self, theme_name: &str) -> &'static str {
-        if theme_name == "dark" {
-            self.dark
-        } else {
-            self.light
-        }
-    }
-
     /// Żywy kolor do kółek palety, awatarów i wykresów - taki sam w obu motywach.
     pub fn swatch(&self) -> &'static str {
         self.dark

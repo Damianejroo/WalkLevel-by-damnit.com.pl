@@ -195,6 +195,14 @@ fn not_logged_in() -> KontoError {
     KontoError::invalid(&crate::teksty::t("konto.blad.niezalogowany", &[]))
 }
 
+fn history_missing() -> KontoError {
+    KontoError::new(
+        KontoErrorKind::Io,
+        &crate::teksty::t("historia.niedostepna", &[]),
+        0,
+    )
+}
+
 // --- zegary (z pętli co 5 klatek) ------------------------------------------------------------
 
 pub fn tick(core: &Core) {
@@ -622,11 +630,7 @@ pub fn upload_now(core: &Core) -> CmdResult<u32> {
 pub fn accept_terms(core: &Core) -> CmdResult<()> {
     simple(core, "terms", None, |acc, h| match h {
         Some(h) => acc.accept_terms(h),
-        None => Err(KontoError::new(
-            KontoErrorKind::Io,
-            &crate::teksty::t("historia.niedostepna", &[]),
-            0,
-        )),
+        None => Err(history_missing()),
     })?;
     lock(&core.0.app).toast(crate::teksty::t("konto.regulamin.dziekujemy", &[]));
     core.flush();
@@ -912,10 +916,6 @@ pub fn forget_person(core: &Core, person: &str) {
 pub fn set_visibility(core: &Core, value: String) -> CmdResult<()> {
     simple(core, "profile", None, move |acc, h| match h {
         Some(h) => acc.set_visibility(h, &value),
-        None => Err(KontoError::new(
-            KontoErrorKind::Io,
-            &crate::teksty::t("historia.niedostepna", &[]),
-            0,
-        )),
+        None => Err(history_missing()),
     })
 }

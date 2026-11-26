@@ -17,7 +17,7 @@ mod zrodlo;
 
 use std::sync::atomic::Ordering;
 
-use serde_json::{Map, Value, json};
+use serde_json::{Value, json};
 use tauri::{Manager, WindowEvent};
 use walklevel_core::config::{self, Config};
 use walklevel_core::history::{History, SessionTracker};
@@ -34,25 +34,15 @@ use crate::stan::{App, Core, lock};
 const EMBEDDED_CONFIG: &str = include_str!("../../../config.toml");
 
 fn load_config(paths: &AppPaths) -> Config {
-    match config::load_config(&paths.resources, &paths.data) {
-        Ok(c) => c,
-        Err(e) => {
-            if walklevel_core::paths::is_installed() {
-                log::info!("config.toml z programu ({e})");
-            } else {
-                log::warn!("config.toml: {e} - używam wbudowanego");
-            }
-            let mut values: Map<String, Value> =
-                toml::from_str(EMBEDDED_CONFIG).unwrap_or_default();
-            let local = paths.data.join(config::LOCAL_FILE);
-            if let Ok(text) = std::fs::read_to_string(&local)
-                && let Ok(over) = toml::from_str::<Map<String, Value>>(&text)
-            {
-                values = config::merge(&values, &over);
-            }
-            Config { values }
+    let (config, embedded) = config::load_config_or(&paths.resources, &paths.data, EMBEDDED_CONFIG);
+    match embedded {
+        Some(e) if walklevel_core::paths::is_installed() => {
+            log::info!("config.toml z programu ({e})");
         }
+        Some(e) => log::warn!("config.toml: {e} - używam wbudowanego"),
+        None => {}
     }
+    config
 }
 
 fn build_app(paths: AppPaths, config: Config, clock: treadmill::Clock) -> App {

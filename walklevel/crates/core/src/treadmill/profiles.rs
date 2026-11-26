@@ -19,7 +19,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-use super::kontrakt::{Capabilities, DriverKind, py_is_space};
+use super::kontrakt::{Capabilities, DriverKind};
+use crate::py::{is_space, truthy};
 
 pub const FORMAT: i64 = 1;
 /// Moduły, które profil może wskazać.
@@ -173,10 +174,6 @@ impl ModelProfile {
         self.capabilities.apply(base)
     }
 
-    pub fn option(&self, key: &str) -> Option<&Value> {
-        self.options.get(key)
-    }
-
     /// Opcja tekstowa (np. "table").
     pub fn option_str(&self, key: &str) -> Option<&str> {
         self.options.get(key).and_then(Value::as_str)
@@ -191,18 +188,6 @@ impl ModelProfile {
             .map(|m| m.chars().count())
             .max()
             .unwrap_or(0)
-    }
-}
-
-/// Wartość prawdziwa w sensie Pythona (`x or {}`).
-fn py_truthy(value: &Value) -> bool {
-    match value {
-        Value::Null => false,
-        Value::Bool(b) => *b,
-        Value::Number(n) => n.as_f64().is_some_and(|f| f != 0.0),
-        Value::String(s) => !s.is_empty(),
-        Value::Array(a) => !a.is_empty(),
-        Value::Object(o) => !o.is_empty(),
     }
 }
 
@@ -298,8 +283,8 @@ pub fn parse_profile(data: &Value, source: &str) -> Result<ModelProfile, Profile
         _ => return err("brak poprawnego id (litery, cyfry, myślniki)"),
     };
     let name = match obj.get("name") {
-        Some(Value::String(s)) if !s.trim_matches(py_is_space).is_empty() => {
-            s.trim_matches(py_is_space).to_string()
+        Some(Value::String(s)) if !s.trim_matches(is_space).is_empty() => {
+            s.trim_matches(is_space).to_string()
         }
         _ => return err("brak nazwy modelu"),
     };
@@ -335,7 +320,7 @@ pub fn parse_profile(data: &Value, source: &str) -> Result<ModelProfile, Profile
                 parse_capability(&mut caps, key, value)?;
             }
         }
-        Some(other) if py_truthy(other) => return err("capabilities: oczekiwano obiektu"),
+        Some(other) if truthy(other) => return err("capabilities: oczekiwano obiektu"),
         _ => {}
     }
     if caps.speed_min.unwrap_or(0.0) >= caps.speed_max.unwrap_or(99.0) {
@@ -351,7 +336,7 @@ pub fn parse_profile(data: &Value, source: &str) -> Result<ModelProfile, Profile
                 options.insert(key.clone(), value.clone());
             }
         }
-        Some(other) if py_truthy(other) => return err("options: tylko proste wartości"),
+        Some(other) if truthy(other) => return err("options: tylko proste wartości"),
         _ => {}
     }
     Ok(ModelProfile {

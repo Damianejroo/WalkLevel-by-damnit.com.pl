@@ -409,7 +409,7 @@ impl BleWorker {
     /// `start_if_stopped`: stojącą taśmę najpierw uruchom (pad: ruch gałki budzi bieżnię).
     pub fn set_speed(&self, kmh: f64, start_if_stopped: bool) {
         self.send(Cmd::Speed {
-            kmh: super::kontrakt::py_round1(kmh),
+            kmh: crate::py::round_tenth(kmh),
             start_if_stopped,
         });
     }

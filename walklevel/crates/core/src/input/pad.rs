@@ -11,6 +11,8 @@ use std::sync::{Arc, Mutex};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::py::{py_float, py_int, round_tenth};
+
 /// Gałka w spoczynku potrafi stać na kilku procentach...
 pub const INNER_DEADZONE: f64 = 0.08;
 /// ...a do końca rzadko dochodzi równe 100%.
@@ -182,7 +184,7 @@ fn try_parse_steps(data: &Value) -> Option<Vec<PadStep>> {
             }
             _ => return None,
         };
-        steps.push((py_int(&at)?, round1(py_float(&speed)?)));
+        steps.push((py_int(&at)?, round_tenth(py_float(&speed)?)));
     }
     if !(STEPS_MIN..=STEPS_MAX).contains(&steps.len()) || steps[0].0 != 0 {
         return None;
@@ -201,38 +203,6 @@ fn try_parse_steps(data: &Value) -> Option<Vec<PadStep>> {
         return None;
     }
     Some(steps)
-}
-
-/// `int(value)` z Pythona (bez napisów z ułamkiem).
-fn py_int(v: &Value) -> Option<i64> {
-    match v {
-        Value::Bool(b) => Some(i64::from(*b)),
-        Value::Number(n) => n.as_i64().or_else(|| {
-            n.as_f64()
-                .filter(|f| f.is_finite())
-                .map(|f| f.trunc() as i64)
-        }),
-        Value::String(s) => s.trim().parse::<i64>().ok(),
-        _ => None,
-    }
-}
-
-/// `float(value)` z Pythona.
-fn py_float(v: &Value) -> Option<f64> {
-    match v {
-        Value::Bool(b) => Some(if *b { 1.0 } else { 0.0 }),
-        Value::Number(n) => n.as_f64(),
-        Value::String(s) => s.trim().parse::<f64>().ok(),
-        _ => None,
-    }
-}
-
-/// `round(x, 1)` z Pythona: poprawne zaokrąglenie dokładnej wartości (remis do parzystej).
-fn round1(x: f64) -> f64 {
-    if !x.is_finite() {
-        return x;
-    }
-    format!("{x:.1}").parse().unwrap_or(x)
 }
 
 /// Który skok teraz obowiązuje. Przy cofaniu gałki mały zapas, żeby skok nie migał.

@@ -19,10 +19,11 @@ use futures::future::BoxFuture;
 
 use super::kontrakt::{
     Capabilities, Clock, Counts, DeviceInfo, Driver, DriverError, DriverKind, FrameCallback,
-    StartResult, py_round1,
+    StartResult,
 };
 use super::telemetry::TelemetryFrame;
 use super::watchdog::SpeedStats;
+use crate::py::round_tenth;
 
 pub const REPORT_EVERY_S: f64 = 0.75;
 pub const ACCEL_KMH_PER_S: f64 = 1.0;
@@ -157,7 +158,7 @@ impl SimulatorDriver {
                     distance_m: Some((b.distance_m / 10.0).floor() as u64 * 10),
                     steps: Some(b.steps as u64),
                     elapsed_s: Some(b.moving_s as u64),
-                    ..TelemetryFrame::data(now, Some(py_round1(b.speed)))
+                    ..TelemetryFrame::data(now, Some(round_tenth(b.speed)))
                 })
             } else {
                 None
@@ -293,7 +294,7 @@ impl Driver for SimulatorDriver {
 
     fn belt_speed(&self) -> Option<(f64, f64)> {
         let s = self.lock();
-        (s.report_at != f64::NEG_INFINITY).then(|| (py_round1(s.belt.speed), s.report_at))
+        (s.report_at != f64::NEG_INFINITY).then(|| (round_tenth(s.belt.speed), s.report_at))
     }
 
     fn belt_running(&self) -> Option<bool> {

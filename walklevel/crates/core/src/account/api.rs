@@ -22,6 +22,7 @@ use serde::Serialize;
 use serde_json::{Map, Value, json};
 
 use super::{KontoError, KontoErrorKind};
+use crate::py::{quote, truthy};
 use crate::teksty::t;
 
 /// Limit czasu połączenia i odpowiedzi (sekundy).
@@ -233,19 +234,6 @@ pub fn field_errors(payload: &Value) -> BTreeMap<String, String> {
     out
 }
 
-/// Kodowanie fragmentu ścieżki jak `urllib.parse.quote(text, safe="")`.
-fn quote(text: &str) -> String {
-    let mut out = String::with_capacity(text.len());
-    for &b in text.as_bytes() {
-        if b.is_ascii_alphanumeric() || matches!(b, b'_' | b'.' | b'-' | b'~') {
-            out.push(char::from(b));
-        } else {
-            out.push_str(&format!("%{b:02X}"));
-        }
-    }
-    out
-}
-
 // --- dane z serwera --------------------------------------------------------------------------
 
 /// Użytkownik z rekordu PocketBase.
@@ -369,18 +357,6 @@ fn num(v: &Value, key: &str) -> f64 {
         Some(Value::String(s)) => s.trim().parse().unwrap_or(0.0),
         Some(Value::Bool(b)) => f64::from(u8::from(*b)),
         _ => 0.0,
-    }
-}
-
-/// Prawdziwość wartości jak `bool()` w Pythonie.
-pub(crate) fn truthy(v: &Value) -> bool {
-    match v {
-        Value::Null => false,
-        Value::Bool(b) => *b,
-        Value::Number(n) => n.as_f64().is_some_and(|f| f != 0.0),
-        Value::String(s) => !s.is_empty(),
-        Value::Array(a) => !a.is_empty(),
-        Value::Object(o) => !o.is_empty(),
     }
 }
 

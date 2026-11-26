@@ -136,11 +136,6 @@ fn table(name: &str) -> Option<&'static [u8; 65]> {
     TABLES.iter().find(|(n, _)| *n == name).map(|(_, t)| *t)
 }
 
-/// Czy taka tablica istnieje.
-pub fn is_table(name: &str) -> bool {
-    table(name).is_some()
-}
-
 /// Nazwy wszystkich tablic w kolejności QZ.
 pub fn table_names() -> Vec<&'static str> {
     TABLES.iter().map(|(n, _)| *n).collect()
@@ -163,7 +158,7 @@ pub fn speed_command(kmh: f64) -> String {
     if kmh <= 0.0 {
         return "props CurrentSpeed 0".to_string();
     }
-    let value = super::kontrakt::py_round1(SPEED_MAX.min(SPEED_MIN.max(kmh)));
+    let value = crate::py::round_tenth(SPEED_MAX.min(SPEED_MIN.max(kmh)));
     // jak `{value:g}` w Pythonie: liczba bez zbędnych zer, np. "1.5", "3"
     format!("props CurrentSpeed {value}")
 }
@@ -686,7 +681,7 @@ impl Telemetry {
     /// w tych samych jednostkach co `last_speed`, którym pilnujemy, czy taśma posłuchała.
     pub fn native_speed(&self, kmh: f64) -> f64 {
         if self.imperial() {
-            super::kontrakt::py_round1(kmh / MILE_KM)
+            crate::py::round_tenth(kmh / MILE_KM)
         } else {
             kmh
         }

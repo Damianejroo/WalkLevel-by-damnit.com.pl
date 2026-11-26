@@ -146,6 +146,28 @@ pub fn load_config(resources: &Path, data: &Path) -> Result<Config, ConfigError>
     Ok(Config { values })
 }
 
+/// Jak [`load_config`], a gdy się nie da (brak pliku obok exe, błędny plik) - `embedded`
+/// (config.toml wbudowany w program) z config.local.toml, jeśli ten jest poprawny.
+/// Drugi element: powód użycia wbudowanego (do logu).
+pub fn load_config_or(
+    resources: &Path,
+    data: &Path,
+    embedded: &str,
+) -> (Config, Option<ConfigError>) {
+    match load_config(resources, data) {
+        Ok(config) => (config, None),
+        Err(e) => {
+            let mut values: Map<String, Value> = toml::from_str(embedded).unwrap_or_default();
+            if let Ok(text) = std::fs::read_to_string(data.join(LOCAL_FILE))
+                && let Ok(over) = toml::from_str::<Map<String, Value>>(&text)
+            {
+                values = merge(&values, &over);
+            }
+            (Config { values }, Some(e))
+        }
+    }
+}
+
 /// Łączy dwie mapy: tabele w obu łączą się rekurencyjnie, resztę zastępuje `over`.
 pub fn merge(base: &Map<String, Value>, over: &Map<String, Value>) -> Map<String, Value> {
     let mut result = base.clone();
@@ -229,6 +251,30 @@ mod tests {
             .nth(3)
             .unwrap()
             .to_path_buf()
+    }
+
+    #[test]
+    fn embedded_config_when_file_is_missing_or_broken() {
+        let res = tempfile::tempdir().unwrap();
+        let data = tempfile::tempdir().unwrap();
+        let embedded = "[konto]\nadres = \"https://a.example\"\n[ui]\ntheme = \"dark\"\n";
+        let (c, why) = load_config_or(res.path(), data.path(), embedded);
+        assert!(matches!(why, Some(ConfigError::Read { .. })));
+        assert_eq!(c.str_value("ui", "theme"), Some("dark"));
+        // poprawny config.local.toml dokłada się do wbudowanego, zepsuty jest pomijany
+        fs::write(data.path().join(LOCAL_FILE), "[ui]\ntheme = \"light\"\n").unwrap();
+        let (c, _) = load_config_or(res.path(), data.path(), embedded);
+        assert_eq!(c.str_value("ui", "theme"), Some("light"));
+        assert_eq!(c.str_value("konto", "adres"), Some("https://a.example"));
+        fs::write(data.path().join(LOCAL_FILE), "[ui\n").unwrap();
+        let (c, _) = load_config_or(res.path(), data.path(), embedded);
+        assert_eq!(c.str_value("ui", "theme"), Some("dark"));
+        // plik obok exe jest - wbudowany nieużywany
+        fs::remove_file(data.path().join(LOCAL_FILE)).unwrap();
+        fs::write(res.path().join(DEFAULT_FILE), "[ui]\ntheme = \"system\"\n").unwrap();
+        let (c, why) = load_config_or(res.path(), data.path(), embedded);
+        assert!(why.is_none());
+        assert_eq!(c.str_value("ui", "theme"), Some("system"));
     }
 
     #[test]

@@ -49,14 +49,6 @@ pub fn data_dir() -> PathBuf {
     )
 }
 
-/// Folder danych, utworzony jeśli go nie ma (odpowiednik `enter_data_dir` bez zmiany
-/// bieżącego folderu - reszta rdzenia dostaje ścieżki jawnie).
-pub fn ensure_data_dir() -> std::io::Result<PathBuf> {
-    let dir = data_dir();
-    std::fs::create_dir_all(&dir)?;
-    Ok(dir)
-}
-
 /// Wersja aplikacji zapisywana w sesjach: numer z Cargo w wersji zainstalowanej,
 /// "dev" przy uruchamianiu z kodu (jak w Pythonie bez wersja.txt).
 pub fn app_version() -> &'static str {

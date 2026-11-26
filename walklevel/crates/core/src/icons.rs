@@ -50,11 +50,6 @@ fn norm(s: &str) -> String {
         .collect()
 }
 
-/// Najbardziej prawdopodobny plik gry w folderze: z ikoną, nazwą jak folder, płytko, duży.
-pub fn pick_exe(folder: &Path) -> Option<PathBuf> {
-    pick_exe_with(folder, MAX_DEPTH, &|p| icon_count(p) > 0)
-}
-
 fn pick_exe_with(
     folder: &Path,
     max_depth: usize,

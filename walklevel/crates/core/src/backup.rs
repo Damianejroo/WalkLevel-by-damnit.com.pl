@@ -20,11 +20,14 @@ use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
-use chrono::{Datelike, Local, NaiveDate, NaiveTime, TimeZone, Timelike};
+use chrono::{Local, NaiveDate, NaiveTime, TimeZone};
 use regex::Regex;
 use rusqlite::Connection;
 use serde::Serialize;
 use serde_json::{Map, Value};
+
+// liczby z wartości JSON jak float()/int() w Pythonie (napis z liczbą też - jak SQLite REAL)
+use crate::py::{py_float as json_f64, py_int as json_i64};
 
 use crate::history::{History, HistoryError, VISIBILITY, new_session};
 use crate::model::Session;
@@ -349,7 +352,7 @@ fn write_archive(
 ) -> Result<(), BackupError> {
     let options = zip::write::SimpleFileOptions::default()
         .compression_method(zip::CompressionMethod::Deflated)
-        .last_modified_time(zip_time());
+        .last_modified_time(crate::reports::zip_time());
     let mut zip = zip::ZipWriter::new(File::create(path)?);
 
     let manifest = Manifest {
@@ -469,21 +472,6 @@ fn tail(path: &Path, max: u64) -> io::Result<Vec<u8>> {
     Ok(buf)
 }
 
-/// Czas pliku w archiwum (lokalny, jak zipfile w Pythonie).
-fn zip_time() -> zip::DateTime {
-    let now = Local::now();
-    let year = u16::try_from(now.year()).unwrap_or(1980);
-    zip::DateTime::from_date_and_time(
-        year,
-        now.month() as u8,
-        now.day() as u8,
-        now.hour() as u8,
-        now.minute() as u8,
-        now.second() as u8,
-    )
-    .unwrap_or_default()
-}
-
 /// Nazwa ikony w archiwum: `<nazwa pliku bez rozszerzenia>.png`.
 fn icon_key(icon_file: &str) -> String {
     let stem = Path::new(icon_file)
@@ -597,30 +585,6 @@ fn json_text(v: &Value) -> Option<String> {
         Value::String(s) => Some(s.clone()),
         Value::Number(n) if n.is_f64() => n.as_f64().map(crate::reports::py_float),
         Value::Number(n) => Some(n.to_string()),
-        _ => None,
-    }
-}
-
-/// Liczba z wartości JSON (liczba, prawda/fałsz albo napis z liczbą - jak SQLite REAL).
-fn json_f64(v: &Value) -> Option<f64> {
-    match v {
-        Value::Number(n) => n.as_f64(),
-        Value::Bool(b) => Some(if *b { 1.0 } else { 0.0 }),
-        Value::String(s) => s.trim().parse().ok(),
-        _ => None,
-    }
-}
-
-/// Liczba całkowita z wartości JSON (ułamek obcinany).
-fn json_i64(v: &Value) -> Option<i64> {
-    match v {
-        Value::Number(n) => n.as_i64().or_else(|| {
-            n.as_f64()
-                .filter(|f| f.is_finite())
-                .map(|f| f.trunc() as i64)
-        }),
-        Value::Bool(b) => Some(i64::from(*b)),
-        Value::String(s) => s.trim().parse().ok(),
         _ => None,
     }
 }
@@ -808,7 +772,7 @@ pub fn read(path: &Path) -> Result<Preview, BackupError> {
         Some(Value::Object(m)) => m,
         _ => &empty,
     };
-    let flag = |key: &str| content.get(key).is_some_and(store::truthy);
+    let flag = |key: &str| content.get(key).is_some_and(crate::py::truthy);
     Ok(Preview {
         path: path.to_path_buf(),
         app_version: manifest

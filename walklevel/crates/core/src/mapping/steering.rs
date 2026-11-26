@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::engine::OutputKind;
-use super::py::{py_float, py_int, round_tenth};
+use crate::py::{py_float, py_int, round_tenth};
 
 /// Gałka w drodze przez skoki - wysyłamy prędkość dopiero, gdy skok trzyma się tyle sekund.
 pub const PAD_SETTLE_S: f64 = 0.15;

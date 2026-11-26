@@ -31,6 +31,7 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::history::{History, HistoryError};
+use crate::py::truthy;
 use crate::teksty::t;
 
 pub use api::{
@@ -509,15 +510,15 @@ impl Account {
         {
             s.games_visibility = v.to_string();
         }
-        if let Some(v) = profile.get("regulamin_aktualny").filter(|v| api::truthy(v)) {
+        if let Some(v) = profile.get("regulamin_aktualny").filter(|v| truthy(v)) {
             s.terms_current = value_text(v);
         }
-        if let Some(v) = profile.get("regulamin").filter(|v| api::truthy(v)) {
+        if let Some(v) = profile.get("regulamin").filter(|v| truthy(v)) {
             s.terms = value_text(v);
         }
         if let Some(v) = profile.get("verified") {
             // po kliknięciu linku z maila
-            s.verified = api::truthy(v);
+            s.verified = truthy(v);
         }
     }
 
@@ -527,7 +528,7 @@ impl Account {
         let result = self.client.my_profile();
         let profile = self.handle(result)?;
         if let Some(v) = profile.get("verified") {
-            self.state.verified = api::truthy(v);
+            self.state.verified = truthy(v);
             self.save()?;
         }
         Ok(self.state.verified)
@@ -887,10 +888,6 @@ impl Accounts {
     /// Zalogowane konta (do wysyłki i synchronizacji każdej osoby jej kontem).
     pub fn logged_in(&self) -> impl Iterator<Item = &Account> {
         self.items.iter().filter(|a| a.state.logged_in())
-    }
-
-    pub fn logged_in_mut(&mut self) -> impl Iterator<Item = &mut Account> {
-        self.items.iter_mut().filter(|a| a.state.logged_in())
     }
 
     /// Osoba, do której przypięte jest konto użytkownika ("" - żadna).
