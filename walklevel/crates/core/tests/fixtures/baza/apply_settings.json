@@ -1,0 +1,145 @@
+{
+  "sections": {
+    "stand_below": "mapping",
+    "run_on": "mapping",
+    "run_off": "mapping",
+    "quick_stop": "mapping",
+    "output": "output",
+    "walk_key": "output",
+    "run_key": "output",
+    "toggle_key": "output",
+    "toggle_pad": "output",
+    "direction": "output",
+    "belt_control": "ble",
+    "idle_speed": "ble",
+    "walk_speed": "ble",
+    "run_speed": "ble",
+    "pad_steps": "ble",
+    "training_levels": "ble",
+    "training_level": "ble",
+    "pad_idle": "ble",
+    "device_address": "ble",
+    "device_name": "ble",
+    "simulator": "ui",
+    "record": "ui",
+    "always_on_top": "ui",
+    "floating_button": "ui",
+    "floating_pos": "ui",
+    "theme": "ui",
+    "large_text": "ui",
+    "detailed_logs": "ui",
+    "last_version": "ui"
+  },
+  "cases": [
+    {
+      "config": {
+        "mapping": {
+          "run_on": 6.3
+        },
+        "output": {
+          "type": "dry"
+        }
+      },
+      "settings": {
+        "run_on": 7.0,
+        "output": "keys",
+        "device_name": "KS-X21"
+      },
+      "result": {
+        "mapping": {
+          "run_on": 7.0
+        },
+        "output": {
+          "type": "keys"
+        },
+        "ble": {
+          "device_name": "KS-X21"
+        }
+      }
+    },
+    {
+      "config": {
+        "mapping": {
+          "run_on": 6.3
+        },
+        "output": {
+          "type": "dry"
+        }
+      },
+      "settings": {
+        "theme": "dark",
+        "detailed_logs": false,
+        "pad_steps": [
+          [
+            0,
+            1.0
+          ],
+          [
+            100,
+            4.0
+          ]
+        ]
+      },
+      "result": {
+        "mapping": {
+          "run_on": 6.3
+        },
+        "output": {
+          "type": "dry"
+        },
+        "ui": {
+          "theme": "dark",
+          "detailed_logs": false
+        },
+        "ble": {
+          "pad_steps": [
+            [
+              0,
+              1.0
+            ],
+            [
+              100,
+              4.0
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "config": {
+        "mapping": {
+          "run_on": 6.3
+        },
+        "output": {
+          "type": "dry"
+        }
+      },
+      "settings": {
+        "walk_key": "w",
+        "toggle_pad": "back",
+        "floating_pos": [
+          10,
+          20
+        ],
+        "last_version": "0.5.1"
+      },
+      "result": {
+        "mapping": {
+          "run_on": 6.3
+        },
+        "output": {
+          "type": "dry",
+          "walk_key": "w",
+          "toggle_pad": "back"
+        },
+        "ui": {
+          "floating_pos": [
+            10,
+            20
+          ],
+          "last_version": "0.5.1"
+        }
+      }
+    }
+  ]
+}

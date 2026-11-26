@@ -1,0 +1,65 @@
+[
+  {
+    "base": "[output]\ntype = \"dry\"\nstart_enabled = false\n",
+    "local": "[output]\ntype = \"keys\"\n",
+    "result": {
+      "output": {
+        "type": "keys",
+        "start_enabled": false
+      }
+    }
+  },
+  {
+    "base": "[a]\nx = 1\n[a.b]\ny = 2\nz = [1, 2]\n[c]\nk = \"v\"\n",
+    "local": "[a.b]\ny = 3\nnowy = true\n[a]\nx = { w = 1 }\n[d]\nq = 1.5\n",
+    "result": {
+      "a": {
+        "x": {
+          "w": 1
+        },
+        "b": {
+          "y": 3,
+          "z": [
+            1,
+            2
+          ],
+          "nowy": true
+        }
+      },
+      "c": {
+        "k": "v"
+      },
+      "d": {
+        "q": 1.5
+      }
+    }
+  },
+  {
+    "base": "[a]\nx = { w = 1 }\n",
+    "local": "[a]\nx = 5\n",
+    "result": {
+      "a": {
+        "x": 5
+      }
+    }
+  },
+  {
+    "base": "[konto]\nadres = \"https://x\"\n",
+    "local": null,
+    "result": {
+      "konto": {
+        "adres": "https://x"
+      }
+    }
+  },
+  {
+    "base": "top = 1\n[s]\nlista = [[0, 1.0], [25, 1.5]]\n",
+    "local": "top = \"z\"\n[s]\nlista = []\n",
+    "result": {
+      "top": "z",
+      "s": {
+        "lista": []
+      }
+    }
+  }
+]
