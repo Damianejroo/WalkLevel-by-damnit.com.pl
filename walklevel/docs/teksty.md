@@ -1437,3 +1437,22 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: Profil gry
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `profil.wskaz_plik` | (nowy) | Wskaż plik gry… | Drugi przycisk obok „Wskaż folder gry…”: plik .exe albo skrót (podpowiedź `profil.wskaz_podpowiedz`). |
+| `profil.folder_gry` | (nowy) | …\{folder} | Pod nazwą pliku gry: folder, w którym leży. |
+| `profil.ikona_dostepnosc` | (nowy) | Ikona {nazwa} | Nazwa pola w siatce ikon dla czytnika ekranu (nazwy w `profil.ikona.*`). |
+| `profil.zacznij_domyslne_opis` | (nowy) | Tryb, klawisze, stopnie pada i prędkości będą takie jak po instalacji. | Pod „Zacznij od”, gdy wybrane „Ustawień domyślnych”. |
+
+## Dodatki: Edycja osoby
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `osoba.edycja.konto` | (nowy) | Konto online | Tytuł karty konta osoby. |
+| `osoba.edycja.konto_jest` | (nowy) | Ta osoba ma konto online {pseudonim}. | |
+| `osoba.edycja.konto_brak` | (nowy) | Ta osoba nie ma konta online. Bez konta wszystko działa na tym komputerze. | |
+| `osoba.edycja.konto_wybierz` | (nowy) | Kontem online zarządzasz, gdy ta osoba jest wybrana. | Edycja osoby, która nie jest teraz wybrana. |
+| `osoba.edycja.wybierz` | (nowy) | Wybierz tę osobę | Przełącza aplikację na tę osobę. |
