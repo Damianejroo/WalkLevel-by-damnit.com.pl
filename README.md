@@ -1,4 +1,4 @@
-# WalkingPad X21 PC Gaming by damnit.com.pl
+# WalkLevel by damnit.com.pl
 
 **WalkLevel** to aplikacja na Windows, która zamienia chodzenie po bieżni na sterowanie
 w grach: chód to **W**, bieg to **Shift + W** (oba klawisze można zmienić). Łączy się z bieżnią przez Bluetooth i sama ją
@@ -11,7 +11,7 @@ kontakt@damnit.com.pl
 
 ## Instalacja
 
-1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/latest).
+1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/latest).
 2. Uruchom instalator i kliknij **Instaluj** (jeden ekran, bez administratora). Po instalacji
    aplikacja otworzy się sama.
    Windows może pokazać okno „System Windows ochronił ten komputer” (aplikacja nie ma
@@ -185,7 +185,7 @@ standard FTMS (tylko odczyt).
   instalator jest uruchamiany dopiero po zgodności sumy SHA-256 podanej przez GitHub,
 - wydania budują się w GitHub Actions z przypiętych wersji (akcje po commitach, Inno Setup
   po sumie SHA-256, biblioteki z `uv.lock` z sumami) i mają poświadczenie pochodzenia
-  (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl`),
+  (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/WalkLevel-by-damnit.com.pl`),
 - instalacja i działanie bez administratora; aplikacja startuje z wyłączonym sterowaniem,
   wysyła do bieżni tylko start, stop i prędkość (gdy sterowanie jest włączone) i puszcza W/Shift po utracie
   danych, awarii albo zamknięciu,
