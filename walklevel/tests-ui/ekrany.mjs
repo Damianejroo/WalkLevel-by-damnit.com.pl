@@ -12,8 +12,8 @@ export const EKRANY = [
   { ekran: 'history', scenariusze: ['domyslny'] },
   { ekran: 'achievements', scenariusze: ['domyslny'] },
   { ekran: 'trail', scenariusze: ['domyslny'] },
-  { ekran: 'online', scenariusze: ['domyslny'] },
-  { ekran: 'onlinePerson', scenariusze: ['domyslny'] },
+  { ekran: 'online', scenariusze: ['domyslny', 'dlugie', 'wylogowany'] },
+  { ekran: 'onlinePerson', scenariusze: ['domyslny', 'dlugie'] },
   { ekran: 'report', scenariusze: ['domyslny'] },
   { ekran: 'log', scenariusze: ['domyslny'] },
   { ekran: 'export', scenariusze: ['domyslny'] },
@@ -24,6 +24,6 @@ export const EKRANY = [
   { ekran: 'profile', scenariusze: ['domyslny'] },
   { ekran: 'person', scenariusze: ['domyslny'] },
   { ekran: 'session', scenariusze: ['domyslny'] },
-  { ekran: 'account', scenariusze: ['wylogowany'] },
+  { ekran: 'account', scenariusze: ['wylogowany', 'domyslny'] },
   { ekran: 'wzornik', scenariusze: ['domyslny', 'dlugie'] },
 ];

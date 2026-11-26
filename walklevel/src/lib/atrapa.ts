@@ -1197,6 +1197,13 @@ export function utworzAtrape(): Silnik {
     };
   }
 
+  // Podgląd profilu osoby bez klikania (?ekran=onlinePerson): profil znajomego; &osoba=ja - własny,
+  // &osoba=obcy - osoba spoza znajomych (z podziałem na gry)
+  if (account.loggedIn && p.get('ekran') === 'onlinePerson') {
+    const kto = p.get('osoba');
+    void komendy.online_person_open({ userId: kto === 'ja' ? account.userId : kto === 'obcy' ? 'u-ania' : 'u-ola' });
+  }
+
   // Narzędzie z wyglad.md 11.2 dostępne w konsoli przeglądarki i dla testu: window.wystaje()
   void import('./dev/wystaje').then((m) => Object.assign(window, { wystaje: m.wystaje }));
 
