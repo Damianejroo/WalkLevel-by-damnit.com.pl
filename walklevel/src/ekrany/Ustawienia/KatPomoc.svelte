@@ -51,6 +51,7 @@
     onclick={() => wykonaj(api.updateCheck(false))}
   />
   <p class="o-aplikacji">{t('app.o_aplikacji', { wersja: stan.app.version, autor: stan.statics.author })}</p>
+  <p class="o-aplikacji">{t('ustawienia.pomoc.podziekowania')}</p>
   <div class="linki">
     {#each LINKI as [rodzaj, klucz] (rodzaj)}
       <Przycisk wariant="link" napis={t(klucz)} onclick={() => wykonaj(api.openLink(rodzaj))} />
@@ -60,6 +61,6 @@
 
 <style>
   .opis { font-size: var(--fs-sm); color: var(--text-2); line-height: var(--lh-body); }
-  .o-aplikacji { font-size: var(--fs-sm); color: var(--text-2); }
+  .o-aplikacji { font-size: var(--fs-sm); color: var(--text-2); overflow-wrap: anywhere; }
   .linki { display: flex; flex-wrap: wrap; column-gap: var(--sp-5); min-width: 0; margin-block: -8px -6px; }
 </style>

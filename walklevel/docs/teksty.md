@@ -1650,3 +1650,9 @@ wcześniej wpisu.
 |---|---|---|---|
 | `profil_online.inne_gry` | (nowy) | Inne gry ({liczba}) | Ostatni wiersz podziału na gry w profilu osoby (`inne_gry`: gry bez nazw). |
 | `osiagniecia.procent_graczy` | (nowy) | Ma to {procent}% graczy | Stopka osiągnięcia na ekranie Osiągnięcia (konto online, od 25 kont). |
+
+## Dodatki: podziękowania (0.6.2)
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `ustawienia.pomoc.podziekowania` | (nowy) | Pomysłodawca i główny tester: Velczer | Ustawienia > Pomoc i diagnostyka, pod wersją aplikacji; zwykły tekst --text-2, bez ikony i akcentu (decyzja Damiana). |

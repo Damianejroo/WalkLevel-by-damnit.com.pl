@@ -198,3 +198,7 @@ standard FTMS (tylko odczyt).
 Protokół KingSmith odtworzony na podstawie sterownika z projektu
 [QZ (qdomyos-zwift)](https://github.com/cagnulein/qdomyos-zwift), również na licencji GPL-3.0.
 Ikona przygotowana z pomocą generatora obrazów GPT.
+
+## Podziękowania
+
+Velczer - pomysłodawca i główny tester WalkLevel.

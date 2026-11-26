@@ -1116,4 +1116,5 @@ export const SLOWNIK = {
   "dymek.stop_dostepnosc": "Zatrzymaj taśmę",
   "profil_online.inne_gry": "Inne gry ({liczba})",
   "osiagniecia.procent_graczy": "Ma to {procent}% graczy",
+  "ustawienia.pomoc.podziekowania": "Pomysłodawca i główny tester: Velczer",
 } as const;
