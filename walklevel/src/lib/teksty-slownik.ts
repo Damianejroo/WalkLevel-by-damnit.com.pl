@@ -972,4 +972,11 @@ export const SLOWNIK = {
   "nazwy.osoba_domyslna": "Gracz",
   "nazwy.profil_domyslny": "Domyślny",
   "nazwy.profil": "Profil",
+  "zgloszenie.droga_ogolna": "Zgłoszenie trafia przez serwer WalkLevel prosto na skrzynkę autora. Serwer niczego nie przechowuje.",
+  "zgloszenie.droga_email": "Otworzy się e-mail do autora i folder z paczką. Wystarczy przeciągnąć plik do wiadomości.",
+  "dziennik.podpis": "Na żywo · {liczba} {liczba:wpis/wpisy/wpisów}",
+  "dziennik.pusty": "Dziennik jest pusty. Wpisy pojawią się tutaj, gdy coś się wydarzy.",
+  "dziennik.kopiuj": "Kopiuj dziennik",
+  "dziennik.skopiowano": "Skopiowano dziennik. Możesz go wkleić do wiadomości.",
+  "dziennik.kopiuj_blad": "Nie udało się skopiować dziennika. Zaznacz wpisy myszą i naciśnij Ctrl+C.",
 } as const;

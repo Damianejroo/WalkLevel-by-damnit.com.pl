@@ -543,6 +543,17 @@ export function utworzAtrape(): Silnik {
   };
   for (let i = 0; i < 24; i++) logi.push(`0${8 + Math.floor(i / 6)}:${String(10 + i * 2).padStart(2, '0')}:0${i % 10}  bieznia.ble: odczyt prędkości ${liczba(2 + (i % 5) * 0.3, 1)} km/h, kroki ${1200 + i * 37}`);
 
+  // Dziennik: godziny przykładowych wpisów w formacie HH:MM:SS (pętla wyżej daje „010:34:02”),
+  // długie wpisy bez spacji (scenariusz „dlugie”) i nowe wpisy na żywo co 2,5 s
+  logi.forEach((l, i) => (logi[i] = l.replace(/^0(\d\d:)/, '$1')));
+  if (dlugie) {
+    logi.push('09:59:58  bieznia.zgloszenia: zapisano paczkę C:\\Users\\Gracz\\AppData\\Local\\Bieznia\\dane\\zgloszenia\\zgloszenie-20261126-095958-bardzo-dlugi-plik.zip');
+    logi.push(`09:59:59  bieznia.ble: ${'0123456789abcdef'.repeat(8)}`);
+  }
+  setInterval(() => {
+    if (stanBiezni === 'strumien' || stanBiezni === 'symulator') loguj(`bieznia.ble: odczyt prędkości ${liczba(Math.max(0, predkosc), 1)} km/h, kroki ${Math.floor(kroki)}`);
+  }, 2500);
+
   const wycinki = (): K.SliceMap => ({
     app, settings, people, device, control, levels, history, account, online, update, report, models, bubble,
   });
@@ -1169,6 +1180,16 @@ export function utworzAtrape(): Silnik {
     bubble_drag_end: () => undefined,
     popup_ready: () => ({ items: [] }) satisfies K.PopupsView,
   };
+
+  // Zgłoś problem: stany do podglądu (?stan=zgloszenie-wyslano | zgloszenie-wysylanie |
+  // zgloszenie-email | zgloszenie-blad - wysyłka kończy się błędem braku internetu)
+  const stanZgloszenia = p.get('stan');
+  if (stanZgloszenia === 'zgloszenie-wyslano') Object.assign(report, { sentNumber: 'WL-1042', status: t('zgloszenie.wyslano', { numer: 'WL-1042' }) });
+  if (stanZgloszenia === 'zgloszenie-wysylanie') Object.assign(report, { busy: true, status: t('zgloszenie.przygotowuje') });
+  if (stanZgloszenia === 'zgloszenie-email') app.reportEndpoint = false;
+  if (stanZgloszenia === 'zgloszenie-blad') {
+    komendy.report_send = () => new Promise((_ok, nie) => pozniej(600, () => nie(blad('offline', t('zgloszenie.blad.internet')))));
+  }
 
   function statics(): K.StaticData {
     return {
