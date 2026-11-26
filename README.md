@@ -9,6 +9,36 @@ i opcjonalne **konto online** (znajomi, ranking, wyniki na koncie).
 Twórca: **damnit.com.pl Damian Skrzypiec** · [damnit.com.pl](https://damnit.com.pl) ·
 kontakt@damnit.com.pl
 
+## Jak wygląda
+
+Zrzuty wersji 0.6.2 z przykładowymi danymi (osoby, znajomi i wyniki są wymyślone).
+
+<table>
+  <tr>
+    <td width="50%"><img src="walklevel/docs/readme/main-window-dark.png" alt="Ekran główny w ciemnym motywie: chód po bieżni, wskaźnik prędkości i panel znajomych"></td>
+    <td width="50%"><img src="walklevel/docs/readme/main-window-light.png" alt="Ekran główny w jasnym motywie: tryb Klawisze"></td>
+  </tr>
+  <tr>
+    <td>Ekran główny podczas chodzenia: prędkość taśmy, strefa (chód / bieg), kroki i dystans sesji, poziom z rangą. Z prawej panel znajomych - kto chodzi teraz i w co gra.</td>
+    <td>To samo w jasnym motywie, tryb <b>Klawisze</b>: W i Shift + W ustawiają prędkość taśmy.</td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="25%"><img src="walklevel/docs/readme/history-dark.png" alt="Historia kroków z wykresem dziennym"></td>
+    <td width="25%"><img src="walklevel/docs/readme/achievements-dark.png" alt="Osiągnięcia według rzadkości"></td>
+    <td width="25%"><img src="walklevel/docs/readme/ranking-dark.png" alt="Ranking kroków znajomych"></td>
+    <td width="25%"><img src="walklevel/docs/readme/settings-dark.png" alt="Ustawienia: profile gier i sterowanie"></td>
+  </tr>
+  <tr>
+    <td>Historia kroków: wykres dzienny i podział na profile gier.</td>
+    <td>Osiągnięcia i szlak.</td>
+    <td>Ranking znajomych w koncie online.</td>
+    <td>Ustawienia: profile gier i tryb sterowania.</td>
+  </tr>
+</table>
+
 ## Instalacja
 
 1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/latest).
