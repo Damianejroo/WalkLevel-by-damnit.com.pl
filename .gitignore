@@ -30,3 +30,4 @@ node_modules/
 /walklevel/dist/
 /walklevel/src-tauri/gen/
 /walklevel/narzedzia/
+/walklevel/dist-instalator/
