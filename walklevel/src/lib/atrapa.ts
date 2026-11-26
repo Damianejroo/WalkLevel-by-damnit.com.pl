@@ -53,6 +53,7 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   pusto: { konto: false, historia: false, bieznia: 'brak' },
   pierwsze: { pierwsze: true, konto: false, historia: false, bieznia: 'brak' },
   dlugie: { dlugie: true, tryb: 'training', wlaczone: true },
+  'dlugie-pad': { dlugie: true, tryb: 'gamepad', wlaczone: true },
 };
 
 function czytajScenariusz(): Scenariusz {

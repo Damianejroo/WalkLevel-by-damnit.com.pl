@@ -1437,3 +1437,14 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: Główny
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `glowny.osoby.lista` | (nowy) | Osoby na tym komputerze | Nazwa listy rozwijanej osób (czytnik ekranu). |
+| `glowny.sterowanie.lista` | (nowy) | Profile gier | Nazwa listy rozwijanej profili (czytnik ekranu). |
+| `glowny.sterowanie.tryby` | (nowy) | Tryb sterowania | Nazwa grupy kafelków trybu (czytnik ekranu). |
+| `glowny.licznik.kadencja_krotko` | Kroki/min | Kroki/min | Tytuł kafelka; pełna nazwa dla czytnika ekranu to `glowny.licznik.kadencja`. |
+| `glowny.strefy.puszczona_krotko` | 0% | 0% | Nazwa pierwszego żetonu trybu Pad przy 5 stopniach (krótsza niż „Gałka puszczona”). |
+| `tryb.chodzenie.opis_proba` | (nowy) | tryb próbny, postać stoi | Opis kafelka Chodzenie w trybie próbnym (gra nie dostaje klawiszy). |
