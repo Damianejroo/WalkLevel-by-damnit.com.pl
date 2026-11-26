@@ -163,7 +163,14 @@
   .lista { display: flex; flex-direction: column; margin-inline: calc(-1 * var(--sp-2)); }
   /* zakres bez znaczenia, gdy wyniki nie są zapisywane */
   .wylaczony { opacity: 0.6; }
-  .osoba + .osoba { margin-top: var(--sp-1); padding-top: var(--sp-1); border-top: 1px solid var(--line); }
+  /* kreska między osobami wyrównana do treści wierszy (jak w wczytaniu kopii) */
+  .osoba + .osoba::before {
+    content: '';
+    display: block;
+    height: 1px;
+    margin: var(--sp-1) var(--sp-2);
+    background: var(--line);
+  }
 
   .stopka {
     display: flex;

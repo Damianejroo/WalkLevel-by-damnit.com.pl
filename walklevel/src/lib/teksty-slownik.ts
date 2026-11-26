@@ -986,4 +986,5 @@ export const SLOWNIK = {
   "kopia.import.przed.tytul": "Dane sprzed wczytania kopii",
   "kopia.import.przed.opis": "Zapisano je przed ostatnim wczytaniem kopii. Przywrócenie cofa to wczytanie i wszystko, co zmieniło się od tamtej chwili, także nowe sesje.",
   "kopia.import.przed.przywroc": "Przywróć te dane",
+  "kopia.import.osoba_jest_tytul": "Ta osoba już jest na tym komputerze",
 } as const;

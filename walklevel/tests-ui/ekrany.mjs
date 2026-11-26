@@ -17,7 +17,7 @@ export const EKRANY = [
   { ekran: 'report', scenariusze: ['domyslny'] },
   { ekran: 'log', scenariusze: ['domyslny'] },
   { ekran: 'export', scenariusze: ['domyslny', 'dlugie'] },
-  { ekran: 'import', scenariusze: ['domyslny', 'dlugie'] },
+  { ekran: 'import', scenariusze: ['domyslny', 'dlugie', 'kopia-wybor'] },
   { ekran: 'models', scenariusze: ['domyslny'] },
   { ekran: 'wizard', scenariusze: ['pierwsze'] },
   { ekran: 'devices', scenariusze: ['domyslny'] },

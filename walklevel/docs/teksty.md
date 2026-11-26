@@ -1456,3 +1456,4 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 | `kopia.import.przed.tytul` | (nowy) | Dane sprzed wczytania kopii | Karta z przywracaniem (gdy jest kopia `przed-importem-*`). |
 | `kopia.import.przed.opis` | (nowy) | Zapisano je przed ostatnim wczytaniem kopii. Przywrócenie cofa to wczytanie i wszystko, co zmieniło się od tamtej chwili, także nowe sesje. | Pod nim przycisk z przytrzymaniem `kopia.import.przed.przywroc`. |
 | `kopia.import.przed.przywroc` | (nowy) | Przywróć te dane | Przycisk z przytrzymaniem w karcie `kopia.import.przed.tytul` (pełny napis `ustawienia.dane.przywroc` nie mieści się w wąskim oknie). |
+| `kopia.import.osoba_jest_tytul` | (nowy) | Ta osoba już jest na tym komputerze | Tytuł karty, gdy w pliku jest jedna taka osoba (tytuł w jednej linii, nazwa osoby w wierszu pod opisem). Zastępuje `kopia.import.konflikt` w tytule karty. |
