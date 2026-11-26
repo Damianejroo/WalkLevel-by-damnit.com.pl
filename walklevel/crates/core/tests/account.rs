@@ -50,6 +50,8 @@ struct State {
     terms_current: String,
     /// `poziomy` w GET regulamin: od tej wersji serwer zapisuje pola gier ("" - jeszcze nie)
     terms_games: String,
+    /// opis dla znajomych (PATCH profil `opis`)
+    description: String,
     issued: u64,
     offline: bool,
     /// serwer bez trasy synchronizacji (404)
@@ -236,6 +238,7 @@ impl FakeServer {
             let mut mine = json!({
                 "id": user.id, "email": user.email, "name": user.name, "verified": user.verified,
                 "widocznosc_profilu": "publiczny", "widocznosc_gier": "znajomi",
+                "opis": if st.description.is_empty() { Value::Null } else { json!(st.description) },
             });
             if !st.terms_current.is_empty() {
                 mine["regulamin"] = user.terms.clone();
@@ -244,6 +247,12 @@ impl FakeServer {
             return reply(&url, 200, mine);
         }
         if path == "/api/bieznia/profil" && method == "PATCH" {
+            if let Some(opis) = body.get("opis").and_then(Value::as_str) {
+                if opis.chars().count() > 40 {
+                    return error(&url, 400, "Opis może mieć najwyżej 40 znaków.");
+                }
+                st.description = opis.to_string();
+            }
             if let Some(terms) = body.get("regulamin") {
                 if terms.as_str() != Some(st.terms_current.as_str()) {
                     return error(&url, 400, "Nieaktualna wersja regulaminu.");
@@ -934,29 +943,137 @@ fn online_routes_return_server_data() {
     assert!(text.starts_with("{\n \"konto\""));
 }
 
+fn walk() -> account::LiveWalk {
+    account::LiveWalk {
+        kmh: 3.24,
+        steps: 840,
+        active_s: 600.7,
+        session_id: "abc".into(),
+        distance_km: 1.5249,
+        mode: "gra".into(),
+        game: Some(account::LiveGame {
+            id: "0a1b2c3d4e".into(),
+            name: "  World   of Warcraft ".into(),
+            public: true,
+        }),
+    }
+}
+
 #[test]
-fn live_state_only_when_enabled() {
+fn live_state_only_when_not_invisible() {
     let dir = tempfile::tempdir().expect("katalog");
     let server = FakeServer::new();
     let (mut account, _) = standalone(&server, dir.path());
     signed_in(&mut account, "p1");
+    assert_eq!(account.state.live_status, "niewidoczny"); // domyślnie wyłączony
     let before = server.requests();
-    account.live(3.24, 840, 600.7, "abc").expect("na żywo");
-    assert_eq!(server.requests(), before); // wyłączone - nic nie idzie
-    account.set_live(true).expect("włącz");
-    account.live(3.24, 840, 600.7, "abc").expect("na żywo");
+    account.live(&walk()).expect("na żywo");
+    assert_eq!(server.requests(), before); // niewidoczny - nic nie idzie
+    account.set_live_status("wszystko").expect("włącz");
+    assert!(account.state.live);
+    account.live(&walk()).expect("na żywo");
     let last = server.state().requests.last().cloned().expect("żądanie");
     assert_eq!(last.method, "PUT");
+    // bez regulaminu z grami - tylko pola sprzed 0.6.2
     assert_eq!(
         last.body,
         json!({"kmh": 3.2, "kroki": 840, "ruch_s": 600, "sesja_uuid": "abc"})
     );
-    account.set_live(false).expect("wyłącz");
+    assert!(account.set_live_status("zle").is_err());
+    account.set_live_status("niewidoczny").expect("wyłącz");
+    assert!(!account.state.live);
     let last = server.state().requests.last().cloned().expect("żądanie");
     assert_eq!(
         (last.method.as_str(), last.path.as_str()),
         ("DELETE", "/api/bieznia/stan")
     );
+}
+
+#[test]
+fn live_body_has_distance_mode_and_game_only_with_consent_and_status() {
+    let w = walk();
+    let full = account::api::live_body(&w, true, true);
+    assert_eq!(
+        full,
+        json!({"kmh": 3.2, "kroki": 840, "ruch_s": 600, "sesja_uuid": "abc",
+               "dystans_km": 1.525, "tryb": "gra", "gra_id": "0a1b2c3d4e",
+               "gra": "World of Warcraft", "gra_publiczna": true})
+    );
+    // „Pokazuj tylko, że chodzę”: tryb i dystans tak, gra nie
+    let only = account::api::live_body(&w, true, false);
+    assert_eq!(only["tryb"], "gra");
+    assert!(only.get("gra_id").is_none() && only.get("gra").is_none());
+    assert!(only.get("gra_publiczna").is_none());
+    // bez zgody na regulamin z grami - nic nowego
+    let old = account::api::live_body(&w, false, true);
+    assert!(old.get("dystans_km").is_none() && old.get("tryb").is_none());
+    // trening bez gry, dystans w zakresie 0..300, zły id gry pomijany
+    let mut t = walk();
+    t.mode = "trening".into();
+    t.distance_km = 999.0;
+    let tr = account::api::live_body(&t, true, true);
+    assert_eq!(
+        (tr["tryb"].as_str(), tr["dystans_km"].as_f64()),
+        (Some("trening"), Some(300.0))
+    );
+    assert!(tr.get("gra_id").is_none());
+    let mut bad = walk();
+    bad.game = Some(account::LiveGame {
+        id: "XYZ".into(),
+        ..account::LiveGame::default()
+    });
+    assert!(
+        account::api::live_body(&bad, true, true)
+            .get("gra_id")
+            .is_none()
+    );
+}
+
+#[test]
+fn live_status_migrates_from_live_switch_and_description_round_trips() {
+    let st = account::AccountState::from_value(&json!({"user_id": "u1", "live": true}));
+    assert_eq!((st.live_status.as_str(), st.live), ("wszystko", true));
+    let st = account::AccountState::from_value(&json!({"user_id": "u1", "live": false}));
+    assert_eq!((st.live_status.as_str(), st.live), ("niewidoczny", false));
+    let st = account::AccountState::from_value(&json!({"live": true, "live_status": "chodze"}));
+    assert_eq!((st.live_status.as_str(), st.live), ("chodze", true));
+    let st =
+        account::AccountState::from_value(&json!({"live": true, "live_status": "niewidoczny"}));
+    assert!(!st.live); // status wygrywa, `live` dla 0.5.x idzie za nim
+    let mut st = account::AccountState::default();
+    st.set_live_status("chodze");
+    st.description = "Do Mordoru".into();
+    let v = serde_json::to_value(&st).expect("json");
+    assert_eq!(
+        (v["live_status"].as_str(), v["live"].as_bool()),
+        (Some("chodze"), Some(true))
+    );
+    assert_eq!(account::AccountState::from_value(&v), st);
+    let off = serde_json::to_value(account::AccountState::default()).expect("json");
+    assert!(off.get("live_status").is_none()); // domyślny plik jak w 0.5.x
+}
+
+#[test]
+fn description_is_patched_checked_and_read_back() {
+    let dir = tempfile::tempdir().expect("katalog");
+    let server = FakeServer::new();
+    let (mut account, _) = standalone(&server, dir.path());
+    signed_in(&mut account, "p1");
+    account
+        .set_description("  Cel:   5 km dziennie ")
+        .expect("opis");
+    assert_eq!(account.state.description, "Cel: 5 km dziennie");
+    assert_eq!(server.state().description, "Cel: 5 km dziennie");
+    let long = "x".repeat(41);
+    let before = server.requests();
+    let e = account.set_description(&long).expect_err("za długi");
+    assert_eq!(e.message, "Opis może mieć najwyżej 40 znaków.");
+    assert_eq!(server.requests(), before); // nie poszło na serwer
+    account.set_description("").expect("czyści");
+    assert_eq!(server.state().description, "");
+    server.state().description = "Z innego komputera".into();
+    account.refresh().expect("odświeżenie");
+    assert_eq!(account.state.description, "Z innego komputera");
 }
 
 // --- wysyłka -------------------------------------------------------------------------------

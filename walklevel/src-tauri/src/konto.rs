@@ -10,7 +10,8 @@ use std::path::Path;
 
 use serde_json::Value;
 use walklevel_core::account::{
-    self, Account, Accounts, KontoError, KontoErrorKind, LiveUpdate, SyncTarget, online,
+    self, Account, Accounts, KontoError, KontoErrorKind, LiveGame, LiveUpdate, LiveWalk,
+    SyncTarget, online,
 };
 use walklevel_core::history::{History, now_unix};
 
@@ -234,13 +235,10 @@ pub fn tick(core: &Core) {
         let mine_live = app
             .konta
             .get(&person)
-            .is_some_and(|k| k.state.logged_in() && k.state.live);
+            .is_some_and(|k| k.state.logged_in() && k.state.shares_live());
         if mine_live && app.account_timers.live.due(now) {
-            let speed = app.bridge.state().control.speed;
-            let stats = app.tracker.live(now);
-            let current = app.tracker.current().map(|s| s.id.clone());
-            let steps = stats.steps.unwrap_or(0);
-            live = account::live_update(&mut app.live_on, current, speed, steps, stats.active_s);
+            let walk = live_walk(&app, now);
+            live = account::live_update(&mut app.live_on, walk);
         }
         (
             refresh.then(|| logged.clone()),
@@ -273,16 +271,38 @@ pub fn tick(core: &Core) {
         background(core, person, "live", move |ctx| {
             let acc = ctx.accounts.get(&p);
             match live {
-                LiveUpdate::Walking {
-                    kmh,
-                    steps,
-                    active_s,
-                    session_id,
-                } => acc.live(kmh, steps, active_s, &session_id),
+                LiveUpdate::Walking(walk) => acc.live(&walk),
                 LiveUpdate::Stopped => acc.clear_live(),
             }
         });
     }
+}
+
+/// Migawka stanu na żywo bieżącej sesji (None bez sesji): tempo, kroki, dystans, tryb i gra
+/// aktywnego profilu (konto samo odfiltruje pola bez zgody i przy statusie „tylko że chodzę”).
+fn live_walk(app: &crate::stan::App, now: f64) -> Option<LiveWalk> {
+    let session = app.tracker.current()?.id.clone();
+    let stats = app.tracker.live(now);
+    let training = app.s("direction") == "training";
+    let game = app
+        .store
+        .as_ref()
+        .filter(|_| !training)
+        .map(|s| s.profile())
+        .map(|p| LiveGame {
+            id: p.id.clone(),
+            name: p.name.clone(),
+            public: p.online,
+        });
+    Some(LiveWalk {
+        kmh: app.bridge.state().control.speed,
+        steps: stats.steps.unwrap_or(0),
+        active_s: stats.active_s,
+        session_id: session,
+        distance_km: stats.distance_km,
+        mode: if training { "trening" } else { "gra" }.into(),
+        game,
+    })
 }
 
 /// Profile gier osoby, których nazwy wolno pokazać online.

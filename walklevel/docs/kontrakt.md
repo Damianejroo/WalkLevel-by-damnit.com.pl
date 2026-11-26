@@ -740,10 +740,18 @@ export interface OtherGames { steps: number; distanceKm: number; activeS: number
 export interface PeriodTotals { steps: number; distanceKm: number; activeS: number; sessions: number | null }
 export interface GameTotals { game: string; gameId: string | null; steps: number; distanceKm: number; activeS: number } // game '' = „bez gry”
 export interface OnlineStats extends PeriodTotals { games: GameTotals[] | null }
-export interface LiveState { kmh: number; steps: number }
+/** 0.6.2: distanceKm/mode/game null bez zgody tej osoby na regulamin z grami; game null przy ukrytej grze („W grze”). */
+export interface LiveState {
+  kmh: number; steps: number; activeS: number;
+  since: number | null;        // od_utc_s
+  distanceKm: number | null;   // dystans BIEŻĄCEJ sesji (live XP = xp + floor(distanceKm * 100))
+  mode: SessionMode | null; game: string | null;
+}
 export interface Friend {
   id: string; name: string;
   level: number | null;        // null - serwer nie podaje poziomu bez zgody tej osoby: UI pokazuje neutralny awatar „Poziom ukryty”
+  xp: number | null;           // 0.6.2; null jak level
+  description: string | null;  // 0.6.2: opis dla znajomych (pusty = null)
   live: LiveState | null;      // idzie teraz
   week: PeriodTotals;
 }
@@ -1164,7 +1172,10 @@ pub struct HistoryView {
 pub struct AccountView {
     pub enabled: bool, pub person_id: String, pub logged_in: bool, pub user_id: String,
     pub name: String, pub email: String, pub verified: bool, pub upload: bool,
-    pub visibility: String, pub live: bool, pub profile_visibility: String,
+    pub visibility: String, pub live: bool,
+    pub live_status: String,     // 0.6.2: wszystko / chodze / niewidoczny (live = status != niewidoczny)
+    pub description: String,     // 0.6.2: opis dla znajomych
+    pub profile_visibility: String,
     pub games_visibility: String, pub terms: String, pub terms_current: String,
     pub terms_outdated: bool, pub games_allowed: bool, pub remember: bool, pub terms_url: String,
     pub busy: Vec<String>, pub message: String, pub verify_polling: bool, pub pending_uploads: u32,
@@ -1199,7 +1210,7 @@ pub struct PeoplePage { pub page: u32, pub has_next: bool, pub people: Vec<Peopl
 #[derive(Debug, Clone, Serialize, Deserialize)] #[serde(rename_all = "camelCase")]
 pub struct PeopleQuery { pub search: String, pub page: u32 }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
-pub struct EarnedOnline { pub id: String, pub earned_at: f64 }
+pub struct EarnedOnline { pub id: String, pub earned_at: Option<f64> } // cudzy profil: bez zdobyte_utc_s (prywatność) -> None, UI bez „zdobyte …”, kolejność z serwera
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct OnlinePerson {
     pub id: String, pub name: String, pub me: bool, pub level: Option<u32>, pub xp: Option<i64>,
@@ -1207,6 +1218,7 @@ pub struct OnlinePerson {
     pub since: Option<f64>, pub treadmill_model: Option<String>, pub friend: bool,
     pub week: Option<PeriodTotals>, pub total: Option<PeriodTotals>,
     pub games: Option<Vec<GameTotals>>, pub games_hidden: bool,
+    pub description: Option<String>, // 0.6.2: `opis` - tylko znajomy i właściciel
 }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct RegistrationCode { pub code: String, pub valid_until: Option<f64> }
@@ -1409,7 +1421,8 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 | `account_set_remember` | `on: bool` | `()` | token do Menedżera poświadczeń albo tylko w pamięci |
 | `account_set_upload` | `on: bool` | `()` | lokalnie |
 | `account_set_visibility` | `value: String` (`prywatna`/`znajomi`/`publiczna`) | `()` | `history.mark_all_for_resend(osoba, teraz)` - wszystkie sesje osoby pójdą z nową widocznością i nowszym `zmieniono_utc_s` (serwer nadpisuje tylko nowszą wersją) |
-| `account_set_live` | `on: bool` | `()` | wyłączenie → `clear_live` na serwerze |
+| `account_set_live_status` | `value: String` (`wszystko`/`chodze`/`niewidoczny`) | `()` | 0.6.2, zastępuje `account_set_live`: status dla znajomych (stopka panelu znajomych i Moje konto - jedno ustawienie). `niewidoczny` → `DELETE /api/bieznia/stan`, potem żadnego `PUT stan`. konto.json: `live_status` (bez pola: `live` true → wszystko, false → niewidoczny), `live` dalej zapisywane dla 0.5.x |
+| `account_set_description` | `text: String` | `()` | 0.6.2: `PATCH /api/bieznia/profil {opis}` (spacje sklejone, do 40 znaków; dłuższy → `invalid` z polem `description` „Opis może mieć najwyżej 40 znaków.” - ten sam tekst daje 400 serwera; "" czyści). Wartość wraca z `GET profil` przy odświeżeniu |
 | `account_set_profile_visibility` | `value: String` (`ukryty`/`znajomi`/`publiczny`) | `()` | PATCH profilu; „Zapisano.” |
 | `account_set_games_visibility` | `value: String` (`ja`/`znajomi`/`wszyscy`) | `()` | PATCH profilu |
 | `account_rename` | `name: String` | `()` | `check_name` → `invalid`; PATCH profilu |
@@ -1545,7 +1558,8 @@ account_check_verified(force: bool) -> CmdResult<bool>
 account_set_remember(on: bool) -> CmdResult<()>
 account_set_upload(on: bool) -> CmdResult<()>
 account_set_visibility(value: String) -> CmdResult<()>
-account_set_live(on: bool) -> CmdResult<()>
+account_set_live_status(value: String) -> CmdResult<()>
+account_set_description(text: String) -> CmdResult<()>
 account_set_profile_visibility(value: String) -> CmdResult<()>
 account_set_games_visibility(value: String) -> CmdResult<()>
 account_rename(name: String) -> CmdResult<()>

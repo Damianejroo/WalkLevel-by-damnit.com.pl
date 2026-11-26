@@ -59,11 +59,21 @@ pub struct OnlineStats {
     pub games: Option<Vec<GameTotals>>,
 }
 
+/// Stan na żywo znajomego (`na_zywo`). `distance_km`, `mode`, `game` - `None` bez zgody tej
+/// osoby na regulamin z grami; `game` - `None` także przy ukrytej grze (interfejs: „W grze”).
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LiveState {
     pub kmh: f64,
     pub steps: i64,
+    pub active_s: f64,
+    /// od kiedy chodzi (`od_utc_s`)
+    pub since: Option<f64>,
+    /// dystans bieżącej sesji
+    pub distance_km: Option<f64>,
+    /// "gra" albo "trening"
+    pub mode: Option<String>,
+    pub game: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -71,7 +81,11 @@ pub struct LiveState {
 pub struct Friend {
     pub id: String,
     pub name: String,
+    /// `None` bez zgody tej osoby (poziom ukryty)
     pub level: Option<u32>,
+    pub xp: Option<i64>,
+    /// opis dla znajomych
+    pub description: Option<String>,
     pub live: Option<LiveState>,
     pub week: PeriodTotals,
 }
@@ -140,7 +154,8 @@ pub struct PeoplePage {
 #[serde(rename_all = "camelCase")]
 pub struct EarnedOnline {
     pub id: String,
-    pub earned_at: f64,
+    /// czas zdobycia; cudzy profil go nie podaje (zdradzał godzinę sesji, także „Tylko ja”)
+    pub earned_at: Option<f64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -162,6 +177,8 @@ pub struct OnlinePerson {
     /// gry poza listą `games` (bez nazw); `None` - brak
     pub other_games: Option<OtherGames>,
     pub games_hidden: bool,
+    /// opis dla znajomych (serwer podaje go tylko znajomym i właścicielowi)
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -302,6 +319,30 @@ pub fn stats(v: &Value) -> OnlineStats {
     }
 }
 
+/// Niepusty napis (po przycięciu) albo `None` (brak, `null`, inny typ).
+fn some_text(v: &Value, key: &str) -> Option<String> {
+    v.get(key)
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(String::from)
+}
+
+fn live_state(l: &Value) -> LiveState {
+    LiveState {
+        kmh: num(l, "kmh"),
+        steps: int(l, "kroki"),
+        active_s: num(l, "ruch_s"),
+        since: l.get("od_utc_s").and_then(Value::as_f64),
+        distance_km: l
+            .get("dystans_km")
+            .and_then(Value::as_f64)
+            .map(|d| d.clamp(0.0, 300.0)),
+        mode: some_text(l, "tryb").filter(|m| m == "gra" || m == "trening"),
+        game: some_text(l, "gra"),
+    }
+}
+
 /// Lista znajomych.
 pub fn friends(v: &Value) -> Vec<Friend> {
     list(Some(v))
@@ -311,13 +352,13 @@ pub fn friends(v: &Value) -> Vec<Friend> {
             id: text(f, "id"),
             name: text(f, "name"),
             level: level(f),
-            live: f
-                .get("na_zywo")
-                .filter(|l| l.is_object())
-                .map(|l| LiveState {
-                    kmh: num(l, "kmh"),
-                    steps: int(l, "kroki"),
-                }),
+            xp: f
+                .get("xp")
+                .and_then(Value::as_f64)
+                .filter(|x| *x >= 0.0)
+                .map(|x| x as i64),
+            description: some_text(f, "opis"),
+            live: f.get("na_zywo").filter(|l| l.is_object()).map(live_state),
             week: period(f.get("tydzien")),
         })
         .collect()
@@ -416,7 +457,7 @@ pub fn person(v: &Value, my_id: &str) -> OnlinePerson {
             l.iter()
                 .map(|a| EarnedOnline {
                     id: text(a, "id"),
-                    earned_at: num(a, "zdobyte_utc_s"),
+                    earned_at: a.get("zdobyte_utc_s").and_then(Value::as_f64),
                 })
                 .collect()
         });
@@ -445,6 +486,7 @@ pub fn person(v: &Value, my_id: &str) -> OnlinePerson {
         games: games(v.get("gry")),
         other_games: other_games(v.get("inne_gry")),
         games_hidden: v.get("gry").is_some_and(Value::is_null),
+        description: some_text(v, "opis"),
         id,
     }
 }

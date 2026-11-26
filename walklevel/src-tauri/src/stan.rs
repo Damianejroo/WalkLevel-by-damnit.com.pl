@@ -1203,6 +1203,8 @@ impl App {
             upload: s.upload,
             visibility: s.visibility.clone(),
             live: s.live,
+            live_status: s.live_status.clone(),
+            description: s.description.clone(),
             profile_visibility: s.profile_visibility.clone(),
             games_visibility: s.games_visibility.clone(),
             terms: s.terms.clone(),

@@ -502,18 +502,33 @@ export function utworzAtrape(): Silnik {
   const account: K.AccountView = {
     enabled: true, personId: people.activePersonId, loggedIn: sc.konto && !sc.pierwsze, userId: sc.konto ? 'u-damianejro' : '',
     name: sc.konto ? pseudonim : '', email: sc.konto ? 'damianejro@przyklad.pl' : '', verified: true, upload: true,
-    visibility: 'znajomi', live: true, profileVisibility: 'znajomi', gamesVisibility: 'znajomi',
+    visibility: 'znajomi', live: true, liveStatus: 'wszystko', description: '',
+    profileVisibility: 'znajomi', gamesVisibility: 'znajomi',
     terms: '2026-11-01', termsCurrent: dlugie ? '2026-11-20' : '2026-11-01', termsOutdated: dlugie,
     gamesAllowed: true, remember: true, termsUrl: 'https://damnit.com.pl/bieznia/regulamin',
     busy: [], message: '', verifyPolling: false, pendingUploads: 2,
   };
   const tydzien = (k: number): K.PeriodTotals => ({ steps: k, distanceKm: k / 1350, activeS: k * 0.55, sessions: Math.max(1, Math.round(k / 6000)) });
+  // poziom z XP jak w rdzeniu (definicje: próg każdego poziomu)
+  const poziomZXp = (xp: number) => {
+    let n = 1;
+    while (n < defs.levelsXp.length && defs.levelsXp[n] <= xp) n++;
+    return n;
+  };
+  const zywo = (kmh: number, minut: number, mode: K.SessionMode | null, game: string | null, km: number | null): K.LiveState => ({
+    kmh, steps: Math.round(minut * 95), activeS: minut * 60, since: teraz() - minut * 60, distanceKm: km, mode, game,
+  });
+  const znajomy = (id: string, name: string, xp: number | null, live: K.LiveState | null, week: number, description: string | null = null): K.Friend => ({
+    id, name, level: xp === null ? null : poziomZXp(xp), xp, description, live, week: tydzien(week),
+  });
+  // panel znajomych 0.6.2: chodzą z grą, w Treningu i z ukrytą grą („W grze”), opis, ukryty poziom
   const znajomi: K.Friend[] = [
-    { id: 'u-ola', name: 'OlaBiega', level: 14, live: { kmh: 3.4, steps: 2140 }, week: tydzien(31240) },
-    // poziom ukryty: serwer nie podaje go bez zgody tej osoby
-    { id: 'u-kuba', name: 'KubaWędrowiec', level: null, live: null, week: tydzien(18420) },
-    { id: 'u-marta', name: 'Marta_z_Gór', level: 23, live: null, week: tydzien(52310) },
-    { id: 'u-tomek', name: dlugie ? 'Tomasz_o_dlugim_nicku24' : 'Tomek', level: 3, live: null, week: tydzien(4120) },
+    znajomy('u-ola', 'OlaBiega', 50290, zywo(3.4, 27, 'gra', dlugie ? 'The Elder Scrolls V: Skyrim Special Edit' : 'World of Warcraft', 1.52), 31240),
+    // poziom ukryty: serwer nie podaje go (ani XP) bez zgody tej osoby
+    znajomy('u-kuba', 'KubaWędrowiec', null, zywo(4.2, 34, 'trening', null, 2.36), 18420),
+    znajomy('u-wera', 'WeraNaBieżni', 158400, zywo(5.1, 48, 'gra', null, 4.05), 68400),
+    znajomy('u-marta', 'Marta_z_Gór', 117900, null, 52310, dlugie ? 'Opis_bez_spacji_na_czterdziesci_znakow_x' : 'Do Mordoru i z powrotem'),
+    znajomy('u-tomek', dlugie ? 'Tomasz_o_dlugim_nicku24' : 'Tomek', 4100, null, 4120),
   ];
   const ranking = (scope: K.RankingScope): { scope: K.RankingScope; rows: K.RankingRow[] } => {
     const mnoznik = { tydzien: 1, miesiac: 4.2, razem: 26, poziom: 1 }[scope];
@@ -1202,7 +1217,17 @@ export function utworzAtrape(): Silnik {
     account_set_remember: (a) => { account.remember = Boolean(a.on); wyslij('account'); },
     account_set_upload: (a) => { account.upload = Boolean(a.on); wyslij('account'); },
     account_set_visibility: (a) => { account.visibility = a.value as K.SessionVisibility; wyslij('account'); },
-    account_set_live: (a) => { account.live = Boolean(a.on); wyslij('account'); },
+    account_set_live_status: (a) => {
+      account.liveStatus = a.value as K.LiveStatus;
+      account.live = account.liveStatus !== 'niewidoczny';
+      wyslij('account');
+    },
+    account_set_description: (a) => {
+      const opis = String(a.text ?? '').trim().replace(/\s+/g, ' ');
+      if ([...opis].length > 40) throw blad('invalid', t('konto.blad.opis_dlugosc', { liczba: 40 }));
+      account.description = opis;
+      wyslij('account');
+    },
     account_set_profile_visibility: (a) => { account.profileVisibility = a.value as K.ProfileVisibility; wyslij('account'); },
     account_set_games_visibility: (a) => { account.gamesVisibility = a.value as K.GamesVisibility; wyslij('account'); },
     account_rename: (a) => {
@@ -1247,9 +1272,17 @@ export function utworzAtrape(): Silnik {
       }
       pozniej(400, () => {
         // odświeżenie znajomych co 10 s: „idzie teraz” rośnie, lista podmieniana w miejscu
-        const ola = znajomi[0];
-        if (tab === 'friends' && ola.live) {
-          ola.live = { kmh: ola.live.kmh, steps: ola.live.steps + 12 };
+        if (tab === 'friends') {
+          for (const f of znajomi) {
+            if (!f.live) continue;
+            const dt = teraz() - (f.live.since ?? teraz()) - f.live.activeS;
+            f.live = {
+              ...f.live,
+              steps: f.live.steps + Math.round(dt * 1.6),
+              activeS: f.live.activeS + dt,
+              distanceKm: f.live.distanceKm === null ? null : f.live.distanceKm + (f.live.kmh * dt) / 3600,
+            };
+          }
           online.friends = znajomi.map((f) => ({ ...f }));
         }
         if (tab === 'ranking') online.ranking = ranking(online.ranking?.scope ?? 'tydzien');
@@ -1274,14 +1307,17 @@ export function utworzAtrape(): Silnik {
     online_person_open: (a) => {
       const f = znajomi.find((x) => x.id === a.userId);
       const ja = a.userId === account.userId;
+      const moje = (levels?.progress ?? []).filter((x) => x.earnedAt !== null).slice(0, 17);
       const person: K.OnlinePerson = {
         id: String(a.userId), name: ja ? account.name : f?.name ?? 'AniaNaBieżni', me: ja,
         level: ja ? levels?.level ?? 1 : f ? f.level : 31, xp: f && f.level === null ? null : 25300, achievementsCount: 17,
-        achievements: (levels?.progress ?? []).filter((x) => x.earnedAt !== null).slice(0, 17).map((x) => ({ id: x.id, earnedAt: x.earnedAt! })),
+        // cudzy profil: serwer nie podaje czasu zdobycia (prywatność), kolejność z listy
+        achievements: moje.map((x) => ({ id: x.id, earnedAt: ja ? x.earnedAt : null })),
         since: teraz() - 200 * 86400, treadmillModel: model, friend: !!f,
         week: f?.week ?? tydzien(41230), total: { steps: 812400, distanceKm: 601.8, activeS: 1_300_000, sessions: 214 },
         games: f ? null : online.stats?.games ?? null, gamesHidden: !!f,
         otherGames: f ? null : { steps: 5230, distanceKm: 3.9, activeS: 2810, sessions: 3, games: 2 },
+        description: ja ? account.description || null : (f?.description ?? null),
       };
       online.person = person;
       wyslij('online');

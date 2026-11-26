@@ -1,6 +1,7 @@
 <script lang="ts">
   // Zdobyte osiągnięcie na profilu osoby (wersja zwarta wiersza z docs/wyglad.md 9.5): odznaka 44 |
-  // nazwa (zawija się), pod nią rzadkość wersalikami, warunek, „zdobyte wczoraj · +250 XP”.
+  // nazwa (zawija się), pod nią rzadkość wersalikami, warunek, „zdobyte wczoraj · +250 XP”
+  // (cudzy profil bez czasu zdobycia - samo „+250 XP”).
   // Karta neutralna - kolor niesie tylko odznaka i napis rzadkości.
   import OdznakaRzadkosci from '../../lib/ui/OdznakaRzadkosci.svelte';
   import type { Achievement } from '../../lib/typy';
@@ -8,7 +9,15 @@
   import { t } from '../../lib/teksty';
   import { kiedy } from './pomocnicze';
 
-  let { osiagniecie: a, zdobyte }: { osiagniecie: Achievement; zdobyte: number } = $props();
+  let { osiagniecie: a, zdobyte }: { osiagniecie: Achievement; zdobyte: number | null } = $props();
+  const stopka = $derived(
+    [
+      zdobyte === null ? '' : t('poziomy.osiagniecie.zdobyte', { kiedy: kiedy(zdobyte) }),
+      t('poziomy.osiagniecie.xp', { xp: stan.statics.definitions.rarityXp[a.rarity] }),
+    ]
+      .filter(Boolean)
+      .join(' · '),
+  );
   const nazwaRzadkosci = $derived(t(`rzadkosc.${a.rarity}`));
 </script>
 
@@ -18,9 +27,7 @@
     <span class="nazwa dane">{a.name}</span>
     <span class="hud rzadkosc" style:color="var(--rarity-{a.rarity}-text)">{nazwaRzadkosci}</span>
     <span class="warunek">{a.condition}</span>
-    <span class="stopka liczba">
-      {t('poziomy.osiagniecie.zdobyte', { kiedy: kiedy(zdobyte) })} · {t('poziomy.osiagniecie.xp', { xp: stan.statics.definitions.rarityXp[a.rarity] })}
-    </span>
+    <span class="stopka liczba">{stopka}</span>
   </span>
 </li>
 

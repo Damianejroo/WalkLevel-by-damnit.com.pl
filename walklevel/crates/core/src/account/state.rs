@@ -9,6 +9,9 @@
 //! 0.6.1 dopisuje `terms_games` (z `GET regulamin` pole `poziomy`: wersja regulaminu, od której
 //! serwer zapisuje pola gier i pokazuje poziomy) i `resent_terms` (wersja, po której akceptacji
 //! historia poszła jeszcze raz z grami) - oba tylko niepuste.
+//! 0.6.2 dopisuje `live_status` (status dla znajomych: wszystko / chodze / niewidoczny; bez
+//! pola - z `live`: true -> wszystko, false -> niewidoczny; `live` zostaje zgodne dla 0.5.x)
+//! i `description` (opis dla znajomych, tylko niepusty).
 
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -17,7 +20,7 @@ use std::sync::{Mutex, PoisonError};
 use serde::Serialize;
 use serde_json::Value;
 
-use super::{GAMES_VISIBILITY, PROFILE_VISIBILITY, VISIBILITY};
+use super::{GAMES_VISIBILITY, LIVE_STATUS, PROFILE_VISIBILITY, VISIBILITY};
 
 /// Plik stanu kont względem folderu danych.
 pub const STATE_FILE: &str = "dane/konto.json";
@@ -56,6 +59,13 @@ pub struct AccountState {
     /// wersja regulaminu, po której akceptacji cała historia poszła jeszcze raz (z grami)
     #[serde(skip_serializing_if = "String::is_empty")]
     pub resent_terms: String,
+    /// status dla znajomych ([`LIVE_STATUS`]); `live` = status inny niż „niewidoczny”
+    /// („niewidoczny” nie trafia do pliku - odczyt bierze go z `live: false`, plik jak w 0.5.x)
+    #[serde(skip_serializing_if = "is_invisible")]
+    pub live_status: String,
+    /// opis dla znajomych (z serwera, do 40 znaków)
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub description: String,
 }
 
 impl Default for AccountState {
@@ -77,6 +87,8 @@ impl Default for AccountState {
             sync_cursor: String::new(),
             terms_games: String::new(),
             resent_terms: String::new(),
+            live_status: "niewidoczny".into(),
+            description: String::new(),
         }
     }
 }
@@ -92,6 +104,17 @@ impl AccountState {
 
     pub fn logged_in(&self) -> bool {
         !self.user_id.is_empty()
+    }
+
+    /// Stan na żywo idzie do znajomych (status inny niż „niewidoczny”).
+    pub fn shares_live(&self) -> bool {
+        self.live_status != "niewidoczny"
+    }
+
+    /// Nowy status dla znajomych; `live` (pole 0.5.x) idzie za nim.
+    pub fn set_live_status(&mut self, value: &str) {
+        self.live_status = value.to_string();
+        self.live = self.shares_live();
     }
 
     /// Serwer ma nowszy regulamin niż ten zaakceptowany - karta „zaakceptuj”.
@@ -138,7 +161,19 @@ impl AccountState {
             sync_cursor: s("sync_cursor", ""),
             terms_games: s("terms_games", ""),
             resent_terms: s("resent_terms", ""),
+            live_status: s("live_status", ""),
+            description: s("description", ""),
         };
+        if !LIVE_STATUS.contains(&state.live_status.as_str()) {
+            // konto.json sprzed 0.6.2: przełącznik „Na żywo dla znajomych”
+            state.live_status = if state.live {
+                "wszystko"
+            } else {
+                "niewidoczny"
+            }
+            .into();
+        }
+        state.live = state.shares_live();
         if !VISIBILITY.contains(&state.visibility.as_str()) {
             state.visibility = "znajomi".into();
         }
@@ -151,6 +186,10 @@ impl AccountState {
         }
         state
     }
+}
+
+fn is_invisible(status: &str) -> bool {
+    status == "niewidoczny"
 }
 
 fn read_json(path: &Path) -> Option<Value> {

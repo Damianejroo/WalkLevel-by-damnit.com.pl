@@ -11,7 +11,7 @@
   import * as api from '../../lib/api';
   import { komunikat, stan, wykonaj } from '../../lib/stan.svelte';
   import { t } from '../../lib/teksty';
-  import type { AccountAction, GamesVisibility, ProfileVisibility, SessionVisibility } from '../../lib/typy';
+  import type { AccountAction, GamesVisibility, LiveStatus, ProfileVisibility, SessionVisibility } from '../../lib/typy';
   import { bladHasla, bladPseudonimu, sprobuj, wersjaRegulaminu } from './pomocnicze';
 
   interface Props {
@@ -110,13 +110,21 @@
       />
       <p class="opis">{t('moje.wyniki.jedna_sesja')}</p>
     </div>
-    <Przelacznik
-      wlaczony={konto.live}
-      tytul={t('moje.na_zywo')}
-      opis={t('moje.na_zywo_opis')}
-      disabled={zajete('live')}
-      onzmiana={(on) => wykonaj(api.accountSetLive(on))}
-    />
+    <!-- status dla znajomych: to samo ustawienie co w stopce panelu znajomych (0.6.2) -->
+    <div class="grupa">
+      <p class="etykieta">{t('panel.status')}</p>
+      <Segmentowy
+        etykieta={t('panel.status')}
+        wartosc={konto.liveStatus}
+        onzmiana={(v: LiveStatus) => wykonaj(api.accountSetLiveStatus(v))}
+        opcje={[
+          { wartosc: 'wszystko', napis: t('panel.status.wszystko') },
+          { wartosc: 'chodze', napis: t('panel.status.chodze') },
+          { wartosc: 'niewidoczny', napis: t('panel.status.niewidoczny') },
+        ]}
+      />
+      <p class="opis">{t(`panel.status.${konto.liveStatus}_opis`)}</p>
+    </div>
     <div class="przyciski">
       <Przycisk napis={t('moje.wyslij_teraz')} disabled={zajete('upload') || !konto.upload} onclick={wyslijTeraz} />
       <Przycisk napis={t('znajomi.moj_profil')} disabled={!konto.userId || zajete('person')} onclick={() => onotworz(konto.userId)} />

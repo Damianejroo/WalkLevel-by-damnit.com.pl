@@ -28,22 +28,23 @@
   const xp = $derived(osoba?.xp ?? (osoba?.me ? stan.levels?.xp : null) ?? null);
   const ranga = $derived(poziom === null ? null : rangaPoziomu(defs, poziom));
 
-  // Zdobyte osiągnięcia od najnowszego; null - serwer nie podał listy (własny: z aplikacji)
-  const zdobyte = $derived.by((): Array<{ a: Achievement; kiedy: number }> | null => {
+  // Zdobyte osiągnięcia od najnowszego; null - serwer nie podał listy (własny: z aplikacji).
+  // Cudzy profil nie ma czasów zdobycia (prywatność) - kolejność z listy serwera, bez dat.
+  const zdobyte = $derived.by((): Array<{ a: Achievement; kiedy: number | null }> | null => {
     if (!osoba) return null;
     const lista =
       osoba.achievements ??
       (osoba.me && stan.levels
-        ? stan.levels.progress.filter((p) => p.earnedAt !== null).map((p) => ({ id: p.id, earnedAt: p.earnedAt as number }))
+        ? stan.levels.progress.filter((p) => p.earnedAt !== null).map((p) => ({ id: p.id, earnedAt: p.earnedAt }))
         : null);
     if (!lista) return null;
     const wg = new Map(defs.achievements.map((a) => [a.id, a]));
-    return lista
+    const wynik = lista
       .flatMap((x) => {
         const a = wg.get(x.id);
         return a ? [{ a, kiedy: x.earnedAt }] : [];
-      })
-      .sort((p, q) => q.kiedy - p.kiedy);
+      });
+    return lista.every((x) => x.earnedAt !== null) ? wynik.sort((p, q) => (q.kiedy ?? 0) - (p.kiedy ?? 0)) : wynik;
   });
   const osiagnieciaNaglowek = $derived(
     tytulIPodpis(t('poziomy.osiagniecia_tytul', { liczba: zdobyte?.length ?? 0, razem: defs.achievements.length })),
@@ -106,6 +107,7 @@
 
     <Karta>
       <ul class="fakty">
+        {#if osoba.description}<li class="opis-znajomego dane">{osoba.description}</li>{/if}
         {#if osoba.since}<li>{t('profil_online.od', { data: data(osoba.since) })}</li>{/if}
         {#if poziom === null && !osoba.me}<li>{t('online.poziom_ukryty')}</li>{/if}
         {#if osoba.treadmillModel}<li class="dane">{t('profil_online.bieznia', { model: osoba.treadmillModel })}</li>{/if}
@@ -157,6 +159,7 @@
   /* notatki poza kartami - lekko wcięte jak w pozostałych ekranach; w kartach bez wcięcia */
   .uwaga { padding-inline: 2px; }
   .osiagniecia { display: flex; flex-direction: column; }
+  .opis-znajomego { font-style: italic; color: var(--text); overflow-wrap: anywhere; }
   .fakty { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-md); color: var(--text-2); line-height: var(--lh-body); }
   .przyciski { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
   .przyciski > :global(button) { flex: 0 1 auto; }

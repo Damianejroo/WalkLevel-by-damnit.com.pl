@@ -1136,7 +1136,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
 | `konto.regulamin.zmiana_tytul` | Zaktualizowaliśmy regulamin konta | Regulamin konta się zmienił | Bez „zaktualizowaliśmy”. |
-| `konto.regulamin.zmiana_opis` | Przeczytaj zmiany i zaakceptuj, żeby korzystać z nowych funkcji (np. podziału wyników na gry). Do tego czasu nowe dane nie są wysyłane. | Przeczytaj zmiany i zaakceptuj je, żeby korzystać z nowych funkcji, np. podziału wyników na gry. Do tego czasu nowe sesje czekają na komputerze. | |
+| `konto.regulamin.zmiana_opis` | Przeczytaj zmiany i zaakceptuj, żeby korzystać z nowych funkcji (np. podziału wyników na gry). Do tego czasu nowe dane nie są wysyłane. | Przeczytaj zmiany i zaakceptuj je, żeby korzystać z nowych funkcji: podziału wyników na gry, poziomów i osiągnięć widocznych dla znajomych. Do tego czasu sesje wysyłają się jak dotąd, bez nazw gier i trybu. | 0.6.2: sesje bez akceptacji idą jak dotąd (bez pól gier) - stare „czekają na komputerze” było nieprawdą. |
 | `konto.regulamin.czytaj` | Przeczytaj | Przeczytaj | |
 | `konto.regulamin.akceptuj` | Akceptuję | Akceptuję | |
 | `konto.regulamin.dziekujemy` | Dziękujemy - regulamin zaakceptowany. | Dziękujemy. Regulamin zaakceptowany. | |
@@ -1236,8 +1236,6 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `moje.widocznosc.znajomi` | Znajomi | Znajomi | |
 | `moje.widocznosc.wszyscy` | Wszyscy | Wszyscy | |
 | `moje.wyniki.jedna_sesja` | Pojedynczą sesję ukryjesz w Historii kroków (zostaje tylko u Ciebie). | Pojedynczą sesję ukryjesz w Historia kroków > szczegóły sesji. Zostanie wtedy tylko na tym komputerze. | Pełna ścieżka. |
-| `moje.na_zywo` | Na żywo dla znajomych | Na żywo dla znajomych | |
-| `moje.na_zywo_opis` | Znajomi widzą, że idziesz, i Twoje tempo | Znajomi widzą, że idziesz, i z jaką prędkością. | |
 | `moje.wyslij_teraz` | Wyślij teraz | Wyślij teraz | |
 | `moje.profil.tytul` | Mój profil - jak widzą mnie inni | Mój profil oczami innych | |
 | `moje.profil.etykieta` | Profil | Profil | |
@@ -1656,3 +1654,60 @@ wcześniej wpisu.
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
 | `ustawienia.pomoc.podziekowania` | (nowy) | Pomysłodawca i główny tester: Velczer | Ustawienia > Pomoc i diagnostyka, pod wersją aplikacji; zwykły tekst --text-2, bez ikony i akcentu (decyzja Damiana). |
+
+## Dodatki: panel znajomych (0.6.2)
+
+Panel z boku okna (docs/wyglad.md 8.20), status i opis dla znajomych, Ustawienia > Wygląd i okno.
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `ustawienia.wyglad.panel` | (nowy) | Panel znajomych | Przełącznik (ustawienie `friends_panel`, domyślnie włączony). |
+| `ustawienia.wyglad.panel_opis` | (nowy) | Lista znajomych z boku okna: kto teraz chodzi, w co gra i jak rośnie mu poziom. | |
+| `ustawienia.wyglad.panel_strona` | (nowy) | Strona panelu | Wybór Z lewej / Z prawej (domyślnie z prawej). |
+| `ustawienia.wyglad.panel_strona.lewa` | (nowy) | Z lewej | |
+| `ustawienia.wyglad.panel_strona.prawa` | (nowy) | Z prawej | |
+| `ustawienia.wyglad.panel_powiadom` | (nowy) | Powiadom, gdy znajomy zacznie chodzić | Domyślnie wyłączone. |
+| `ustawienia.wyglad.panel_powiadom_opis` | (nowy) | Krótki komunikat w oknie WalkLevel. Nad grą nic się nie pokazuje. | |
+| `panel.tytul` | (nowy) | Znajomi | Nagłówek panelu i jego nazwa dostępna. |
+| `panel.chodza` | (nowy) | {liczba} z {razem} {liczba:chodzi/chodzą/chodzi} teraz | Podpis nagłówka. |
+| `panel.na_liscie` | (nowy) | Na liście: {liczba} | Podpis nagłówka, gdy nikt nie chodzi. |
+| `panel.bez_konta` | (nowy) | bez konta online | Podpis nagłówka bez konta. |
+| `panel.bez_konta_opis` | (nowy) | Tu zobaczysz znajomych: kto teraz chodzi, w co gra i jak rośnie mu poziom. | |
+| `panel.bez_konta_opis2` | (nowy) | Potrzebne konto online (darmowe, na kod zaproszenia). | |
+| `panel.konto` | (nowy) | Konto online | Przycisk w panelu bez konta. |
+| `panel.szukaj` | (nowy) | Szukaj albo zaproś znajomego | Podpowiedź ikony plusa. |
+| `panel.zwin` | (nowy) | Zwiń do paska | Podpowiedź ikony; okno zwęża się razem z panelem. |
+| `panel.rozwin` | (nowy) | Rozwiń panel | |
+| `panel.pole` | (nowy) | Pseudonim | Podpowiedź w polu. |
+| `panel.pole_dostepnosc` | (nowy) | Szukaj wśród znajomych albo zaproś po pseudonimie | |
+| `panel.pole_opis` | (nowy) | Filtruje listę. Pseudonim spoza listy możesz od razu zaprosić. | |
+| `panel.zapros` | (nowy) | Zaproś „{pseudonim}” do znajomych | Pseudonim spoza listy, co najmniej 3 znaki. |
+| `panel.nikt` | (nowy) | Nikt z listy nie pasuje do „{fraza}”. | |
+| `panel.pusto` | (nowy) | Lista znajomych jest pusta. Kliknij plus i wpisz pseudonim. | |
+| `panel.zaprasza` | (nowy) | zaprasza Cię | Wiersz zaproszenia do mnie. |
+| `panel.chodza_teraz` | (nowy) | Chodzą teraz · {liczba} | Nagłówek grupy. |
+| `panel.pozostali` | (nowy) | Pozostali · {liczba} | Nagłówek grupy (sortowani po krokach tygodnia). |
+| `panel.gra` | (nowy) | {gra} · {kmh} km/h | Czynność: gra z włączonym „Pokazuj tę grę na koncie online”. |
+| `panel.trening` | (nowy) | Trening · {kmh} km/h | |
+| `panel.w_grze` | (nowy) | W grze · {kmh} km/h | Gra ukryta. |
+| `panel.chodzi` | (nowy) | Chodzi · {kmh} km/h | Osoba bez regulaminu z grami (serwer nie podaje trybu). |
+| `panel.tydzien` | (nowy) | w tym tygodniu {kroki} {kroki:krok/kroki/kroków} | |
+| `panel.xp_sesja` | (nowy) | +{xp} XP | Licznik przy pasku: XP z bieżącej sesji. |
+| `panel.xp_procent` | (nowy) | {procent}% | Licznik przy pasku: postęp do następnego poziomu. |
+| `panel.xp_dostepnosc` | (nowy) | {xp} XP, {procent}% do poziomu {nastepny} | |
+| `panel.osoba` | (nowy) | {pseudonim} · poziom {poziom} · {ranga} | Podpowiedź wiersza i komunikat awansu w panelu. |
+| `panel.zaczyna` | (nowy) | {pseudonim} zaczyna chodzić. | Komunikat w oknie WalkLevel przy „Powiadom, gdy znajomy zacznie chodzić”. |
+| `panel.status` | (nowy) | Status dla znajomych | Nazwa dostępna menu statusu i tytuł wyboru w Moje konto. |
+| `panel.status.wszystko` | (nowy) | Pokazuj grę i tempo | |
+| `panel.status.wszystko_opis` | (nowy) | Znajomi widzą, że chodzisz, jak szybko i w co grasz (gry z przełącznikiem). | |
+| `panel.status.chodze` | (nowy) | Pokazuj tylko, że chodzę | |
+| `panel.status.chodze_opis` | (nowy) | Tempo i kroki tak, nazwa gry nie. | |
+| `panel.status.niewidoczny` | (nowy) | Niewidoczny | |
+| `panel.status.niewidoczny_opis` | (nowy) | Znajomi nie widzą, że teraz chodzisz. Wyniki tygodnia zostają. | |
+| `panel.opis` | (nowy) | Opis dla znajomych (do {liczba} znaków) | Pole w menu statusu; Enter zapisuje. |
+| `panel.opis_podpowiedz` | (nowy) | np. Cel: 5 km dziennie | |
+| `panel.menu.profil` | (nowy) | Profil | Menu prawego przycisku na znajomym. |
+| `panel.menu.usun` | (nowy) | Usuń ze znajomych | |
+| `panel.usunieto` | (nowy) | Usunięto {pseudonim} ze znajomych | Usunięcie idzie na serwer dopiero po zniknięciu komunikatu. |
+| `panel.cofnij` | (nowy) | Cofnij | |
+| `konto.blad.opis_dlugosc` | (nowy) | Opis może mieć najwyżej {liczba} znaków. | Ten sam tekst zwraca serwer (400). |

@@ -2,7 +2,7 @@
 
 use serde_json::{Value, json};
 use walklevel_core::account::online::{self, Friend, PeriodTotals};
-use walklevel_core::account::{LiveUpdate, live_update};
+use walklevel_core::account::{LiveUpdate, LiveWalk, live_update};
 
 #[test]
 fn period_and_games_tolerate_missing_and_wrong_types() {
@@ -75,6 +75,56 @@ fn friends_with_level_live_state_and_week() {
 }
 
 #[test]
+fn friends_0_6_2_xp_description_and_live_game() {
+    let f = online::friends(&json!([
+        {"id": "u-ola", "name": "OlaBiega", "poziom": 14, "xp": 50290, "opis": " Do Mordoru ",
+         "tydzien": {"kroki": 31240},
+         "na_zywo": {"kmh": 3.4, "kroki": 2100, "ruch_s": 1500, "od_utc_s": 1000.0,
+                     "dystans_km": 1.52, "tryb": "gra", "gra": "World of Warcraft"}},
+        {"id": "u-ania", "name": "AniaNaBieżni", "poziom": 26, "xp": 158400, "opis": "",
+         "na_zywo": {"kmh": 5.1, "kroki": 4800, "ruch_s": 2600, "od_utc_s": 900.0,
+                     "dystans_km": 4.05, "tryb": "gra", "gra": null}},
+        {"id": "u-x", "name": "Bez zgody", "poziom": null, "xp": null, "opis": null,
+         "na_zywo": {"kmh": 4.0, "kroki": 10, "ruch_s": 5, "od_utc_s": 1.0,
+                     "dystans_km": null, "tryb": null, "gra": null}},
+        {"id": "u-k", "name": "Kuba", "na_zywo": {"kmh": 4.2, "tryb": "trening", "dystans_km": 500}}
+    ]));
+    let ola = &f[0];
+    assert_eq!((ola.level, ola.xp), (Some(14), Some(50290)));
+    assert_eq!(ola.description.as_deref(), Some("Do Mordoru"));
+    let live = ola.live.as_ref().expect("na żywo");
+    assert_eq!(
+        (live.active_s, live.since, live.distance_km),
+        (1500.0, Some(1000.0), Some(1.52))
+    );
+    assert_eq!(
+        (live.mode.as_deref(), live.game.as_deref()),
+        (Some("gra"), Some("World of Warcraft"))
+    );
+    let ania = f[1].live.as_ref().expect("na żywo");
+    assert_eq!(
+        (ania.mode.as_deref(), ania.game.as_deref()),
+        (Some("gra"), None)
+    ); // ukryta gra - „W grze”
+    assert_eq!(f[1].description, None); // pusty opis = brak
+    let x = &f[2];
+    assert_eq!(
+        (x.level, x.xp, x.description.as_deref()),
+        (None, None, None)
+    );
+    let xl = x.live.as_ref().expect("na żywo");
+    assert_eq!((xl.distance_km, xl.mode.as_deref()), (None, None));
+    let k = f[3].live.as_ref().expect("na żywo");
+    assert_eq!(
+        (k.mode.as_deref(), k.distance_km),
+        (Some("trening"), Some(300.0))
+    );
+    let out = serde_json::to_value(&f[0]).expect("json");
+    assert_eq!(out["live"]["distanceKm"], json!(1.52));
+    assert_eq!(out["description"], json!("Do Mordoru"));
+}
+
+#[test]
 fn invitations_take_name_from_person_then_record() {
     let inv = online::invitations(&json!({
         "przychodzace": [
@@ -99,6 +149,8 @@ fn friend(id: &str, name: &str) -> Friend {
         id: id.into(),
         name: name.into(),
         level: None,
+        xp: None,
+        description: None,
         live: None,
         week: PeriodTotals::default(),
     }
@@ -178,6 +230,10 @@ fn person_profile_me_achievements_and_hidden_games() {
     assert_eq!(p.xp, Some(12345));
     assert_eq!(p.achievements_count, Some(4));
     assert_eq!(p.achievements.as_ref().map(Vec::len), Some(1));
+    assert_eq!(
+        p.achievements.as_ref().map(|a| a[0].earned_at),
+        Some(Some(1.5))
+    );
     assert_eq!(p.treadmill_model, None);
     assert_eq!(p.week.as_ref().map(|w| w.steps), Some(10));
     assert_eq!(p.total, None);
@@ -192,6 +248,20 @@ fn person_profile_me_achievements_and_hidden_games() {
     assert_eq!(p.achievements, None);
     assert_eq!(p.games, Some(vec![]));
     assert_eq!(p.treadmill_model.as_deref(), Some("R1"));
+    assert_eq!(p.description, None);
+    let p = online::person(&json!({"id": "u2", "opis": "Cel: 5 km dziennie"}), "u1");
+    assert_eq!(p.description.as_deref(), Some("Cel: 5 km dziennie"));
+    // cudzy profil: lista osiągnięć bez czasu zdobycia (prywatność) - brak, nie 1970
+    let p = online::person(
+        &json!({"id": "u2", "osiagniecia_lista": [{"id": "km1"}, {"id": "s3"}]}),
+        "u1",
+    );
+    let lista = p.achievements.expect("lista");
+    assert_eq!(
+        lista.iter().map(|a| a.earned_at).collect::<Vec<_>>(),
+        [None, None]
+    );
+    assert_eq!(lista[1].id, "s3");
     // pusty id nigdy nie jest „mną”
     assert!(!online::person(&json!({}), "").me);
 }
@@ -215,26 +285,24 @@ fn registration_code_and_invite_answer() {
 #[test]
 fn live_state_walking_then_one_stop() {
     let mut on = false;
-    // bez sesji albo w miejscu - nic
-    assert_eq!(live_update(&mut on, None, 4.0, 10, 5.0), None);
-    assert_eq!(live_update(&mut on, Some("s1".into()), 0.05, 10, 5.0), None);
-    let walking = live_update(&mut on, Some("s1".into()), 4.0, 10, 5.0);
-    assert_eq!(
-        walking,
-        Some(LiveUpdate::Walking {
-            kmh: 4.0,
+    let at = |kmh: f64| {
+        Some(LiveWalk {
+            kmh,
             steps: 10,
             active_s: 5.0,
-            session_id: "s1".into()
+            session_id: "s1".into(),
+            ..LiveWalk::default()
         })
-    );
+    };
+    // bez sesji albo w miejscu - nic
+    assert_eq!(live_update(&mut on, None), None);
+    assert_eq!(live_update(&mut on, at(0.05)), None);
+    let walking = live_update(&mut on, at(4.0));
+    assert_eq!(walking, at(4.0).map(LiveUpdate::Walking));
     assert!(on);
-    assert_eq!(
-        live_update(&mut on, Some("s1".into()), 0.0, 10, 5.0),
-        Some(LiveUpdate::Stopped)
-    );
+    assert_eq!(live_update(&mut on, at(0.0)), Some(LiveUpdate::Stopped));
     assert!(!on);
-    assert_eq!(live_update(&mut on, None, 0.0, 0, 0.0), None);
+    assert_eq!(live_update(&mut on, None), None);
 }
 
 #[test]

@@ -169,7 +169,8 @@ export const accountCheckVerified = (force: boolean) => wywolaj<boolean>('accoun
 export const accountSetRemember = (on: boolean) => wywolaj<void>('account_set_remember', { on });
 export const accountSetUpload = (on: boolean) => wywolaj<void>('account_set_upload', { on });
 export const accountSetVisibility = (value: K.SessionVisibility) => wywolaj<void>('account_set_visibility', { value });
-export const accountSetLive = (on: boolean) => wywolaj<void>('account_set_live', { on });
+export const accountSetLiveStatus = (value: K.LiveStatus) => wywolaj<void>('account_set_live_status', { value });
+export const accountSetDescription = (text: string) => wywolaj<void>('account_set_description', { text });
 export const accountSetProfileVisibility = (value: K.ProfileVisibility) =>
   wywolaj<void>('account_set_profile_visibility', { value });
 export const accountSetGamesVisibility = (value: K.GamesVisibility) =>

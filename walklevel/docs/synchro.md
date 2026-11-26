@@ -58,6 +58,35 @@ Odpowiedź 200:
 - Po pobraniu zmian: przeliczyć poziomy i osiągnięcia (popupy tylko dla nowo zdobytych, nie dla
   historii z innego komputera - jak „Z Twojej historii” przy pierwszym liczeniu).
 
+## Stan na żywo i panel znajomych (0.6.2, kontrakt od HUB; za zaporą do publikacji regulaminu)
+
+`PUT /api/bieznia/stan` (co 5 s, `LIVE_EVERY_S`) - MIGAWKA, zawsze pełny komplet (`api::live_body`):
+- zawsze: `kmh` (0,1), `kroki`, `ruch_s`, `sesja_uuid` (z kreskami);
+- po regulaminie z grami (`games_allowed()`, warunek „poziomy” z 0.6.1): `dystans_km` (dystans
+  BIEŻĄCEJ sesji, 0..300) i `tryb` (`gra`/`trening`);
+- dodatkowo przy statusie „Pokazuj grę i tempo” (`live_status` = `wszystko`) i sesji z profilem gry
+  (tryb `gra`): `gra_id` (10 hex), `gra` (do 40 znaków), `gra_publiczna` (przełącznik profilu -
+  inni widzą nazwę tylko przy true).
+- „Pokazuj tylko, że chodzę” (`chodze`) = bez `gra_id`/`gra`/`gra_publiczna` (tryb i dystans tak).
+- „Niewidoczny” = żadnego `PUT stan`; przełączenie na niego woła `DELETE /api/bieznia/stan`.
+  Migracja konto.json: brak `live_status` -> z `live` (true = wszystko, false = niewidoczny,
+  domyślnie niewidoczny jak dotąd „Na żywo” wyłączone).
+
+`GET /api/bieznia/znajomi` - wpis: `{id, name, tydzien{...}, poziom, xp, opis, na_zywo}`;
+`na_zywo` = `null` albo `{kmh, kroki, ruch_s, od_utc_s, dystans_km, tryb, gra}`. `poziom`, `xp`,
+`opis` = null bez zgody tej osoby; w `na_zywo` `dystans_km`/`tryb`/`gra` null bez zgody, `gra`
+null także przy ukrytej grze (panel: „W grze”). Parser: `online::friends` (pusty opis = brak,
+dystans przycięty do 0..300, tryb tylko `gra`/`trening`).
+
+Live XP w panelu: `xp + floor(dystans_km * 100)`; między odświeżeniami (co 10 s przy widocznym
+oknie, co 60 s przy zminimalizowanym, jedno zapytanie naraz) dystans rośnie z `kmh`.
+
+`PATCH /api/bieznia/profil {opis}` - do 40 znaków (dłuższy: 400 „Opis może mieć najwyżej 40
+znaków.”), "" albo null czyści; `GET /api/bieznia/profil` oddaje `opis`.
+`GET /api/bieznia/profil/{id}` - `opis` tylko dla znajomego i właściciela. Dla CUDZEGO konta
+`osiagniecia_lista` = `[{id}]` bez `zdobyte_utc_s` (czas zdobycia zdradzał godzinę sesji, także
+„Tylko ja”): parser daje `earned_at: None`, profil bez „zdobyte …”, kolejność z serwera.
+
 ## Gry na koncie (0.6.1, kontrakt od HUB; serwer wdroży przy publikacji regulaminu z grami)
 
 Decyzja Damiana: nazwa gry jest zapisywana na serwerze ZAWSZE (widzi ją tylko właściciel), inni

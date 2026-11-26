@@ -623,6 +623,10 @@ pub struct AccountView {
     pub upload: bool,
     pub visibility: String,
     pub live: bool,
+    /// status dla znajomych: wszystko / chodze / niewidoczny
+    pub live_status: String,
+    /// opis dla znajomych
+    pub description: String,
     pub profile_visibility: String,
     pub games_visibility: String,
     pub terms: String,

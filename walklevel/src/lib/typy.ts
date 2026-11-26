@@ -27,6 +27,8 @@ export type SessionMode = 'gra' | 'trening';
 export type SessionVisibility = 'prywatna' | 'znajomi' | 'publiczna';
 export type ProfileVisibility = 'ukryty' | 'znajomi' | 'publiczny';
 export type GamesVisibility = 'ja' | 'znajomi' | 'wszyscy';
+export type LiveStatus = 'wszystko' | 'chodze' | 'niewidoczny'; // status dla znajomych (0.6.2)
+export type PanelSide = 'left' | 'right';            // strona panelu znajomych
 export type RankingScope = 'tydzien' | 'miesiac' | 'razem' | 'poziom';
 export type StatsScope = 'tydzien' | 'miesiac' | 'razem';
 export type Rarity = 'pospolite' | 'rzadkie' | 'epickie' | 'heroiczne' | 'legendarne';
@@ -548,7 +550,9 @@ export interface AccountView {
   verified: boolean;
   upload: boolean;             // „Wysyłaj moje sesje”
   visibility: SessionVisibility;
-  live: boolean;               // „Na żywo dla znajomych”
+  live: boolean;               // stan na żywo idzie do znajomych (= liveStatus !== 'niewidoczny')
+  liveStatus: LiveStatus;      // „Pokazuj grę i tempo” / „Pokazuj tylko, że chodzę” / „Niewidoczny”
+  description: string;         // opis dla znajomych (do 40 znaków)
   profileVisibility: ProfileVisibility;
   gamesVisibility: GamesVisibility;
   terms: string;               // zaakceptowana wersja regulaminu
@@ -587,10 +591,19 @@ export interface OtherGames { steps: number; distanceKm: number; activeS: number
 export interface PeriodTotals { steps: number; distanceKm: number; activeS: number; sessions: number | null }
 export interface GameTotals { game: string; gameId: string | null; steps: number; distanceKm: number; activeS: number } // game '' = „bez gry”
 export interface OnlineStats extends PeriodTotals { games: GameTotals[] | null }
-export interface LiveState { kmh: number; steps: number }
+/** Stan na żywo znajomego: distanceKm/mode/game null bez zgody tej osoby; game null przy ukrytej grze („W grze”). */
+export interface LiveState {
+  kmh: number; steps: number; activeS: number;
+  since: number | null;        // od_utc_s
+  distanceKm: number | null;   // dystans bieżącej sesji
+  mode: SessionMode | null;
+  game: string | null;
+}
 export interface Friend {
   id: string; name: string;
-  level: number | null;
+  level: number | null;        // null bez zgody tej osoby (poziom ukryty)
+  xp: number | null;
+  description: string | null;  // opis dla znajomych
   live: LiveState | null;      // idzie teraz
   week: PeriodTotals;
 }
@@ -608,7 +621,7 @@ export interface PeoplePage {
 export interface OnlinePerson {
   id: string; name: string; me: boolean;
   level: number | null; xp: number | null; achievementsCount: number | null;
-  achievements: Array<{ id: string; earnedAt: number }> | null; // osiagniecia_lista; null - serwer nie podał
+  achievements: Array<{ id: string; earnedAt: number | null }> | null; // osiagniecia_lista; null - serwer nie podał; earnedAt null - cudzy profil (bez czasu zdobycia)
   since: number | null;        // od_utc_s
   treadmillModel: string | null;
   friend: boolean;
@@ -617,6 +630,7 @@ export interface OnlinePerson {
   games: GameTotals[] | null;  // profil: gry[].nazwa, statystyki: gry[].gra
   otherGames: OtherGames | null; // inne_gry; null - brak
   gamesHidden: boolean;        // serwer podał "gry": null - osoba nie pokazuje podziału
+  description: string | null;  // opis dla znajomych (tylko znajomy i właściciel)
 }
 export interface RegistrationCode { code: string; validUntil: number | null }
 

@@ -386,37 +386,46 @@ impl AccountTimers {
 /// Od tej prędkości (km/h) w trakcie sesji osoba „idzie” w stanie na żywo.
 pub const LIVE_MIN_KMH: f64 = 0.05;
 
+/// Gra bieżącej sesji w stanie na żywo (profil gry; tryb Trening - bez gry).
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct LiveGame {
+    /// id profilu (10 znaków hex)
+    pub id: String,
+    pub name: String,
+    /// przełącznik „Pokazuj tę grę na koncie online”
+    pub public: bool,
+}
+
+/// Migawka stanu na żywo (co [`LIVE_EVERY_S`] pełny komplet, docs/synchro.md).
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct LiveWalk {
+    pub kmh: f64,
+    pub steps: i64,
+    pub active_s: f64,
+    pub session_id: String,
+    /// dystans BIEŻĄCEJ sesji (km)
+    pub distance_km: f64,
+    /// "gra" albo "trening"
+    pub mode: String,
+    pub game: Option<LiveGame>,
+}
+
 /// Stan na żywo do wysłania przy kolejnym tyknięciu zegara [`LIVE_EVERY_S`].
 #[derive(Debug, Clone, PartialEq)]
 pub enum LiveUpdate {
-    Walking {
-        kmh: f64,
-        steps: i64,
-        active_s: f64,
-        session_id: String,
-    },
+    Walking(LiveWalk),
     /// koniec ruchu - wyczyścić stan na serwerze (raz)
     Stopped,
 }
 
-/// Co wysłać teraz: ruch, gdy trwa sesja i prędkość > [`LIVE_MIN_KMH`]; po ruchu jeden raz
-/// [`LiveUpdate::Stopped`]; potem nic. `live_on` - ostatnio wysłano ruch.
-pub fn live_update(
-    live_on: &mut bool,
-    session_id: Option<String>,
-    kmh: f64,
-    steps: i64,
-    active_s: f64,
-) -> Option<LiveUpdate> {
-    match session_id {
-        Some(session_id) if kmh > LIVE_MIN_KMH => {
+/// Co wysłać teraz: ruch, gdy trwa sesja (`walk` - None bez sesji) i prędkość >
+/// [`LIVE_MIN_KMH`]; po ruchu jeden raz [`LiveUpdate::Stopped`]; potem nic. `live_on` -
+/// ostatnio wysłano ruch.
+pub fn live_update(live_on: &mut bool, walk: Option<LiveWalk>) -> Option<LiveUpdate> {
+    match walk {
+        Some(walk) if walk.kmh > LIVE_MIN_KMH => {
             *live_on = true;
-            Some(LiveUpdate::Walking {
-                kmh,
-                steps,
-                active_s,
-                session_id,
-            })
+            Some(LiveUpdate::Walking(walk))
         }
         _ if *live_on => {
             *live_on = false;

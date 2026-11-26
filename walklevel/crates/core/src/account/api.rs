@@ -273,6 +273,8 @@ pub struct ProfilePatch {
     pub terms: Option<String>,
     /// kto widzi podział na gry: ja / znajomi / wszyscy
     pub games_visibility: Option<String>,
+    /// opis dla znajomych (do 40 znaków; "" czyści)
+    pub description: Option<String>,
 }
 
 /// Obowiązujący regulamin (`GET regulamin`).
@@ -363,6 +365,45 @@ pub struct ChangesPage {
 }
 
 /// Tekst pola (liczby i inne wartości jak `str()` w Pythonie; brak/null - pusty).
+/// Dystans bieżącej sesji w stanie na żywo: serwer przyjmuje 0..300 km.
+pub const LIVE_DISTANCE_MAX_KM: f64 = 300.0;
+
+/// Ciało `PUT /api/bieznia/stan` - pełna migawka. `games` (regulamin z grami): także
+/// `dystans_km` i `tryb`; `show_game` (status „Pokazuj grę i tempo”) - dla sesji z profilem gry
+/// `gra_id`, `gra` i `gra_publiczna` (nazwę inni widzą tylko przy przełączniku profilu).
+pub fn live_body(walk: &super::LiveWalk, games: bool, show_game: bool) -> Value {
+    let mut body = json!({
+        "kmh": (walk.kmh * 10.0).round() / 10.0,
+        "kroki": walk.steps,
+        "ruch_s": walk.active_s.trunc() as i64,
+        // jak przy wysyłce sesji: postać z kreskami (lokalnie id to 32 znaki hex) - serwer
+        // odrzucał stan na żywo z 0.6.0 („Nieprawidłowy identyfikator sesji”)
+        "sesja_uuid": super::canonical_uuid(&walk.session_id),
+    });
+    if !games {
+        return body;
+    }
+    let distance = (walk.distance_km.clamp(0.0, LIVE_DISTANCE_MAX_KM) * 1000.0).round() / 1000.0;
+    let mode = if walk.mode == "trening" {
+        "trening"
+    } else {
+        "gra"
+    };
+    body["dystans_km"] = json!(distance);
+    body["tryb"] = json!(mode);
+    if let Some(game) = walk.game.as_ref().filter(|_| show_game && mode == "gra")
+        && super::upload::valid_game_id(&game.id)
+    {
+        body["gra_id"] = json!(game.id);
+        let name = super::upload::game_name(&game.name);
+        if !name.is_empty() {
+            body["gra"] = json!(name);
+        }
+        body["gra_publiczna"] = json!(game.public);
+    }
+    body
+}
+
 fn text(v: &Value, key: &str) -> String {
     match v.get(key) {
         None | Some(Value::Null) => String::new(),
@@ -762,23 +803,9 @@ impl Client {
         })
     }
 
-    /// Stan na żywo dla znajomych.
-    pub fn put_live(
-        &mut self,
-        kmh: f64,
-        steps: i64,
-        active_s: f64,
-        session_uuid: &str,
-    ) -> Result<(), KontoError> {
-        let body = json!({
-            "kmh": (kmh * 10.0).round() / 10.0,
-            "kroki": steps,
-            "ruch_s": active_s.trunc() as i64,
-            // jak przy wysyłce sesji: postać z kreskami (lokalnie id to 32 znaki hex) - serwer
-            // odrzucał stan na żywo z 0.6.0 („Nieprawidłowy identyfikator sesji”)
-            "sesja_uuid": super::canonical_uuid(session_uuid),
-        });
-        self.call("PUT", "/api/bieznia/stan", Some(&body), &[], true)?;
+    /// Stan na żywo dla znajomych (ciało z [`live_body`]).
+    pub fn put_live(&mut self, body: &Value) -> Result<(), KontoError> {
+        self.call("PUT", "/api/bieznia/stan", Some(body), &[], true)?;
         Ok(())
     }
 
@@ -890,6 +917,7 @@ impl Client {
         put("widocznosc_profilu", &patch.visibility);
         put("regulamin", &patch.terms);
         put("widocznosc_gier", &patch.games_visibility);
+        put("opis", &patch.description);
         let result = self.call(
             "PATCH",
             "/api/bieznia/profil",

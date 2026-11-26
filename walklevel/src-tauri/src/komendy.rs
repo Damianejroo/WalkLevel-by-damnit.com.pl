@@ -658,10 +658,20 @@ pub async fn account_set_visibility(core: State<'_, Core>, value: String) -> Cmd
     blocking(&core, move |c| konto::set_visibility(&c, value)).await
 }
 
+/// Status dla znajomych (0.6.2): `wszystko` / `chodze` / `niewidoczny` (czyści stan na żywo).
 #[tauri::command]
-pub async fn account_set_live(core: State<'_, Core>, on: bool) -> CmdResult<()> {
+pub async fn account_set_live_status(core: State<'_, Core>, value: String) -> CmdResult<()> {
     blocking(&core, move |c| {
-        konto::simple(&c, "live", None, move |a, _| a.set_live(on))
+        konto::simple(&c, "live", None, move |a, _| a.set_live_status(&value))
+    })
+    .await
+}
+
+/// Opis dla znajomych (do 40 znaków, "" czyści); błąd 400 z serwera wraca przy polu.
+#[tauri::command]
+pub async fn account_set_description(core: State<'_, Core>, text: String) -> CmdResult<()> {
+    blocking(&core, move |c| {
+        konto::simple(&c, "profile", None, move |a, _| a.set_description(&text))
     })
     .await
 }

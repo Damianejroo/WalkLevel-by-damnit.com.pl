@@ -40,7 +40,10 @@ pub use api::{
     check_base_url, field_errors, friendly,
 };
 pub use state::{AccountState, STATE_FILE, load_state, load_states, save_state, save_states};
-pub use sync::{AccountTimers, Every, LiveUpdate, NewGame, SyncReport, SyncTarget, live_update};
+pub use sync::{
+    AccountTimers, Every, LiveGame, LiveUpdate, LiveWalk, NewGame, SyncReport, SyncTarget,
+    live_update,
+};
 pub use upload::{DELETED_ELSEWHERE, UploadSession, game_name, session_payload, valid_game_id};
 pub use vault::{MemoryStore, TARGET, TokenStore, default_store, vault_target};
 
@@ -49,6 +52,11 @@ use state::StateFile;
 pub const VISIBILITY: [&str; 3] = ["prywatna", "znajomi", "publiczna"];
 pub const PROFILE_VISIBILITY: [&str; 3] = ["ukryty", "znajomi", "publiczny"];
 pub const GAMES_VISIBILITY: [&str; 3] = ["ja", "znajomi", "wszyscy"];
+/// Status dla znajomych (0.6.2, zastępuje przełącznik „Na żywo dla znajomych”): gra i tempo /
+/// tylko że chodzę (bez gry) / niewidoczny (bez stanu na żywo).
+pub const LIVE_STATUS: [&str; 3] = ["wszystko", "chodze", "niewidoczny"];
+/// Opis dla znajomych: najwyżej tyle znaków.
+pub const DESCRIPTION_MAX: usize = 40;
 pub const GAME_NAME_MAX: usize = 40;
 /// Sesja odrzucona przez serwer: ponowienie po dobie.
 pub const REJECTED_RETRY_S: f64 = 24.0 * 3600.0;
@@ -460,7 +468,7 @@ impl Account {
 
     /// Wylogowanie: stan na żywo na serwerze czyszczony (bez znaczenia, czy się uda).
     pub fn logout(&mut self) {
-        if self.state.live && !self.client.token().is_empty() {
+        if self.state.shares_live() && !self.client.token().is_empty() {
             let _ = self.client.clear_live();
         }
         self.forget();
@@ -537,6 +545,33 @@ impl Account {
             // po kliknięciu linku z maila
             s.verified = truthy(v);
         }
+        match profile.get("opis") {
+            Some(Value::String(v)) => s.description = v.trim().to_string(),
+            Some(Value::Null) => s.description.clear(),
+            _ => {}
+        }
+    }
+
+    /// Opis dla znajomych (PATCH profil `opis`): do [`DESCRIPTION_MAX`] znaków, pusty czyści.
+    pub fn set_description(&mut self, text: &str) -> Result<()> {
+        let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
+        if text.chars().count() > DESCRIPTION_MAX {
+            return Err(KontoError::invalid_field(
+                "description",
+                &t(
+                    "konto.blad.opis_dlugosc",
+                    &[("liczba", &DESCRIPTION_MAX.to_string())],
+                ),
+            ));
+        }
+        let patch = ProfilePatch {
+            description: Some(text.clone()),
+            ..ProfilePatch::default()
+        };
+        let result = self.client.update_profile(&patch);
+        self.handle(result)?;
+        self.state.description = text;
+        self.save()
     }
 
     /// Czy adres jest już potwierdzony. Link z maila otwiera się w przeglądarce, więc
@@ -680,21 +715,31 @@ impl Account {
         self.save()
     }
 
-    /// „Na żywo dla znajomych”; wyłączenie czyści stan na serwerze.
-    pub fn set_live(&mut self, on: bool) -> Result<()> {
-        self.state.live = on;
+    /// Status dla znajomych ([`LIVE_STATUS`]); „niewidoczny” czyści stan na serwerze.
+    pub fn set_live_status(&mut self, value: &str) -> Result<()> {
+        if !LIVE_STATUS.contains(&value) {
+            return Err(KontoError::invalid(&t("wspolne.blad_nieznany", &[])));
+        }
+        self.state.set_live_status(value);
         self.save()?;
-        if !on && self.state.logged_in() {
+        if !self.state.shares_live() && self.state.logged_in() {
             let result = self.client.clear_live();
             self.handle(result)?;
         }
         Ok(())
     }
 
-    /// Stan na żywo (co [`sync::LIVE_EVERY_S`], gdy osoba idzie i ma włączone „na żywo”).
-    pub fn live(&mut self, kmh: f64, steps: i64, active_s: f64, session_id: &str) -> Result<()> {
-        if self.state.logged_in() && self.state.live {
-            let result = self.client.put_live(kmh, steps, active_s, session_id);
+    /// Stan na żywo (co [`sync::LIVE_EVERY_S`] pełna migawka, gdy osoba idzie, a status nie
+    /// jest „niewidoczny”). Dystans, tryb i gra tylko po regulaminie z grami; gra tylko przy
+    /// statusie „Pokazuj grę i tempo”.
+    pub fn live(&mut self, walk: &LiveWalk) -> Result<()> {
+        if self.state.logged_in() && self.state.shares_live() {
+            let body = api::live_body(
+                walk,
+                self.state.games_allowed(),
+                self.state.live_status == "wszystko",
+            );
+            let result = self.client.put_live(&body);
             self.handle(result)?;
         }
         Ok(())
