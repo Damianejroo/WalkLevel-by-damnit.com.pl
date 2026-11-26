@@ -22,3 +22,12 @@ build-log.txt
 
 # podgląd maili (generuje strona/maile/zbuduj.py)
 /strona/maile/podglad/
+
+# Tauri/Rust/Node
+node_modules/
+/walklevel/target/
+/walklevel/target-*/
+/walklevel/dist/
+/walklevel/src-tauri/gen/
+/walklevel/narzedzia/
+/walklevel/dist-instalator/

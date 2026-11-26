@@ -1,4 +1,4 @@
-﻿; Instalator WalkLevel, dawniej Bieżnia Gamingowa (Inno Setup 6/7). Budowanie: uv run python packaging/zbuduj.py
+﻿; Instalator WalkLevel (Inno Setup 6/7). Budowanie: uv run python packaging/zbuduj.py
 ; Jedno kliknięcie: bez pytań i bez umowy, pasek postępu, potem aplikacja sama się otwiera.
 ; Instalacja na koncie użytkownika (bez administratora). Dane w %LOCALAPPDATA%\Bieznia
 ; zostają przy aktualizacji i odinstalowaniu. Techniczne nazwy (Bieznia.exe, folder, AppId,

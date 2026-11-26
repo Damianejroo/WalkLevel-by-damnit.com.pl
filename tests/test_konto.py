@@ -557,3 +557,60 @@ def test_game_names_go_only_after_accepting_current_terms_and_per_profile(
     assert server.sessions[uuid_of("a")]["tryb"] == "gra"
     assert "gra" not in server.sessions[uuid_of("b")]  # nazwa gry ukryta w profilu
     assert server.sessions[uuid_of("b")]["gra_id"] == "bbbbbbbbbb"  # do osiągnięć za gry
+
+
+def test_walking_offline_uploads_everything_when_internet_returns(
+    account: konto.Account, server: FakeServer, tmp_path: Path
+) -> None:
+    """Chodzenie bez internetu: sesje zostają na komputerze i idą same, gdy sieć wróci."""
+    import urllib.error
+
+    history = History(tmp_path / "h.db")
+    signed_in(account)
+    online = {"on": True}
+    real = account.client.opener
+
+    def opener(request: Any, timeout: float) -> Any:
+        if not online["on"]:
+            raise urllib.error.URLError("brak sieci")
+        return real(request, timeout)
+
+    account.client.opener = opener
+    online["on"] = False
+    history.save(session("a"))
+    history.save(session("b"))
+    with pytest.raises(KontoError):
+        account.upload(history)
+    assert len(history.unsent("p1")) == 2  # nic nie przepadło ani nie udaje wysłanego
+    walking = session("b", updated=20.0)  # sesja trwała dalej, nadal bez sieci
+    walking.steps = 1500
+    history.save(walking)
+    with pytest.raises(KontoError):
+        account.upload(history)
+    online["on"] = True
+    assert account.upload(history) == 2
+    assert server.sessions[uuid_of("b")]["kroki"] == 1500  # najnowszy stan
+    assert account.upload(history) == 0
+
+
+def test_rejected_session_is_retried_after_a_day(
+    account: konto.Account, server: FakeServer, tmp_path: Path
+) -> None:
+    """Odrzucona sesja nie wraca w kółko, ale po dobie próbuje jeszcze raz (serwer mógł
+    zmienić zasady - jak z sesjami bez zapisanego sterownika)."""
+    import time as _time
+
+    history = History(tmp_path / "h.db")
+    bad = session(session_id(2))
+    bad.steps = 999_999
+    history.save(bad)
+    signed_in(account)
+    assert account.upload(history) == 0
+    assert history.unsent("p1") == []  # nie zaraz
+    assert "zakresem" in history.rejected()[bad.id]
+    later = _time.time() + konto.REJECTED_RETRY_S + 60
+    assert [s.id for s in history.unsent("p1", now=later)] == [bad.id]  # po dobie
+    fixed = session(session_id(2), updated=50.0)  # albo od razu, gdy sesja się zmieni
+    history.save(fixed)
+    assert [s.id for s in history.unsent("p1")] == [bad.id]
+    assert account.upload(history) == 1 and history.rejected() == {}

@@ -107,6 +107,7 @@ log = logging.getLogger("bieznia")
 TICK_MS = 50
 STARTED = time.monotonic()  # import tego modułu to praktycznie start procesu
 TOAST_MS = 4000
+REPORT_MIN_CHARS = 5  # krótszy opis zgłoszenia nic nie mówi autorowi
 DEFAULT_W, DEFAULT_H = 740, 890  # okno przy pierwszym starcie (potem z ostatniej sesji)
 LOOK_RELOAD = ("theme", "large_text", "profile_color")
 
@@ -708,7 +709,13 @@ class App(
         self.report_text.setAccessibleName("Opis problemu")
         self.report_text.setObjectName("prose")  # zwykłe pismo, nie krój logów
         self.report_text.setMinimumHeight(120)
+        self.report_text.textChanged.connect(self.check_report_text)
         lay.addWidget(self.report_text)
+        # błąd tuż pod polem (a nie nad przyciskiem): widać, co poprawić
+        self.report_error = label("", "danger")
+        self.report_error.setWordWrap(True)
+        self.report_error.hide()
+        lay.addWidget(self.report_error)
         lay.addWidget(label("Kontakt (opcjonalnie)"))
         self.report_contact = QLineEdit()
         self.report_contact.setPlaceholderText("Np. nick na Discordzie albo e-mail")
@@ -953,9 +960,15 @@ class App(
         elif direction == "keyboard":
             text = f"Trzymaj {walk.name}, żeby przyspieszyć, {walk.name} + {run.name} - bieg."
         elif self.settings["output"] == "keys":
-            text = f"Gra dostaje {walk.name} i {run.name} + {walk.name} (aktywne okno)."
+            text = (
+                f"Gdy idziesz, aplikacja trzyma {walk.name} w aktywnym oknie gry,"
+                f" a przy szybszym chodzie {run.name} + {walk.name}."
+            )
         else:
-            text = "Podgląd: nic nie jest naciskane - Klawiatura w Ustawieniach."
+            text = (
+                "Tryb próbny: aplikacja nie naciska klawiszy w grze. Żeby postać szła,"
+                " w Ustawieniach > Gry i sterowanie ustaw Wyjście na Klawiatura."
+            )
         self.output_hint.setText(text)
 
     def key_buttons(self) -> list[KeyButton]:
@@ -1048,8 +1061,8 @@ class App(
         if self.report_busy:
             return
         description = self.report_text.toPlainText().strip()
-        if len(description) < 5:
-            self.report_status.setText("Napisz w kilku słowach, co się stało.")
+        if len(description) < REPORT_MIN_CHARS:
+            self.show_report_error(len(description))
             return
         self.report_busy = True
         self.report_send.setEnabled(False)
@@ -1057,6 +1070,32 @@ class App(
         self.run_task(
             self.report_task, description, self.report_contact.text(), False, self.report_period_s()
         )
+
+    def show_report_error(self, length: int) -> None:
+        """Za krótki opis: czerwona ramka pola, komunikat pod nim i kursor w polu."""
+        missing = REPORT_MIN_CHARS - length
+        if length == 0:
+            text = "Opisz, co się stało - wystarczy jedno zdanie."
+        else:
+            word = "znak" if missing == 1 else "znaki" if missing < 5 else "znaków"
+            text = f"Opis jest za krótki - dopisz jeszcze {missing} {word}, np. co poszło nie tak."
+        self.report_error.setText(text)
+        self.report_error.show()
+        self.report_status.setText("")
+        self.report_text.setProperty("error", True)
+        self.report_text.style().unpolish(self.report_text)
+        self.report_text.style().polish(self.report_text)
+        self.report_text.setFocus()
+
+    def check_report_text(self) -> None:
+        """Błąd znika, gdy opis jest już wystarczający."""
+        if not self.report_text.property("error"):
+            return
+        if len(self.report_text.toPlainText().strip()) >= REPORT_MIN_CHARS:
+            self.report_error.hide()
+            self.report_text.setProperty("error", False)
+            self.report_text.style().unpolish(self.report_text)
+            self.report_text.style().polish(self.report_text)
 
     def save_report(self) -> None:
         if self.report_busy:

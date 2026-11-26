@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "id": "kingsmith-x21",
+  "name": "KingSmith WalkingPad X21",
+  "driver": "kingsmith",
+  "match": ["KS-HDSY-X21"],
+  "capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 12.0,
+    "start_speed": 1.0,
+    "telemetry_s": 2.0
+  }
+}

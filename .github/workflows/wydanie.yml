@@ -1,9 +1,12 @@
 name: Wydanie
 
-# Nowa wersja dla testera:  git tag -a v0.2.2 -m "Co się zmieniło"  &&  git push origin v0.2.2
+# Nowa wersja:  git tag -a v0.6.1 -m "Co się zmieniło"  &&  git push origin v0.6.1
 #
-# Testy i budowa idą równolegle. Budowa tworzy wydanie jako SZKIC (niewidoczny dla przycisku
-# Aktualizuj); publikacja zmienia go w widoczne wydanie dopiero, gdy testy też przeszły.
+# Od 0.6.0 budujemy WalkLevel w Tauri 2 + Svelte + Rust (folder walklevel/). Testy i budowa idą
+# równolegle. Budowa tworzy wydanie jako SZKIC (niewidoczny dla przycisku Aktualizuj);
+# publikacja zmienia go w widoczne wydanie dopiero, gdy testy też przeszły.
+# Instalator: walklevel/packaging/zbuduj.ps1 (ten sam skrypt co lokalnie), nazwa pliku
+# Bieznia-Setup-X.Y.Z.exe jak w 0.5.x - aktualizacja z 0.5.x podmienia aplikację.
 on:
   push:
     tags: ["v*.*.*"]
@@ -17,32 +20,47 @@ concurrency:
 
 env:
   TAG: ${{ github.ref_name }}
+  CARGO_TERM_COLOR: never
 
 jobs:
   testy:
     runs-on: windows-latest
-    timeout-minutes: 15
-    env:
-      QT_QPA_PLATFORM: offscreen
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: walklevel
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
-        with:
-          version: "0.13.9"
-      - name: Zależności (zgodne z uv.lock)
-        run: uv sync --locked
-      - name: Testy i kontrole
+      - name: Rust stable (Rust 2024) i clippy
         run: |
-          uv run ruff check
-          uv run ruff format --check
-          uv run mypy
-          uv run pytest -q
+          rustup toolchain install stable --profile minimal --component clippy
+          rustup default stable
+          rustc --version
+      - name: Rdzeń i klej Tauri (clippy, testy)
+        run: |
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+          if ($LASTEXITCODE) { throw "clippy" }
+          cargo test --workspace --locked
+          if ($LASTEXITCODE) { throw "cargo test" }
+      - name: Interfejs (typy, budowa, test widoków w Edge)
+        run: |
+          npm ci
+          if ($LASTEXITCODE) { throw "npm ci" }
+          npm run check
+          if ($LASTEXITCODE) { throw "npm run check" }
+          npm run build
+          if ($LASTEXITCODE) { throw "npm run build" }
+          npm run test:ui -- --bez-zrzutow
+          if ($LASTEXITCODE) { throw "test:ui" }
+          node tests-ui/zwijanie.mjs
+          if ($LASTEXITCODE) { throw "zwijanie" }
 
   budowa:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     permissions:
       contents: write # szkic wydania
       id-token: write # poświadczenie pochodzenia (Sigstore)
@@ -55,18 +73,16 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # treść tagu = opis wydania
-      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
-        with:
-          version: "0.13.9"
       - name: Wersja z tagu
         shell: pwsh
         run: |
           if ($env:TAG -notmatch '^v(\d+\.\d+\.\d+)$') { throw "Tag musi mieć postać v1.2.3" }
           "VERSION=$($Matches[1])" >> $env:GITHUB_ENV
-      - name: Zależności i Inno Setup (przypięta wersja, sprawdzona suma)
+      - name: Rust stable i Inno Setup (przypięta wersja, sprawdzona suma)
         shell: pwsh
         run: |
-          uv sync --locked
+          rustup toolchain install stable --profile minimal
+          rustup default stable
           $ProgressPreference = 'SilentlyContinue'
           $f = "$env:RUNNER_TEMP\innosetup.exe"
           Invoke-WebRequest -Uri $env:INNO_URL -OutFile $f -UseBasicParsing
@@ -74,12 +90,19 @@ jobs:
           $dir = "$env:RUNNER_TEMP\inno"
           Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CURRENTUSER','/PORTABLE=1',"/DIR=$dir" -Wait
           "ISCC=$dir\ISCC.exe" >> $env:GITHUB_ENV
+      - name: Zależności interfejsu
+        shell: pwsh
+        working-directory: walklevel
+        run: |
+          npm ci
+          if ($LASTEXITCODE) { throw "npm ci" }
       - name: Budowa exe i instalatora
-        run: uv run python packaging/zbuduj.py ${{ env.VERSION }}
+        shell: pwsh
+        run: ./walklevel/packaging/zbuduj.ps1 -Wersja $env:VERSION -Iscc $env:ISCC
       - name: Poświadczenie pochodzenia instalatora
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: dist/Bieznia-Setup-*.exe
+          subject-path: walklevel/dist-instalator/Bieznia-Setup-*.exe
       - name: Szkic wydania (jeszcze niewidoczny dla aplikacji)
         shell: pwsh
         env:
@@ -89,7 +112,8 @@ jobs:
           if (-not $notes) { $notes = "Nowa wersja WalkLevel." }
           $notes += "`n`n**Instalacja:** pobierz Bieznia-Setup-$env:VERSION.exe i uruchom. Masz już aplikację? Kliknij w niej Aktualizuj."
           $notes | Out-File -Encoding utf8 notes.md
-          gh release create $env:TAG dist/Bieznia-Setup-$env:VERSION.exe dist/Bieznia-Setup-$env:VERSION.exe.sha256 --draft --title "WalkLevel $env:VERSION" --notes-file notes.md --verify-tag
+          $dist = "walklevel/dist-instalator"
+          gh release create $env:TAG "$dist/Bieznia-Setup-$env:VERSION.exe" "$dist/Bieznia-Setup-$env:VERSION.exe.sha256" --draft --title "WalkLevel $env:VERSION" --notes-file notes.md --verify-tag
 
   publikacja:
     needs: [testy, budowa]

@@ -29,7 +29,7 @@ SAVE_EVERY_S = 60.0
 MIN_SESSION_S = 10.0  # krótsze nie trafiają do historii (przypadkowy ruch taśmy)
 DELETED_PERSON = "Usunięte osoby"
 
-SCHEMA_VERSION = 4  # 3: wysłane i ukryte online; 4: tryb sesji, osiągnięcia i poziom osoby
+SCHEMA_VERSION = 5  # 3: wysłane i ukryte online; 4: tryb, osiągnięcia, poziom; 5: odrzucone
 VISIBILITY = ("prywatna", "znajomi", "publiczna")
 SOURCES = ("bieznia", "symulator")
 
@@ -70,6 +70,12 @@ CREATE INDEX IF NOT EXISTS sesje_osoba_start ON sesje (osoba, start_utc_s);
 CREATE TABLE IF NOT EXISTS wyslane (
     id TEXT PRIMARY KEY,
     zmieniono_utc_s REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS odrzucone (
+    id TEXT PRIMARY KEY,
+    zmieniono_utc_s REAL NOT NULL,
+    powod TEXT NOT NULL,
+    ponow_utc_s REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS ukryte_online (
     id TEXT PRIMARY KEY
@@ -222,15 +228,32 @@ class History:
 
     # --- konto online (opcjonalne) ---------------------------------------------------------
 
-    def unsent(self, person: str) -> list[Session]:
+    def unsent(self, person: str, now: float | None = None) -> list[Session]:
         """Sesje osoby powiązanej z kontem, których serwer jeszcze nie ma albo które się
-        zmieniły od wysyłki. Bez sesji z symulatora (nie idą do rankingu ani statystyk)."""
+        zmieniły od wysyłki. Bez sesji z symulatora (nie idą do rankingu ani statystyk).
+        Odrzucona przez serwer czeka do terminu ponowienia (serwer mógł zmienić zasady),
+        chyba że sama się zmieniła."""
         sql = (
             f"{_SELECT} WHERE osoba = ? AND zrodlo = 'bieznia' AND NOT EXISTS ("
             "SELECT 1 FROM wyslane w WHERE w.id = sesje.id"
-            " AND w.zmieniono_utc_s >= sesje.zmieniono_utc_s) ORDER BY start_utc_s"
+            " AND w.zmieniono_utc_s >= sesje.zmieniono_utc_s) AND NOT EXISTS ("
+            "SELECT 1 FROM odrzucone o WHERE o.id = sesje.id"
+            " AND o.zmieniono_utc_s >= sesje.zmieniono_utc_s AND o.ponow_utc_s > ?)"
+            " ORDER BY start_utc_s"
         )
-        return [Session.from_row(r) for r in self.db.execute(sql, (person,))]
+        at = time.time() if now is None else now
+        return [Session.from_row(r) for r in self.db.execute(sql, (person, at))]
+
+    def mark_rejected(self, rejected: list[tuple[Session, str]], retry_at: float) -> None:
+        """Odrzucone przez serwer: bez pętli wysyłek, ale z ponowieniem po retry_at."""
+        with self.db:
+            self.db.executemany(
+                "INSERT OR REPLACE INTO odrzucone VALUES (?, ?, ?, ?)",
+                [(s.id, s.updated, reason[:200], retry_at) for s, reason in rejected],
+            )
+
+    def rejected(self) -> dict[str, str]:
+        return dict(self.db.execute("SELECT id, powod FROM odrzucone").fetchall())
 
     def mark_sent(self, sessions: list[Session]) -> None:
         with self.db:
@@ -238,11 +261,13 @@ class History:
                 "INSERT OR REPLACE INTO wyslane VALUES (?, ?)",
                 [(s.id, s.updated) for s in sessions],
             )
+            self.db.executemany("DELETE FROM odrzucone WHERE id = ?", [(s.id,) for s in sessions])
 
     def forget_sent(self) -> None:
         """Inne konto, wylogowanie albo zmiana widoczności - wszystko pójdzie od nowa."""
         with self.db:
             self.db.execute("DELETE FROM wyslane")
+            self.db.execute("DELETE FROM odrzucone")
 
     def hidden_online(self) -> set[str]:
         return {r[0] for r in self.db.execute("SELECT id FROM ukryte_online")}

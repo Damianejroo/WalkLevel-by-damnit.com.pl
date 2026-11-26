@@ -1,0 +1,225 @@
+{
+ "wersja": 3.0,
+ "opis": "Definicje testowe",
+ "xp_za_km": 37.0,
+ "xp_za_rzadkosc": {
+  "a": 7,
+  "b": 13.0
+ },
+ "rzadkosci": [
+  "a",
+  "b",
+  "c"
+ ],
+ "poziomy_xp": [
+  0,
+  0,
+  50,
+  50,
+  200,
+  400.0
+ ],
+ "rangi": [
+  {
+   "od_poziomu": 3,
+   "nazwa": "Trzeci",
+   "opis": "od 3"
+  },
+  {
+   "od_poziomu": 5.0,
+   "nazwa": "Piąty",
+   "opis": "od 5"
+  }
+ ],
+ "nowe_pole": [
+  1,
+  2
+ ],
+ "osiagniecia": [
+  {
+   "id": "k1",
+   "typ": "dystans",
+   "km": 1,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "K1",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "k05",
+   "typ": "dystans",
+   "km": 0.5,
+   "rzadkosc": "c",
+   "znak": "s",
+   "nazwa": "K05",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "k3",
+   "typ": "dystans",
+   "km": 3.0,
+   "rzadkosc": "b",
+   "ikona": "nowa",
+   "znak": "s",
+   "nazwa": "K3",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "s3dni",
+   "typ": "seria",
+   "dni": 2,
+   "km_dziennie": 3.0,
+   "rzadkosc": "b",
+   "znak": "s",
+   "nazwa": "S3DNI",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "s4dni",
+   "typ": "seria",
+   "dni": 4,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "S4DNI",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "gry2a",
+   "typ": "gry_km",
+   "gier": 2,
+   "km": 1,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "GRY2A",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "gry2b",
+   "typ": "gry_km",
+   "gier": 2,
+   "km": 3,
+   "rzadkosc": "b",
+   "znak": "s",
+   "nazwa": "GRY2B",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "gry3a",
+   "typ": "gry_km",
+   "gier": 3,
+   "km": 1,
+   "rzadkosc": "b",
+   "znak": "s",
+   "nazwa": "GRY3A",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "jedna",
+   "typ": "gra_km",
+   "km": 2.5,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "JEDNA",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "zawsze",
+   "typ": "start_miedzy",
+   "od": 5,
+   "do": 5,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "ZAWSZE",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "pozno",
+   "typ": "start_miedzy",
+   "od": 22.9,
+   "do": 1.2,
+   "rzadkosc": "c",
+   "znak": "s",
+   "nazwa": "POZNO",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "kroki",
+   "typ": "dzien_kroki",
+   "kroki": 1000.5,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "KROKI",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "sesja2",
+   "typ": "sesja_km",
+   "km": 2,
+   "rzadkosc": "b",
+   "znak": "s",
+   "nazwa": "SESJA2",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "znaj2",
+   "typ": "znajomi",
+   "ile": 2,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "ZNAJ2",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "pol0",
+   "typ": "polecenia",
+   "ile": 0,
+   "rzadkosc": "b",
+   "znak": "s",
+   "nazwa": "POL0",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "nowe",
+   "typ": "cos_nowego",
+   "ile": 5,
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "NOWE",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "tren",
+   "typ": "trening",
+   "rzadkosc": "c",
+   "znak": "s",
+   "nazwa": "TREN",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  },
+  {
+   "id": "pierwsza",
+   "typ": "gra_pierwsza",
+   "rzadkosc": "a",
+   "znak": "s",
+   "nazwa": "PIERWSZA",
+   "klimat": "Klimat.",
+   "warunek": "Warunek."
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+{
+  "source": {
+    "type": "sim",
+    "replay_file": ""
+  },
+  "output": {
+    "type": "dry",
+    "direction": "keyboard",
+    "start_enabled": false
+  },
+  "mapping": {
+    "stand_below": 0.8,
+    "run_on": 6.3,
+    "run_off": 5.7,
+    "max_speed": 12.0,
+    "smoothing_samples": 1,
+    "stale_after_s": 3.0,
+    "quick_stop": true,
+    "brake_drop": 0.6,
+    "brake_near": 0.6,
+    "brake_hold_s": 3.0
+  },
+  "hotkeys": {
+    "toggle": "F8",
+    "sim_slower": "F6",
+    "sim_faster": "F7"
+  },
+  "record": {
+    "enabled": false
+  },
+  "update": {
+    "remote": "origin",
+    "branch": "main"
+  },
+  "ble": {
+    "device_address": "",
+    "device_name": "",
+    "belt_control": true,
+    "idle_speed": 1.0,
+    "walk_speed": 1.5,
+    "run_speed": 2.5,
+    "pad_steps": [
+      [
+        0,
+        1.0
+      ],
+      [
+        25,
+        1.5
+      ],
+      [
+        50,
+        2.5
+      ],
+      [
+        100,
+        4.0
+      ]
+    ],
+    "pad_idle": "stop",
+    "training_levels": [
+      1.5,
+      2.5,
+      3.5,
+      4.5
+    ]
+  },
+  "ui": {
+    "simulator": false,
+    "record": false,
+    "always_on_top": false,
+    "floating_button": false,
+    "theme": "system",
+    "large_text": false,
+    "detailed_logs": true
+  },
+  "zgloszenia": {
+    "adres": "https://bieznia.damnit-live.pl/api/bieznia/zgloszenie"
+  },
+  "konto": {
+    "adres": "https://bieznia.damnit-live.pl",
+    "regulamin": "https://bieznia.damnit-live.pl/bieznia"
+  }
+}
