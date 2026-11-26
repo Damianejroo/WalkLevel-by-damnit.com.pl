@@ -127,22 +127,24 @@ pub struct Definitions {
     pub achievements: Vec<Achievement>,
 }
 
+// Liczby całkowite czytane jako f64 i obcinane jak `int()` w Pythonie - plik z `2.0`
+// zamiast `2` wczytuje się tak samo jak w 0.5.x.
 #[derive(Deserialize)]
 struct RawDefinitions {
-    wersja: i64,
+    wersja: f64,
     #[serde(default)]
     opis: String,
-    xp_za_km: i64,
-    xp_za_rzadkosc: BTreeMap<String, i64>,
+    xp_za_km: f64,
+    xp_za_rzadkosc: BTreeMap<String, f64>,
     rzadkosci: Vec<String>,
-    poziomy_xp: Vec<i64>,
+    poziomy_xp: Vec<f64>,
     rangi: Vec<RawRank>,
     osiagniecia: Vec<RawAchievement>,
 }
 
 #[derive(Deserialize)]
 struct RawRank {
-    od_poziomu: u32,
+    od_poziomu: f64,
     nazwa: String,
     opis: String,
 }
@@ -197,16 +199,18 @@ impl Definitions {
     pub fn from_json(text: &str) -> Result<Definitions, LevelsError> {
         let raw: RawDefinitions =
             serde_json::from_str(text).map_err(|e| LevelsError::Parse(e.to_string()))?;
-        if raw.poziomy_xp.is_empty() {
+        let levels: Vec<i64> = raw.poziomy_xp.iter().map(|&x| x as i64).collect();
+        let xp_per_km = raw.xp_za_km as i64;
+        if levels.is_empty() {
             return Err(LevelsError::Invalid("pusta tabela poziomów".into()));
         }
-        if raw.poziomy_xp.windows(2).any(|w| w[0] > w[1]) {
+        if levels.windows(2).any(|w| w[0] > w[1]) {
             return Err(LevelsError::Invalid("progi poziomów nie rosną".into()));
         }
         if raw.rangi.is_empty() {
             return Err(LevelsError::Invalid("brak rang".into()));
         }
-        if raw.xp_za_km <= 0 {
+        if xp_per_km <= 0 {
             return Err(LevelsError::Invalid("xp_za_km musi być dodatnie".into()));
         }
         let mut seen = std::collections::HashSet::new();
@@ -227,17 +231,22 @@ impl Definitions {
             }
         }
         Ok(Definitions {
-            version: raw.wersja,
+            version: raw.wersja as i64,
             description: raw.opis,
-            xp_per_km: raw.xp_za_km,
-            rarity_xp: raw.xp_za_rzadkosc,
+            xp_per_km,
+            rarity_xp: raw
+                .xp_za_rzadkosc
+                .into_iter()
+                .map(|(k, v)| (k, v as i64))
+                .collect(),
             rarities: raw.rzadkosci,
-            levels: raw.poziomy_xp,
+            levels,
             ranks: raw
                 .rangi
                 .into_iter()
                 .map(|r| Rank {
-                    level: r.od_poziomu,
+                    // ujemny próg działa w rank/next_rank tak samo jak 0
+                    level: r.od_poziomu as u32,
                     name: r.nazwa,
                     about: r.opis,
                 })
@@ -487,6 +496,7 @@ impl Progress {
         }
     }
 
+    /// Czy osiągnięcie jest zdobyte.
     pub fn earned(&self) -> bool {
         self.earned_at.is_some()
     }

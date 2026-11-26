@@ -156,13 +156,16 @@ fn check_case(defs: &Definitions, c: &Case) {
     assert_eq!(ids(s.closest(10)), e.closest10, "{n}: najbliższe 10");
 }
 
-#[test]
-fn evaluate_matches_python_fixtures() {
-    let defs = Definitions::builtin().expect("wbudowane definicje");
+/// Wszystkie przypadki z katalogu (bez plików definicji i podkatalogów); zwraca ich nazwy.
+fn check_dir(defs: &Definitions, dir: &Path, skip: &[&str]) -> Vec<String> {
     let mut names = Vec::new();
-    for entry in std::fs::read_dir(fixtures_dir()).expect("katalog fixtur") {
+    for entry in std::fs::read_dir(dir).expect("katalog fixtur") {
         let path = entry.expect("wpis").path();
-        if path.file_name().is_some_and(|f| f == "definicje.json") {
+        let skipped = path
+            .file_name()
+            .and_then(|f| f.to_str())
+            .is_some_and(|f| skip.contains(&f));
+        if path.is_dir() || skipped {
             continue;
         }
         let text = std::fs::read_to_string(&path).expect("fixtura");
@@ -170,15 +173,34 @@ fn evaluate_matches_python_fixtures() {
         check_case(defs, &c);
         names.push(c.name);
     }
-    assert!(names.len() >= 15, "za mało fixtur: {names:?}");
+    names
+}
+
+#[test]
+fn evaluate_matches_python_fixtures() {
+    let defs = Definitions::builtin().expect("wbudowane definicje");
+    let names = check_dir(defs, &fixtures_dir(), &["definicje.json"]);
+    assert!(names.len() >= 18, "za mało fixtur: {names:?}");
+}
+
+#[test]
+fn other_definitions_file_matches_python() {
+    let dir = fixtures_dir().join("inne");
+    let defs = Definitions::load_file(&dir.join("definicje.json")).expect("inne definicje");
+    let text = std::fs::read_to_string(dir.join("wynik_definicji.json")).expect("fixtura");
+    check_definitions(&defs, &serde_json::from_str(&text).expect("json"));
+    let names = check_dir(&defs, &dir, &["definicje.json", "wynik_definicji.json"]);
+    assert!(names.len() >= 4, "za mało fixtur: {names:?}");
 }
 
 #[test]
 fn definitions_match_python() {
     let d = Definitions::builtin().expect("wbudowane definicje");
     let text = std::fs::read_to_string(fixtures_dir().join("definicje.json")).expect("fixtura");
-    let x: Value = serde_json::from_str(&text).expect("json");
+    check_definitions(d, &serde_json::from_str(&text).expect("json"));
+}
 
+fn check_definitions(d: &Definitions, x: &Value) {
     assert_eq!(Value::from(d.version), x["version"]);
     assert_eq!(Value::from(d.xp_per_km), x["xpPerKm"]);
     assert_eq!(

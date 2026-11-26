@@ -94,8 +94,9 @@ def case(
     referrals: int = 0,
     earned_before: dict[str, float] | None = None,
     rest_per_week: int = 1,
+    defs_path: Path = poziomy.DEFINITIONS,
 ) -> dict[str, Any]:
-    defs = poziomy.load()
+    defs = poziomy.load(defs_path)
     walks = poziomy.walks_from_sessions(sessions)
     st = poziomy.evaluate(
         defs,
@@ -324,9 +325,10 @@ def level_100() -> dict[str, Any]:
     return case("poziom_100", s, now=at(6 * 365 + 1, 12))
 
 
-def definitions() -> dict[str, Any]:
-    d = poziomy.load()
-    xps = [0, 1, 960, 961, 962, 4996, 99_999, 947_099, 947_100, 2_000_000, -5, 0.5, 960.999]
+def definitions(path: Path = poziomy.DEFINITIONS) -> dict[str, Any]:
+    d = poziomy.load(path)
+    xps = [0, 1, 49, 50, 51, 200, 399, 400, 960, 961, 962, 4996, 99_999, 947_099, 947_100]
+    xps += [2_000_000, -5, 0.5, 960.999]
     return {
         "version": d.version,
         "xpPerKm": d.xp_per_km,
@@ -359,6 +361,74 @@ def definitions() -> dict[str, Any]:
     }
 
 
+# --- inny plik definicji (np. nowsza wersja z serwera) --------------------------------------
+
+OTHER = OUT / "inne"
+
+OTHER_DEFINITIONS: dict[str, Any] = {
+    "wersja": 3.0,  # liczby z kropką - Python czyta je przez int()
+    "opis": "Definicje testowe",
+    "xp_za_km": 37.0,
+    "xp_za_rzadkosc": {"a": 7, "b": 13.0},  # "c" bez premii
+    "rzadkosci": ["a", "b", "c"],
+    "poziomy_xp": [0, 0, 50, 50, 200, 400.0],  # równe progi
+    "rangi": [
+        {"od_poziomu": 3, "nazwa": "Trzeci", "opis": "od 3"},  # pierwsza ranga nie od 1
+        {"od_poziomu": 5.0, "nazwa": "Piąty", "opis": "od 5"},
+    ],
+    "nowe_pole": [1, 2],
+    "osiagniecia": [
+        {"id": "k1", "typ": "dystans", "km": 1, "rzadkosc": "a"},
+        {"id": "k05", "typ": "dystans", "km": 0.5, "rzadkosc": "c"},
+        {"id": "k3", "typ": "dystans", "km": 3.0, "rzadkosc": "b", "ikona": "nowa"},
+        {"id": "s3dni", "typ": "seria", "dni": 2, "km_dziennie": 3.0, "rzadkosc": "b"},
+        {"id": "s4dni", "typ": "seria", "dni": 4, "rzadkosc": "a"},  # domyślnie 2 km
+        {"id": "gry2a", "typ": "gry_km", "gier": 2, "km": 1, "rzadkosc": "a"},
+        {"id": "gry2b", "typ": "gry_km", "gier": 2, "km": 3, "rzadkosc": "b"},
+        {"id": "gry3a", "typ": "gry_km", "gier": 3, "km": 1, "rzadkosc": "b"},  # ten sam próg km
+        {"id": "jedna", "typ": "gra_km", "km": 2.5, "rzadkosc": "a"},
+        {"id": "zawsze", "typ": "start_miedzy", "od": 5, "do": 5, "rzadkosc": "a"},
+        {"id": "pozno", "typ": "start_miedzy", "od": 22.9, "do": 1.2, "rzadkosc": "c"},
+        {"id": "kroki", "typ": "dzien_kroki", "kroki": 1000.5, "rzadkosc": "a"},
+        {"id": "sesja2", "typ": "sesja_km", "km": 2, "rzadkosc": "b"},
+        {"id": "znaj2", "typ": "znajomi", "ile": 2, "rzadkosc": "a"},
+        {"id": "pol0", "typ": "polecenia", "ile": 0, "rzadkosc": "b"},  # zawsze zdobyte
+        {"id": "nowe", "typ": "cos_nowego", "ile": 5, "rzadkosc": "a"},  # nieznany typ
+        {"id": "tren", "typ": "trening", "rzadkosc": "c"},
+        {"id": "pierwsza", "typ": "gra_pierwsza", "rzadkosc": "a"},
+    ],
+}
+for _a in OTHER_DEFINITIONS["osiagniecia"]:
+    _a.update(znak="s", nazwa=_a["id"].upper(), klimat="Klimat.", warunek="Warunek.")
+
+
+def other_cases(path: Path) -> list[dict[str, Any]]:
+    """Te same reguły z innym plikiem definicji, strefy z połówkami godzin."""
+    out = [case("inne_pusta", [], now=T0, defs_path=path)]
+    s = [
+        sess(at(0, 22, 30, tz_min=330), 1800, 1.2, game="x", tz_offset_min=330),
+        sess(at(0, 23, 50, tz_min=330), 1800, 2.0, game="y", tz_offset_min=330),
+        sess(at(1, 0, 30, tz_min=-420), 1800, 1.0, game="x", tz_offset_min=-420),
+        sess(at(2, 6), 1800, 0.4, mode="trening"),
+        sess(at(3, 7), 3600, 3.1, game="z"),
+        sess(at(5, 12), 3600, 3.5, game="y"),
+    ]
+    out.append(
+        case(
+            "inne_strefy",
+            s,
+            now=at(6, 1),
+            friends=2,
+            earned_before={"nowe": T0 + 3, "k3": at(9)},
+            rest_per_week=2,
+            defs_path=path,
+        )
+    )
+    out.append(case("inne_max_poziom", [sess(at(0, 8), 4 * HOUR, 16.0)], now=at(1), defs_path=path))
+    out.append(case("inne_rowny_prog", [sess(at(0, 8), 600, 0.01)], now=at(0, 9), defs_path=path))
+    return out
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     cases: list[dict[str, Any]] = [
@@ -384,7 +454,20 @@ def main() -> None:
     (OUT / "definicje.json").write_text(
         json.dumps(definitions(), ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
     )
-    print(f"zapisano {len(cases)} przypadków do {OUT}")
+    OTHER.mkdir(parents=True, exist_ok=True)
+    other = OTHER / "definicje.json"
+    other.write_text(
+        json.dumps(OTHER_DEFINITIONS, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    other_list = other_cases(other)
+    for c in other_list:
+        (OTHER / f"{c['name']}.json").write_text(
+            json.dumps(c, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+        )
+    (OTHER / "wynik_definicji.json").write_text(
+        json.dumps(definitions(other), ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    print(f"zapisano {len(cases) + len(other_list)} przypadków do {OUT}")
 
 
 if __name__ == "__main__":
