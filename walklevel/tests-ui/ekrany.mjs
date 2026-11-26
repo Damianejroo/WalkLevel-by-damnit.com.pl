@@ -22,7 +22,7 @@ export const EKRANY = [
   { ekran: 'wizard', scenariusze: ['pierwsze'] },
   { ekran: 'devices', scenariusze: ['domyslny'] },
   { ekran: 'profile', scenariusze: ['domyslny', 'dlugie'] },
-  { ekran: 'profileNew', scenariusze: ['domyslny'] },
+  { ekran: 'profileNew', scenariusze: ['domyslny', 'dlugie'] },
   { ekran: 'person', scenariusze: ['domyslny', 'wylogowany', 'dlugie'] },
   { ekran: 'session', scenariusze: ['domyslny'] },
   { ekran: 'account', scenariusze: ['wylogowany'] },

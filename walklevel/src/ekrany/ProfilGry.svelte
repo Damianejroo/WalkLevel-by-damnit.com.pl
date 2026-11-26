@@ -118,6 +118,12 @@
     if (n && n !== profil.name) await zmien({ name: n });
   }
 
+  // wyjście z pola: pusta nazwa się nie zapisuje, więc wraca zapisana (pole nie zostaje puste)
+  async function skonczonoNazwe() {
+    await zapiszNazwe();
+    if (!nowy && profil && !nazwa.trim()) nazwa = profil.name;
+  }
+
   function zmienKolor(k: K.ColorName) {
     if (nowy) kolor = k;
     else void zmien({ color: k });
@@ -144,7 +150,9 @@
     } else {
       const bezNazwy = !nazwa.trim();
       if (bezNazwy) nazwa = w.name;
-      await zmien({ pickId: w.pickId, color: w.iconColor, ...(bezNazwy ? { name: w.name } : {}) });
+      const ok = await zmien({ pickId: w.pickId, color: w.iconColor, ...(bezNazwy ? { name: w.name } : {}) });
+      // nieprzyjęta gra nie zostaje w plikach tymczasowych
+      if (!ok) void wykonaj(api.gamePickDiscard(w.pickId));
     }
   }
 
@@ -226,8 +234,8 @@
             etykietaDostepna={t('profil.nazwa')}
             podpowiedz={t('profil.nazwa_przyklad')}
             oninput={wpisanoNazwe}
-            onblur={zapiszNazwe}
-            onenter={zapiszNazwe}
+            onblur={skonczonoNazwe}
+            onenter={skonczonoNazwe}
           />
         </div>
       </div>

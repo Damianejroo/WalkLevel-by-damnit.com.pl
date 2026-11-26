@@ -1,7 +1,8 @@
 <script lang="ts">
-  // Siatka ikon profilu (docs/wyglad.md 8.14): 12 znaków w polach 48 x 48, 2 rzędy po 6.
-  // Wybrana: ramka 2 px --ink i tło --surface-2 (neutralnie, wyglad.md 3). Ikona z gry = nic
-  // nie jest wybrane. Strzałki chodzą po siatce.
+  // Siatka ikon profilu (docs/wyglad.md 8.14): 12 znaków w polach 48 x 48, 2 rzędy po 6
+  // (w kontenerze węższym niż 6 pól - 3 rzędy po 4). Wybrana: ramka 2 px --ink i tło --surface-2
+  // (neutralnie, wyglad.md 3). Ikona z gry = nic nie jest wybrane. Strzałki, Home i End chodzą
+  // po siatce.
   import Ikona from '../../lib/ui/Ikona.svelte';
   import { stan } from '../../lib/stan.svelte';
   import { jestKlucz, t } from '../../lib/teksty';
@@ -14,7 +15,6 @@
   }
   let { wartosc, etykieta, onzmiana }: Props = $props();
 
-  const KOLUMNY = 6;
   let siatka: HTMLDivElement;
   let wybrany = $derived(wartosc);
   const znaki = $derived(stan.statics.glyphs);
@@ -34,38 +34,53 @@
   }
 
   function klawisz(e: KeyboardEvent) {
-    const krok: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: KOLUMNY, ArrowUp: -KOLUMNY };
+    const przyciski = [...siatka.querySelectorAll<HTMLElement>('[role="radio"]')];
+    // od pola z fokusem - przy ikonie z gry nic nie jest wybrane, a fokus stoi na pierwszym
+    const biezacy = Math.max(0, przyciski.indexOf(e.currentTarget as HTMLElement));
+    const gora = przyciski[0]?.offsetTop ?? 0;
+    const kolumny = Math.max(1, przyciski.filter((p) => p.offsetTop === gora).length);
+    const krok: Record<string, number> = {
+      ArrowRight: 1, ArrowLeft: -1, ArrowDown: kolumny, ArrowUp: -kolumny,
+      Home: -biezacy, End: znaki.length - 1 - biezacy,
+    };
     if (!(e.key in krok)) return;
     e.preventDefault();
-    const nowy = Math.min(znaki.length - 1, Math.max(0, Math.max(indeks, 0) + krok[e.key]));
+    const nowy = Math.min(znaki.length - 1, Math.max(0, biezacy + krok[e.key]));
     wybierz(nowy);
-    siatka.querySelectorAll<HTMLElement>('[role="radio"]')[nowy]?.focus();
+    przyciski[nowy]?.focus();
   }
 </script>
 
-<div class="siatka" role="radiogroup" aria-label={etykieta} bind:this={siatka}>
-  {#each znaki as g, i (g.code)}
-    <button
-      type="button"
-      role="radio"
-      class="pole"
-      aria-checked={i === indeks}
-      aria-label={nazwa(g.name)}
-      title={g.name}
-      tabindex={i === indeks || (indeks < 0 && i === 0) ? 0 : -1}
-      onclick={() => wybierz(i)}
-      onkeydown={klawisz}
-    >
-      <Ikona znak={g.code} rozmiar={20} />
-    </button>
-  {/each}
+<div class="kontener">
+  <div class="siatka" role="radiogroup" aria-label={etykieta} bind:this={siatka}>
+    {#each znaki as g, i (g.code)}
+      <button
+        type="button"
+        role="radio"
+        class="pole"
+        aria-checked={i === indeks}
+        aria-label={nazwa(g.name)}
+        title={g.name}
+        tabindex={i === indeks || (indeks < 0 && i === 0) ? 0 : -1}
+        onclick={() => wybierz(i)}
+        onkeydown={klawisz}
+      >
+        <Ikona znak={g.code} rozmiar={20} />
+      </button>
+    {/each}
+  </div>
 </div>
 
 <style>
+  .kontener { min-width: 0; container-type: inline-size; }
   .siatka {
     display: grid;
     grid-template-columns: repeat(6, 48px);
     gap: var(--sp-2);
+  }
+  /* 6 x 48 + 5 odstępów = 328 px; węższy kontener (wyglad.md 7.1: 320) - po 4 w rzędzie */
+  @container (max-width: 327px) {
+    .siatka { grid-template-columns: repeat(4, 48px); }
   }
   .pole {
     display: grid;

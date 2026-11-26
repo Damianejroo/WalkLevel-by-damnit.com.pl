@@ -64,6 +64,12 @@
     if (osoba && n && n !== osoba.name) await zmien({ name: n });
   }
 
+  // wyjście z pola: pusta nazwa się nie zapisuje, więc wraca zapisana (pole nie zostaje puste)
+  async function skonczonoNazwe() {
+    await zapiszNazwe();
+    if (osoba && !nazwa.trim()) nazwa = osoba.name;
+  }
+
   async function losuj() {
     const n = await wykonaj(api.nameRandom());
     if (!n) return;
@@ -98,8 +104,8 @@
             etykietaDostepna={t('kreator.imie.pole')}
             podpowiedz={t('kreator.imie.domyslna')}
             oninput={wpisanoNazwe}
-            onblur={zapiszNazwe}
-            onenter={zapiszNazwe}
+            onblur={skonczonoNazwe}
+            onenter={skonczonoNazwe}
           />
         </div>
         <Przycisk wariant="ikona" ikona="losuj" etykieta={t('kreator.imie.losuj')} onclick={losuj} />
