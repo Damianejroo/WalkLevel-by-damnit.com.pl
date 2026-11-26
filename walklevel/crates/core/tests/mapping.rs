@@ -24,17 +24,17 @@ fn f(v: &Value) -> f64 {
     v.as_f64().expect("liczba")
 }
 
-/// Porównanie JSON: liczby zmiennoprzecinkowe do 4 ULP, reszta dokładnie. serde_json bez
-/// cechy `float_roundtrip` czyta długie liczby (17 cyfr) z błędem do 1-2 ULP; wejścia fixtur
-/// mają krótkie liczby, więc czyta je dokładnie i liczy dokładnie to samo co Python.
+/// Porównanie JSON bit w bit. Ułamki z Pythona są zapisane jako "f64:<repr>" i czytane
+/// przez `str::parse` (dokładnie) - serde_json bez cechy `float_roundtrip` potrafi pomylić
+/// się o 1 ULP przy 17 cyfrach. Wejścia fixtur to krótkie liczby, więc czyta je dokładnie.
 fn same(a: &Value, b: &Value) -> bool {
     match (a, b) {
+        (Value::Number(x), Value::String(s)) if s.starts_with("f64:") => {
+            let want: f64 = s[4..].parse().expect("liczba z Pythona");
+            x.as_f64().is_some_and(|x| x.to_bits() == want.to_bits())
+        }
         (Value::Number(x), Value::Number(y)) if x.is_f64() || y.is_f64() => {
-            let (x, y) = (
-                x.as_f64().unwrap_or(f64::NAN),
-                y.as_f64().unwrap_or(f64::NAN),
-            );
-            x == y || (x - y).abs() <= 4.0 * f64::EPSILON * x.abs().max(y.abs())
+            x.as_f64() == y.as_f64()
         }
         (Value::Array(x), Value::Array(y)) => {
             x.len() == y.len() && x.iter().zip(y).all(|(x, y)| same(x, y))
@@ -120,6 +120,12 @@ fn bridge_matches_python() {
         let ticks = case["ticks"].as_array().expect("klatki");
         let outputs = case["outputs"].as_array().expect("wyniki");
         for (i, (tick, want)) in ticks.iter().zip(outputs).enumerate() {
+            if tick.get("new_source").is_some() {
+                bridge.reset_source();
+            }
+            if let Some(cfg) = tick.get("mapping") {
+                bridge.set_mapping(MappingConfig::from_value(cfg).expect("ustawienia"));
+            }
             let r = &tick["reading"];
             let reading = (!r.is_null()).then(|| Reading {
                 t: f(&r["t"]),

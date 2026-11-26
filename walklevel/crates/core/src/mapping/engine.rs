@@ -41,6 +41,7 @@ impl OutputKind {
         }
     }
 
+    /// Wartość do zapisu w ustawieniach.
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Dry => "dry",
@@ -84,6 +85,7 @@ impl Output for DryOutput {
 pub struct Reading {
     /// czas odczytu (zegar monotoniczny, sekundy)
     pub t: f64,
+    /// prędkość taśmy (km/h)
     pub speed_kmh: f64,
     /// licznik kroków bieżni, jeśli go podaje
     pub steps: Option<i64>,
@@ -93,9 +95,12 @@ pub struct Reading {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Snapshot {
+    /// sterowanie włączone (klawisze trafiają do wyjścia)
     pub enabled: bool,
     pub output: OutputKind,
+    /// sterowanie z ostatniego odczytu
     pub control: Control,
+    /// ostatni licznik kroków bieżni
     pub steps: Option<i64>,
     /// kroki na minutę
     pub cadence: Option<f64>,
@@ -154,23 +159,44 @@ impl Bridge {
         }
     }
 
+    /// Stan do pokazania w interfejsie.
     pub fn state(&self) -> &Snapshot {
         &self.state
     }
 
+    /// Bieżące progi.
     pub fn mapping(&self) -> &MappingConfig {
         &self.mapping
     }
 
+    /// Bieżący rodzaj wyjścia.
     pub fn output_kind(&self) -> OutputKind {
         self.state.output
     }
 
-    /// Nowe wyjście (inny rodzaj albo inne klawisze) - stare najpierw puszcza wszystko.
+    /// Inny rodzaj wyjścia - stare najpierw puszcza wszystko. Ten sam rodzaj: nic się nie
+    /// zmienia, a `output` przepada (jak `set_output` w 0.5.x - bez puszczania klawiszy).
     pub fn set_output(&mut self, kind: OutputKind, output: Box<dyn Output + Send>) {
+        if kind == self.state.output {
+            return;
+        }
+        self.replace_output(output);
+        self.state.output = kind;
+        log::info!(
+            "Wyjście: {}",
+            if kind == OutputKind::Keys {
+                "klawiatura"
+            } else {
+                "podgląd"
+            }
+        );
+    }
+
+    /// To samo wyjście z nowymi klawiszami chodu/biegu (`set_keys` w 0.5.x) - stare
+    /// klawisze są najpierw puszczane.
+    pub fn replace_output(&mut self, output: Box<dyn Output + Send>) {
         self.output.release_all();
         self.output = output;
-        self.state.output = kind;
     }
 
     /// Nowe progi - mapowanie od nowa (bez biegu i hamowania).
@@ -389,6 +415,18 @@ mod tests {
         assert_eq!(bridge.output_kind(), OutputKind::Keys);
         assert_eq!(spy.lock().expect("spy").released, 1);
         bridge.shutdown();
+    }
+
+    #[test]
+    fn same_output_kind_keeps_keys_pressed() {
+        let (mut bridge, spy) = make(true);
+        bridge.tick(0.0, false, reading(0.0, 4.0, None));
+        bridge.set_output(OutputKind::Dry, Box::new(DryOutput::default()));
+        assert_eq!(spy.lock().expect("spy").released, 0); // nic nie puszczone
+        bridge.tick(0.1, false, None);
+        assert_eq!(spy.lock().expect("spy").applied.len(), 2); // nadal stare wyjście
+        bridge.replace_output(Box::new(DryOutput::default())); // nowe klawisze
+        assert_eq!(spy.lock().expect("spy").released, 1);
     }
 
     #[test]

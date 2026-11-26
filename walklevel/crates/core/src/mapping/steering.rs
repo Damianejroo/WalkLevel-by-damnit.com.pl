@@ -49,6 +49,7 @@ impl Direction {
         }
     }
 
+    /// Wartość do zapisu w ustawieniach.
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Keyboard => "keyboard",
@@ -105,6 +106,7 @@ impl PadIdle {
         }
     }
 
+    /// Wartość do zapisu w ustawieniach.
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Stop => "stop",
@@ -118,12 +120,16 @@ impl PadIdle {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Held {
+    /// bez ruchu (skok 1 pada, brak klawisza)
     Idle,
+    /// chód
     Walk,
+    /// bieg (ostatni skok pada, chód + bieg, poziomy 3-4)
     Run,
 }
 
 impl Held {
+    /// Nazwa strefy jak w 0.5.x ("idle", "walk", "run").
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Idle => "idle",
@@ -194,6 +200,7 @@ pub struct StepPicker {
 }
 
 impl StepPicker {
+    /// Ostatnio wybrany skok (indeks od 0).
     pub fn index(&self) -> usize {
         self.index
     }
@@ -328,15 +335,14 @@ impl SteeringSettings {
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "kind")]
 pub enum BeltCommand {
+    /// uruchom taśmę (czy już jedzie, sprawdza sterownik)
     Start,
+    /// zatrzymaj taśmę
     Stop,
     /// Prędkość docelowa (nie zaokrąglona - sterownik zaokrągla do 0,1 km/h).
     /// `start_if_stopped`: stojącą taśmę najpierw uruchom (ruch gałki budzi bieżnię).
     #[serde(rename_all = "camelCase")]
-    SetSpeed {
-        kmh: f64,
-        start_if_stopped: bool,
-    },
+    SetSpeed { kmh: f64, start_if_stopped: bool },
 }
 
 /// Wejście jednej klatki.
@@ -396,6 +402,7 @@ impl Default for BeltSteering {
 }
 
 impl BeltSteering {
+    /// Nic jeszcze nie wysłane, gałka puszczona.
     pub fn new() -> Self {
         Self {
             belt_target: BeltTarget::Unknown,

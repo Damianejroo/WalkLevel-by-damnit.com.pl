@@ -36,6 +36,18 @@ def save(name: str, data: Any) -> None:
     print(f"{path.name}: {len(data)}")
 
 
+def exact(obj: Any) -> Any:
+    """Wyniki z ułamkami jako napisy "f64:<repr>": test Rust czyta je dokładnie (str::parse)
+    i porównuje bit w bit - serde_json bez float_roundtrip potrafi pomylić się o 1 ULP."""
+    if isinstance(obj, float):
+        return f"f64:{obj!r}"
+    if isinstance(obj, dict):
+        return {k: exact(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [exact(v) for v in obj]
+    return obj
+
+
 def control(c: Any) -> dict[str, Any]:
     return {"speed": c.speed, "stick": c.stick, "walk": c.walk, "run": c.run}
 
@@ -162,7 +174,7 @@ def mapper_cases() -> list[dict[str, Any]]:
             if case["name"].startswith("random_") and len(outputs) == 150:
                 m.reset()  # reset w połowie: okno i hamowanie od nowa
                 outputs[-1]["reset_after"] = True
-        case["outputs"] = outputs
+        case["outputs"] = exact(outputs)
     return cases
 
 
@@ -220,6 +232,13 @@ class SpyOutput:
         self.events.append(["release"])
 
 
+MAPPINGS: list[dict[str, Any]] = [
+    {},
+    {"stand_below": 1.0, "run_on": 4.0, "run_off": 3.4},
+    {"smoothing_samples": 2, "quick_stop": False},
+]
+
+
 def bridge_ticks_random(rng: random.Random) -> list[dict[str, Any]]:
     ticks: list[dict[str, Any]] = []
     now, v, steps = round(rng.uniform(0, 50), 3), 0.0, 0
@@ -242,7 +261,13 @@ def bridge_ticks_random(rng: random.Random) -> list[dict[str, Any]]:
             reading = {"t": round(now - rng.choice([0.0, 0.01, 0.2]), 6), "speed_kmh": round(v, 1),
                        "steps": s}
             next_reading = now + rng.choice([0.75, 0.75, 2.0, 4.5])
-        ticks.append({"now": now, "toggle": rng.random() < 0.01, "reading": reading})
+        tick: dict[str, Any] = {"now": now, "toggle": rng.random() < 0.01, "reading": reading}
+        r = rng.random()
+        if r < 0.005:
+            tick["new_source"] = True  # set_source: postać staje, dane nieświeże
+        elif r < 0.01:
+            tick["mapping"] = rng.choice(MAPPINGS)  # set_mapping: mapowanie od nowa
+        ticks.append(tick)
     return ticks
 
 
@@ -283,6 +308,10 @@ def bridge_cases() -> list[dict[str, Any]]:
         bridge.set_source(source)
         outputs = []
         for tick in case["ticks"]:
+            if tick.get("new_source"):
+                bridge.set_source(source)
+            if "mapping" in tick:
+                bridge.set_mapping(MappingConfig.from_dict(tick["mapping"]))
             r = tick["reading"]
             source.next = None if r is None else Reading(r["t"], r["speed_kmh"], r["steps"])
             spy.events = []
@@ -303,7 +332,7 @@ def bridge_cases() -> list[dict[str, Any]]:
                     "events": spy.events,
                 }
             )
-        case["outputs"] = outputs
+        case["outputs"] = exact(outputs)
     return cases
 
 
@@ -622,7 +651,7 @@ def steering_cases() -> list[dict[str, Any]]:
     sterowanie.save_enabled = lambda on: None  # atrapa nie zapisuje stanu na dysku
     for case in cases:
         app = FakeApp(dict(case["settings"]), case["caps_control"])
-        case["outputs"] = run_ops(app, case["ops"])
+        case["outputs"] = exact(run_ops(app, case["ops"]))
     return cases
 
 

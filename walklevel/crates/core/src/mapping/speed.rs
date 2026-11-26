@@ -154,6 +154,7 @@ impl SpeedMapper {
         }
     }
 
+    /// Progi, z którymi mapowanie powstało.
     pub fn config(&self) -> &MappingConfig {
         &self.config
     }
