@@ -105,8 +105,8 @@
   <p class="opis">
     {t('ustawienia.trening.opis', {
       klawisz_wlaczania: s.toggleKey.label,
-      klawisz_szybciej: stan.statics.hotkeys.simFaster,
-      klawisz_wolniej: stan.statics.hotkeys.simSlower,
+      klawisz_szybciej: stan.settings.fasterKey.label,
+      klawisz_wolniej: stan.settings.slowerKey.label,
     })}
   </p>
   {#each s.trainingLevels as v, i (i)}

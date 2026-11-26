@@ -162,7 +162,7 @@ export type Direction = 'keyboard' | 'gamepad' | 'treadmill' | 'training'; // Kl
 export type OutputKind = 'dry' | 'keys';           // podgląd / naciska klawisze w grze
 export type ThemeChoice = 'system' | 'light' | 'dark';
 export type PadIdle = 'stop' | 'slow' | 'zero';    // gałka puszczona: stop / prędkość skoku 1 / 0 km/h (test)
-export type KeyRole = 'walk' | 'run' | 'toggle';
+export type KeyRole = 'walk' | 'run' | 'toggle' | 'faster' | 'slower'; // faster/slower: symulator i poziom Treningu
 export type ColorName =                            // nazwy z bieznia/paleta.py (zapisywane w plikach)
   | 'Czerwień' | 'Koral' | 'Pomarańcz' | 'Morela' | 'Banan' | 'Limonka' | 'Zieleń' | 'Szmaragd'
   | 'Mięta' | 'Morski' | 'Niebo' | 'Błękit' | 'Chaber' | 'Indygo' | 'Fiolet' | 'Lawenda'
@@ -340,7 +340,6 @@ export interface StaticData {
   maxSpeed: number;            // mapping.max_speed z config.toml (12.0) - górna krawędź wskaźnika w trybie Chodzenie
   hysteresis: number;          // 0.6 - run_off = run_on - 0.6
   thresholdGap: number;        // 0.8 - najmniejszy odstęp progów chodu i biegu (HYSTERESIS + 0.2)
-  hotkeys: { simSlower: string; simFaster: string }; // 'F6', 'F7'
   padPresets: Record<2 | 3 | 4 | 5, PadStep[]>;
   padMinGap: number;           // 5 (punkty procentowe między skokami)
   trainingRange: [number, number];   // [0.5, 20]
@@ -422,6 +421,8 @@ export interface Settings {
   beltControl: boolean;        // start i stop taśmy razem ze sterowaniem
   quickStop: boolean;          // szybkie zatrzymanie (hamowanie = postać staje)
   toggleKey: KeyBinding;       // domyślnie F8
+  fasterKey: KeyBinding;       // szybciej (symulator, poziom Treningu); bez zapisu config.toml [hotkeys] sim_faster, potem F7
+  slowerKey: KeyBinding;       // wolniej; bez zapisu config.toml [hotkeys] sim_slower, potem F6
   togglePad: PadButton | '';   // przycisk pada działający jak F8
   simulator: boolean;
   record: boolean;             // nagrywanie przejść do nagrania/
@@ -794,6 +795,10 @@ export interface BubbleView {   // okno "przycisk"
   enabled: boolean;
   theme: ThemeChoice;
   accent: ColorName;            // kolor profilu
+  training: boolean;            // tryb Trening: przy kółku +, − i Stop (okno 88 × 84 zamiast 56 × 56)
+  trainingLevel: 0 | 1 | 2 | 3;
+  fasterLabel: string;          // nazwy klawiszy szybciej/wolniej do podpowiedzi + i −
+  slowerLabel: string;
 }
 
 // ============================================================================
@@ -959,6 +964,7 @@ pub enum WindowRequest {
     ShowMain,                              // przycisk prawym / „otwórz okno”: showNormal + raise + focus
     MainAlwaysOnTop(bool),
     BubbleVisible(bool),
+    BubbleSize(bool),                      // true - tryb Trening (88 × 84 z +, − i Stop), false - 56 × 56
     BubbleMove { x: i32, y: i32 },         // piksele logiczne (jak floating_pos w 0.5)
     PopupPlace { x: i32, y: i32, w: u32, h: u32 }, // piksele fizyczne ekranu z grą
     PopupVisible(bool),                    // pokazanie BEZ aktywacji (SW_SHOWNOACTIVATE)
@@ -1001,7 +1007,7 @@ pub enum ThemeChoice { System, Light, Dark }
 pub enum PadIdle { Stop, Slow, Zero }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum KeyRole { Walk, Run, Toggle }
+pub enum KeyRole { Walk, Run, Toggle, Faster, Slower }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Link { Idle, Searching, Connecting, Connected, Streaming, Retrying, BluetoothOff, Unsupported }
@@ -1036,7 +1042,8 @@ pub struct AppInfo {
 #[derive(Debug, Clone, PartialEq, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct Settings {
     pub device_address: String, pub device_name: String, pub belt_control: bool, pub quick_stop: bool,
-    pub toggle_key: KeyBinding, pub toggle_pad: String, pub simulator: bool, pub record: bool,
+    pub toggle_key: KeyBinding, pub faster_key: KeyBinding, pub slower_key: KeyBinding,
+    pub toggle_pad: String, pub simulator: bool, pub record: bool,
     pub detailed_logs: bool,
     pub theme: ThemeChoice, pub large_text: bool, pub always_on_top: bool, pub floating_button: bool,
     pub show_person_switch: bool, pub show_profile_switch: bool,
@@ -1211,7 +1218,10 @@ pub struct ModelItem { pub id: String, pub name: String, pub driver: String, pub
 #[derive(Debug, Clone, Default, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct ModelsView { pub items: Vec<ModelItem>, pub busy: bool, pub status: String }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
-pub struct BubbleView { pub visible: bool, pub enabled: bool, pub theme: ThemeChoice, pub accent: String }
+pub struct BubbleView {
+    pub visible: bool, pub enabled: bool, pub theme: ThemeChoice, pub accent: String,
+    pub training: bool, pub training_level: u32, pub faster_label: String, pub slower_label: String,
+}
 
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct PopupItem { pub id: u64, pub kicker: String, pub title: String, pub line: String, pub color: String, pub rarity: String, pub mark: String, pub badge_text: Option<String>, pub progress: Option<f64>, pub leaving: bool }
@@ -1298,8 +1308,8 @@ Poniżej `T` to typ wyniku; `()` = `void`.
 | `pad_steps_count` | `count: u8` (2-5) | `()` | gotowe skoki `PRESETS[count]` |
 | `pad_step_set` | `index: u8`, `at: Option<u8>`, `kmh: Option<f64>` | `()` | `on_pad_at` / `on_pad_speed`; walidacja `parse_steps` (pierwszy 0, odstęp ≥ 5, ≤ 100, 0,5-12 km/h) → `invalid` |
 | `training_speed_set` | `index: u8` (0-3), `kmh: f64` | `()` | `on_training_speed` (0,5-20), nowa prędkość od razu na taśmę |
-| `key_capture` | `role: Option<KeyRole>` | `()` | wejście/wyjście z przypisywania klawisza: skrót globalny (F8) i F6/F7 wstrzymane, `control.keyCapturing` |
-| `key_set` | `role: KeyRole`, `key: KeyCapture` | `KeyBinding` | zamiana `code` → scan/extended (tabela kodów), `vk` przez `MapVirtualKeyW(MAPVK_VSC_TO_VK_EX)`, nazwa przez `GetKeyNameTextW` (zapas: `key`); walidacja `klawisze.problem()` → błąd `key` z komunikatem (toast i podpowiedź robi UI z `message`); kończy przypisywanie |
+| `key_capture` | `role: Option<KeyRole>` | `()` | wejście/wyjście z przypisywania klawisza: skróty globalne (włączanie, szybciej, wolniej) wstrzymane, `control.keyCapturing` |
+| `key_set` | `role: KeyRole`, `key: KeyCapture` | `KeyBinding` | zamiana `code` → scan/extended (tabela kodów), `vk` przez `MapVirtualKeyW(MAPVK_VSC_TO_VK_EX)`, nazwa przez `GetKeyNameTextW` (zapas: `key`); walidacja `keys::problem_with()` (walk/run/toggle; klawisze szybciej/wolniej zajęte), a dla `faster`/`slower` `keys::speed_problem()` (różne od siebie i od włączania, chodu i biegu; kombinacje dozwolone, skróty Windows nie) → błąd `key` z komunikatem (toast i podpowiedź robi UI z `message`); zmiana toggle/faster/slower przebudowuje skróty od razu; kończy przypisywanie |
 | `pad_capture_start` | - | `()` | czeka do 10 s na przycisk pada (`control.padCapturing`); wybrany przycisk → `togglePad`; „Krzyżyk”/„Kółko” (`south`/`east`) → toast z ostrzeżeniem |
 | `pad_capture_cancel` | - | `()` | przerywa czekanie |
 
@@ -1312,8 +1322,8 @@ Zmiana koloru profilu to `profile_update(id, { color })`; wygląd przelicza UI (
 | `control_set` | `on: bool` | `()` | `set_control`: jedno miejsce dla przełącznika, skrótu, pada i przycisku; zapis `dane/stan.json`; start/stop taśmy wg trybu (rozdz. 9.3) |
 | `control_toggle` | - | `()` | jak przycisk na ekranie / F8 |
 | `training_level_set` | `level: u8` | `()` | ustawia poziom; gdy sterowanie wyłączone - włącza je (taśma rusza) |
-| `training_level_step` | `step: i8` (±1) | `()` | F7/F6 w trybie Trening robią to samo w pętli |
-| `training_stop` | - | `()` | wyłącza sterowanie (taśma staje), a gdy już wyłączone - sam stop taśmy |
+| `training_level_step` | `step: i8` (±1) | `()` | klawisze szybciej/wolniej (domyślnie F7/F6) w trybie Trening robią to samo w pętli; wołane też z okna przycisku (+/−) |
+| `training_stop` | - | `()` | wyłącza sterowanie (taśma staje), a gdy już wyłączone - sam stop taśmy; wołane też z okna przycisku (Stop) |
 
 ### 6.4 Bieżnia
 
@@ -1329,7 +1339,7 @@ Zmiana koloru profilu to `profile_update(id, { color })`; wygląd przelicza UI (
 | `models_add_file` | - (okno) | `Option<String>` | `install_from_file`; `invalid` z powodem odrzucenia |
 | `models_remove` | `id: String` | `()` | tylko profil `dodatkowy` |
 
-Symulator: `settings_set('simulator', true|false)`. F6/F7 (pilot symulatora) obsługuje pętla.
+Symulator: `settings_set('simulator', true|false)`. Klawisze wolniej/szybciej (pilot symulatora, domyślnie F6/F7, `settings.slowerKey/fasterKey`) obsługuje pętla.
 
 ### 6.5 Osoby i profile gier
 
@@ -1444,6 +1454,7 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 | `bubble_open` | przycisk | - | `()` | = `window_show_main` (prawy klik) |
 | `bubble_drag_start` | przycisk | - | `()` | rdzeń zaczyna śledzić `WindowEvent::Moved`; po puszczeniu (`bubble_drag_end`) zapisuje `floatingPos` |
 | `bubble_drag_end` | przycisk | - | `()` | zapis pozycji (piksele logiczne), sprawdzenie, czy na ekranie |
+| `training_level_step`, `training_stop` | przycisk | jak w 6.4 | `()` | przyciski +, − i Stop przy kółku w trybie Trening (`bubble.training`) |
 | `popup_ready` | popup | - | `PopupsView` | stan przy starcie okna popupu |
 
 Przesuwanie przycisku wykonuje JS przez `getCurrentWindow().startDragging()` po przesunięciu
@@ -1620,7 +1631,9 @@ Odpowiednik `bieznia/gui/popupy.py`. Jedno okno na stos do 3 popupów.
 
 Odpowiednik `FloatingToggle`.
 
-- 56 × 56 px logicznych, `transparent`, bez ramki i cienia, `always_on_top`, `skip_taskbar`,
+- 56 × 56 px logicznych (tryb Trening: 88 × 84, `WindowRequest::BubbleSize(training)` przy każdej
+  zmianie trybu i po utworzeniu okna; kółko zostaje w lewym górnym rogu, okno rośnie w prawo
+  i w dół, a gdy wyszłoby poza obszar roboczy - przesuwa się do środka bez zapisu pozycji), `transparent`, bez ramki i cienia, `always_on_top`, `skip_taskbar`,
   `focused(false)` + `WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW` przez `hwnd()` (klik nie zabiera
   fokusu grze), **bez** `ignore_cursor_events` (ma być klikalny).
 - Okno istnieje tylko, gdy `settings.floatingButton` (`WindowRequest::BubbleVisible`): włączenie
@@ -1630,7 +1643,11 @@ Odpowiednik `FloatingToggle`.
 - Rysowanie (SVG w `przycisk.svelte`): koło; włączone - wypełnienie akcentem (bieg: kolor biegu),
   ikona postaci; gdy `enabled && live` - pod ikoną prędkość („2,5”); wyłączone - tło
   powierzchni, ramka kontrolki. Dane: `wl:telemetria` (`enabled`, `mode`, `speedKmh`, `live`)
-  + wycinek `bubble` (motyw, akcent, widoczność).
+  + wycinek `bubble` (motyw, akcent, widoczność, tryb Trening i poziom).
+- Tryb Trening: obok kółka kolumna 28 px (+ / numer poziomu / −, jedna ramka `--control`), pod
+  spodem Stop 24 px (wariant „stop”: ramka i tekst `--danger`). + → `training_level_step(1)`,
+  − → `training_level_step(-1)` (wyłączone na poziomie 4 / 1), Stop → `training_stop`. Klik
+  nie aktywuje okna (ten sam `WS_EX_NOACTIVATE`).
 - Lewy klik → `bubble_click`; prawy → `bubble_open`; przeciąganie → `startDragging()`
   i `bubble_drag_start/end`. Podpowiedź (title): „Sterowanie: włączone/wyłączone · Kliknij -
   wyłącz/włącz · Prawy przycisk - okno · Przeciągnij - przesuń”.
@@ -1709,6 +1726,8 @@ ewentualnie z ustawieniami 0.2 z `dane/ustawienia.json` (tylko czytane, nigdy ni
 | `belt_control` | `beltControl` | wspolne | `true` | bool |
 | `quick_stop` | `quickStop` | wspolne | `true` | bool |
 | `toggle_key` | `toggleKey` | wspolne | F8 `{scan: 0x42, extended: false, name: "F8", vk: 0x77}` | `Key.from_dict`; `vk == 0` (zapis sprzed kodów wirtualnych) → F8 |
+| `faster_key` | `fasterKey` | wspolne | brak klucza (0.5.x i nowe dane) → `[hotkeys] sim_faster` z config.toml (F1-F12), potem F7 | `Key::speed_from_value`: błędny zapis albo `vk == 0` → jak brak klucza. Nowe w 0.6.0 (0.5.x pomija nieznany klucz) |
+| `slower_key` | `slowerKey` | wspolne | jw., `sim_slower`, potem F6 | jw. |
 | `toggle_pad` | `togglePad` | wspolne | `""` | string, inaczej `""` |
 | `simulator` | `simulator` | wspolne | `false` | bool |
 | `record` | `record` | wspolne | `false` | bool |
@@ -1739,7 +1758,7 @@ ewentualnie z ustawieniami 0.2 z `dane/ustawienia.json` (tylko czytane, nigdy ni
 | `training_levels` | `trainingLevels` | profil | `[1.5, 2.5, 3.5, 4.5]` | dokładnie 4, każdy 0,5-20, zaokr. 0,1; inaczej domyślne |
 | `training_level` | `trainingLevel` | profil | `0` | int 0-3, inaczej 0 |
 
-- Klucz `toggle_key`/`walk_key`/`run_key`: `{"scan": int, "extended": bool, "name": str,
+- Klucz `toggle_key`/`faster_key`/`slower_key`/`walk_key`/`run_key`: `{"scan": int, "extended": bool, "name": str,
   "vk": int}` + `"mods": ["ctrl","alt","shift"]` tylko gdy niepuste (kolejność ctrl, alt,
   shift, win). `label` NIE jest zapisywany.
 - Progi `MappingConfig` muszą spełniać `0 ≤ stand_below < run_off ≤ run_on ≤ max_speed`;
@@ -1845,7 +1864,7 @@ Token nigdy nie trafia do plików, kopii danych ani logów; w żądaniach tylko 
 
 | Plik | Format / zasada |
 |---|---|
-| `config.toml` (zasób aplikacji) + `config.local.toml` (folder danych) | TOML, scalanie słowników (lokalny wygrywa). Sekcje: `[mapping]` (progi, `max_speed`, `stale_after_s`, hamowanie), `[hotkeys]` (`toggle`, `sim_slower`, `sim_faster`), `[ble]`, `[ui]`, `[zgloszenia] adres`, `[konto] adres, regulamin`. 0.6.0 osadza ten sam `config.toml` |
+| `config.toml` (zasób aplikacji) + `config.local.toml` (folder danych) | TOML, scalanie słowników (lokalny wygrywa). Sekcje: `[mapping]` (progi, `max_speed`, `stale_after_s`, hamowanie), `[hotkeys]` (`toggle`, `sim_slower`, `sim_faster` - domyślne klawisze wolniej/szybciej, gdy osoby.json nie ma `slower_key`/`faster_key`), `[ble]`, `[ui]`, `[zgloszenia] adres`, `[konto] adres, regulamin`. 0.6.0 osadza ten sam `config.toml` |
 | `dane/ustawienia.json` | ustawienia 0.2 - tylko odczyt (migracja w konfiguratorze); kopia do `dane/kopie/ustawienia-0.2.json` |
 | `dane/stan.json` | `{"enabled": bool}` po każdej zmianie sterowania; przy starcie używany tylko, gdy zmienna środowiskowa `BIEZNIA_RESUME=1` (zwykły start zawsze wyłączony) |
 | `dane/profile/*.json` | profile modeli bieżni dodane/pobrane (`"format": 1`, `id`, `name`, `driver` = `kingsmith`/`ftms`, `match[]`, `capabilities{}`, `options{}`); wbudowane są w zasobach (`sterowniki/profile/*.json` + `indeks.json`) |

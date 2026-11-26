@@ -1,7 +1,7 @@
 <script lang="ts">
   // Przycisk przypisywania klawisza (docs/wyglad.md 8.14 „Przycisk z klawiszem”): „Klawisz chodu: W”.
   // Klik -> „…: naciśnij klawisz…”, następny klawisz trafia do rdzenia (key_set), Esc, klik obok
-  // albo drugi klik anuluje. `kombinacje` (klawisz włączania): trzymane Ctrl/Alt/Shift czekają na
+  // albo drugi klik anuluje. `kombinacje` (włączanie, szybciej, wolniej): trzymane Ctrl/Alt/Shift czekają na
   // klawisz właściwy. Szerokość = najdłuższy z napisów, więc przycisk nie skacze.
   import Przycisk from '../../lib/ui/Przycisk.svelte';
   import { t } from '../../lib/teksty';

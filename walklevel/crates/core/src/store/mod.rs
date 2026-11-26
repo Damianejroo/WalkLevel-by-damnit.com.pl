@@ -1,7 +1,7 @@
 //! Osoby i profile gier (dane/osoby.json) - port bieznia/dane.py.
 //!
 //! Jeden plik osoby.json w folderze danych (zapis atomowy):
-//! - wspólne: bieżnia, klawisz start/stop, logi - jedno dla wszystkich osób,
+//! - wspólne: bieżnia, klawisze start/stop, szybciej i wolniej, logi - jedno dla wszystkich osób,
 //! - osoby: nazwa, kolor, wygląd (motyw, duży tekst, przycisk na ekranie...) i profile gier,
 //! - profil gry: nazwa, ikona (z gry albo z zestawu), kolor, ustawienia sterowania.
 //!
@@ -49,6 +49,8 @@ pub const SHARED_KEYS: &[&str] = &[
     "belt_control",
     "quick_stop",
     "toggle_key",
+    "faster_key",
+    "slower_key",
     "toggle_pad",
     "simulator",
     "record",

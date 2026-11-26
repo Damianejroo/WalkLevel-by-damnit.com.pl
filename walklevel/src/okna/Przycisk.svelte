@@ -2,7 +2,10 @@
   // Przycisk na ekranie (bańka 56 × 56, docs/wyglad.md 9.7, kontrakt 7.3): koło; wyłączone -
   // tło powierzchni i ramka kontrolki; włączone - wypełnienie akcentem (bieg: kolor biegu),
   // ikona postaci i pod nią prędkość taśmy, gdy dane płyną. Jedyny element widoku = jedyny akcent.
-  // Dane: wl:telemetria (enabled, mode, speedKmh, live) i wycinek „bubble” (motyw, kolor profilu).
+  // Tryb Trening: obok kółka kolumna + / numer poziomu / − i pod spodem Stop (okno 88 × 84,
+  // rozmiar ustawia rdzeń - okna.rs BUBBLE_TRAINING_*); małe przyciski neutralne, Stop jak 8.1 „stop”.
+  // Dane: wl:telemetria (enabled, mode, speedKmh, live) i wycinek „bubble” (motyw, kolor profilu,
+  // tryb Trening i poziom).
   import { onMount } from 'svelte';
   import type { BubbleView, GaugeMode, PaletteColor } from '../lib/typy';
   import * as api from '../lib/api';
@@ -29,6 +32,12 @@
   const pokazPredkosc = $derived(wlaczone && naZywo);
   const tekstPredkosci = $derived(liczba(predkosc, 1));
   const stanSlowo = $derived(t(wlaczone ? 'dymek.stan.wl' : 'dymek.stan.wyl'));
+  const trening = $derived(wyglad?.training ?? false);
+  const poziom = $derived(wyglad?.trainingLevel ?? 0);
+  const POZIOMY = 4;
+  const tekstWyzej = $derived(t('dymek.trening.wyzej', { klawisz_szybciej: wyglad?.fasterLabel ?? '' }));
+  const tekstNizej = $derived(t('dymek.trening.nizej', { klawisz_wolniej: wyglad?.slowerLabel ?? '' }));
+  const tekstPoziomu = $derived(t('dymek.trening.poziom', { poziom: String(poziom + 1), liczba: String(POZIOMY) }));
 
   /** Błąd komendy z przycisku nie ma gdzie się pokazać - tylko do konsoli (dziennik okna). */
   const wyslij = (obietnica: Promise<unknown>) =>
@@ -85,6 +94,10 @@
     ustawMotyw(motyw === 'system' ? (ciemnySystem ? 'dark' : 'light') : motyw);
     if (wyglad && paleta.length) ustawAkcent(wyglad.accent, paleta);
     if (uruchomione) document.documentElement.dataset.gotowe = '1';
+  });
+  // Podgląd w przeglądarce: prostokąt okna jak w Tauri (56 × 56 albo 88 × 84 w Treningu)
+  $effect(() => {
+    document.documentElement.classList.toggle('trening', trening);
   });
 
   // ---------------- klik, prawy klik, przeciąganie ----------------
@@ -152,13 +165,13 @@
   }
 </script>
 
+<div class="uklad" class:trening style:transform={podgladX || podgladY ? `translate(${podgladX}px, ${podgladY}px)` : undefined}>
 <button
   type="button"
   class="przycisk"
   class:wlaczone
   class:bieg={wlaczone && tryb === 'run'}
   class:przeciaga
-  style:transform={podgladX || podgladY ? `translate(${podgladX}px, ${podgladY}px)` : undefined}
   aria-pressed={wlaczone}
   aria-label={t('dymek.dostepnosc', { stan: stanSlowo })}
   title={t(wlaczone ? 'dymek.podpowiedz_wl' : 'dymek.podpowiedz_wyl')}
@@ -179,6 +192,35 @@
     >
   </svg>
 </button>
+{#if trening}
+  <div class="kolumna">
+    <button
+      type="button"
+      class="maly"
+      disabled={poziom >= POZIOMY - 1}
+      aria-label={tekstWyzej}
+      title={tekstWyzej}
+      onclick={() => wyslij(api.trainingLevelStep(1))}
+    ><span class="glif" aria-hidden="true">{IKONY.dodaj}</span></button>
+    <span class="poziom" aria-label={tekstPoziomu} title={tekstPoziomu}>{poziom + 1}</span>
+    <button
+      type="button"
+      class="maly"
+      disabled={poziom <= 0}
+      aria-label={tekstNizej}
+      title={tekstNizej}
+      onclick={() => wyslij(api.trainingLevelStep(-1))}
+    ><span class="glif" aria-hidden="true">{IKONY.minus}</span></button>
+  </div>
+  <button
+    type="button"
+    class="stop"
+    aria-label={t('dymek.trening.stop_dostepnosc')}
+    title={t('dymek.trening.stop_dostepnosc')}
+    onclick={() => wyslij(api.trainingStop())}
+  >{t('dymek.trening.stop')}</button>
+{/if}
+</div>
 
 <style>
   /* Okno przezroczyste: widać tylko koło */
@@ -193,6 +235,11 @@
     background: var(--bg);
   }
   :global(html.podglad-okna #app) { width: 56px; height: 56px; }
+  :global(html.podglad-okna.trening #app) { width: 88px; height: 84px; }
+
+  /* Trening: kółko 56 + kolumna 28 (+, poziom, −), pod spodem Stop 24; odstępy 4 px */
+  .uklad { display: grid; grid-template-columns: 56px; gap: 4px; width: max-content; }
+  .uklad.trening { grid-template-columns: 56px 28px; grid-template-rows: 56px 24px; }
 
   .przycisk {
     display: block;
@@ -242,4 +289,50 @@
     transition: opacity var(--t-switch) var(--ease-smooth);
   }
   .predkosc.widoczna { opacity: 1; }
+
+  /* Kolumna jak krokownik: jedna ramka, + i − bez własnych ramek, numer poziomu pośrodku
+     (tło powierzchni - czytelne nad każdą grą) */
+  .kolumna {
+    display: grid;
+    grid-template-rows: 20px 1fr 20px;
+    min-width: 0;
+    border: 1px solid var(--control);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .maly,
+  .stop {
+    display: grid;
+    place-items: center;
+    color: var(--text);
+    user-select: none;
+    transition: background-color var(--t-color) linear, color var(--t-color) linear;
+  }
+  .maly:hover:not(:disabled) { background: var(--surface-2); }
+  .maly:active:not(:disabled) { background: var(--surface-3); transition-duration: var(--t-press); }
+  .maly:disabled { color: var(--text-2); }
+  .glif { font-family: var(--font-icon); font-size: 12px; line-height: 1; }
+  .poziom {
+    display: grid;
+    place-items: center;
+    font-family: var(--font-num);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--text);
+  }
+  .stop {
+    grid-column: 1 / -1;
+    border: 1px solid var(--danger);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    color: var(--danger);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+  }
+  .stop:hover { background: var(--danger); color: var(--bg); }
+  .maly:focus-visible,
+  .stop:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 </style>

@@ -136,6 +136,46 @@ fn file_format_is_like_python() {
 }
 
 #[test]
+fn speed_keys_are_shared_and_default_to_f7_f6() {
+    use crate::input::Key;
+    let (dir, mut store) = store();
+    // dane bez klucza (osoby.json z 0.5.x i świeże) - F7 i F6, jak dotąd
+    let flat = store.flat(&defaults());
+    assert!(!flat.contains_key("faster_key") && !flat.contains_key("slower_key"));
+    let read = |flat: &Settings, key: &str, default: &Key| {
+        Key::speed_from_value(flat.get(key).unwrap_or(&Value::Null), None, default)
+    };
+    assert_eq!(
+        read(&flat, "faster_key", &Key::faster_default()).label(),
+        "F7"
+    );
+    assert_eq!(
+        read(&flat, "slower_key", &Key::slower_default()).label(),
+        "F6"
+    );
+
+    let faster = Key::new(0x49, true, "Page Up", 0x21).with_mods(vec![crate::input::Mod::Ctrl]);
+    let slower = Key::new(0x51, true, "Page Down", 0x22);
+    let mut flat = flat;
+    flat.insert("faster_key".into(), faster.to_value());
+    flat.insert("slower_key".into(), slower.to_value());
+    store.update_flat(&flat).unwrap();
+    assert_eq!(store.shared()["faster_key"], faster.to_value()); // wspólne, nie w profilu
+    assert!(!store.profile().settings.contains_key("faster_key"));
+
+    // po ponownym wczytaniu z dysku i u innej osoby - te same klawisze
+    let loaded = Store::load(store.path()).unwrap();
+    let flat = loaded.flat(&defaults());
+    assert_eq!(read(&flat, "faster_key", &Key::faster_default()), faster);
+    assert_eq!(read(&flat, "slower_key", &Key::slower_default()), slower);
+    assert_eq!(
+        read(&flat, "faster_key", &Key::faster_default()).label(),
+        "Ctrl+Page Up"
+    );
+    drop(dir);
+}
+
+#[test]
 fn settings_go_to_the_active_profile_only() {
     let (_dir, mut store) = store();
     let default_id = store.profile().id.clone();

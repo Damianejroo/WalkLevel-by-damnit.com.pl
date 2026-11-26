@@ -547,6 +547,10 @@ Nazwy kategorii i kart są celem ścieżek „Ustawienia > …” we wszystkich 
 | `ustawienia.wlaczanie.pad_podpowiedz` | Przycisk pada działa jak klawisz włączania - też w grze. Najlepiej taki, którego gra nie używa: panel dotykowy, Create albo kliknięcie gałki. | Przycisk pada działa jak klawisz włączania, także w trakcie gry. Wybierz taki, którego gra nie używa, np. panel dotykowy, Create albo wciśnięcie gałki. | |
 | `ustawienia.wlaczanie.pad_usun` | Usuń | Usuń | |
 | `ustawienia.wlaczanie.pad_ostrzezenie` | {przycisk_pada} to w wielu grach skok albo akcja - rozważ inny przycisk. | {przycisk_pada} w wielu grach to skok albo akcja. Lepiej wybierz inny przycisk. | Komunikat po przypisaniu Krzyżyka/Kółka/A/B. |
+| `ustawienia.tempo.tytul` | (nowy) | Klawisze szybciej i wolniej | Karta pod kartą klawisza włączania. |
+| `ustawienia.tempo.opis` | (nowy) | W trybie Trening zmieniają poziom, z symulatorem jego prędkość. Działają też w trakcie gry. Kombinacje są dozwolone, np. Ctrl+F7. | |
+| `ustawienia.tempo.szybciej` | (nowy) | Szybciej | Rola przycisku przypisywania („Szybciej: F7”). |
+| `ustawienia.tempo.wolniej` | (nowy) | Wolniej | Jw. („Wolniej: F6”). |
 | `ustawienia.wlaczanie.zmiana_profilu` | Zmiana profilu na karcie sterowania | Zmiana profilu gry na ekranie głównym | |
 | `ustawienia.wlaczanie.zmiana_profilu_opis` | Lista profili po kliknięciu nazwy (przy jednym profilu i tak jej nie ma) | Kliknięcie nazwy profilu otwiera listę profili. Działa, gdy profili jest więcej niż jeden. | |
 
@@ -567,8 +571,8 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
 | `klawisz.blad.ogolny` | Nie można użyć tego klawisza: {powod}. | Tego klawisza nie da się użyć: {powod}. Wybierz inny. | |
-| `klawisz.powod.f6` | F6 to skrót symulatora | F6 zwalnia symulator i trening | Gdy domyślne klawisze. W kodzie z `{klawisz_wolniej}`. |
-| `klawisz.powod.f7` | F7 to skrót symulatora | F7 przyspiesza symulator i trening | |
+| `klawisz.powod.wolniej` | F6 to skrót symulatora | {klawisz_wolniej} zwalnia symulator i trening | Klawisz wolniej z Ustawień (domyślnie F6). Do 0.6.0 klucz `klawisz.powod.f6` ze stałym F6. |
+| `klawisz.powod.szybciej` | F7 to skrót symulatora | {klawisz_szybciej} przyspiesza symulator i trening | Jw. dla klawisza szybciej (domyślnie F7). |
 | `klawisz.powod.esc` | Esc anuluje wybór klawisza | Esc anuluje wybór klawisza | |
 | `klawisz.powod.f12` | F12 jest zarezerwowany przez Windows | F12 jest zajęty przez Windows | |
 | `klawisz.powod.printscreen` | Print Screen robi zrzut ekranu w Windows | Print Screen robi zrzut ekranu | |
@@ -594,6 +598,9 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `klawisz.blad.te_same` | Chód i bieg muszą mieć różne klawisze. | Chód i bieg muszą mieć różne klawisze. | |
 | `klawisz.blad.wlaczanie_koliduje` | Start/stop musi mieć inny klawisz niż chód i bieg. | Klawisz włączania musi być inny niż klawisze chodu i biegu. | |
 | `klawisz.blad.wlaczanie_niedozwolony` | Tego klawisza nie da się użyć jako start/stop - wybierz inny. | Tego klawisza nie da się użyć jako klawisza włączania. Wybierz inny. | |
+| `klawisz.blad.tempo_te_same` | (nowy) | Szybciej i wolniej muszą mieć różne klawisze. | |
+| `klawisz.blad.tempo_koliduje` | (nowy) | Klawisze szybciej i wolniej muszą być inne niż klawisze włączania, chodu i biegu. | Ten sam klawisz z innym modyfikatorem też się liczy. |
+| `klawisz.blad.tempo_niedozwolony` | (nowy) | Tego klawisza nie da się użyć do zmiany prędkości. Wybierz inny. | Klawisz bez kodu wirtualnego. |
 | `klawisz.blad.chod_z_modyfikatorem` | Chód i bieg to pojedyncze klawisze - bez Ctrl, Alt i Shift. | Chód i bieg to pojedyncze klawisze, bez kombinacji z Ctrl, Alt albo Shift. | Sam Shift jako klawisz biegu jest dozwolony (domyślny), zabronione są tylko kombinacje. Stare zdanie sugerowało, że Shift w ogóle odpada. |
 | `klawisz.kod` | Kod {liczba} | Klawisz nr {liczba} | Klawisz bez nazwy. |
 
@@ -1570,6 +1577,11 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 |---|---|---|---|
 | `dymek.podpowiedz_wl` | (nowy) | Sterowanie włączone\nKliknij, żeby wyłączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Gotowa forma `dymek.podpowiedz` dla włączonego sterowania (`{wyłączyć/włączyć}` nie jest zmienną słownika). |
 | `dymek.podpowiedz_wyl` | (nowy) | Sterowanie wyłączone\nKliknij, żeby włączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Jw. dla wyłączonego sterowania. |
+| `dymek.trening.wyzej` | (nowy) | Poziom wyżej ({klawisz_szybciej}) | Przycisk + przy kółku w trybie Trening (nazwa i podpowiedź). |
+| `dymek.trening.nizej` | (nowy) | Poziom niżej ({klawisz_wolniej}) | Przycisk − w trybie Trening. |
+| `dymek.trening.poziom` | (nowy) | Poziom {poziom} z {liczba} | Numer poziomu między + i − (czytnik ekranu i podpowiedź). |
+| `dymek.trening.stop` | (nowy) | Stop | Przycisk pod kółkiem w trybie Trening. |
+| `dymek.trening.stop_dostepnosc` | (nowy) | Zatrzymaj taśmę i wyłącz sterowanie | |
 
 ## Dodatki: rdzeń
 

@@ -91,6 +91,7 @@ fn build_app(paths: AppPaths, config: Config, clock: treadmill::Clock) -> App {
     if toggle.vk == 0 {
         toggle = Key::toggle_default(); // zapis sprzed kodów wirtualnych
     }
+    let (faster, slower) = stan::speed_keys(&settings, &config);
     let now = walklevel_core::input::system::monotonic_s();
     let mut app = App {
         caps: treadmill::known_capabilities(
@@ -123,6 +124,8 @@ fn build_app(paths: AppPaths, config: Config, clock: treadmill::Clock) -> App {
         bridge,
         steering: BeltSteering::new(),
         toggle_key: toggle,
+        faster_key: faster,
+        slower_key: slower,
         walk_key: Key::walk_default(),
         run_key: Key::run_default(),
         hotkeys: None,
@@ -170,6 +173,7 @@ fn build_app(paths: AppPaths, config: Config, clock: treadmill::Clock) -> App {
         updated_from: None,
         window_focused: false,
         bubble_dragging: false,
+        bubble_training: None,
         status_key: String::new(),
         frame: 0,
         people_rev: 0,

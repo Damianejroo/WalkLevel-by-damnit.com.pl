@@ -1,6 +1,6 @@
 <script lang="ts">
   // Ustawienia > Gry i sterowanie: profile gier, sterowanie (przełącznik trybów + ustawienia
-  // wybranego trybu), klawisz włączania (docs/teksty.md 11-13). Zmiana podglądanego trybu zmienia
+  // wybranego trybu), klawisz włączania, klawisze szybciej/wolniej (docs/teksty.md 11-13). Zmiana podglądanego trybu zmienia
   // tylko kartę sterowania; to, co pod nią, zjeżdża FLIP-em (bez skoku).
   import { untrack } from 'svelte';
   import Karta from '../../lib/ui/Karta.svelte';
@@ -137,6 +137,14 @@
     wlaczony={stan.settings.showProfileSwitch}
     onzmiana={(v) => wykonaj(api.settingsSet('showProfileSwitch', v))}
   />
+</Karta>
+
+<Karta tytul={t('ustawienia.tempo.tytul')}>
+  <p class="opis">{t('ustawienia.tempo.opis')}</p>
+  <Rzad>
+    <PrzyciskKlawisza rola="faster" nazwaRoli={t('ustawienia.tempo.szybciej')} klawisz={stan.settings.fasterKey.label} kombinacje />
+    <PrzyciskKlawisza rola="slower" nazwaRoli={t('ustawienia.tempo.wolniej')} klawisz={stan.settings.slowerKey.label} kombinacje />
+  </Rzad>
 </Karta>
 
 <style>

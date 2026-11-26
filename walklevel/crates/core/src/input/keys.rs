@@ -130,6 +130,35 @@ impl Key {
         Key::new(0x42, false, "F8", 0x77)
     }
 
+    /// Domyślny klawisz „szybciej” (symulator i poziom Treningu): F7.
+    pub fn faster_default() -> Key {
+        Key::new(0x41, false, "F7", 0x76)
+    }
+
+    /// Domyślny klawisz „wolniej” (symulator i poziom Treningu): F6.
+    pub fn slower_default() -> Key {
+        Key::new(0x40, false, "F6", 0x75)
+    }
+
+    /// Klawisz F1-F12 z nazwy w config.toml `[hotkeys]` (wielkość liter bez znaczenia).
+    pub fn from_hotkey_name(name: &str) -> Option<Key> {
+        let upper = name.trim().to_uppercase();
+        let n: u32 = upper.strip_prefix('F')?.parse().ok()?;
+        if !(1..=12).contains(&n) || upper != format!("F{n}") {
+            return None;
+        }
+        key_from_code(&upper, "")
+    }
+
+    /// Zapisany klawisz szybciej/wolniej z ustawień; brak, błąd albo zapis bez kodu
+    /// wirtualnego - nazwa z config.toml (`config_name`), a bez niej `default` (F7/F6).
+    pub fn speed_from_value(data: &Value, config_name: Option<&str>, default: &Key) -> Key {
+        parse_key(data)
+            .filter(|k| k.vk != 0)
+            .or_else(|| config_name.and_then(Key::from_hotkey_name))
+            .unwrap_or_else(|| default.clone())
+    }
+
     /// Ten sam fizyczny klawisz (bez względu na nazwę, kod wirtualny i modyfikatory).
     pub fn same_key(&self, other: &Key) -> bool {
         (self.scan, self.extended) == (other.scan, other.extended)
@@ -288,11 +317,9 @@ const NAMES: &[((u16, bool), &str)] = &[
     ((0x51, true), "Page Down"),
 ];
 
-/// F6/F7: skróty symulatora, Esc: anulowanie wyboru, F12: debuger Windows, Print Screen
-/// (wartości: klucze powodów w docs/teksty.md).
+/// Esc: anulowanie wyboru, F12: debuger Windows, Print Screen (wartości: klucze powodów
+/// w docs/teksty.md). Klawisze szybciej/wolniej (domyślnie F7/F6) sprawdza [`problem_with`].
 const RESERVED: &[((u16, bool), &str)] = &[
-    ((0x40, false), "klawisz.powod.f6"),
-    ((0x41, false), "klawisz.powod.f7"),
     ((0x01, false), "klawisz.powod.esc"),
     ((0x58, false), "klawisz.powod.f12"),
     ((0x37, true), "klawisz.powod.printscreen"),
@@ -398,12 +425,44 @@ pub fn key_from_native(native_scan: u32, fallback_name: &str, vk: i64) -> Option
     Some(Key::new(scan, extended, &name, vk))
 }
 
-/// Opis problemu z wybranymi klawiszami albo None, gdy wszystko w porządku.
+/// Opis problemu z wybranymi klawiszami albo None, gdy wszystko w porządku (klawisze
+/// szybciej/wolniej domyślne: F7/F6, jak w 0.5.x).
 pub fn problem(walk: &Key, run: &Key, toggle: &Key) -> Option<String> {
+    problem_with(
+        walk,
+        run,
+        toggle,
+        &Key::faster_default(),
+        &Key::slower_default(),
+    )
+}
+
+/// Problem z klawiszami chodu, biegu i włączania przy danych klawiszach szybciej/wolniej
+/// (te są zajęte: zmieniają prędkość symulatora i poziom Treningu).
+pub fn problem_with(
+    walk: &Key,
+    run: &Key,
+    toggle: &Key,
+    faster: &Key,
+    slower: &Key,
+) -> Option<String> {
     for key in [walk, run, toggle] {
-        if let Some(reason) = lookup(RESERVED, (key.scan, key.extended)) {
-            return Some(t("klawisz.blad.ogolny", &[("powod", &t(reason, &[]))]));
-        }
+        let reason = if key.same_key(slower) {
+            t(
+                "klawisz.powod.wolniej",
+                &[("klawisz_wolniej", &slower.label())],
+            )
+        } else if key.same_key(faster) {
+            t(
+                "klawisz.powod.szybciej",
+                &[("klawisz_szybciej", &faster.label())],
+            )
+        } else if let Some(reason) = lookup(RESERVED, (key.scan, key.extended)) {
+            t(reason, &[])
+        } else {
+            continue;
+        };
+        return Some(t("klawisz.blad.ogolny", &[("powod", &reason)]));
     }
     if walk.same_key(run) {
         return Some(t("klawisz.blad.te_same", &[]));
@@ -419,6 +478,37 @@ pub fn problem(walk: &Key, run: &Key, toggle: &Key) -> Option<String> {
         return Some(t("klawisz.blad.chod_z_modyfikatorem", &[]));
     }
     combo_problem(toggle)
+}
+
+/// Problem z nowymi klawiszami szybciej/wolniej (kombinacje dozwolone, skróty Windows nie):
+/// muszą być różne i inne niż klawisze włączania, chodu i biegu.
+pub fn speed_problem(
+    faster: &Key,
+    slower: &Key,
+    walk: &Key,
+    run: &Key,
+    toggle: &Key,
+) -> Option<String> {
+    for key in [faster, slower] {
+        if let Some(reason) = lookup(RESERVED, (key.scan, key.extended)) {
+            return Some(t("klawisz.blad.ogolny", &[("powod", &t(reason, &[]))]));
+        }
+    }
+    if faster.same_key(slower) {
+        return Some(t("klawisz.blad.tempo_te_same", &[]));
+    }
+    let taken = [walk, run, toggle];
+    if taken
+        .iter()
+        .any(|k| k.same_key(faster) || k.same_key(slower))
+    {
+        // naciśnięcie chodu (robi to też sama aplikacja) albo włączania zmieniałoby prędkość
+        return Some(t("klawisz.blad.tempo_koliduje", &[]));
+    }
+    if faster.vk == 0 || slower.vk == 0 {
+        return Some(t("klawisz.blad.tempo_niedozwolony", &[]));
+    }
+    combo_problem(faster).or_else(|| combo_problem(slower))
 }
 
 /// Fizyczne klawisze po `KeyboardEvent.code` z okna aplikacji: (code, scan, rozszerzony,
@@ -649,6 +739,88 @@ mod tests {
                 .unwrap_or_default()
                 .contains("inny")
         );
+    }
+
+    #[test]
+    fn speed_keys_default_to_f7_f6_and_config() {
+        let (faster, slower) = (Key::faster_default(), Key::slower_default());
+        assert_eq!(key_from_code("F7", "F7"), Some(faster.clone()));
+        assert_eq!(key_from_code("F6", "F6"), Some(slower.clone()));
+        // brak klucza w danych (osoby.json sprzed 0.6.0) - F7/F6 albo nazwa z config.toml
+        assert_eq!(Key::speed_from_value(&Value::Null, None, &faster), faster);
+        assert_eq!(
+            Key::speed_from_value(&Value::Null, Some("f9"), &faster),
+            Key::new(0x43, false, "F9", 0x78)
+        );
+        for bad in ["F13", "F08", "G1", ""] {
+            assert_eq!(
+                Key::speed_from_value(&Value::Null, Some(bad), &slower),
+                slower,
+                "{bad}"
+            );
+        }
+        // zapis wygrywa z config.toml; kombinacja przeżywa zapis i odczyt
+        let saved = combo(0x49, "Page Up", 0x21, &[Mod::Ctrl]);
+        assert_eq!(
+            Key::speed_from_value(&saved.to_value(), Some("F9"), &faster),
+            saved
+        );
+        // zapis bez kodu wirtualnego nie zadziała jako skrót - jak bez zapisu
+        let old = serde_json::json!({"scan": 0x43, "name": "F9"});
+        assert_eq!(Key::speed_from_value(&old, None, &faster), faster);
+    }
+
+    #[test]
+    fn speed_key_conflicts_are_explained() {
+        let (walk, run, toggle) = (
+            Key::walk_default(),
+            Key::run_default(),
+            Key::toggle_default(),
+        );
+        let (f7, f6) = (Key::faster_default(), Key::slower_default());
+        let f9 = Key::new(0x43, false, "F9", 0x78);
+        assert_eq!(speed_problem(&f7, &f6, &walk, &run, &toggle), None);
+        assert_eq!(speed_problem(&f9, &f6, &walk, &run, &toggle), None);
+        let ctrl_up = combo(0x48, "Strzałka w górę", 0x26, &[Mod::Ctrl]);
+        assert_eq!(speed_problem(&ctrl_up, &f6, &walk, &run, &toggle), None);
+        let text = |found: Option<String>| found.unwrap_or_default();
+        assert!(text(speed_problem(&f6, &f6, &walk, &run, &toggle)).contains("różne"));
+        // ten sam klawisz co włączanie (też z innym modyfikatorem), chód albo bieg
+        let ctrl_f8 = combo(0x42, "F8", 0x77, &[Mod::Ctrl]);
+        for taken in [&toggle, &ctrl_f8, &walk, &run] {
+            assert!(
+                text(speed_problem(taken, &f6, &walk, &run, &toggle)).contains("włączania"),
+                "{}",
+                taken.label()
+            );
+            assert!(text(speed_problem(&f7, taken, &walk, &run, &toggle)).contains("włączania"));
+        }
+        // skróty Windows i klawisze zajęte - jak przy włączaniu
+        let alt_tab = combo(0x0F, "Tab", 0x09, &[Mod::Alt]);
+        assert!(text(speed_problem(&alt_tab, &f6, &walk, &run, &toggle)).contains("Alt+Tab"));
+        let esc = Key::new(0x01, false, "Esc", 0x1B);
+        assert!(text(speed_problem(&f7, &esc, &walk, &run, &toggle)).contains("Esc"));
+        let win = combo(0x43, "F9", 0x78, &[Mod::Win]);
+        assert!(text(speed_problem(&win, &f6, &walk, &run, &toggle)).contains("Windows"));
+    }
+
+    #[test]
+    fn other_keys_cannot_take_speed_keys() {
+        let (walk, run, toggle) = (
+            Key::walk_default(),
+            Key::run_default(),
+            Key::toggle_default(),
+        );
+        let f9 = Key::new(0x43, false, "F9", 0x78);
+        let pgdn = Key::new(0x51, true, "Page Down", 0x22);
+        // F6 i F7 wolne, gdy szybciej/wolniej mają inne klawisze
+        let f6 = Key::slower_default();
+        assert_eq!(problem_with(&walk, &run, &f6, &f9, &pgdn), None);
+        assert!(problem(&walk, &run, &f6).is_some());
+        let found = problem_with(&walk, &run, &f9, &f9, &pgdn).unwrap_or_default();
+        assert!(found.contains("F9 przyspiesza"), "{found}");
+        let found = problem_with(&pgdn, &run, &toggle, &f9, &pgdn).unwrap_or_default();
+        assert!(found.contains("Page Down zwalnia"), "{found}");
     }
 
     #[test]

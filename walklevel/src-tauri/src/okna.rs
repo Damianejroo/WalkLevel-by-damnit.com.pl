@@ -21,6 +21,10 @@ pub const DEFAULT_H: f64 = 890.0;
 pub const MIN_W: f64 = 420.0;
 pub const MIN_H: f64 = 560.0;
 pub const BUBBLE_SIZE: f64 = 56.0;
+/// Tryb Trening: kółko + kolumna 28 px (+, poziom, −) obok i rząd Stop 24 px pod spodem
+/// (odstępy 4 px; układ w src/okna/Przycisk.svelte).
+pub const BUBBLE_TRAINING_W: f64 = BUBBLE_SIZE + 4.0 + 28.0;
+pub const BUBBLE_TRAINING_H: f64 = BUBBLE_SIZE + 4.0 + 24.0;
 /// 3 popupy po 96 px z odstępami 10 px
 pub const POPUP_W: f64 = 380.0;
 pub const POPUP_H: f64 = 3.0 * 96.0 + 2.0 * 10.0;
@@ -34,6 +38,8 @@ pub enum Okno {
     ShowMain,
     MainAlwaysOnTop(bool),
     BubbleVisible(bool, Option<[f64; 2]>),
+    /// rozmiar okna przycisku: `true` - Trening (z +, − i Stop)
+    BubbleSize(bool),
     PopupShow,
     PopupHide,
     Quit,
@@ -120,6 +126,11 @@ fn apply(app: &AppHandle, r: Okno) {
             if let Some(w) = app.get_webview_window(BUBBLE) {
                 let _ = w.hide();
                 let _ = w.destroy();
+            }
+        }
+        Okno::BubbleSize(training) => {
+            if let Some(w) = app.get_webview_window(BUBBLE) {
+                resize_bubble(app, &w, training);
             }
         }
         Okno::PopupShow => {
@@ -395,6 +406,34 @@ fn place_bubble(app: &AppHandle, w: &WebviewWindow, pos: Option<[f64; 2]>) {
         let right = (area.position.x as f64 + area.size.width as f64) / k;
         let middle = (area.position.y as f64 + area.size.height as f64 / 2.0) / k;
         let _ = w.set_position(LogicalPosition::new(right - BUBBLE_SIZE - 24.0, middle));
+    }
+}
+
+/// Rozmiar okna przycisku. Kółko zostaje w lewym górnym rogu okna (tam, gdzie było), większe
+/// okno rośnie w prawo i w dół; gdy wyszłoby poza obszar roboczy monitora - przesuwa się do
+/// środka (bez zapisu pozycji).
+fn resize_bubble(app: &AppHandle, w: &WebviewWindow, training: bool) {
+    let (width, height) = if training {
+        (BUBBLE_TRAINING_W, BUBBLE_TRAINING_H)
+    } else {
+        (BUBBLE_SIZE, BUBBLE_SIZE)
+    };
+    let _ = w.set_size(LogicalSize::new(width, height));
+    let (Ok(k), Ok(p)) = (w.scale_factor(), w.outer_position()) else {
+        return;
+    };
+    let (x, y) = (p.x as f64 / k, p.y as f64 / k);
+    let Some(m) = monitor_at_logical(app, x + BUBBLE_SIZE / 2.0, y + BUBBLE_SIZE / 2.0) else {
+        return;
+    };
+    let mk = m.scale_factor();
+    let area = m.work_area();
+    let (ax, ay) = (area.position.x as f64 / mk, area.position.y as f64 / mk);
+    let (aw, ah) = (area.size.width as f64 / mk, area.size.height as f64 / mk);
+    let nx = x.min(ax + aw - width).max(ax);
+    let ny = y.min(ay + ah - height).max(ay);
+    if (nx, ny) != (x, y) {
+        let _ = w.set_position(LogicalPosition::new(nx, ny));
     }
 }
 

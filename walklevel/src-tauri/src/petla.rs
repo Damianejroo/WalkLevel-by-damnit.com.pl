@@ -1,5 +1,5 @@
 //! Pętla sterowania co 50 ms (TICK_MS z 0.5.x) w osobnym wątku: zdarzenia bieżni, skróty
-//! (F8 / F6 / F7), pad, most (mapowanie -> klawisze w grze), tryby sterujące taśmą, sesja
+//! (włączanie, szybciej, wolniej - domyślnie F8 / F7 / F6), pad, most (mapowanie -> klawisze w grze), tryby sterujące taśmą, sesja
 //! w historii, poziomy, popupy, konto, telemetria do okien.
 
 use std::io::Write;
@@ -120,17 +120,15 @@ impl App {
     }
 
     pub fn make_hotkeys(&mut self) {
-        let hk = self.config.section("hotkeys").cloned().unwrap_or_default();
-        let name = |k: &str, d: &str| hk.get(k).and_then(Value::as_str).unwrap_or(d).to_string();
         let bindings = vec![
             ("toggle".to_string(), Binding::from_key(&self.toggle_key)),
             (
                 "sim_slower".to_string(),
-                Binding::Name(name("sim_slower", "F6")),
+                Binding::from_key(&self.slower_key),
             ),
             (
                 "sim_faster".to_string(),
-                Binding::Name(name("sim_faster", "F7")),
+                Binding::from_key(&self.faster_key),
             ),
         ];
         self.hotkeys = match Hotkeys::new(bindings, SystemKeys) {

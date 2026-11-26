@@ -63,8 +63,10 @@ export const OKNA = [
     ekran: 'przycisk', strona: 'przycisk.html', okno: { szer: 56, wys: 56 },
     scenariusze: [
       { nazwa: 'wylaczony', zapytanie: 'stan=domyslny' },
-      { nazwa: 'chod', zapytanie: 'stan=trening&poziom=1' },
-      { nazwa: 'bieg', zapytanie: 'stan=trening&poziom=4' },
+      // Trening: okno 88 × 84 (kółko + kolumna +/poziom/− i Stop, okna.rs BUBBLE_TRAINING_*)
+      { nazwa: 'chod', zapytanie: 'stan=trening&poziom=1', okno: { szer: 88, wys: 84 } },
+      { nazwa: 'bieg', zapytanie: 'stan=trening&poziom=4', okno: { szer: 88, wys: 84 } },
+      { nazwa: 'klawisze', zapytanie: 'stan=klawisze' },
       { nazwa: 'bez-danych', zapytanie: 'stan=klawisze&bieznia=rozlaczona' },
     ],
   },

@@ -9,8 +9,9 @@
 //!
 //! Typowe użycie w aplikacji:
 //! - wybór klawisza w oknie: [`keys::key_from_code`] (z `KeyboardEvent.code`/`key`) +
-//!   [`keys::mods_from_flags`], sprawdzenie [`keys::problem`], zapis [`Key::to_value`],
-//!   odczyt [`Key::from_value`],
+//!   [`keys::mods_from_flags`], sprawdzenie [`keys::problem_with`] (szybciej/wolniej:
+//!   [`keys::speed_problem`]), zapis [`Key::to_value`], odczyt [`Key::from_value`]
+//!   (szybciej/wolniej: [`Key::speed_from_value`]),
 //! - sterowanie: [`KeyboardOutput::set_keys`] co klatkę, [`KeyboardOutput::release`] przy pauzie,
 //! - skróty: [`Hotkeys`] + [`HotkeyWatcher::spawn`],
 //! - pad: [`PadReader::system`] co klatkę, [`PadState::deflection`] + [`StepPicker`].
@@ -25,7 +26,9 @@ pub mod system;
 mod pad_win;
 
 pub use hotkeys::{Binding, HotkeyWatcher, Hotkeys, KeyState, SystemKeys};
-pub use keys::{Key, Mod, combo_problem, key_from_code, key_from_native, problem};
+pub use keys::{
+    Key, Mod, combo_problem, key_from_code, key_from_native, problem, problem_with, speed_problem,
+};
 pub use pad::{PadReader, PadSource, PadState, PadStep, StepPicker, button_label, parse_steps};
 pub use send::{DryOutput, KeySender, KeyboardOutput, Output, SystemSender, create_output};
 

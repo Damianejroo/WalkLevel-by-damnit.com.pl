@@ -222,7 +222,7 @@ export function utworzAtrape(): Silnik {
     deviceAddress: 'C8:47:8C:12:34:56',
     deviceName: dlugie ? 'KS-ST-X21C' : 'KS-NACH-MXG',
     beltControl: true, quickStop: true,
-    toggleKey: klawisz('F8', 0x42, 0x77), togglePad: '',
+    toggleKey: klawisz('F8', 0x42, 0x77), fasterKey: klawisz('F7', 0x41, 0x76), slowerKey: klawisz('F6', 0x40, 0x75), togglePad: '',
     simulator: sc.bieznia === 'symulator', record: false, detailedLogs: false,
     theme: motyw === 'jasny' ? 'light' : motyw === 'ciemny' ? 'dark' : 'system',
     largeText: p.get('tekst') === 'duzy',
@@ -292,7 +292,7 @@ export function utworzAtrape(): Silnik {
       ponawiam: () => ({ ...st('run', true, 'ponawiam', 'disconnect', false), sub: t('ble.powod.timeout'), actionLabel: t('glowny.status.ponawiam.akcja') }),
       bt: () => st('danger', false, 'bt_wylaczony', 'retry', true),
       nieobslugiwane: () => st('danger', false, 'nieobslugiwane', 'scan', true),
-      symulator: () => st('accent', false, 'symulator', 'simulatorOff', false, { klawisz_szybciej: 'F7', klawisz_wolniej: 'F6' }),
+      symulator: () => st('accent', false, 'symulator', 'simulatorOff', false, { klawisz_szybciej: settings.fasterKey.label, klawisz_wolniej: settings.slowerKey.label }),
     };
     device.status = statusy[s]();
     device.label = s === 'symulator'
@@ -327,7 +327,7 @@ export function utworzAtrape(): Silnik {
     const d = settings.direction;
     const zm = {
       klawisz_chodu: settings.walkKey.name, klawisz_biegu: settings.runKey.name,
-      klawisz_szybciej: 'F7', klawisz_wolniej: 'F6',
+      klawisz_szybciej: settings.fasterKey.label, klawisz_wolniej: settings.slowerKey.label,
     };
     control.direction = d;
     control.setsSpeed = d !== 'treadmill';
@@ -564,7 +564,11 @@ export function utworzAtrape(): Silnik {
     ],
     busy: false, status: '',
   };
-  const bubble: K.BubbleView = { visible: false, enabled: control.enabled, theme: settings.theme, accent: settings.profileColor };
+  const bubble: K.BubbleView = {
+    visible: false, enabled: control.enabled, theme: settings.theme, accent: settings.profileColor,
+    training: settings.direction === 'training', trainingLevel: settings.trainingLevel,
+    fasterLabel: settings.fasterKey.label, slowerLabel: settings.slowerKey.label,
+  };
   const logi: string[] = [];
   const loguj = (tekst: string) => {
     const d = new Date();
@@ -613,6 +617,7 @@ export function utworzAtrape(): Silnik {
     settings.personColor = o?.color ?? 'Mięta';
     settings.profileColor = aktywnyProfil()?.color ?? 'Mięta';
     bubble.accent = settings.profileColor;
+    bubble.training = settings.direction === 'training';
     account.personId = people.activePersonId;
     account.loggedIn = !!o?.hasAccount;
     account.name = o?.accountName ?? '';
@@ -794,7 +799,10 @@ export function utworzAtrape(): Silnik {
     settings_set: (a) => {
       const key = a.key as K.SettingKey;
       (settings as unknown as A)[key] = a.value;
-      if (key === 'direction') przeliczSterowanie();
+      if (key === 'direction') {
+        przeliczSterowanie();
+        bubble.training = settings.direction === 'training';
+      }
       if (key === 'output') przeliczSterowanie();
       if (key === 'simulator') {
         stanBiezni = a.value ? 'symulator' : 'strumien';
@@ -847,13 +855,39 @@ export function utworzAtrape(): Silnik {
         throw blad('key', t('klawisz.blad.ogolny', { powod: t('klawisz.powod.esc') }));
       }
       const nazwa = k.code.startsWith('Key') ? k.code.slice(3) : k.code.startsWith('Digit') ? k.code.slice(5) : k.key.length === 1 ? k.key.toUpperCase() : k.code;
-      const mods: KeyBindingMods = role === 'toggle' ? [...(k.ctrl ? ['ctrl' as const] : []), ...(k.alt ? ['alt' as const] : []), ...(k.shift ? ['shift' as const] : [])] : [];
+      const mods: KeyBindingMods = role === 'toggle' || role === 'faster' || role === 'slower' ? [...(k.ctrl ? ['ctrl' as const] : []), ...(k.alt ? ['alt' as const] : []), ...(k.shift ? ['shift' as const] : [])] : [];
       const kb = klawisz(nazwa, 0, 0, mods);
+      // jak rdzeń (klawisze.speed_problem): szybciej/wolniej różne i inne niż włączanie, chód i bieg
+      if (role === 'faster' || role === 'slower') {
+        const drugi = role === 'faster' ? settings.slowerKey : settings.fasterKey;
+        const komunikat = drugi.name === kb.name
+          ? t('klawisz.blad.tempo_te_same')
+          : [settings.toggleKey, settings.walkKey, settings.runKey].some((x) => x.name === kb.name)
+            ? t('klawisz.blad.tempo_koliduje')
+            : '';
+        if (komunikat) {
+          wyslij('control');
+          throw blad('key', komunikat);
+        }
+      } else {
+        const zajety = [settings.fasterKey, settings.slowerKey].find((x) => x.name === kb.name);
+        if (zajety) {
+          wyslij('control');
+          const powod = zajety === settings.fasterKey
+            ? t('klawisz.powod.szybciej', { klawisz_szybciej: zajety.label })
+            : t('klawisz.powod.wolniej', { klawisz_wolniej: zajety.label });
+          throw blad('key', t('klawisz.blad.ogolny', { powod }));
+        }
+      }
       if (role === 'walk') settings.walkKey = kb;
       else if (role === 'run') settings.runKey = kb;
+      else if (role === 'faster') settings.fasterKey = kb;
+      else if (role === 'slower') settings.slowerKey = kb;
       else settings.toggleKey = kb;
+      Object.assign(bubble, { fasterLabel: settings.fasterKey.label, slowerLabel: settings.slowerKey.label });
       przeliczSterowanie();
-      wyslij('settings', 'control');
+      przeliczBieznie();
+      wyslij('settings', 'control', 'device', 'bubble');
       return kb;
     },
     pad_capture_start: () => {
@@ -880,13 +914,14 @@ export function utworzAtrape(): Silnik {
     },
     control_toggle: () => komendy.control_set({ on: !control.enabled }),
     training_level_set: (a) => {
-      settings.trainingLevel = Number(a.level) as 0 | 1 | 2 | 3;
+      settings.trainingLevel = bubble.trainingLevel = Number(a.level) as 0 | 1 | 2 | 3;
       if (!control.enabled) komendy.control_set({ on: true });
-      wyslij('settings');
+      wyslij('settings', 'bubble');
     },
     training_level_step: (a) => {
-      settings.trainingLevel = Math.max(0, Math.min(3, settings.trainingLevel + Number(a.step))) as 0 | 1 | 2 | 3;
-      wyslij('settings');
+      settings.trainingLevel = bubble.trainingLevel = Math.max(0, Math.min(3, settings.trainingLevel + Number(a.step))) as 0 | 1 | 2 | 3;
+      if (!control.enabled) komendy.control_set({ on: true });
+      wyslij('settings', 'bubble');
     },
     training_stop: () => komendy.control_set({ on: false }),
 
@@ -1014,6 +1049,7 @@ export function utworzAtrape(): Silnik {
       settings.profileColor = aktywnyProfil()!.color;
       settings.direction = aktywnyProfil()!.summary.direction;
       bubble.accent = settings.profileColor;
+      bubble.training = settings.direction === 'training';
       przeliczSterowanie();
       wyslij('people', 'settings', 'control', 'bubble');
     },
@@ -1314,7 +1350,7 @@ export function utworzAtrape(): Silnik {
       contact: 'kontakt@damnit.com.pl', palette: PALETA, defaultColor: 'Mięta', runAltColor: 'Malina',
       glyphs: GLIFY, defaultGlyph: GLIF_POSTAC,
       modeNames: { keyboard: t('tryb.klawisze.nazwa'), gamepad: t('tryb.pad.nazwa'), treadmill: t('tryb.chodzenie.nazwa'), training: t('tryb.trening.nazwa') },
-      maxSpeed: 12, hysteresis: 0.6, thresholdGap: 0.8, hotkeys: { simSlower: 'F6', simFaster: 'F7' },
+      maxSpeed: 12, hysteresis: 0.6, thresholdGap: 0.8,
       padPresets: {
         2: [[0, 1], [100, 2.5]], 3: [[0, 1], [50, 2], [100, 3]],
         4: [[0, 1], [25, 1.5], [50, 2.5], [100, 4]], 5: [[0, 1], [25, 1.5], [50, 2.5], [75, 3.5], [100, 4.5]],

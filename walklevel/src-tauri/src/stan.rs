@@ -110,6 +110,7 @@ impl Core {
         let _order = lock(&self.0.flush_lock);
         let (slices, out) = {
             let mut app = lock(&self.0.app);
+            app.sync_bubble_size();
             let dirty = std::mem::take(&mut app.dirty);
             let slices: Vec<(SliceName, Value)> =
                 dirty.into_iter().map(|s| (s, app.slice_value(s))).collect();
@@ -183,6 +184,9 @@ pub struct App {
     pub bridge: Bridge,
     pub steering: BeltSteering,
     pub toggle_key: Key,
+    /// szybciej/wolniej: symulator i poziom Treningu (domyślnie F7/F6)
+    pub faster_key: Key,
+    pub slower_key: Key,
     pub walk_key: Key,
     pub run_key: Key,
     pub hotkeys: Option<Hotkeys>,
@@ -239,6 +243,8 @@ pub struct App {
     pub updated_from: Option<String>,
     pub window_focused: bool,
     pub bubble_dragging: bool,
+    /// rozmiar okna przycisku ostatnio wysłany do okien (Trening: większe; None - nieznany)
+    pub bubble_training: Option<bool>,
     /// ostatnio wysłana karta statusu bieżni (żeby nie wysyłać jej 4 razy na sekundę)
     pub status_key: String,
     pub frame: u64,
@@ -251,6 +257,23 @@ pub struct App {
 
 fn section(config: &Config, name: &str) -> Map<String, Value> {
     config.section(name).cloned().unwrap_or_default()
+}
+
+/// Klawisze szybciej i wolniej: zapis w ustawieniach wspólnych, bez niego nazwa z config.toml
+/// `[hotkeys] sim_faster/sim_slower`, a bez niej F7 i F6 (jak w 0.5.x).
+pub fn speed_keys(settings: &Map<String, Value>, config: &Config) -> (Key, Key) {
+    let hk = section(config, "hotkeys");
+    let read = |key: &str, config_key: &str, default: Key| {
+        Key::speed_from_value(
+            settings.get(key).unwrap_or(&Value::Null),
+            hk.get(config_key).and_then(Value::as_str),
+            &default,
+        )
+    };
+    (
+        read("faster_key", "sim_faster", Key::faster_default()),
+        read("slower_key", "sim_slower", Key::slower_default()),
+    )
 }
 
 fn get_or(m: &Map<String, Value>, key: &str, default: Value) -> Value {
@@ -455,6 +478,9 @@ impl App {
     }
 
     pub fn window(&mut self, w: Okno) {
+        if matches!(w, Okno::BubbleVisible(..)) {
+            self.bubble_training = None; // nowe okno ma rozmiar podstawowy
+        }
         self.out.push(Wyjscie::Okno(w));
     }
 
@@ -742,6 +768,8 @@ impl App {
             belt_control: self.b("belt_control"),
             quick_stop: self.b("quick_stop"),
             toggle_key: Self::key_binding(&self.toggle_key),
+            faster_key: Self::key_binding(&self.faster_key),
+            slower_key: Self::key_binding(&self.slower_key),
             toggle_pad: self.s("toggle_pad"),
             simulator: self.b("simulator"),
             record: self.b("record"),
@@ -903,10 +931,8 @@ impl App {
     pub fn link_status(&self) -> LinkStatus {
         let remembered = !self.s("device_address").is_empty();
         let model = self.device_model_name();
-        let hk = section(&self.config, "hotkeys");
-        let key = |k: &str, d: &str| hk.get(k).and_then(Value::as_str).unwrap_or(d).to_string();
-        let slower = key("sim_slower", "F6");
-        let faster = key("sim_faster", "F7");
+        let slower = self.slower_key.label();
+        let faster = self.faster_key.label();
         let min_kmh = teksty::kmh(self.caps.speed_min);
         let max_kmh = teksty::kmh(self.caps.speed_max);
         let vars: [(&str, &str); 5] = [
@@ -1056,8 +1082,7 @@ impl App {
 
     pub fn control_view(&self) -> ControlView {
         let direction = self.s("direction");
-        let hk = section(&self.config, "hotkeys");
-        let key = |k: &str, d: &str| hk.get(k).and_then(Value::as_str).unwrap_or(d).to_string();
+        let (slower, faster) = (self.slower_key.label(), self.faster_key.label());
         let pad_button = self.pad_button_label();
         let hint = self.hint_override.clone().unwrap_or_else(|| {
             teksty::output_hint(
@@ -1065,8 +1090,8 @@ impl App {
                 &self.s("output"),
                 &self.walk_key.name,
                 &self.run_key.name,
-                &key("sim_slower", "F6"),
-                &key("sim_faster", "F7"),
+                &slower,
+                &faster,
             )
         });
         ControlView {
@@ -1077,8 +1102,8 @@ impl App {
                 self.b("belt_control"),
                 &pad_button,
                 &self.walk_key.name,
-                &key("sim_slower", "F6"),
-                &key("sim_faster", "F7"),
+                &slower,
+                &faster,
             ),
             direction,
             hint,
@@ -1201,12 +1226,29 @@ impl App {
                 .store
                 .as_ref()
                 .map_or(palette::DEFAULT.to_string(), |s| s.profile().color.clone()),
+            training: self.s("direction") == "training",
+            training_level: walklevel_core::mapping::parse_training_level(
+                self.settings.get("training_level").unwrap_or(&Value::Null),
+            ) as u32,
+            faster_label: self.faster_key.label(),
+            slower_label: self.slower_key.label(),
+        }
+    }
+
+    /// Rozmiar okna przycisku za trybem: w Treningu miejsce na +, − i Stop. Prośba idzie
+    /// tylko przy zmianie (i po każdym utworzeniu okna - `window` zeruje `bubble_training`).
+    pub fn sync_bubble_size(&mut self) {
+        if !self.b("floating_button") {
+            return;
+        }
+        let training = self.s("direction") == "training";
+        if self.bubble_training != Some(training) {
+            self.bubble_training = Some(training);
+            self.window(Okno::BubbleSize(training));
         }
     }
 
     pub fn statics(&self) -> Value {
-        let hk = section(&self.config, "hotkeys");
-        let key = |k: &str, d: &str| hk.get(k).and_then(Value::as_str).unwrap_or(d).to_string();
         let palette: Vec<Value> = palette::COLORS
             .iter()
             .map(|c| json!({"name": c.name, "hue": c.hue, "dark": c.dark, "light": c.light}))
@@ -1278,7 +1320,6 @@ impl App {
             "maxSpeed": self.max_speed(),
             "hysteresis": 0.6,
             "thresholdGap": 0.8,
-            "hotkeys": {"simSlower": key("sim_slower", "F6"), "simFaster": key("sim_faster", "F7")},
             "padPresets": presets,
             "padMinGap": walklevel_core::input::pad::MIN_GAP,
             "trainingRange": [0.5, 20.0],

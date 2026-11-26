@@ -286,6 +286,8 @@ pub struct Settings {
     pub belt_control: bool,
     pub quick_stop: bool,
     pub toggle_key: KeyBinding,
+    pub faster_key: KeyBinding,
+    pub slower_key: KeyBinding,
     pub toggle_pad: String,
     pub simulator: bool,
     pub record: bool,
@@ -717,6 +719,13 @@ pub struct BubbleView {
     pub enabled: bool,
     pub theme: String,
     pub accent: String,
+    /// tryb Trening: przy kółku +, − i Stop (okno większe, okna::BUBBLE_TRAINING_*)
+    pub training: bool,
+    /// poziom Treningu 0-3
+    pub training_level: u32,
+    /// nazwy klawiszy szybciej/wolniej (podpowiedzi + i −)
+    pub faster_label: String,
+    pub slower_label: String,
 }
 
 #[derive(Debug, Clone, Serialize)]

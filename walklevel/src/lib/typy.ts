@@ -9,7 +9,7 @@ export type Direction = 'keyboard' | 'gamepad' | 'treadmill' | 'training'; // Kl
 export type OutputKind = 'dry' | 'keys';           // podgląd / naciska klawisze w grze
 export type ThemeChoice = 'system' | 'light' | 'dark';
 export type PadIdle = 'stop' | 'slow' | 'zero';    // gałka puszczona: stop / prędkość skoku 1 / 0 km/h (test)
-export type KeyRole = 'walk' | 'run' | 'toggle';
+export type KeyRole = 'walk' | 'run' | 'toggle' | 'faster' | 'slower'; // faster/slower: symulator i poziom Treningu
 export type ColorName =                            // nazwy z bieznia/paleta.py (zapisywane w plikach)
   | 'Czerwień' | 'Koral' | 'Pomarańcz' | 'Morela' | 'Banan' | 'Limonka' | 'Zieleń' | 'Szmaragd'
   | 'Mięta' | 'Morski' | 'Niebo' | 'Błękit' | 'Chaber' | 'Indygo' | 'Fiolet' | 'Lawenda'
@@ -187,7 +187,6 @@ export interface StaticData {
   maxSpeed: number;            // mapping.max_speed z config.toml (12.0) - górna krawędź wskaźnika w trybie Chodzenie
   hysteresis: number;          // 0.6 - run_off = run_on - 0.6
   thresholdGap: number;        // 0.8 - najmniejszy odstęp progów chodu i biegu (HYSTERESIS + 0.2)
-  hotkeys: { simSlower: string; simFaster: string }; // 'F6', 'F7'
   padPresets: Record<2 | 3 | 4 | 5, PadStep[]>;
   padMinGap: number;           // 5 (punkty procentowe między skokami)
   trainingRange: [number, number];   // [0.5, 20]
@@ -269,6 +268,8 @@ export interface Settings {
   beltControl: boolean;        // start i stop taśmy razem ze sterowaniem
   quickStop: boolean;          // szybkie zatrzymanie (hamowanie = postać staje)
   toggleKey: KeyBinding;       // domyślnie F8
+  fasterKey: KeyBinding;       // szybciej (symulator, poziom Treningu); bez zapisu config.toml [hotkeys] sim_faster, potem F7
+  slowerKey: KeyBinding;       // wolniej; bez zapisu config.toml [hotkeys] sim_slower, potem F6
   togglePad: PadButton | '';   // przycisk pada działający jak F8
   simulator: boolean;
   record: boolean;             // nagrywanie przejść do nagrania/
@@ -641,6 +642,10 @@ export interface BubbleView {   // okno "przycisk"
   enabled: boolean;
   theme: ThemeChoice;
   accent: ColorName;            // kolor profilu
+  training: boolean;            // tryb Trening: przy kółku +, − i Stop (okno 88 × 84 zamiast 56 × 56)
+  trainingLevel: 0 | 1 | 2 | 3;
+  fasterLabel: string;          // nazwy klawiszy szybciej/wolniej do podpowiedzi + i −
+  slowerLabel: string;
 }
 
 // ============================================================================

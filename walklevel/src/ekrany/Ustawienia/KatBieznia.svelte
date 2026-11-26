@@ -26,8 +26,8 @@
   <Przelacznik
     tytul={t('ustawienia.bieznia.symulator')}
     opis={t('ustawienia.bieznia.symulator_przelacznik_opis', {
-      klawisz_szybciej: stan.statics.hotkeys.simFaster,
-      klawisz_wolniej: stan.statics.hotkeys.simSlower,
+      klawisz_szybciej: stan.settings.fasterKey.label,
+      klawisz_wolniej: stan.settings.slowerKey.label,
     })}
     wlaczony={stan.settings.simulator}
     onzmiana={(v) => wykonaj(api.settingsSet('simulator', v))}

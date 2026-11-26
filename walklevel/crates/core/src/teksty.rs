@@ -173,9 +173,11 @@ pub fn from_052(old: &str, prefixes: &[&str]) -> String {
                 (n.clone(), v)
             })
             .collect();
+        // w 0.5.2 klawisze szybciej/wolniej były stałe (F7/F6)
         let vars: Vec<(&str, &str)> = values
             .iter()
             .map(|(n, v)| (n.as_str(), v.as_str()))
+            .chain([("klawisz_szybciej", "F7"), ("klawisz_wolniej", "F6")])
             .collect();
         let fixed = before.len() - names.iter().map(|n| n.len() + 2).sum::<usize>();
         if best.as_ref().is_none_or(|(f, _)| fixed > *f) {

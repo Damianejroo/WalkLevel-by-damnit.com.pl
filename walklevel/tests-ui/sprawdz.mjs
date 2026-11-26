@@ -109,16 +109,22 @@ try {
       let konsola = [];
       strona.on('console', (m) => m.type() === 'error' && konsola.push(m.text()));
       strona.on('pageerror', (e) => konsola.push(String(e)));
-      for (const { nazwa: scenariusz, zapytanie } of scenariusze) {
+      for (const { nazwa: scenariusz, zapytanie, okno: oknoScenariusza } of scenariusze) {
         const nazwa = `${ekran}-${scenariusz}-${motyw}`;
         konsola = [];
+        // scenariusz może mieć własny rozmiar okna (przycisk w trybie Trening)
+        const o = oknoScenariusza ?? okno;
+        await strona.setViewportSize({ width: o.szer + 32, height: o.wys + 32 });
         await strona.goto(`${adres}${plik}?demo=1&${zapytanie}&motyw=${motyw}`);
         await strona.waitForFunction(() => document.documentElement.dataset.gotowe === '1' && typeof window.wystaje === 'function');
         await strona.evaluate(() => document.fonts.ready);
         await strona.waitForTimeout(300);
-        const wynik = await strona.evaluate(() => {
+        const wynik = await strona.evaluate(({ szer, wys }) => {
           const app = document.getElementById('app');
           const o = app.getBoundingClientRect();
+          const rozmiar = Math.round(o.width) !== szer || Math.round(o.height) !== wys
+            ? [`okno ${Math.round(o.width)} × ${Math.round(o.height)} zamiast ${szer} × ${wys}`]
+            : [];
           const poza = [...app.querySelectorAll('*')]
             .filter((el) => el.checkVisibility({ visibilityProperty: true }))
             .filter((el) => {
@@ -126,8 +132,8 @@ try {
               return (r.width || r.height) && (r.bottom > o.bottom + 0.5 || r.top < o.top - 0.5 || r.left < o.left - 0.5);
             })
             .map((el) => `poza oknem (góra/dół/lewo): ${el.tagName.toLowerCase()}.${el.getAttribute('class') ?? ''}`);
-          return { wystaje: [...window.wystaje(app, o.right + 0.5), ...poza], elementy: app.querySelectorAll('*').length };
-        });
+          return { wystaje: [...rozmiar, ...window.wystaje(app, o.right + 0.5), ...poza], elementy: app.querySelectorAll('*').length };
+        }, o);
         const problemy = [
           ...wynik.wystaje,
           ...(wynik.elementy === 0 ? ['okno puste'] : []),

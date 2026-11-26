@@ -222,6 +222,8 @@ impl App {
             Some("walk") => Some("walk"),
             Some("run") => Some("run"),
             Some("toggle") => Some("toggle"),
+            Some("faster") => Some("faster"),
+            Some("slower") => Some("slower"),
             _ => None,
         };
         self.mark(&[SliceName::Control]);
@@ -236,7 +238,8 @@ impl App {
                 crate::teksty::t("klawisz.blad.nieznany", &[]),
             ));
         };
-        if role == "toggle" {
+        // skróty globalne (włączanie, szybciej, wolniej) mogą być kombinacjami
+        if matches!(role, "toggle" | "faster" | "slower") {
             key.mods = input::keys::mods_from_flags(cap.ctrl, cap.alt, cap.shift, cap.meta);
             if input::keys::is_modifier_code(&cap.code) {
                 key.mods.clear();
@@ -247,30 +250,56 @@ impl App {
             self.run_key.clone(),
             self.toggle_key.clone(),
         );
+        let (mut faster, mut slower) = (self.faster_key.clone(), self.slower_key.clone());
         match role {
             "walk" => walk = key.clone(),
             "run" => run = key.clone(),
             "toggle" => toggle = key.clone(),
+            "faster" => faster = key.clone(),
+            "slower" => slower = key.clone(),
             _ => return Err(CmdError::unexpected("Nieznany klawisz.")),
         }
-        if let Some(problem) = input::problem(&walk, &run, &toggle) {
+        let problem = if matches!(role, "faster" | "slower") {
+            input::speed_problem(&faster, &slower, &walk, &run, &toggle)
+        } else {
+            input::problem_with(&walk, &run, &toggle, &faster, &slower)
+        };
+        if let Some(problem) = problem {
             self.hint_override = Some(problem.clone());
             return Err(CmdError::new(ErrorCode::Key, problem));
         }
         self.settings.insert("walk_key".into(), walk.to_value());
         self.settings.insert("run_key".into(), run.to_value());
-        let toggle_changed = toggle != self.toggle_key;
+        let hotkeys_changed =
+            toggle != self.toggle_key || faster != self.faster_key || slower != self.slower_key;
         self.walk_key = walk;
         self.run_key = run;
-        if toggle_changed {
+        if hotkeys_changed {
             self.settings.insert("toggle_key".into(), toggle.to_value());
+            if faster != self.faster_key || slower != self.slower_key {
+                self.settings.insert("faster_key".into(), faster.to_value());
+                self.settings.insert("slower_key".into(), slower.to_value());
+                log::info!(
+                    "Klawisze szybciej/wolniej: {} / {}",
+                    faster.label(),
+                    slower.label()
+                );
+            }
             self.toggle_key = toggle;
+            self.faster_key = faster;
+            self.slower_key = slower;
             self.make_hotkeys(); // trzymany właśnie klawisz się nie liczy
         }
         self.apply_keys_output();
         self.hint_override = None;
         self.save();
-        self.mark(&[SliceName::Settings, SliceName::Control]);
+        // karta symulatora (Device) i podpowiedzi pokazują nazwy klawiszy szybciej/wolniej
+        self.mark(&[
+            SliceName::Settings,
+            SliceName::Control,
+            SliceName::Device,
+            SliceName::Bubble,
+        ]);
         Ok(Self::key_binding(&key))
     }
 
