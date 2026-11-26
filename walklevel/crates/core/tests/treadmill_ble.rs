@@ -73,6 +73,8 @@ struct KsConfig {
     lose_first_speed: bool,
     /// zapis GATT się nie udaje (bieżnia zniknęła bez zgłoszenia rozłączenia)
     fail_writes: bool,
+    /// po stopie prędkości kolejnych ramek z runState 1 (hamowanie X21C), potem runState 0
+    braking: Vec<f64>,
 }
 
 impl Default for KsConfig {
@@ -88,6 +90,7 @@ impl Default for KsConfig {
             drop_commands: 0,
             lose_first_speed: false,
             fail_writes: false,
+            braking: Vec::new(),
         }
     }
 }
@@ -97,6 +100,7 @@ struct KsState {
     received: Vec<String>,
     buf: Vec<u8>,
     speed_lost: bool,
+    braking_left: Vec<f64>,
 }
 
 /// Odszyfrowuje polecenia i odpowiada jak X21 (wg sterownika QZ).
@@ -133,6 +137,7 @@ impl FakeKs {
                 received: Vec::new(),
                 buf: Vec::new(),
                 speed_lost: false,
+                braking_left: Vec::new(),
             }),
             radio: Radio::default(),
         })
@@ -174,7 +179,14 @@ impl FakeKs {
         };
         s.received.push(text.clone());
         let word = text.split_whitespace().next().unwrap_or("").to_string();
-        if word == "servers" {
+        if word == "servers" && !s.braking_left.is_empty() {
+            let speed = s.braking_left.remove(0);
+            if s.braking_left.is_empty() {
+                s.cfg.running = false;
+            }
+            let reply = format!("props CurrentSpeed {speed} RunningSteps 120 runState 1");
+            self.reply(s, &reply);
+        } else if word == "servers" {
             let speed = if s.cfg.running { s.cfg.speed } else { 0.0 };
             let reply = format!(
                 "props CurrentSpeed {speed} RunningSteps 120 runState {}",
@@ -192,6 +204,8 @@ impl FakeKs {
                 s.cfg.running = true;
                 self.reply(s, "props runState 1");
             }
+        } else if text == ks::CMD_STOP && !s.cfg.braking.is_empty() {
+            s.braking_left = s.cfg.braking.clone(); // hamuje stopniami, runState 1 do końca
         } else if text == ks::CMD_STOP {
             s.cfg.running = false;
             self.reply(s, "props runState 0");
@@ -271,6 +285,8 @@ fn fast() -> Timing {
         verdict_max_s: 0.5,
         control_gap_s: 0.0,
         quiet_after_push_s: 0.0,
+        brake_no_drop_s: 0.4,
+        brake_max_s: 2.0,
     }
 }
 
@@ -477,6 +493,25 @@ async fn stop_belt_stops() {
     push.abort();
     assert!(!rig.fake.running());
     assert_eq!(rig.driver.belt_running(), Some(false));
+}
+
+/// Zgłoszenie Velczera (KS-NACH-X21C): po stopie taśma hamuje 3,5 › 3,0 › 2,0 › 1,0 z runState 1
+/// do końca - spadająca prędkość to potwierdzenie, bez ponawiania i bez alarmu.
+#[tokio::test]
+async fn braking_x21c_confirms_stop_without_resend() {
+    let rig = started(
+        KsConfig {
+            braking: vec![3.5, 3.0, 2.0, 1.0, 0.0],
+            ..KsConfig::default()
+        },
+        1,
+    )
+    .await;
+    let push = pusher(&rig);
+    assert!(rig.driver.stop_belt(true).await.expect("stop"));
+    push.abort();
+    assert!(!rig.fake.running());
+    assert_eq!(rig.fake.count(ks::CMD_STOP), 1);
 }
 
 #[tokio::test]

@@ -32,7 +32,7 @@ pub use kontrakt::{
 pub use profiles::{DownloadError, DownloadResult, ModelProfile, ProfileError, ProfileRegistry};
 pub use simulator::SimulatorDriver;
 pub use telemetry::{CounterSpec, FrameKind, Meter, MeterTotals, TelemetryFrame, TelemetrySpec};
-pub use watchdog::{SpeedGuard, SpeedStats};
+pub use watchdog::{BrakeWatch, Braking, ResumeSpeed, SpeedGuard, SpeedStats};
 pub use worker::{BeltCommand, BeltOutcome, BleWorker, FoundDevice, Link, WorkerEvent};
 
 /// Sterownik dla połączonej bieżni: moduł po usługach GATT, profil po nazwie (jak

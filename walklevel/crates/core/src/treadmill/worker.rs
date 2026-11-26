@@ -22,7 +22,7 @@ use super::kontrakt::{
 use super::profiles::ProfileRegistry;
 use super::simulator::{self, SimulatorDriver};
 use super::telemetry::{TelemetryFrame, TelemetrySpec};
-use super::watchdog::SpeedStats;
+use super::watchdog::{ResumeSpeed, SpeedStats};
 use crate::teksty::t;
 
 /// Tyle razy prędkość bez potwierdzenia idzie od nowa (co odpytanie).
@@ -30,6 +30,10 @@ pub const SPEED_ATTEMPTS: u32 = 3;
 /// Tyle nieudanych odpytań z rzędu (np. zapis GATT do bieżni, której już nie ma) i łączymy
 /// od nowa - w 0.5 każdy błąd odpytania kończył połączenie.
 pub const POLL_FAILURES: u32 = 3;
+/// Tempo sprzed zatrzymania idzie tyle sekund po rozruchu bieżni (`start_delay_s`).
+pub const RESUME_AFTER_START_S: f64 = 1.0;
+/// Taśma już jedzie tym tempem (km/h) - nic nie wysyłamy.
+pub const RESUME_TOLERANCE_KMH: f64 = 0.15;
 
 /// Stan połączenia z bieżnią (wartości jak w 0.5, w JSON-ie camelCase).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -307,6 +311,8 @@ enum SessionCmd {
     /// wynik zadania taśmy (id zadania, wynik)
     Started(u64, Result<StartResult, String>),
     Stopped(u64, Result<bool, String>),
+    /// po rozruchu: prędkość sprzed zatrzymania (numer startu)
+    ResumeDue(u64),
 }
 
 enum Cmd {
@@ -974,6 +980,10 @@ struct Stream {
     speed_later: bool,
     speed_failures: u32,
     stats: SessionStats,
+    /// Chodzenie: tempo sprzed zatrzymania, ustawiane raz po starcie z aplikacji
+    resume: ResumeSpeed,
+    /// start, po którym czeka ustawienie tego tempa (stop je kasuje)
+    resume_pending: Option<u64>,
 }
 
 impl Stream {
@@ -1001,6 +1011,8 @@ impl Stream {
             speed_later: false,
             speed_failures: 0,
             stats,
+            resume: ResumeSpeed::new(),
+            resume_pending: None,
         }
     }
 
@@ -1041,6 +1053,9 @@ impl Stream {
                 if self.driver.capabilities() != self.caps {
                     // bieżnia potrafi zdradzić więcej w trakcie (np. Urevo: kroki w danych)
                     self.announce(address);
+                }
+                if let Some((kmh, at)) = self.driver.belt_speed() {
+                    self.resume.observe(kmh, at);
                 }
                 self.check_speed().await;
             }
@@ -1116,6 +1131,8 @@ impl Stream {
     fn begin_stop(&mut self) {
         self.cancel_belt(); // stop przerywa start w toku
         self.sent_speed = None;
+        self.resume.stop_requested();
+        self.resume_pending = None;
         {
             // stop kasuje prośby o prędkość i samo-uruchamianie
             let mut r = lock(&self.ctx.requests);
@@ -1199,9 +1216,11 @@ impl Stream {
                 self.sent_at = 0.0;
                 if matches!(outcome, BeltOutcome::Started | BeltOutcome::Unknown) {
                     self.apply_speed().await;
+                    self.schedule_resume(id);
                 }
                 self.ctx.emit(WorkerEvent::Belt(outcome));
             }
+            SessionCmd::ResumeDue(id) => self.resume_speed(id).await,
             SessionCmd::Stopped(id, result) => {
                 if !self.job_done(id) {
                     return;
@@ -1216,6 +1235,51 @@ impl Stream {
                 }
                 self.ctx.emit(WorkerEvent::Belt(BeltOutcome::Stopped));
             }
+        }
+    }
+
+    /// Chodzenie (nikt nie prosi o prędkość): po rozruchu ustaw raz tempo sprzed zatrzymania -
+    /// KingSmith rusza z prędkością startową z aplikacji producenta (np. 1 km/h).
+    fn schedule_resume(&mut self, id: u64) {
+        if self.requests().target.is_some() || self.resume.target().is_none() {
+            return;
+        }
+        self.resume_pending = Some(id);
+        let wait = self.caps.start_delay_s.max(0.0) + RESUME_AFTER_START_S;
+        let tx = self.tx.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(secs(wait)).await;
+            let _ = tx.send(SessionCmd::ResumeDue(id));
+        });
+    }
+
+    async fn resume_speed(&mut self, id: u64) {
+        if self.resume_pending != Some(id) {
+            return; // w międzyczasie stop albo nowy start
+        }
+        self.resume_pending = None;
+        let Some(wanted) = self.resume.target() else {
+            return;
+        };
+        if self.requests().target.is_some() || self.driver.belt_running() == Some(false) {
+            return;
+        }
+        let kmh = if self.caps.speed_max > self.caps.speed_min {
+            self.caps.clamp(wanted)
+        } else {
+            wanted
+        };
+        let now = self.driver.belt_speed().map(|(v, _)| v);
+        if now.is_some_and(|v| (v - kmh).abs() <= RESUME_TOLERANCE_KMH) {
+            return; // już jedzie tym tempem
+        }
+        log::info!(
+            "Taśma ruszyła z {} km/h - ustawiam {kmh:.1} km/h sprzed zatrzymania",
+            now.map_or_else(|| "?".to_string(), |v| format!("{v:.1}"))
+        );
+        self.sent_at = self.ctx.now();
+        if !matches!(self.driver.set_speed(kmh).await, Ok(true)) {
+            log::warn!("Bieżnia nie przyjęła {kmh:.1} km/h sprzed zatrzymania");
         }
     }
 

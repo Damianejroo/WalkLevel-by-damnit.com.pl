@@ -21,7 +21,7 @@ use super::kontrakt::{
     Capabilities, Clock, Counts, DeviceInfo, Driver, DriverError, FrameCallback, GattClient,
     StartResult,
 };
-use super::watchdog::{SpeedGuard, SpeedStats};
+use super::watchdog::{BrakeWatch, Braking, SpeedGuard, SpeedStats};
 
 pub const START_ATTEMPTS: u32 = 4;
 pub const STOP_ATTEMPTS: u32 = 3;
@@ -51,6 +51,9 @@ pub struct Timing {
     pub control_gap_s: f64,
     /// X21 gubi polecenia wysłane tuż po jego własnej ramce z danymi
     pub quiet_after_push_s: f64,
+    /// stop: prędkość nie spada od tylu sekund - ponowienie; po `brake_max_s` wciąż jedzie - alarm
+    pub brake_no_drop_s: f64,
+    pub brake_max_s: f64,
 }
 
 impl Default for Timing {
@@ -64,6 +67,8 @@ impl Default for Timing {
             verdict_max_s: 2.6,
             control_gap_s: 0.4,
             quiet_after_push_s: 0.4,
+            brake_no_drop_s: super::watchdog::BRAKE_NO_DROP_S,
+            brake_max_s: super::watchdog::BRAKE_MAX_S,
         }
     }
 }
@@ -473,8 +478,13 @@ impl KingSmithDriver {
         })
     }
 
+    /// Stop. Potwierdzeniem jest runState 0 albo SPADAJĄCA prędkość: X21C hamuje stopniami
+    /// (3,5 › 3,0 › 2,0 › 1,0) z runState 1 do końca - wtedy czekamy spokojnie ([`BrakeWatch`]).
+    /// Stop idzie jeszcze raz, gdy prędkość nie spada od ok. 3 s; alarm (false) dopiero, gdy
+    /// po ponowieniach dalej nie spada albo taśma po ok. 15 s wciąż jedzie.
     async fn stop_belt_inner(&self, verify: bool) -> Result<bool, DriverError> {
-        let began = self.now();
+        let mut watch = BrakeWatch::new(self.now(), self.rx().t.belt_speed())
+            .with_limits(self.timing.brake_no_drop_s, self.timing.brake_max_s);
         for attempt in 1..=STOP_ATTEMPTS {
             self.rx().t.last_error = None;
             self.send(CMD_STOP).await?;
@@ -482,17 +492,52 @@ impl KingSmithDriver {
                 log::info!("Wysłano stop taśmy");
                 return Ok(true);
             }
-            if self.verdict(self.now(), 0).await == Verdict::Ok {
-                log::info!(
-                    "Stop: przyjęty po {:.1} s (próba {attempt})",
-                    self.now() - began
-                );
-                return Ok(true);
+            watch.resent(self.now());
+            loop {
+                let state = {
+                    let now = self.now();
+                    let rx = self.rx();
+                    if let Some((kmh, at)) = rx.t.belt_speed() {
+                        watch.feed(kmh, at);
+                    }
+                    if rx.t.last_error.is_some() {
+                        Braking::Stuck // odmowa - ponawiamy jak przy braku reakcji
+                    } else {
+                        watch.state(now, rx.t.belt_running())
+                    }
+                };
+                match state {
+                    Braking::Stopped => {
+                        log::info!(
+                            "Stop: hamowanie {} (próba {attempt})",
+                            watch.describe(self.now())
+                        );
+                        return Ok(true);
+                    }
+                    Braking::TooLong => {
+                        log::warn!(
+                            "Bieżnia nie potwierdziła stopu: {}",
+                            watch.describe(self.now())
+                        );
+                        return Ok(false);
+                    }
+                    Braking::Stuck => break,
+                    Braking::Slowing => {
+                        let seen = self.rx().t.last_props_at;
+                        self.wait_until(0.5, |rx| rx.t.last_props_at > seen).await;
+                    }
+                }
             }
-            log::warn!("Bieżnia nie zareagowała na stop (próba {attempt}) - ponawiam");
+            log::warn!(
+                "Bieżnia nie zwalnia po stopie (próba {attempt}): {} - ponawiam",
+                watch.describe(self.now())
+            );
             self.quiet().await;
         }
-        log::warn!("Bieżnia nie potwierdziła stopu");
+        log::warn!(
+            "Bieżnia nie potwierdziła stopu: {}",
+            watch.describe(self.now())
+        );
         Ok(false)
     }
 }
