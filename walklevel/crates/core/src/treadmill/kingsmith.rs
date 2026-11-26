@@ -578,7 +578,9 @@ impl Driver for KingSmithDriver {
                 let now = self.now();
                 let mut rx = self.rx();
                 let belt = rx.t.belt_speed();
-                rx.guard.set(kmh, now, belt)
+                // bieżnia w milach: polecenie i pilnowanie w jej jednostkach
+                let native = rx.t.native_speed(kmh);
+                rx.guard.set(native, now, belt)
             };
             let sent = self.send_speed(kmh).await;
             let now = self.now();

@@ -273,14 +273,21 @@ impl BleBackend for BtleplugBackend {
                 .find(|(_, a)| a.address.eq_ignore_ascii_case(&address))
                 .map(|(p, _)| p)
                 .ok_or(BleError::NotFound)?;
-            tokio::time::timeout(timeout, peripheral.connect())
-                .await
-                .map_err(|_| BleError::Timeout)?
-                .map_err(ble_error)?;
-            tokio::time::timeout(timeout, peripheral.discover_services())
-                .await
-                .map_err(|_| BleError::Timeout)?
-                .map_err(ble_error)?;
+            let ready = async {
+                tokio::time::timeout(timeout, peripheral.connect())
+                    .await
+                    .map_err(|_| BleError::Timeout)?
+                    .map_err(ble_error)?;
+                tokio::time::timeout(timeout, peripheral.discover_services())
+                    .await
+                    .map_err(|_| BleError::Timeout)?
+                    .map_err(ble_error)
+            };
+            if let Err(e) = ready.await {
+                // połączenie w połowie (np. bez listy usług) nie może zostać otwarte
+                let _ = peripheral.disconnect().await;
+                return Err(e);
+            }
             let characteristics: Vec<Characteristic> =
                 peripheral.characteristics().into_iter().collect();
             let services = peripheral
@@ -395,6 +402,8 @@ impl BleLink for BtleplugLink {
             tokio::spawn(async move {
                 loop {
                     tokio::select! {
+                        // odbiorca zamknięty (koniec połączenia) - zadanie nie czeka dalej
+                        () = tx.closed() => break,
                         value = values.next() => match value {
                             Some(v) => {
                                 let n = Notification {

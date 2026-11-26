@@ -71,6 +71,8 @@ struct KsConfig {
     drop_commands: u32,
     /// pierwsze polecenie prędkości przepada
     lose_first_speed: bool,
+    /// zapis GATT się nie udaje (bieżnia zniknęła bez zgłoszenia rozłączenia)
+    fail_writes: bool,
 }
 
 impl Default for KsConfig {
@@ -85,6 +87,7 @@ impl Default for KsConfig {
             refuse_start: false,
             drop_commands: 0,
             lose_first_speed: false,
+            fail_writes: false,
         }
     }
 }
@@ -141,6 +144,10 @@ impl FakeKs {
 
     fn running(&self) -> bool {
         self.state.lock().expect("stan").cfg.running
+    }
+
+    fn fail_writes(&self, fail: bool) {
+        self.state.lock().expect("stan").cfg.fail_writes = fail;
     }
 
     fn count(&self, text: &str) -> usize {
@@ -219,6 +226,9 @@ impl GattClient for FakeKs {
         _with_response: bool,
     ) -> BoxFuture<'a, Result<(), DriverError>> {
         let mut s = self.state.lock().expect("stan");
+        if s.cfg.fail_writes {
+            return async { Err(DriverError::Gatt("zapis nieudany".into())) }.boxed();
+        }
         if characteristic.uuid.starts_with(s.cfg.prefix) {
             s.buf.extend_from_slice(data);
             while let Some(i) = s.buf.iter().position(|b| *b == b'\r') {
@@ -864,12 +874,32 @@ struct FakeBackend {
     ads: Vec<Advertisement>,
     link: Arc<dyn BleLink>,
     connects: AtomicU64,
+    scan_fails: bool,
+}
+
+impl FakeBackend {
+    fn new(ads: Vec<Advertisement>, link: Arc<dyn BleLink>) -> Self {
+        Self {
+            ads,
+            link,
+            connects: AtomicU64::new(0),
+            scan_fails: false,
+        }
+    }
 }
 
 impl BleBackend for FakeBackend {
     fn scan(&self, _duration: Duration) -> BoxFuture<'_, Result<Vec<Advertisement>, BleError>> {
         let ads = self.ads.clone();
-        async move { Ok(ads) }.boxed()
+        let fails = self.scan_fails;
+        async move {
+            if fails {
+                Err(BleError::Other("skan przerwany".into()))
+            } else {
+                Ok(ads)
+            }
+        }
+        .boxed()
     }
 
     fn find(
@@ -945,15 +975,14 @@ async fn worker_scans_connects_streams_and_reconnects() {
         prefix: "0001",
         ..KsConfig::default()
     });
-    let backend = Arc::new(FakeBackend {
-        ads: vec![
+    let backend = Arc::new(FakeBackend::new(
+        vec![
             ad("11:22:33:44:55:66", Some("JBL Flip 5"), -40),
             ad("AA:BB:CC:DD:EE:FF", Some("KS-HDSY-X21C"), -70),
             ad("00:00:00:00:00:01", None, -30),
         ],
-        link: fake.clone(),
-        connects: AtomicU64::new(0),
-    });
+        fake.clone(),
+    ));
     let (worker, mut events) = BleWorker::spawn_with(
         &tokio::runtime::Handle::current(),
         backend.clone(),
@@ -1070,11 +1099,10 @@ async fn worker_reports_unsupported_device_and_stops_trying() {
             self.0.disconnect()
         }
     }
-    let backend = Arc::new(FakeBackend {
-        ads: vec![ad("AA:00:00:00:00:01", Some("JBL"), -50)],
-        link: Arc::new(Plain(ftms_like)),
-        connects: AtomicU64::new(0),
-    });
+    let backend = Arc::new(FakeBackend::new(
+        vec![ad("AA:00:00:00:00:01", Some("JBL"), -50)],
+        Arc::new(Plain(ftms_like)),
+    ));
     let (worker, mut events) = BleWorker::spawn_with(
         &tokio::runtime::Handle::current(),
         backend.clone(),
@@ -1099,11 +1127,10 @@ async fn worker_reports_unsupported_device_and_stops_trying() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn worker_drives_simulator_like_a_treadmill() {
-    let backend = Arc::new(FakeBackend {
-        ads: Vec::new(),
-        link: FakeKs::new(KsConfig::default()),
-        connects: AtomicU64::new(0),
-    });
+    let backend = Arc::new(FakeBackend::new(
+        Vec::new(),
+        FakeKs::new(KsConfig::default()),
+    ));
     let (worker, mut events) = BleWorker::spawn_with(
         &tokio::runtime::Handle::current(),
         backend,
@@ -1146,11 +1173,10 @@ async fn worker_drives_simulator_like_a_treadmill() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn diagnostics_report_lists_devices_and_raw_notifications() {
     let fake = FakeFtms::new(true);
-    let backend = FakeBackend {
-        ads: vec![ad("AA:BB:CC:00:11:22", Some("URTM054"), -60)],
-        link: fake.clone(),
-        connects: AtomicU64::new(0),
-    };
+    let backend = FakeBackend::new(
+        vec![ad("AA:BB:CC:00:11:22", Some("URTM054"), -60)],
+        fake.clone(),
+    );
     let dir = std::env::temp_dir().join(format!("walklevel-raport-{}", std::process::id()));
     let path = dir.join("raport.txt");
     let pusher = {
@@ -1179,4 +1205,119 @@ async fn diagnostics_report_lists_devices_and_raw_notifications() {
     assert!(text.contains("== Połączenie z AA:BB:CC:00:11:22 =="));
     assert!(text.contains("'V90.08.15'"));
     assert!(text.contains("<< 00002acd"));
+}
+
+/// Bieżnia znika bez zgłoszenia rozłączenia (zapisy GATT się nie udają): po kilku nieudanych
+/// odpytaniach worker łączy od nowa, jak 0.5 przy błędzie odpytania.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn worker_reconnects_when_polling_keeps_failing() {
+    let fake = FakeKs::new(KsConfig::default());
+    let backend = Arc::new(FakeBackend::new(
+        vec![ad("AA:BB:CC:DD:EE:FF", Some("KS-HDSY-X21C"), -60)],
+        fake.clone(),
+    ));
+    let (worker, mut events) = BleWorker::spawn_with(
+        &tokio::runtime::Handle::current(),
+        backend.clone(),
+        ProfileRegistry::builtin(),
+        monotonic_clock(),
+        fast_worker(),
+    );
+    let mut seen = Vec::new();
+    worker.connect("AA:BB:CC:DD:EE:FF", "KS-HDSY-X21C");
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    fake.fail_writes(true);
+    let event = wait_for(&mut events, &mut seen, is_link(Link::Retrying)).await;
+    let WorkerEvent::Link { text, .. } = event else {
+        unreachable!()
+    };
+    assert!(
+        text.starts_with("Problem z Bluetooth. Łączę ponownie…"),
+        "{text}"
+    );
+    fake.fail_writes(false);
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    assert!(backend.connects.load(Ordering::SeqCst) >= 2);
+    worker.shutdown(Duration::from_secs(2)).await;
+}
+
+/// Nieudany skan nie zostawia zapamiętanej bieżni rozłączonej.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn failed_scan_resumes_the_paused_connection() {
+    let fake = FakeKs::new(KsConfig::default());
+    let backend = Arc::new(FakeBackend {
+        scan_fails: true,
+        ..FakeBackend::new(
+            vec![ad("AA:BB:CC:DD:EE:FF", Some("KS-HDSY-X21C"), -60)],
+            fake.clone(),
+        )
+    });
+    let (worker, mut events) = BleWorker::spawn_with(
+        &tokio::runtime::Handle::current(),
+        backend.clone(),
+        ProfileRegistry::builtin(),
+        monotonic_clock(),
+        fast_worker(),
+    );
+    let mut seen = Vec::new();
+    worker.connect("AA:BB:CC:DD:EE:FF", "KS-HDSY-X21C");
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    worker.scan();
+    let failed = wait_for(&mut events, &mut seen, |e| {
+        matches!(e, WorkerEvent::ScanFailed { .. })
+    })
+    .await;
+    assert_eq!(
+        failed,
+        WorkerEvent::ScanFailed {
+            link: Link::Retrying,
+            text: "Problem z Bluetooth. Łączę ponownie… (skan przerwany)".into()
+        }
+    );
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    assert_eq!(backend.connects.load(Ordering::SeqCst), 2);
+    worker.shutdown(Duration::from_secs(2)).await;
+}
+
+/// Stop z okna kasuje prośbę o prędkość i budzenie taśmy - taśma zostaje zatrzymana, choć
+/// odpytywanie dalej widzi stojącą taśmę (port test_stop_cancels_wake_so_belt_stays_stopped).
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn stop_cancels_wake_so_belt_stays_stopped() {
+    let backend = Arc::new(FakeBackend::new(
+        Vec::new(),
+        FakeKs::new(KsConfig::default()),
+    ));
+    let (worker, mut events) = BleWorker::spawn_with(
+        &tokio::runtime::Handle::current(),
+        backend,
+        ProfileRegistry::builtin(),
+        monotonic_clock(),
+        fast_worker(),
+    );
+    let mut seen = Vec::new();
+    worker.connect_simulator();
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    worker.set_speed(2.0, true);
+    wait_for(&mut events, &mut seen, |e| {
+        *e == WorkerEvent::Belt(BeltOutcome::Started)
+    })
+    .await;
+    worker.belt(BeltCommand::Stop);
+    wait_for(&mut events, &mut seen, |e| {
+        *e == WorkerEvent::Belt(BeltOutcome::Stopped)
+    })
+    .await;
+    // kilka odpytań symulatora (co 0,75 s): taśma stoi i nikt jej nie budzi
+    let quiet = tokio::time::timeout(Duration::from_millis(2500), async {
+        while let Some(e) = events.recv().await {
+            if matches!(e, WorkerEvent::Belt(_)) {
+                return Some(e);
+            }
+        }
+        None
+    })
+    .await;
+    assert!(quiet.is_err(), "nieoczekiwane polecenie taśmy: {quiet:?}");
+    assert!(!worker.stop_belt_now(Duration::from_secs(1)).await); // taśma już stoi
+    worker.shutdown(Duration::from_secs(2)).await;
 }

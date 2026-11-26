@@ -682,6 +682,16 @@ impl Telemetry {
         self.unit == Some(1)
     }
 
+    /// Prędkość do polecenia w jednostkach bieżni (przy milach przeliczona z km/h, co 0,1) -
+    /// w tych samych jednostkach co `last_speed`, którym pilnujemy, czy taśma posłuchała.
+    pub fn native_speed(&self, kmh: f64) -> f64 {
+        if self.imperial() {
+            super::kontrakt::py_round1(kmh / MILE_KM)
+        } else {
+            kmh
+        }
+    }
+
     /// Ostatnia prędkość w km/h (przy milach przeliczona, zaokrąglona do 0,01).
     pub fn speed_kmh(&self) -> f64 {
         if self.imperial() {
@@ -936,6 +946,8 @@ mod tests {
         assert_eq!(d9.speed_kmh, Some(3.22));
         assert_eq!(d9.distance_m, None); // licznik dystansu wyłączony
         assert_eq!(miles.last_speed, 2.0); // pilnowanie prędkości w jednostkach bieżni
+        assert_eq!(miles.native_speed(3.2), 2.0); // polecenie też w milach
+        assert_eq!(t.native_speed(3.2), 3.2);
     }
 
     #[test]

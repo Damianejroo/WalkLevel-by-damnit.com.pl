@@ -202,9 +202,6 @@ pub enum DriverError {
     /// Połączenie zerwane.
     #[error("Bieżnia się rozłączyła. Łączę ponownie…")]
     Disconnected,
-    /// Bieżnia nie odpowiedziała na czas (np. przy rozpoznawaniu).
-    #[error("Bieżnia nie odpowiada. Jeśli to się powtarza, wyłącz ją i włącz ponownie.")]
-    Timeout,
 }
 
 /// Charakterystyka GATT (UUID małymi literami w pełnej postaci 128-bitowej).

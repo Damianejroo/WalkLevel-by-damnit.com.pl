@@ -26,6 +26,9 @@ pub const CADENCE_MIN_SPAN_S: f64 = 6.0;
 pub const CADENCE_STOPPED_S: f64 = 3.0;
 /// Po takiej przerwie w danych liczniki zaczynają od nowego punktu odniesienia.
 pub const COUNTERS_RESET_AFTER_S: f64 = 120.0;
+/// Licznik dystansu stoi, choć taśma przejechała tyle metrów (albo 10 kwantów, jeśli więcej) -
+/// bieżnia go nie liczy (np. stałe 0), dalej sama całka prędkości.
+pub const DISTANCE_STUCK_M: f64 = 100.0;
 
 /// Rodzaj ramki: dane z bieżni albo sam sygnał życia (KingSmith „servers 0”).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -319,6 +322,14 @@ pub struct Meter {
     cadence: VecDeque<(f64, u64)>,
     steps_seen: bool,
     distance_seen: bool,
+    /// licznik dystansu stoi mimo jazdy - nie pilnuje już całki
+    distance_stuck: bool,
+    /// całka bez ograniczenia od ostatniego przyrostu licznika dystansu (m)
+    since_counter_m: f64,
+    /// dystans (po ograniczeniu) w chwili ostatniego przyrostu licznika
+    at_counter_m: f64,
+    /// całka w chwili pierwszej wartości licznika dystansu (jego zero)
+    counter_base_m: f64,
 }
 
 impl Default for Meter {
@@ -351,6 +362,10 @@ impl Meter {
             cadence: VecDeque::new(),
             steps_seen: false,
             distance_seen: false,
+            distance_stuck: false,
+            since_counter_m: 0.0,
+            at_counter_m: 0.0,
+            counter_base_m: 0.0,
         }
     }
 
@@ -365,7 +380,7 @@ impl Meter {
 
     /// Dystans pilnowany licznikiem bieżni (inaczej sama całka prędkości).
     pub fn has_distance_counter(&self) -> bool {
-        self.distance_seen
+        self.distance_seen && !self.distance_stuck
     }
 
     pub fn totals(&self) -> MeterTotals {
@@ -428,8 +443,15 @@ impl Meter {
                 self.cadence.pop_front();
             }
         }
+        let mut distance_grew = false;
         if let (Some(raw), Some(_)) = (frame.distance_m, self.spec.distance) {
-            self.distance.feed(raw, frame.t);
+            if !self.distance_seen {
+                // licznik pojawił się dopiero teraz - pilnuje dystansu od tej chwili
+                self.counter_base_m = self.integral;
+                self.at_counter_m = self.integral;
+                self.since_counter_m = 0.0;
+            }
+            distance_grew = self.distance.feed(raw, frame.t) > 0;
             self.distance_seen = true;
         }
         if let (Some(raw), Some(_)) = (frame.elapsed_s, self.spec.elapsed) {
@@ -460,6 +482,7 @@ impl Meter {
                 Some(p) => {
                     let dt = frame.t - p.t;
                     self.integral += p.kmh / 3.6 * dt;
+                    self.since_counter_m += p.kmh / 3.6 * dt;
                     if p.kmh > MOVING_KMH {
                         self.moving_s += dt;
                     }
@@ -468,12 +491,24 @@ impl Meter {
                 None => self.prev = Some(point),
             }
         }
-        if self.distance_seen {
-            let c = self.distance.total() as f64;
+        if self.distance_seen && !self.distance_stuck {
+            let c = self.counter_base_m + self.distance.total() as f64;
             let q = self.spec.distance.map_or(0, |d| d.quantum) as f64;
             self.integral = self.integral.clamp((c - q).max(0.0), c + q);
             if after_gap {
                 self.integral = self.integral.max(c);
+            }
+            if distance_grew {
+                self.since_counter_m = 0.0;
+                self.at_counter_m = self.integral;
+            } else if self.since_counter_m > DISTANCE_STUCK_M.max(10.0 * q) {
+                // licznik nie rośnie, a taśma jedzie: bez niego, z odzyskaniem ściętej całki
+                log::warn!(
+                    "Licznik dystansu bieżni stoi od {:.0} m jazdy - liczę dystans z prędkości",
+                    self.since_counter_m
+                );
+                self.distance_stuck = true;
+                self.integral = self.integral.max(self.at_counter_m + self.since_counter_m);
             }
         }
     }
@@ -606,6 +641,41 @@ mod tests {
         }
         assert!(meter.has_steps());
         assert_eq!(meter.totals().steps, 1);
+    }
+
+    /// Bieżnia z polem dystansu, które zawsze ma 0: po 100 m jazdy dystans z samej całki,
+    /// bez utraty metrów ściętych przez licznik.
+    #[test]
+    fn stuck_distance_counter_falls_back_to_speed() {
+        let mut meter = Meter::default();
+        for i in 0..=200 {
+            meter.feed(&TelemetryFrame {
+                distance_m: Some(0),
+                ..TelemetryFrame::data(f64::from(i), Some(3.6))
+            });
+        }
+        assert!(!meter.has_distance_counter());
+        assert!((meter.totals().distance_m - 200.0).abs() < 1e-9);
+    }
+
+    /// Licznik dystansu pojawia się w ramkach dopiero po 50 m: dystans się nie cofa.
+    #[test]
+    fn late_distance_counter_keeps_earlier_distance() {
+        let mut meter = Meter::default();
+        for i in 0..=50 {
+            meter.feed(&TelemetryFrame::data(f64::from(i), Some(3.6)));
+        }
+        for i in 51..=80 {
+            let counted = (f64::from(i - 51) / 10.0).floor() as u64 * 10;
+            meter.feed(&TelemetryFrame {
+                distance_m: Some(1000 + counted),
+                ..TelemetryFrame::data(f64::from(i), Some(3.6))
+            });
+        }
+        assert!(meter.has_distance_counter());
+        let d = meter.totals().distance_m;
+        assert!((d - 80.0).abs() <= 10.0, "dystans {d}");
+        assert!(d >= 70.0);
     }
 
     #[test]

@@ -26,6 +26,9 @@ use super::watchdog::SpeedStats;
 
 /// Tyle razy prędkość bez potwierdzenia idzie od nowa (co odpytanie).
 pub const SPEED_ATTEMPTS: u32 = 3;
+/// Tyle nieudanych odpytań z rzędu (np. zapis GATT do bieżni, której już nie ma) i łączymy
+/// od nowa - w 0.5 każdy błąd odpytania kończył połączenie.
+pub const POLL_FAILURES: u32 = 3;
 
 /// Stan połączenia z bieżnią (wartości jak w 0.5, w JSON-ie camelCase).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -127,6 +130,16 @@ impl From<StartResult> for BeltOutcome {
 pub const STOP_NOT_CONFIRMED: &str = "Bieżnia nie potwierdziła zatrzymania. Zatrzymaj taśmę \
                                       pilotem albo wyjmij klucz bezpieczeństwa.";
 
+/// Komunikat: stop przy zamykaniu aplikacji nie zdążył się wysłać ([`BleWorker::stop_belt_now`]
+/// zwróciło `false` przy jadącej taśmie) - powiadomienie systemowe.
+pub const STOP_NOT_SENT: &str = "Nie udało się zatrzymać taśmy. Zatrzymaj ją pilotem.";
+
+/// Raport diagnostyczny w toku, zapisany i nieudany (docs/teksty.md, dziennik.raport_*).
+pub const REPORT_BUSY: &str = "Zbieram raport, to potrwa ok. 30 s…";
+pub const REPORT_DONE: &str = "Raport zapisany. Dołączy się sam do następnego zgłoszenia.";
+pub const REPORT_FAILED: &str =
+    "Nie udało się zebrać raportu. Sprawdź, czy Bluetooth jest włączony.";
+
 /// Komunikat: bieżnia nie przyjmuje prędkości.
 pub fn speed_refused_text(kmh: f64) -> String {
     let kmh = format!("{kmh:.1}").replace('.', ",");
@@ -161,7 +174,7 @@ pub enum WorkerEvent {
     Belt(BeltOutcome),
     /// problem do pokazania jako komunikat
     Problem(String),
-    /// raport diagnostyczny: ścieżka albo opis błędu
+    /// raport diagnostyczny: ścieżka albo komunikat dla użytkownika (szczegóły w logu)
     Report(Result<PathBuf, String>),
 }
 
@@ -599,7 +612,11 @@ impl Worker {
                     link,
                     text: text.clone(),
                 });
-                self.ctx.link(link, text);
+                // wstrzymane połączenie wraca (w 0.5 zostawało rozłączone po nieudanym skanie)
+                match resume {
+                    Some((address, name)) => self.start_session(address, name).await,
+                    None => self.ctx.link(link, text),
+                }
                 return;
             }
         };
@@ -637,8 +654,7 @@ impl Worker {
 
     async fn diagnose(&mut self, path: PathBuf) {
         let resume = self.pause_session().await;
-        self.ctx
-            .link(Link::Searching, "Zbieram raport diagnostyczny (ok. 30 s)…");
+        self.ctx.link(Link::Searching, REPORT_BUSY);
         let address = resume.as_ref().map(|(a, _)| a.clone());
         let result = run_diagnostics(
             self.backend.as_ref(),
@@ -651,10 +667,15 @@ impl Worker {
         .await;
         let report = result.map_err(|e| {
             log::error!("Raport diagnostyczny nie powiódł się: {e}");
-            format!("Błąd raportu: {e}")
+            REPORT_FAILED.to_string()
         });
+        let idle = if report.is_ok() {
+            REPORT_DONE
+        } else {
+            REPORT_FAILED
+        };
         self.ctx.emit(WorkerEvent::Report(report));
-        self.resume(resume, "Raport gotowy").await;
+        self.resume(resume, idle).await;
     }
 }
 
@@ -965,13 +986,19 @@ impl Stream {
     ) -> Result<bool, DriverError> {
         tokio::pin!(lost);
         let mut next_poll = tokio::time::Instant::now();
+        let mut failures = 0;
         loop {
             if tokio::time::Instant::now() >= next_poll {
                 next_poll = tokio::time::Instant::now() + secs(self.driver.poll_interval());
-                if let Err(e) = self.driver.poll().await {
-                    log::warn!("Odpytywanie bieżni: {e}");
-                    if matches!(e, DriverError::Disconnected) {
-                        return Ok(true);
+                match self.driver.poll().await {
+                    Ok(()) => failures = 0,
+                    Err(DriverError::Disconnected) => return Ok(true),
+                    Err(e) => {
+                        log::warn!("Odpytywanie bieżni: {e}");
+                        failures += 1;
+                        if failures >= POLL_FAILURES {
+                            return Err(e); // połączenie martwe, choć nikt nie zgłosił rozłączenia
+                        }
                     }
                 }
                 if self.driver.capabilities() != self.caps {

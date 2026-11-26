@@ -200,7 +200,9 @@ impl SessionTracker {
         let Some(s) = self.current.as_mut() else {
             return Ok(());
         };
-        s.steps += i64::try_from(d_steps).unwrap_or(i64::MAX);
+        s.steps = s
+            .steps
+            .saturating_add(i64::try_from(d_steps).unwrap_or(i64::MAX));
         self.session_m += d_m;
         s.distance_km = self.session_m.round() / 1000.0;
         s.active_s += d_active;
