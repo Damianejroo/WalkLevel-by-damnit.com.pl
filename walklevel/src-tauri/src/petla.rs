@@ -474,6 +474,11 @@ impl App {
                 walk_down: direction == "keyboard" && key_down(&self.walk_key),
                 run_down: direction == "keyboard" && key_down(&self.run_key),
                 deflection,
+                belt_kmh: state
+                    .live
+                    .then(|| state.history.back().map(|&(_, kmh)| kmh))
+                    .flatten(),
+                belt_range: (self.caps.speed_min, self.caps.speed_max),
             },
         );
         if let Some(cmd) = frame.command {

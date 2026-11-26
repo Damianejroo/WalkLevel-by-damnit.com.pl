@@ -359,7 +359,17 @@ pub struct FrameInput {
     pub run_down: bool,
     /// wychylenie gałki 0..1 (0, gdy nie ma pada)
     pub deflection: f64,
+    /// prędkość taśmy z bieżni (świeży odczyt), None - brak danych
+    pub belt_kmh: Option<f64>,
+    /// zakres prędkości bieżni (min, max); (0, 0) - nieznany
+    pub belt_range: (f64, f64),
 }
+
+/// Trening: po ilu sekundach niezgodności prędkości taśmy z poziomem wysłać ją jeszcze raz
+/// (bieżnia gubi polecenie wysłane w trakcie hamowania albo rozruchu).
+pub const RESEND_AFTER_S: f64 = 3.0;
+/// Różnica prędkości (km/h) uznawana za niezgodność (odczyt ma rozdzielczość 0,1).
+pub const RESEND_TOLERANCE_KMH: f64 = 0.15;
 
 /// Wynik klatki: cel taśmy, strefa wskaźnika i ewentualne polecenie.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
@@ -393,6 +403,8 @@ pub struct BeltSteering {
     picker: StepPicker,
     pad_step: usize,
     pad_step_since: f64,
+    /// od kiedy jadąca taśma ma inną prędkość niż wysłany poziom treningu
+    mismatch_since: Option<f64>,
 }
 
 impl Default for BeltSteering {
@@ -409,6 +421,30 @@ impl BeltSteering {
             picker: StepPicker::default(),
             pad_step: 0,
             pad_step_since: 0.0,
+            mismatch_since: None,
+        }
+    }
+
+    /// Trening: jadąca taśma od [`RESEND_AFTER_S`] ma inną prędkość niż wysłany poziom -
+    /// zapominamy wysłaną prędkość, więc klatka wyśle ją jeszcze raz. Stojącej taśmy nie
+    /// ruszamy (mogła ją zatrzymać osoba pilotem).
+    fn resend_if_lost(&mut self, target: f64, input: &FrameInput) {
+        let (min, max) = input.belt_range;
+        let want = if max > min { target.clamp(min, max) } else { target };
+        let lost = match (input.belt_kmh, self.belt_target) {
+            (Some(kmh), BeltTarget::Speed(sent)) if sent == target && kmh > 0.05 => {
+                (kmh - want).abs() > RESEND_TOLERANCE_KMH
+            }
+            _ => false,
+        };
+        if !lost {
+            self.mismatch_since = None;
+            return;
+        }
+        let since = *self.mismatch_since.get_or_insert(input.now);
+        if input.now - since >= RESEND_AFTER_S {
+            self.mismatch_since = None;
+            self.belt_target = BeltTarget::Unknown;
         }
     }
 
@@ -533,6 +569,9 @@ impl BeltSteering {
         };
         let sends =
             direction != Direction::Treadmill && input.enabled && settled && !input.capturing;
+        if sends && direction == Direction::Training {
+            self.resend_if_lost(target, input);
+        }
         let command = if sends && direction == Direction::Gamepad {
             self.send_pad(settings, target)
         } else if sends && !self.sent(target) {
@@ -798,6 +837,34 @@ mod tests {
             b.set_control(&s, true, false, false),
             vec![BeltCommand::Stop]
         );
+    }
+
+    #[test]
+    fn training_resends_level_lost_by_belt() {
+        let s = SteeringSettings {
+            direction: Direction::Training,
+            training_level: clamp_training_level(0),
+            ..SteeringSettings::default()
+        };
+        let mut b = BeltSteering::new();
+        let biegnie = |now: f64, kmh: f64| FrameInput {
+            belt_kmh: Some(kmh),
+            belt_range: (0.5, 6.0),
+            ..at(now)
+        };
+        let poziom = b.frame(&s, &at(0.0)).command;
+        let Some(BeltCommand::SetSpeed { kmh: cel, .. }) = poziom else {
+            panic!("pierwsza klatka wysyła poziom");
+        };
+        // taśma zgubiła polecenie (np. w trakcie hamowania) i jedzie inną prędkością
+        let inna = cel + 1.0;
+        assert_eq!(b.frame(&s, &biegnie(1.0, inna)).command, None);
+        assert_eq!(b.frame(&s, &biegnie(3.9, inna)).command, None);
+        assert_eq!(b.frame(&s, &biegnie(4.0, inna)).command, speed(cel));
+        // zgodna prędkość, stojąca taśma albo brak danych - nic nie powtarzamy
+        assert_eq!(b.frame(&s, &biegnie(10.0, cel)).command, None);
+        assert_eq!(b.frame(&s, &biegnie(20.0, 0.0)).command, None);
+        assert_eq!(b.frame(&s, &at(30.0)).command, None);
     }
 
     #[test]

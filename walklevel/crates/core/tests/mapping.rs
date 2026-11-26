@@ -267,6 +267,7 @@ fn steering_matches_python() {
                         walk_down: op["walk"].as_bool().expect("walk"),
                         run_down: op["run"].as_bool().expect("run"),
                         deflection: op["deflection"].as_f64().unwrap_or(0.0),
+                        ..FrameInput::default()
                     };
                     let frame = b.frame(&s, &input);
                     got = json!({
