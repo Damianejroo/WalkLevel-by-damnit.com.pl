@@ -18,6 +18,8 @@ export const EKRANY = [
   { ekran: 'history', scenariusze: ['domyslny', 'pusto', 'dlugie'] },
   { ekran: 'achievements', scenariusze: ['domyslny'] },
   { ekran: 'trail', scenariusze: ['domyslny'] },
+  { ekran: 'achievements', scenariusze: ['domyslny', 'dlugie', 'pusto'] },
+  { ekran: 'trail', scenariusze: ['domyslny', 'dlugie', 'pusto'] },
   { ekran: 'online', scenariusze: ['domyslny'] },
   { ekran: 'onlinePerson', scenariusze: ['domyslny'] },
   { ekran: 'report', scenariusze: ['domyslny'] },

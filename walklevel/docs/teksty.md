@@ -1466,3 +1466,17 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 | `historia.wykres.opis` | (nowy) | Razem {kroki} {kroki:krok/kroki/kroków}, najwięcej: {kiedy}. | Opis wykresu dla czytnika ekranu. |
 | `sesja.online.kto` | (nowy) | Kto ją widzi: {kto}. Zmienisz to w Konto online > Moje konto. | `{kto}` z `moje.widocznosc.*`. Tylko dla wybranej osoby z kontem. |
 | `sesja.usun.opis_lokalnie` | (nowy) | Sesja zniknie z historii na tym komputerze. Tego nie da się cofnąć. Przytrzymaj przycisk, żeby usunąć. | Wariant `sesja.usun.opis` dla osoby bez konta online. |
+## Dodatki: Osiągnięcia i szlak
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `osiagniecia.tytul` | (nowy) | Osiągnięcia | Tytuł ekranu (wyglad.md 9.1: zmienna część w podpisie). |
+| `osiagniecia.podpis` | (nowy) | {liczba} z {razem} zdobytych | Podpis pod tytułem. |
+| `osiagniecia.dzis` | dzisiaj | dziś | Do `poziomy.osiagniecie.zdobyte`. |
+| `osiagniecia.wczoraj` | wczoraj | wczoraj | Do `poziomy.osiagniecie.zdobyte`. |
+| `osiagniecia.zdobyte` | zdobyte | zdobyte | Stan dla czytnika ekranu. |
+| `osiagniecia.dostepnosc` | (nowy) | {nazwa}, {rzadkosc}, {stan}. {warunek} | Nazwa wiersza osiągnięcia dla czytnika ekranu (zastępuje `poziomy.osiagniecie.dostepnosc`). |
+| `osiagniecia.rzadkosc_dostepnosc` | (nowy) | {rzadkosc}: {liczba} z {razem} | Komórka paska rzadkości dla czytnika ekranu. |
+| `osiagniecia.lista_rzadkosci` | (nowy) | Zdobyte według rzadkości | Nazwa paska rzadkości dla czytnika ekranu. |
+| `szlak.koniec` | (nowy) | Cały szlak jest już za Tobą. | Wiersz „TU JESTEŚ” po ostatnim przystanku. |
+| `szlak.przystanki` | (nowy) | Przystanki szlaku | Nazwa listy dla czytnika ekranu. |
