@@ -396,11 +396,7 @@ impl App {
     fn session_icon(&self, profile_id: &str) -> IconRef {
         match self.find_profile(profile_id) {
             Some(p) => self.icon_ref(p),
-            None => IconRef {
-                color: palette::DEFAULT.into(),
-                glyph: Some("\u{e7fc}".into()),
-                url: None,
-            },
+            None => removed_profile_icon(),
         }
     }
 
@@ -528,18 +524,26 @@ impl App {
                     .get(name)
                     .cloned()
                     .unwrap_or_else(|| palette::default_color().swatch().into());
+                // profil albo osoba usunięte (albo przemianowane) - ikona zastępcza, żeby wiersz
+                // miał zawsze ikonę i nazwę (bez niej układ wiersza się rozsypywał)
                 let (icon, avatar) = match key {
                     GroupKey::Profile => (
-                        store
-                            .and_then(|s| s.person().profiles().iter().find(|p| &p.name == name))
-                            .map(|p| self.icon_ref(p)),
+                        Some(
+                            store
+                                .and_then(|s| {
+                                    s.person().profiles().iter().find(|p| &p.name == name)
+                                })
+                                .map_or_else(removed_profile_icon, |p| self.icon_ref(p)),
+                        ),
                         None,
                     ),
                     GroupKey::Person => (
                         None,
-                        store
-                            .and_then(|s| s.people().iter().find(|p| &p.name == name))
-                            .map(|p| p.color.clone()),
+                        Some(
+                            store
+                                .and_then(|s| s.people().iter().find(|p| &p.name == name))
+                                .map_or_else(|| palette::DEFAULT.into(), |p| p.color.clone()),
+                        ),
                     ),
                 };
                 HistoryGroup {
@@ -988,4 +992,13 @@ pub fn icon_file(data_files: &Path, name: &str) -> Option<std::path::PathBuf> {
         && !name.contains("..")
         && name.to_ascii_lowercase().ends_with(".png");
     ok.then(|| data_files.join(walklevel_core::store::ICONS_DIR).join(name))
+}
+
+/// Ikona sesji i grupy profilu, którego już nie ma (pad na polu w kolorze domyślnym).
+fn removed_profile_icon() -> IconRef {
+    IconRef {
+        color: palette::DEFAULT.into(),
+        glyph: Some("\u{e7fc}".into()),
+        url: None,
+    }
 }

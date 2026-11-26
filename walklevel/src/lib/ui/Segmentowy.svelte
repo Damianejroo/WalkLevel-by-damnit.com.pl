@@ -2,16 +2,16 @@
   export interface Opcja<W> {
     wartosc: W;
     napis: string;
-    /** Kropka â€žaktywny trybâ€ť przed napisem. */
+    /** Kropka „aktywny tryb” przed napisem. */
     aktywny?: boolean;
     title?: string;
   }
 </script>
 
 <script lang="ts" generics="T extends string | number">
-  // PrzeĹ‚Ä…cznik segmentowany (docs/wyglad.md 8.3): segmenty rĂłwnej szerokoĹ›ci, neutralny
-  // wskaĹşnik przesuwany transformem. Za wÄ…sko na rzÄ…d: 4 opcje -> 2 x 2, 3+ -> kolumna,
-  // 2 opcje zawsze w rzÄ™dzie. WysokoĹ›Ä‡ nie zaleĹĽy od wybranej wartoĹ›ci.
+  // Przełącznik segmentowany (docs/wyglad.md 8.3): segmenty równej szerokości, neutralny
+  // wskaźnik przesuwany transformem. Za wąsko na rząd: 4 opcje -> 2 x 2, 3+ -> kolumna,
+  // 2 opcje zawsze w rzędzie. Wysokość nie zależy od wybranej wartości.
   import { onMount } from 'svelte';
 
   interface Props {
@@ -40,7 +40,9 @@
   }
 
   onMount(() => {
-    const ro = new ResizeObserver(dopasuj);
+    // w następnej klatce: zmiana liczby kolumn zmienia rozmiar toru, a zmiana w tej samej
+    // klatce kończyła się błędem „ResizeObserver loop completed with undelivered notifications”
+    const ro = new ResizeObserver(() => requestAnimationFrame(dopasuj));
     ro.observe(tor);
     document.fonts?.ready.then(dopasuj);
     return () => ro.disconnect();

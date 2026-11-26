@@ -63,6 +63,8 @@ pub const LOOK_KEYS: &[&str] = &[
     "floating_pos",
     "show_person_switch",
     "show_profile_switch",
+    "achievement_popups",
+    "achievement_sound",
 ];
 /// Klucze sterowania - osobne dla każdego profilu gry.
 pub const PROFILE_KEYS: &[&str] = &[

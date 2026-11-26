@@ -89,7 +89,7 @@
       wysokosc = Math.max(240, Math.floor(przewijanie.clientHeight - reszta));
       tick().then(przewinNaDol);
     };
-    const ro = new ResizeObserver(dopasuj);
+    const ro = new ResizeObserver(() => requestAnimationFrame(dopasuj)); // bez pętli obserwatora
     ro.observe(przewijanie);
     for (const el of blok.children) if (el !== panel) ro.observe(el);
     return () => ro.disconnect();

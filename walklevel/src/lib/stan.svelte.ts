@@ -18,6 +18,8 @@ export interface Parametry {
   personId?: string;
   accountMode?: K.AccountFormMode;
   wizardMode?: K.WizardMode;
+  /** Ustawienia: kategoria do rozwinięcia przy wejściu (np. „Zarządzaj profilami gier”). */
+  kategoria?: 'osoby' | 'sterowanie';
 }
 
 /** Props każdego ekranu w src/ekrany/ (ekran montowany raz, potem tylko chowany). */

@@ -60,6 +60,8 @@ pub struct Shared {
     pub log_tail: Mutex<VecDeque<String>>,
     pub main_visible: AtomicBool,
     pub quitting: AtomicBool,
+    /// wątek pętli zdarzeń okien (Core powstaje w `setup`)
+    main_thread: std::thread::ThreadId,
 }
 
 impl Core {
@@ -82,6 +84,7 @@ impl Core {
             log_tail: Mutex::new(VecDeque::with_capacity(LOG_TAIL)),
             main_visible: AtomicBool::new(false),
             quitting: AtomicBool::new(false),
+            main_thread: std::thread::current().id(),
         }))
     }
 
@@ -96,8 +99,14 @@ impl Core {
         r
     }
 
-    /// Brudne wycinki i wyjścia do okien - poza blokadą stanu.
+    /// Brudne wycinki i wyjścia do okien - poza blokadą stanu. Z wątku okien (zdarzenia okna,
+    /// `setup`) nic nie wysyłamy: WebView2 gubił tak wysłane zdarzenia (np. pierwsze poziomy przy
+    /// pokazaniu okna - karta poziomu nie pojawiała się do restartu). Zostają brudne i wysyła je
+    /// pętla w ciągu jednego taktu (50 ms).
     pub fn flush(&self) {
+        if std::thread::current().id() == self.0.main_thread {
+            return;
+        }
         let _order = lock(&self.0.flush_lock);
         let (slices, out) = {
             let mut app = lock(&self.0.app);
@@ -123,8 +132,9 @@ impl Core {
     /// Pełny stan (`app_snapshot`): `rev` obecny - zdarzenia z większym numerem są nowsze.
     pub fn snapshot(&self) -> Value {
         let _order = lock(&self.0.flush_lock);
+        // Brudnych wycinków nie czyścimy: snapshot woła też okno przycisku, a okno główne dostaje
+        // zmiany tylko zdarzeniami. Zdarzenie wysłane po snapshocie ma większy `rev`.
         let mut app = lock(&self.0.app);
-        app.dirty.clear(); // wszystko i tak idzie w snapshot
         let mut map = Map::new();
         for s in SliceName::ALL {
             let key = serde_json::to_value(s)

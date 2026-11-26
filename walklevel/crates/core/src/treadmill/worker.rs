@@ -360,6 +360,7 @@ impl BleWorker {
             ctx,
             session: None,
             target: None,
+            simulator: false,
             rssi: HashMap::new(),
         };
         runtime.spawn(worker.run(rx));
@@ -450,7 +451,15 @@ struct Worker {
     session: Option<Session>,
     /// zapamiętana bieżnia trwającego połączenia (adres, nazwa)
     target: Option<(String, String)>,
+    /// trwa symulator (wraca po skanie i raporcie diagnostycznym jak bieżnia)
+    simulator: bool,
     rssi: HashMap<String, i16>,
+}
+
+/// Co wznowić po skanie albo raporcie diagnostycznym.
+enum Resume {
+    Device(String, String),
+    Simulator,
 }
 
 /// Komunikat i stan połączenia dla błędu (docs/teksty.md, ble.powod.*).
@@ -521,6 +530,7 @@ impl Worker {
     async fn stop_session(&mut self, forget: bool) {
         if forget {
             self.target = None;
+            self.simulator = false;
         }
         let Some(session) = self.session.take() else {
             return;
@@ -554,6 +564,7 @@ impl Worker {
 
     async fn start_simulator(&mut self) {
         self.stop_session(true).await;
+        self.simulator = true;
         let (tx, rx) = mpsc::unbounded_channel();
         let (close, closed) = watch::channel(false);
         let ctx = self.ctx.clone();
@@ -586,18 +597,31 @@ impl Worker {
         self.session = Some(Session { tx, close, handle });
     }
 
-    /// Wstrzymuje połączenie na czas skanu albo raportu; zwraca bieżnię do wznowienia.
-    async fn pause_session(&mut self) -> Option<(String, String)> {
-        let target = self.target.clone();
+    /// Wstrzymuje połączenie na czas skanu albo raportu; zwraca, co potem wznowić.
+    async fn pause_session(&mut self) -> Option<Resume> {
+        let resume = if self.simulator {
+            Some(Resume::Simulator)
+        } else {
+            self.target
+                .clone()
+                .map(|(address, name)| Resume::Device(address, name))
+        };
         self.stop_session(false).await;
-        target
+        resume
     }
 
-    async fn resume(&mut self, target: Option<(String, String)>, idle_text: String) {
-        match target {
-            Some((address, name)) => self.start_session(address, name).await,
-            None => self.ctx.link(Link::Idle, idle_text),
+    /// Wznawia wstrzymane połączenie; bez niego - stan `link` z tekstem.
+    async fn resume_or(&mut self, resume: Option<Resume>, link: Link, text: String) {
+        match resume {
+            Some(Resume::Device(address, name)) => self.start_session(address, name).await,
+            // w 0.5.x symulator po skanie albo raporcie zostawał rozłączony (taśma „niepołączona”)
+            Some(Resume::Simulator) => self.start_simulator().await,
+            None => self.ctx.link(link, text),
         }
+    }
+
+    async fn resume(&mut self, resume: Option<Resume>, idle_text: String) {
+        self.resume_or(resume, Link::Idle, idle_text).await;
     }
 
     async fn scan(&mut self) {
@@ -614,10 +638,7 @@ impl Worker {
                     text: text.clone(),
                 });
                 // wstrzymane połączenie wraca (w 0.5 zostawało rozłączone po nieudanym skanie)
-                match resume {
-                    Some((address, name)) => self.start_session(address, name).await,
-                    None => self.ctx.link(link, text),
-                }
+                self.resume_or(resume, link, text).await;
                 return;
             }
         };
@@ -656,7 +677,10 @@ impl Worker {
     async fn diagnose(&mut self, path: PathBuf) {
         let resume = self.pause_session().await;
         self.ctx.link(Link::Searching, report_busy());
-        let address = resume.as_ref().map(|(a, _)| a.clone());
+        let address = match &resume {
+            Some(Resume::Device(address, _)) => Some(address.clone()),
+            _ => None,
+        };
         let result = run_diagnostics(
             self.backend.as_ref(),
             &self.ctx.registry,

@@ -161,6 +161,8 @@ pub struct ExportSummary {
 struct Selected<'a> {
     person: &'a Person,
     profiles: Vec<&'a Profile>,
+    /// wszystkie profile osoby - wtedy też sesje profili już usuniętych
+    all_profiles: bool,
 }
 
 fn selected<'a>(store: &'a Store, choice: &ExportChoice) -> Vec<Selected<'a>> {
@@ -169,12 +171,17 @@ fn selected<'a>(store: &'a Store, choice: &ExportChoice) -> Vec<Selected<'a>> {
         .iter()
         .filter_map(|person| {
             let wanted = choice.people.get(&person.id)?;
-            let profiles = person
+            let profiles: Vec<&Profile> = person
                 .profiles()
                 .iter()
                 .filter(|pr| wanted.as_ref().is_none_or(|w| w.contains(&pr.id)))
                 .collect();
-            Some(Selected { person, profiles })
+            let all_profiles = profiles.len() == person.profiles().len();
+            Some(Selected {
+                person,
+                profiles,
+                all_profiles,
+            })
         })
         .collect()
 }
@@ -184,6 +191,11 @@ fn selected_sessions(
     since: f64,
     sel: &Selected,
 ) -> Result<Vec<Session>, HistoryError> {
+    // Cała osoba: wszystkie jej sesje, także profili usuniętych wcześniej (w 0.5.x takie sesje
+    // po cichu wypadały z pełnej kopii).
+    if sel.all_profiles {
+        return history.sessions(since, Some(&sel.person.id), None, None);
+    }
     let ids: HashSet<String> = sel.profiles.iter().map(|p| p.id.clone()).collect();
     history.sessions(since, Some(&sel.person.id), Some(&ids), None)
 }

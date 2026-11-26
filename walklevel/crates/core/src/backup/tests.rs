@@ -247,6 +247,38 @@ fn export_respects_person_profile_and_content_filters() {
 }
 
 #[test]
+fn full_person_export_keeps_sessions_of_removed_profiles() {
+    let w = world();
+    let a = w.store.people()[0].clone();
+    // sesja profilu, którego już nie ma (usunięty albo z dawnej wersji)
+    let mut orphan = session(
+        "s4",
+        &a,
+        "dawno-usuniety",
+        "Domyślny",
+        800.0,
+        900.0,
+        70,
+        0.05,
+        90.0,
+    );
+    w.history.save(&mut orphan).unwrap();
+    let every: HashSet<String> = a.profiles().iter().map(|p| p.id.clone()).collect();
+    let all = ExportChoice::new(BTreeMap::from([(a.id.clone(), Some(every))]));
+    let summary = summarize(&w.store, Some(&w.history), &all).unwrap();
+    assert_eq!(summary.sessions, 3, "s1, s2 i sesja usuniętego profilu");
+    // część profili - tylko ich sesje
+    let cp = ids(&w.store, &a.name)["Cyberpunk 2077"].clone();
+    let part = ExportChoice::new(BTreeMap::from([(a.id.clone(), Some(HashSet::from([cp])))]));
+    assert_eq!(
+        summarize(&w.store, Some(&w.history), &part)
+            .unwrap()
+            .sessions,
+        1
+    );
+}
+
+#[test]
 fn export_results_only_and_logs() {
     let w = world();
     let logs = w.root().join("logs");

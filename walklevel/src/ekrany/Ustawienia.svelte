@@ -17,7 +17,7 @@
   import { stan, type PropsEkranu } from '../lib/stan.svelte';
   import * as api from '../lib/api';
 
-  let _props: PropsEkranu = $props();
+  let { parametry, aktywny }: PropsEkranu = $props();
 
   type Kategoria = 'osoby' | 'sterowanie' | 'bieznia' | 'poziomy' | 'wyglad' | 'dane' | 'pomoc';
   interface OpisKategorii {
@@ -49,6 +49,11 @@
     return wynik;
   }
   const otwarte = $state(naStart());
+  // Wejście z odnośnika („Zarządzaj profilami gier”, klawisz włączania na ekranie głównym) rozwija
+  // wskazaną kategorię; pozostałe zostają, jak były.
+  $effect(() => {
+    if (aktywny && parametry.kategoria) otwarte[parametry.kategoria] = true;
+  });
 
   const osoba = $derived(stan.people.people.find((o) => o.id === stan.people.activePersonId));
   const profil = $derived(osoba?.profiles.find((p) => p.id === stan.people.activeProfileId));

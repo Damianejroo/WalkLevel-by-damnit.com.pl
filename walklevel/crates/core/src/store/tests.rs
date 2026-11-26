@@ -166,6 +166,8 @@ fn settings_go_to_the_active_profile_only() {
     store.set("theme", json!("light")).unwrap(); // wygląd - osoba, nie profil
     assert!(!find(&store, &default_id).settings.contains_key("theme"));
     assert_eq!(store.person().look["theme"], "light");
+    store.set("achievement_sound", json!(true)).unwrap(); // powiadomienia - też osoba
+    assert_eq!(store.person().look["achievement_sound"], true);
     store.set("device_name", json!("KS-NACH-X21C")).unwrap(); // wspólne
     assert_eq!(store.shared()["device_name"], "KS-NACH-X21C");
     store.set("tylko_na_teraz", json!(1)).unwrap(); // klucz spoza zestawów - pomijany

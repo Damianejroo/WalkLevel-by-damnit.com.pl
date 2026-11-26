@@ -158,7 +158,7 @@
     pozycje={osoby}
     linki={[
       { tytul: t('glowny.osoby.dodaj'), ikona: 'dodaj', onclick: () => idz('wizard', { wizardMode: 'add' }) },
-      { tytul: t('glowny.osoby.zarzadzaj'), ikona: 'ustawienia', onclick: () => idz('settings') },
+      { tytul: t('glowny.osoby.zarzadzaj'), ikona: 'ustawienia', onclick: () => idz('settings', { kategoria: 'osoby' }) },
     ]}
     onwybierz={(id) => id !== stan.people.activePersonId && wykonaj(api.personSwitch(id))}
   >

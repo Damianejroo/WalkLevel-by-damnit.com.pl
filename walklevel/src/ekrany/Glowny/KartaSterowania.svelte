@@ -53,7 +53,7 @@
           class="klawisz-kapsel"
           aria-label={t('glowny.sterowanie.klawisz_dostepnosc', { klawisz_wlaczania: stan.control.toggleLabel })}
           title={t('glowny.sterowanie.klawisz_podpowiedz')}
-          onclick={() => idz('settings')}
+          onclick={() => idz('settings', { kategoria: 'sterowanie' })}
         >{stan.control.toggleLabel}</button>
         <span class="podtytul jedna-linia" title={stan.control.subtitle}>{stan.control.subtitle}</span>
       </div>
@@ -78,7 +78,7 @@
     {wyzwalacz}
     etykieta={t('glowny.sterowanie.lista')}
     {pozycje}
-    linki={[{ tytul: t('glowny.sterowanie.zarzadzaj'), ikona: 'ustawienia', onclick: () => idz('settings') }]}
+    linki={[{ tytul: t('glowny.sterowanie.zarzadzaj'), ikona: 'ustawienia', onclick: () => idz('settings', { kategoria: 'sterowanie' }) }]}
     onwybierz={(id) => id !== stan.people.activeProfileId && wykonaj(api.profileSwitch(id))}
   >
     {#snippet poczatek(id)}

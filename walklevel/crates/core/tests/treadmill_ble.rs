@@ -1321,3 +1321,38 @@ async fn stop_cancels_wake_so_belt_stays_stopped() {
     assert!(!worker.stop_belt_now(Duration::from_secs(1)).await); // taśma już stoi
     worker.shutdown(Duration::from_secs(2)).await;
 }
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn simulator_comes_back_after_scan_and_diagnostics() {
+    let fake = FakeKs::new(KsConfig::default());
+    let backend = Arc::new(FakeBackend::new(
+        vec![ad("11:22:33:44:55:66", Some("JBL Flip 5"), -40)],
+        fake.clone(),
+    ));
+    let (worker, mut events) = BleWorker::spawn_with(
+        &tokio::runtime::Handle::current(),
+        backend,
+        ProfileRegistry::builtin(),
+        monotonic_clock(),
+        fast_worker(),
+    );
+    let mut seen = Vec::new();
+    worker.connect_simulator();
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    // skan przy włączonym symulatorze: lista urządzeń, potem symulator znowu nadaje
+    worker.scan();
+    wait_for(&mut events, &mut seen, |e| {
+        matches!(e, WorkerEvent::Devices(_))
+    })
+    .await;
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    // raport diagnostyczny: tak samo (w 0.5.x taśma zostawała „niepołączona”)
+    let dir = tempfile::tempdir().unwrap();
+    worker.diagnose(dir.path().join("raport.txt"));
+    wait_for(&mut events, &mut seen, |e| {
+        matches!(e, WorkerEvent::Report(_))
+    })
+    .await;
+    wait_for(&mut events, &mut seen, is_link(Link::Streaming)).await;
+    worker.shutdown(Duration::from_secs(2)).await;
+}
