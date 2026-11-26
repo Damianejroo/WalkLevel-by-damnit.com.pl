@@ -6,7 +6,8 @@
   import Segmentowy from '../../lib/ui/Segmentowy.svelte';
   import Paleta from './Paleta.svelte';
   import { t, tytulIPodpis } from '../../lib/teksty';
-  import { stan, wykonaj } from '../../lib/stan.svelte';
+  import { stan, ui, wykonaj } from '../../lib/stan.svelte';
+  import { rozwinMotyw, ustawMotyw } from '../../lib/wyglad';
   import * as api from '../../lib/api';
   import type { SettingKey, ThemeChoice } from '../../lib/typy';
 
@@ -47,7 +48,11 @@
       opcje={motywy}
       wartosc={stan.settings.theme}
       etykieta={t('ustawienia.wyglad.motyw')}
-      onzmiana={(v) => wykonaj(api.settingsSet('theme', v))}
+      onzmiana={(v) => {
+        // od razu, bez czekania na rdzeń (zapis idzie w tle, stan wróci tym samym motywem)
+        ustawMotyw(rozwinMotyw(v, ui.ciemnySystem));
+        void wykonaj(api.settingsSet('theme', v));
+      }}
     />
   </div>
   {#each PRZELACZNIKI as [klucz, tytul, opis] (klucz)}

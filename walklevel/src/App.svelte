@@ -7,7 +7,7 @@
   import Toast from './lib/ui/Toast.svelte';
   import { EKRANY } from './ekrany/rejestr';
   import { stan, ui, uruchom, schowajKomunikat, type Trasa } from './lib/stan.svelte';
-  import { ustawAkcent, ustawDuzyTekst, ustawMotyw } from './lib/wyglad';
+  import { rozwinMotyw, ustawAkcent, ustawDuzyTekst, ustawMotyw } from './lib/wyglad';
   import { t } from './lib/teksty';
 
   let bladStartu = $state(false);
@@ -31,8 +31,7 @@
   // Wygląd z ustawień osoby i profilu: tylko podmiana zmiennych CSS
   $effect(() => {
     if (!ui.gotowy) return;
-    const motyw = stan.settings.theme;
-    ustawMotyw(motyw === 'system' ? (ui.ciemnySystem ? 'dark' : 'light') : motyw);
+    ustawMotyw(rozwinMotyw(stan.settings.theme, ui.ciemnySystem));
     ustawAkcent(stan.settings.profileColor, stan.statics.palette);
     ustawDuzyTekst(stan.settings.largeText);
     document.documentElement.dataset.gotowe = '1';

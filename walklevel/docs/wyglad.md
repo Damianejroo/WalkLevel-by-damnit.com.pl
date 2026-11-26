@@ -415,7 +415,7 @@ U+202F (`12 345`), jednostka po niełamliwej spacji U+00A0 (`2,5 km/h`) – licz
 | Najechanie, zmiana koloru | `--t-color` 90 | liniowa | `background-color`, `color`, `border-color` (tylko kolor – nie układ) |
 | Wciśnięcie | `--t-press` 60 | liniowa | kolor tła |
 | Gałka przełącznika | `--t-switch` 110 | `--ease-enter` | `transform: translateX` |
-| Zmiana motywu / koloru profilu | `--t-theme` 120 | `--ease-enter` | przenikanie zrzutów (View Transitions, `opacity`) |
+| Zmiana motywu | 0 | – | natychmiast, cały ekran naraz (na klatkę `bez-przejsc`); przenikanie zrzutów szło przez szarą klatkę i zamrażało obraz |
 | Wejście ekranu | 100 | `--ease-enter` | `opacity` 0,5→1, `transform: translateX(4px→0)` (wstecz: -4px) |
 | Wyjście ekranu | 0 | – | poprzedni ekran znika od razu (przenikanie dwóch ekranów wyglądało jak lag) |
 | Podświetlenie segmentowanego | `--t-slide` 140 | `--ease-smooth` | `transform: translate` wskaźnika |

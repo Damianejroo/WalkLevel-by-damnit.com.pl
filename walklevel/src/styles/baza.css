@@ -156,6 +156,13 @@ ul, ol { padding: 0; list-style: none; }
   }
 }
 
+/* Zmiana motywu: na jedną klatkę bez przejść kolorów - cały ekran przełącza się naraz */
+:root.bez-przejsc *,
+:root.bez-przejsc *::before,
+:root.bez-przejsc *::after {
+  transition: none !important;
+}
+
 /* Podgląd w przeglądarce z ?szer=420: aplikacja w kolumnie o szerokości okna */
 :root.podglad-szer body {
   width: var(--podglad-szer);

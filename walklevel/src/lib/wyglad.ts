@@ -4,19 +4,22 @@ import type { ColorName, PaletteColor } from './typy';
 
 const BIEG_MALINA = { d: '#f0426e', l: '#e21246' };
 
-/** Motyw „light”/„dark” na <html data-theme>; przy zmianie przenikanie 160 ms (View Transitions). */
+/**
+ * Motyw „light”/„dark” na <html data-theme> - natychmiast. 26.11: przenikanie zrzutów (View
+ * Transitions) szło przez szarą klatkę i zamrażało obraz (zaznaczenie przeskakiwało z opóźnieniem).
+ * Na jedną klatkę wyłączamy przejścia kolorów, żeby elementy nie dojeżdżały do nowych barw osobno.
+ */
 export function ustawMotyw(motyw: 'light' | 'dark') {
   const root = document.documentElement;
   if (root.dataset.theme === motyw) return;
-  const zmien = () => {
-    root.dataset.theme = motyw;
-  };
-  const spokojnie = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (root.dataset.theme && !spokojnie && typeof document.startViewTransition === 'function') {
-    document.startViewTransition(zmien);
-  } else {
-    zmien();
-  }
+  root.classList.add('bez-przejsc');
+  root.dataset.theme = motyw;
+  requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('bez-przejsc')));
+}
+
+/** Motyw do pokazania z wyboru użytkownika („system” wg Windows). */
+export function rozwinMotyw(wybor: 'system' | 'light' | 'dark', ciemnySystem: boolean): 'light' | 'dark' {
+  return wybor === 'system' ? (ciemnySystem ? 'dark' : 'light') : wybor;
 }
 
 /** Akcent = kolor aktywnego profilu. Profile w odcieniach 10-70° dostają bieg w kolorze Malina. */
