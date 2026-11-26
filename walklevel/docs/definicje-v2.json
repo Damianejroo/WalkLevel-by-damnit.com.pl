@@ -453,14 +453,14 @@
    "warunek": "Przejdź łącznie 100 km."
   },
   {
-   "id": "km1127",
+   "id": "km115",
    "typ": "dystans",
-   "km": 112.7,
+   "km": 115,
    "rzadkosc": "rzadkie",
-   "znak": "stopy",
-   "nazwa": "Siedemdziesiąt mil do Londynu",
-   "klimat": "Kamień milowy mówi Oliverowi Twistowi z powieści Dickensa, że do Londynu jest 70 mil. Chłopak idzie tam pieszo przez tydzień.",
-   "warunek": "Przejdź łącznie 112,7 km."
+   "znak": "fala",
+   "nazwa": "Prom w Bucklebury",
+   "klimat": "Etap drogi Froda: prom przez Brandywinę na wschodnim skraju Shire.",
+   "warunek": "Przejdź łącznie 115 km."
   },
   {
    "id": "km160",
@@ -483,6 +483,16 @@
    "warunek": "Przejdź łącznie 200 km."
   },
   {
+   "id": "km215",
+   "typ": "dystans",
+   "km": 215,
+   "rzadkosc": "rzadkie",
+   "znak": "dom",
+   "nazwa": "Pod Rozbrykanym Kucykiem",
+   "klimat": "Etap drogi Froda: gospoda w Bree, pierwszy nocleg za granicą Shire.",
+   "warunek": "Przejdź łącznie 215 km."
+  },
+  {
    "id": "km246",
    "typ": "dystans",
    "km": 246,
@@ -503,14 +513,14 @@
    "warunek": "Przejdź łącznie 318 km."
   },
   {
-   "id": "km377",
+   "id": "km385",
    "typ": "dystans",
-   "km": 377,
+   "km": 385,
    "rzadkosc": "rzadkie",
-   "znak": "planeta",
-   "nazwa": "Równik w Space Engineers",
-   "klimat": "Domyślna planeta ziemiopodobna w Space Engineers ma 120 km średnicy. Jej równik to prawie 377 km.",
-   "warunek": "Przejdź łącznie 377 km."
+   "znak": "gora",
+   "nazwa": "Wichrowy Czub",
+   "klimat": "Etap drogi Froda: ruiny strażnicy na samotnym wzgórzu przy Wielkim Gościńcu.",
+   "warunek": "Przejdź łącznie 385 km."
   },
   {
    "id": "km420",
@@ -603,14 +613,14 @@
    "warunek": "Przejdź łącznie 1 085 km."
   },
   {
-   "id": "km1200",
+   "id": "km1190",
    "typ": "dystans",
-   "km": 1200,
+   "km": 1190,
    "rzadkosc": "epickie",
-   "znak": "brama",
-   "nazwa": "88 świątyń Shikoku",
-   "klimat": "Pielgrzymka do 88 świątyń związanych z mnichem Kūkai okrąża całą wyspę Shikoku. Pieszo to najczęściej podawane około 1 200 km.",
-   "warunek": "Przejdź łącznie 1 200 km."
+   "znak": "gora",
+   "nazwa": "Przełęcz Caradhrasu",
+   "klimat": "Etap wyprawy Drużyny: śnieżna przełęcz, która nie wpuściła ich w góry.",
+   "warunek": "Przejdź łącznie 1 190 km."
   },
   {
    "id": "km1257",
@@ -623,6 +633,16 @@
    "warunek": "Przejdź łącznie 1 257 km."
   },
   {
+   "id": "km1285",
+   "typ": "dystans",
+   "km": 1285,
+   "rzadkosc": "epickie",
+   "znak": "brama",
+   "nazwa": "Wrota Morii",
+   "klimat": "Z Rivendell pod zachodnią ścianę Morii, przez śniegi Caradhrasu.",
+   "warunek": "Przejdź łącznie 1 285 km."
+  },
+  {
    "id": "km1407",
    "typ": "dystans",
    "km": 1407,
@@ -633,14 +653,14 @@
    "warunek": "Przejdź łącznie 1 407 km."
   },
   {
-   "id": "km1508",
+   "id": "km1480",
    "typ": "dystans",
-   "km": 1508,
+   "km": 1480,
    "rzadkosc": "epickie",
-   "znak": "ksiezyc",
-   "nazwa": "Równik Calliope",
-   "klimat": "Calliope, księżyc planety microTech ze Star Citizen, ma w grze 240 km promienia. Jej równik to prawie 1 508 km.",
-   "warunek": "Przejdź łącznie 1 508 km."
+   "znak": "drzewo",
+   "nazwa": "Lothlórien",
+   "klimat": "Etap Drużyny: złoty las elfów nad Srebrną Żyłą, w którym zima jakby nie miała wstępu.",
+   "warunek": "Przejdź łącznie 1 480 km."
   },
   {
    "id": "km1609",
@@ -683,6 +703,16 @@
    "warunek": "Przejdź łącznie 1 854 km."
   },
   {
+   "id": "km1935",
+   "typ": "dystans",
+   "km": 1935,
+   "rzadkosc": "heroiczne",
+   "znak": "fala",
+   "nazwa": "Progi Sarn Gebir",
+   "klimat": "Etap Drużyny: skaliste progi na Anduinie, przed którymi łodzie trzeba przenieść brzegiem.",
+   "warunek": "Przejdź łącznie 1 935 km."
+  },
+  {
    "id": "km2000",
    "typ": "dystans",
    "km": 2000,
@@ -693,24 +723,24 @@
    "warunek": "Przejdź łącznie 2 000 km."
   },
   {
-   "id": "km2092",
+   "id": "km2105",
    "typ": "dystans",
-   "km": 2092,
-   "rzadkosc": "heroiczne",
-   "znak": "dom",
-   "nazwa": "Szlak Mormonów",
-   "klimat": "W latach 1846–1847 mormoni przeszli z Nauvoo nad Wielkie Jezioro Słone. Według amerykańskiej służby parków narodowych to około 1 300 mil, 2 092 km.",
-   "warunek": "Przejdź łącznie 2 092 km."
-  },
-  {
-   "id": "km2201",
-   "typ": "dystans",
-   "km": 2201,
+   "km": 2105,
    "rzadkosc": "heroiczne",
    "znak": "fala",
-   "nazwa": "Wzdłuż Dniepru",
-   "klimat": "Dniepr, nad którym toczy się duża część „Ogniem i mieczem”, ma 2 201 km długości. Od źródeł w Rosji do Morza Czarnego.",
-   "warunek": "Przejdź łącznie 2 201 km."
+   "nazwa": "Wodogrzmoty Rauros",
+   "klimat": "Wielkie wodogrzmoty na Anduinie, do których Drużyna dopłynęła łodziami elfów.",
+   "warunek": "Przejdź łącznie 2 105 km."
+  },
+  {
+   "id": "km2220",
+   "typ": "dystans",
+   "km": 2220,
+   "rzadkosc": "heroiczne",
+   "znak": "gora",
+   "nazwa": "Zejście z Emyn Muil",
+   "klimat": "Etap drogi Froda i Sama: po kilku dniach błądzenia po skałach zejście z urwiska po elfickiej linie.",
+   "warunek": "Przejdź łącznie 2 220 km."
   },
   {
    "id": "km2300",
@@ -723,6 +753,16 @@
    "warunek": "Przejdź łącznie 2 300 km."
   },
   {
+   "id": "km2360",
+   "typ": "dystans",
+   "km": 2360,
+   "rzadkosc": "heroiczne",
+   "znak": "fala",
+   "nazwa": "Martwe Bagna",
+   "klimat": "Etap drogi Froda i Sama: bagna ze światełkami, za którymi nie wolno iść.",
+   "warunek": "Przejdź łącznie 2 360 km."
+  },
+  {
    "id": "km2414",
    "typ": "dystans",
    "km": 2414,
@@ -733,14 +773,34 @@
    "warunek": "Przejdź łącznie 2 414 km."
   },
   {
-   "id": "km2500",
+   "id": "km2480",
    "typ": "dystans",
-   "km": 2500,
+   "km": 2480,
    "rzadkosc": "heroiczne",
-   "znak": "korona",
-   "nazwa": "Droga Królewska Persów",
-   "klimat": "Herodot liczy drogę z Sardes do Suzy na 450 parasangów i 90 dni marszu. W przeliczeniu to około 2 500 km.",
-   "warunek": "Przejdź łącznie 2 500 km."
+   "znak": "brama",
+   "nazwa": "Czarna Brama",
+   "klimat": "Etap drogi Froda i Sama: zamknięte wrota Mordoru.",
+   "warunek": "Przejdź łącznie 2 480 km."
+  },
+  {
+   "id": "km2540",
+   "typ": "dystans",
+   "km": 2540,
+   "rzadkosc": "heroiczne",
+   "znak": "lisc",
+   "nazwa": "Ithilien",
+   "klimat": "Etap drogi Froda i Sama: zielona, pachnąca ziołami kraina Gondoru tuż pod górami Mordoru.",
+   "warunek": "Przejdź łącznie 2 540 km."
+  },
+  {
+   "id": "km2650",
+   "typ": "dystans",
+   "km": 2650,
+   "rzadkosc": "heroiczne",
+   "znak": "gora",
+   "nazwa": "Schody Cirith Ungol",
+   "klimat": "Etap drogi Froda i Sama: kręte schody wykute w skałach Ephel Dúath.",
+   "warunek": "Przejdź łącznie 2 650 km."
   },
   {
    "id": "km2700",

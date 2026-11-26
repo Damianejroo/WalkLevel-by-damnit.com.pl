@@ -330,8 +330,8 @@ fn v2_changes_only_the_trail() {
     // bo kont poza kontem Damiana jeszcze nie ma; zdobyte nieznane id evaluate pomija
     let (old, new) = (v1(), Definitions::builtin().expect("wbudowane definicje"));
     assert_eq!((old.version, new.version), (1, 2));
-    assert_eq!(new.achievements.len(), 80);
-    assert_eq!(new.trail().len(), 59);
+    assert_eq!(new.achievements.len(), 86);
+    assert_eq!(new.trail().len(), 65);
     for a in old.achievements.iter().filter(|a| a.kind != "dystans") {
         let b = new.by_id(&a.id);
         assert_eq!(Some(a), b, "osiągnięcie spoza szlaku zmienione: {}", a.id);
@@ -352,12 +352,13 @@ fn v2_changes_only_the_trail() {
 #[test]
 fn trail_rarity_grows_with_km_and_fits_the_bounds() {
     // analiza-szlak.md, sekcja 1: progi spełnia i v1, i v2
-    // odstęp: v1 do Mordoru (2 865 km) 151 km (test 0.5.x dopuszczał 152); v2 do 2 500 km
-    // najwyżej 150, do 2 865 km najwyżej 200 (analiza-szlak.md, sekcja 9)
+    // odstęp do Mordoru (2 865 km): v1 151 km (test 0.5.x dopuszczał 152), v2 najwyżej 150
     check_trail_rules(&v1(), 2865.0, 152.0);
-    let v2 = Definitions::builtin().expect("wbudowane definicje");
-    check_trail_rules(v2, 2500.0, 150.0);
-    check_trail_rules(v2, 2865.0, 200.0);
+    check_trail_rules(
+        Definitions::builtin().expect("wbudowane definicje"),
+        2865.0,
+        150.0,
+    );
 }
 
 fn check_trail_rules(d: &Definitions, until_km: f64, gap: f64) {

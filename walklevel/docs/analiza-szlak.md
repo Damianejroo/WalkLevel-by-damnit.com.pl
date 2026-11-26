@@ -5,8 +5,9 @@ Stan na: WalkLevel 0.5.2, plik `bieznia/poziomy/definicje.json` (wersja 1, 61 os
 61 przystanków). Plik v1 nie był zmieniany.
 
 **Aktualizacja 26.11.2026:** szlak przebudowany pod kątem różnorodności uniwersów (najwyżej 2
-przystanki z jednego świata): 59 przystanków, 80 osiągnięć. Opis, research i lista zmienionych id
-w sekcji 9. Sekcje 1–7 opisują pierwszą wersję v2.
+przystanki z jednego świata, research w sekcji 9), a potem decyzją Damiana wróciła droga Froda
+jako główna nić (sekcja 10, stan obowiązujący): 65 przystanków, 86 osiągnięć. Sekcje 1–7
+opisują pierwszą wersję v2.
 
 ## 1. Najważniejsze wnioski
 
@@ -318,7 +319,7 @@ Do zrobienia w 0.6.0 (poza tym plikiem):
 Uwaga Damiana: za dużo Kerbala („Z Kerbala 1, góra 2 rzeczy”). Zasada zastosowana do każdego
 uniwersum: **najwyżej 2 przystanki z jednego świata**. Kont poza kontem Damiana na serwerze jeszcze
 nie ma, więc id przystanków można było zmieniać i usuwać (sekcja 9.4). Sekcje 3 i 6 opisują stan
-sprzed przebudowy.
+sprzed przebudowy. **Listy z sekcji 9.2–9.4 zastępuje sekcja 10** (Frodo przywrócony).
 
 ### 9.1. Research uniwersów 26.11
 
@@ -461,3 +462,93 @@ Plik dla serwera: `walklevel/docs/definicje-v2-serwer.json`, generowany skryptem
 `server_file_matches_app_definitions` pilnuje, że id, typy, progi, rzadkości, `poziomy_xp`
 i liczbowe `zasady` są te same co w aplikacji. Typy w pliku: dystans, sesja_km, dzien_kroki, seria,
 gra_pierwsza, gry_km, gra_km, trening, start_miedzy, znajomi, polecenia (bez nowych).
+
+## 10. Droga Froda przywrócona (decyzja Damiana 26.11.2026)
+
+Damian o pytaniu z sekcji 9: „Tak, przywróć Froda”. Śródziemie jest zwolnione z limitu 2
+i znów jest główną nicią szlaku. Pozostałe uniwersa stoją między etapami Froda, z limitem 2 na
+uniwersum (Kerbal 1). Ten stan zastępuje listę z sekcji 9.2–9.4. Research z sekcji 9.1 zostaje.
+
+### 10.1. Etapy Froda (15)
+
+Liczby i źródła jak w sekcjach 2 i 3.1 (rozpiska Eowyn Challenge według atlasu Fonstad, dni
+marszu z kalendarza Tolkiena). Nowe id tam, gdzie próg różni się od v1.
+
+| km | id | Etap |
+|---|---|---|
+| 115 | km115 | Prom w Bucklebury |
+| 215 | km215 | Pod Rozbrykanym Kucykiem (Bree) |
+| 385 | km385 | Wichrowy Czub |
+| 737 | km737 | Do Rivendell |
+| 1 190 | km1190 | Przełęcz Caradhrasu |
+| 1 285 | km1285 | Wrota Morii |
+| 1 480 | km1480 | Lothlórien |
+| 1 935 | km1935 | Progi Sarn Gebir |
+| 2 105 | km2105 | Wodogrzmoty Rauros |
+| 2 220 | km2220 | Zejście z Emyn Muil |
+| 2 360 | km2360 | Martwe Bagna |
+| 2 480 | km2480 | Czarna Brama |
+| 2 540 | km2540 | Ithilien |
+| 2 650 | km2650 | Schody Cirith Ungol |
+| 2 865 | km2865 | Z buta do Mordoru |
+
+Nie wróciły: Brunatne Pola (1 790, 20 km od „Dzikiej drogi”), Argonath (2 080, 25 km przed
+Rauros; lukę 1 935 → 2 105 zamyka Via Francigena) i trzy przystanki z Hobbita (to droga Bilba,
+nie Froda; Tam i z powrotem koliduje z Pony Express).
+
+### 10.2. Co wypadło z sekcji 9, bo koliduje z etapem Froda
+
+| Było w sekcji 9 | Koliduje z | Decyzja |
+|---|---|---|
+| 112,7 km1127, „Oliver Twist” | 115 Bucklebury | usunięty (zapas) |
+| 377 km377, Space Engineers | 385 Wichrowy Czub | usunięty (zapas) |
+| 1 200 km1200, Shikoku | 1 190 Caradhras | usunięty (zapas) |
+| 1 508 km1508, Calliope (Star Citizen) | 1 480 Lothlórien | usunięty; Star Citizen ma 1 przystanek (Daymar) |
+| 2 092 km2092, Szlak Mormonów | 2 105 Rauros | usunięty (zapas) |
+| 2 201 km2201, Dniepr | 2 220 Emyn Muil | usunięty (zapas) |
+| 2 500 km2500, Droga Królewska Persów | 2 480 Czarna Brama | usunięty; Herodot ma 1 przystanek (Sparta) |
+
+Zostały wszystkie inne pozycje z sekcji 9, w tym DayZ.
+
+### 10.3. Szlak po zmianie (65 przystanków, 86 osiągnięć)
+
+1 Tutorial · 2 Gothic · 5,7 Skyrim · 11,3 PUBG · 21,2 DayZ · 24 Minecraft · 30 S.T.A.L.K.E.R. ·
+44,7 Mass Effect · 53 „Zew krwi” · 63 Valheim · 70 Ghost of Tsushima · 80,5 „W 80 dni dookoła
+świata” · 100 Pokémon GO · **115 Frodo** · 160 Gwiezdne wojny · 200 Diuna · **215 Frodo** ·
+246 Herodot · 318 Halo · **385 Frodo** · 420 Togo (sztafeta do Nome) · 483 Westeros · 583 Via Appia
+(„Quo vadis”) · 640 Szlak św. Olafa · **737 Frodo** · 800 „Marsjanin” · 950 The Last of Us ·
+1 009 Harold Fry · 1 085 Balto (sztafeta do Nome) · **1 190 Frodo** · 1 257 Kerbal (Mun) ·
+**1 285 Frodo** · 1 407 Land’s End – John o’Groats · **1 480 Frodo** · 1 609 „Pierścień” (Niven) ·
+1 697 Szlak Tōkai · 1 770 „Dzika droga” · 1 854 Star Citizen (Daymar) · **1 935 Frodo** ·
+2 000 Via Francigena · **2 105 Frodo** · **2 220 Frodo** · 2 300 Wielka Rafa Koralowa („Gdzie jest
+Nemo”) · **2 360 Frodo** · 2 414 „Rabbit-Proof Fence” · **2 480 Frodo** · **2 540 Frodo** ·
+**2 650 Frodo** · 2 700 „Tracks” · 2 762 „Michał Strogow” (Omsk) · **2 865 Frodo** · 3 058 Pony
+Express · 3 235 „Marsjanin” · 3 490 The Oregon Trail · 3 940 Route 66 · 4 023 „Zew krwi” ·
+4 500 Death Stranding · 4 800 Westeros · 5 523 „Michał Strogow” · 6 128 Diuna · 6 500 Rawicz ·
+7 200 Gwiezdne wojny · 8 047 Świat Dysku · 9 656 „Podróże Guliwera” · 10 000 Pokémon GO.
+
+Na uniwersum: Śródziemie 15; po 2: Pokémon GO, Gwiezdne wojny, Diuna, Westeros, „Marsjanin”,
+sztafeta do Nome 1925, „Zew krwi”, „Michał Strogow”; Kerbal 1; reszta po 1.
+
+Odstępy: do 500 km najwyżej 72 km (246 → 318), do Mordoru najwyżej 150 km (800 → 950). Dziura
+2 500 → 2 700 km z sekcji 9.3 zniknęła. Testy znów pilnują 150 km aż do 2 865 km, jak przed
+sekcją 9.
+
+### 10.4. Id względem v1 (dla HUB)
+
+- Usunięte id z v1: km377, km628, km880, km1019, km1150, km1400, km1530, km1670, km1800,
+  km1940, km2080, km2565, km2715, km3060, km5200.
+- Id z v1 z nowym motywem i tym samym progiem: km2220 (Harrenhal → Zejście z Emyn Muil, już
+  w pierwszej v2), km2300 (Martwe Bagna → Wielka Rafa Koralowa), km2414 (Królewska Przystań →
+  „Rabbit-Proof Fence”).
+- Nowe id (nie było ich w v1): km53, km63, km70, km100, km115, km212, km215, km246, km385,
+  km420, km583, km640, km800, km805, km1009, km1085, km1190, km1285, km1407, km1480, km1609,
+  km1697, km1770, km1854, km1935, km2000, km2105, km2360, km2480, km2540, km2650, km2700,
+  km2762, km3058, km3940, km4023, km5523, km6500, km9656, km10000.
+- Względem pierwszej v2 (sprzed sekcji 9) etapy Froda z przesuniętym progiem mają nowe id:
+  km880 → km1190, km1019 → km1285, km1800 → km2105, km2300 (2 360 km) → km2360,
+  km2565 → km2480, km2715 → km2650. Stare id oznaczały w v1 inny próg, więc nie mogły zostać.
+
+Żadne id nie zmieniło progu względem v1 (test `v2_changes_only_the_trail`). Zapisane id, których
+już nie ma, `evaluate` pomija. Plik dla serwera `docs/definicje-v2-serwer.json` wygenerowany
+ponownie (`tools/definicje_serwer.py`), typy bez zmian.

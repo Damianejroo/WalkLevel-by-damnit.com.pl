@@ -1022,10 +1022,10 @@ mod tests {
         assert!(trail.windows(2).all(|w| w[0] <= w[1]));
         let max_gap = trail
             .windows(2)
-            .filter(|w| w[1] <= 2500.0)
+            .filter(|w| w[1] <= 2865.0)
             .map(|w| w[1] - w[0])
             .fold(0.0, f64::max);
-        assert!(max_gap <= 150.0); // do 2 500 km przystanek co ok. 30 dni przy 5 km dziennie
+        assert!(max_gap <= 150.0); // do Mordoru przystanek co ok. 30 dni przy 5 km dziennie
     }
 
     #[test]

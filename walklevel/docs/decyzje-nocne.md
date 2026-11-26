@@ -17,23 +17,28 @@ Każda decyzja jest odwracalna. Przy każdej jest powód.
 
    **Aktualizacja 26.11 (przebudowa szlaku, docs/analiza-szlak.md sekcja 9):**
    - Rozstrzygnięte: najwyżej 2 przystanki z jednego uniwersum (uwaga Damiana o Kerbalu
-     zastosowana do wszystkich). Kerbal 1 (Mun), Tolkien 2 (Rivendell, Mordor), Westeros 2 (Mur,
-     Z Muru do Dorne, czyli bez fanowskich pomiarów map), Pokémon GO 2 (Srebrny i Platynowy
+     zastosowana do wszystkich). Kerbal 1 (Mun), Tolkien 2 (potem zmienione, patrz niżej),
+     Westeros 2 (Mur, Z Muru do Dorne, czyli bez fanowskich pomiarów map), Pokémon GO 2 (Srebrny i Platynowy
      Jogger), Gwiezdne wojny 2. W miejsce reszty weszło 26 nowych przystanków z 50+ sprawdzonych
-     kandydatów (research w sekcji 9.1). 59 przystanków, 80 osiągnięć.
+     kandydatów (research w sekcji 9.1).
    - Z propozycji Damiana: DayZ wszedł (Chernarus 225 km², 21,2 km z rogu w róg). Dziedzictwo
      Hogwartu i Kingdom Come: Deliverance II odrzucone: twórcy nie podają wymiarów, są tylko
      pomiary poradników (Hogwart ok. 7,65 km²) i „dwa razy większa niż KCD1”.
    - Gothic dostał źródło: „kula o średnicy dwóch kilometrów” to opis wydawcy na Steam.
    - Id przystanków zmienione i usunięte (konto Damiana to jedyne na serwerze). Lista dla HUB
-     w sekcji 9.4. Plik dla serwera: docs/definicje-v2-serwer.json (tools/definicje_serwer.py,
+     w sekcji 10.4. Plik dla serwera: docs/definicje-v2-serwer.json (tools/definicje_serwer.py,
      tylko istniejące typy). Na serwer nic nie wysłano.
-   - Do decyzji: (a) zasada „2 na uniwersum” zabrała Tolkienowi kręgosłup szlaku, czyli drogę
-     Froda etap po etapie. Jeśli Damian woli ją z powrotem, to jest osobna decyzja; (b) dziura
-     200 km między 2 500 a 2 700 km (wcześniej etapy Froda, teraz brak kandydata ze źródłem);
-     (c) sporo prawdziwych tras (Shikoku, Tōkai, Land’s End – John o’Groats, Szlak Mormonów,
-     Via Francigena, szlak św. Olafa) w środku szlaku, bo gier z dystansami 1 000–2 500 km prawie
-     nie ma; (d) Pokémon GO i Skyrim 5,7 km jak wyżej.
+   - **Frodo przywrócony decyzją Damiana** („Tak, przywróć Froda”, analiza-szlak.md sekcja 10):
+     Śródziemie zwolnione z limitu, 15 etapów od Bucklebury do Mordoru. Inne uniwersa stoją
+     między etapami, nadal najwyżej 2 na uniwersum (Kerbal 1). Z nowych pozycji wypadło 7, które
+     wypadały kilka-kilkanaście km od etapu Froda (Oliver Twist, Space Engineers, Shikoku,
+     Calliope, Szlak Mormonów, Dniepr, Droga Królewska Persów). DayZ zostaje. 65 przystanków,
+     86 osiągnięć. Dziura 2 500 → 2 700 km zniknęła; najdłuższy odstęp do Mordoru to 150 km,
+     testy znów pilnują 150 km do 2 865 km. Lista id względem v1 dla HUB w sekcji 10.4, plik dla
+     serwera wygenerowany ponownie.
+   - Do decyzji: (a) w środku szlaku zostało kilka prawdziwych tras (Land’s End – John o’Groats,
+     Tōkai, Via Francigena, szlak św. Olafa), bo gier z dystansami 1 000–2 500 km prawie nie ma;
+     (b) Pokémon GO i Skyrim 5,7 km jak wyżej.
 4. **Dystans i czas ruchu liczone niezależnie od ustawień gry** (dziś zależą od progu „Chód od” -
    przy 2,6 km/h dystans wychodził 27% za mały). Dystans = prędkość × czas, pilnowany licznikiem
    bieżni (±10 m). Liczniki kroków odporne na reset, przepełnienie i pojedyncze błędne odczyty

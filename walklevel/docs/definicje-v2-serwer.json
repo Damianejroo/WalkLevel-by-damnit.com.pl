@@ -194,9 +194,9 @@
    "rz": "rzadkie"
   },
   {
-   "id": "km1127",
+   "id": "km115",
    "typ": "dystans",
-   "prog": 112.7,
+   "prog": 115,
    "rz": "rzadkie"
   },
   {
@@ -212,6 +212,12 @@
    "rz": "rzadkie"
   },
   {
+   "id": "km215",
+   "typ": "dystans",
+   "prog": 215,
+   "rz": "rzadkie"
+  },
+  {
    "id": "km246",
    "typ": "dystans",
    "prog": 246,
@@ -224,9 +230,9 @@
    "rz": "rzadkie"
   },
   {
-   "id": "km377",
+   "id": "km385",
    "typ": "dystans",
-   "prog": 377,
+   "prog": 385,
    "rz": "rzadkie"
   },
   {
@@ -284,9 +290,9 @@
    "rz": "epickie"
   },
   {
-   "id": "km1200",
+   "id": "km1190",
    "typ": "dystans",
-   "prog": 1200,
+   "prog": 1190,
    "rz": "epickie"
   },
   {
@@ -296,15 +302,21 @@
    "rz": "epickie"
   },
   {
+   "id": "km1285",
+   "typ": "dystans",
+   "prog": 1285,
+   "rz": "epickie"
+  },
+  {
    "id": "km1407",
    "typ": "dystans",
    "prog": 1407,
    "rz": "epickie"
   },
   {
-   "id": "km1508",
+   "id": "km1480",
    "typ": "dystans",
-   "prog": 1508,
+   "prog": 1480,
    "rz": "epickie"
   },
   {
@@ -332,21 +344,27 @@
    "rz": "heroiczne"
   },
   {
+   "id": "km1935",
+   "typ": "dystans",
+   "prog": 1935,
+   "rz": "heroiczne"
+  },
+  {
    "id": "km2000",
    "typ": "dystans",
    "prog": 2000,
    "rz": "heroiczne"
   },
   {
-   "id": "km2092",
+   "id": "km2105",
    "typ": "dystans",
-   "prog": 2092,
+   "prog": 2105,
    "rz": "heroiczne"
   },
   {
-   "id": "km2201",
+   "id": "km2220",
    "typ": "dystans",
-   "prog": 2201,
+   "prog": 2220,
    "rz": "heroiczne"
   },
   {
@@ -356,15 +374,33 @@
    "rz": "heroiczne"
   },
   {
+   "id": "km2360",
+   "typ": "dystans",
+   "prog": 2360,
+   "rz": "heroiczne"
+  },
+  {
    "id": "km2414",
    "typ": "dystans",
    "prog": 2414,
    "rz": "heroiczne"
   },
   {
-   "id": "km2500",
+   "id": "km2480",
    "typ": "dystans",
-   "prog": 2500,
+   "prog": 2480,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2540",
+   "typ": "dystans",
+   "prog": 2540,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2650",
+   "typ": "dystans",
+   "prog": 2650,
    "rz": "heroiczne"
   },
   {
