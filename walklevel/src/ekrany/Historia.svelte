@@ -44,6 +44,8 @@
   const wszyscy = $derived(widok?.everyone ?? false);
   const podpis = $derived(wiele ? (czyja === 'all' ? t('historia.czyja.wszyscy') : (osoba?.name ?? '')) : '');
   const sumy = $derived(widok?.totals ?? null);
+  /** Tytuł wykresu z pokazanych danych (nie z wybranego zakresu - do odpowiedzi zostaje stary wykres). */
+  const godzinowy = $derived(widok ? widok.chart.hourly : zakres === 'day');
 
   const ZAKRESY: Array<{ wartosc: K.HistoryRange; napis: string }> = [
     { wartosc: 'day', napis: t('historia.zakres.dzis') },
@@ -84,7 +86,7 @@
       <KafelekStatystyki tytul={t('historia.suma.srednio')} wartosc={sumy ? zJednostka(sumy.avgKmh, 'km/h', 1) : null} />
     </SiatkaKafelkow>
 
-    <Karta tytul={t(zakres === 'day' ? 'historia.wykres.dzien' : 'historia.wykres.dni')}>
+    <Karta tytul={t(godzinowy ? 'historia.wykres.dzien' : 'historia.wykres.dni')}>
       {#if widok}
         <WykresKrokow wykres={widok.chart} {teraz} />
       {:else}
@@ -120,7 +122,9 @@
       </Karta>
     {/if}
 
-    {#if widok}
+    <!-- „Jeszcze nie ma sesji” tylko dla zakresu Wszystko - w krótszym zakresie starsze sesje mogą
+         być (np. Dziś bez sesji po wczorajszym spacerze), a pusty okres opisuje już wykres -->
+    {#if widok && (widok.recent.length || widok.query.range === 'all')}
       <Karta tytul={t('historia.sesje.tytul')}>
         {#if widok.recent.length}
           <ul class="sesje">

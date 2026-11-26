@@ -20,6 +20,7 @@
   import type { HistoryChart } from '../../lib/typy';
   import { t } from '../../lib/teksty';
   import { liczba } from '../../lib/format';
+  import { stan } from '../../lib/stan.svelte';
 
   interface Props {
     wykres: HistoryChart;
@@ -39,6 +40,7 @@
   let pismo = $state(11);
   $effect(() => {
     void szer;
+    void stan.settings.largeText;
     pismo = parseFloat(getComputedStyle(pole).fontSize) || 11;
   });
   /** Przybliżona szerokość napisu osi (bez pomiaru DOM przy każdej zmianie). */
@@ -101,12 +103,13 @@
       const w = dlugosc(k.tekst);
       let x = lewa + slot * (k.i + 0.5);
       let kotwica: Etykieta['kotwica'] = 'middle';
-      // przy krawędziach napis nie wychodzi poza wykres ani pod etykiety osi Y
+      // przy krawędziach napis nie wychodzi poza wykres; z lewej może wejść pod kolumnę osi Y
+      // (etykiety osi Y kończą się na linii 0, wyżej) - inaczej druga etykieta odpadałaby
       if (x + w / 2 > szer) {
         x = szer;
         kotwica = 'end';
-      } else if (x - w / 2 < lewa - 4) {
-        x = lewa - 4;
+      } else if (x - w / 2 < 0) {
+        x = 0;
         kotwica = 'start';
       }
       const srodek = srodekNapisu(x, kotwica, w);
