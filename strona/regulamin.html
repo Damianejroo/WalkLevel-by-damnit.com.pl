@@ -49,7 +49,7 @@ footer { color: var(--muted); font-size: 14px; }
     <li>Na serwer trafia m.in.: e-mail, pseudonim, skrót hasła i sesje chodzenia jednej osoby z aplikacji, z trybem (gra albo trening) i nazwą gry. Nie trafiają imiona osób z aplikacji, waga, wzrost ani wiek. Pełna lista jest niżej, w części „Jakie dane są na serwerze”.</li>
     <li>Nazwę gry zapisuję, żeby Twoje wyniki w podziale na gry były takie same na każdym komputerze. Innym pokazuję ją tylko wtedy, gdy przy profilu gry włączysz „Pokazuj tę grę na koncie online”.</li>
     <li>Z sesji serwer liczy Twój poziom, rangę i osiągnięcia. Widzą je te same osoby, które widzą Twój profil.</li>
-    <li>Ty decydujesz, kto widzi Twoje wyniki. Zakończonych sesji (dat, godzin) nikt poza Tobą nie widzi - inni widzą tylko łączne wyniki. Wyjątek: stan na żywo, jeśli go włączysz.</li>
+    <li>Ty decydujesz, kto widzi Twoje wyniki. Zakończonych sesji (dat, godzin) nikt poza Tobą nie widzi - inni widzą tylko łączne wyniki. Wyjątki: stan na żywo, jeśli go włączysz, i łączne wyniki z bieżącego dnia (z nich widać, czy dziś chodziłeś).</li>
     <li>Jeśli nie zaakceptujesz tej wersji, konto działa dalej jak dotąd: nie zapisuję nazw gier ani trybu, a Twój poziom i osiągnięcia widzisz tylko Ty.</li>
     <li>Konto usuniesz sam w aplikacji. Dane pobierzesz przyciskiem „Pobierz moje dane”.</li>
   </ul>
@@ -98,7 +98,7 @@ footer { color: var(--muted); font-size: 14px; }
 
   <h3>8. Zmiany regulaminu</h3>
   <p>O zmianach informuję w aplikacji. Drobne zmiany (poprawki tekstu, nowe funkcje, które nie zmieniają tego, co dzieje się z Twoimi danymi) obowiązują od razu po ogłoszeniu. Zmiana, która ogranicza Twoje prawa albo dokłada nowe użycie danych, obowiązuje Cię dopiero po zaakceptowaniu jej w aplikacji; jeśli jej nie chcesz, możesz usunąć konto.</p>
-  <p>Ta wersja dokłada nowe użycie danych (gry, tryb sesji, poziomy i osiągnięcia widoczne dla innych, opis dla znajomych, gra i dystans w stanie na żywo). Bez jej akceptacji konto działa jak dotąd: nie zapisuję nazw gier ani trybu sesji, a Twój poziom i osiągnięcia widzisz tylko Ty.</p>
+  <p>Ta wersja dokłada nowe użycie danych (gry, tryb sesji, poziomy i osiągnięcia widoczne dla innych, opis dla znajomych, gra i dystans w stanie na żywo, łączne wyniki z bieżącego dnia). Bez jej akceptacji konto działa jak dotąd: nie zapisuję nazw gier ani trybu sesji, a Twój poziom i osiągnięcia widzisz tylko Ty.</p>
 </section>
 
 <section id="prywatnosc">
@@ -127,7 +127,7 @@ footer { color: var(--muted); font-size: 14px; }
   <h3>Kto co widzi</h3>
   <ul>
     <li><strong>Ty:</strong> wszystkie swoje sesje i wyniki, z nazwami gier i trybem - na każdym komputerze, na którym się zalogujesz.</li>
-    <li><strong>Znajomi:</strong> łączne wyniki (kroki, dystans, czas ruchu) z Twoich sesji z widocznością „Znajomi” i „Wszyscy” (ostatnie 7 dni, ostatnie 30 dni w rankingu miesięcznym i od początku), pseudonim, datę założenia konta, model bieżni, poziom, rangę, liczbę i listę zdobytych osiągnięć, opis, który ustawisz, a gdy włączysz stan na żywo - to, że teraz chodzisz, tempo, dystans bieżącej sesji i grę (tylko z włączonym przełącznikiem). Status „Niewidoczny” ukrywa stan na żywo.</li>
+    <li><strong>Znajomi:</strong> łączne wyniki (kroki, dystans, czas ruchu) z Twoich sesji z widocznością „Znajomi” i „Wszyscy” (bieżący dzień, bieżący tydzień od poniedziałku i bieżący miesiąc - według czasu polskiego - oraz od początku), pseudonim, datę założenia konta, model bieżni, poziom, rangę, liczbę i listę zdobytych osiągnięć, opis, który ustawisz, a gdy włączysz stan na żywo - to, że teraz chodzisz, tempo, dystans bieżącej sesji i grę (tylko z włączonym przełącznikiem). Status „Niewidoczny” ukrywa stan na żywo.</li>
     <li><strong>Pozostali:</strong> tylko łączne wyniki z sesji „Wszyscy” (te same okresy), poziom, rangę i osiągnięcia, i tylko wtedy, gdy Twój profil jest publiczny.</li>
     <li><strong>Ranking poziomów:</strong> pokazuje przy Tobie poziom, rangę i łączny dystans ze wszystkich Twoich wiarygodnych sesji z bieżni - także tych z widocznością „Tylko ja”. Widzą go te same osoby, które widzą Twój profil.</li>
     <li><strong>Wyniki w poszczególnych grach:</strong> widzą osoby wybrane w ustawieniu „Kto widzi wyniki w poszczególnych grach” (Tylko ja, Znajomi albo Wszyscy). Nazwę pokazuję tylko tych gier, przy których włączysz „Pokazuj tę grę na koncie online”; pozostałe gry widać razem jako „inne gry”, bez nazw.</li>
@@ -170,7 +170,7 @@ footer { color: var(--muted); font-size: 14px; }
 </section>
 
 <footer>
-  <p>Obowiązuje prawo polskie, co nie odbiera Ci ochrony, którą daje prawo Twojego kraju. Jeśli któryś punkt okaże się nieważny, pozostałe obowiązują dalej. Ostatnia zmiana: 2026-11-26 (gry i tryb sesji, synchronizacja między komputerami, poziomy i osiągnięcia).</p>
+  <p>Obowiązuje prawo polskie, co nie odbiera Ci ochrony, którą daje prawo Twojego kraju. Jeśli któryś punkt okaże się nieważny, pozostałe obowiązują dalej. Ostatnia zmiana: 2026-11-26 (gry i tryb sesji, synchronizacja między komputerami, poziomy i osiągnięcia, wyniki z bieżącego dnia).</p>
 </footer>
 </main>
 </body>
