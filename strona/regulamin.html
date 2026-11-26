@@ -80,6 +80,7 @@ footer { color: var(--muted); font-size: 14px; }
   <ul>
     <li>Nie podszywaj się pod innych i nie używaj pseudonimu obraźliwego ani z imieniem i nazwiskiem.</li>
     <li>Nazwę gry wpisujesz sam - nie wpisuj w nią danych osobowych.</li>
+    <li>Opis dla znajomych podlega tym samym zasadom co pseudonim.</li>
     <li>Nie oszukuj wyników. Serwer sprawdza, czy każda sesja jest wiarygodna (czy pochodzi z prawdziwej bieżni i czy prędkość, kroki i czas do siebie pasują). Sesja, która nie przejdzie sprawdzenia, zostaje w Twoich prywatnych statystykach, ale nie trafia do rankingów ani do wyników widocznych dla innych.</li>
     <li>Do rankingu poziomów i rankingu od początku liczą się tylko sesje wysłane najwyżej 7 dni po ich zakończeniu. Starsza historia liczy się do Twojego poziomu, ale nie do rankingu.</li>
     <li>Raz zdobytego osiągnięcia nie odbieram, także gdy w nowej wersji aplikacji zmieni się lista osiągnięć. Wyjątek: wynik usunięty za oszustwo.</li>
@@ -97,7 +98,7 @@ footer { color: var(--muted); font-size: 14px; }
 
   <h3>8. Zmiany regulaminu</h3>
   <p>O zmianach informuję w aplikacji. Drobne zmiany (poprawki tekstu, nowe funkcje, które nie zmieniają tego, co dzieje się z Twoimi danymi) obowiązują od razu po ogłoszeniu. Zmiana, która ogranicza Twoje prawa albo dokłada nowe użycie danych, obowiązuje Cię dopiero po zaakceptowaniu jej w aplikacji; jeśli jej nie chcesz, możesz usunąć konto.</p>
-  <p>Ta wersja dokłada nowe użycie danych (gry, tryb sesji, poziomy i osiągnięcia widoczne dla innych). Bez jej akceptacji konto działa jak dotąd: nie zapisuję nazw gier ani trybu sesji, a Twój poziom i osiągnięcia widzisz tylko Ty.</p>
+  <p>Ta wersja dokłada nowe użycie danych (gry, tryb sesji, poziomy i osiągnięcia widoczne dla innych, opis dla znajomych, gra i dystans w stanie na żywo). Bez jej akceptacji konto działa jak dotąd: nie zapisuję nazw gier ani trybu sesji, a Twój poziom i osiągnięcia widzisz tylko Ty.</p>
 </section>
 
 <section id="prywatnosc">
@@ -114,11 +115,11 @@ footer { color: var(--muted); font-size: 14px; }
 
   <h3>Jakie dane są na serwerze</h3>
   <ul>
-    <li><strong>Konto:</strong> e-mail, pseudonim, skrót hasła (samego hasła nie przechowuję), widoczność profilu, data założenia, wersja i czas akceptacji regulaminu, a także kto Cię zaprosił do WalkLevel i kogo zaprosiłeś.</li>
+    <li><strong>Konto:</strong> e-mail, pseudonim, skrót hasła (samego hasła nie przechowuję), widoczność profilu, opis dla znajomych (do 40 znaków), jeśli go ustawisz, data założenia, wersja i czas akceptacji regulaminu, a także kto Cię zaprosił do WalkLevel i kogo zaprosiłeś.</li>
     <li><strong>Sesje chodzenia:</strong> identyfikator sesji, początek i koniec, kroki, dystans, czas ruchu, model i profil bieżni, sterownik (jak aplikacja rozmawia z bieżnią), firmware, wersja aplikacji, źródło (bieżnia albo symulator), widoczność sesji, strefa czasowa, czas ostatniej zmiany, czas, w którym serwer dostał sesję, numer osoby na Twoim komputerze (bez imienia), wynik sprawdzenia, czy sesja jest wiarygodna, tryb sesji (gra albo trening), losowy numer gry (żeby ta sama gra łączyła się na różnych komputerach), nazwa gry (do 40 znaków) i to, czy pokazywać ją innym.</li>
     <li><strong>Usunięte sesje:</strong> gdy usuniesz sesję, przez 90 dni trzymam jej identyfikator i czas usunięcia, żeby zniknęła też z Twoich pozostałych komputerów.</li>
     <li><strong>Poziom i osiągnięcia:</strong> lista zdobytych osiągnięć z czasem zdobycia i wersją listy osiągnięć. Przy koncie zapisuję też ostatnio policzony poziom, punkty doświadczenia (XP) i dystans - to wynik liczenia z sesji, który serwer odtwarza po każdej zmianie.</li>
-    <li><strong>Stan na żywo</strong> (domyślnie wyłączony, tylko gdy go włączysz): bieżąca prędkość, kroki, czas ruchu, identyfikator bieżącej sesji i czas jej rozpoczęcia w jednym nadpisywanym wpisie - bez historii przebiegu. Znajomi przestają go widzieć 30 s po ostatniej aktualizacji; wpis znika po wyłączeniu udostępniania.</li>
+    <li><strong>Stan na żywo</strong> (domyślnie wyłączony, tylko gdy go włączysz): bieżąca prędkość, kroki, czas ruchu, dystans bieżącej sesji, tryb (gra albo trening) i nazwa gry (tylko gry z włączonym „Pokazuj tę grę na koncie online”), identyfikator bieżącej sesji i od kiedy chodzisz - w jednym nadpisywanym wpisie, bez historii przebiegu. Znajomi przestają go widzieć 30 s po ostatniej aktualizacji; wpis znika po wyłączeniu udostępniania.</li>
     <li><strong>Znajomości</strong> i oczekujące zaproszenia do znajomych.</li>
   </ul>
   <p>Nie zbieram: imion osób z aplikacji, wagi, wzrostu, wieku, lokalizacji, kontaktów, plików ani awatarów. Nie ma ciasteczek, narzędzi analitycznych ani logowania przez serwisy zewnętrzne. Kroki i dystans to dane o aktywności - nie wyciągam z nich wniosków o zdrowiu.</p>
@@ -126,7 +127,7 @@ footer { color: var(--muted); font-size: 14px; }
   <h3>Kto co widzi</h3>
   <ul>
     <li><strong>Ty:</strong> wszystkie swoje sesje i wyniki, z nazwami gier i trybem - na każdym komputerze, na którym się zalogujesz.</li>
-    <li><strong>Znajomi:</strong> łączne wyniki (kroki, dystans, czas ruchu) z Twoich sesji z widocznością „Znajomi” i „Wszyscy” (ostatnie 7 dni, ostatnie 30 dni w rankingu miesięcznym i od początku), pseudonim, datę założenia konta, model bieżni, poziom, rangę, liczbę i listę zdobytych osiągnięć, a gdy go włączysz - stan na żywo.</li>
+    <li><strong>Znajomi:</strong> łączne wyniki (kroki, dystans, czas ruchu) z Twoich sesji z widocznością „Znajomi” i „Wszyscy” (ostatnie 7 dni, ostatnie 30 dni w rankingu miesięcznym i od początku), pseudonim, datę założenia konta, model bieżni, poziom, rangę, liczbę i listę zdobytych osiągnięć, opis, który ustawisz, a gdy włączysz stan na żywo - to, że teraz chodzisz, tempo, dystans bieżącej sesji i grę (tylko z włączonym przełącznikiem). Status „Niewidoczny” ukrywa stan na żywo.</li>
     <li><strong>Pozostali:</strong> tylko łączne wyniki z sesji „Wszyscy” (te same okresy), poziom, rangę i osiągnięcia, i tylko wtedy, gdy Twój profil jest publiczny.</li>
     <li><strong>Ranking poziomów:</strong> pokazuje przy Tobie poziom, rangę i łączny dystans ze wszystkich Twoich wiarygodnych sesji z bieżni - także tych z widocznością „Tylko ja”. Widzą go te same osoby, które widzą Twój profil.</li>
     <li><strong>Wyniki w poszczególnych grach:</strong> widzą osoby wybrane w ustawieniu „Kto widzi wyniki w poszczególnych grach” (Tylko ja, Znajomi albo Wszyscy). Nazwę pokazuję tylko tych gier, przy których włączysz „Pokazuj tę grę na koncie online”; pozostałe gry widać razem jako „inne gry”, bez nazw.</li>
