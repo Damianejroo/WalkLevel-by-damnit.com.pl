@@ -1,0 +1,1346 @@
+{
+ "v0": {
+  "schemaVersion": 5,
+  "sessions": [
+   {
+    "id": "b0",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g2",
+    "profileName": "Cyberpunk 2077",
+    "start": 1795194900.0,
+    "end": 1795195500.0,
+    "steps": 7,
+    "distanceKm": 0.0,
+    "activeS": 9.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 1795195500.0,
+    "mode": "gra"
+   },
+   {
+    "id": "a0",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g1",
+    "profileName": "PEAK",
+    "start": 1795194000.0,
+    "end": 1795194600.0,
+    "steps": 1000,
+    "distanceKm": 0.5,
+    "activeS": 600.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 1795194600.0,
+    "mode": "gra"
+   },
+   {
+    "id": "c0",
+    "person": "p2",
+    "personName": "Bartek",
+    "profile": "g3",
+    "profileName": "Żółć ąęś",
+    "start": 1795107600.0,
+    "end": 1795108000.0,
+    "steps": 400,
+    "distanceKm": 0.25,
+    "activeS": 380.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 1795108000.0,
+    "mode": "gra"
+   }
+  ],
+  "tables": {
+   "odrzucone": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "powod",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "ponow_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ],
+   "osiagniecia": [
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     1
+    ],
+    [
+     "id",
+     "TEXT",
+     1,
+     null,
+     2
+    ],
+    [
+     "zdobyte_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "wersja",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "poziom_osoby": [
+    [
+     "osoba",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "poziom",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "sesje": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "osoba_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "start_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "koniec_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "kroki",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "dystans_km",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "ruch_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "bieznia_model",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "sterownik",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "bieznia_profil",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "firmware",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "wersja_aplikacji",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "zrodlo",
+     "TEXT",
+     1,
+     "'bieznia'",
+     0
+    ],
+    [
+     "widocznosc",
+     "TEXT",
+     1,
+     "'prywatna'",
+     0
+    ],
+    [
+     "strefa_min",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "tryb",
+     "TEXT",
+     1,
+     "'gra'",
+     0
+    ]
+   ],
+   "ukryte_online": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ]
+   ],
+   "wyslane": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ]
+  },
+  "data": {
+   "wyslane": [],
+   "odrzucone": [],
+   "ukryte_online": [],
+   "osiagniecia": [],
+   "poziom_osoby": []
+  },
+  "version": [
+   3,
+   1407,
+   1795195500.0
+  ]
+ },
+ "v2": {
+  "schemaVersion": 5,
+  "sessions": [
+   {
+    "id": "bv2",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g2",
+    "profileName": "Elden Ring",
+    "start": 1795194900.0,
+    "end": 1795195500.0,
+    "steps": 300,
+    "distanceKm": 0.2,
+    "activeS": 500.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "0.4.0",
+    "source": "symulator",
+    "visibility": "znajomi",
+    "tzOffsetMin": 0,
+    "updated": 1795195505.0,
+    "mode": "gra"
+   },
+   {
+    "id": "av2",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g1",
+    "profileName": "PEAK",
+    "start": 1795194000.0,
+    "end": 1795194600.0,
+    "steps": 1000,
+    "distanceKm": 0.5,
+    "activeS": 600.0,
+    "deviceModel": "KS-F0",
+    "driver": "kingsmith",
+    "deviceProfile": "walkingpad",
+    "firmware": "1.2.3",
+    "appVersion": "0.4.0",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 60,
+    "updated": 1795194605.0,
+    "mode": "gra"
+   },
+   {
+    "id": "cv2",
+    "person": "p2",
+    "personName": "Bartek",
+    "profile": "g3",
+    "profileName": "PEAK",
+    "start": 1795107600.0,
+    "end": 1795108000.0,
+    "steps": 400,
+    "distanceKm": 0.25,
+    "activeS": 380.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 1795108005.0,
+    "mode": "gra"
+   }
+  ],
+  "tables": {
+   "odrzucone": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "powod",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "ponow_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ],
+   "osiagniecia": [
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     1
+    ],
+    [
+     "id",
+     "TEXT",
+     1,
+     null,
+     2
+    ],
+    [
+     "zdobyte_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "wersja",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "poziom_osoby": [
+    [
+     "osoba",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "poziom",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "sesje": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "osoba_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "start_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "koniec_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "kroki",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "dystans_km",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "ruch_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "bieznia_model",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "sterownik",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "bieznia_profil",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "firmware",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "wersja_aplikacji",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "zrodlo",
+     "TEXT",
+     1,
+     "'bieznia'",
+     0
+    ],
+    [
+     "widocznosc",
+     "TEXT",
+     1,
+     "'prywatna'",
+     0
+    ],
+    [
+     "strefa_min",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "tryb",
+     "TEXT",
+     1,
+     "'gra'",
+     0
+    ]
+   ],
+   "ukryte_online": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ]
+   ],
+   "wyslane": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ]
+  },
+  "data": {
+   "wyslane": [],
+   "odrzucone": [],
+   "ukryte_online": [],
+   "osiagniecia": [],
+   "poziom_osoby": []
+  },
+  "version": [
+   3,
+   1700,
+   1795195500.0
+  ]
+ },
+ "v3": {
+  "schemaVersion": 5,
+  "sessions": [
+   {
+    "id": "bv3",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g2",
+    "profileName": "Elden Ring",
+    "start": 1795194900.0,
+    "end": 1795195500.0,
+    "steps": 300,
+    "distanceKm": 0.2,
+    "activeS": 500.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "0.4.0",
+    "source": "symulator",
+    "visibility": "znajomi",
+    "tzOffsetMin": 0,
+    "updated": 1795195505.0,
+    "mode": "gra"
+   },
+   {
+    "id": "av3",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g1",
+    "profileName": "PEAK",
+    "start": 1795194000.0,
+    "end": 1795194600.0,
+    "steps": 1000,
+    "distanceKm": 0.5,
+    "activeS": 600.0,
+    "deviceModel": "KS-F0",
+    "driver": "kingsmith",
+    "deviceProfile": "walkingpad",
+    "firmware": "1.2.3",
+    "appVersion": "0.4.0",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 60,
+    "updated": 1795194605.0,
+    "mode": "gra"
+   },
+   {
+    "id": "cv3",
+    "person": "p2",
+    "personName": "Bartek",
+    "profile": "g3",
+    "profileName": "PEAK",
+    "start": 1795107600.0,
+    "end": 1795108000.0,
+    "steps": 400,
+    "distanceKm": 0.25,
+    "activeS": 380.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 1795108005.0,
+    "mode": "gra"
+   }
+  ],
+  "tables": {
+   "odrzucone": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "powod",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "ponow_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ],
+   "osiagniecia": [
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     1
+    ],
+    [
+     "id",
+     "TEXT",
+     1,
+     null,
+     2
+    ],
+    [
+     "zdobyte_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "wersja",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "poziom_osoby": [
+    [
+     "osoba",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "poziom",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "sesje": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "osoba_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "start_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "koniec_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "kroki",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "dystans_km",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "ruch_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "bieznia_model",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "sterownik",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "bieznia_profil",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "firmware",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "wersja_aplikacji",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "zrodlo",
+     "TEXT",
+     1,
+     "'bieznia'",
+     0
+    ],
+    [
+     "widocznosc",
+     "TEXT",
+     1,
+     "'prywatna'",
+     0
+    ],
+    [
+     "strefa_min",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "tryb",
+     "TEXT",
+     1,
+     "'gra'",
+     0
+    ]
+   ],
+   "ukryte_online": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ]
+   ],
+   "wyslane": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ]
+  },
+  "data": {
+   "wyslane": [
+    [
+     "av3",
+     1795194605.0
+    ]
+   ],
+   "odrzucone": [],
+   "ukryte_online": [
+    "bv3"
+   ],
+   "osiagniecia": [],
+   "poziom_osoby": []
+  },
+  "version": [
+   3,
+   1700,
+   1795195500.0
+  ]
+ },
+ "v4": {
+  "schemaVersion": 5,
+  "sessions": [
+   {
+    "id": "bv4",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g2",
+    "profileName": "Elden Ring",
+    "start": 1795194900.0,
+    "end": 1795195500.0,
+    "steps": 300,
+    "distanceKm": 0.2,
+    "activeS": 500.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "0.4.0",
+    "source": "symulator",
+    "visibility": "znajomi",
+    "tzOffsetMin": 0,
+    "updated": 1795195505.0,
+    "mode": "gra"
+   },
+   {
+    "id": "av4",
+    "person": "p1",
+    "personName": "Ala",
+    "profile": "g1",
+    "profileName": "PEAK",
+    "start": 1795194000.0,
+    "end": 1795194600.0,
+    "steps": 1000,
+    "distanceKm": 0.5,
+    "activeS": 600.0,
+    "deviceModel": "KS-F0",
+    "driver": "kingsmith",
+    "deviceProfile": "walkingpad",
+    "firmware": "1.2.3",
+    "appVersion": "0.4.0",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 60,
+    "updated": 1795194605.0,
+    "mode": "gra"
+   },
+   {
+    "id": "cv4",
+    "person": "p2",
+    "personName": "Bartek",
+    "profile": "g3",
+    "profileName": "PEAK",
+    "start": 1795107600.0,
+    "end": 1795108000.0,
+    "steps": 400,
+    "distanceKm": 0.25,
+    "activeS": 380.0,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 1795108005.0,
+    "mode": "trening"
+   }
+  ],
+  "tables": {
+   "odrzucone": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "powod",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "ponow_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ],
+   "osiagniecia": [
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     1
+    ],
+    [
+     "id",
+     "TEXT",
+     1,
+     null,
+     2
+    ],
+    [
+     "zdobyte_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "wersja",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "poziom_osoby": [
+    [
+     "osoba",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "poziom",
+     "INTEGER",
+     1,
+     null,
+     0
+    ]
+   ],
+   "sesje": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "osoba",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "osoba_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "profil_nazwa",
+     "TEXT",
+     1,
+     null,
+     0
+    ],
+    [
+     "start_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "koniec_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ],
+    [
+     "kroki",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "dystans_km",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "ruch_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "bieznia_model",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "sterownik",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "bieznia_profil",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "firmware",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "wersja_aplikacji",
+     "TEXT",
+     1,
+     "''",
+     0
+    ],
+    [
+     "zrodlo",
+     "TEXT",
+     1,
+     "'bieznia'",
+     0
+    ],
+    [
+     "widocznosc",
+     "TEXT",
+     1,
+     "'prywatna'",
+     0
+    ],
+    [
+     "strefa_min",
+     "INTEGER",
+     1,
+     "0",
+     0
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     "0",
+     0
+    ],
+    [
+     "tryb",
+     "TEXT",
+     1,
+     "'gra'",
+     0
+    ]
+   ],
+   "ukryte_online": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ]
+   ],
+   "wyslane": [
+    [
+     "id",
+     "TEXT",
+     0,
+     null,
+     1
+    ],
+    [
+     "zmieniono_utc_s",
+     "REAL",
+     1,
+     null,
+     0
+    ]
+   ]
+  },
+  "data": {
+   "wyslane": [
+    [
+     "av4",
+     1795194605.0
+    ]
+   ],
+   "odrzucone": [],
+   "ukryte_online": [
+    "bv4"
+   ],
+   "osiagniecia": [
+    [
+     "p1",
+     "1000-krokow",
+     1795194020.0,
+     1
+    ],
+    [
+     "p1",
+     "pierwsze-kroki",
+     1795194010.0,
+     1
+    ]
+   ],
+   "poziom_osoby": [
+    [
+     "p1",
+     3
+    ]
+   ]
+  },
+  "version": [
+   3,
+   1700,
+   1795195500.0
+  ]
+ }
+}
