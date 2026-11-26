@@ -99,6 +99,10 @@ ul, ol { padding: 0; list-style: none; }
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  /* overflow: hidden przycina do wysokości linii (1,25), a ogonki g/y/ę w Segoe UI sięgają niżej -
+     obszar przycinania większy o zapas, układ bez zmian (ujemny margines go oddaje) */
+  padding-block: 0.12em;
+  margin-block: -0.12em;
 }
 
 .wyciszony { color: var(--text-2); }
