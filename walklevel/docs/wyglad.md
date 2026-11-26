@@ -416,8 +416,8 @@ U+202F (`12 345`), jednostka po niełamliwej spacji U+00A0 (`2,5 km/h`) – licz
 | Wciśnięcie | `--t-press` 60 | liniowa | kolor tła |
 | Gałka przełącznika | `--t-switch` 110 | `--ease-enter` | `transform: translateX` |
 | Zmiana motywu / koloru profilu | `--t-theme` 120 | `--ease-enter` | przenikanie zrzutów (View Transitions, `opacity`) |
-| Wejście strony | `--t-in` 140 | `--ease-enter` | `opacity` 0→1, `transform: translateX(8px→0)` (wstecz: -8px) |
-| Wyjście strony | `--t-out` 100 | `--ease-exit` | `opacity` 1→0 |
+| Wejście ekranu | 100 | `--ease-enter` | `opacity` 0,5→1, `transform: translateX(4px→0)` (wstecz: -4px) |
+| Wyjście ekranu | 0 | – | poprzedni ekran znika od razu (przenikanie dwóch ekranów wyglądało jak lag) |
 | Podświetlenie segmentowanego | `--t-slide` 140 | `--ease-smooth` | `transform: translate` wskaźnika |
 | Rozwinięcie kategorii / zmiana karty trybu | `--t-morph` 160 | `--ease-smooth` | treść: `opacity` + `translateY(-4px→0)`; elementy pod spodem: FLIP `translateY` |
 | Strzałka kategorii | `--t-switch` 110 | `--ease-smooth` | `transform: rotate(0→90deg)` |

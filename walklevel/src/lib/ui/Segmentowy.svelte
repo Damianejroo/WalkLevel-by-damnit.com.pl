@@ -30,8 +30,12 @@
   const k = $derived(kolumny || ile);
   const indeks = $derived(Math.max(0, opcje.findIndex((o) => o.wartosc === wartosc)));
 
+  // Wskaźnik jedzie tylko po wyborze użytkownika. Zmiana układu (ukryta zakładka ma szerokość 0,
+  // przeliczenie kolumn, pierwsze wyświetlenie) ustawia go od razu - wcześniej „przypływał” z boku.
+  let ruch = $state(false);
+
   function dopasuj() {
-    if (!tor) return;
+    if (!tor || tor.clientWidth === 0) return;
     const napisy = [...tor.querySelectorAll<HTMLElement>('.napis')];
     const potrzeba = Math.max(0, ...napisy.map((n) => n.scrollWidth)) + 20 + (opcje.some((o) => o.aktywny) ? 12 : 0);
     const szer = tor.clientWidth - 6;
@@ -56,6 +60,7 @@
     if (disabled) return;
     const o = opcje[i];
     if (!o || o.wartosc === wartosc) return;
+    ruch = true;
     wartosc = o.wartosc;
     onzmiana?.(o.wartosc);
   }
@@ -80,7 +85,9 @@
 >
   <span
     class="wskaznik"
+    class:ruch
     aria-hidden="true"
+    ontransitionend={() => (ruch = false)}
     style:transform="translate(calc({indeks % k} * (100% + 2px)), calc({Math.floor(indeks / k)} * (100% + 2px)))"
   ></span>
   {#each opcje as o, i (o.wartosc)}
@@ -122,9 +129,9 @@
     border: 1px solid var(--sel-border);
     border-radius: var(--r-seg);
     background: var(--sel-bg);
-    transition: transform var(--t-slide) var(--ease-smooth);
     pointer-events: none;
   }
+  .wskaznik.ruch { transition: transform var(--t-slide) var(--ease-smooth); }
   .segment {
     position: relative;
     display: flex;

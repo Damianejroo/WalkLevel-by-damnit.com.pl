@@ -47,7 +47,7 @@
       wychodzi = biezaca;
       biezaca = nowa;
       clearTimeout(zegarWyjscia);
-      zegarWyjscia = setTimeout(() => (wychodzi = null), 180);
+      zegarWyjscia = setTimeout(() => (wychodzi = null), 120); // po --t-out (100 ms)
     });
   });
 
@@ -87,12 +87,15 @@
     min-width: 0;
     min-height: 0;
   }
-  .ekran[data-stan='aktywny'] { animation: wl-wejscie var(--t-in) var(--ease-enter); }
-  .ekran[data-stan='wychodzi'] {
-    animation: wl-wyjscie var(--t-out) var(--ease-exit) forwards;
-    pointer-events: none;
-  }
+  /* 26.11: przenikanie dwóch ekranów (stary wygasa, nowy wjeżdża od zera) wyglądało jak lag -
+     stary znika od razu, nowy startuje od połowy jasności i dojeżdża w 100 ms */
+  .ekran[data-stan='aktywny'] { animation: wejscie-ekranu 100ms var(--ease-enter); }
+  .ekran[data-stan='wychodzi'],
   .ekran[data-stan='ukryty'] { visibility: hidden; }
+  @keyframes wejscie-ekranu {
+    from { opacity: 0.5; transform: translateX(calc(var(--wl-przesun, 8px) / 2)); }
+    to { opacity: 1; transform: none; }
+  }
   .blad-startu {
     align-self: center;
     justify-self: center;

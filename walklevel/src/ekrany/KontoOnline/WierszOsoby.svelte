@@ -21,8 +21,11 @@
     opis?: Snippet;
     koniec?: Snippet;
   }
-  let { nazwa, poziom, miejsce, ja = false, onotworz, opis, koniec }: Props = $props();
+  let { nazwa, poziom: zSerwera, miejsce, ja = false, onotworz, opis, koniec }: Props = $props();
 
+  // serwer nie zawsze odsyła poziom (np. we własnym wierszu rankingu kroków) - własny bierzemy
+  // z aplikacji, jak w 0.5.x; bez tego zostawała pusta odznaka
+  const poziom = $derived(zSerwera ?? (ja ? (stan.levels?.level ?? null) : null));
   const ranga = $derived(poziom === null ? null : rangaPoziomu(stan.statics.definitions, poziom));
   const rzadkosc = $derived(rzadkoscPoziomu(poziom ?? 1));
 </script>

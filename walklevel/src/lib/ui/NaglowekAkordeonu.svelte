@@ -1,3 +1,12 @@
+<script lang="ts" module>
+  /** Zapas na dole kontenera przewijania po zwinięciu kategorii (wspólny dla nagłówków). */
+  interface Zapas { px: number; dolCss: number; tresc: HTMLElement; przewin: () => void }
+  const zapasy = new WeakMap<HTMLElement, Zapas>();
+  function ustawZapas(z: Zapas) {
+    z.tresc.style.paddingBottom = z.px ? `${z.dolCss + z.px}px` : '';
+  }
+</script>
+
 <script lang="ts">
   // Nagłówek akordeonu - kategoria Ustawień (docs/wyglad.md 8.5): stała wysokość 64, tytuł i opis
   // po jednej linii z wielokropkiem, wartość z prawej ustępuje miejsca pierwsza (< 440 px ukryta).
@@ -20,17 +29,68 @@
   const id = $props.id();
   let korzen: HTMLElement;
 
+  /** Najbliższy przewijany przodek (ekran Ustawień). */
+  function przewijak(el: HTMLElement): HTMLElement | null {
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      const o = getComputedStyle(p).overflowY;
+      if ((o === 'auto' || o === 'scroll') && p.scrollHeight > p.clientHeight) return p;
+    }
+    return null;
+  }
+
+  /**
+   * Zwinięcie skraca stronę: gdy była przewinięta nisko, przeglądarka przycina przewinięcie
+   * i nagłówek uciekał spod kursora. Dopełnienie na dole trzyma go w miejscu; znika samo, gdy
+   * użytkownik przewija w górę (i przy kolejnym przełączeniu).
+   */
+  function trzymajNaMiejscu(gora: number, okno: HTMLElement | null) {
+    const tresc = okno?.firstElementChild as HTMLElement | null | undefined;
+    const ucieklo = korzen.getBoundingClientRect().top - gora;
+    if (!okno || !tresc || ucieklo <= 0.5) return;
+    let z = zapasy.get(okno);
+    if (!z) {
+      // jeden nasłuch na kontener: zapas maleje, gdy użytkownik przewija w górę
+      const nowy: Zapas = { px: 0, dolCss: parseFloat(getComputedStyle(tresc).paddingBottom) || 0, tresc, przewin: () => {} };
+      nowy.przewin = () => {
+        // tyle zapasu, ile trzeba dla obecnego przewinięcia - maleje przy przewijaniu w górę
+        const tresci = tresc.offsetHeight - nowy.px;
+        const trzeba = Math.max(0, okno.scrollTop + okno.clientHeight - Math.max(tresci, okno.clientHeight));
+        if (trzeba >= nowy.px) return;
+        nowy.px = trzeba;
+        ustawZapas(nowy);
+        if (!nowy.px) {
+          okno.removeEventListener('scroll', nowy.przewin);
+          zapasy.delete(okno);
+        }
+      };
+      okno.addEventListener('scroll', nowy.przewin, { passive: true });
+      zapasy.set(okno, nowy);
+      z = nowy;
+    }
+    // przewinięcie, przy którym nagłówek wraca na miejsce, i ile treści do niego brakuje
+    const cel = okno.scrollTop + ucieklo;
+    // (wysokość treści, nie scrollHeight - ten nie spada poniżej wysokości okna)
+    z.px += Math.max(0, cel + okno.clientHeight - tresc.offsetHeight);
+    ustawZapas(z);
+    okno.scrollTop = cel;
+  }
+
   async function przelacz() {
     const rodzenstwo = korzen.parentElement ? [...korzen.parentElement.children] : [];
     const nizej = rodzenstwo.slice(rodzenstwo.indexOf(korzen) + 1);
     const przed = nizej.map((el) => el.getBoundingClientRect().top);
+    const okno = przewijak(korzen);
+    const gora = korzen.getBoundingClientRect().top;
     otwarty = !otwarty;
     onprzelacz?.(otwarty);
     await tick();
+    if (!otwarty) trzymajNaMiejscu(gora, okno);
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const styl = getComputedStyle(document.documentElement);
     const czas = parseFloat(styl.getPropertyValue(otwarty ? '--t-in' : '--t-out')) || 0;
-    const krzywa = styl.getPropertyValue(otwarty ? '--ease-enter' : '--ease-exit').trim() || 'ease';
+    // elementy niżej zawsze ruszają od razu (krzywa wyjścia startowała powoli i pod nagłówkiem
+    // przez chwilę było pusto)
+    const krzywa = styl.getPropertyValue('--ease-enter').trim() || 'ease';
     nizej.forEach((el, i) => {
       const roznica = przed[i] - el.getBoundingClientRect().top;
       if (roznica) el.animate([{ transform: `translateY(${roznica}px)` }, { transform: 'none' }], { duration: czas, easing: krzywa });
