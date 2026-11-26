@@ -345,8 +345,14 @@ fn v2_keeps_every_v1_id_and_the_rest_of_the_file() {
 }
 
 #[test]
-fn v2_trail_rarity_grows_with_km_and_fits_the_bounds() {
-    let d = Definitions::builtin().expect("wbudowane definicje");
+fn trail_rarity_grows_with_km_and_fits_the_bounds() {
+    // analiza-szlak.md, sekcja 1: progi spełnia i v1, i v2
+    // odstęp do Mordoru: v1 151 km (test 0.5.x dopuszczał 152), v2 najwyżej 150 (sekcja 5)
+    check_trail_rules(&v1(), 152.0);
+    check_trail_rules(Definitions::builtin().expect("wbudowane definicje"), 150.0);
+}
+
+fn check_trail_rules(d: &Definitions, gap: f64) {
     // górna granica km rzadkości przy 5 km dziennie: 14 / 91 / 365 / 912 dni, dalej bez granicy
     let bound = |rarity: &str| match rarity {
         "pospolite" => Some(70.0),
@@ -360,7 +366,8 @@ fn v2_trail_rarity_grows_with_km_and_fits_the_bounds() {
     for w in trail.windows(2) {
         assert!(
             tier(&w[0].rarity) <= tier(&w[1].rarity),
-            "rzadkość maleje: {} -> {}",
+            "v{}: rzadkość maleje: {} -> {}",
+            d.version,
             w[0].id,
             w[1].id
         );
@@ -370,12 +377,24 @@ fn v2_trail_rarity_grows_with_km_and_fits_the_bounds() {
         let t = tier(&a.rarity);
         if t + 1 < d.rarities.len() {
             let max = bound(&a.rarity).expect("granica rzadkości");
-            assert!(km <= max, "{} ({km} km) za daleko na {}", a.id, a.rarity);
+            assert!(
+                km <= max,
+                "v{}: {} ({km} km) za daleko na {}",
+                d.version,
+                a.id,
+                a.rarity
+            );
         }
         if t > 0 {
             // poprzednia rzadkość kończy się przed tym przystankiem
             let min = bound(&d.rarities[t - 1]).expect("granica rzadkości");
-            assert!(km > min, "{} ({km} km) za blisko na {}", a.id, a.rarity);
+            assert!(
+                km > min,
+                "v{}: {} ({km} km) za blisko na {}",
+                d.version,
+                a.id,
+                a.rarity
+            );
         }
     }
     let km: Vec<f64> = trail.iter().filter_map(|a| a.km()).collect();
@@ -384,7 +403,11 @@ fn v2_trail_rarity_grows_with_km_and_fits_the_bounds() {
         .filter(|w| w[1] <= 2865.0)
         .map(|w| w[1] - w[0])
         .fold(0.0, f64::max);
-    assert!(max_gap <= 150.0, "odstęp {max_gap} km do Mordoru");
+    assert!(
+        max_gap <= gap,
+        "v{}: odstęp {max_gap} km do Mordoru",
+        d.version
+    );
     // Skyrim nadal wypada na 6. km, Erangel na 12.
     let at = |id: &str| d.by_id(id).and_then(|a| a.km()).expect("przystanek");
     assert!(5.0 < at("km57") && at("km57") <= 6.0);

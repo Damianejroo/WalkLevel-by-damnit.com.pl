@@ -867,8 +867,10 @@ impl PopupQueue<'_> {
 ///
 /// Kolejność od najstarszego (`earned_at`, brak czasu jak 0 w 0.5.x; przy równym czasie
 /// kolejność definicji). Do `max` nowych - każde osobno. Więcej - najwyżej `max` popupów
-/// razem: `max - 1` najrzadszych osobno (przy równej rzadkości starsze), reszta w jednym
-/// zbiorczym. Popup awansu dokłada wywołujący, poza tym limitem.
+/// razem: `max - 1` najrzadszych osobno, reszta w jednym zbiorczym. Przy równej rzadkości
+/// osobno idzie nowsze (przy równym czasie wcześniejsze w definicjach) - jak `max(...)`
+/// w `show_new` z 0.5.x, więc `max` 2 daje dokładnie popupy 0.5.x. `max` 0 działa jak 1
+/// (sam zbiorczy). Popup awansu dokłada wywołujący, poza tym limitem.
 pub fn popup_queue<'a>(
     defs: &Definitions,
     new: impl IntoIterator<Item = &'a Progress>,
@@ -891,16 +893,22 @@ pub fn popup_queue<'a>(
             grouped: Vec::new(),
         };
     }
-    // nieznana rzadkość liczy się jak najczęstsza
+    // nieznana rzadkość (0.5.x by tu padło) - poniżej najczęstszej
     let tier = |p: &Progress| {
         defs.rarities
             .iter()
             .position(|r| *r == p.achievement.rarity)
             .map_or(0, |i| i + 1)
     };
+    let time = |i: usize| all[i].earned_at.unwrap_or(0.0);
     let mut by_rarity: Vec<usize> = (0..all.len()).collect();
-    // sortowanie stabilne: przy równej rzadkości zostaje kolejność od najstarszego
-    by_rarity.sort_by_key(|&i| std::cmp::Reverse(tier(all[i])));
+    // najrzadsze, potem nowsze; przy równym czasie indeks (= kolejność definicji) rośnie
+    by_rarity.sort_by(|&i, &j| {
+        tier(all[j])
+            .cmp(&tier(all[i]))
+            .then_with(|| cmp_f64(time(j), time(i)))
+            .then_with(|| i.cmp(&j))
+    });
     let mut picked = vec![false; all.len()];
     for &i in by_rarity.iter().take(max.saturating_sub(1)) {
         picked[i] = true;
@@ -1271,9 +1279,9 @@ mod tests {
             got("km1", Some(T0 + 1.0)),
         ];
         let q = popup_queue(defs(), &list, MAX_POPUPS_AT_ONCE);
-        // 3 najrzadsze (przy równej rzadkości starsze) osobno, od najstarszego
-        assert_eq!(ids(&q.single), ["km1", "km160", "km483"]);
-        assert_eq!(ids(&q.grouped), ["km2", "km30"]);
+        // 3 najrzadsze (przy równej rzadkości nowsze) osobno, od najstarszego
+        assert_eq!(ids(&q.single), ["km160", "km483", "km30"]);
+        assert_eq!(ids(&q.grouped), ["km1", "km2"]);
         assert_eq!(q.popups(), MAX_POPUPS_AT_ONCE);
         // limit 2 - jak 0.5.x: najrzadsze i zbiorczy
         let q2 = popup_queue(defs(), &list, 2);
@@ -1293,8 +1301,49 @@ mod tests {
         odd.achievement.rarity = "nowa".into();
         let list = [odd, got("km1", Some(T0 + 2.0)), got("km2", Some(T0 + 3.0))];
         let q = popup_queue(defs(), &list, 2);
+        assert_eq!(ids(&q.single), ["km2"]);
+        assert_eq!(ids(&q.grouped), ["km160", "km1"]);
+    }
+
+    #[test]
+    fn limit_two_picks_the_same_popup_as_0_5() {
+        // 0.5.x (show_new): > 4 nowe - max(new, key=rzadkość) po liście od najnowszego,
+        // czyli pierwsze najrzadsze od najnowszego, i zbiorczy „+(n-1) kolejnych”
+        let walks: Vec<Walk> = [12.0, 13.0, 0.5]
+            .into_iter()
+            .enumerate()
+            .map(|(d, km)| Walk {
+                end: T0 + d as f64 * DAY + 3.0 * 3600.0,
+                ..walk_full(d as i64, km, 0, "g1", "gra", 0)
+            })
+            .collect();
+        let s = evaluate(defs(), &walks, &at(T0 + 3.0 * DAY));
+        let new = s.earned();
+        assert!(new.len() > MAX_POPUPS_AT_ONCE, "{:?}", ids(&new));
+        let tier = |p: &Progress| {
+            defs()
+                .rarities
+                .iter()
+                .position(|r| *r == p.achievement.rarity)
+        };
+        let mut best = new[0];
+        for &p in &new {
+            if tier(p) > tier(best) {
+                best = p;
+            }
+        }
+        let q = popup_queue(defs(), new.iter().copied(), 2);
+        assert_eq!(ids(&q.single), ids(&[best]));
+        assert_eq!(q.grouped.len(), new.len() - 1);
+        // równe rzadkości i czasy: wygrywa wcześniejsze w definicjach (jak w 0.5.x)
+        let same = [
+            got("km2", Some(T0)),
+            got("km1", Some(T0)),
+            got("km57", Some(T0)),
+        ];
+        let q = popup_queue(defs(), &same, 2);
         assert_eq!(ids(&q.single), ["km1"]);
-        assert_eq!(ids(&q.grouped), ["km160", "km2"]);
+        assert_eq!(ids(&q.grouped), ["km2", "km57"]);
     }
 
     #[test]

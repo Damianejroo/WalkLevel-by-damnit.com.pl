@@ -474,7 +474,6 @@ def v2_cases() -> list[dict[str, Any]]:
     return out
 
 
-
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     cases: list[dict[str, Any]] = [
