@@ -1563,3 +1563,9 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 | `osoba.edycja.konto_brak` | (nowy) | Ta osoba nie ma konta online. Bez konta wszystko działa na tym komputerze. | |
 | `osoba.edycja.konto_wybierz` | (nowy) | Kontem online zarządzasz, gdy ta osoba jest wybrana. | Edycja osoby, która nie jest teraz wybrana. |
 | `osoba.edycja.wybierz` | (nowy) | Wybierz tę osobę | Przełącza aplikację na tę osobę. |
+## Dodatki: okna
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `dymek.podpowiedz_wl` | (nowy) | Sterowanie włączone\nKliknij, żeby wyłączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Gotowa forma `dymek.podpowiedz` dla włączonego sterowania (`{wyłączyć/włączyć}` nie jest zmienną słownika). |
+| `dymek.podpowiedz_wyl` | (nowy) | Sterowanie wyłączone\nKliknij, żeby włączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Jw. dla wyłączonego sterowania. |

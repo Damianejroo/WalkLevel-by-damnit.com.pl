@@ -5,6 +5,7 @@
 // Scenariusze z adresu: ?stan=<nazwa> (SCENARIUSZE niżej) oraz pojedyncze nadpisania:
 //   tryb=keyboard|gamepad|treadmill|training   bieznia=<StanBiezni>   konto=0|1   historia=0|1
 //   wlaczone=0|1   motyw=jasny|ciemny   tekst=duzy
+//   poziom=1..4 (poziom Treningu)   demo=1 (okno popup: przykładowe powiadomienia w kolejce)
 // Przykład: /?stan=trening&ekran=main&szer=420&motyw=jasny
 import type * as K from './typy';
 import type { Silnik } from './api';
@@ -238,6 +239,9 @@ export function utworzAtrape(): Silnik {
     profileColor: aktywnyProfil()?.color ?? 'Mięta',
     personColor: aktywnaOsoba()?.color ?? 'Mięta',
   };
+  // ?poziom=1..4 - poziom Treningu na starcie (np. podgląd przycisku na ekranie w kolorze biegu)
+  const poziomStartowy = Number(p.get('poziom'));
+  if (poziomStartowy >= 1 && poziomStartowy <= 4) settings.trainingLevel = (poziomStartowy - 1) as 0 | 1 | 2 | 3;
 
   // ---------------- bieżnia ----------------
   const model = dlugie ? 'WalkingPad X21 (KS-ST-X21C)' : 'KingSmith X21';
@@ -685,6 +689,85 @@ export function utworzAtrape(): Silnik {
     };
     emituj('wl:telemetria', tel);
   }, 100);
+
+  // ---------------- powiadomienia nad grą (okno popup) ----------------
+  // Kolejka jak w rdzeniu (kontrakt 7.2): najwyżej 3 widoczne, najnowsze na końcu, każde 6000 ms,
+  // potem leaving: true na 220 ms i wypada; reszta czeka. Podgląd: /popup.html?demo=1 - trzy
+  // powiadomienia od razu, potem co 2,5 s kolejne z listy przykładów (&stan=dlugie - najdłuższe nazwy).
+  type TrescPopupu = Omit<K.PopupItem, 'id' | 'leaving'>;
+  const KOLOR_RZADKOSCI: Record<K.Rarity, string> = {
+    pospolite: '#9aa5b1', rzadkie: '#4aa3ff', epickie: '#b26bff', heroiczne: '#ff5470', legendarne: '#ffa133',
+  };
+  const rzadkoscPoziomu = (n: number): K.Rarity => (n < 10 ? 'pospolite' : n < 25 ? 'rzadkie' : n < 50 ? 'epickie' : n < 80 ? 'heroiczne' : 'legendarne');
+  const popupy: K.PopupItem[] = [];
+  const czekajace: TrescPopupu[] = [];
+  let numerPopupu = 0;
+  const wyslijPopupy = () => emituj('wl:popupy', { items: popupy } satisfies K.PopupsView);
+  function pompujPopupy() {
+    while (czekajace.length && popupy.length < 3) {
+      const it: K.PopupItem = { ...czekajace.shift()!, id: ++numerPopupu, leaving: false };
+      popupy.push(it);
+      pozniej(6000, () => {
+        it.leaving = true;
+        wyslijPopupy();
+        pozniej(220, () => {
+          popupy.splice(popupy.indexOf(it), 1);
+          pompujPopupy();
+          wyslijPopupy();
+        });
+      });
+    }
+    wyslijPopupy();
+  }
+  function przykladyPopupow(): TrescPopupu[] {
+    const najdluzsze = (lista: K.Achievement[]) => lista.reduce((a, b) => (b.name.length + b.condition.length > a.name.length + a.condition.length ? b : a));
+    const zRzadkosci = (r: K.Rarity) => {
+      const lista = defs.achievements.filter((a) => a.rarity === r);
+      return dlugie ? najdluzsze(lista) : lista[0];
+    };
+    const osiagniecie = (a: K.Achievement): TrescPopupu => ({
+      kicker: t('powiadomienie.osiagniecie.nad', { rzadkosc: t(`rzadkosc.${a.rarity}`) }),
+      title: a.name, line: t('powiadomienie.osiagniecie.linia', { xp: defs.rarityXp[a.rarity], warunek: a.condition }),
+      color: KOLOR_RZADKOSCI[a.rarity], rarity: a.rarity, mark: a.mark, badgeText: null, progress: null,
+    });
+    const poziom = dlugie ? 87 : (levels?.level ?? 11) + 1;
+    const ranga = [...defs.ranks].reverse().find((x) => x.level <= poziom) ?? defs.ranks[0];
+    const rzPoziomu = rzadkoscPoziomu(poziom);
+    return [
+      osiagniecie(dlugie ? najdluzsze(defs.achievements) : zRzadkosci('epickie')),
+      {
+        kicker: t('powiadomienie.awans.nad', { poziom }),
+        title: dlugie ? ranga.name : t('powiadomienie.awans.tytul', { poziom }),
+        line: t(dlugie ? 'powiadomienie.awans.ranga_linia' : 'powiadomienie.awans.linia', { km: liczba(dlugie ? 1234.5 : 3.2, 1) }),
+        color: KOLOR_RZADKOSCI[rzPoziomu], rarity: rzPoziomu, mark: '', badgeText: String(poziom), progress: 0.08,
+      },
+      {
+        kicker: t('powiadomienie.wiele.nad'), title: t('powiadomienie.wiele.tytul', { liczba: dlugie ? 12 : 4 }),
+        line: t('powiadomienie.wiele.linia'), color: KOLOR_RZADKOSCI.rzadkie, rarity: 'rzadkie', mark: 'korona', badgeText: null, progress: null,
+      },
+      osiagniecie(zRzadkosci('legendarne')),
+      {
+        kicker: t('powiadomienie.historia.nad'), title: t('powiadomienie.historia.tytul', { poziom, ranga: ranga.name }),
+        line: t('powiadomienie.historia.linia', { liczba: 7, km: liczba(levels?.km ?? 212, 1) }),
+        color: KOLOR_RZADKOSCI[rzPoziomu], rarity: rzPoziomu, mark: '', badgeText: String(poziom), progress: null,
+      },
+      osiagniecie(zRzadkosci('pospolite')),
+    ];
+  }
+  let demoPopupow = false;
+  function uruchomDemoPopupow() {
+    if (demoPopupow || p.get('demo') !== '1') return;
+    demoPopupow = true;
+    const przyklady = przykladyPopupow();
+    czekajace.push(...przyklady.slice(0, 3));
+    pompujPopupy();
+    let nastepny = 3;
+    setInterval(() => {
+      if (czekajace.length) return;
+      czekajace.push(przyklady[nastepny++ % przyklady.length]);
+      pompujPopupy();
+    }, 2500);
+  }
 
   // ---------------- komendy ----------------
   type A = Record<string, unknown>;
@@ -1206,7 +1289,10 @@ export function utworzAtrape(): Silnik {
     bubble_open: () => undefined,
     bubble_drag_start: () => undefined,
     bubble_drag_end: () => undefined,
-    popup_ready: () => ({ items: [] }) satisfies K.PopupsView,
+    popup_ready: () => {
+      uruchomDemoPopupow();
+      return { items: popupy } satisfies K.PopupsView;
+    },
   };
 
   // Zgłoś problem: stany do podglądu (?stan=zgloszenie-wyslano | zgloszenie-wysylanie |

@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { build, preview } from 'vite';
 import { chromium } from 'playwright-core';
-import { EKRANY, MOTYWY, SZEROKOSCI, WYSOKOSC } from './ekrany.mjs';
+import { EKRANY, MOTYWY, OKNA, SZEROKOSCI, WYSOKOSC } from './ekrany.mjs';
 
 const katalog = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const zrzuty = path.join(katalog, 'docs', 'zrzuty');
@@ -89,6 +89,58 @@ try {
             await strona.screenshot({ path: path.join(zrzuty, `${nazwa}.png`) });
           }
         }
+      }
+      await kontekst.close();
+    }
+  }
+
+  // Osobne okna (popup, przycisk): stały rozmiar, podgląd ?demo=1 z marginesem 16 px wokół okna
+  for (const motyw of MOTYWY) {
+    for (const { ekran, strona: plik, okno, scenariusze } of OKNA) {
+      if (tylkoEkran && ekran !== tylkoEkran) continue;
+      const kontekst = await przegladarka.newContext({
+        viewport: { width: okno.szer + 32, height: okno.wys + 32 },
+        deviceScaleFactor: 2,
+        reducedMotion: 'reduce',
+        colorScheme: motyw === 'jasny' ? 'light' : 'dark',
+        locale: 'pl-PL',
+      });
+      const strona = await kontekst.newPage();
+      let konsola = [];
+      strona.on('console', (m) => m.type() === 'error' && konsola.push(m.text()));
+      strona.on('pageerror', (e) => konsola.push(String(e)));
+      for (const { nazwa: scenariusz, zapytanie } of scenariusze) {
+        const nazwa = `${ekran}-${scenariusz}-${motyw}`;
+        konsola = [];
+        await strona.goto(`${adres}${plik}?demo=1&${zapytanie}&motyw=${motyw}`);
+        await strona.waitForFunction(() => document.documentElement.dataset.gotowe === '1' && typeof window.wystaje === 'function');
+        await strona.evaluate(() => document.fonts.ready);
+        await strona.waitForTimeout(300);
+        const wynik = await strona.evaluate(() => {
+          const app = document.getElementById('app');
+          const o = app.getBoundingClientRect();
+          const poza = [...app.querySelectorAll('*')]
+            .filter((el) => el.checkVisibility({ visibilityProperty: true }))
+            .filter((el) => {
+              const r = el.getBoundingClientRect();
+              return (r.width || r.height) && (r.bottom > o.bottom + 0.5 || r.top < o.top - 0.5 || r.left < o.left - 0.5);
+            })
+            .map((el) => `poza oknem (góra/dół/lewo): ${el.tagName.toLowerCase()}.${el.getAttribute('class') ?? ''}`);
+          return { wystaje: [...window.wystaje(app, o.right + 0.5), ...poza], elementy: app.querySelectorAll('*').length };
+        });
+        const problemy = [
+          ...wynik.wystaje,
+          ...(wynik.elementy === 0 ? ['okno puste'] : []),
+          ...konsola.map((k) => `konsola: ${k}`),
+        ];
+        sprawdzone++;
+        if (problemy.length) {
+          bledy.push({ nazwa, problemy });
+          console.log(`BŁĄD ${nazwa}\n  ${problemy.slice(0, 12).join('\n  ')}`);
+        } else {
+          console.log(`ok   ${nazwa}`);
+        }
+        if (!arg('bez-zrzutow')) await strona.screenshot({ path: path.join(zrzuty, `${nazwa}.png`) });
       }
       await kontekst.close();
     }
