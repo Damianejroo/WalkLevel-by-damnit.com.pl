@@ -109,6 +109,7 @@ fn check_case(defs: &Definitions, c: &Case) {
         earned_before: c.input.earned_before.clone(),
         now: Some(c.input.now),
         rest_per_week: c.input.rest_per_week,
+        open_session_start: None,
     };
     let s = evaluate(defs, &walks, &opts);
     assert_close(s.km, e.km, &format!("{n}: km"));

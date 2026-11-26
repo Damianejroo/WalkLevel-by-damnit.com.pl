@@ -12,12 +12,14 @@ use crate::widoki::SliceName;
 impl App {
     fn levels_stamp(&self) -> Option<String> {
         let v = self.history.as_ref()?.version().ok()?;
+        // koniec sesji przelicza poziomy nawet bez zmiany historii („Tryb treningowy” po treningu)
         Some(format!(
-            "{}:{}:{}:{}",
+            "{}:{}:{}:{}:{}",
             self.person_id(),
             v.count,
             v.steps,
-            v.last_end
+            v.last_end,
+            self.tracker.current().is_some()
         ))
     }
 
@@ -43,6 +45,7 @@ impl App {
         let opts = EvalOptions {
             friends,
             earned_before: history.earned(person).unwrap_or_default(),
+            open_session_start: self.tracker.current().map(|s| s.start),
             ..EvalOptions::default()
         };
         Some(levels::evaluate(self.defs, &walks, &opts))

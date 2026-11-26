@@ -574,6 +574,9 @@ pub struct EvalOptions {
     pub now: Option<f64>,
     /// ile dni wolnych na 7 nie przerywa serii
     pub rest_per_week: usize,
+    /// początek trwającej sesji (zapisywanej co minutę w historii) - „Tryb treningowy” liczy
+    /// się dopiero z ukończonej sesji, nie w trakcie pierwszego treningu
+    pub open_session_start: Option<f64>,
 }
 
 impl Default for EvalOptions {
@@ -584,6 +587,7 @@ impl Default for EvalOptions {
             earned_before: HashMap::new(),
             now: None,
             rest_per_week: 1,
+            open_session_start: None,
         }
     }
 }
@@ -699,7 +703,9 @@ pub fn evaluate(defs: &Definitions, walks: &[Walk], opts: &EvalOptions) -> Statu
             day_done_at.entry(day).or_insert(w.end);
         }
         if w.mode == TRAINING_MODE {
-            first_training.get_or_insert(w.end);
+            if opts.open_session_start != Some(w.start) {
+                first_training.get_or_insert(w.end);
+            }
         } else {
             first_game.get_or_insert(w.end);
             *game_km.entry(w.game.as_str()).or_insert(0.0) += w.km;
@@ -1122,6 +1128,12 @@ mod tests {
         assert!(!p(&s, "gry3").earned()); // trening nie liczy się do gry
         assert_eq!(p(&s, "gry3").current, 2.0);
         assert_eq!(p(&s, "trening").earned_at, Some(walks[3].end));
+        // trwający pierwszy trening (zapisany już w historii) jeszcze nie daje osiągnięcia
+        let open = EvalOptions {
+            open_session_start: Some(walks[3].start),
+            ..at(T0 + 4.0 * DAY)
+        };
+        assert!(!p(&evaluate(defs(), &walks, &open), "trening").earned());
         walks.push(walk_full(4, 1.0, 0, "c", "gra", 18));
         let s2 = evaluate(defs(), &walks, &at(T0 + 5.0 * DAY));
         assert!(p(&s2, "gry3").earned());
