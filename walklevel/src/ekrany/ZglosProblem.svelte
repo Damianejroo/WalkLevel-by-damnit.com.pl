@@ -22,6 +22,8 @@
   let pokazBlad = $state(false);
   /** Komunikat błędu ostatniej komendy (sieć, dysk, serwer). */
   let bladKomendy = $state('');
+  /** Komenda w toku, zanim rdzeń zgłosi report.busy - drugie kliknięcie nie wysyła drugi raz. */
+  let wysylam = $state(false);
 
   const minimum = $derived(stan.statics.reportMinChars);
   const dlugosc = $derived(opis.trim().length);
@@ -34,7 +36,7 @@
   );
   const okresy = $derived(stan.statics.reportPeriods.map((p) => ({ wartosc: p.seconds, napis: p.label })));
   const serwer = $derived(stan.app.reportEndpoint);
-  const zajety = $derived(stan.report.busy);
+  const zajety = $derived(stan.report.busy || wysylam);
   const status = $derived(bladKomendy || stan.report.status);
 
   function sprawdzOpis() {
@@ -49,10 +51,12 @@
   async function wykonajKomende(wysylka: boolean) {
     if (zajety) return;
     bladKomendy = '';
+    wysylam = true;
     try {
       if (wysylka) {
         await api.reportSend(opis.trim(), kontakt.trim(), okres);
-        opis = '';
+        // jak w 0.5.x: opis znika tylko po wysłaniu przez serwer; przy e-mailu zostaje
+        if (serwer) opis = '';
       } else {
         await api.reportSave(opis.trim(), kontakt.trim(), okres);
       }
@@ -60,6 +64,8 @@
       if (!api.jestBledemKomendy(e) || e.code === 'cancelled') return;
       if (e.code === 'invalid' && wysylka) pokazBladOpisu();
       else bladKomendy = e.message;
+    } finally {
+      wysylam = false;
     }
   }
 

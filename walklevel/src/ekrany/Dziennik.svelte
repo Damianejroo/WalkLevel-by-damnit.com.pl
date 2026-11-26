@@ -118,11 +118,14 @@
       </div>
     </div>
 
+    <!-- przewijany panel musi dać się przewinąć z klawiatury (strzałki, PageUp/PageDown) -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div
       class="panel"
       bind:this={panel}
       style:height="{wysokosc}px"
       onscroll={przewinieto}
+      tabindex="0"
       role="log"
       aria-live="off"
       aria-label={t('dziennik.dostepnosc')}
