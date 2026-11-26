@@ -429,6 +429,51 @@ def other_cases(path: Path) -> list[dict[str, Any]]:
     return out
 
 
+# --- definicje v2 (walklevel/docs/definicje-v2.json, wbudowane w 0.6.0) ---------------------
+
+V2 = Path("walklevel/docs/definicje-v2.json")
+V2_OUT = OUT / "v2"
+
+
+def again(c: dict[str, Any], name: str) -> dict[str, Any]:
+    """Ten sam przypadek (sesje i opcje) policzony z definicjami v2."""
+    inp = c["input"]
+    sessions = [
+        Session(**{f.name: s[CAMEL.get(f.name, f.name)] for f in fields(Session)})
+        for s in inp["sessions"]
+    ]
+    return case(
+        name,
+        sessions,
+        now=inp["now"],
+        friends=inp["friends"],
+        referrals=inp["referrals"],
+        earned_before=inp["earnedBefore"],
+        rest_per_week=inp["restPerWeek"],
+        defs_path=V2,
+    )
+
+
+def v2_cases() -> list[dict[str, Any]]:
+    """Kilka historii liczonych z definicjami v2 (nowe i przesunięte przystanki szlaku)."""
+    out = [case("v2_pusta", [], now=T0, defs_path=V2)]
+    # jedna sesja z kilkoma progami naraz (km1, km2, km57, km113)
+    out.append(case("v2_kilka_naraz", [sess(at(0), 3 * HOUR, 12.0)], now=at(1), defs_path=V2))
+    # 5 km dziennie przez 130 dni: nowe przystanki do 650 km (km53 ... km1150 przesunięty)
+    s = [sess(at(d, 7), 3600, 5.0, game=f"g{d % 3}") for d in range(130)]
+    out.append(case("v2_szlak_650", s, now=at(130, 6), friends=1, defs_path=V2))
+    # zdobyte w v1 na starszym progu zostają (km1800, km880 przed czasem), km1150 od razu
+    s = [sess(at(d, 18), 2 * HOUR, 10.0) for d in range(62)]
+    eb = {"km1800": at(3), "km880": at(4)}
+    out.append(case("v2_zdobyte_w_v1", s, now=at(62), earned_before=eb, defs_path=V2))
+    out.append(again(simple(), "v2_proste"))
+    out.append(again(boundaries(), "v2_granice"))
+    out.append(again(games_and_training(), "v2_gry_i_trening"))
+    out.append(again(long_history(42, 3, "x"), "v2_dluga_3_lata"))
+    out.append(again(level_100(), "v2_poziom_100"))
+    return out
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     cases: list[dict[str, Any]] = [
@@ -467,7 +512,19 @@ def main() -> None:
     (OTHER / "wynik_definicji.json").write_text(
         json.dumps(definitions(other), ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
     )
-    print(f"zapisano {len(cases) + len(other_list)} przypadków do {OUT}")
+    # przypadki v1 liczone z kopią definicji v1 (w 0.6.0 wbudowane są już v2)
+    (OUT / "definicje-v1.json").write_bytes(poziomy.DEFINITIONS.read_bytes())
+    V2_OUT.mkdir(parents=True, exist_ok=True)
+    v2_list = v2_cases()
+    for c in v2_list:
+        path = V2_OUT / f"{c['name']}.json"
+        indent = 1 if len(c["input"]["sessions"]) < 100 else None
+        path.write_text(json.dumps(c, ensure_ascii=False, indent=indent) + "\n", encoding="utf-8")
+    (V2_OUT / "wynik_definicji.json").write_text(
+        json.dumps(definitions(V2), ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    total = len(cases) + len(other_list) + len(v2_list)
+    print(f"zapisano {total} przypadków do {OUT}")
 
 
 if __name__ == "__main__":
