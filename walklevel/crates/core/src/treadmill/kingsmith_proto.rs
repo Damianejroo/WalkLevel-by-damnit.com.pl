@@ -16,7 +16,11 @@ use base64::Engine;
 use base64::engine::{DecodePaddingMode, GeneralPurpose, GeneralPurposeConfig};
 use regex::Regex;
 
-use super::kontrakt::{Capabilities, Counts, GattCharacteristic, GattService, Reading, py_split};
+use super::kontrakt::{Capabilities, Counts, GattCharacteristic, GattService, py_split};
+use super::telemetry::TelemetryFrame;
+
+/// km na milę - `unit 1` to jednostki imperialne.
+pub const MILE_KM: f64 = 1.609344;
 
 /// Alfabet base64 w kolejności, w której tablice podają zamienniki.
 pub const PLAINTEXT: &[u8; 65] =
@@ -530,6 +534,8 @@ pub struct Telemetry {
     /// kanał (UUID usługi), z którego przyszła pierwsza odszyfrowana ramka - potem polecenia
     /// idą tylko nim (None = wysyłaj wszystkimi)
     pub active: Option<String>,
+    /// `unit` z ramek: 0 metryczne, 1 imperialne (None - bieżnia nie powiedziała)
+    pub unit: Option<i64>,
     buffers: BTreeMap<String, FrameBuffer>,
 }
 
@@ -539,6 +545,7 @@ impl Telemetry {
         Self {
             codec: Codec::new(order),
             last_speed: 0.0,
+            unit: None,
             last_steps: None,
             last_props_at: f64::NEG_INFINITY,
             run_state: None,
@@ -577,7 +584,7 @@ impl Telemetry {
     }
 
     /// Powiadomienie z kanału (`channel` - UUID usługi; każdy kanał ma własny bufor ramek).
-    pub fn feed(&mut self, channel: &str, data: &[u8], now: f64) -> Vec<Reading> {
+    pub fn feed(&mut self, channel: &str, data: &[u8], now: f64) -> Vec<TelemetryFrame> {
         let frames = self
             .buffers
             .entry(channel.to_string())
@@ -618,7 +625,7 @@ impl Telemetry {
     }
 
     /// Jedna pewna odpowiedź bieżni: stan taśmy i odczyt (jeśli coś niesie).
-    pub fn handle(&mut self, text: &str, now: f64) -> Option<Reading> {
+    pub fn handle(&mut self, text: &str, now: f64) -> Option<TelemetryFrame> {
         self.track_state(text);
         let props = parse_props(text);
         if props.is_empty() {
@@ -627,29 +634,70 @@ impl Telemetry {
             // ramki z prędkością (PROPS_TIMEOUT_S) nic nie oddajemy - wtedy bezpiecznik
             // w silniku zatrzyma postać.
             if text.starts_with("servers") && now - self.last_props_at < PROPS_TIMEOUT_S {
-                return Some(self.reading());
+                let steps = self.last_steps.and_then(|s| u64::try_from(s).ok());
+                return Some(TelemetryFrame::heartbeat(
+                    now,
+                    Some(self.speed_kmh()),
+                    steps,
+                ));
             }
             return None;
         }
         self.last_props_at = now;
         self.state_changes += 1; // każda ramka rozstrzyga, czy polecenie zadziałało
+        if let Some(unit) = props.get("unit").and_then(|u| py_int(*u)) {
+            if self.unit != Some(unit) {
+                log::info!("Bieżnia podaje jednostki: unit {unit}");
+            }
+            self.unit = Some(unit);
+        }
         if let Some(speed) = props.get("CurrentSpeed") {
             self.last_speed = speed.max(0.0);
         }
         if props.get("runState") == Some(&0.0) {
             self.last_speed = 0.0; // taśma zatrzymana
         }
+        let counter = |key: &str| {
+            props
+                .get(key)
+                .and_then(|v| py_int(*v))
+                .and_then(|v| u64::try_from(v).ok())
+        };
+        let steps = counter("RunningSteps");
         if let Some(steps) = props.get("RunningSteps").and_then(|s| py_int(*s)) {
             self.last_steps = Some(steps);
         }
         // Każda ramka z danymi = żywa bieżnia, nawet jeśli prędkość się nie zmieniła.
-        Some(self.reading())
+        Some(TelemetryFrame {
+            steps,
+            // przy milach licznik dystansu wyłączony, dopóki jednostka nie jest sprawdzona
+            distance_m: counter("RunningDistance").filter(|_| !self.imperial()),
+            elapsed_s: counter("RunningTotalTime"),
+            ..TelemetryFrame::data(now, Some(self.speed_kmh()))
+        })
     }
 
-    fn reading(&self) -> Reading {
-        Reading {
-            speed_kmh: self.last_speed,
-            steps: self.last_steps,
+    /// Bieżnia podaje mile (`unit 1`).
+    pub fn imperial(&self) -> bool {
+        self.unit == Some(1)
+    }
+
+    /// Prędkość do polecenia w jednostkach bieżni (przy milach przeliczona z km/h, co 0,1) -
+    /// w tych samych jednostkach co `last_speed`, którym pilnujemy, czy taśma posłuchała.
+    pub fn native_speed(&self, kmh: f64) -> f64 {
+        if self.imperial() {
+            super::kontrakt::py_round1(kmh / MILE_KM)
+        } else {
+            kmh
+        }
+    }
+
+    /// Ostatnia prędkość w km/h (przy milach przeliczona, zaokrąglona do 0,01).
+    pub fn speed_kmh(&self) -> f64 {
+        if self.imperial() {
+            (self.last_speed * MILE_KM * 100.0).round() / 100.0
+        } else {
+            self.last_speed
         }
     }
 
@@ -856,6 +904,50 @@ mod tests {
         assert_eq!(py_int_text("-99999999999999999999"), Some(i64::MIN));
         assert_eq!(py_int(f64::INFINITY), None);
         assert_eq!(py_int(-7.5), Some(-7));
+    }
+
+    /// Przypadki D7-D11 z docs/analiza-dystans.md: pełna ramka z liczników bieżni.
+    #[test]
+    fn full_frames_like_analysis_d7_to_d11() {
+        use crate::treadmill::telemetry::FrameKind;
+        let mut t = Telemetry::new(&["v1"]);
+        let d7 = t
+            .handle(
+                "props netled 0 ControlMode 1 CurrentSpeed 2.3 RunningTotalTime 169 \
+                 RunningSteps 232 RunningDistance 100 BurnCalories 6800",
+                1.0,
+            )
+            .expect("ramka");
+        assert_eq!(d7.kind, FrameKind::Data);
+        assert_eq!(
+            (d7.speed_kmh, d7.elapsed_s, d7.steps, d7.distance_m),
+            (Some(2.3), Some(169), Some(232), Some(100))
+        );
+        let d8 = t
+            .handle(
+                "props netled 0 ControlMode 1 CurrentSpeed 2.0 RunningTotalTime 3 \
+                 RunningDistance 0 BurnCalories 0",
+                2.0,
+            )
+            .expect("ramka");
+        assert_eq!(d8.steps, None); // nie 0
+        assert_eq!(t.last_steps, Some(232)); // poprzednia wartość bez zmian
+        let d11 = t.handle("servers 0", 3.0).expect("sygnał życia");
+        assert_eq!(d11.kind, FrameKind::Heartbeat);
+        assert_eq!(d11.speed_kmh, Some(2.0));
+        let d10 = t
+            .handle("props runState 0 CurrentSpeed 1.5", 4.0)
+            .expect("ramka");
+        assert_eq!(d10.speed_kmh, Some(0.0));
+        let mut miles = Telemetry::new(&["v1"]);
+        let d9 = miles
+            .handle("props CurrentSpeed 2.0 unit 1 RunningDistance 50", 1.0)
+            .expect("ramka");
+        assert_eq!(d9.speed_kmh, Some(3.22));
+        assert_eq!(d9.distance_m, None); // licznik dystansu wyłączony
+        assert_eq!(miles.last_speed, 2.0); // pilnowanie prędkości w jednostkach bieżni
+        assert_eq!(miles.native_speed(3.2), 2.0); // polecenie też w milach
+        assert_eq!(t.native_speed(3.2), 3.2);
     }
 
     #[test]

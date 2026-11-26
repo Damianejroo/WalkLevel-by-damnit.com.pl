@@ -4,23 +4,63 @@
 //! Rdzeń aplikacji używa tego modułu i kontraktu ([`kontrakt`]). Moduły protokołów:
 //! [`kingsmith_proto`] (WalkingPad), [`ftms_proto`] (standard Bluetooth, np. Urevo) i
 //! [`simulator`]. Model rozpoznajemy po usługach GATT (który moduł) i nazwie Bluetooth
-//! (który profil - dane w [`profiles`]). Połączenie BLE (btleplug) i worker korzystają z
-//! [`detect`] oraz części odbiorczych `kingsmith_proto::Telemetry` / `ftms_proto::Telemetry`.
+//! (który profil - dane w [`profiles`]). Sterowniki połączenia: [`kingsmith`] i [`ftms`]
+//! (na [`GattClient`]), warstwa Bluetooth [`ble`] (btleplug, raport diagnostyczny) i
+//! [`worker`] (skanowanie, łączenie z ponawianiem, polecenia taśmy, zdarzenia przez kanał).
+//! Każdy sterownik oddaje pełne ramki [`telemetry::TelemetryFrame`]; dystans, czas ruchu,
+//! kroki i kadencję liczy z nich [`telemetry::Meter`] - niezależnie od mapowania gry.
 
+pub mod ble;
+pub mod ftms;
 pub mod ftms_proto;
+pub mod kingsmith;
 pub mod kingsmith_proto;
 pub mod kontrakt;
 pub mod profiles;
 pub mod simulator;
+pub mod telemetry;
 pub mod watchdog;
+pub mod worker;
 
+pub use ble::{Advertisement, BleBackend, BleError, BleLink, BtleplugBackend, Notification};
+pub use ftms::FtmsDriver;
+pub use kingsmith::KingSmithDriver;
 pub use kontrakt::{
-    Capabilities, Clock, Counts, DeviceInfo, Driver, DriverError, DriverKind, GattCharacteristic,
-    GattClient, GattService, Reading, ReadingCallback, StartResult, monotonic_clock,
+    Capabilities, Clock, Counts, DeviceInfo, Driver, DriverError, DriverKind, FrameCallback,
+    GattCharacteristic, GattClient, GattService, StartResult, monotonic_clock,
 };
 pub use profiles::{DownloadError, DownloadResult, ModelProfile, ProfileError, ProfileRegistry};
 pub use simulator::SimulatorDriver;
+pub use telemetry::{CounterSpec, FrameKind, Meter, MeterTotals, TelemetryFrame, TelemetrySpec};
 pub use watchdog::{SpeedGuard, SpeedStats};
+pub use worker::{BeltCommand, BeltOutcome, BleWorker, FoundDevice, Link, WorkerEvent};
+
+/// Sterownik dla połączonej bieżni: moduł po usługach GATT, profil po nazwie (jak
+/// `make_driver` w Pythonie). Urządzenie bez usług bieżni: [`DriverError::UnsupportedDevice`].
+pub fn make_driver(
+    client: std::sync::Arc<dyn GattClient>,
+    device_name: &str,
+    registry: &ProfileRegistry,
+    on_frame: FrameCallback,
+    clock: Clock,
+) -> Result<std::sync::Arc<dyn Driver>, DriverError> {
+    let services = client.services();
+    let found = detect(&services, device_name, registry)?;
+    let caps = found.capabilities(&services);
+    let info = found.device_info(device_name);
+    Ok(match found {
+        Detected::KingSmith { channels, profile } => {
+            let table = profile.as_ref().and_then(|p| p.option_str("table"));
+            let order = kingsmith_proto::Telemetry::order_for(device_name, table);
+            std::sync::Arc::new(KingSmithDriver::new(
+                client, channels, &order, caps, info, on_frame, clock,
+            ))
+        }
+        Detected::Ftms { .. } => std::sync::Arc::new(FtmsDriver::new(
+            client, &services, caps, info, on_frame, clock,
+        )),
+    })
+}
 
 /// Możliwości modułu bez profilu.
 pub fn default_capabilities(kind: DriverKind) -> Capabilities {

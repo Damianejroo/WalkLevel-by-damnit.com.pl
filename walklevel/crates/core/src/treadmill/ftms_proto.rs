@@ -10,7 +10,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::kontrakt::{Capabilities, Counts, GattCharacteristic, GattService, Reading};
+use super::kontrakt::{Capabilities, Counts, GattCharacteristic, GattService};
+use super::telemetry::TelemetryFrame;
 
 pub const FTMS_SERVICE: &str = "00001826-0000-1000-8000-00805f9b34fb";
 pub const FEATURE: &str = "00002acc-0000-1000-8000-00805f9b34fb";
@@ -99,6 +100,24 @@ pub struct TreadmillData {
     pub heart_rate: Option<u8>,
     pub elapsed_s: Option<u16>,
     pub steps: Option<u16>,
+    /// bajty na końcu ramki, których nie opisuje żadna flaga (Urevo: 1)
+    pub trailing: usize,
+}
+
+impl TreadmillData {
+    /// Pola z `self`, a brakujące z wcześniejszej ramki „More Data”.
+    fn or(self, older: TreadmillData) -> TreadmillData {
+        TreadmillData {
+            speed_kmh: self.speed_kmh.or(older.speed_kmh),
+            distance_m: self.distance_m.or(older.distance_m),
+            incline_pct: self.incline_pct.or(older.incline_pct),
+            energy_kcal: self.energy_kcal.or(older.energy_kcal),
+            heart_rate: self.heart_rate.or(older.heart_rate),
+            elapsed_s: self.elapsed_s.or(older.elapsed_s),
+            steps: self.steps.or(older.steps),
+            trailing: self.trailing,
+        }
+    }
 }
 
 struct Cursor<'a> {
@@ -185,6 +204,7 @@ pub fn decode_treadmill_data(data: &[u8]) -> Option<TreadmillData> {
     if flags & STEPS_FLAG != 0 {
         out.steps = Some(c.u16()?);
     }
+    out.trailing = data.len().saturating_sub(c.pos);
     Some(out)
 }
 
@@ -314,6 +334,9 @@ pub struct Telemetry {
     pub running: Option<bool>,
     pub has_control: bool,
     pub counts: Counts,
+    /// pola z ramki „More Data” (bez prędkości) - czekają na następną ramkę z prędkością
+    pending: Option<TreadmillData>,
+    trailing_logged: bool,
 }
 
 impl Telemetry {
@@ -324,19 +347,37 @@ impl Telemetry {
             running: None,
             has_control: false,
             counts: Counts::default(),
+            pending: None,
+            trailing_logged: false,
         }
     }
 
-    /// Ramka Treadmill Data. None, gdy ramki nie da się odczytać (albo nie ma w niej prędkości).
-    pub fn on_data(&mut self, raw: &[u8], now: f64) -> Option<Reading> {
-        let Some((decoded, speed)) =
-            decode_treadmill_data(raw).and_then(|d| Some((d, d.speed_kmh?)))
-        else {
+    /// Ramka Treadmill Data. None, gdy ramki nie da się odczytać albo gdy to pierwsza część
+    /// danych („More Data”, bez prędkości) - jej pola trafią do następnej ramki z prędkością.
+    pub fn on_data(&mut self, raw: &[u8], now: f64) -> Option<TelemetryFrame> {
+        let Some(part) = decode_treadmill_data(raw) else {
             self.counts.undecoded += 1;
             log::debug!("<< FTMS (nie do odczytania) {}", hex::encode(raw));
             return None;
         };
         self.counts.frames += 1;
+        if part.trailing > 0 && !self.trailing_logged {
+            self.trailing_logged = true;
+            log::info!(
+                "FTMS: {} nieopisane bajty na końcu ramki danych ({})",
+                part.trailing,
+                hex::encode(raw)
+            );
+        }
+        let Some(speed) = part.speed_kmh else {
+            let older = self.pending.take().unwrap_or_default();
+            self.pending = Some(part.or(older));
+            return None;
+        };
+        let decoded = match self.pending.take() {
+            Some(older) => part.or(older),
+            None => part,
+        };
         if decoded.steps.is_some() && !self.capabilities.steps {
             self.capabilities.steps = true;
         }
@@ -346,9 +387,11 @@ impl Telemetry {
         } else if self.running.is_none() {
             self.running = Some(false);
         }
-        Some(Reading {
-            speed_kmh: speed,
-            steps: decoded.steps.map(i64::from),
+        Some(TelemetryFrame {
+            distance_m: decoded.distance_m.map(u64::from),
+            steps: decoded.steps.map(u64::from),
+            elapsed_s: decoded.elapsed_s.map(u64::from),
+            ..TelemetryFrame::data(now, Some(speed))
         })
     }
 
@@ -410,6 +453,57 @@ mod tests {
         assert_eq!(parse_treadmill_data(&[0x00, 0x00, 0x5E, 0x01]), Some(3.5));
         assert_eq!(parse_treadmill_data(&[0x01, 0x00, 0x5E, 0x01]), None);
         assert_eq!(parse_treadmill_data(b"\x00"), None);
+    }
+
+    const D1: &str = "9c25fa008601002800000000000000250000000000fb02280300";
+
+    /// Przypadki D1-D6 z docs/analiza-dystans.md.
+    #[test]
+    fn decodes_full_frames_like_analysis_d1_to_d6() {
+        let d1 = decode_treadmill_data(&hex(D1)).expect("D1");
+        assert_eq!(d1.speed_kmh, Some(2.5));
+        assert_eq!(d1.distance_m, Some(390));
+        assert_eq!(d1.incline_pct, Some(4.0));
+        assert_eq!(d1.energy_kcal, Some(37));
+        assert_eq!(
+            (d1.elapsed_s, d1.steps, d1.trailing),
+            (Some(763), Some(808), 1)
+        );
+        let d2 =
+            decode_treadmill_data(&hex("9c25640000000000000000000000000000000000000000000000"))
+                .expect("D2");
+        assert_eq!(
+            (d2.speed_kmh, d2.distance_m, d2.elapsed_s, d2.steps),
+            (Some(1.0), Some(0), Some(0), Some(0))
+        );
+        let d3 =
+            decode_treadmill_data(&hex("9c255a000a000000000000000000000000000000000700000000"))
+                .expect("D3");
+        assert_eq!(
+            (d3.speed_kmh, d3.distance_m, d3.elapsed_s, d3.steps),
+            (Some(0.9), Some(10), Some(7), Some(0))
+        );
+        // D4: ucięta ramka (bez kroków) - nic nie trafia dalej
+        assert_eq!(decode_treadmill_data(&hex(D1)[..24]), None);
+        let mut t = Telemetry::new(DEFAULT_CAPS);
+        assert_eq!(t.on_data(&hex(D1)[..24], 0.0), None);
+        // D5: „More Data” bez prędkości - pola scalone z następną ramką z prędkością
+        let full = hex(D1);
+        let mut more = vec![0x9d, 0x25];
+        more.extend_from_slice(&full[4..]);
+        assert_eq!(t.on_data(&more, 1.0), None);
+        let speed_only = [0x00, 0x00, 0xfa, 0x00];
+        let merged = t.on_data(&speed_only, 1.1).expect("scalona ramka");
+        assert_eq!(merged.speed_kmh, Some(2.5));
+        assert_eq!(
+            (merged.distance_m, merged.elapsed_s, merged.steps),
+            (Some(390), Some(763), Some(808))
+        );
+        let next = t.on_data(&speed_only, 2.1).expect("ramka");
+        assert_eq!(next.steps, None); // scalone pola tylko raz
+        // D6: energia 0xFFFF = brak
+        let d6 = decode_treadmill_data(&hex("8000fa00ffff000000")).expect("D6");
+        assert_eq!((d6.speed_kmh, d6.energy_kcal), (Some(2.5), None));
     }
 
     #[test]
