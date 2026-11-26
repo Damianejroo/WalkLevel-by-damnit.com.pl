@@ -5,6 +5,11 @@
 //! przetestować bez Bluetooth. Taśma rozpędza się płynnie, po starcie jest krótkie
 //! odliczanie, kroki rosną z kadencją zależną od prędkości. F6 / F7 działają jak pilot
 //! bieżni: zmieniają prędkość bez udziału aplikacji ([`SimulatorDriver::remote`]).
+//!
+//! Liczniki jak w prawdziwej bieżni (docs/analiza-dystans.md, R9): dystans co 10 m z
+//! dokładnej całki prędkości, kroki z kadencją `40 + 14·v` na minutę (dopasowaną do Urevo:
+//! krok 0,61 m przy 3 km/h) i czas ruchu w pełnych sekundach - ramki przechodzą tę samą
+//! drogę ([`super::telemetry::Meter`]) co z bieżni.
 
 use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
@@ -13,9 +18,10 @@ use futures::FutureExt;
 use futures::future::BoxFuture;
 
 use super::kontrakt::{
-    Capabilities, Clock, Counts, DeviceInfo, Driver, DriverError, DriverKind, Reading,
-    ReadingCallback, StartResult, py_round1,
+    Capabilities, Clock, Counts, DeviceInfo, Driver, DriverError, DriverKind, FrameCallback,
+    StartResult, py_round1,
 };
+use super::telemetry::TelemetryFrame;
 use super::watchdog::SpeedStats;
 
 pub const REPORT_EVERY_S: f64 = 0.75;
@@ -56,8 +62,17 @@ pub struct SimulatorState {
     pub target: f64,
     /// prędkość taśmy (bez zaokrąglenia)
     pub speed: f64,
-    /// kroki (ułamkowe - w odczytach obcięte do całych)
+    /// kroki (ułamkowe - w ramkach obcięte do całych)
     pub steps: f64,
+    /// dokładny dystans (w ramkach co 10 m)
+    pub distance_m: f64,
+    /// czas jazdy taśmy (w ramkach pełne sekundy)
+    pub moving_s: f64,
+}
+
+/// Kadencja symulatora (kroki/min) przy prędkości `kmh` - dopasowana do danych z Urevo.
+pub fn cadence(kmh: f64) -> f64 {
+    40.0 + 14.0 * kmh
 }
 
 struct State {
@@ -71,7 +86,7 @@ struct State {
 
 /// Symulowana bieżnia (patrz opis modułu).
 pub struct SimulatorDriver {
-    on_reading: ReadingCallback,
+    on_frame: FrameCallback,
     clock: Clock,
     capabilities: Capabilities,
     info: DeviceInfo,
@@ -80,9 +95,9 @@ pub struct SimulatorDriver {
 
 impl SimulatorDriver {
     /// `capabilities` - zwykle [`CAPS`] (testy skracają odliczanie).
-    pub fn new(on_reading: ReadingCallback, clock: Clock, capabilities: Capabilities) -> Self {
+    pub fn new(on_frame: FrameCallback, clock: Clock, capabilities: Capabilities) -> Self {
         Self {
-            on_reading,
+            on_frame,
             clock,
             capabilities,
             info: info(),
@@ -92,6 +107,8 @@ impl SimulatorDriver {
                     target: 0.0,
                     speed: 0.0,
                     steps: 0.0,
+                    distance_m: 0.0,
+                    moving_s: 0.0,
                 },
                 last_t: None,
                 report_at: f64::NEG_INFINITY,
@@ -116,7 +133,7 @@ impl SimulatorDriver {
     /// Fizyka taśmy do chwili obecnej i ramka z danymi (co [`REPORT_EVERY_S`]).
     pub fn advance(&self) {
         let now = (self.clock)();
-        let reading = {
+        let frame = {
             let mut s = self.lock();
             let dt = s.last_t.map_or(0.0, |last| (now - last).max(0.0));
             s.last_t = Some(now);
@@ -125,21 +142,29 @@ impl SimulatorDriver {
             let change = ACCEL_KMH_PER_S * dt;
             b.speed += (-change).max(change.min(goal - b.speed));
             if b.speed > 0.4 {
-                b.steps += (60.0 + 15.0 * b.speed) / 60.0 * dt;
+                b.steps += cadence(b.speed) / 60.0 * dt;
+            }
+            if b.speed > 0.0 {
+                b.distance_m += b.speed / 3.6 * dt;
+                b.moving_s += dt;
             }
             if now - s.report_at >= REPORT_EVERY_S - 1e-6 {
                 s.report_at = now;
                 s.counts.frames += 1;
-                Some(Reading {
-                    speed_kmh: py_round1(s.belt.speed),
-                    steps: Some(s.belt.steps as i64),
+                let b = &s.belt;
+                Some(TelemetryFrame {
+                    // licznik dystansu co 10 m, jak w bieżni
+                    distance_m: Some((b.distance_m / 10.0).floor() as u64 * 10),
+                    steps: Some(b.steps as u64),
+                    elapsed_s: Some(b.moving_s as u64),
+                    ..TelemetryFrame::data(now, Some(py_round1(b.speed)))
                 })
             } else {
                 None
             }
         };
-        if let Some(reading) = reading {
-            (self.on_reading)(reading); // poza zamkiem - odbiorca może pytać sterownik o stan
+        if let Some(frame) = frame {
+            (self.on_frame)(frame); // poza zamkiem - odbiorca może pytać sterownik o stan
         }
     }
 
@@ -236,7 +261,7 @@ impl Driver for SimulatorDriver {
         .boxed()
     }
 
-    fn stop_belt(&self, _verify: bool) -> BoxFuture<'_, Result<(), DriverError>> {
+    fn stop_belt(&self, _verify: bool) -> BoxFuture<'_, Result<bool, DriverError>> {
         {
             let mut s = self.lock();
             s.counts.commands += 1;
@@ -244,7 +269,7 @@ impl Driver for SimulatorDriver {
             s.belt.running = false;
             s.belt.target = 0.0;
         }
-        async { Ok(()) }.boxed()
+        async { Ok(true) }.boxed()
     }
 
     fn set_speed(&self, kmh: f64) -> BoxFuture<'_, Result<bool, DriverError>> {
@@ -287,12 +312,12 @@ mod tests {
 
     use super::*;
 
-    fn driver(clock: Arc<AtomicU64>, readings: Arc<Mutex<Vec<Reading>>>) -> SimulatorDriver {
+    fn driver(clock: Arc<AtomicU64>, readings: Arc<Mutex<Vec<TelemetryFrame>>>) -> SimulatorDriver {
         let caps = Capabilities {
             start_delay_s: 0.0,
             ..CAPS
         };
-        let sink: ReadingCallback = Arc::new(move |r| readings.lock().expect("odczyty").push(r));
+        let sink: FrameCallback = Arc::new(move |r| readings.lock().expect("odczyty").push(r));
         let tick: Clock = Arc::new(move || f64::from_bits(clock.load(Ordering::SeqCst)));
         SimulatorDriver::new(sink, tick, caps)
     }
@@ -320,6 +345,88 @@ mod tests {
                 .iter()
                 .any(|r| r.steps.unwrap_or(0) > 0)
         );
+    }
+
+    /// Przypadki M1-M4 z docs/analiza-dystans.md: liczniki symulatora przez [`Meter`].
+    #[tokio::test]
+    async fn counters_are_realistic_m1_to_m4() {
+        use crate::treadmill::telemetry::{Meter, TelemetrySpec};
+
+        /// Przyrost kroków i dystansu przez `seconds` po rozpędzie do `kmh`.
+        async fn walk(kmh: f64, seconds: u32) -> (u64, f64, Meter) {
+            let clock = Arc::new(AtomicU64::new(0f64.to_bits()));
+            let frames = Arc::new(Mutex::new(Vec::new()));
+            let sink_frames = frames.clone();
+            let sink: FrameCallback = Arc::new(move |f| sink_frames.lock().expect("ramki").push(f));
+            let tick = clock.clone();
+            let now: Clock = Arc::new(move || f64::from_bits(tick.load(Ordering::SeqCst)));
+            let caps = Capabilities {
+                start_delay_s: 0.0,
+                speed_min: 0.1, // M3: taśma 0,3 km/h
+                ..CAPS
+            };
+            let sim = SimulatorDriver::new(sink, now, caps);
+            sim.start().await.expect("start");
+            sim.start_belt().await.expect("taśma");
+            sim.set_speed(kmh).await.expect("prędkość");
+            let mut meter = Meter::new(TelemetrySpec::for_driver(DriverKind::Simulator, &CAPS));
+            let mut t = 0.0;
+            // rozpęd (po nim liczymy przyrosty)
+            while t < 10.0 {
+                t += REPORT_EVERY_S;
+                clock.store(t.to_bits(), Ordering::SeqCst);
+                sim.advance();
+            }
+            let warm = frames.lock().expect("ramki").len();
+            for f in frames.lock().expect("ramki").iter() {
+                meter.feed(f);
+            }
+            let before = meter.totals();
+            let end = t + f64::from(seconds);
+            while t < end - 1e-9 {
+                t += REPORT_EVERY_S;
+                clock.store(t.to_bits(), Ordering::SeqCst);
+                sim.advance();
+            }
+            let all = frames.lock().expect("ramki").clone();
+            for f in &all[warm..] {
+                meter.feed(f);
+            }
+            let after = meter.totals();
+            (
+                after.steps - before.steps,
+                after.distance_m - before.distance_m,
+                meter,
+            )
+        }
+
+        let (steps, d, meter) = walk(3.0, 60).await;
+        assert!(steps.abs_diff(82) <= 1, "kroki {steps}");
+        assert!((d - 50.0).abs() <= 0.1, "dystans {d}");
+        assert!(meter.has_distance_counter());
+        let (steps, d, _) = walk(1.0, 60).await;
+        assert!(steps.abs_diff(54) <= 1, "kroki {steps}");
+        let stride = d / steps as f64;
+        assert!((stride - 0.31).abs() < 0.01, "krok {stride}");
+        let (steps, _, _) = walk(0.3, 30).await;
+        assert_eq!(steps, 0); // przy 0,3 km/h kroki nie rosną
+        // M4: ten sam zegar - te same ramki
+        let run = || async {
+            let clock = Arc::new(AtomicU64::new(0f64.to_bits()));
+            let frames = Arc::new(Mutex::new(Vec::new()));
+            let sim = driver(clock.clone(), frames.clone());
+            sim.start().await.expect("start");
+            sim.start_belt().await.expect("taśma");
+            sim.set_speed(4.0).await.expect("prędkość");
+            for i in 1..=200 {
+                clock.store((f64::from(i) * 0.75).to_bits(), Ordering::SeqCst);
+                sim.advance();
+            }
+            frames.lock().expect("ramki").clone()
+        };
+        let (a, b) = (run().await, run().await);
+        assert_eq!(a, b);
+        assert!(a.iter().any(|f| f.distance_m.unwrap_or(0) >= 10));
     }
 
     #[test]

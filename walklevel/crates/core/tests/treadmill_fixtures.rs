@@ -9,7 +9,7 @@ use walklevel_core::treadmill::kingsmith_proto::{self as ks, Codec, FrameBuffer}
 use walklevel_core::treadmill::profiles::{self, ModelProfile, ProfileRegistry};
 use walklevel_core::treadmill::simulator::{self, SimulatorDriver};
 use walklevel_core::treadmill::{
-    Capabilities, Clock, Driver, DriverKind, ReadingCallback, SpeedGuard, ftms_proto as ftms,
+    Capabilities, Clock, Driver, DriverKind, FrameCallback, SpeedGuard, ftms_proto as ftms,
     known_capabilities, looks_like_treadmill, model_name,
 };
 
@@ -163,9 +163,11 @@ fn kingsmith_replies_drive_state_like_python() {
     for step in data["handle"].as_array().expect("odpowiedzi") {
         let text = step["text"].as_str().expect("tekst");
         let reading = telemetry.handle(text, f(&step["t"]));
+        // Python oddawał ostatnie kroki przy każdej ramce; ramka 0.6 niesie tylko obecne
+        // pole (kroki sprzed ramki są w `last_steps`)
         let actual: Vec<Value> = reading
             .iter()
-            .map(|r| json!([r.speed_kmh, r.steps]))
+            .map(|r| json!([r.speed_kmh, telemetry.last_steps]))
             .collect();
         assert_same(&json!(actual), &step["readings"], text);
         assert_eq!(telemetry.run_state, step["run_state"].as_i64(), "{text}");
@@ -302,7 +304,7 @@ fn x21_trace_is_received_like_python() {
         let readings = telemetry.feed(channel, &bytes(&event["hex"]), now);
         let actual: Vec<Value> = readings
             .iter()
-            .map(|r| json!({"t": now, "speed": r.speed_kmh, "steps": r.steps}))
+            .map(|r| json!({"t": now, "speed": r.speed_kmh, "steps": telemetry.last_steps}))
             .collect();
         assert_same(&json!(actual), &event["readings"], "odczyty");
         assert_eq!(
@@ -417,7 +419,7 @@ fn urevo_trace_drives_state_like_python() {
             telemetry
                 .on_data(&raw, now)
                 .map(|r| {
-                    speeds.push(r.speed_kmh);
+                    speeds.push(r.speed_kmh.unwrap_or_default());
                     json!({"t": now, "speed": r.speed_kmh, "steps": r.steps})
                 })
                 .into_iter()
@@ -626,8 +628,7 @@ async fn simulator_scenarios_match_python() {
         let clock = Arc::new(AtomicU64::new(0f64.to_bits()));
         let readings = Arc::new(Mutex::new(Vec::new()));
         let sink_readings = readings.clone();
-        let sink: ReadingCallback =
-            Arc::new(move |r| sink_readings.lock().expect("odczyty").push(r));
+        let sink: FrameCallback = Arc::new(move |r| sink_readings.lock().expect("odczyty").push(r));
         let tick = clock.clone();
         let now: Clock = Arc::new(move || f64::from_bits(tick.load(Ordering::SeqCst)));
         let caps = Capabilities {
@@ -648,7 +649,9 @@ async fn simulator_scenarios_match_python() {
                     let result = sim.start_belt().await.expect("start taśmy");
                     assert_eq!(result.as_str(), op["result"].as_str().expect("wynik"));
                 }
-                "stop_belt" => sim.stop_belt(true).await.expect("stop"),
+                "stop_belt" => {
+                    sim.stop_belt(true).await.expect("stop");
+                }
                 "set_speed" => {
                     let ok = sim.set_speed(f(&op["kmh"])).await.expect("prędkość");
                     assert_eq!(ok, op["result"].as_bool().expect("wynik"));
@@ -663,9 +666,9 @@ async fn simulator_scenarios_match_python() {
             let state = sim.state();
             let count = readings.lock().expect("odczyty").len() as u64;
             assert_eq!(count, step["readings"].as_u64().expect("odczyty"), "{op}");
+            // kroki: 0.6 ma kadencję 40 + 14·v (docs/analiza-dystans.md, R9), Python 60 + 15·v
             let floats = [
                 (state.speed, &step["speed"]),
-                (state.steps, &step["steps"]),
                 (state.target, &step["target"]),
             ];
             for (actual, expected) in floats {
@@ -690,8 +693,14 @@ async fn simulator_scenarios_match_python() {
             .lock()
             .expect("odczyty")
             .iter()
-            .map(|r| json!([r.speed_kmh, r.steps]))
+            .map(|r| json!(r.speed_kmh))
             .collect();
-        assert_same(&json!(actual), &scenario["readings"], "odczyty");
+        let expected: Vec<Value> = scenario["readings"]
+            .as_array()
+            .expect("odczyty")
+            .iter()
+            .map(|r| r[0].clone())
+            .collect();
+        assert_same(&json!(actual), &json!(expected), "odczyty");
     }
 }

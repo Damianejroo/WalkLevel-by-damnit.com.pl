@@ -10,6 +10,7 @@ use rusqlite::types::ValueRef;
 use serde_json::{Value, json};
 
 use super::*;
+use crate::treadmill::telemetry::TelemetryFrame;
 
 fn mem() -> History {
     History::open_in_memory().unwrap()
@@ -43,11 +44,9 @@ fn row(
     s
 }
 
-/// Zegar sterowany ręcznie i narastające liczniki aplikacji (jak Clock i walk() w Pythonie).
+/// Zegar sterowany ręcznie (ten sam dla sesji i ramek) i ramki bieżni co sekundę.
 struct Walker {
     t: Arc<Mutex<f64>>,
-    dist: f64,
-    act: f64,
 }
 
 impl Walker {
@@ -55,14 +54,7 @@ impl Walker {
         let t = Arc::new(Mutex::new(start));
         let c = Arc::clone(&t);
         let tracker = SessionTracker::with_clock(Box::new(move || *c.lock().unwrap()));
-        (
-            Self {
-                t,
-                dist: 0.0,
-                act: 0.0,
-            },
-            tracker,
-        )
+        (Self { t }, tracker)
     }
 
     fn now(&self) -> f64 {
@@ -73,16 +65,21 @@ impl Walker {
         *self.t.lock().unwrap() += s;
     }
 
-    /// Chód: odczyt co sekundę, licznik kroków bieżni rośnie.
+    fn frame(&self, speed: f64, steps: Option<i64>) -> TelemetryFrame {
+        TelemetryFrame {
+            steps: steps.map(|s| s as u64),
+            ..TelemetryFrame::data(self.now(), Some(speed))
+        }
+    }
+
+    /// Chód: ramka co sekundę, licznik kroków bieżni rośnie.
     fn walk(&mut self, t: &mut SessionTracker, h: &History, seconds: u32, start_steps: i64) -> i64 {
         let mut steps = start_steps;
-        t.update(h, 0.0, Some(steps), self.dist, self.act).unwrap();
+        t.feed(h, &self.frame(0.0, Some(steps))).unwrap();
         for _ in 0..seconds {
             self.tick(1.0);
             steps += 100 / 60 + i64::from(self.now() % 3.0 == 0.0);
-            self.dist += 2.5 / 3600.0;
-            self.act += 1.0;
-            t.update(h, 2.5, Some(steps), self.dist, self.act).unwrap();
+            t.feed(h, &self.frame(2.5, Some(steps))).unwrap();
         }
         steps
     }
@@ -90,7 +87,7 @@ impl Walker {
     fn idle(&mut self, t: &mut SessionTracker, h: &History, seconds: u32, steps: i64) {
         for _ in 0..seconds {
             self.tick(1.0);
-            t.update(h, 0.0, Some(steps), self.dist, self.act).unwrap();
+            t.feed(h, &self.frame(0.0, Some(steps))).unwrap();
         }
     }
 }
@@ -116,8 +113,12 @@ fn session_counts_steps_and_ends_after_idle() {
     let s = &ss[0];
     assert_eq!(s.profile_name, "Cyberpunk 2077");
     assert_eq!(s.steps, end_steps - 1000);
-    assert!((s.distance_km - 300.0 * 2.5 / 3600.0).abs() < 1e-9);
-    assert!((s.avg_kmh() - 2.5).abs() < 1e-9);
+    // prędkość z lewego końca odcinka: 300 s jazdy taśmy, dystans do metra
+    assert!((s.distance_km - (300.0_f64 * 2.5 / 3.6).round() / 1000.0).abs() < 1e-9);
+    assert_eq!(s.active_s, 300.0);
+    assert!((s.avg_kmh() - 2.5).abs() < 0.01);
+    // koniec = ostatni ruch taśmy (sekunda po ostatniej ramce z prędkością), nie +120 s
+    assert_eq!(s.end, w.now() - f64::from(IDLE_END_S as u32 + 1));
     assert_eq!(s.id.len(), 32);
     assert!(s.updated > 0.0);
 }
@@ -165,7 +166,8 @@ fn short_accidental_moves_are_not_saved() {
     let (w, mut t) = Walker::new(1_800_000_000.0);
     t.set_owner(&h, "p1", "A", "g1", "PEAK").unwrap();
     w.tick(1.0);
-    t.update(&h, 0.5, None, 0.0001, 1.0).unwrap();
+    t.feed(&h, &TelemetryFrame::data(w.now(), Some(0.5)))
+        .unwrap();
     t.finish(&h).unwrap();
     assert_eq!(h.count().unwrap(), 0);
 }
@@ -745,85 +747,6 @@ fn sums_match_python_bit_for_bit() {
     assert_eq!(t.distance_km, 1.0);
     assert_eq!(t.active_s, 1.0);
     assert_eq!(h.by_group(0.0, None, GroupKey::Profile).unwrap()[0].1, t);
-}
-
-/// Zdarzenia SessionTracker z Pythona odtworzone w Rust: stan po każdym i zapisane sesje.
-#[test]
-fn tracker_replays_python_events() {
-    let want = load_json("tracker.json");
-    let events = want["events"].as_array().unwrap();
-    let states = want["states"].as_array().unwrap();
-    assert_eq!(events.len(), states.len());
-    let h = mem();
-    let (w, mut t) = Walker::new(0.0);
-    let f = |v: &Value| v.as_f64().unwrap();
-    let st = |v: &Value| v.as_str().unwrap().to_string();
-    for (i, (e, state)) in events.iter().zip(states).enumerate() {
-        *w.t.lock().unwrap() = f(&e["t"]);
-        match e["op"].as_str().unwrap() {
-            "update" => t
-                .update(
-                    &h,
-                    f(&e["speed"]),
-                    e["steps"].as_i64(),
-                    f(&e["dist"]),
-                    f(&e["act"]),
-                )
-                .unwrap(),
-            "owner" => {
-                let a = e["args"].as_array().unwrap();
-                t.set_owner(&h, &st(&a[0]), &st(&a[1]), &st(&a[2]), &st(&a[3]))
-                    .unwrap();
-            }
-            "source" => {
-                let s = &e["src"];
-                let src = SessionSource {
-                    model: st(&s["model"]),
-                    driver: st(&s["driver"]),
-                    profile: st(&s["profile"]),
-                    firmware: st(&s["firmware"]),
-                    app_version: st(&s["app_version"]),
-                    source: st(&s["source"]),
-                };
-                t.set_source(&h, src).unwrap();
-            }
-            "mode" => t.set_mode(&h, e["mode"].as_str().unwrap()).unwrap(),
-            "flush" => t.flush(&h).unwrap(),
-            "finish" => t.finish(&h).unwrap(),
-            other => panic!("nieznane zdarzenie {other}"),
-        }
-        let got = match t.current() {
-            None => json!([h.count().unwrap()]),
-            Some(s) => json!([
-                h.count().unwrap(),
-                s.steps,
-                s.distance_km,
-                s.active_s,
-                s.start,
-                s.end,
-                s.firmware
-            ]),
-        };
-        assert_close(&got, state, &format!("zdarzenie {i} ({})", e["op"]));
-    }
-    let mut saved = all(&h);
-    saved.sort_by(|a, b| a.start.total_cmp(&b.start));
-    for s in &saved {
-        assert_eq!(s.id.len(), 32);
-        assert_eq!(s.tz_offset_min, utc_offset_min(s.start));
-    }
-    let got: Vec<Value> = saved
-        .into_iter()
-        .map(|s| {
-            let mut v = serde_json::to_value(s).unwrap();
-            let m = v.as_object_mut().unwrap();
-            for k in ["id", "updated", "tzOffsetMin"] {
-                m.remove(k);
-            }
-            v
-        })
-        .collect();
-    assert_close(&Value::Array(got), &want["sessions"], "sesje");
 }
 
 /// Strefa z jedną zmianą czasu w chwili `at` (UTC): przed nią `pre`, od niej `post`.

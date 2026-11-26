@@ -1,9 +1,18 @@
-//! Bieżąca sesja liczona z odczytów aplikacji (port SessionTracker z bieznia/historia.py).
+//! Bieżąca sesja liczona z ramek telemetrii bieżni (port SessionTracker z bieznia/historia.py,
+//! zasady z docs/analiza-dystans.md, R8).
+//!
+//! Tracker trzyma własny licznik ([`Meter`]) - kroki, dystans i czas ruchu nie zależą od
+//! mapowania gry ani od sum aplikacji. Sesja zaczyna się od pierwszego ruchu taśmy i kończy po
+//! [`IDLE_END_S`] bez ruchu albo bez żadnych danych ([`SessionTracker::tick`]); koniec sesji
+//! to chwila ostatniego ruchu.
+
+use serde::{Deserialize, Serialize};
 
 use super::{
     History, IDLE_END_S, MIN_SESSION_S, Result, SAVE_EVERY_S, Session, SessionSource, apply_source,
     new_session, now_unix, utc_offset_min, uuid7,
 };
+use crate::treadmill::telemetry::{MOVING_KMH, Meter, MeterTotals, TelemetryFrame, TelemetrySpec};
 
 /// Zegar: bieżący czas uniksowy w sekundach (w testach - sterowany ręcznie).
 pub type Clock = Box<dyn Fn() -> f64 + Send>;
@@ -17,17 +26,32 @@ struct Owner {
     profile_name: String,
 }
 
-/// Liczy bieżącą sesję z odczytów aplikacji i zapisuje ją do historii.
+/// Wartości do kafelków i podglądu na żywo: bieżąca sesja, a po jej końcu - ostatnia
+/// sesja do następnego ruchu.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LiveStats {
+    /// None - bieżnia nie podaje kroków (kafelek „–”)
+    pub steps: Option<i64>,
+    /// kroki/min z okna 15 s (None - taśma stoi albo za mało danych)
+    pub cadence: Option<f64>,
+    pub distance_km: f64,
+    /// czas ruchu taśmy (s)
+    pub active_s: f64,
+}
+
+/// Liczy bieżącą sesję z ramek bieżni i zapisuje ją do historii.
 ///
-/// Kroki z licznika bieżni (zerowanie licznika nie gubi kroków), dystans i czas ruchu
-/// z narastających liczników aplikacji. Zapis co [`SAVE_EVERY_S`], koniec po
-/// [`IDLE_END_S`] bez ruchu. Zmiana osoby, profilu, trybu albo bieżni kończy sesję.
+/// Zapis co [`SAVE_EVERY_S`], koniec po [`IDLE_END_S`] bez ruchu. Zmiana osoby, profilu
+/// albo trybu kończy sesję; zmiana bieżni dodatkowo zaczyna liczniki od nowa.
 pub struct SessionTracker {
     clock: Clock,
     current: Option<Session>,
-    last_steps: Option<i64>,
-    last_distance: f64,
-    last_active: f64,
+    last: Option<Session>,
+    meter: Meter,
+    seen: MeterTotals,
+    /// dystans trwającej sesji w metrach (w sesji zaokrąglony do metra)
+    session_m: f64,
     last_move: f64,
     saved_at: f64,
     owner: Owner,
@@ -52,9 +76,10 @@ impl SessionTracker {
         Self {
             clock,
             current: None,
-            last_steps: None,
-            last_distance: 0.0,
-            last_active: 0.0,
+            last: None,
+            meter: Meter::default(),
+            seen: MeterTotals::default(),
+            session_m: 0.0,
             last_move: 0.0,
             saved_at: 0.0,
             owner: Owner::default(),
@@ -68,6 +93,16 @@ impl SessionTracker {
         self.current.as_ref()
     }
 
+    /// Ostatnia zakończona sesja (do kafelków przed następnym ruchem).
+    pub fn last(&self) -> Option<&Session> {
+        self.last.as_ref()
+    }
+
+    /// Licznik ramek bieżącej bieżni.
+    pub fn meter(&self) -> &Meter {
+        &self.meter
+    }
+
     /// Bieżąca bieżnia (albo symulator).
     pub fn source(&self) -> &SessionSource {
         &self.origin
@@ -78,7 +113,7 @@ impl SessionTracker {
         &self.mode
     }
 
-    /// Zmiana osoby albo profilu kończy sesję poprzedniego.
+    /// Zmiana osoby albo profilu kończy sesję poprzedniego (liczniki bieżni ciągną się dalej).
     pub fn set_owner(
         &mut self,
         history: &History,
@@ -109,14 +144,15 @@ impl SessionTracker {
         Ok(())
     }
 
-    /// Inna bieżnia (albo symulator) to nowa sesja - wyniki nie mieszają się między nimi.
-    /// Firmware odczytany później uzupełnia trwającą sesję.
+    /// Inna bieżnia (albo symulator) to nowa sesja i liczniki od nowa - wyniki i liczniki nie
+    /// mieszają się między nimi. Firmware odczytany później uzupełnia trwającą sesję.
     pub fn set_source(&mut self, history: &History, origin: SessionSource) -> Result<()> {
         let same = origin.model == self.origin.model
             && origin.driver == self.origin.driver
             && origin.source == self.origin.source;
         if !same {
             self.finish(history)?;
+            self.reset_meter(*self.meter.spec());
         }
         if let Some(s) = self.current.as_mut()
             && s.firmware.is_empty()
@@ -128,62 +164,97 @@ impl SessionTracker {
         Ok(())
     }
 
-    /// Wywoływane z pętli aplikacji. `distance_km` i `active_s` to liczniki narastające
-    /// aplikacji, `steps` - licznik bieżni (None, gdy bieżnia go nie podaje).
-    pub fn update(
-        &mut self,
-        history: &History,
-        speed: f64,
-        steps: Option<i64>,
-        distance_km: f64,
-        active_s: f64,
-    ) -> Result<()> {
-        let now = (self.clock)();
-        let d_dist = (distance_km - self.last_distance).max(0.0);
-        let d_active = (active_s - self.last_active).max(0.0);
-        self.last_distance = distance_km;
-        self.last_active = active_s;
-        let mut d_steps = 0;
-        if let Some(steps) = steps {
-            if let Some(last) = self.last_steps {
-                // licznik bieżni wyzerowany - liczymy od zera
-                d_steps = if steps >= last { steps - last } else { steps };
-            }
-            self.last_steps = Some(steps);
+    /// Liczniki bieżącej bieżni (z [`crate::treadmill::WorkerEvent::Device`]). Inne niż
+    /// dotąd - liczniki od nowego punktu odniesienia (sesja trwa dalej).
+    pub fn set_spec(&mut self, spec: TelemetrySpec) {
+        if spec != *self.meter.spec() {
+            self.reset_meter(spec);
         }
-        let moving = speed > 0.05 || d_steps > 0;
+    }
+
+    fn reset_meter(&mut self, spec: TelemetrySpec) {
+        self.meter = Meter::new(spec);
+        self.seen = MeterTotals::default();
+    }
+
+    /// Ramka z bieżni (albo symulatora).
+    pub fn feed(&mut self, history: &History, frame: &TelemetryFrame) -> Result<()> {
+        let now = (self.clock)();
+        if self.current.is_some() && now - self.last_move >= IDLE_END_S {
+            // dane wróciły po długiej przerwie - poprzednia sesja już się skończyła
+            self.finish(history)?;
+        }
+        self.meter.feed(frame);
+        let totals = self.meter.totals();
+        let d_steps = totals.steps.saturating_sub(self.seen.steps);
+        let d_m = (totals.distance_m - self.seen.distance_m).max(0.0);
+        let d_active = (totals.moving_s - self.seen.moving_s).max(0.0);
+        self.seen = totals;
+        let moving = frame.speed_kmh.unwrap_or(0.0) > MOVING_KMH || d_steps > 0 || d_active > 0.0;
         if moving {
             self.last_move = now;
             if self.current.is_none() {
-                let o = &self.owner;
-                let mut s = new_session(
-                    &uuid7(),
-                    &o.person,
-                    &o.person_name,
-                    &o.profile,
-                    &o.profile_name,
-                    now,
-                    now,
-                );
-                apply_source(&mut s, &self.origin);
-                s.tz_offset_min = utc_offset_min(now);
-                s.mode.clone_from(&self.mode);
-                self.current = Some(s);
+                self.begin(now);
             }
         }
         let Some(s) = self.current.as_mut() else {
             return Ok(());
         };
-        s.steps += d_steps.max(0);
-        s.distance_km += d_dist;
+        s.steps += i64::try_from(d_steps).unwrap_or(i64::MAX);
+        self.session_m += d_m;
+        s.distance_km = self.session_m.round() / 1000.0;
         s.active_s += d_active;
-        s.end = now;
-        if !moving && now - self.last_move >= IDLE_END_S {
+        s.end = self.last_move;
+        self.after_update(history, now)
+    }
+
+    /// Co sekundę, także bez danych: koniec sesji po [`IDLE_END_S`] bez ruchu i zapis co
+    /// [`SAVE_EVERY_S`].
+    pub fn tick(&mut self, history: &History) -> Result<()> {
+        let now = (self.clock)();
+        if self.current.is_some() {
+            self.after_update(history, now)?;
+        }
+        Ok(())
+    }
+
+    fn after_update(&mut self, history: &History, now: f64) -> Result<()> {
+        if now - self.last_move >= IDLE_END_S {
             self.finish(history)
         } else if now - self.saved_at >= SAVE_EVERY_S {
             self.save(history)
         } else {
             Ok(())
+        }
+    }
+
+    fn begin(&mut self, now: f64) {
+        let o = &self.owner;
+        let mut s = new_session(
+            &uuid7(),
+            &o.person,
+            &o.person_name,
+            &o.profile,
+            &o.profile_name,
+            now,
+            now,
+        );
+        apply_source(&mut s, &self.origin);
+        s.tz_offset_min = utc_offset_min(now);
+        s.mode.clone_from(&self.mode);
+        self.session_m = 0.0;
+        self.meter.clear_cadence();
+        self.current = Some(s);
+    }
+
+    /// Kafelki: bieżąca sesja (albo ostatnia do następnego ruchu). `now` - zegar ramek.
+    pub fn live(&self, now: f64) -> LiveStats {
+        let shown = self.current.as_ref().or(self.last.as_ref());
+        LiveStats {
+            steps: self.meter.has_steps().then(|| shown.map_or(0, |s| s.steps)),
+            cadence: self.current.as_ref().and_then(|_| self.meter.cadence(now)),
+            distance_km: shown.map_or(0.0, |s| s.distance_km),
+            active_s: shown.map_or(0.0, |s| s.active_s),
         }
     }
 
@@ -214,8 +285,13 @@ impl SessionTracker {
         if self.current.is_some() {
             self.save(history)?;
             if let Some(s) = &self.current {
+                let stride = if s.steps >= 50 {
+                    format!(", krok {:.2} m", s.distance_km * 1000.0 / s.steps as f64)
+                } else {
+                    String::new()
+                };
                 log::info!(
-                    "Sesja kroków: {} / {} - {} kroków, {:.2} km, {:.0} min",
+                    "Sesja kroków: {} / {} - {} kroków, {:.2} km, {:.0} min{stride}",
                     s.person_name,
                     s.profile_name,
                     s.steps,
@@ -224,7 +300,10 @@ impl SessionTracker {
                 );
             }
         }
-        self.current = None;
+        if let Some(s) = self.current.take() {
+            self.last = Some(s);
+        }
+        self.session_m = 0.0;
         Ok(())
     }
 }

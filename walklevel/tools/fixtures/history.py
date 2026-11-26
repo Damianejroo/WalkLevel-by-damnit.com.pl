@@ -7,9 +7,9 @@ Stare bazy (schemat 0, 2, 3, 4) tworzy kod historia.py z commitów tych wersji (
 a oczekiwany stan po migracji liczy bieżący bieznia.historia na kopii każdej bazy.
 Baza v5 z danymi i wynikami zapytań (dni, godziny, grupy, wysyłka) - bieżący kod.
 Daty w listopadzie 2026 (bez zmiany czasu w oknie 30 dni) - test Rust używa zapisanej strefy.
-tracker.json: zdarzenia SessionTracker i stan po każdym z nich; sums.json: sum() co do bitu.
+sums.json: sum() co do bitu (SessionTracker 0.6 liczy z ramek bieżni - testy w Ruście).
 
-Tylko nowe fixtury (bez przebudowy baz): ... history.py tracker
+Tylko sums.json (bez przebudowy baz): ... history.py tracker
 """
 
 from __future__ import annotations
@@ -289,111 +289,6 @@ def make_sums() -> dict[str, Any]:
     }
 
 
-def tracker_events() -> list[dict[str, Any]]:
-    """Scenariusz: bez osoby, chód z zerowaniem licznika, bez licznika, próg 0.05 km/h,
-    przypadkowy ruch, firmware później, symulator, trening, zmiana osoby, flush."""
-    t = ts(2026, 11, 21, 18, 0) + 0.25
-    ev: list[dict[str, Any]] = []
-    dist = act = 0.0
-
-    def upd(speed: float, steps: int | None, dt: float = 1.0) -> None:
-        nonlocal t, dist, act
-        t += dt
-        if speed > 0:
-            dist += speed / 3600 * dt
-            act += dt
-        ev.append({"op": "update", "t": t, "speed": speed, "steps": steps, "dist": dist, "act": act})
-
-    def op(name: str, **kw: Any) -> None:
-        ev.append({"op": name, "t": t, **kw})
-
-    for i in range(15):  # bez osoby - nic nie trafia do historii
-        upd(3.0, 100 + i)
-    op("finish")
-    op("owner", args=["p1", "Ala", "g1", "PEAK"])
-    ks = {"model": "KS-F0", "driver": "kingsmith", "profile": "walkingpad", "firmware": "",
-          "app_version": "0.5.2", "source": "bieznia"}
-    op("source", src=ks)
-    steps = 1000
-    for i in range(90):
-        steps += 1 + (i % 3 == 0)
-        upd(2.7, steps)
-    op("source", src={**ks, "firmware": "1.4.2"})  # firmware odczytany później
-    for i in range(20):  # taśma stoi, ale licznik rośnie (ruch z kroków)
-        steps += 1
-        upd(0.0, steps)
-    for _ in range(10):
-        upd(0.05, steps)  # próg: 0.05 to jeszcze nie ruch
-    steps = 3  # bieżnia wyzerowała licznik
-    upd(2.0, steps)
-    for i in range(40):
-        steps += 2
-        upd(2.0, steps, 1.5)
-    for _ in range(30):
-        upd(3.1, None)  # bieżnia bez licznika kroków
-    for _ in range(125):
-        upd(0.0, None)  # koniec po IDLE_END_S
-    for _ in range(3):
-        upd(0.6, None)  # przypadkowy ruch - za krótko i bez kroków
-    for _ in range(122):
-        upd(0.0, None)
-    op("source", src={"model": "", "driver": "", "profile": "", "firmware": "",
-                      "app_version": "0.5.2", "source": "symulator"})
-    for i in range(70):
-        upd(4.0, 10 + i)
-    op("mode", mode="trening")
-    for i in range(30):
-        upd(4.0, 80 + i)
-    op("flush")
-    op("owner", args=["p2", "Bartek", "", "Trening"])
-    for i in range(65):
-        upd(5.0, 200 + i * 2)
-    op("finish")
-    return ev
-
-
-def snapshot(tr: cur.SessionTracker, h: cur.History) -> list[Any]:
-    """[zapisane sesje, kroki, km, ruch_s, start, koniec, firmware] (bez sesji - same zapisane)."""
-    s = tr.current
-    if s is None:
-        return [h.count()]
-    return [h.count(), s.steps, s.distance_km, s.active_s, s.start, s.end, s.firmware]
-
-
-def make_tracker() -> dict[str, Any]:
-    events = tracker_events()
-    clock = {"t": events[0]["t"]}
-    with tempfile.TemporaryDirectory() as tmp:
-        h = cur.History(Path(tmp) / "historia.db")
-        tr = cur.SessionTracker(h, lambda: clock["t"])
-        states = []
-        for e in events:
-            clock["t"] = e["t"]
-            if e["op"] == "update":
-                tr.update(e["speed"], e["steps"], e["dist"], e["act"])
-            elif e["op"] == "owner":
-                tr.set_owner(*e["args"])
-            elif e["op"] == "source":
-                tr.set_source(cur.SessionSource(**{
-                    "model": e["src"]["model"], "driver": e["src"]["driver"],
-                    "profile": e["src"]["profile"], "firmware": e["src"]["firmware"],
-                    "app_version": e["src"]["app_version"], "source": e["src"]["source"],
-                }))
-            elif e["op"] == "mode":
-                tr.set_mode(e["mode"])
-            elif e["op"] == "flush":
-                tr.flush()
-            elif e["op"] == "finish":
-                tr.finish()
-            states.append(snapshot(tr, h))
-        saved = [
-            {k: v for k, v in sess(s).items() if k not in ("id", "updated", "tzOffsetMin")}
-            for s in sorted(h.sessions(), key=lambda s: s.start)
-        ]
-        h.close()
-    return {"events": events, "states": states, "sessions": saved}
-
-
 def write_json(name: str, data: Any) -> None:
     text = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     (OUT / name).write_text(text, encoding="utf-8")
@@ -401,10 +296,9 @@ def write_json(name: str, data: Any) -> None:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    write_json("tracker.json", make_tracker())
     write_json("sums.json", make_sums())
     if sys.argv[1:] == ["tracker"]:
-        print("fixtury tracker i sums zapisane w", OUT)
+        print("fixtura sums zapisana w", OUT)
         return
     expected: dict[str, Any] = {}
     for key, commit in OLD.items():

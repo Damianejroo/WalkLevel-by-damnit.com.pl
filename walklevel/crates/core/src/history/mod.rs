@@ -22,7 +22,7 @@ use rusqlite::{Connection, OptionalExtension, Row, ToSql};
 use serde::{Deserialize, Serialize};
 
 pub use crate::model::{Session, Totals};
-pub use tracker::{Clock, SessionTracker};
+pub use tracker::{Clock, LiveStats, SessionTracker};
 
 /// Ścieżka bazy względem folderu danych (%LOCALAPPDATA%\Bieznia).
 pub const DB_FILE: &str = "dane/historia.db";

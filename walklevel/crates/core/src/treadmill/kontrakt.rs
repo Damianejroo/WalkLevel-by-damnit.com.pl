@@ -12,6 +12,8 @@ use std::time::Instant;
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};
 
+pub use super::telemetry::TelemetryFrame;
+
 /// Moduł sterownika. Nazwy tekstowe jak w Pythonie - trafiają do historii (`Session::driver`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum DriverKind {
@@ -160,16 +162,8 @@ impl StartResult {
     }
 }
 
-/// Jeden odczyt z bieżni: prędkość taśmy i licznik kroków (None, gdy bieżnia go nie podaje).
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Reading {
-    pub speed_kmh: f64,
-    pub steps: Option<i64>,
-}
-
-/// Odbiorca odczytów (wątek Bluetooth -> silnik sterowania).
-pub type ReadingCallback = Arc<dyn Fn(Reading) + Send + Sync>;
+/// Odbiorca ramek telemetrii (wątek Bluetooth -> silnik sterowania i licznik sesji).
+pub type FrameCallback = Arc<dyn Fn(TelemetryFrame) + Send + Sync>;
 
 /// Zegar monotoniczny w sekundach (w testach podmieniany).
 pub type Clock = Arc<dyn Fn() -> f64 + Send + Sync>;
@@ -198,16 +192,19 @@ pub struct Counts {
 pub enum DriverError {
     /// Urządzenie nie ma żadnej znanej usługi bieżni.
     #[error(
-        "To urządzenie nie wygląda na bieżnię (brak usługi KingSmith ani FTMS). \
-         Zapisz raport diagnostyczny i wyślij go."
+        "To urządzenie nie wygląda na bieżnię. Jeśli to bieżnia, zgłoś ją w Ustawienia > \
+         Pomoc i diagnostyka > Zgłoś problem."
     )]
     UnsupportedDevice,
     /// Błąd Bluetooth (zapis, odczyt, subskrypcja).
-    #[error("Błąd Bluetooth: {0}")]
+    #[error("Problem z Bluetooth. Łączę ponownie… ({0})")]
     Gatt(String),
     /// Połączenie zerwane.
-    #[error("Bieżnia się rozłączyła.")]
+    #[error("Bieżnia się rozłączyła. Łączę ponownie…")]
     Disconnected,
+    /// Bieżnia nie odpowiedziała na czas (np. przy rozpoznawaniu).
+    #[error("Bieżnia nie odpowiada. Jeśli to się powtarza, wyłącz ją i włącz ponownie.")]
+    Timeout,
 }
 
 /// Charakterystyka GATT (UUID małymi literami w pełnej postaci 128-bitowej).
@@ -286,8 +283,14 @@ pub trait Driver: Send + Sync {
 
     fn start_belt(&self) -> BoxFuture<'_, Result<StartResult, DriverError>>;
 
-    /// `verify = false` przy zamykaniu aplikacji (pełny stop zamiast pauzy).
-    fn stop_belt(&self, verify: bool) -> BoxFuture<'_, Result<(), DriverError>>;
+    /// `verify = false` przy zamykaniu aplikacji (pełny stop zamiast pauzy). Wynik: czy
+    /// bieżnia potwierdziła zatrzymanie (bez sprawdzania - zawsze `true`).
+    fn stop_belt(&self, verify: bool) -> BoxFuture<'_, Result<bool, DriverError>>;
+
+    /// Liczniki tej bieżni (zakresy, rozdzielczość) dla [`super::telemetry::Meter`].
+    fn telemetry_spec(&self) -> super::telemetry::TelemetrySpec {
+        super::telemetry::TelemetrySpec::for_driver(self.info().driver, &self.capabilities())
+    }
 
     fn set_speed(&self, kmh: f64) -> BoxFuture<'_, Result<bool, DriverError>>;
 

@@ -7,12 +7,12 @@ use std::time::Duration;
 
 use walklevel_core::treadmill::simulator::{self, SimulatorDriver};
 use walklevel_core::treadmill::{
-    Capabilities, Clock, Driver, DriverKind, Reading, ReadingCallback, StartResult,
+    Capabilities, Clock, Driver, DriverKind, FrameCallback, StartResult, TelemetryFrame,
 };
 
 struct Harness {
     driver: Arc<SimulatorDriver>,
-    readings: Arc<Mutex<Vec<Reading>>>,
+    readings: Arc<Mutex<Vec<TelemetryFrame>>>,
     stop: Arc<AtomicBool>,
     pump: tokio::task::JoinHandle<()>,
 }
@@ -22,8 +22,7 @@ impl Harness {
         let clock = Arc::new(AtomicU64::new(0f64.to_bits()));
         let readings = Arc::new(Mutex::new(Vec::new()));
         let sink_readings = readings.clone();
-        let sink: ReadingCallback =
-            Arc::new(move |r| sink_readings.lock().expect("odczyty").push(r));
+        let sink: FrameCallback = Arc::new(move |r| sink_readings.lock().expect("odczyty").push(r));
         let tick = clock.clone();
         let now: Clock = Arc::new(move || f64::from_bits(tick.load(Ordering::SeqCst)));
         let caps = Capabilities {
