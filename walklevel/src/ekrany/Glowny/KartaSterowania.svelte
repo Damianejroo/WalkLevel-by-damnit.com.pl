@@ -24,6 +24,9 @@
 
   let listaOtwarta = $state(false);
   let wyzwalacz = $state<HTMLButtonElement>();
+  // lista otwarta myszą zamyka się bez fokusu na wyzwalaczu (zgłoszenie: strzałki i Enter od
+  // programu do pada zmieniały profil w oknie WalkLevel); z klawiatury fokus wraca jak zwykle
+  let zKlawiatury = $state(false);
 </script>
 
 <Karta>
@@ -39,7 +42,10 @@
           aria-expanded={listaOtwarta}
           aria-label={t('glowny.sterowanie.profil_dostepnosc', { profil: nazwa })}
           title={nazwa}
-          onclick={() => (listaOtwarta = !listaOtwarta)}
+          onclick={(e) => {
+            zKlawiatury = e.detail === 0;
+            listaOtwarta = !listaOtwarta;
+          }}
         >
           <span class="nazwa jedna-linia dane">{nazwa}</span>
           <Ikona nazwa="w_dol" rozmiar={12} />
@@ -61,7 +67,8 @@
     <Przelacznik
       wlaczony={stan.control.enabled}
       etykieta={t('glowny.sterowanie.przelacznik')}
-      onzmiana={(on) => wykonaj(api.controlSet(on))}
+      bezFokusuPoKliknieciu
+      onzmiana={(on, zKlawiatury) => wykonaj(api.controlSet(on, zKlawiatury))}
     />
   </div>
 
@@ -79,7 +86,8 @@
     etykieta={t('glowny.sterowanie.lista')}
     {pozycje}
     linki={[{ tytul: t('glowny.sterowanie.zarzadzaj'), ikona: 'ustawienia', onclick: () => idz('settings', { kategoria: 'sterowanie' }) }]}
-    onwybierz={(id) => id !== stan.people.activeProfileId && wykonaj(api.profileSwitch(id))}
+    fokusPoZamknieciu={zKlawiatury}
+    onwybierz={(id, klawiatura) => id !== stan.people.activeProfileId && wykonaj(api.profileSwitch(id, 'main', klawiatura))}
   >
     {#snippet poczatek(id)}
       {@const p = osoba?.profiles.find((x) => x.id === id)}

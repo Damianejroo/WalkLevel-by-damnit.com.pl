@@ -30,9 +30,22 @@
     pozycje: Pozycja[];
     linki: Link[];
     poczatek: Snippet<[string]>;
-    onwybierz: (id: string) => void;
+    /** Po zamknięciu fokus wraca na wyzwalacz (lista otwarta z klawiatury); domyślnie tak. */
+    fokusPoZamknieciu?: boolean;
+    /** `zKlawiatury` - wybór Enterem albo spacją. */
+    onwybierz: (id: string, zKlawiatury: boolean) => void;
   }
-  let { otwarta = $bindable(false), wyzwalacz, strona = 'lewo', etykieta, pozycje, linki, poczatek, onwybierz }: Props = $props();
+  let {
+    otwarta = $bindable(false),
+    wyzwalacz,
+    strona = 'lewo',
+    etykieta,
+    pozycje,
+    linki,
+    poczatek,
+    fokusPoZamknieciu = true,
+    onwybierz,
+  }: Props = $props();
 
   let lista = $state<HTMLElement>();
   let polozenie = $state<{ left: number; top?: number; bottom?: number; width: number; maxHeight: number }>({
@@ -57,14 +70,15 @@
       : { left, bottom: b.bottom - r.top + 4, width, maxHeight: nad };
   }
 
-  function zamknij(fokus = true) {
+  function zamknij(fokus = fokusPoZamknieciu) {
     otwarta = false;
     if (fokus) wyzwalacz?.focus({ focusVisible: false } as FocusOptions);
   }
 
-  function wybierz(id: string) {
-    zamknij();
-    onwybierz(id);
+  function wybierz(id: string, e: MouseEvent) {
+    const zKlawiatury = e.detail === 0;
+    zamknij(fokusPoZamknieciu || zKlawiatury);
+    onwybierz(id, zKlawiatury);
   }
 
   function przejdz(link: Link) {
@@ -82,7 +96,7 @@
   function klawisz(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       e.preventDefault();
-      zamknij();
+      zamknij(true);
       return;
     }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -139,7 +153,7 @@
           class:z-opisem={!!p.opis}
           role="radio"
           aria-checked={p.aktywna}
-          onclick={() => wybierz(p.id)}
+          onclick={(e) => wybierz(p.id, e)}
         >
           {@render poczatek(p.id)}
           <span class="tekst">

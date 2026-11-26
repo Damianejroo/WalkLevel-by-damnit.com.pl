@@ -91,7 +91,8 @@ export const padCaptureCancel = () => wywolaj<void>('pad_capture_cancel');
 // 6.3 Sterowanie i trening
 // ============================================================================
 
-export const controlSet = (on: boolean) => wywolaj<void>('control_set', { on });
+/** `keyboard` - przełącznik użyty Enterem albo spacją (dopisek w dzienniku rdzenia). */
+export const controlSet = (on: boolean, keyboard = false) => wywolaj<void>('control_set', { on, keyboard });
 export const controlToggle = () => wywolaj<void>('control_toggle');
 export const trainingLevelSet = (level: 0 | 1 | 2 | 3) => wywolaj<void>('training_level_set', { level });
 export const trainingLevelStep = (step: 1 | -1) => wywolaj<void>('training_level_step', { step });
@@ -122,7 +123,9 @@ export const wizardFinish = (result: K.WizardResult) => wywolaj<void>('wizard_fi
 export const personSwitch = (personId: string) => wywolaj<void>('person_switch', { personId });
 export const personUpdate = (personId: string, patch: K.PersonPatch) => wywolaj<void>('person_update', { personId, patch });
 export const personRemove = (personId: string) => wywolaj<void>('person_remove', { personId });
-export const profileSwitch = (profileId: string) => wywolaj<void>('profile_switch', { profileId });
+/** `from` i `keyboard` trafiają tylko do dziennika rdzenia (skąd przyszła zmiana profilu). */
+export const profileSwitch = (profileId: string, from: 'main' | 'settings', keyboard = false) =>
+  wywolaj<void>('profile_switch', { profileId, from, keyboard });
 export const gamePick = (kind: K.GamePickKind) => wywolaj<K.GamePick | null>('game_pick', { kind });
 export const gamePickDiscard = (pickId: string) => wywolaj<void>('game_pick_discard', { pickId });
 export const profileCreate = (draft: K.ProfileDraft) => wywolaj<string>('profile_create', { draft });

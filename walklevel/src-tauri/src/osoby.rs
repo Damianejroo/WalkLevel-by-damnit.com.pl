@@ -254,13 +254,16 @@ impl App {
         Ok(true)
     }
 
-    pub fn profile_switch(&mut self, profile_id: &str) -> CmdResult<()> {
+    /// Zmiana profilu gry; `source` - skąd (dopisek w dzienniku, jak przy sterowaniu).
+    /// Sterowania nie wyłącza i taśmy nie zatrzymuje sama z siebie - nowy tryb dostaje stan
+    /// sterowania bez zmian (Pad z puszczoną gałką przy „taśma staje” zatrzyma ją sam).
+    pub fn profile_switch(&mut self, profile_id: &str, source: &str) -> CmdResult<()> {
         let Some(store) = self.store.as_mut() else {
             return Ok(());
         };
         if profile_id != store.profile().id {
             store.switch_profile(profile_id)?;
-            log::info!("Profil: {}", store.profile().name);
+            log::info!("Profil: {} ({source})", store.profile().name);
             self.apply_profile();
         }
         Ok(())

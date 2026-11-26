@@ -9,8 +9,8 @@ use std::time::{Duration, Instant};
 use serde_json::{Value, json};
 use walklevel_core::input::{Binding, Hotkeys, Key, KeyboardOutput, SystemKeys};
 use walklevel_core::mapping::{
-    self, BeltCommand, Control, Direction, FrameInput, Held, KeyIdle, PadIdle, Reading,
-    SteeringSettings,
+    self, BeltCommand, Control, ControlSource, Direction, FrameInput, Held, KeyIdle, PadIdle,
+    Reading, SteeringSettings,
 };
 use walklevel_core::treadmill::{self, Link, WorkerEvent};
 
@@ -149,9 +149,10 @@ impl App {
     }
 
     /// Jedno miejsce dla przełącznika, skrótu, pada i przycisku (sterowanie.py set_control).
-    pub fn set_control(&mut self, on: bool) {
+    /// `source` trafia do dziennika przy każdej zmianie (zgłoszenia „samo się wyłącza”).
+    pub fn set_control(&mut self, on: bool, source: &ControlSource) {
         let was = self.bridge.state().enabled;
-        self.bridge.set_enabled(on);
+        self.bridge.set_enabled(on, source);
         walklevel_core::store::settings::save_enabled(
             on,
             &self
@@ -189,7 +190,7 @@ impl App {
         }
         self.steering.forget_target();
         if !self.bridge.state().enabled {
-            self.set_control(true);
+            self.set_control(true, &ControlSource::TrainingLevel(level + 1));
         }
         self.mark(&[SliceName::Settings]);
     }
@@ -205,7 +206,7 @@ impl App {
 
     pub fn training_stop(&mut self) {
         if self.bridge.state().enabled {
-            self.set_control(false);
+            self.set_control(false, &ControlSource::TrainingStop);
         } else {
             self.belt(BeltCommand::Stop);
         }
@@ -215,7 +216,7 @@ impl App {
     /// najpierw się wyłącza (inaczej klawisz albo gałka zaraz by ją znów uruchomiły).
     pub fn belt_stop(&mut self) {
         if self.bridge.state().enabled {
-            self.set_control(false);
+            self.set_control(false, &ControlSource::BubbleStop);
         }
         self.belt_target = None;
         self.belt(BeltCommand::Stop);
@@ -441,7 +442,8 @@ impl App {
         let toggle = self.s("toggle_pad");
         if !toggle.is_empty() && pressed.contains(&toggle) && !capturing_keys {
             let on = !self.bridge.state().enabled;
-            self.set_control(on);
+            let source = ControlSource::PadButton(self.pad_button_label());
+            self.set_control(on, &source);
         }
     }
 
@@ -482,7 +484,8 @@ impl App {
         }
         if actions.iter().any(|a| a == "toggle") && !capturing {
             let on = !self.bridge.state().enabled;
-            self.set_control(on);
+            let source = ControlSource::Hotkey(self.toggle_key.label());
+            self.set_control(on, &source);
         }
         let reading = self.pending_reading.take();
         let state = self.bridge.tick(now, false, reading).clone();

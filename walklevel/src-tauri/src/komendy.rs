@@ -9,6 +9,7 @@ use serde_json::Value;
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
 use walklevel_core::backup;
+use walklevel_core::mapping::ControlSource;
 
 use crate::akcje;
 use crate::konto;
@@ -206,8 +207,11 @@ pub async fn pad_capture_cancel(core: State<'_, Core>) -> CmdResult<()> {
 // --- 6.3 sterowanie ---------------------------------------------------------------------------
 
 #[tauri::command]
-pub async fn control_set(core: State<'_, Core>, on: bool) -> CmdResult<()> {
-    core.with(|a| a.set_control(on));
+pub async fn control_set(core: State<'_, Core>, on: bool, keyboard: Option<bool>) -> CmdResult<()> {
+    let source = ControlSource::WindowSwitch {
+        keyboard: keyboard.unwrap_or(false),
+    };
+    core.with(|a| a.set_control(on, &source));
     Ok(())
 }
 
@@ -215,7 +219,7 @@ pub async fn control_set(core: State<'_, Core>, on: bool) -> CmdResult<()> {
 pub async fn control_toggle(core: State<'_, Core>) -> CmdResult<()> {
     core.with(|a| {
         let on = !a.bridge.state().enabled;
-        a.set_control(on);
+        a.set_control(on, &ControlSource::Command);
     });
     Ok(())
 }
@@ -416,9 +420,30 @@ pub async fn person_remove(core: State<'_, Core>, person_id: String) -> CmdResul
     Ok(())
 }
 
+/// Dopisek w dzienniku przy zmianie profilu: z której listy i czy z klawiatury (zgłoszenie:
+/// profil „sam” przeskakiwał - klawisze od programu do pada trafiały w okno WalkLevel).
+fn profile_switch_source(from: Option<&str>, keyboard: bool) -> String {
+    let place = match from {
+        Some("main") => "okno: lista profili na ekranie głównym",
+        Some("settings") => "okno: Ustawienia",
+        _ => "polecenie",
+    };
+    if keyboard {
+        format!("{place}, z klawiatury")
+    } else {
+        place.to_string()
+    }
+}
+
 #[tauri::command]
-pub async fn profile_switch(core: State<'_, Core>, profile_id: String) -> CmdResult<()> {
-    core.with(|a| a.profile_switch(&profile_id))
+pub async fn profile_switch(
+    core: State<'_, Core>,
+    profile_id: String,
+    from: Option<String>,
+    keyboard: Option<bool>,
+) -> CmdResult<()> {
+    let source = profile_switch_source(from.as_deref(), keyboard.unwrap_or(false));
+    core.with(|a| a.profile_switch(&profile_id, &source))
 }
 
 #[tauri::command]
@@ -992,7 +1017,7 @@ pub async fn update_check(core: State<'_, Core>, install: bool) -> CmdResult<()>
 pub async fn bubble_click(core: State<'_, Core>) -> CmdResult<()> {
     core.with(|a| {
         let on = !a.bridge.state().enabled;
-        a.set_control(on);
+        a.set_control(on, &ControlSource::Bubble);
     });
     Ok(())
 }

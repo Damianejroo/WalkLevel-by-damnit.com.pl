@@ -1329,7 +1329,7 @@ Zmiana koloru profilu to `profile_update(id, { color })`; wygląd przelicza UI (
 
 | Komenda | Argumenty | Wynik | Skutek |
 |---|---|---|---|
-| `control_set` | `on: bool` | `()` | `set_control`: jedno miejsce dla przełącznika, skrótu, pada i przycisku; zapis `dane/stan.json`; start/stop taśmy wg trybu (rozdz. 9.3) |
+| `control_set` | `on: bool`, `keyboard: Option<bool>` | `()` | `set_control`: jedno miejsce dla przełącznika, skrótu, pada i przycisku; zapis `dane/stan.json`; start/stop taśmy wg trybu (rozdz. 9.3). Od 0.6.2 każda zmiana stanu idzie do dziennika ze źródłem (`ControlSource`): „Sterowanie WYŁĄCZONE (klawisz ])”, „(okno: przełącznik)”, „(okno: przełącznik, z klawiatury)” - `keyboard` = Enter/spacja, „(przycisk na ekranie)”, „(przycisk na ekranie: Stop)”, „(Trening: Stop)”, „(Trening: poziom N)”, „(pad: przycisk X)”, „(polecenie)” |
 | `control_toggle` | - | `()` | jak przycisk na ekranie / F8 |
 | `training_level_set` | `level: u8` | `()` | ustawia poziom; gdy sterowanie wyłączone - włącza je (taśma rusza) |
 | `training_level_step` | `step: i8` (±1) | `()` | klawisze szybciej/wolniej (domyślnie F7/F6) w trybie Trening robią to samo w pętli; wołane też z okna przycisku (+/−) |
@@ -1362,7 +1362,7 @@ Symulator: `settings_set('simulator', true|false)`. Klawisze wolniej/szybciej (p
 | `person_switch` | `person_id: String` | `()` | `choose_person`: kończy bieżącą sesję, czyści `online`, nowe ustawienia/wygląd |
 | `person_update` | `person_id: String`, `patch: PersonPatch` | `()` | nazwa (pusta → bez zmian) i kolor; UI zapisuje 500 ms po ostatniej literze i przy wyjściu z pola |
 | `person_remove` | `person_id: String` | `()` | ostatniej się nie da (`invalid`); wylogowuje konto osoby lokalnie (`Accounts.forget_person`), sesje → „Usunięte osoby” |
-| `profile_switch` | `profile_id: String` | `()` | `choose_profile` (kończy sesję poprzedniego profilu) |
+| `profile_switch` | `profile_id: String`, `from: Option<String>` (`main`/`settings`), `keyboard: Option<bool>` | `()` | `choose_profile` (kończy sesję poprzedniego profilu); dziennik: „Profil: X (okno: lista profili na ekranie głównym, z klawiatury)”. Sterowania nie wyłącza |
 | `game_pick` | `kind: String` (`"folder"`/`"file"`) (okno) | `Option<GamePick>` | `ikony.resolve` + ikona 128 px + kolor z ikony; nic nie znaleziono → `notFound` „Nie znalazłem pliku gry w tym miejscu.” |
 | `game_pick_discard` | `pick_id: String` | `()` | usuwa tymczasową ikonę (wyjście bez zapisu) |
 | `profile_create` | `draft: ProfileDraft` | `String` (id) | `add_profile` + aktywacja + `apply_profile` |
@@ -1495,7 +1495,7 @@ key_set(role: KeyRole, key: KeyCapture) -> CmdResult<KeyBinding>
 pad_capture_start() -> CmdResult<()>
 pad_capture_cancel() -> CmdResult<()>
 
-control_set(on: bool) -> CmdResult<()>
+control_set(on: bool, keyboard: Option<bool>) -> CmdResult<()>
 control_toggle() -> CmdResult<()>
 training_level_set(level: u8) -> CmdResult<()>
 training_level_step(step: i8) -> CmdResult<()>
@@ -1518,7 +1518,7 @@ wizard_finish(result: WizardResult) -> CmdResult<()>
 person_switch(person_id: String) -> CmdResult<()>
 person_update(person_id: String, patch: PersonPatch) -> CmdResult<()>
 person_remove(person_id: String) -> CmdResult<()>
-profile_switch(profile_id: String) -> CmdResult<()>
+profile_switch(profile_id: String, from: Option<String>, keyboard: Option<bool>) -> CmdResult<()>
 game_pick(kind: String) -> CmdResult<Option<GamePick>>
 game_pick_discard(pick_id: String) -> CmdResult<()>
 profile_create(draft: ProfileDraft) -> CmdResult<String>

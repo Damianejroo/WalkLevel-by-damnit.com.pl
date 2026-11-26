@@ -14,6 +14,58 @@ pub const HISTORY_LEN: usize = 1300;
 /// Kadencja z ostatnich tylu odczytów licznika kroków.
 const STEPS_WINDOW: usize = 20;
 
+/// Skąd przyszło włączenie albo wyłączenie sterowania (dopisek w dzienniku).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ControlSource {
+    /// klawisz włączania sterowania (etykieta klawisza, np. „F8”, „]”)
+    Hotkey(String),
+    /// przycisk pada działający jak klawisz włączania (nazwa przycisku)
+    PadButton(String),
+    /// przełącznik na ekranie głównym; `keyboard` - Enter albo spacja zamiast kliknięcia
+    WindowSwitch { keyboard: bool },
+    /// kliknięcie przycisku na ekranie (nad grą)
+    Bubble,
+    /// Stop pod przyciskiem na ekranie poza Treningiem
+    BubbleStop,
+    /// Stop w Treningu (ekran główny albo przycisk na ekranie)
+    TrainingStop,
+    /// wybór poziomu Treningu włącza sterowanie (numer poziomu od 1)
+    TrainingLevel(usize),
+    /// polecenie bez wskazanego miejsca (komenda `control_toggle`, testy)
+    Command,
+}
+
+impl ControlSource {
+    /// Dopisek do dziennika, np. „klawisz F8”, „okno: przełącznik”.
+    pub fn label(&self) -> String {
+        match self {
+            Self::Hotkey(key) => format!("klawisz {key}"),
+            Self::PadButton(button) => format!("pad: przycisk {button}"),
+            Self::WindowSwitch { keyboard: false } => "okno: przełącznik".into(),
+            Self::WindowSwitch { keyboard: true } => "okno: przełącznik, z klawiatury".into(),
+            Self::Bubble => "przycisk na ekranie".into(),
+            Self::BubbleStop => "przycisk na ekranie: Stop".into(),
+            Self::TrainingStop => "Trening: Stop".into(),
+            Self::TrainingLevel(level) => format!("Trening: poziom {level}"),
+            Self::Command => "polecenie".into(),
+        }
+    }
+}
+
+/// Linia dziennika przy zmianie stanu sterowania - zawsze ze źródłem w nawiasie.
+pub fn control_log_line(enabled: bool, source: &ControlSource) -> String {
+    let label = source.label();
+    let label = if label.trim().is_empty() {
+        "nieznane źródło".to_string()
+    } else {
+        label
+    };
+    format!(
+        "Sterowanie {} ({label})",
+        if enabled { "WŁĄCZONE" } else { "WYŁĄCZONE" }
+    )
+}
+
 /// Co robimy z wyliczonym sterowaniem. Realizacje: [`DryOutput`] i klawiatura (moduł input).
 pub trait Output {
     /// Ustawia stan wyjścia zgodnie ze sterowaniem (wywoływane co klatkę).
@@ -205,24 +257,29 @@ impl Bridge {
         self.mapper = SpeedMapper::new(mapping);
     }
 
-    /// Włącza albo wyłącza sterowanie; wyłączenie puszcza klawisze.
-    pub fn set_enabled(&mut self, enabled: bool) {
+    /// Włącza albo wyłącza sterowanie; wyłączenie puszcza klawisze. Każda zmiana trafia do
+    /// dziennika razem ze źródłem ([`control_log_line`]) - zgłoszenia „samo się wyłącza”
+    /// rozstrzyga dopiero to, skąd przyszło polecenie. Zwraca, czy stan się zmienił.
+    pub fn set_enabled(&mut self, enabled: bool, source: &ControlSource) -> bool {
         if enabled == self.state.enabled {
-            return;
+            log::debug!(
+                "Sterowanie już {} ({})",
+                if enabled { "włączone" } else { "wyłączone" },
+                source.label()
+            );
+            return false;
         }
         self.state.enabled = enabled;
-        log::info!(
-            "Sterowanie {}",
-            if enabled { "WŁĄCZONE" } else { "WYŁĄCZONE" }
-        );
+        log::info!("{}", control_log_line(enabled, source));
         if !enabled {
             self.output.release_all();
         }
+        true
     }
 
     /// Przełącza sterowanie; zwraca nowy stan.
-    pub fn toggle(&mut self) -> bool {
-        self.set_enabled(!self.state.enabled);
+    pub fn toggle(&mut self, source: &ControlSource) -> bool {
+        self.set_enabled(!self.state.enabled, source);
         self.state.enabled
     }
 
@@ -257,7 +314,7 @@ impl Bridge {
     /// odczyt z bieżni od poprzedniej klatki (albo `None`).
     pub fn tick(&mut self, now: f64, toggle: bool, reading: Option<Reading>) -> &Snapshot {
         if toggle {
-            self.toggle();
+            self.toggle(&ControlSource::Command);
         }
         let dt = match self.last_tick {
             None => 0.0,
@@ -370,6 +427,48 @@ mod tests {
         let state = bridge.tick(4.0, false, None); // dłużej niż stale_after_s (3 s)
         assert!(!state.control.walk && !state.live);
         assert_eq!(spy.lock().expect("spy").applied.last(), Some(&false));
+    }
+
+    #[test]
+    fn every_control_change_is_logged_with_its_source() {
+        let sources = [
+            ControlSource::Hotkey("]".into()),
+            ControlSource::Hotkey(String::new()),
+            ControlSource::PadButton("Panel dotykowy".into()),
+            ControlSource::WindowSwitch { keyboard: false },
+            ControlSource::WindowSwitch { keyboard: true },
+            ControlSource::Bubble,
+            ControlSource::BubbleStop,
+            ControlSource::TrainingStop,
+            ControlSource::TrainingLevel(2),
+            ControlSource::Command,
+        ];
+        for source in &sources {
+            for on in [true, false] {
+                let line = control_log_line(on, source);
+                let (head, tail) = line.split_once(" (").expect("źródło w nawiasie");
+                assert_eq!(
+                    head,
+                    if on {
+                        "Sterowanie WŁĄCZONE"
+                    } else {
+                        "Sterowanie WYŁĄCZONE"
+                    }
+                );
+                assert!(tail.ends_with(')') && tail.len() > 3, "{line}");
+            }
+        }
+        assert_eq!(
+            control_log_line(false, &ControlSource::Hotkey("]".into())),
+            "Sterowanie WYŁĄCZONE (klawisz ])"
+        );
+        assert_eq!(
+            control_log_line(true, &ControlSource::TrainingLevel(3)),
+            "Sterowanie WŁĄCZONE (Trening: poziom 3)"
+        );
+        let (mut bridge, _) = make(false);
+        assert!(bridge.set_enabled(true, &ControlSource::Bubble));
+        assert!(!bridge.set_enabled(true, &ControlSource::Bubble)); // bez zmiany - bez wpisu info
     }
 
     #[test]

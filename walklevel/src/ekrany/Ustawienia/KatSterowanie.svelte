@@ -76,7 +76,7 @@
       opis={podsumowanie(p)}
       wybrany={p.id === stan.people.activeProfileId}
       etykietaEdycji={t('wspolne.edytuj_co', { nazwa: p.name })}
-      onwybierz={() => p.id !== stan.people.activeProfileId && wykonaj(api.profileSwitch(p.id))}
+      onwybierz={() => p.id !== stan.people.activeProfileId && wykonaj(api.profileSwitch(p.id, 'settings'))}
       onedytuj={() => idz('profile', { profileId: p.id })}
     >
       {#snippet poczatek()}<IkonaProfilu ikona={p.icon} />{/snippet}

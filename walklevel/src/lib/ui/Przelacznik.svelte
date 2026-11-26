@@ -8,14 +8,23 @@
     /** Nazwa dostępna, gdy nie ma tytułu. */
     etykieta?: string;
     disabled?: boolean;
-    onzmiana?: (wlaczony: boolean) => void;
+    /** `zKlawiatury` - Enter albo spacja (kliknięcie bez wskaźnika, `detail === 0`). */
+    onzmiana?: (wlaczony: boolean, zKlawiatury: boolean) => void;
+    /**
+     * Po kliknięciu myszą fokus nie zostaje na przełączniku: klawisze, które program do pada
+     * wysyła do okna WalkLevel (Enter, spacja), nie przełączą go wtedy przypadkiem.
+     */
+    bezFokusuPoKliknieciu?: boolean;
   }
-  let { wlaczony = $bindable(false), tytul, opis, etykieta, disabled = false, onzmiana }: Props = $props();
+  let { wlaczony = $bindable(false), tytul, opis, etykieta, disabled = false, onzmiana, bezFokusuPoKliknieciu = false }: Props =
+    $props();
   const id = $props.id();
 
-  function przelacz() {
+  function przelacz(e: MouseEvent) {
+    const zKlawiatury = e.detail === 0;
     wlaczony = !wlaczony;
-    onzmiana?.(wlaczony);
+    onzmiana?.(wlaczony, zKlawiatury);
+    if (bezFokusuPoKliknieciu && !zKlawiatury) (e.currentTarget as HTMLElement).blur();
   }
 </script>
 
