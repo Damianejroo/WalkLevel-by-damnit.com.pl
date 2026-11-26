@@ -1,0 +1,1153 @@
+{
+ "wersja": 2,
+ "opis": "WalkLevel: definicje poziomów, rang i osiągnięć. Wspólne dla aplikacji i serwera. Zmiana progu = nowa wersja; zdobytych nie odbieramy.",
+ "xp_za_km": 100,
+ "xp_za_rzadkosc": {
+  "pospolite": 20,
+  "rzadkie": 100,
+  "epickie": 500,
+  "heroiczne": 1200,
+  "legendarne": 2500
+ },
+ "rzadkosci": [
+  "pospolite",
+  "rzadkie",
+  "epickie",
+  "heroiczne",
+  "legendarne"
+ ],
+ "poziomy_xp": [
+  0,
+  961,
+  2719,
+  4996,
+  7691,
+  10749,
+  14130,
+  17806,
+  21755,
+  25960,
+  30404,
+  35077,
+  39968,
+  45066,
+  50365,
+  55857,
+  61535,
+  67393,
+  73426,
+  79629,
+  85997,
+  92527,
+  99214,
+  106055,
+  113047,
+  120185,
+  127468,
+  134892,
+  142455,
+  150155,
+  157988,
+  165953,
+  174047,
+  182269,
+  190616,
+  199088,
+  207681,
+  216394,
+  225225,
+  234174,
+  243238,
+  252417,
+  261707,
+  271110,
+  280622,
+  290243,
+  299971,
+  309806,
+  319745,
+  329789,
+  339936,
+  350185,
+  360535,
+  370985,
+  381534,
+  392181,
+  402925,
+  413766,
+  424702,
+  435733,
+  446858,
+  458076,
+  469386,
+  480788,
+  492280,
+  503863,
+  515535,
+  527296,
+  539146,
+  551082,
+  563105,
+  575215,
+  587410,
+  599690,
+  612055,
+  624503,
+  637035,
+  649649,
+  662346,
+  675124,
+  687983,
+  700923,
+  713943,
+  727043,
+  740221,
+  753479,
+  766815,
+  780228,
+  793719,
+  807287,
+  820931,
+  834651,
+  848447,
+  862318,
+  876263,
+  890283,
+  904377,
+  918545,
+  932786,
+  947100
+ ],
+ "rangi": [
+  {
+   "od_poziomu": 1,
+   "nazwa": "Hobbit z Shire",
+   "opis": "Hobbici rzadko chodzili dalej niż do sąsiedniej wsi."
+  },
+  {
+   "od_poziomu": 2,
+   "nazwa": "Robinson Crusoe",
+   "opis": "Dwadzieścia osiem lat na jednej wyspie. Zna każdą jej ścieżkę."
+  },
+  {
+   "od_poziomu": 3,
+   "nazwa": "Sim z The Sims",
+   "opis": "Najdalsze wyprawy: do lodówki i do skrzynki na listy."
+  },
+  {
+   "od_poziomu": 4,
+   "nazwa": "Bezimienny",
+   "opis": "Cały jego świat mieścił się pod Barierą o średnicy około 2 km."
+  },
+  {
+   "od_poziomu": 5,
+   "nazwa": "Baron Harkonnen",
+   "opis": "Po Arrakis wożą go dryfy i ornitoptery, więc sam chodzi niewiele."
+  },
+  {
+   "od_poziomu": 6,
+   "nazwa": "Chell",
+   "opis": "Przeszła wszystkie komory testowe Aperture, kilometry korytarzy."
+  },
+  {
+   "od_poziomu": 7,
+   "nazwa": "V z Night City",
+   "opis": "Night City zna na pamięć, choć zwykle zza kierownicy."
+  },
+  {
+   "od_poziomu": 9,
+   "nazwa": "Gordon Freeman",
+   "opis": "Z Black Mesa do City 17, prawie cały czas pieszo i z łomem."
+  },
+  {
+   "od_poziomu": 10,
+   "nazwa": "Nieumarły Wybraniec",
+   "opis": "Lordran przeszedł wzdłuż i w dół, ginąc po drodze setki razy."
+  },
+  {
+   "od_poziomu": 12,
+   "nazwa": "Naznaczony",
+   "opis": "Z Kordonu przez całą Zonę aż pod Elektrownię."
+  },
+  {
+   "od_poziomu": 13,
+   "nazwa": "Bohater Kvatch",
+   "opis": "Cyrodiil od bramy do bramy Otchłani."
+  },
+  {
+   "od_poziomu": 15,
+   "nazwa": "Smocze Dziecię",
+   "opis": "Skyrim ma kilka kilometrów wszerz, a zadania wysyłają w każdy jego kąt."
+  },
+  {
+   "od_poziomu": 17,
+   "nazwa": "Nerevaryjczyk",
+   "opis": "Vvardenfell pieszo, od Seyda Neen po Czerwoną Górę."
+  },
+  {
+   "od_poziomu": 19,
+   "nazwa": "Link",
+   "opis": "Obudził się po stu latach i przeszedł Hyrule wzdłuż i wszerz."
+  },
+  {
+   "od_poziomu": 21,
+   "nazwa": "Minsc i Boo",
+   "opis": "Wojownik z Rashemenu i jego chomik przeszli całe Wybrzeże Mieczy, szukając zła do skopania."
+  },
+  {
+   "od_poziomu": 23,
+   "nazwa": "Master Chief",
+   "opis": "Przeszedł spory kawałek pierścienia Halo, metr po metrze."
+  },
+  {
+   "od_poziomu": 26,
+   "nazwa": "Samotny Wędrowiec",
+   "opis": "Wyszedł z Krypty 101 i przeszedł całe Stołeczne Pustkowie."
+  },
+  {
+   "od_poziomu": 31,
+   "nazwa": "Arthur Morgan",
+   "opis": "Pół Dzikiego Zachodu przemierzył z gangiem, choć głównie w siodle."
+  },
+  {
+   "od_poziomu": 35,
+   "nazwa": "Kurier z Mojave",
+   "opis": "Z kulą w głowie przeszedł pustynię od Goodsprings po Zaporę Hoovera."
+  },
+  {
+   "od_poziomu": 40,
+   "nazwa": "Drużyna z tawerny",
+   "opis": "Każda kampania D&D zaczyna się w tawernie, a kończy kilka tysięcy mil dalej."
+  },
+  {
+   "od_poziomu": 44,
+   "nazwa": "Steve",
+   "opis": "Świat Minecrafta ma 60 milionów bloków szerokości, więc zawsze jest dokąd iść."
+  },
+  {
+   "od_poziomu": 48,
+   "nazwa": "Bohater Azeroth",
+   "opis": "W pierwszym WoW-ie wierzchowiec był dopiero od 40 poziomu, więc całe Azeroth trzeba było przejść pieszo."
+  },
+  {
+   "od_poziomu": 52,
+   "nazwa": "Lara Croft",
+   "opis": "Grobowce na wszystkich kontynentach, zwykle na piechotę i z liną."
+  },
+  {
+   "od_poziomu": 55,
+   "nazwa": "Nathan Drake",
+   "opis": "Szukał skarbów od Borneo po Madagaskar."
+  },
+  {
+   "od_poziomu": 59,
+   "nazwa": "Kratos",
+   "opis": "Z synem przez Midgard na najwyższy szczyt wszystkich krain."
+  },
+  {
+   "od_poziomu": 62,
+   "nazwa": "Geralt z Rivii",
+   "opis": "Wiedźmin całe życie na szlaku, choć sporą część drogi zrobiła Płotka."
+  },
+  {
+   "od_poziomu": 65,
+   "nazwa": "Aloy",
+   "opis": "Przemierzyła pieszo cały Zakazany Zachód."
+  },
+  {
+   "od_poziomu": 69,
+   "nazwa": "Ellie",
+   "opis": "Przez zrujnowane Stany, od Bostonu na zachód."
+  },
+  {
+   "od_poziomu": 72,
+   "nazwa": "Arya Stark",
+   "opis": "Z Królewskiej Przystani przez całe Dorzecze, potem do Braavos i z powrotem."
+  },
+  {
+   "od_poziomu": 75,
+   "nazwa": "Arthas",
+   "opis": "Z Lordaeronu przez morze do mroźnego Northrendu."
+  },
+  {
+   "od_poziomu": 78,
+   "nazwa": "Paul Atryda",
+   "opis": "Z Arrakin w głęboką pustynię, a potem z Fremenami przez cały Arrakis."
+  },
+  {
+   "od_poziomu": 81,
+   "nazwa": "Ciri",
+   "opis": "Jaskółka, która wędrowała nie tylko po Kontynencie, ale i między światami."
+  },
+  {
+   "od_poziomu": 84,
+   "nazwa": "Duncan Idaho",
+   "opis": "Mistrz miecza Atrydów, który miesiącami żył z Fremenami na pustyni."
+  },
+  {
+   "od_poziomu": 87,
+   "nazwa": "Bilbo Baggins",
+   "opis": "Włamywacz z Bag End, który wyruszył na wyprawę nawet bez chusteczki do nosa."
+  },
+  {
+   "od_poziomu": 89,
+   "nazwa": "Frodo Baggins",
+   "opis": "Pieszo z Shire do Mordoru, prawie 3 000 km."
+  },
+  {
+   "od_poziomu": 92,
+   "nazwa": "Sam Porter Bridges",
+   "opis": "Tragarz, który pieszo połączył Amerykę od wybrzeża do wybrzeża."
+  },
+  {
+   "od_poziomu": 95,
+   "nazwa": "Odyseusz",
+   "opis": "Dziesięć lat wracał spod Troi na Itakę."
+  },
+  {
+   "od_poziomu": 97,
+   "nazwa": "Obieżyświat",
+   "opis": "Strażnik Północy, który przez dziesiątki lat przemierzał Śródziemie."
+  },
+  {
+   "od_poziomu": 100,
+   "nazwa": "Szary Pielgrzym",
+   "opis": "Gandalf wędrował po Śródziemiu przez dwa tysiące lat."
+  }
+ ],
+ "zasady": {
+  "seria_wolne_dni_na_7": 1,
+  "min_km_dnia_serii": 2.0,
+  "dzien_sesji": "lokalny dzień początku sesji",
+  "zrodlo": "tylko bieżnia, bez symulatora"
+ },
+ "osiagniecia": [
+  {
+   "id": "km1",
+   "typ": "dystans",
+   "km": 1,
+   "rzadkosc": "pospolite",
+   "znak": "stopy",
+   "nazwa": "Tutorial ukończony",
+   "klimat": "Postać przeszła pierwszy kilometr i samouczek zniknął z ekranu.",
+   "warunek": "Przejdź łącznie 1 km."
+  },
+  {
+   "id": "km2",
+   "typ": "dystans",
+   "km": 2,
+   "rzadkosc": "pospolite",
+   "znak": "kopula",
+   "nazwa": "Za Barierą",
+   "klimat": "Magiczna kopuła nad Kolonią z Gothica ma około 2 km średnicy. Od ściany do ściany.",
+   "warunek": "Przejdź łącznie 2 km."
+  },
+  {
+   "id": "km57",
+   "typ": "dystans",
+   "km": 5.7,
+   "rzadkosc": "pospolite",
+   "znak": "helm",
+   "nazwa": "Skyrim na piechotę",
+   "klimat": "Mniej więcej tyle ma mapa Skyrima w grze z zachodu na wschód. Cała prowincja, w skali gry, przebyta pieszo.",
+   "warunek": "Przejdź łącznie 5,7 km."
+  },
+  {
+   "id": "km113",
+   "typ": "dystans",
+   "km": 11.3,
+   "rzadkosc": "pospolite",
+   "znak": "celownik",
+   "nazwa": "Erangel po przekątnej",
+   "klimat": "Mapa Erangel z PUBG ma 8 na 8 km, więc z rogu do rogu to ponad 11 km.",
+   "warunek": "Przejdź łącznie 11,3 km."
+  },
+  {
+   "id": "km24",
+   "typ": "dystans",
+   "km": 24,
+   "rzadkosc": "pospolite",
+   "znak": "portal",
+   "nazwa": "Skrót przez Nether",
+   "klimat": "W Netherze z Minecrafta każdy blok liczy się za osiem. Tam te 24 km to tylko 3 000 bloków.",
+   "warunek": "Przejdź łącznie 24 km."
+  },
+  {
+   "id": "km30",
+   "typ": "dystans",
+   "km": 30,
+   "rzadkosc": "pospolite",
+   "znak": "radiacja",
+   "nazwa": "Przez Zonę",
+   "klimat": "Zona ze Stalkera to strefa wokół elektrowni o promieniu około 30 km. Z Kordonu na południu pod samą Elektrownię.",
+   "warunek": "Przejdź łącznie 30 km."
+  },
+  {
+   "id": "km447",
+   "typ": "dystans",
+   "km": 44.7,
+   "rzadkosc": "pospolite",
+   "znak": "cytadela",
+   "nazwa": "Cytadela od końca do końca",
+   "klimat": "Stacja Cytadela z Mass Effect ma 44,7 km długości, od końca do końca.",
+   "warunek": "Przejdź łącznie 44,7 km."
+  },
+  {
+   "id": "km53",
+   "typ": "dystans",
+   "km": 53,
+   "rzadkosc": "pospolite",
+   "znak": "gora",
+   "nazwa": "Przełęcz Chilkoot",
+   "klimat": "Szlakiem przez przełęcz Chilkoot Buck z „Zewu krwi” Londona idzie ku Klondike. Od Dyea do jeziora Bennett to 53 km.",
+   "warunek": "Przejdź łącznie 53 km."
+  },
+  {
+   "id": "km63",
+   "typ": "dystans",
+   "km": 63,
+   "rzadkosc": "pospolite",
+   "znak": "dysk",
+   "nazwa": "Krawędź Valheim",
+   "klimat": "Świat Valheim to dysk o promieniu 10 km. Dookoła, wzdłuż samej krawędzi, wychodzi prawie 63 km.",
+   "warunek": "Przejdź łącznie 63 km."
+  },
+  {
+   "id": "km70",
+   "typ": "dystans",
+   "km": 70,
+   "rzadkosc": "pospolite",
+   "znak": "miecz",
+   "nazwa": "Cuszima wzdłuż",
+   "klimat": "Wyspa Cuszima, na której dzieje się Ghost of Tsushima, ma w rzeczywistości około 70 km z północy na południe.",
+   "warunek": "Przejdź łącznie 70 km."
+  },
+  {
+   "id": "km805",
+   "typ": "dystans",
+   "km": 80.5,
+   "rzadkosc": "rzadkie",
+   "znak": "kolo",
+   "nazwa": "Słoniem do Allahabadu",
+   "klimat": "W „W 80 dni dookoła świata” brakuje 50 mil torów między Kholby a Allahabadem. Tę lukę Phileas Fogg pokonuje na grzbiecie słonia.",
+   "warunek": "Przejdź łącznie 80,5 km."
+  },
+  {
+   "id": "km100",
+   "typ": "dystans",
+   "km": 100,
+   "rzadkosc": "rzadkie",
+   "znak": "biegacz",
+   "nazwa": "Srebrny Jogger",
+   "klimat": "Srebrny medal Jogger w Pokémon GO wymaga 100 km przebytych pieszo z telefonem w kieszeni.",
+   "warunek": "Przejdź łącznie 100 km."
+  },
+  {
+   "id": "km115",
+   "typ": "dystans",
+   "km": 115,
+   "rzadkosc": "rzadkie",
+   "znak": "fala",
+   "nazwa": "Prom w Bucklebury",
+   "klimat": "Etap drogi Froda: prom przez Brandywinę na wschodnim skraju Shire.",
+   "warunek": "Przejdź łącznie 115 km."
+  },
+  {
+   "id": "km160",
+   "typ": "dystans",
+   "km": 160,
+   "rzadkosc": "rzadkie",
+   "znak": "gwiazda",
+   "nazwa": "Gwiazda Śmierci na wylot",
+   "klimat": "Pierwsza Gwiazda Śmierci miała 160 km średnicy. Tyle z bieguna na biegun.",
+   "warunek": "Przejdź łącznie 160 km."
+  },
+  {
+   "id": "km200",
+   "typ": "dystans",
+   "km": 200,
+   "rzadkosc": "rzadkie",
+   "znak": "czerw",
+   "nazwa": "Z Carthag do Arrakin",
+   "klimat": "Tyle dzieli dwa miasta Arrakis z „Diuny”. Fremeni przeszliby to bez rytmu, żeby nie zwabić czerwia.",
+   "warunek": "Przejdź łącznie 200 km."
+  },
+  {
+   "id": "km215",
+   "typ": "dystans",
+   "km": 215,
+   "rzadkosc": "rzadkie",
+   "znak": "dom",
+   "nazwa": "Pod Rozbrykanym Kucykiem",
+   "klimat": "Etap drogi Froda: gospoda w Bree, pierwszy nocleg za granicą Shire.",
+   "warunek": "Przejdź łącznie 215 km."
+  },
+  {
+   "id": "km246",
+   "typ": "dystans",
+   "km": 246,
+   "rzadkosc": "rzadkie",
+   "znak": "biegacz",
+   "nazwa": "Z Aten do Sparty",
+   "klimat": "Według „Dziejów” Herodota posłaniec Filippides dobiegł z Aten do Sparty w dwa dni. Spartathlon na tej trasie liczy 246 km.",
+   "warunek": "Przejdź łącznie 246 km."
+  },
+  {
+   "id": "km276",
+   "typ": "dystans",
+   "km": 276,
+   "rzadkosc": "rzadkie",
+   "znak": "planeta",
+   "nazwa": "Dookoła Pol",
+   "klimat": "Najmniejszy księżyc Joola z Kerbal Space Program ma 44 km promienia, więc jego równik to około 276 km.",
+   "warunek": "Przejdź łącznie 276 km."
+  },
+  {
+   "id": "km318",
+   "typ": "dystans",
+   "km": 318,
+   "rzadkosc": "rzadkie",
+   "znak": "pierscien",
+   "nazwa": "Halo w poprzek",
+   "klimat": "Pierścień Halo ma 318 km szerokości. Od jednej ściany do drugiej.",
+   "warunek": "Przejdź łącznie 318 km."
+  },
+  {
+   "id": "km377",
+   "typ": "dystans",
+   "km": 377,
+   "rzadkosc": "rzadkie",
+   "znak": "planeta",
+   "nazwa": "Dookoła Minmusa",
+   "klimat": "Miętowy księżyc z Kerbal Space Program ma 377 km obwodu. Okrążony pieszo.",
+   "warunek": "Przejdź łącznie 377 km."
+  },
+  {
+   "id": "km385",
+   "typ": "dystans",
+   "km": 385,
+   "rzadkosc": "rzadkie",
+   "znak": "gora",
+   "nazwa": "Wichrowy Czub",
+   "klimat": "Etap drogi Froda: ruiny strażnicy na samotnym wzgórzu przy Wielkim Gościńcu.",
+   "warunek": "Przejdź łącznie 385 km."
+  },
+  {
+   "id": "km408",
+   "typ": "dystans",
+   "km": 408,
+   "rzadkosc": "rzadkie",
+   "znak": "planeta",
+   "nazwa": "Dookoła Bop",
+   "klimat": "Bop, nieregularny księżyc Joola z Kerbal Space Program, ma 65 km promienia. Równik to około 408 km.",
+   "warunek": "Przejdź łącznie 408 km."
+  },
+  {
+   "id": "km483",
+   "typ": "dystans",
+   "km": 483,
+   "rzadkosc": "epickie",
+   "znak": "mur",
+   "nazwa": "Patrol na Murze",
+   "klimat": "Mur zamyka północ Westeros od morza do morza. Patrol przez całą długość zaliczony.",
+   "warunek": "Przejdź łącznie 483 km."
+  },
+  {
+   "id": "km1150",
+   "typ": "dystans",
+   "km": 580,
+   "rzadkosc": "epickie",
+   "znak": "wieza",
+   "nazwa": "Fosa Cailin",
+   "klimat": "Etap Drogi Królewskiej z Winterfell na południe: ruiny twierdzy na bagnach Przesmyku, brama Północy.",
+   "warunek": "Przejdź łącznie 580 km."
+  },
+  {
+   "id": "km628",
+   "typ": "dystans",
+   "km": 628,
+   "rzadkosc": "epickie",
+   "znak": "gwiazda",
+   "nazwa": "Równik drugiej Gwiazdy Śmierci",
+   "klimat": "Druga Gwiazda Śmierci miała 200 km średnicy, więc jej równik to ponad 600 km.",
+   "warunek": "Przejdź łącznie 628 km."
+  },
+  {
+   "id": "km737",
+   "typ": "dystans",
+   "km": 737,
+   "rzadkosc": "epickie",
+   "znak": "lisc",
+   "nazwa": "Do Rivendell",
+   "klimat": "Tyle szli hobbici z Hobbitonu do domu Elronda, z Nazgûlami na karku.",
+   "warunek": "Przejdź łącznie 737 km."
+  },
+  {
+   "id": "km817",
+   "typ": "dystans",
+   "km": 817,
+   "rzadkosc": "epickie",
+   "znak": "planeta",
+   "nazwa": "Dookoła Ike",
+   "klimat": "Księżyc Duny z Kerbal Space Program ma 130 km promienia, więc jego równik to prawie 817 km.",
+   "warunek": "Przejdź łącznie 817 km."
+  },
+  {
+   "id": "km950",
+   "typ": "dystans",
+   "km": 950,
+   "rzadkosc": "epickie",
+   "znak": "stopy",
+   "nazwa": "Z Bostonu do Pittsburgha",
+   "klimat": "Pierwszy duży etap Joela i Ellie w The Last of Us, przez zarośnięte autostrady.",
+   "warunek": "Przejdź łącznie 950 km."
+  },
+  {
+   "id": "km1000",
+   "typ": "dystans",
+   "km": 1000,
+   "rzadkosc": "epickie",
+   "znak": "biegacz",
+   "nazwa": "Złoty Jogger",
+   "klimat": "Złoty medal Jogger w Pokémon GO wymaga 1 000 km. Platynowy dopiero dziesięć razy tyle.",
+   "warunek": "Przejdź łącznie 1 000 km."
+  },
+  {
+   "id": "km1046",
+   "typ": "dystans",
+   "km": 1046,
+   "rzadkosc": "epickie",
+   "znak": "mur",
+   "nazwa": "Z Winterfell na Mur",
+   "klimat": "Według pomiarów map Droga Królewska z Winterfell do Czarnego Zamku liczy około 650 mil.",
+   "warunek": "Przejdź łącznie 1 046 km."
+  },
+  {
+   "id": "km880",
+   "typ": "dystans",
+   "km": 1190,
+   "rzadkosc": "epickie",
+   "znak": "gora",
+   "nazwa": "Przełęcz Caradhrasu",
+   "klimat": "Etap wyprawy Drużyny: śnieżna przełęcz, która nie wpuściła ich w góry.",
+   "warunek": "Przejdź łącznie 1 190 km."
+  },
+  {
+   "id": "km1257",
+   "typ": "dystans",
+   "km": 1257,
+   "rzadkosc": "epickie",
+   "znak": "planeta",
+   "nazwa": "Dookoła Muna",
+   "klimat": "Mun z Kerbal Space Program ma 200 km promienia. Okrążony bez rakiety.",
+   "warunek": "Przejdź łącznie 1 257 km."
+  },
+  {
+   "id": "km1019",
+   "typ": "dystans",
+   "km": 1285,
+   "rzadkosc": "epickie",
+   "znak": "brama",
+   "nazwa": "Wrota Morii",
+   "klimat": "Z Rivendell pod zachodnią ścianę Morii, przez śniegi Caradhrasu.",
+   "warunek": "Przejdź łącznie 1 285 km."
+  },
+  {
+   "id": "km1400",
+   "typ": "dystans",
+   "km": 1400,
+   "rzadkosc": "epickie",
+   "znak": "drzewo",
+   "nazwa": "Mroczna Puszcza",
+   "klimat": "Etap wyprawy Bilba: ścieżka przez las, z której nie wolno było zejść.",
+   "warunek": "Przejdź łącznie 1 400 km."
+  },
+  {
+   "id": "km1480",
+   "typ": "dystans",
+   "km": 1480,
+   "rzadkosc": "epickie",
+   "znak": "drzewo",
+   "nazwa": "Lothlórien",
+   "klimat": "Etap Drużyny: złoty las elfów nad Srebrną Żyłą, w którym zima jakby nie miała wstępu.",
+   "warunek": "Przejdź łącznie 1 480 km."
+  },
+  {
+   "id": "km1530",
+   "typ": "dystans",
+   "km": 1530,
+   "rzadkosc": "epickie",
+   "znak": "gora",
+   "nazwa": "Pod Samotną Górę",
+   "klimat": "Droga Bilba i trzynastu krasnoludów z Bag End do Ereboru.",
+   "warunek": "Przejdź łącznie 1 530 km."
+  },
+  {
+   "id": "km1670",
+   "typ": "dystans",
+   "km": 1609,
+   "rzadkosc": "epickie",
+   "znak": "pierscien",
+   "nazwa": "Ściana Pierścienia",
+   "klimat": "Ściany na brzegach Pierścienia z powieści Nivena mają około 1 000 mil wysokości. Tyle w pionie, gdyby dało się po nich iść.",
+   "warunek": "Przejdź łącznie 1 609 km."
+  },
+  {
+   "id": "km1940",
+   "typ": "dystans",
+   "km": 1706,
+   "rzadkosc": "epickie",
+   "znak": "fala",
+   "nazwa": "Rubinowy Bród",
+   "klimat": "Etap Drogi Królewskiej z Winterfell na południe: płytki bród na Tridencie, w którym podobno wciąż leżą rubiny.",
+   "warunek": "Przejdź łącznie 1 706 km."
+  },
+  {
+   "id": "km1790",
+   "typ": "dystans",
+   "km": 1790,
+   "rzadkosc": "epickie",
+   "znak": "fala",
+   "nazwa": "Brunatne Pola",
+   "klimat": "Etap Drużyny: łodzie elfów płyną Anduinem wzdłuż pustych, martwych Brunatnych Pól.",
+   "warunek": "Przejdź łącznie 1 790 km."
+  },
+  {
+   "id": "km1935",
+   "typ": "dystans",
+   "km": 1935,
+   "rzadkosc": "heroiczne",
+   "znak": "fala",
+   "nazwa": "Progi Sarn Gebir",
+   "klimat": "Etap Drużyny: skaliste progi na Anduinie, przed którymi łodzie trzeba przenieść brzegiem.",
+   "warunek": "Przejdź łącznie 1 935 km."
+  },
+  {
+   "id": "km2080",
+   "typ": "dystans",
+   "km": 2080,
+   "rzadkosc": "heroiczne",
+   "znak": "gora",
+   "nazwa": "Argonath",
+   "klimat": "Etap Drużyny: Anduin wpływa między wzgórza Emyn Muil, a nad wodą stoją dwa kamienne posągi dawnych królów.",
+   "warunek": "Przejdź łącznie 2 080 km."
+  },
+  {
+   "id": "km1800",
+   "typ": "dystans",
+   "km": 2105,
+   "rzadkosc": "heroiczne",
+   "znak": "fala",
+   "nazwa": "Wodogrzmoty Rauros",
+   "klimat": "Wielkie wodogrzmoty na Anduinie, do których Drużyna dopłynęła łodziami elfów.",
+   "warunek": "Przejdź łącznie 2 105 km."
+  },
+  {
+   "id": "km2220",
+   "typ": "dystans",
+   "km": 2220,
+   "rzadkosc": "heroiczne",
+   "znak": "gora",
+   "nazwa": "Zejście z Emyn Muil",
+   "klimat": "Etap drogi Froda i Sama: po kilku dniach błądzenia po skałach zejście z urwiska po elfickiej linie.",
+   "warunek": "Przejdź łącznie 2 220 km."
+  },
+  {
+   "id": "km2300",
+   "typ": "dystans",
+   "km": 2360,
+   "rzadkosc": "heroiczne",
+   "znak": "fala",
+   "nazwa": "Martwe Bagna",
+   "klimat": "Etap drogi Froda i Sama: bagna ze światełkami, za którymi nie wolno iść.",
+   "warunek": "Przejdź łącznie 2 360 km."
+  },
+  {
+   "id": "km2414",
+   "typ": "dystans",
+   "km": 2414,
+   "rzadkosc": "heroiczne",
+   "znak": "korona",
+   "nazwa": "Królewska Przystań",
+   "klimat": "Według pomiarów map z Winterfell do stolicy Westeros jest około 1 500 mil Drogi Królewskiej.",
+   "warunek": "Przejdź łącznie 2 414 km."
+  },
+  {
+   "id": "km2565",
+   "typ": "dystans",
+   "km": 2480,
+   "rzadkosc": "heroiczne",
+   "znak": "brama",
+   "nazwa": "Czarna Brama",
+   "klimat": "Etap drogi Froda i Sama: zamknięte wrota Mordoru.",
+   "warunek": "Przejdź łącznie 2 480 km."
+  },
+  {
+   "id": "km2540",
+   "typ": "dystans",
+   "km": 2540,
+   "rzadkosc": "heroiczne",
+   "znak": "lisc",
+   "nazwa": "Ithilien",
+   "klimat": "Etap drogi Froda i Sama: zielona, pachnąca ziołami kraina Gondoru tuż pod górami Mordoru.",
+   "warunek": "Przejdź łącznie 2 540 km."
+  },
+  {
+   "id": "km2715",
+   "typ": "dystans",
+   "km": 2650,
+   "rzadkosc": "heroiczne",
+   "znak": "gora",
+   "nazwa": "Schody Cirith Ungol",
+   "klimat": "Etap drogi Froda i Sama: kręte schody wykute w skałach Ephel Dúath.",
+   "warunek": "Przejdź łącznie 2 650 km."
+  },
+  {
+   "id": "km2762",
+   "typ": "dystans",
+   "km": 2762,
+   "rzadkosc": "heroiczne",
+   "znak": "kolo",
+   "nazwa": "Omsk",
+   "klimat": "Według Verne’a Omsk leży mniej więcej w połowie drogi kuriera carskiego z Moskwy do Irkucka.",
+   "warunek": "Przejdź łącznie 2 762 km."
+  },
+  {
+   "id": "km2865",
+   "typ": "dystans",
+   "km": 2865,
+   "rzadkosc": "heroiczne",
+   "znak": "wulkan",
+   "nazwa": "Z buta do Mordoru",
+   "klimat": "Cała droga Froda i Sama z Shire na zbocze Góry Przeznaczenia.",
+   "warunek": "Przejdź łącznie 2 865 km."
+  },
+  {
+   "id": "km3060",
+   "typ": "dystans",
+   "km": 3060,
+   "rzadkosc": "heroiczne",
+   "znak": "drzwi",
+   "nazwa": "Tam i z powrotem",
+   "klimat": "Cała wyprawa Bilba: do Ereboru i z powrotem do Bag End.",
+   "warunek": "Przejdź łącznie 3 060 km."
+  },
+  {
+   "id": "km3235",
+   "typ": "dystans",
+   "km": 3235,
+   "rzadkosc": "heroiczne",
+   "znak": "planeta",
+   "nazwa": "Do krateru Schiaparelli",
+   "klimat": "Tyle Mark Watney z „Marsjanina” przejechał łazikiem przez Marsa, żeby wrócić do domu.",
+   "warunek": "Przejdź łącznie 3 235 km."
+  },
+  {
+   "id": "km3490",
+   "typ": "dystans",
+   "km": 3490,
+   "rzadkosc": "heroiczne",
+   "znak": "kolo",
+   "nazwa": "Szlak do Oregonu",
+   "klimat": "Historyczny Szlak Oregoński, po którym prowadzi gra The Oregon Trail, liczył około 2 170 mil. Wozem i pieszo przez prerię.",
+   "warunek": "Przejdź łącznie 3 490 km."
+  },
+  {
+   "id": "km4000",
+   "typ": "dystans",
+   "km": 4000,
+   "rzadkosc": "heroiczne",
+   "znak": "planeta",
+   "nazwa": "Valles Marineris",
+   "klimat": "Wielki kanion Marsa, znany z marsjańskiej trylogii Robinsona, ma około 4 000 km długości.",
+   "warunek": "Przejdź łącznie 4 000 km."
+  },
+  {
+   "id": "km4500",
+   "typ": "dystans",
+   "km": 4500,
+   "rzadkosc": "heroiczne",
+   "znak": "pudlo",
+   "nazwa": "Przesyłka dostarczona",
+   "klimat": "Mniej więcej tyle ma Ameryka z Death Stranding, od wschodniego wybrzeża do zachodniego.",
+   "warunek": "Przejdź łącznie 4 500 km."
+  },
+  {
+   "id": "km4800",
+   "typ": "dystans",
+   "km": 4800,
+   "rzadkosc": "legendarne",
+   "znak": "mur",
+   "nazwa": "Z Muru do Dorne",
+   "klimat": "Westeros od Muru po południowe wybrzeże Dorne, około 3 000 mil w skali map, w której Mur ma 300 mil.",
+   "warunek": "Przejdź łącznie 4 800 km."
+  },
+  {
+   "id": "km5200",
+   "typ": "dystans",
+   "km": 5523,
+   "rzadkosc": "legendarne",
+   "znak": "kolo",
+   "nazwa": "Kurier carski",
+   "klimat": "Droga Michała Strogowa z powieści Verne’a: 5 200 wiorst z Moskwy do Irkucka przez całą Syberię.",
+   "warunek": "Przejdź łącznie 5 523 km."
+  },
+  {
+   "id": "km6128",
+   "typ": "dystans",
+   "km": 6128,
+   "rzadkosc": "legendarne",
+   "znak": "czerw",
+   "nazwa": "Do serca Arrakis",
+   "klimat": "Według Encyklopedii Diuny promień Arrakis to 6 128 km. Tyle dzieli piasek od środka planety.",
+   "warunek": "Przejdź łącznie 6 128 km."
+  },
+  {
+   "id": "km7200",
+   "typ": "dystans",
+   "km": 7200,
+   "rzadkosc": "legendarne",
+   "znak": "planeta",
+   "nazwa": "Przez Hoth",
+   "klimat": "Lodowa planeta z Gwiezdnych Wojen ma 7 200 km średnicy. Na wylot, w śniegu po kolana.",
+   "warunek": "Przejdź łącznie 7 200 km."
+  },
+  {
+   "id": "km8047",
+   "typ": "dystans",
+   "km": 8047,
+   "rzadkosc": "legendarne",
+   "znak": "dysk",
+   "nazwa": "Od Osi do Krawędzi",
+   "klimat": "Świat Dysku Pratchetta ma około 10 000 mil średnicy. Od środka aż do wodospadu na krawędzi.",
+   "warunek": "Przejdź łącznie 8 047 km."
+  },
+  {
+   "id": "km10000",
+   "typ": "dystans",
+   "km": 10000,
+   "rzadkosc": "legendarne",
+   "znak": "biegacz",
+   "nazwa": "Platynowy Jogger",
+   "klimat": "Najwyższy stopień medalu Jogger w Pokémon GO: 10 000 km przebytych pieszo.",
+   "warunek": "Przejdź łącznie 10 000 km."
+  },
+  {
+   "id": "s3",
+   "typ": "sesja_km",
+   "km": 3,
+   "rzadkosc": "pospolite",
+   "znak": "plomien",
+   "nazwa": "Pierwszy checkpoint",
+   "klimat": "Gra zapisała postęp. Można iść dalej.",
+   "warunek": "Przejdź 3 km w jednej sesji."
+  },
+  {
+   "id": "s10",
+   "typ": "sesja_km",
+   "km": 10,
+   "rzadkosc": "rzadkie",
+   "znak": "miecz",
+   "nazwa": "Jeszcze jedna tura",
+   "klimat": "Znany problem graczy strategii przeniósł się na bieżnię.",
+   "warunek": "Przejdź 10 km w jednej sesji."
+  },
+  {
+   "id": "s21",
+   "typ": "sesja_km",
+   "km": 21.0,
+   "rzadkosc": "epickie",
+   "znak": "miecz",
+   "nazwa": "Na jednym życiu",
+   "klimat": "Run jak w roguelike’u: od startu do końca bez zapisu gry.",
+   "warunek": "Przejdź 21 km w jednej sesji."
+  },
+  {
+   "id": "d7",
+   "typ": "dzien_kroki",
+   "kroki": 7000,
+   "rzadkosc": "pospolite",
+   "znak": "gora",
+   "nazwa": "Siedem tysięcy stopni",
+   "klimat": "Tyle stopni prowadzi na Gardło Świata do Wysokiego Hrothgaru.",
+   "warunek": "Zrób 7 000 kroków jednego dnia."
+  },
+  {
+   "id": "d12",
+   "typ": "dzien_kroki",
+   "kroki": 12000,
+   "rzadkosc": "rzadkie",
+   "znak": "slonce",
+   "nazwa": "Dzień farmienia",
+   "klimat": "Licznik kroków nabił dziś tyle, co niejeden przez tydzień.",
+   "warunek": "Zrób 12 000 kroków jednego dnia."
+  },
+  {
+   "id": "d20",
+   "typ": "dzien_kroki",
+   "kroki": 20000,
+   "rzadkosc": "epickie",
+   "znak": "slonce",
+   "nazwa": "Poziom trudności: koszmar",
+   "klimat": "Najwyższy poziom trudności w trybie dziennym. Mało kto go wybiera.",
+   "warunek": "Zrób 20 000 kroków jednego dnia."
+  },
+  {
+   "id": "seria3",
+   "typ": "seria",
+   "dni": 3,
+   "km_dziennie": 2.0,
+   "rzadkosc": "pospolite",
+   "znak": "ksiezyc",
+   "nazwa": "Trzy dni do upadku",
+   "klimat": "W Majora’s Mask Termina ma trzy dni, zanim spadnie na nią księżyc. Twoja seria przetrwała pełny cykl.",
+   "warunek": "Chodź min. 2 km dziennie przez 3 dni z rzędu (1 dzień wolny na 7 nie przerywa serii)."
+  },
+  {
+   "id": "seria7",
+   "typ": "seria",
+   "dni": 7,
+   "km_dziennie": 2.0,
+   "rzadkosc": "rzadkie",
+   "znak": "plomien",
+   "nazwa": "Noc hordy",
+   "klimat": "W 7 Days to Die co siódma noc przychodzi horda. Twoja seria doczekała pierwszej.",
+   "warunek": "Chodź min. 2 km dziennie przez 7 dni z rzędu (1 dzień wolny na 7 nie przerywa serii)."
+  },
+  {
+   "id": "seria28",
+   "typ": "seria",
+   "dni": 28,
+   "km_dziennie": 2.0,
+   "rzadkosc": "epickie",
+   "znak": "slonce",
+   "nazwa": "Pełna pora roku",
+   "klimat": "Pora roku w Stardew Valley trwa 28 dni. Seria przetrwała całą, od pierwszego do ostatniego dnia.",
+   "warunek": "Chodź min. 2 km dziennie przez 28 dni z rzędu (1 dzień wolny na 7 nie przerywa serii)."
+  },
+  {
+   "id": "seria80",
+   "typ": "seria",
+   "dni": 80,
+   "km_dziennie": 2.0,
+   "rzadkosc": "heroiczne",
+   "znak": "glob",
+   "nazwa": "W 80 dni dookoła świata",
+   "klimat": "Phileas Fogg z powieści Verne’a okrążył świat w 80 dni. Seria trwa tyle samo.",
+   "warunek": "Chodź min. 2 km dziennie przez 80 dni z rzędu (1 dzień wolny na 7 nie przerywa serii)."
+  },
+  {
+   "id": "seria365",
+   "typ": "seria",
+   "dni": 365,
+   "km_dziennie": 2.0,
+   "rzadkosc": "legendarne",
+   "znak": "drzwi",
+   "nazwa": "Rok na wyspie",
+   "klimat": "W Animal Crossing czas płynie jak w kalendarzu, więc pełny rok na wyspie trwa naprawdę rok.",
+   "warunek": "Chodź min. 2 km dziennie przez 365 dni z rzędu (1 dzień wolny na 7 nie przerywa serii)."
+  },
+  {
+   "id": "gra1",
+   "typ": "gra_pierwsza",
+   "rzadkosc": "pospolite",
+   "znak": "pad",
+   "nazwa": "Nowa gra",
+   "klimat": "Postać w tej grze pierwszy raz idzie twoimi nogami.",
+   "warunek": "Rozegraj pierwszą sesję w profilu gry."
+  },
+  {
+   "id": "gry3",
+   "typ": "gry_km",
+   "gier": 3,
+   "km": 10.0,
+   "rzadkosc": "rzadkie",
+   "znak": "portale",
+   "nazwa": "Trzy światy",
+   "klimat": "Postacie się zmieniają, zakwasy zostają te same.",
+   "warunek": "Przejdź po 10 km w 3 różnych grach."
+  },
+  {
+   "id": "gry5",
+   "typ": "gry_km",
+   "gier": 5,
+   "km": 10.0,
+   "rzadkosc": "epickie",
+   "znak": "portale",
+   "nazwa": "Turysta międzywymiarowy",
+   "klimat": "Pięć światów nosi już twoje ślady.",
+   "warunek": "Przejdź po 10 km w 5 różnych grach."
+  },
+  {
+   "id": "gra100",
+   "typ": "gra_km",
+   "km": 100.0,
+   "rzadkosc": "rzadkie",
+   "znak": "pad",
+   "nazwa": "Mój main",
+   "klimat": "Reszta biblioteki zaczyna być zazdrosna.",
+   "warunek": "Przejdź 100 km w jednej grze."
+  },
+  {
+   "id": "gra1000",
+   "typ": "gra_km",
+   "km": 1000.0,
+   "rzadkosc": "epickie",
+   "znak": "dom",
+   "nazwa": "Tu mieszkam",
+   "klimat": "Strażnicy w tej grze znają cię z imienia.",
+   "warunek": "Przejdź 1 000 km w jednej grze."
+  },
+  {
+   "id": "trening",
+   "typ": "trening",
+   "rzadkosc": "pospolite",
+   "znak": "stopy",
+   "nazwa": "Tryb treningowy",
+   "klimat": "Jak w bijatykach: najpierw trening, potem prawdziwe walki.",
+   "warunek": "Ukończ pierwszą sesję w trybie Trening."
+  },
+  {
+   "id": "rano",
+   "typ": "start_miedzy",
+   "rzadkosc": "pospolite",
+   "znak": "slonce",
+   "nazwa": "Pierwszy na serwerze",
+   "klimat": "Sesja przed siódmą, serwer jeszcze pusty.",
+   "warunek": "Rozpocznij sesję między 4:00 a 7:00.",
+   "od": 4,
+   "do": 7
+  },
+  {
+   "id": "noc",
+   "typ": "start_miedzy",
+   "rzadkosc": "pospolite",
+   "znak": "ksiezyc",
+   "nazwa": "Nocny grind",
+   "klimat": "Jeszcze jeden kilometr i spać. Na pewno.",
+   "warunek": "Rozpocznij sesję między 23:00 a 4:00.",
+   "od": 23,
+   "do": 4
+  },
+  {
+   "id": "znajomy",
+   "typ": "znajomi",
+   "ile": 1,
+   "rzadkosc": "pospolite",
+   "znak": "druzyna",
+   "nazwa": "Party +1",
+   "klimat": "Do drużyny dołączył pierwszy kompan.",
+   "warunek": "Dodaj pierwszego znajomego."
+  },
+  {
+   "id": "polecenie",
+   "typ": "polecenia",
+   "ile": 1,
+   "rzadkosc": "rzadkie",
+   "znak": "druzyna",
+   "nazwa": "Werbownik",
+   "klimat": "Ktoś założył konto z twojego zaproszenia i drużyna urosła.",
+   "warunek": "Ktoś założy konto z twoim kodem."
+  }
+ ]
+}
