@@ -1,0 +1,53 @@
+[
+ {
+  "case": "ok",
+  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "version": "0.3.0"
+ },
+ {
+  "case": "bom",
+  "body": "﻿{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "version": "0.3.0"
+ },
+ {
+  "case": "nie_json",
+  "body": "<html>",
+  "error": "Nie udało się sprawdzić aktualizacji - sprawdź internet."
+ },
+ {
+  "case": "lista",
+  "body": "[1, 2]",
+  "error": "Nieoczekiwana odpowiedź GitHuba."
+ },
+ {
+  "case": "w_limicie_1mb",
+  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "pad": 999643,
+  "version": "0.3.0"
+ },
+ {
+  "case": "obciety_ponad_1mb",
+  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "pad": 999644,
+  "error": "Nie udało się sprawdzić aktualizacji - sprawdź internet."
+ },
+ {
+  "case": "brak_sieci",
+  "error": "Nie udało się sprawdzić aktualizacji - sprawdź internet."
+ },
+ {
+  "case": "404",
+  "status": 404,
+  "error": "Na GitHubie nie ma jeszcze żadnego wydania."
+ },
+ {
+  "case": "403",
+  "status": 403,
+  "error": "GitHub odpowiedział błędem 403 - spróbuj później."
+ },
+ {
+  "case": "500",
+  "status": 500,
+  "error": "GitHub odpowiedział błędem 500 - spróbuj później."
+ }
+]

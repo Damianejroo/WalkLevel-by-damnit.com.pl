@@ -1,0 +1,172 @@
+{
+ "payload_repeat": 60000,
+ "cases": [
+  {
+   "case": "ok",
+   "file": "Bieznia-Setup-0.3.0.exe",
+   "ok": true,
+   "files": [
+    "Bieznia-Setup-0.3.0.exe"
+   ],
+   "progress": [
+    [
+     262144,
+     600002
+    ],
+    [
+     524288,
+     600002
+    ],
+    [
+     600002,
+     600002
+    ]
+   ]
+  },
+  {
+   "case": "rozmiar_nieznany",
+   "size": 0,
+   "file": "Bieznia-Setup-0.3.0.exe",
+   "ok": true,
+   "files": [
+    "Bieznia-Setup-0.3.0.exe"
+   ],
+   "progress": [
+    [
+     262144,
+     0
+    ],
+    [
+     524288,
+     0
+    ],
+    [
+     600002,
+     0
+    ]
+   ]
+  },
+  {
+   "case": "dopisany_bajt",
+   "extra": "x",
+   "error": "Suma kontrolna się nie zgadza - plik odrzucony.",
+   "files": [],
+   "progress": [
+    [
+     262144,
+     600002
+    ],
+    [
+     524288,
+     600002
+    ],
+    [
+     600003,
+     600002
+    ]
+   ]
+  },
+  {
+   "case": "za_duzy",
+   "size": 300000,
+   "error": "Plik aktualizacji jest większy niż zapowiadany - przerwano.",
+   "files": [],
+   "progress": [
+    [
+     262144,
+     300000
+    ]
+   ]
+  },
+  {
+   "case": "tuz_w_limicie",
+   "size": 598978,
+   "file": "Bieznia-Setup-0.3.0.exe",
+   "ok": true,
+   "files": [
+    "Bieznia-Setup-0.3.0.exe"
+   ],
+   "progress": [
+    [
+     262144,
+     598978
+    ],
+    [
+     524288,
+     598978
+    ],
+    [
+     600002,
+     598978
+    ]
+   ]
+  },
+  {
+   "case": "tuz_ponad_limit",
+   "size": 598977,
+   "error": "Plik aktualizacji jest większy niż zapowiadany - przerwano.",
+   "files": [],
+   "progress": [
+    [
+     262144,
+     598977
+    ],
+    [
+     524288,
+     598977
+    ]
+   ]
+  },
+  {
+   "case": "przekierowanie_poza_github",
+   "final_url": "https://evil.example/x.exe",
+   "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa.",
+   "files": [],
+   "progress": []
+  },
+  {
+   "case": "przekierowanie_na_cdn",
+   "final_url": "https://release-assets.githubusercontent.com/a/b",
+   "file": "Bieznia-Setup-0.3.0.exe",
+   "ok": true,
+   "files": [
+    "Bieznia-Setup-0.3.0.exe"
+   ],
+   "progress": [
+    [
+     262144,
+     600002
+    ],
+    [
+     524288,
+     600002
+    ],
+    [
+     600002,
+     600002
+    ]
+   ]
+  },
+  {
+   "case": "blad_http",
+   "status": 500,
+   "error": "Pobieranie przerwane - spróbuj ponownie.",
+   "files": [],
+   "progress": []
+  },
+  {
+   "case": "brak_sieci",
+   "network": true,
+   "error": "Pobieranie przerwane - spróbuj ponownie.",
+   "files": [],
+   "progress": []
+  },
+  {
+   "case": "zly_adres_wydania",
+   "url": "http://github.com/x/Bieznia-Setup-0.3.0.exe",
+   "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa.",
+   "files": [],
+   "progress": []
+  }
+ ]
+}
