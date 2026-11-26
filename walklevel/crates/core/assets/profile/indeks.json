@@ -1,0 +1,25 @@
+{
+ "format": 1,
+ "profile": [
+  {
+   "plik": "kingsmith-x21.json",
+   "sha256": "b8f29184b39598bd7d6ed8aaf6927715d9f71d96cf5ab33136fcfe2656a0d3f7"
+  },
+  {
+   "plik": "kingsmith-x23.json",
+   "sha256": "849a68b6aa6bfa2aaacf882e6a36663d6f94e6806fe832d4e92795bb34587418"
+  },
+  {
+   "plik": "kingsmith.json",
+   "sha256": "a8b8548f358bd3ed9b5a9e7a2fcee4a4de5f7c56bfde6794fb1f4849a578a8f0"
+  },
+  {
+   "plik": "urevo-spacewalk-5l.json",
+   "sha256": "a2b8a21ca7f7261ee8897bd174949d907a247468dc26aedf864f5eb8dcfaea55"
+  },
+  {
+   "plik": "urevo.json",
+   "sha256": "c5040a45c18d82cf6c47ba35652ca90ec3ab327a271f89af8bf6cf66677e9878"
+  }
+ ]
+}

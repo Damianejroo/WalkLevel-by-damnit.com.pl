@@ -1,0 +1,575 @@
+{
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 0.0,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    0.0
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 1.02,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 1.02,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    1.02
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 2.01,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 2.01,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    2.01
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 3.03,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 3.03,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    3.03
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 4.051,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 4.051,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    4.051
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 5.07,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 5.07,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    5.07
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 6.06,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 6.06,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    6.06
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 7.08,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 7.08,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    7.08
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 8.07,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 8.07,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    8.07
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 9.091,
+   "kind": "data",
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 9.091,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    9.091
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 10.08,
+   "kind": "status",
+   "hex": "04",
+   "readings": [],
+   "running": true,
+   "belt_speed": [
+    0.0,
+    9.091
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 10.11,
+   "kind": "data",
+   "hex": "9c25640000000000000000000000000000000000000000000000",
+   "readings": [
+    {
+     "t": 10.11,
+     "speed": 1.0,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    1.0,
+    10.11
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 11.101,
+   "kind": "data",
+   "hex": "9c25960000000000000000000000000000000000000100000000",
+   "readings": [
+    {
+     "t": 11.101,
+     "speed": 1.5,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    1.5,
+    11.101
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 12.091,
+   "kind": "data",
+   "hex": "9c25fa0000000000000000000000000000000000000200000000",
+   "readings": [
+    {
+     "t": 12.091,
+     "speed": 2.5,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    2.5,
+    12.091
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 13.111,
+   "kind": "data",
+   "hex": "9c25900100000000000000000000000000000000000300000000",
+   "readings": [
+    {
+     "t": 13.111,
+     "speed": 4.0,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    4.0,
+    13.111
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 14.131,
+   "kind": "data",
+   "hex": "9c25900100000000000000000000000000000000000400000000",
+   "readings": [
+    {
+     "t": 14.131,
+     "speed": 4.0,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    4.0,
+    14.131
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 15.121,
+   "kind": "data",
+   "hex": "9c25900100000000000000000000000000000000000500000000",
+   "readings": [
+    {
+     "t": 15.121,
+     "speed": 4.0,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    4.0,
+    15.121
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 16.111,
+   "kind": "data",
+   "hex": "9c25900100000000000000000000000000000000000600000000",
+   "readings": [
+    {
+     "t": 16.111,
+     "speed": 4.0,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    4.0,
+    16.111
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 17.131,
+   "kind": "data",
+   "hex": "9c25fa000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 17.131,
+     "speed": 2.5,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    2.5,
+    17.131
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 18.121,
+   "kind": "data",
+   "hex": "9c2518010a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 18.121,
+     "speed": 2.8,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    2.8,
+    18.121
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 19.141,
+   "kind": "data",
+   "hex": "9c25e6000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 19.141,
+     "speed": 2.3,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    2.3,
+    19.141
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 20.131,
+   "kind": "data",
+   "hex": "9c25b4000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 20.131,
+     "speed": 1.8,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    1.8,
+    20.131
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 21.151,
+   "kind": "data",
+   "hex": "9c2582000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 21.151,
+     "speed": 1.3,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    1.3,
+    21.151
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 22.141,
+   "kind": "data",
+   "hex": "9c255a000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 22.141,
+     "speed": 0.9,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    0.9,
+    22.141
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 23.161,
+   "kind": "data",
+   "hex": "9c2532000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 23.161,
+     "speed": 0.5,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    0.5,
+    23.161
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 24.152,
+   "kind": "data",
+   "hex": "9c2514000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 24.152,
+     "speed": 0.2,
+     "steps": 0
+    }
+   ],
+   "running": true,
+   "belt_speed": [
+    0.2,
+    24.152
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 25.171,
+   "kind": "status",
+   "hex": "0202",
+   "readings": [],
+   "running": false,
+   "belt_speed": [
+    0.2,
+    24.152
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 25.201,
+   "kind": "data",
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 25.201,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    25.201
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 26.161,
+   "kind": "data",
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 26.161,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    26.161
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 27.242,
+   "kind": "data",
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 27.242,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    27.242
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 28.171,
+   "kind": "data",
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 28.171,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    28.171
+   ],
+   "steps_cap": true
+  },
+  {
+   "t": 29.192,
+   "kind": "data",
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "readings": [
+    {
+     "t": 29.192,
+     "speed": 0.0,
+     "steps": 0
+    }
+   ],
+   "running": false,
+   "belt_speed": [
+    0.0,
+    29.192
+   ],
+   "steps_cap": true
+  }
+ ],
+ "counts": {
+  "commands": 0,
+  "acks": 0,
+  "refused": 0,
+  "frames": 30,
+  "undecoded": 0
+ }
+}
