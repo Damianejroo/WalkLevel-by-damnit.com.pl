@@ -36,6 +36,8 @@ interface Scenariusz {
   klawiszStop: boolean;
   /** taśma jedzie mimo wyłączonego sterowania (pilot) */
   jedzie: boolean;
+  /** wczytywanie danych online kończy się błędem sieci */
+  bladOnline: boolean;
   /** panel znajomych (0.6.2) i jego strona; duży tekst */
   panel: 'pelny' | 'waski' | 'wylaczony';
   strona: 'prawa' | 'lewa';
@@ -45,7 +47,7 @@ interface Scenariusz {
 const BAZA: Scenariusz = {
   tryb: 'keyboard', bieznia: 'strumien', wlaczone: false, wyjscie: 'keys',
   konto: true, historia: true, pierwsze: false, dlugie: false, klawiszStop: false, jedzie: false,
-  panel: 'pelny', strona: 'prawa', duzyTekst: false,
+  panel: 'pelny', strona: 'prawa', duzyTekst: false, bladOnline: false,
 };
 
 export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
@@ -90,6 +92,7 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   'panel-duzy': { duzyTekst: true },
   'panel-bez-konta': { konto: false },
   'panel-dlugie': { dlugie: true, duzyTekst: true },
+  'online-blad': { bladOnline: true },
 };
 
 function czytajScenariusz(): Scenariusz {
@@ -1275,6 +1278,14 @@ export function utworzAtrape(): Silnik {
     online_load: (a) => {
       if (!account.loggedIn) throw blad('loggedOut', t('konto.blad.niezalogowany'));
       const tab = a.tab as K.OnlineTab;
+      // ?stan=online-blad: serwer kont nie odpowiada (karta błędu z ponawianiem)
+      if (sc.bladOnline && tab !== 'achievements') {
+        online.friends = null;
+        online.stats = null;
+        online.invitations = null;
+        wyslij('online');
+        throw blad('offline', t('konto.blad.internet'));
+      }
       if (tab === 'achievements') {
         // procent graczy dla co trzeciego osiągnięcia (prawdziwy serwer: od 25 kont)
         if (!online.achievementStats) {

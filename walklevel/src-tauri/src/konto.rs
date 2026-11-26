@@ -711,6 +711,14 @@ fn load(
     apply: impl FnOnce(&mut App, &Value),
 ) -> CmdResult<()> {
     let person = current_person(core);
+    // to samo wczytanie już trwa (odświeżanie znajomych w tle i wejście na zakładkę) - jego
+    // wynik przyjdzie, więc bez błędu i bez gaszenia „ładuję” tamtego wczytania
+    if lock(&core.0.app)
+        .account_busy
+        .contains(&App::busy_key(&person, action))
+    {
+        return Ok(());
+    }
     if !quiet {
         set_loading(core, key, true);
     }
@@ -724,7 +732,10 @@ fn load(
         acc.handle(r)
     });
     set_loading(core, key, false);
-    let value = result?;
+    let value = match result {
+        Err(e) if e.code == ErrorCode::Busy => return Ok(()), // wyścig ze sprawdzeniem wyżej
+        r => r?,
+    };
     let mut app = lock(&core.0.app);
     if app.person_id() == person {
         app.online.person_id = person;

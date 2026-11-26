@@ -896,6 +896,18 @@ podgląd profilu – dane), tło `--surface-2`.
   motywu (`window_theme`), więc odsłonięty na chwilę fragment okna nie prześwituje.
 - Nic nie wystaje przy oknie 720 z pełnym panelem i dużym tekstem, w obu motywach.
 
+### 8.17 Karta błędu (`KartaBledu.svelte`, 0.6.2)
+
+- W miejscu treści, której nie udało się wczytać (zakładki Konto online, panel znajomych).
+  Karta neutralna jak 8.4: `--surface`, ramka `--line`, promień 12 (w panelu zwarta: promień 10,
+  mniejszy odstęp). Bez paska z lewej, bez pastylki, bez czerwonego tła.
+- Ikona ostrzeżenia E7BA 20 px w `--danger` (jedyny kolor), tytuł 15/700 („Nie udało się
+  wczytać znajomych”), jedno-dwa zdania 13 `--text-2`: co się stało i co zrobić (teksty
+  `konto.blad.*`), pod spodem „Spróbuj ponownie” (zwykły przycisk) i - gdy aplikacja ponawia
+  sama - „Kolejna próba za 10 s” 13 `--text-2`.
+- Pokazywana tylko, gdy nie ma czego pokazać: błąd odświeżenia w tle zostawia ostatnie dane bez
+  komunikatu; „to już trwa” przy wczytywaniu nie jest błędem. `role="alert"`.
+
 ---
 
 ## 9. Ekrany – co zmienia się względem 0.5.x

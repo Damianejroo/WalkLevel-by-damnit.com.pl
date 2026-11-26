@@ -14,7 +14,8 @@
   import * as api from '../lib/api';
   import { idz, stan, wykonaj } from '../lib/stan.svelte';
   import { t } from '../lib/teksty';
-  import { potrzebujeZnajomych, xpTeraz } from '../lib/znajomi.svelte';
+  import { odswiezZnajomych, potrzebujeZnajomych, xpTeraz, znajomi } from '../lib/znajomi.svelte';
+  import KartaBledu from '../lib/ui/KartaBledu.svelte';
   import { zmienPanel } from '../lib/panel.svelte';
   import { bladPseudonimu, rangaPoziomu, sprobuj } from './KontoOnline/pomocnicze';
   import type { Friend } from '../lib/typy';
@@ -45,7 +46,9 @@
   const podpis = $derived(
     !konto.loggedIn
       ? t('panel.bez_konta')
-      : ileChodzi
+      : online.friends === null
+        ? ''
+        : ileChodzi
         ? t('panel.chodza', { liczba: ileChodzi, razem: wszyscy.length })
         : t('panel.na_liscie', { liczba: wszyscy.length }),
   );
@@ -266,6 +269,17 @@
           <WierszZnajomego {f} {waski} rozwiniety={menu?.f.id === f.id} onotworz={otworz} onmenu={otworzMenu} />
         {/each}
       {/if}
+      {#if !waski && online.friends === null && znajomi.blad}
+        <div class="blad-panelu">
+          <KartaBledu
+            zwarta
+            tytul={t('online.blad.znajomi')}
+            opis={znajomi.blad}
+            ponowiZa={znajomi.nastepna ? (znajomi.nastepna - znajomi.teraz) / 1000 : null}
+            onponow={() => odswiezZnajomych(true)}
+          />
+        </div>
+      {/if}
       {#if !waski && online.friends !== null && !chodza.length && !pozostali.length}
         <p class="podpowiedz pusto">{fraza.trim() ? t('panel.nikt', { fraza: fraza.trim() }) : t('panel.pusto')}</p>
       {/if}
@@ -353,6 +367,7 @@
   .szukaj { display: grid; gap: 6px; padding: 4px 10px 8px; min-width: 0; }
   .podpowiedz { font-size: var(--fs-sm); color: var(--text-2); line-height: var(--lh-tight); padding-inline: 2px; }
   .pusto { padding: 12px 6px; }
+  .blad-panelu { padding: 8px 6px 0 0; }
 
   .lista {
     flex: 1 1 0;

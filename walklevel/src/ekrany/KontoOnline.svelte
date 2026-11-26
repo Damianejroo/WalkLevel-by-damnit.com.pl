@@ -21,7 +21,9 @@
   import { t, tytulIPodpis } from '../lib/teksty';
   import type { OnlineTab } from '../lib/typy';
   import { sprobuj } from './KontoOnline/pomocnicze';
-  import { potrzebujeZnajomych } from '../lib/znajomi.svelte';
+  import { odswiezZnajomych, potrzebujeZnajomych, znajomi } from '../lib/znajomi.svelte';
+  import KartaBledu from '../lib/ui/KartaBledu.svelte';
+  import type { Klucz } from '../lib/teksty';
 
   let { aktywny }: PropsEkranu = $props();
 
@@ -71,6 +73,21 @@
     return potrzebujeZnajomych();
   });
 
+  // Karta błędu tylko wtedy, gdy nie ma czego pokazać (błąd odświeżenia przy istniejących
+  // danych zostawia ostatnią listę). Znajomi: błąd wspólnego odświeżania (znajomi.svelte.ts).
+  const TYTUL_BLEDU: Partial<Record<OnlineTab, Klucz>> = {
+    friends: 'online.blad.znajomi',
+    ranking: 'online.blad.ranking',
+    people: 'online.blad.osoby',
+  };
+  const bladZakladki = $derived.by(() => {
+    const o = stan.online;
+    if (zakladka === 'friends') return o.friends === null ? znajomi.blad || bledy.friends || '' : '';
+    if (zakladka === 'ranking') return o.ranking === null ? bledy.ranking || '' : '';
+    if (zakladka === 'people') return o.people === null ? bledy.people || '' : '';
+    return '';
+  });
+
   function otworzProfil(userId: string) {
     if (!userId || konto.busy.includes('person')) return;
     wykonaj(api.onlinePersonOpen(userId));
@@ -113,13 +130,14 @@
       </Karta>
     {/if}
 
-    {#if bledy[zakladka]}
-      <Karta>
-        <p class="blad" role="alert">{t('online.blad_ladowania', { powod: bledy[zakladka] ?? '' })}</p>
-        <div class="przyciski">
-          <Przycisk napis={t('online.ponow')} onclick={() => wczytaj(zakladka, true)} />
-        </div>
-      </Karta>
+    {#if bladZakladki}
+      <KartaBledu
+        tytul={t(TYTUL_BLEDU[zakladka] ?? 'online.blad.znajomi')}
+        opis={bladZakladki}
+        zajete={stan.online.loading.length > 0}
+        ponowiZa={zakladka === 'friends' && znajomi.nastepna ? (znajomi.nastepna - znajomi.teraz) / 1000 : null}
+        onponow={() => (zakladka === 'friends' ? odswiezZnajomych(true) : wczytaj(zakladka, true))}
+      />
     {/if}
 
     {#each ZAKLADKI as z (z)}
@@ -142,7 +160,6 @@
 
 <style>
   .opis { font-size: var(--fs-sm); color: var(--text-2); line-height: var(--lh-body); }
-  .blad { font-size: var(--fs-sm); color: var(--danger); line-height: var(--lh-body); }
   .przyciski { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
   .przyciski > :global(button) { flex: 0 1 auto; }
   .panel { display: flex; flex-direction: column; min-width: 0; animation: wl-rozwin var(--t-in) var(--ease-enter); }

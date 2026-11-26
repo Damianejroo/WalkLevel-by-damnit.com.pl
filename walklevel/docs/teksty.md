@@ -1152,7 +1152,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `online.zakladka.osoby` | Osoby | Osoby z kontem | „Osoby” myliło się z osobami na komputerze. |
 | `online.zakladka.konto` | Konto | Moje konto | |
 | `online.laduje` | Ładuję… | Wczytuję… | |
-| `online.blad_ladowania` | (nowy; dziś zostaje „Ładuję…” albo pusto) | Nie udało się wczytać danych. {powod} | `{powod}` z `konto.blad.*`. Plus przycisk `online.ponow`. |
+| `online.blad_ladowania` | (nowy; dziś zostaje „Ładuję…” albo pusto) | (0.6.2: zastąpione kartą błędu `online.blad.*`) | Nie udało się wczytać danych. {powod} | Zostaje dla zgodności; ekrany używają `KartaBledu` z tytułem `online.blad.*` i powodem z `konto.blad.*`. |
 | `online.ponow` | (nowy) | Spróbuj ponownie | |
 
 ### 22.6. Zakładka Znajomi
@@ -1305,21 +1305,21 @@ Trzeba je przejrzeć osobno w kodzie serwera według tych samych zasad.
 | `konto.blad.kod` | Wpisz kod zaproszenia (dostaniesz go od znajomego). | Wpisz kod zaproszenia. Da Ci go ktoś, kto już ma konto. | |
 | `konto.blad.email` | Wpisz poprawny adres e-mail. | Wpisz poprawny adres e-mail, np. imie@poczta.pl. | |
 | `konto.blad.haslo_krotkie` | Hasło: co najmniej {liczba} znaków. | Hasło musi mieć co najmniej {liczba} {liczba:znak/znaki/znaków}. | |
-| `konto.blad.internet` | Brak połączenia z serwerem kont - sprawdź internet. | Brak połączenia z serwerem kont. Sprawdź połączenie z internetem. | |
+| `konto.blad.internet` | Brak połączenia z serwerem kont - sprawdź internet. | Brak połączenia z internetem. Sprawdź sieć. Wyniki zostają na komputerze i wyślą się później. | 0.6.2: zrozumiale dla każdego (zgłoszenie Damiana). |
 | `konto.blad.400` | Serwer nie przyjął danych. | Serwer nie przyjął tych danych. Sprawdź pola i spróbuj ponownie. | |
 | `konto.blad.403` | Brak dostępu - potwierdź adres e-mail (link w wiadomości). | Najpierw potwierdź adres e-mail: kliknij link w wiadomości od WalkLevel. Nowy link wyślesz w zakładce Moje konto. | |
-| `konto.blad.404` | Nie znaleziono. | Nie znaleziono. | |
+| `konto.blad.404` | Nie znaleziono. | Tego nie ma już na serwerze. Odśwież listę. | |
 | `konto.blad.404_funkcja` | Ta funkcja będzie dostępna wkrótce. | Ta funkcja jeszcze nie działa na serwerze. Spróbuj później. | |
 | `konto.blad.413` | Za dużo danych naraz. | Za dużo danych naraz. Spróbuj ponownie za chwilę. | |
 | `konto.blad.429` | Za dużo prób - odczekaj chwilę i spróbuj ponownie. | Za dużo prób. Odczekaj chwilę i spróbuj ponownie. | |
 | `konto.blad.429_logowanie` | Za dużo prób - spróbuj za minutę. | Za dużo prób logowania. Spróbuj za minutę. | |
 | `konto.blad.logowanie` | Nieprawidłowy e-mail lub hasło. | Nieprawidłowy e-mail lub hasło. | |
-| `konto.blad.500` | Serwer kont ma chwilowy problem - spróbuj później. | Serwer kont ma chwilowy problem. Spróbuj później. | |
-| `konto.blad.kod_inny` | Serwer odpowiedział błędem {kod}. | Serwer kont nie odpowiada poprawnie. Spróbuj później. (kod {kod}) | |
+| `konto.blad.500` | Serwer kont ma chwilowy problem - spróbuj później. | Serwer kont chwilowo nie odpowiada. Wyniki zostają na komputerze i wyślą się później. | |
+| `konto.blad.kod_inny` | Serwer odpowiedział błędem {kod}. | Serwer kont chwilowo nie działa poprawnie. Wyniki zostają na komputerze. Spróbuj później. | Bez kodu dla gracza (kod jest w dzienniku). |
 | `konto.blad.niezalogowany` | Zaloguj się, żeby korzystać z funkcji online. | Zaloguj się, żeby korzystać z funkcji online. | |
-| `konto.blad.sesja_wygasla` | Sesja wygasła - zaloguj się ponownie. | Logowanie wygasło. Zaloguj się ponownie. | „Sesja” znaczy w aplikacji co innego (sesja chodzenia). |
+| `konto.blad.sesja_wygasla` | Sesja wygasła - zaloguj się ponownie. | Logowanie wygasło. Zaloguj się ponownie w Ustawienia > Konto i osoby. | „Sesja” znaczy w aplikacji co innego (sesja chodzenia). |
 | `konto.blad.aktualizacja` | (tekst z serwera przy kodzie 426) | Ta wersja WalkLevel jest za stara dla konta online. Zaktualizuj aplikację: kliknij Aktualizuj na górnym pasku. | Tekst zastępczy, gdy serwer nie poda własnego. |
-| `konto.blad.przekierowanie` | Serwer przekierował na inny adres - przerwano. | Połączenie przerwane dla bezpieczeństwa (nieznany adres). | |
+| `konto.blad.przekierowanie` | Serwer przekierował na inny adres - przerwano. | Połączenie z serwerem kont przerwano dla bezpieczeństwa. Jeśli sieć wymaga logowania (np. Wi-Fi w hotelu), zaloguj się w przeglądarce i spróbuj ponownie. | |
 | `konto.blad.za_duza_odpowiedz` | Odpowiedź serwera jest za duża - przerwano. | Serwer odpowiedział niezrozumiale. Spróbuj później. | Trzy rzadkie przypadki jednym tekstem. |
 | `konto.blad.format` | Serwer odpowiedział w nieznanym formacie. | Serwer odpowiedział niezrozumiale. Spróbuj później. | |
 | `konto.blad.adres_https` | Adres serwera kont musi zaczynać się od https:// | Adres serwera kont w konfiguracji jest błędny. | Błąd konfiguracji. |
@@ -1605,7 +1605,7 @@ wcześniej wpisu.
 | `klawisz.powod.ctrl_a` | Ctrl+A zaznacza wszystko | Ctrl+A zaznacza wszystko | |
 | `klawisz.powod.ctrl_s` | Ctrl+S zapisuje | Ctrl+S zapisuje | |
 | `aktualizacja.trwa` | Aktualizacja już trwa. | Aktualizacja już trwa. | |
-| `konto.blad.trwa` | To zadanie już trwa - chwilę. | To zadanie konta już trwa. Poczekaj chwilę. | |
+| `konto.blad.trwa` | To zadanie już trwa - chwilę. | WalkLevel już to robi. Poczekaj chwilę. | 0.6.2: wczytywanie danych już tego nie pokazuje (drugie wczytanie czeka na pierwsze). |
 | `konto.blad.zapis` | Nie udało się zapisać danych konta na tym komputerze. | Nie udało się zapisać danych konta na tym komputerze. | |
 | `profil_online.brak_osoby` | Nie znalazłem tej osoby. | Nie ma już tej osoby na liście. Odśwież listę. | |
 | `znajomi.przyjeto_zaproszenie` | Gotowe. | Przyjęto zaproszenie. | Za `znajomi.odpowiedziano` (uwaga tam). |
@@ -1711,3 +1711,16 @@ Panel z boku okna (docs/wyglad.md 8.20), status i opis dla znajomych, Ustawienia
 | `panel.usunieto` | (nowy) | Usunięto {pseudonim} ze znajomych | Usunięcie idzie na serwer dopiero po zniknięciu komunikatu. |
 | `panel.cofnij` | (nowy) | Cofnij | |
 | `konto.blad.opis_dlugosc` | (nowy) | Opis może mieć najwyżej {liczba} znaków. | Ten sam tekst zwraca serwer (400). |
+
+## Dodatki: komunikaty błędów konta online (0.6.2)
+
+Karta błędu (`KartaBledu.svelte`, docs/wyglad.md 8.17): tytuł mówi, czego nie udało się zrobić,
+opis (z `konto.blad.*`) - co się stało i co zrobić. Odświeżenia w tle nigdy nie pokazują karty,
+jeśli są już dane do pokazania.
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `online.blad.znajomi` | (nowy) | Nie udało się wczytać znajomych | Tytuł karty błędu (zakładka Znajomi, panel znajomych). |
+| `online.blad.ranking` | (nowy) | Nie udało się wczytać rankingu | |
+| `online.blad.osoby` | (nowy) | Nie udało się wczytać listy osób z kontem | |
+| `online.ponowi` | (nowy) | Kolejna próba za {sekundy} s | Obok „Spróbuj ponownie”, gdy aplikacja ponawia sama. |

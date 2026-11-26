@@ -21,6 +21,10 @@ class Znajomi {
   odebrano = $state(0);
   /** Zegar 1 s do dociągania XP (tylko gdy ktoś chodzi i lista jest widoczna). */
   teraz = $state(0);
+  /** Ostatni błąd odświeżenia (pusty - w porządku); karta błędu tylko, gdy nie ma listy. */
+  blad = $state('');
+  /** performance.now() kolejnej próby w tle (0 - nie ponawiamy). */
+  nastepna = $state(0);
 }
 export const znajomi = new Znajomi();
 
@@ -48,10 +52,13 @@ export async function odswiezZnajomych(force = false): Promise<void> {
     await api.onlineLoad('friends', force);
     znajomi.odebrano = performance.now();
     znajomi.teraz = znajomi.odebrano;
+    znajomi.blad = '';
     powiadomONowych(stan.online.friends);
   } catch (e) {
     console.warn('Znajomi: odświeżenie nie powiodło się', e);
+    if (api.jestBledemKomendy(e) && e.code !== 'busy' && e.code !== 'loggedOut') znajomi.blad = e.message;
   } finally {
+    znajomi.nastepna = ostatnio + (document.hidden ? ODSWIEZ_UKRYTE_MS : ODSWIEZ_WIDOCZNE_MS);
     trwa = false;
   }
 }
@@ -99,7 +106,8 @@ export function uruchomZnajomych(): () => void {
       const zegar = setInterval(() => {
         const odstep = document.hidden ? ODSWIEZ_UKRYTE_MS : ODSWIEZ_WIDOCZNE_MS;
         if (performance.now() - ostatnio >= odstep) void odswiezZnajomych();
-        if (!document.hidden && stan.online.friends?.some((f) => f.live)) znajomi.teraz = performance.now();
+        // zegar co sekundę: XP chodzących i odliczanie „Kolejna próba za N s” przy błędzie
+        if (!document.hidden && (znajomi.blad || stan.online.friends?.some((f) => f.live))) znajomi.teraz = performance.now();
       }, 1000);
       // pierwsze pobranie od razu (panel otwarty po starcie, zmiana osoby)
       if (performance.now() - ostatnio >= 2000) void odswiezZnajomych();

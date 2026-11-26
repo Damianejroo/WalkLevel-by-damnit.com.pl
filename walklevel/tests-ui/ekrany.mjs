@@ -59,6 +59,8 @@ export const EKRANY = [
     scenariusze: ['domyslny', 'panel-waski', 'panel-lewa', 'panel-lewa-waski', 'panel-wylaczony', 'panel-duzy', 'panel-bez-konta', 'panel-dlugie'],
   },
   { ekran: 'online', szerokosci: [720], scenariusze: ['domyslny', 'panel-duzy'] },
+  // karta błędu (serwer kont nie odpowiada) w zakładce i w panelu
+  { ekran: 'online', szerokosci: [420, 720, 1400], scenariusze: ['online-blad'] },
   { ekran: 'settings', szerokosci: [720], scenariusze: ['ustawienia', 'panel-duzy'] },
 ];
 
