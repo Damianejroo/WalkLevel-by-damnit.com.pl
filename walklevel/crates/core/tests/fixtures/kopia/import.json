@@ -1,0 +1,396 @@
+{
+ "fresh": {
+  "pelna.bieznia": {
+   "report": {
+    "peopleAdded": 2,
+    "peopleMerged": 0,
+    "profilesAdded": 4,
+    "profilesUpdated": 0,
+    "sessionsAdded": 3
+   },
+   "store": {
+    "active": "Cicha Tropicielka",
+    "people": [
+     {
+      "name": "Cicha Tropicielka",
+      "color": "Fiolet",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Szalony Biegacz",
+      "color": "Morski",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 1.5
+        },
+        "icon": null
+       },
+       {
+        "name": "Cyberpunk 2077",
+        "color": "Banan",
+        "glyph": null,
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": "89504e470d0a1a0a696b6f6e612d637962657270756e6b"
+       },
+       {
+        "name": "Stardew Valley",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Nocna Wędrowniczka",
+      "color": "Orchidea",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     }
+    ]
+   },
+   "sessions": 3
+  },
+  "wyniki.bieznia": {
+   "report": {
+    "peopleAdded": 2,
+    "peopleMerged": 0,
+    "profilesAdded": 2,
+    "profilesUpdated": 0,
+    "sessionsAdded": 3
+   },
+   "store": {
+    "active": "Cicha Tropicielka",
+    "people": [
+     {
+      "name": "Cicha Tropicielka",
+      "color": "Fiolet",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Szalony Biegacz",
+      "color": "Morski",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Nocna Wędrowniczka",
+      "color": "Orchidea",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     }
+    ]
+   },
+   "sessions": 3
+  },
+  "v1.bieznia": {
+   "report": {
+    "peopleAdded": 1,
+    "peopleMerged": 0,
+    "profilesAdded": 1,
+    "profilesUpdated": 0,
+    "sessionsAdded": 1
+   },
+   "store": {
+    "active": "Cicha Tropicielka",
+    "people": [
+     {
+      "name": "Cicha Tropicielka",
+      "color": "Fiolet",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Stary Piechur",
+      "color": "Niebo",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 1.8
+        },
+        "icon": null
+       }
+      ]
+     }
+    ]
+   },
+   "sessions": 1
+  }
+ },
+ "own": [
+  {
+   "label": "keep",
+   "report": {
+    "peopleAdded": 0,
+    "peopleMerged": 1,
+    "profilesAdded": 0,
+    "profilesUpdated": 0,
+    "sessionsAdded": 0
+   },
+   "store": {
+    "active": "Szalony Biegacz",
+    "people": [
+     {
+      "name": "Szalony Biegacz",
+      "color": "Morski",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 1.5
+        },
+        "icon": null
+       },
+       {
+        "name": "Cyberpunk 2077",
+        "color": "Banan",
+        "glyph": null,
+        "settings": {
+         "walk_speed": 9.9
+        },
+        "icon": "89504e470d0a1a0a696b6f6e612d637962657270756e6b"
+       },
+       {
+        "name": "Stardew Valley",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Nocna Wędrowniczka",
+      "color": "Orchidea",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     }
+    ]
+   },
+   "sessions": 3
+  },
+  {
+   "label": "replace",
+   "report": {
+    "peopleAdded": 0,
+    "peopleMerged": 1,
+    "profilesAdded": 0,
+    "profilesUpdated": 3,
+    "sessionsAdded": 0
+   },
+   "store": {
+    "active": "Szalony Biegacz",
+    "people": [
+     {
+      "name": "Szalony Biegacz",
+      "color": "Morski",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 1.5
+        },
+        "icon": null
+       },
+       {
+        "name": "Cyberpunk 2077",
+        "color": "Banan",
+        "glyph": null,
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": "89504e470d0a1a0a696b6f6e612d637962657270756e6b"
+       },
+       {
+        "name": "Stardew Valley",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Nocna Wędrowniczka",
+      "color": "Orchidea",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     }
+    ]
+   },
+   "sessions": 3
+  },
+  {
+   "label": "asNew",
+   "report": {
+    "peopleAdded": 1,
+    "peopleMerged": 0,
+    "profilesAdded": 3,
+    "profilesUpdated": 0,
+    "sessionsAdded": 2
+   },
+   "store": {
+    "active": "Szalony Biegacz",
+    "people": [
+     {
+      "name": "Szalony Biegacz",
+      "color": "Morski",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 1.5
+        },
+        "icon": null
+       },
+       {
+        "name": "Cyberpunk 2077",
+        "color": "Banan",
+        "glyph": null,
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": "89504e470d0a1a0a696b6f6e612d637962657270756e6b"
+       },
+       {
+        "name": "Stardew Valley",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Nocna Wędrowniczka",
+      "color": "Orchidea",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {},
+        "icon": null
+       }
+      ]
+     },
+     {
+      "name": "Szalony Biegacz 2",
+      "color": "Morski",
+      "profiles": [
+       {
+        "name": "Domyślny",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 1.5
+        },
+        "icon": null
+       },
+       {
+        "name": "Cyberpunk 2077",
+        "color": "Banan",
+        "glyph": null,
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": "89504e470d0a1a0a696b6f6e612d637962657270756e6b"
+       },
+       {
+        "name": "Stardew Valley",
+        "color": "Mięta",
+        "glyph": "",
+        "settings": {
+         "walk_speed": 2.2
+        },
+        "icon": null
+       }
+      ]
+     }
+    ]
+   },
+   "sessions": 5
+  }
+ ]
+}

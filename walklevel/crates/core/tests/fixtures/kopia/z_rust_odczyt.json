@@ -1,0 +1,182 @@
+{
+ "read": {
+  "appVersion": "dev",
+  "hasSettings": true,
+  "hasResults": true,
+  "describe": "z wersji dev · 2 os. · 3 profili · 2 sesji",
+  "people": [
+   {
+    "id": "c09b1971ef",
+    "nazwa": "Żwawa Łucja",
+    "kolor": "Malina",
+    "wyglad": {
+     "large_text": true,
+     "theme": "light"
+    },
+    "aktywny_profil": "298d7e9716",
+    "profile": [
+     {
+      "id": "1078910071",
+      "nazwa": "Domyślny",
+      "kolor": "Mięta",
+      "kolor_z_ikony": null,
+      "glif": "",
+      "ikona": null,
+      "exe": null,
+      "ustawienia": {
+       "walk_speed": 1.7
+      },
+      "gra_online": true
+     },
+     {
+      "id": "298d7e9716",
+      "nazwa": "Wiedźmin 3",
+      "kolor": "Banan",
+      "kolor_z_ikony": null,
+      "glif": null,
+      "ikona": "w3.png",
+      "exe": null,
+      "ustawienia": {
+       "walk_speed": 2.75
+      },
+      "gra_online": true
+     }
+    ]
+   },
+   {
+    "id": "f6e47dc1f9",
+    "nazwa": "Ósma Gęś",
+    "kolor": "Orchidea",
+    "wyglad": {},
+    "aktywny_profil": "cc03aef95f",
+    "profile": [
+     {
+      "id": "cc03aef95f",
+      "nazwa": "Domyślny",
+      "kolor": "Mięta",
+      "kolor_z_ikony": null,
+      "glif": "",
+      "ikona": null,
+      "exe": null,
+      "ustawienia": {},
+      "gra_online": true
+     }
+    ]
+   }
+  ],
+  "sessions": [
+   {
+    "id": "01a2155f66047251ba1aa3baa6132bc5",
+    "osoba": "c09b1971ef",
+    "osoba_nazwa": "Żwawa Łucja",
+    "profil": "298d7e9716",
+    "profil_nazwa": "Wiedźmin 3",
+    "start_utc_s": 1764300000.5,
+    "koniec_utc_s": 1764301200.25,
+    "kroki": 1500,
+    "dystans_km": 1.125,
+    "ruch_s": 1180.0,
+    "bieznia_model": "KS-NACH-X21C",
+    "sterownik": "kingsmith",
+    "bieznia_profil": "",
+    "firmware": "",
+    "wersja_aplikacji": "0.6.0",
+    "zrodlo": "bieznia",
+    "widocznosc": "znajomi",
+    "strefa_min": 60,
+    "zmieniono_utc_s": 1795654903.3007636,
+    "tryb": "gra"
+   },
+   {
+    "id": "01a2155f66047251ba1aa3bb7d5b53bb",
+    "osoba": "f6e47dc1f9",
+    "osoba_nazwa": "Ósma Gęś",
+    "profil": "cc03aef95f",
+    "profil_nazwa": "Domyślny",
+    "start_utc_s": 1764400000.0,
+    "koniec_utc_s": 1764400300.0,
+    "kroki": 400,
+    "dystans_km": 0.2,
+    "ruch_s": 290.0,
+    "bieznia_model": "",
+    "sterownik": "",
+    "bieznia_profil": "",
+    "firmware": "",
+    "wersja_aplikacji": "",
+    "zrodlo": "symulator",
+    "widocznosc": "prywatna",
+    "strefa_min": 0,
+    "zmieniono_utc_s": 1795654903.303671,
+    "tryb": "trening"
+   }
+  ],
+  "icons": {
+   "w3.png": "89504e470d0a1a0a696b6f6e612d776965647a6d696e"
+  }
+ },
+ "import": {
+  "report": {
+   "peopleAdded": 2,
+   "peopleMerged": 0,
+   "profilesAdded": 3,
+   "profilesUpdated": 0,
+   "sessionsAdded": 2
+  },
+  "store": {
+   "active": "Cicha Tropicielka",
+   "people": [
+    {
+     "name": "Cicha Tropicielka",
+     "color": "Fiolet",
+     "profiles": [
+      {
+       "name": "Domyślny",
+       "color": "Mięta",
+       "glyph": "",
+       "settings": {},
+       "icon": null
+      }
+     ]
+    },
+    {
+     "name": "Żwawa Łucja",
+     "color": "Malina",
+     "profiles": [
+      {
+       "name": "Domyślny",
+       "color": "Mięta",
+       "glyph": "",
+       "settings": {
+        "walk_speed": 1.7
+       },
+       "icon": null
+      },
+      {
+       "name": "Wiedźmin 3",
+       "color": "Banan",
+       "glyph": null,
+       "settings": {
+        "walk_speed": 2.75
+       },
+       "icon": "89504e470d0a1a0a696b6f6e612d776965647a6d696e"
+      }
+     ]
+    },
+    {
+     "name": "Ósma Gęś",
+     "color": "Orchidea",
+     "profiles": [
+      {
+       "name": "Domyślny",
+       "color": "Mięta",
+       "glyph": "",
+       "settings": {},
+       "icon": null
+      }
+     ]
+    }
+   ]
+  },
+  "sessions": 2
+ }
+}

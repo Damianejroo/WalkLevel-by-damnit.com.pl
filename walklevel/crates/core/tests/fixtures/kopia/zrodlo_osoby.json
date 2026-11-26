@@ -1,0 +1,80 @@
+{
+ "wersja": 1,
+ "aktywna": "6059ad28bb",
+ "pytaj_przy_starcie": true,
+ "wspolne": {},
+ "osoby": [
+  {
+   "id": "6059ad28bb",
+   "nazwa": "Szalony Biegacz",
+   "kolor": "Morski",
+   "wyglad": {
+    "theme": "dark"
+   },
+   "aktywny_profil": "635be37609",
+   "profile": [
+    {
+     "id": "23dddf66dc",
+     "nazwa": "Domyślny",
+     "kolor": "Mięta",
+     "kolor_z_ikony": null,
+     "glif": "",
+     "ikona": null,
+     "exe": null,
+     "ustawienia": {
+      "walk_speed": 1.5
+     },
+     "gra_online": true
+    },
+    {
+     "id": "86f82a9d96",
+     "nazwa": "Cyberpunk 2077",
+     "kolor": "Banan",
+     "kolor_z_ikony": null,
+     "glif": null,
+     "ikona": "cp.png",
+     "exe": null,
+     "ustawienia": {
+      "walk_speed": 2.2
+     },
+     "gra_online": true
+    },
+    {
+     "id": "635be37609",
+     "nazwa": "Stardew Valley",
+     "kolor": "Mięta",
+     "kolor_z_ikony": null,
+     "glif": "",
+     "ikona": null,
+     "exe": null,
+     "ustawienia": {
+      "walk_speed": 2.2
+     },
+     "gra_online": true
+    }
+   ]
+  },
+  {
+   "id": "6951491c92",
+   "nazwa": "Nocna Wędrowniczka",
+   "kolor": "Orchidea",
+   "wyglad": {
+    "large_text": true
+   },
+   "aktywny_profil": "58327cd83f",
+   "profile": [
+    {
+     "id": "58327cd83f",
+     "nazwa": "Domyślny",
+     "kolor": "Mięta",
+     "kolor_z_ikony": null,
+     "glif": "",
+     "ikona": null,
+     "exe": null,
+     "ustawienia": {},
+     "gra_online": true
+    }
+   ]
+  }
+ ]
+}
