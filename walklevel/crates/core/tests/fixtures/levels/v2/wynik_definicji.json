@@ -334,7 +334,7 @@
    "rarity": "pospolite",
    "mark": "kopula",
    "name": "Za Barierą",
-   "flavor": "Magiczna kopuła nad Kolonią z Gothica ma około 2 km średnicy. Od ściany do ściany.",
+   "flavor": "Według opisu gry magiczna bariera nad Kolonią z Gothica to kula o średnicy dwóch kilometrów. Od ściany do ściany.",
    "condition": "Przejdź łącznie 2 km.",
    "params": {
     "km": 2
@@ -366,6 +366,19 @@
     "km": 11.3
    },
    "km": 11.3
+  },
+  {
+   "id": "km212",
+   "kind": "dystans",
+   "rarity": "pospolite",
+   "mark": "plomien",
+   "name": "Chernarus z rogu w róg",
+   "flavor": "Chernarus z DayZ ma 225 km², czyli 15 na 15 km. Z rogu w róg wychodzi ponad 21 km.",
+   "condition": "Przejdź łącznie 21,2 km.",
+   "params": {
+    "km": 21.2
+   },
+   "km": 21.2
   },
   {
    "id": "km24",
@@ -472,17 +485,17 @@
    "km": 100.0
   },
   {
-   "id": "km115",
+   "id": "km1127",
    "kind": "dystans",
    "rarity": "rzadkie",
-   "mark": "fala",
-   "name": "Prom w Bucklebury",
-   "flavor": "Etap drogi Froda: prom przez Brandywinę na wschodnim skraju Shire.",
-   "condition": "Przejdź łącznie 115 km.",
+   "mark": "stopy",
+   "name": "Siedemdziesiąt mil do Londynu",
+   "flavor": "Kamień milowy mówi Oliverowi Twistowi z powieści Dickensa, że do Londynu jest 70 mil. Chłopak idzie tam pieszo przez tydzień.",
+   "condition": "Przejdź łącznie 112,7 km.",
    "params": {
-    "km": 115
+    "km": 112.7
    },
-   "km": 115.0
+   "km": 112.7
   },
   {
    "id": "km160",
@@ -511,19 +524,6 @@
    "km": 200.0
   },
   {
-   "id": "km215",
-   "kind": "dystans",
-   "rarity": "rzadkie",
-   "mark": "dom",
-   "name": "Pod Rozbrykanym Kucykiem",
-   "flavor": "Etap drogi Froda: gospoda w Bree, pierwszy nocleg za granicą Shire.",
-   "condition": "Przejdź łącznie 215 km.",
-   "params": {
-    "km": 215
-   },
-   "km": 215.0
-  },
-  {
    "id": "km246",
    "kind": "dystans",
    "rarity": "rzadkie",
@@ -535,19 +535,6 @@
     "km": 246
    },
    "km": 246.0
-  },
-  {
-   "id": "km276",
-   "kind": "dystans",
-   "rarity": "rzadkie",
-   "mark": "planeta",
-   "name": "Dookoła Pol",
-   "flavor": "Najmniejszy księżyc Joola z Kerbal Space Program ma 44 km promienia, więc jego równik to około 276 km.",
-   "condition": "Przejdź łącznie 276 km.",
-   "params": {
-    "km": 276
-   },
-   "km": 276.0
   },
   {
    "id": "km318",
@@ -567,8 +554,8 @@
    "kind": "dystans",
    "rarity": "rzadkie",
    "mark": "planeta",
-   "name": "Dookoła Minmusa",
-   "flavor": "Miętowy księżyc z Kerbal Space Program ma 377 km obwodu. Okrążony pieszo.",
+   "name": "Równik w Space Engineers",
+   "flavor": "Domyślna planeta ziemiopodobna w Space Engineers ma 120 km średnicy. Jej równik to prawie 377 km.",
    "condition": "Przejdź łącznie 377 km.",
    "params": {
     "km": 377
@@ -576,30 +563,17 @@
    "km": 377.0
   },
   {
-   "id": "km385",
+   "id": "km420",
    "kind": "dystans",
    "rarity": "rzadkie",
-   "mark": "gora",
-   "name": "Wichrowy Czub",
-   "flavor": "Etap drogi Froda: ruiny strażnicy na samotnym wzgórzu przy Wielkim Gościńcu.",
-   "condition": "Przejdź łącznie 385 km.",
+   "mark": "druzyna",
+   "name": "Najdłuższy etap Togo",
+   "flavor": "W sztafecie z surowicą do Nome w 1925 roku zaprzęg z psem Togo na czele pokonał 261 mil, czyli około 420 km. To najdłuższy odcinek całej sztafety.",
+   "condition": "Przejdź łącznie 420 km.",
    "params": {
-    "km": 385
+    "km": 420
    },
-   "km": 385.0
-  },
-  {
-   "id": "km408",
-   "kind": "dystans",
-   "rarity": "rzadkie",
-   "mark": "planeta",
-   "name": "Dookoła Bop",
-   "flavor": "Bop, nieregularny księżyc Joola z Kerbal Space Program, ma 65 km promienia. Równik to około 408 km.",
-   "condition": "Przejdź łącznie 408 km.",
-   "params": {
-    "km": 408
-   },
-   "km": 408.0
+   "km": 420.0
   },
   {
    "id": "km483",
@@ -615,30 +589,30 @@
    "km": 483.0
   },
   {
-   "id": "km1150",
+   "id": "km583",
+   "kind": "dystans",
+   "rarity": "epickie",
+   "mark": "kolo",
+   "name": "Via Appia do Brindisi",
+   "flavor": "Przy Via Appia Sienkiewicz umieścił scenę „Quo vadis, Domine?”. Według Britanniki droga liczyła 132 mile do Kapui i 230 dalej, razem około 583 km.",
+   "condition": "Przejdź łącznie 583 km.",
+   "params": {
+    "km": 583
+   },
+   "km": 583.0
+  },
+  {
+   "id": "km640",
    "kind": "dystans",
    "rarity": "epickie",
    "mark": "wieza",
-   "name": "Fosa Cailin",
-   "flavor": "Etap Drogi Królewskiej z Winterfell na południe: ruiny twierdzy na bagnach Przesmyku, brama Północy.",
-   "condition": "Przejdź łącznie 580 km.",
+   "name": "Szlak św. Olafa",
+   "flavor": "Pielgrzymi szlak z Oslo do katedry Nidaros w Trondheim, gdzie pochowano króla Olafa, ma około 640 km.",
+   "condition": "Przejdź łącznie 640 km.",
    "params": {
-    "km": 580
+    "km": 640
    },
-   "km": 580.0
-  },
-  {
-   "id": "km628",
-   "kind": "dystans",
-   "rarity": "epickie",
-   "mark": "gwiazda",
-   "name": "Równik drugiej Gwiazdy Śmierci",
-   "flavor": "Druga Gwiazda Śmierci miała 200 km średnicy, więc jej równik to ponad 600 km.",
-   "condition": "Przejdź łącznie 628 km.",
-   "params": {
-    "km": 628
-   },
-   "km": 628.0
+   "km": 640.0
   },
   {
    "id": "km737",
@@ -654,17 +628,17 @@
    "km": 737.0
   },
   {
-   "id": "km817",
+   "id": "km800",
    "kind": "dystans",
    "rarity": "epickie",
    "mark": "planeta",
-   "name": "Dookoła Ike",
-   "flavor": "Księżyc Duny z Kerbal Space Program ma 130 km promienia, więc jego równik to prawie 817 km.",
-   "condition": "Przejdź łącznie 817 km.",
+   "name": "Po Pathfindera",
+   "flavor": "Watney z „Marsjanina” jedzie łazikiem po starą sondę Pathfinder. Według NASA miejsce lądowania Ares 3 leży około 800 km na północ od niej.",
+   "condition": "Przejdź łącznie 800 km.",
    "params": {
-    "km": 817
+    "km": 800
    },
-   "km": 817.0
+   "km": 800.0
   },
   {
    "id": "km950",
@@ -680,43 +654,43 @@
    "km": 950.0
   },
   {
-   "id": "km1000",
+   "id": "km1009",
    "kind": "dystans",
    "rarity": "epickie",
-   "mark": "biegacz",
-   "name": "Złoty Jogger",
-   "flavor": "Złoty medal Jogger w Pokémon GO wymaga 1 000 km. Platynowy dopiero dziesięć razy tyle.",
-   "condition": "Przejdź łącznie 1 000 km.",
+   "mark": "stopy",
+   "name": "Pielgrzymka Harolda Fry",
+   "flavor": "W powieści Rachel Joyce emeryt Harold Fry wychodzi wysłać list i idzie dalej pieszo, z Kingsbridge do Berwick-upon-Tweed. To 627 mil, czyli około 1 009 km.",
+   "condition": "Przejdź łącznie 1 009 km.",
    "params": {
-    "km": 1000
+    "km": 1009
    },
-   "km": 1000.0
+   "km": 1009.0
   },
   {
-   "id": "km1046",
+   "id": "km1085",
    "kind": "dystans",
    "rarity": "epickie",
-   "mark": "mur",
-   "name": "Z Winterfell na Mur",
-   "flavor": "Według pomiarów map Droga Królewska z Winterfell do Czarnego Zamku liczy około 650 mil.",
-   "condition": "Przejdź łącznie 1 046 km.",
+   "mark": "pudlo",
+   "name": "Surowica dla Nome",
+   "flavor": "W 1925 roku sztafeta psich zaprzęgów przewiozła surowicę z Nenany do Nome: 674 mile, czyli około 1 085 km, w pięć i pół dnia. Ostatni etap poprowadził Balto.",
+   "condition": "Przejdź łącznie 1 085 km.",
    "params": {
-    "km": 1046
+    "km": 1085
    },
-   "km": 1046.0
+   "km": 1085.0
   },
   {
-   "id": "km880",
+   "id": "km1200",
    "kind": "dystans",
    "rarity": "epickie",
-   "mark": "gora",
-   "name": "Przełęcz Caradhrasu",
-   "flavor": "Etap wyprawy Drużyny: śnieżna przełęcz, która nie wpuściła ich w góry.",
-   "condition": "Przejdź łącznie 1 190 km.",
+   "mark": "brama",
+   "name": "88 świątyń Shikoku",
+   "flavor": "Pielgrzymka do 88 świątyń związanych z mnichem Kūkai okrąża całą wyspę Shikoku. Pieszo to najczęściej podawane około 1 200 km.",
+   "condition": "Przejdź łącznie 1 200 km.",
    "params": {
-    "km": 1190
+    "km": 1200
    },
-   "km": 1190.0
+   "km": 1200.0
   },
   {
    "id": "km1257",
@@ -732,59 +706,33 @@
    "km": 1257.0
   },
   {
-   "id": "km1019",
+   "id": "km1407",
    "kind": "dystans",
    "rarity": "epickie",
-   "mark": "brama",
-   "name": "Wrota Morii",
-   "flavor": "Z Rivendell pod zachodnią ścianę Morii, przez śniegi Caradhrasu.",
-   "condition": "Przejdź łącznie 1 285 km.",
+   "mark": "licznik",
+   "name": "Land’s End – John o’Groats",
+   "flavor": "Klasyczna wędrówka przez całą Wielką Brytanię, od cypla w Kornwalii po północny kraniec Szkocji. Drogami to tradycyjnie 874 mile, czyli 1 407 km.",
+   "condition": "Przejdź łącznie 1 407 km.",
    "params": {
-    "km": 1285
+    "km": 1407
    },
-   "km": 1285.0
+   "km": 1407.0
   },
   {
-   "id": "km1400",
+   "id": "km1508",
    "kind": "dystans",
    "rarity": "epickie",
-   "mark": "drzewo",
-   "name": "Mroczna Puszcza",
-   "flavor": "Etap wyprawy Bilba: ścieżka przez las, z której nie wolno było zejść.",
-   "condition": "Przejdź łącznie 1 400 km.",
+   "mark": "ksiezyc",
+   "name": "Równik Calliope",
+   "flavor": "Calliope, księżyc planety microTech ze Star Citizen, ma w grze 240 km promienia. Jej równik to prawie 1 508 km.",
+   "condition": "Przejdź łącznie 1 508 km.",
    "params": {
-    "km": 1400
+    "km": 1508
    },
-   "km": 1400.0
+   "km": 1508.0
   },
   {
-   "id": "km1480",
-   "kind": "dystans",
-   "rarity": "epickie",
-   "mark": "drzewo",
-   "name": "Lothlórien",
-   "flavor": "Etap Drużyny: złoty las elfów nad Srebrną Żyłą, w którym zima jakby nie miała wstępu.",
-   "condition": "Przejdź łącznie 1 480 km.",
-   "params": {
-    "km": 1480
-   },
-   "km": 1480.0
-  },
-  {
-   "id": "km1530",
-   "kind": "dystans",
-   "rarity": "epickie",
-   "mark": "gora",
-   "name": "Pod Samotną Górę",
-   "flavor": "Droga Bilba i trzynastu krasnoludów z Bag End do Ereboru.",
-   "condition": "Przejdź łącznie 1 530 km.",
-   "params": {
-    "km": 1530
-   },
-   "km": 1530.0
-  },
-  {
-   "id": "km1670",
+   "id": "km1609",
    "kind": "dystans",
    "rarity": "epickie",
    "mark": "pierscien",
@@ -797,103 +745,103 @@
    "km": 1609.0
   },
   {
-   "id": "km1940",
+   "id": "km1697",
    "kind": "dystans",
    "rarity": "epickie",
-   "mark": "fala",
-   "name": "Rubinowy Bród",
-   "flavor": "Etap Drogi Królewskiej z Winterfell na południe: płytki bród na Tridencie, w którym podobno wciąż leżą rubiny.",
-   "condition": "Przejdź łącznie 1 706 km.",
+   "mark": "drzewo",
+   "name": "Szlak Tōkai",
+   "flavor": "Japoński szlak przyrodniczy Tōkai biegnie górami z Takao pod Tokio do Minoo pod Osaką. Według władz Tokio ma 1 697 km.",
+   "condition": "Przejdź łącznie 1 697 km.",
    "params": {
-    "km": 1706
+    "km": 1697
    },
-   "km": 1706.0
+   "km": 1697.0
   },
   {
-   "id": "km1790",
+   "id": "km1770",
    "kind": "dystans",
    "rarity": "epickie",
-   "mark": "fala",
-   "name": "Brunatne Pola",
-   "flavor": "Etap Drużyny: łodzie elfów płyną Anduinem wzdłuż pustych, martwych Brunatnych Pól.",
-   "condition": "Przejdź łącznie 1 790 km.",
-   "params": {
-    "km": 1790
-   },
-   "km": 1790.0
-  },
-  {
-   "id": "km1935",
-   "kind": "dystans",
-   "rarity": "heroiczne",
-   "mark": "fala",
-   "name": "Progi Sarn Gebir",
-   "flavor": "Etap Drużyny: skaliste progi na Anduinie, przed którymi łodzie trzeba przenieść brzegiem.",
-   "condition": "Przejdź łącznie 1 935 km.",
-   "params": {
-    "km": 1935
-   },
-   "km": 1935.0
-  },
-  {
-   "id": "km2080",
-   "kind": "dystans",
-   "rarity": "heroiczne",
    "mark": "gora",
-   "name": "Argonath",
-   "flavor": "Etap Drużyny: Anduin wpływa między wzgórza Emyn Muil, a nad wodą stoją dwa kamienne posągi dawnych królów.",
-   "condition": "Przejdź łącznie 2 080 km.",
+   "name": "Dzika droga",
+   "flavor": "W „Dzikiej drodze” Cheryl Strayed opisuje, jak samotnie przeszła 1 100 mil szlaku Pacific Crest Trail. To około 1 770 km.",
+   "condition": "Przejdź łącznie 1 770 km.",
    "params": {
-    "km": 2080
+    "km": 1770
    },
-   "km": 2080.0
+   "km": 1770.0
   },
   {
-   "id": "km1800",
+   "id": "km1854",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "ksiezyc",
+   "name": "Równik Daymara",
+   "flavor": "Daymar, księżyc gazowego olbrzyma Crusader ze Star Citizen, ma w grze 295 km promienia. Jego równik to około 1 854 km.",
+   "condition": "Przejdź łącznie 1 854 km.",
+   "params": {
+    "km": 1854
+   },
+   "km": 1854.0
+  },
+  {
+   "id": "km2000",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "drzwi",
+   "name": "Via Francigena",
+   "flavor": "Szlak pielgrzymów z Canterbury do Rzymu opisał arcybiskup Sigeric w 990 roku. Według przewodników dzisiejsza trasa ma około 2 000 km.",
+   "condition": "Przejdź łącznie 2 000 km.",
+   "params": {
+    "km": 2000
+   },
+   "km": 2000.0
+  },
+  {
+   "id": "km2092",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "dom",
+   "name": "Szlak Mormonów",
+   "flavor": "W latach 1846–1847 mormoni przeszli z Nauvoo nad Wielkie Jezioro Słone. Według amerykańskiej służby parków narodowych to około 1 300 mil, 2 092 km.",
+   "condition": "Przejdź łącznie 2 092 km.",
+   "params": {
+    "km": 2092
+   },
+   "km": 2092.0
+  },
+  {
+   "id": "km2201",
    "kind": "dystans",
    "rarity": "heroiczne",
    "mark": "fala",
-   "name": "Wodogrzmoty Rauros",
-   "flavor": "Wielkie wodogrzmoty na Anduinie, do których Drużyna dopłynęła łodziami elfów.",
-   "condition": "Przejdź łącznie 2 105 km.",
+   "name": "Wzdłuż Dniepru",
+   "flavor": "Dniepr, nad którym toczy się duża część „Ogniem i mieczem”, ma 2 201 km długości. Od źródeł w Rosji do Morza Czarnego.",
+   "condition": "Przejdź łącznie 2 201 km.",
    "params": {
-    "km": 2105
+    "km": 2201
    },
-   "km": 2105.0
-  },
-  {
-   "id": "km2220",
-   "kind": "dystans",
-   "rarity": "heroiczne",
-   "mark": "gora",
-   "name": "Zejście z Emyn Muil",
-   "flavor": "Etap drogi Froda i Sama: po kilku dniach błądzenia po skałach zejście z urwiska po elfickiej linie.",
-   "condition": "Przejdź łącznie 2 220 km.",
-   "params": {
-    "km": 2220
-   },
-   "km": 2220.0
+   "km": 2201.0
   },
   {
    "id": "km2300",
    "kind": "dystans",
    "rarity": "heroiczne",
-   "mark": "fala",
-   "name": "Martwe Bagna",
-   "flavor": "Etap drogi Froda i Sama: bagna ze światełkami, za którymi nie wolno iść.",
-   "condition": "Przejdź łącznie 2 360 km.",
+   "mark": "wglab",
+   "name": "Wielka Rafa Koralowa",
+   "flavor": "Rafa, na której mieszka Nemo z filmu Pixara, ciągnie się wzdłuż wybrzeża Australii przez ponad 2 300 km.",
+   "condition": "Przejdź łącznie 2 300 km.",
    "params": {
-    "km": 2360
+    "km": 2300
    },
-   "km": 2360.0
+   "km": 2300.0
   },
   {
    "id": "km2414",
    "kind": "dystans",
    "rarity": "heroiczne",
-   "mark": "korona",
-   "name": "Królewska Przystań",
-   "flavor": "Według pomiarów map z Winterfell do stolicy Westeros jest około 1 500 mil Drogi Królewskiej.",
+   "mark": "stopy",
+   "name": "Wzdłuż płotu przeciw królikom",
+   "flavor": "W filmie „Rabbit-Proof Fence” trzy dziewczynki uciekają z ośrodka i przez dziewięć tygodni idą do domu wzdłuż płotu. To 1 500 mil, około 2 414 km.",
    "condition": "Przejdź łącznie 2 414 km.",
    "params": {
     "km": 2414
@@ -901,43 +849,30 @@
    "km": 2414.0
   },
   {
-   "id": "km2565",
+   "id": "km2500",
    "kind": "dystans",
    "rarity": "heroiczne",
-   "mark": "brama",
-   "name": "Czarna Brama",
-   "flavor": "Etap drogi Froda i Sama: zamknięte wrota Mordoru.",
-   "condition": "Przejdź łącznie 2 480 km.",
+   "mark": "korona",
+   "name": "Droga Królewska Persów",
+   "flavor": "Herodot liczy drogę z Sardes do Suzy na 450 parasangów i 90 dni marszu. W przeliczeniu to około 2 500 km.",
+   "condition": "Przejdź łącznie 2 500 km.",
    "params": {
-    "km": 2480
+    "km": 2500
    },
-   "km": 2480.0
+   "km": 2500.0
   },
   {
-   "id": "km2540",
+   "id": "km2700",
    "kind": "dystans",
    "rarity": "heroiczne",
-   "mark": "lisc",
-   "name": "Ithilien",
-   "flavor": "Etap drogi Froda i Sama: zielona, pachnąca ziołami kraina Gondoru tuż pod górami Mordoru.",
-   "condition": "Przejdź łącznie 2 540 km.",
+   "mark": "slonce",
+   "name": "Z wielbłądami do oceanu",
+   "flavor": "Robyn Davidson, której wyprawę pokazuje film „Tracks”, przeszła z wielbłądami przez australijskie pustynie z Alice Springs nad Ocean Indyjski. Około 2 700 km.",
+   "condition": "Przejdź łącznie 2 700 km.",
    "params": {
-    "km": 2540
+    "km": 2700
    },
-   "km": 2540.0
-  },
-  {
-   "id": "km2715",
-   "kind": "dystans",
-   "rarity": "heroiczne",
-   "mark": "gora",
-   "name": "Schody Cirith Ungol",
-   "flavor": "Etap drogi Froda i Sama: kręte schody wykute w skałach Ephel Dúath.",
-   "condition": "Przejdź łącznie 2 650 km.",
-   "params": {
-    "km": 2650
-   },
-   "km": 2650.0
+   "km": 2700.0
   },
   {
    "id": "km2762",
@@ -966,17 +901,17 @@
    "km": 2865.0
   },
   {
-   "id": "km3060",
+   "id": "km3058",
    "kind": "dystans",
    "rarity": "heroiczne",
-   "mark": "drzwi",
-   "name": "Tam i z powrotem",
-   "flavor": "Cała wyprawa Bilba: do Ereboru i z powrotem do Bag End.",
-   "condition": "Przejdź łącznie 3 060 km.",
+   "mark": "kolo",
+   "name": "Pony Express",
+   "flavor": "Konni kurierzy z 1860 roku wieźli pocztę z St. Joseph do Sacramento w dziesięć dni. Trasa liczyła około 1 900 mil, czyli 3 058 km.",
+   "condition": "Przejdź łącznie 3 058 km.",
    "params": {
-    "km": 3060
+    "km": 3058
    },
-   "km": 3060.0
+   "km": 3058.0
   },
   {
    "id": "km3235",
@@ -1005,17 +940,30 @@
    "km": 3490.0
   },
   {
-   "id": "km4000",
+   "id": "km3940",
    "kind": "dystans",
    "rarity": "heroiczne",
-   "mark": "planeta",
-   "name": "Valles Marineris",
-   "flavor": "Wielki kanion Marsa, znany z marsjańskiej trylogii Robinsona, ma około 4 000 km długości.",
-   "condition": "Przejdź łącznie 4 000 km.",
+   "mark": "kolo",
+   "name": "Route 66",
+   "flavor": "Steinbeck nazwał ją w „Gronach gniewu” Matką Dróg. Cała Route 66 z Chicago do Santa Monica miała 2 448 mil, czyli 3 940 km.",
+   "condition": "Przejdź łącznie 3 940 km.",
    "params": {
-    "km": 4000
+    "km": 3940
    },
-   "km": 4000.0
+   "km": 3940.0
+  },
+  {
+   "id": "km4023",
+   "kind": "dystans",
+   "rarity": "heroiczne",
+   "mark": "ksiezyc",
+   "name": "Dwa i pół tysiąca mil",
+   "flavor": "W „Zewie krwi” zaprzęg Bucka w niecałe pięć miesięcy przebył 2 500 mil, czyli około 4 023 km.",
+   "condition": "Przejdź łącznie 4 023 km.",
+   "params": {
+    "km": 4023
+   },
+   "km": 4023.0
   },
   {
    "id": "km4500",
@@ -1044,7 +992,7 @@
    "km": 4800.0
   },
   {
-   "id": "km5200",
+   "id": "km5523",
    "kind": "dystans",
    "rarity": "legendarne",
    "mark": "kolo",
@@ -1068,6 +1016,19 @@
     "km": 6128
    },
    "km": 6128.0
+  },
+  {
+   "id": "km6500",
+   "kind": "dystans",
+   "rarity": "legendarne",
+   "mark": "stopy",
+   "name": "Z łagru do Indii",
+   "flavor": "Sławomir Rawicz opisał ucieczkę z łagru na Syberii i marsz aż do Indii, około 6 500 km. Prawdziwość tej relacji jest dziś podważana.",
+   "condition": "Przejdź łącznie 6 500 km.",
+   "params": {
+    "km": 6500
+   },
+   "km": 6500.0
   },
   {
    "id": "km7200",
@@ -1094,6 +1055,19 @@
     "km": 8047
    },
    "km": 8047.0
+  },
+  {
+   "id": "km9656",
+   "kind": "dystans",
+   "rarity": "legendarne",
+   "mark": "glob",
+   "name": "Brobdingnag wzdłuż",
+   "flavor": "Kraina olbrzymów z „Podróży Guliwera” ma według Swifta około 6 000 mil długości. Tyle co 9 656 km.",
+   "condition": "Przejdź łącznie 9 656 km.",
+   "params": {
+    "km": 9656
+   },
+   "km": 9656.0
   },
   {
    "id": "km10000",
@@ -1392,6 +1366,7 @@
   "km2",
   "km57",
   "km113",
+  "km212",
   "km24",
   "km30",
   "km447",
@@ -1400,54 +1375,51 @@
   "km70",
   "km805",
   "km100",
-  "km115",
+  "km1127",
   "km160",
   "km200",
-  "km215",
   "km246",
-  "km276",
   "km318",
   "km377",
-  "km385",
-  "km408",
+  "km420",
   "km483",
-  "km1150",
-  "km628",
+  "km583",
+  "km640",
   "km737",
-  "km817",
+  "km800",
   "km950",
-  "km1000",
-  "km1046",
-  "km880",
+  "km1009",
+  "km1085",
+  "km1200",
   "km1257",
-  "km1019",
-  "km1400",
-  "km1480",
-  "km1530",
-  "km1670",
-  "km1940",
-  "km1790",
-  "km1935",
-  "km2080",
-  "km1800",
-  "km2220",
+  "km1407",
+  "km1508",
+  "km1609",
+  "km1697",
+  "km1770",
+  "km1854",
+  "km2000",
+  "km2092",
+  "km2201",
   "km2300",
   "km2414",
-  "km2565",
-  "km2540",
-  "km2715",
+  "km2500",
+  "km2700",
   "km2762",
   "km2865",
-  "km3060",
+  "km3058",
   "km3235",
   "km3490",
-  "km4000",
+  "km3940",
+  "km4023",
   "km4500",
   "km4800",
-  "km5200",
+  "km5523",
   "km6128",
+  "km6500",
   "km7200",
   "km8047",
+  "km9656",
   "km10000"
  ],
  "maxLevel": 100,

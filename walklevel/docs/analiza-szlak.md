@@ -4,6 +4,10 @@ Stan na: WalkLevel 0.5.2, plik `bieznia/poziomy/definicje.json` (wersja 1, 61 os
 43 przystanki szlaku). Wynik: `walklevel/docs/definicje-v2.json` (wersja 2, 82 osiągnięcia,
 61 przystanków). Plik v1 nie był zmieniany.
 
+**Aktualizacja 26.11.2026:** szlak przebudowany pod kątem różnorodności uniwersów (najwyżej 2
+przystanki z jednego świata): 59 przystanków, 80 osiągnięć. Opis, research i lista zmienionych id
+w sekcji 9. Sekcje 1–7 opisują pierwszą wersję v2.
+
 ## 1. Najważniejsze wnioski
 
 1. **Większość dystansów „ze świata” się zgadza** (Erangel, Nether, Cytadela, Gwiazdy Śmierci,
@@ -308,3 +312,152 @@ Do zrobienia w 0.6.0 (poza tym plikiem):
 - Pierścień (Niven), ściany 1 000 mil: https://larryniven.fandom.com/wiki/Ringworld
 - Rama: https://en.wikipedia.org/wiki/Rendezvous_with_Rama
 - Kerbal Space Program (promienie ciał): dane z gry (wiki KSP)
+
+## 9. Przebudowa szlaku 26.11.2026 (różnorodność uniwersów)
+
+Uwaga Damiana: za dużo Kerbala („Z Kerbala 1, góra 2 rzeczy”). Zasada zastosowana do każdego
+uniwersum: **najwyżej 2 przystanki z jednego świata**. Kont poza kontem Damiana na serwerze jeszcze
+nie ma, więc id przystanków można było zmieniać i usuwać (sekcja 9.4). Sekcje 3 i 6 opisują stan
+sprzed przebudowy.
+
+### 9.1. Research uniwersów 26.11
+
+Wiarygodność: **wysoka** (tekst źródłowy, dane z gry, oficjalny opis, encyklopedia), **średnia**
+(źródła podają różne liczby albo jest tylko przewodnik), **niska** (pomiar albo wyliczenie
+społeczności). Status: **wszedł**, **zapas** (dobra liczba, ale koliduje z innym przystankiem)
+albo powód odrzucenia.
+
+| Kandydat | Liczba | Źródło | Wiarygodność | Status |
+|---|---|---|---|---|
+| Gothic, bariera | kula 2 km średnicy | opis gry na Steam: https://store.steampowered.com/app/65540/Gothic_1/ | wysoka (wydawca) | wszedł (dotąd bez źródła) |
+| **DayZ** (propozycja Damiana), Chernarus | 225 km² (15 × 15 km), przekątna 21,2 km | https://en.wikipedia.org/wiki/DayZ_(video_game) | wysoka (przekątna wyliczona) | wszedł |
+| „Oliver Twist” (Dickens) | 70 mil do Londynu, tydzień pieszo | rozdz. VIII: https://standardebooks.org/ebooks/charles-dickens/oliver-twist/text/chapter-8 | wysoka | wszedł (112,7 km) |
+| Space Engineers, planeta ziemiopodobna | 120 km średnicy, równik 377 km | https://spaceengineers.fandom.com/wiki/Planets, https://www.moddb.com/news/update-01108-planets | wysoka | wszedł |
+| Togo, sztafeta do Nome 1925 | 261 mil (420 km), najdłuższy etap | https://www.smithsonianmag.com/history/this-heroic-dog-raced-across-the-frozen-alaskan-wilderness-to-deliver-life-saving-medicine-but-his-contributions-were-long-overlooked-180985905/, https://en.wikipedia.org/wiki/Togo_(dog) | średnia (261–264 mile) | wszedł |
+| Via Appia („Quo vadis”) | 132 + 230 mil, ok. 583 km | https://www.britannica.com/topic/Appian-Way | średnia (inne źródło: 563 km) | wszedł |
+| Szlak św. Olafa, Oslo → Trondheim | ok. 640 km | https://www.visitnorway.com/listings/saint-olav-ways-to-trondheim-seven-route-suggestions/22461/ | średnia (632–643 km) | wszedł |
+| „Marsjanin”, Ares 3 → Pathfinder | ok. 800 km | https://apod.nasa.gov/apod/ap150516.html, https://hirise.lpl.arizona.edu/ESP_041277_2115 | wysoka | wszedł |
+| „The Unlikely Pilgrimage of Harold Fry” (Joyce) | 627 mil (1 009 km) | https://www.spectator.co.uk/article/the-unlikely-pilgrimage-of-harold-fry-by-rachel-joyce-review | wysoka (dla powieści; BFI o filmie: 450 mil) | wszedł |
+| Sztafeta z surowicą do Nome (Balto) | 674 mile (1 085 km) w 5,5 dnia | https://en.wikipedia.org/wiki/1925_serum_run_to_Nome | wysoka | wszedł |
+| Pielgrzymka 88 świątyń Shikoku | ok. 1 200 km | https://en.wikivoyage.org/wiki/88_Temple_Pilgrimage, https://en.wikipedia.org/wiki/Shikoku_Pilgrimage | średnia (oficjalna strona turystyczna: 1 400 km) | wszedł, tekst: „najczęściej podawane” |
+| Land’s End → John o’Groats | 874 mile (1 407 km) drogami | https://en.wikipedia.org/wiki/Land%27s_End_to_John_o%27_Groats | wysoka | wszedł |
+| Star Citizen: Calliope, Daymar | r = 240 i 295 km, równik 1 508 i 1 854 km | https://starcitizen.tools/Calliope, https://starcitizen.tools/Daymar | wysoka (dane z gry) | weszły oba |
+| Star Citizen: Lyria, Yela, Cellin | r = 223, 313, 260 km | https://starcitizen.tools/Lyria, https://starcitizen.tools/Yela, https://starcitizen.tools/index.php?title=Cellin | wysoka | odrzucone: limit 2 na uniwersum |
+| Szlak przyrodniczy Tōkai | 1 697 km | https://www.kankyo1.metro.tokyo.lg.jp/naturepark/english/know/park/introduction/toritu/meiji/toukaishizenhodou.html | wysoka (władze Tokio) | wszedł |
+| „Dzika droga” (Strayed), Pacific Crest Trail | 1 100 mil (1 770 km) | https://en.wikipedia.org/wiki/Wild_(memoir), https://www.npr.org/2012/03/18/148858058/a-wild-solitary-journey-on-the-pacific-crest-trail | wysoka | wszedł |
+| Via Francigena | Sigeric ok. 1 700 km, dzisiejszy szlak 1 900–2 000 km | https://en.wikipedia.org/wiki/Via_Francigena, https://caminoways.com/how-long-is-the-via-francigena, https://pilgrimstorome.org.uk/planning/walking-the-via-francigena/ | średnia | wszedł, tekst: „według przewodników około 2 000 km” |
+| Szlak Mormonów | ok. 1 300 mil (2 092 km) | https://home.nps.gov/mopi/espanol/index.htm, https://en.wikipedia.org/wiki/Mormon_Trail | wysoka (FAQ NPS: 1 400 mil) | wszedł |
+| Dniepr („Ogniem i mieczem”) | 2 201 km | https://en.wikipedia.org/wiki/Dnieper | wysoka (inne źródła: 2 145–2 290 km) | wszedł |
+| Wielka Rafa Koralowa („Gdzie jest Nemo”) | ponad 2 300 km | https://en.wikipedia.org/wiki/Great_Barrier_Reef | wysoka | wszedł |
+| „Rabbit-Proof Fence” (Noyce) | 1 500 mil przez 9 tygodni | https://en.wikipedia.org/wiki/Rabbit-Proof_Fence | wysoka | wszedł (2 414 km) |
+| Droga Królewska Persów (Herodot V.52–53) | 450 parasangów, 90 dni, ok. 2 500 km | https://livius.org/articles/concept/royal-road | średnia (Wikipedia: 2 699 km, Britannica: ponad 2 400 km) | wszedł |
+| „Tracks”, wyprawa Robyn Davidson | ok. 2 700 km | https://en.wikipedia.org/wiki/Tracks_(2013_film) | wysoka | wszedł |
+| Pony Express | ok. 1 900 mil (3 058 km) w 10 dni | https://www.nps.gov/poex/learn/historyculture/index.htm | średnia (1 800–1 966 mil) | wszedł |
+| Route 66 („Grona gniewu”) | 2 448 mil (3 940 km) | https://en.wikipedia.org/wiki/U.S._Route_66, https://www.legendsofamerica.com/66-facts/ | wysoka | wszedł |
+| „Zew krwi”, zaprzęg Bucka | 2 500 mil w niecałe 5 miesięcy | rozdz. V: https://etc.usf.edu/lit2go/151/the-call-of-the-wild/2664/chapter-5-the-toil-of-trace-and-trail/ | wysoka | wszedł (4 023 km) |
+| Rawicz, „The Long Walk” | ok. 6 500 km (4 000 mil) | https://en.wikipedia.org/wiki/S%C5%82awomir_Rawicz | liczba z książki, sama relacja podważana | wszedł, tekst to zaznacza |
+| „Podróże Guliwera”, Brobdingnag | ok. 6 000 mil (9 656 km) | rozdz. II.4: https://standardebooks.org/ebooks/jonathan-swift/gullivers-travels/text/chapter-2-4 | wysoka | wszedł |
+| **Dziedzictwo Hogwartu** (propozycja Damiana) | mapa ok. 7,65 km² (3,7 × 1,4 km + 1,9 × 1,3 km) | https://www.powerpyx.com/hogwarts-legacy-full-world-map-revealed/ | niska (pomiar poradnika, twórcy nic nie podali) | odrzucone: to tylko powierzchnia, a długość ok. 5,6 km wypada na Skyrim |
+| **Kingdom Come: Deliverance II** (propozycja Damiana) | „dwa razy większa niż KCD1”, bez km | https://gamepressure.com/kingdom-come-deliverance-2/how-big-is-the-open-world/z2117a8, https://dexerto.com/gaming/kingdom-come-deliverance-2-map-size-3025981 | niska (Warhorse nie podaje wymiarów) | odrzucone: brak sprawdzalnej liczby |
+| Atak Tytanów, mury | Maria → Rose 100 km, Rose → Sina 130 km, Sina r = 250 km | wyłącznie strony fanowskie, przewodnika nie udało się potwierdzić | niska | odrzucone |
+| Starkiller (Gwiezdne wojny) | 660 km średnicy (Star Wars: Super Graphic) | cytowania na forach | średnia | odrzucone: limit 2 (Gwiazda Śmierci, Hoth) |
+| Laputa (Swift) | 7 837 jardów (7,2 km) | rozdz. III.3: https://standardebooks.org/ebooks/jonathan-swift/gullivers-travels/text/chapter-3-3 | wysoka | zapas (za gęsto przy Skyrimie) |
+| Nordschleife (Gran Turismo, Forza) | 20,832 km | https://en.wikipedia.org/wiki/List_of_Nordschleife_lap_times_(racing) | wysoka | zapas (koliduje z DayZ) |
+| Most Ramy (Ramajana) | 48 km | https://en.wikipedia.org/wiki/Adam%27s_Bridge | wysoka | zapas (między Cytadelą a Chilkoot) |
+| Mur Hadriana | 80 mil rzymskich, 73 mile (117 km) | https://en.wikipedia.org/wiki/Hadrian%27s_Wall | wysoka | zapas (koliduje z Oliverem) |
+| „Jądro ciemności”, marsz Marlowa | 200 mil (322 km) | https://www.sparknotes.com/nofear/lit/heart-of-darkness/part-1/page_13 | wysoka | zapas (koliduje z Halo) |
+| Indianapolis 500 | 500 mil (805 km) | https://en.wikipedia.org/wiki/Indianapolis_500 | wysoka | zapas (koliduje z Pathfinderem) |
+| Camino Francés („The Way”) | ok. 780–800 km | https://en.wikipedia.org/wiki/The_Way_(2010_film) | średnia | zapas |
+| Test Drive Unlimited (Oahu) / TDU 2 | 1 000 mil dróg / ponad 3 000 km | https://www.gamesradar.com/test-drive-unlimited-13, https://en.wikipedia.org/wiki/Test_Drive_Unlimited_2 | średnia (Autoblog: 1 500 mil dla TDU 2) | zapas (Oahu koliduje z Pierścieniem) |
+| The Crew | ok. 10 000 km dróg | https://whatculture.com/gaming/10-biggest-open-world-maps-in-video-games-2 | średnia | zapas (koliduje z Platynowym Joggerem) |
+| Fuel | 14 400 km² (Guinness) | https://www.guinnessworldrecords.com/world-records/110300-largest-playable-area-in-a-racing-videogame | wysoka | odrzucone: sama powierzchnia |
+| Bashō, „Ścieżkami Północy” | ok. 2 400 km w ok. 150 dni | https://en.wikipedia.org/wiki/Oku_no_Hosomichi | wysoka | zapas (koliduje z 2 414 km) |
+| Harrer, „Siedem lat w Tybecie”; Kipling, „Kim” | ponad 1 500 mil; 1 500 mil Grand Trunk Road | https://www.smithsonianmag.com/history/the-strange-journey-of-heinrich-harrer-52700169/, https://en.wikipedia.org/wiki/Grand_Trunk_Road | średnia | zapas (ta sama pozycja 2 414 km) |
+| Tōkaidō (Hiroshige) | 492 albo 514 km | https://www.nippon.com/en/japan-topics/g02415/, https://www.britannica.com/topic/Tokaido | średnia | odrzucone: źródła się różnią, tuż za Murem |
+| Główny Szlak Beskidzki / Sudecki | 496 / 443 km | https://en.wikipedia.org/wiki/Main_Beskid_Trail, https://en.wikipedia.org/wiki/Main_Sudetes_Trail | wysoka | zapas (bez motywu z gry lub książki) |
+| Iditarod | 975 albo 998 mil zależnie od trasy | https://en.wikipedia.org/wiki/Iditarod_Trail_Sled_Dog_Race | średnia | zapas |
+| King, „Wielki Marsz” | brak łącznej liczby w źródłach | https://en.wikipedia.org/wiki/The_Long_Walk | - | odrzucone |
+| Metro Exodus | brak łącznej liczby | https://www.gamerevolution.com/review/495517-metro-exodus-review-pc | - | odrzucone |
+| Need for Speed: The Run | ok. 3 000 mil | https://www.pcgamer.com/need-for-speed-the-run-trailer-races-3000-miles-for-25-million/ | średnia | zapas |
+| Bryson, „A Walk in the Woods” | 870 mil | jedna recenzja | niska | odrzucone |
+| Ksenofont, „Anabaza” | 34 255 stadiów | https://www.gutenberg.org/files/1170/1170-0.txt | średnia (niepewna długość stadionu) | odrzucone |
+
+### 9.2. Stara → nowa pozycja
+
+Bez zmian zostały: km1, km57, km113, km24, km30, km447, km53, km63, km70, km805, km100, km160,
+km200, km246, km318, km483, km737, km950, km1257, km2762, km2865, km3235, km3490, km4500,
+km4800, km6128, km7200, km8047, km10000. Ściana Pierścienia i Kurier carski mają tę samą treść
+pod nowymi id.
+
+| Było (km, id, motyw, uniwersum) | Jest (km, id, motyw, uniwersum) | Źródło |
+|---|---|---|
+| 2, km2, Za Barierą (bez źródła) | 2, km2, ten sam motyw, tekst według opisu gry | Steam |
+| - | 21,2, km212, Chernarus z rogu w róg, DayZ | Wikipedia |
+| 115, km115, Prom w Bucklebury, Władca Pierścieni | 112,7, km1127, Siedemdziesiąt mil do Londynu, „Oliver Twist” | Dickens, rozdz. VIII |
+| 215, km215, Pod Rozbrykanym Kucykiem, Władca Pierścieni | usunięty (odstęp 200 → 246 to 46 km) | - |
+| 276, km276, Dookoła Pol, KSP | usunięty (odstęp 246 → 318 to 72 km) | - |
+| 377, km377, Dookoła Minmusa, KSP | 377, km377, Równik w Space Engineers | wiki Space Engineers |
+| 385, km385, Wichrowy Czub; 408, km408, Dookoła Bop, KSP | 420, km420, Najdłuższy etap Togo, sztafeta do Nome 1925 | Smithsonian |
+| 580, km1150, Fosa Cailin, Westeros (pomiar map) | 583, km583, Via Appia do Brindisi, „Quo vadis” | Britannica |
+| 628, km628, Równik drugiej Gwiazdy Śmierci | 640, km640, Szlak św. Olafa | Visit Norway |
+| 817, km817, Dookoła Ike, KSP | 800, km800, Po Pathfindera, „Marsjanin” | NASA |
+| 1 000, km1000, Złoty Jogger, Pokémon GO | 1 009, km1009, Pielgrzymka Harolda Fry | The Spectator |
+| 1 046, km1046, Z Winterfell na Mur (pomiar map) | 1 085, km1085, Surowica dla Nome (Balto) | Wikipedia |
+| 1 190, km880, Przełęcz Caradhrasu | 1 200, km1200, 88 świątyń Shikoku | Wikivoyage |
+| 1 285, km1019, Wrota Morii; 1 400, km1400, Mroczna Puszcza | 1 407, km1407, Land’s End – John o’Groats | Wikipedia |
+| 1 480, km1480, Lothlórien; 1 530, km1530, Pod Samotną Górę | 1 508, km1508, Równik Calliope, Star Citizen | starcitizen.tools |
+| 1 609, km1670, Ściana Pierścienia | 1 609, km1609, treść bez zmian | Niven |
+| 1 706, km1940, Rubinowy Bród (pomiar map) | 1 697, km1697, Szlak Tōkai | władze Tokio |
+| 1 790, km1790, Brunatne Pola | 1 770, km1770, Dzika droga (Strayed) | Wikipedia, NPR |
+| 1 935, km1935, Progi Sarn Gebir | 1 854, km1854, Równik Daymara, Star Citizen | starcitizen.tools |
+| 2 080, km2080, Argonath | 2 000, km2000, Via Francigena | przewodniki (≈) |
+| 2 105, km1800, Wodogrzmoty Rauros | 2 092, km2092, Szlak Mormonów | NPS |
+| 2 220, km2220, Zejście z Emyn Muil | 2 201, km2201, Wzdłuż Dniepru, „Ogniem i mieczem” | Wikipedia |
+| 2 360, km2300, Martwe Bagna | 2 300, km2300, Wielka Rafa Koralowa, „Gdzie jest Nemo” | Wikipedia |
+| 2 414, km2414, Królewska Przystań (pomiar map) | 2 414, km2414, Wzdłuż płotu przeciw królikom, „Rabbit-Proof Fence” | Wikipedia |
+| 2 480, km2565, Czarna Brama; 2 540, km2540, Ithilien | 2 500, km2500, Droga Królewska Persów, Herodot | Livius |
+| 2 650, km2715, Schody Cirith Ungol | 2 700, km2700, Z wielbłądami do oceanu, „Tracks” | Wikipedia |
+| 3 060, km3060, Tam i z powrotem, Hobbit | 3 058, km3058, Pony Express | NPS |
+| 4 000, km4000, Valles Marineris, trylogia marsjańska | 3 940, km3940, Route 66, „Grona gniewu”; 4 023, km4023, Dwa i pół tysiąca mil, „Zew krwi” | Wikipedia; London, rozdz. V |
+| 5 523, km5200, Kurier carski | 5 523, km5523, treść bez zmian | Verne |
+| - | 6 500, km6500, Z łagru do Indii, Rawicz | Wikipedia |
+| - | 9 656, km9656, Brobdingnag wzdłuż, „Podróże Guliwera” | Swift, rozdz. II.4 |
+
+Wynik: 59 przystanków (było 61), 80 osiągnięć (było 82). Osiągnięcia spoza szlaku bez zmian.
+
+### 9.3. Uniwersa po zmianie
+
+Po 2 przystanki: Pokémon GO (100, 10 000), Gwiezdne wojny (160, 7 200), Diuna (200, 6 128),
+Herodot (246, 2 500), Pieśń Lodu i Ognia (483, 4 800: same liczby od GRRM, bez pomiarów map),
+Śródziemie (737, 2 865), „Marsjanin” (800, 3 235), Star Citizen (1 508, 1 854), sztafeta do Nome
+1925 (420, 1 085), „Zew krwi” (53, 4 023), „Michał Strogow” (2 762, 5 523). Kerbal Space Program:
+1 (Mun, 1 257 km). Pozostałe po 1. Przed zmianą: Tolkien 20, Westeros 6, KSP 5, Gwiezdne wojny 3,
+Pokémon GO 3.
+
+Odstępy: do 500 km najwyżej 72 km, do 2 500 km najwyżej 150 km (przed 950 i 1 407 km). Jedna
+dziura 200 km: 2 500 → 2 700 km. Wcześniej wypełniały ją etapy Froda (Czarna Brama, Ithilien,
+Cirith Ungol), a żaden kandydat ze źródłem nie wypada na 2 550–2 650 km. Testy pilnują 150 km do
+2 500 km i 200 km do 2 865 km.
+
+### 9.4. Zmienione i usunięte id (dla HUB)
+
+- Usunięte: km115, km215, km276, km385, km408, km628, km817, km880, km1000, km1019, km1046,
+  km1150, km1400, km1480, km1530, km1790, km1800, km1935, km1940, km2080, km2220, km2540,
+  km2565, km2715, km3060, km4000.
+- Przemianowane (ta sama treść i próg): km1670 → km1609, km5200 → km5523.
+- Nowy motyw pod starym id, z tym samym progiem co w v1: km377, km2414, km2300 (w v2 sprzed
+  przebudowy km2300 miało 2 360 km, w v1 2 300 km).
+- Nowe: km212, km1127, km420, km583, km640, km800, km1009, km1085, km1200, km1407, km1508,
+  km1697, km1770, km1854, km2000, km2092, km2201, km2500, km2700, km3058, km3940, km4023,
+  km6500, km9656.
+
+Żadne nowe id nie było wcześniej użyte z innym progiem, więc zdobycze zapisane w `historia.db`
+nie zaliczają przystanku „przed czasem” (pilnuje tego test `v2_changes_only_the_trail`). Zapisane
+id, których już nie ma, `evaluate` pomija bez błędu: pętla idzie po definicjach, a nie po zapisanych
+zdobyczach. Nowe przystanki liczą się z dystansu (fixtura `v2_zdobyte_w_v1`).
+
+Plik dla serwera: `walklevel/docs/definicje-v2-serwer.json`, generowany skryptem
+`walklevel/tools/definicje_serwer.py` z `docs/definicje-v2.json`. Test
+`server_file_matches_app_definitions` pilnuje, że id, typy, progi, rzadkości, `poziomy_xp`
+i liczbowe `zasady` są te same co w aplikacji. Typy w pliku: dystans, sesja_km, dzien_kroki, seria,
+gra_pierwsza, gry_km, gra_km, trening, start_miedzy, znajomi, polecenia (bez nowych).

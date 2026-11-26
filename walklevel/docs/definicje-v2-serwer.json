@@ -1,0 +1,606 @@
+{
+ "wersja": 2,
+ "xp_za_km": 100,
+ "xp_za_rzadkosc": {
+  "pospolite": 20,
+  "rzadkie": 100,
+  "epickie": 500,
+  "heroiczne": 1200,
+  "legendarne": 2500
+ },
+ "poziomy_xp": [
+  0,
+  961,
+  2719,
+  4996,
+  7691,
+  10749,
+  14130,
+  17806,
+  21755,
+  25960,
+  30404,
+  35077,
+  39968,
+  45066,
+  50365,
+  55857,
+  61535,
+  67393,
+  73426,
+  79629,
+  85997,
+  92527,
+  99214,
+  106055,
+  113047,
+  120185,
+  127468,
+  134892,
+  142455,
+  150155,
+  157988,
+  165953,
+  174047,
+  182269,
+  190616,
+  199088,
+  207681,
+  216394,
+  225225,
+  234174,
+  243238,
+  252417,
+  261707,
+  271110,
+  280622,
+  290243,
+  299971,
+  309806,
+  319745,
+  329789,
+  339936,
+  350185,
+  360535,
+  370985,
+  381534,
+  392181,
+  402925,
+  413766,
+  424702,
+  435733,
+  446858,
+  458076,
+  469386,
+  480788,
+  492280,
+  503863,
+  515535,
+  527296,
+  539146,
+  551082,
+  563105,
+  575215,
+  587410,
+  599690,
+  612055,
+  624503,
+  637035,
+  649649,
+  662346,
+  675124,
+  687983,
+  700923,
+  713943,
+  727043,
+  740221,
+  753479,
+  766815,
+  780228,
+  793719,
+  807287,
+  820931,
+  834651,
+  848447,
+  862318,
+  876263,
+  890283,
+  904377,
+  918545,
+  932786,
+  947100
+ ],
+ "zasady": {
+  "seria_wolne_dni_na_7": 1,
+  "min_km_dnia_serii": 2.0
+ },
+ "osiagniecia": [
+  {
+   "id": "km1",
+   "typ": "dystans",
+   "prog": 1,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km2",
+   "typ": "dystans",
+   "prog": 2,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km57",
+   "typ": "dystans",
+   "prog": 5.7,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km113",
+   "typ": "dystans",
+   "prog": 11.3,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km212",
+   "typ": "dystans",
+   "prog": 21.2,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km24",
+   "typ": "dystans",
+   "prog": 24,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km30",
+   "typ": "dystans",
+   "prog": 30,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km447",
+   "typ": "dystans",
+   "prog": 44.7,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km53",
+   "typ": "dystans",
+   "prog": 53,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km63",
+   "typ": "dystans",
+   "prog": 63,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km70",
+   "typ": "dystans",
+   "prog": 70,
+   "rz": "pospolite"
+  },
+  {
+   "id": "km805",
+   "typ": "dystans",
+   "prog": 80.5,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km100",
+   "typ": "dystans",
+   "prog": 100,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km1127",
+   "typ": "dystans",
+   "prog": 112.7,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km160",
+   "typ": "dystans",
+   "prog": 160,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km200",
+   "typ": "dystans",
+   "prog": 200,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km246",
+   "typ": "dystans",
+   "prog": 246,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km318",
+   "typ": "dystans",
+   "prog": 318,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km377",
+   "typ": "dystans",
+   "prog": 377,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km420",
+   "typ": "dystans",
+   "prog": 420,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "km483",
+   "typ": "dystans",
+   "prog": 483,
+   "rz": "epickie"
+  },
+  {
+   "id": "km583",
+   "typ": "dystans",
+   "prog": 583,
+   "rz": "epickie"
+  },
+  {
+   "id": "km640",
+   "typ": "dystans",
+   "prog": 640,
+   "rz": "epickie"
+  },
+  {
+   "id": "km737",
+   "typ": "dystans",
+   "prog": 737,
+   "rz": "epickie"
+  },
+  {
+   "id": "km800",
+   "typ": "dystans",
+   "prog": 800,
+   "rz": "epickie"
+  },
+  {
+   "id": "km950",
+   "typ": "dystans",
+   "prog": 950,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1009",
+   "typ": "dystans",
+   "prog": 1009,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1085",
+   "typ": "dystans",
+   "prog": 1085,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1200",
+   "typ": "dystans",
+   "prog": 1200,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1257",
+   "typ": "dystans",
+   "prog": 1257,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1407",
+   "typ": "dystans",
+   "prog": 1407,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1508",
+   "typ": "dystans",
+   "prog": 1508,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1609",
+   "typ": "dystans",
+   "prog": 1609,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1697",
+   "typ": "dystans",
+   "prog": 1697,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1770",
+   "typ": "dystans",
+   "prog": 1770,
+   "rz": "epickie"
+  },
+  {
+   "id": "km1854",
+   "typ": "dystans",
+   "prog": 1854,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2000",
+   "typ": "dystans",
+   "prog": 2000,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2092",
+   "typ": "dystans",
+   "prog": 2092,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2201",
+   "typ": "dystans",
+   "prog": 2201,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2300",
+   "typ": "dystans",
+   "prog": 2300,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2414",
+   "typ": "dystans",
+   "prog": 2414,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2500",
+   "typ": "dystans",
+   "prog": 2500,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2700",
+   "typ": "dystans",
+   "prog": 2700,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2762",
+   "typ": "dystans",
+   "prog": 2762,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km2865",
+   "typ": "dystans",
+   "prog": 2865,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km3058",
+   "typ": "dystans",
+   "prog": 3058,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km3235",
+   "typ": "dystans",
+   "prog": 3235,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km3490",
+   "typ": "dystans",
+   "prog": 3490,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km3940",
+   "typ": "dystans",
+   "prog": 3940,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km4023",
+   "typ": "dystans",
+   "prog": 4023,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km4500",
+   "typ": "dystans",
+   "prog": 4500,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "km4800",
+   "typ": "dystans",
+   "prog": 4800,
+   "rz": "legendarne"
+  },
+  {
+   "id": "km5523",
+   "typ": "dystans",
+   "prog": 5523,
+   "rz": "legendarne"
+  },
+  {
+   "id": "km6128",
+   "typ": "dystans",
+   "prog": 6128,
+   "rz": "legendarne"
+  },
+  {
+   "id": "km6500",
+   "typ": "dystans",
+   "prog": 6500,
+   "rz": "legendarne"
+  },
+  {
+   "id": "km7200",
+   "typ": "dystans",
+   "prog": 7200,
+   "rz": "legendarne"
+  },
+  {
+   "id": "km8047",
+   "typ": "dystans",
+   "prog": 8047,
+   "rz": "legendarne"
+  },
+  {
+   "id": "km9656",
+   "typ": "dystans",
+   "prog": 9656,
+   "rz": "legendarne"
+  },
+  {
+   "id": "km10000",
+   "typ": "dystans",
+   "prog": 10000,
+   "rz": "legendarne"
+  },
+  {
+   "id": "s3",
+   "typ": "sesja_km",
+   "prog": 3,
+   "rz": "pospolite"
+  },
+  {
+   "id": "s10",
+   "typ": "sesja_km",
+   "prog": 10,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "s21",
+   "typ": "sesja_km",
+   "prog": 21.0,
+   "rz": "epickie"
+  },
+  {
+   "id": "d7",
+   "typ": "dzien_kroki",
+   "prog": 7000,
+   "rz": "pospolite"
+  },
+  {
+   "id": "d12",
+   "typ": "dzien_kroki",
+   "prog": 12000,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "d20",
+   "typ": "dzien_kroki",
+   "prog": 20000,
+   "rz": "epickie"
+  },
+  {
+   "id": "seria3",
+   "typ": "seria",
+   "prog": 3,
+   "km_dziennie": 2.0,
+   "rz": "pospolite"
+  },
+  {
+   "id": "seria7",
+   "typ": "seria",
+   "prog": 7,
+   "km_dziennie": 2.0,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "seria28",
+   "typ": "seria",
+   "prog": 28,
+   "km_dziennie": 2.0,
+   "rz": "epickie"
+  },
+  {
+   "id": "seria80",
+   "typ": "seria",
+   "prog": 80,
+   "km_dziennie": 2.0,
+   "rz": "heroiczne"
+  },
+  {
+   "id": "seria365",
+   "typ": "seria",
+   "prog": 365,
+   "km_dziennie": 2.0,
+   "rz": "legendarne"
+  },
+  {
+   "id": "gra1",
+   "typ": "gra_pierwsza",
+   "rz": "pospolite"
+  },
+  {
+   "id": "gry3",
+   "typ": "gry_km",
+   "prog": 10.0,
+   "gier": 3,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "gry5",
+   "typ": "gry_km",
+   "prog": 10.0,
+   "gier": 5,
+   "rz": "epickie"
+  },
+  {
+   "id": "gra100",
+   "typ": "gra_km",
+   "prog": 100.0,
+   "rz": "rzadkie"
+  },
+  {
+   "id": "gra1000",
+   "typ": "gra_km",
+   "prog": 1000.0,
+   "rz": "epickie"
+  },
+  {
+   "id": "trening",
+   "typ": "trening",
+   "rz": "pospolite"
+  },
+  {
+   "id": "rano",
+   "typ": "start_miedzy",
+   "od": 4,
+   "do": 7,
+   "rz": "pospolite"
+  },
+  {
+   "id": "noc",
+   "typ": "start_miedzy",
+   "od": 23,
+   "do": 4,
+   "rz": "pospolite"
+  },
+  {
+   "id": "znajomy",
+   "typ": "znajomi",
+   "prog": 1,
+   "rz": "pospolite"
+  },
+  {
+   "id": "polecenie",
+   "typ": "polecenia",
+   "prog": 1,
+   "rz": "rzadkie"
+  }
+ ]
+}

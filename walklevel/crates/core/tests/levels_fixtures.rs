@@ -325,16 +325,21 @@ fn known_mark(mark: &str) -> bool {
 }
 
 #[test]
-fn v2_keeps_every_v1_id_and_the_rest_of_the_file() {
+fn v2_changes_only_the_trail() {
+    // szlak przebudowany 26.11 (analiza-szlak.md, sekcja 9): id przystanków mogą zniknąć,
+    // bo kont poza kontem Damiana jeszcze nie ma; zdobyte nieznane id evaluate pomija
     let (old, new) = (v1(), Definitions::builtin().expect("wbudowane definicje"));
     assert_eq!((old.version, new.version), (1, 2));
-    assert_eq!(new.achievements.len(), 82);
-    assert_eq!(new.trail().len(), 61);
-    for a in &old.achievements {
+    assert_eq!(new.achievements.len(), 80);
+    assert_eq!(new.trail().len(), 59);
+    for a in old.achievements.iter().filter(|a| a.kind != "dystans") {
         let b = new.by_id(&a.id);
-        assert!(b.is_some(), "zniknęło id {}", a.id);
-        if a.kind != "dystans" {
-            assert_eq!(Some(a), b, "osiągnięcie spoza szlaku zmienione: {}", a.id);
+        assert_eq!(Some(a), b, "osiągnięcie spoza szlaku zmienione: {}", a.id);
+    }
+    // to samo id na szlaku v1 i v2 = ten sam próg (zdobyte wcześniej nie przychodzą „przed czasem”)
+    for a in old.trail() {
+        if let Some(b) = new.by_id(&a.id) {
+            assert_eq!(a.km(), b.km(), "id {} zmieniło próg", a.id);
         }
     }
     assert_eq!(
@@ -347,12 +352,15 @@ fn v2_keeps_every_v1_id_and_the_rest_of_the_file() {
 #[test]
 fn trail_rarity_grows_with_km_and_fits_the_bounds() {
     // analiza-szlak.md, sekcja 1: progi spełnia i v1, i v2
-    // odstęp do Mordoru: v1 151 km (test 0.5.x dopuszczał 152), v2 najwyżej 150 (sekcja 5)
-    check_trail_rules(&v1(), 152.0);
-    check_trail_rules(Definitions::builtin().expect("wbudowane definicje"), 150.0);
+    // odstęp: v1 do Mordoru (2 865 km) 151 km (test 0.5.x dopuszczał 152); v2 do 2 500 km
+    // najwyżej 150, do 2 865 km najwyżej 200 (analiza-szlak.md, sekcja 9)
+    check_trail_rules(&v1(), 2865.0, 152.0);
+    let v2 = Definitions::builtin().expect("wbudowane definicje");
+    check_trail_rules(v2, 2500.0, 150.0);
+    check_trail_rules(v2, 2865.0, 200.0);
 }
 
-fn check_trail_rules(d: &Definitions, gap: f64) {
+fn check_trail_rules(d: &Definitions, until_km: f64, gap: f64) {
     // górna granica km rzadkości przy 5 km dziennie: 14 / 91 / 365 / 912 dni, dalej bez granicy
     let bound = |rarity: &str| match rarity {
         "pospolite" => Some(70.0),
@@ -400,12 +408,12 @@ fn check_trail_rules(d: &Definitions, gap: f64) {
     let km: Vec<f64> = trail.iter().filter_map(|a| a.km()).collect();
     let max_gap = km
         .windows(2)
-        .filter(|w| w[1] <= 2865.0)
+        .filter(|w| w[1] <= until_km)
         .map(|w| w[1] - w[0])
         .fold(0.0, f64::max);
     assert!(
         max_gap <= gap,
-        "v{}: odstęp {max_gap} km do Mordoru",
+        "v{}: odstęp {max_gap} km do {until_km} km",
         d.version
     );
     // Skyrim nadal wypada na 6. km, Erangel na 12.
@@ -421,5 +429,67 @@ fn every_badge_mark_can_be_drawn() {
             let what = format!("v{}: {} ma nieznany znak {}", d.version, a.id, a.mark);
             assert!(known_mark(&a.mark), "{what}");
         }
+    }
+}
+
+#[test]
+fn server_file_matches_app_definitions() {
+    // docs/definicje-v2-serwer.json (tools/definicje_serwer.py): te same id, typy, progi i rzadkości
+    let docs = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs");
+    let read = |name: &str| -> Value {
+        let text = std::fs::read_to_string(docs.join(name)).expect(name);
+        serde_json::from_str(&text).expect("json")
+    };
+    let (srv, app) = (read("definicje-v2-serwer.json"), read("definicje-v2.json"));
+    let d = Definitions::builtin().expect("wbudowane definicje");
+    assert_eq!(srv["wersja"], Value::from(d.version));
+    assert_eq!(srv["xp_za_km"], Value::from(d.xp_per_km));
+    assert_eq!(
+        srv["xp_za_rzadkosc"],
+        serde_json::to_value(&d.rarity_xp).expect("json")
+    );
+    assert_eq!(
+        srv["poziomy_xp"],
+        serde_json::to_value(&d.levels).expect("json")
+    );
+    for (key, value) in app["zasady"].as_object().expect("zasady") {
+        if value.is_number() {
+            assert_eq!(&srv["zasady"][key], value, "zasada {key}");
+        }
+    }
+    let rows = srv["osiagniecia"].as_array().expect("lista");
+    assert_eq!(rows.len(), d.achievements.len());
+    for (a, row) in d.achievements.iter().zip(rows) {
+        let mut row = row.as_object().expect("osiągnięcie").clone();
+        assert_eq!(row.remove("id"), Some(Value::from(a.id.as_str())));
+        assert_eq!(
+            row.remove("typ"),
+            Some(Value::from(a.kind.as_str())),
+            "{}",
+            a.id
+        );
+        assert_eq!(
+            row.remove("rz"),
+            Some(Value::from(a.rarity.as_str())),
+            "{}",
+            a.id
+        );
+        let field = match a.kind.as_str() {
+            "dystans" | "sesja_km" | "gra_km" | "gry_km" => Some("km"),
+            "dzien_kroki" => Some("kroki"),
+            "seria" => Some("dni"),
+            "znajomi" | "polecenia" => Some("ile"),
+            "gra_pierwsza" | "trening" | "start_miedzy" => None,
+            other => panic!("typ {other} ({}) nieznany serwerowi", a.id),
+        };
+        if let (Some(field), Some(prog)) = (field, row.remove("prog")) {
+            row.insert(field.to_string(), prog);
+        }
+        let num = |m: &serde_json::Map<String, Value>| -> Vec<(String, Option<f64>)> {
+            let mut v: Vec<_> = m.iter().map(|(k, x)| (k.clone(), x.as_f64())).collect();
+            v.sort_by(|x, y| x.0.cmp(&y.0));
+            v
+        };
+        assert_eq!(num(&row), num(&a.params), "parametry {}", a.id);
     }
 }

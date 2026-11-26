@@ -459,10 +459,10 @@ def v2_cases() -> list[dict[str, Any]]:
     out = [case("v2_pusta", [], now=T0, defs_path=V2)]
     # jedna sesja z kilkoma progami naraz (km1, km2, km57, km113)
     out.append(case("v2_kilka_naraz", [sess(at(0), 3 * HOUR, 12.0)], now=at(1), defs_path=V2))
-    # 5 km dziennie przez 130 dni: nowe przystanki do 650 km (km53 ... km1150 przesunięty)
+    # 5 km dziennie przez 130 dni: przystanki do 650 km (km53 ... km640)
     s = [sess(at(d, 7), 3600, 5.0, game=f"g{d % 3}") for d in range(130)]
     out.append(case("v2_szlak_650", s, now=at(130, 6), friends=1, defs_path=V2))
-    # zdobyte w v1 na starszym progu zostają (km1800, km880 przed czasem), km1150 od razu
+    # zdobyte id, których w v2 już nie ma (km1800, km880 z v1), są pomijane bez błędu
     s = [sess(at(d, 18), 2 * HOUR, 10.0) for d in range(62)]
     eb = {"km1800": at(3), "km880": at(4)}
     out.append(case("v2_zdobyte_w_v1", s, now=at(62), earned_before=eb, defs_path=V2))

@@ -84,6 +84,13 @@
     "fraction": 1.0
    },
    {
+    "id": "km212",
+    "earnedAt": null,
+    "current": 12.0,
+    "target": 21.2,
+    "fraction": 0.5660377358490566
+   },
+   {
     "id": "km24",
     "earnedAt": null,
     "current": 12.0,
@@ -140,11 +147,11 @@
     "fraction": 0.12
    },
    {
-    "id": "km115",
+    "id": "km1127",
     "earnedAt": null,
     "current": 12.0,
-    "target": 115.0,
-    "fraction": 0.10434782608695652
+    "target": 112.7,
+    "fraction": 0.1064773735581189
    },
    {
     "id": "km160",
@@ -161,25 +168,11 @@
     "fraction": 0.06
    },
    {
-    "id": "km215",
-    "earnedAt": null,
-    "current": 12.0,
-    "target": 215.0,
-    "fraction": 0.05581395348837209
-   },
-   {
     "id": "km246",
     "earnedAt": null,
     "current": 12.0,
     "target": 246.0,
     "fraction": 0.04878048780487805
-   },
-   {
-    "id": "km276",
-    "earnedAt": null,
-    "current": 12.0,
-    "target": 276.0,
-    "fraction": 0.043478260869565216
    },
    {
     "id": "km318",
@@ -196,18 +189,11 @@
     "fraction": 0.03183023872679045
    },
    {
-    "id": "km385",
+    "id": "km420",
     "earnedAt": null,
     "current": 12.0,
-    "target": 385.0,
-    "fraction": 0.03116883116883117
-   },
-   {
-    "id": "km408",
-    "earnedAt": null,
-    "current": 12.0,
-    "target": 408.0,
-    "fraction": 0.029411764705882353
+    "target": 420.0,
+    "fraction": 0.02857142857142857
    },
    {
     "id": "km483",
@@ -217,18 +203,18 @@
     "fraction": 0.024844720496894408
    },
    {
-    "id": "km1150",
+    "id": "km583",
     "earnedAt": null,
     "current": 12.0,
-    "target": 580.0,
-    "fraction": 0.020689655172413793
+    "target": 583.0,
+    "fraction": 0.02058319039451115
    },
    {
-    "id": "km628",
+    "id": "km640",
     "earnedAt": null,
     "current": 12.0,
-    "target": 628.0,
-    "fraction": 0.01910828025477707
+    "target": 640.0,
+    "fraction": 0.01875
    },
    {
     "id": "km737",
@@ -238,11 +224,11 @@
     "fraction": 0.016282225237449117
    },
    {
-    "id": "km817",
+    "id": "km800",
     "earnedAt": null,
     "current": 12.0,
-    "target": 817.0,
-    "fraction": 0.014687882496940025
+    "target": 800.0,
+    "fraction": 0.015
    },
    {
     "id": "km950",
@@ -252,25 +238,25 @@
     "fraction": 0.01263157894736842
    },
    {
-    "id": "km1000",
+    "id": "km1009",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1000.0,
-    "fraction": 0.012
+    "target": 1009.0,
+    "fraction": 0.011892963330029732
    },
    {
-    "id": "km1046",
+    "id": "km1085",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1046.0,
-    "fraction": 0.011472275334608031
+    "target": 1085.0,
+    "fraction": 0.011059907834101382
    },
    {
-    "id": "km880",
+    "id": "km1200",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1190.0,
-    "fraction": 0.010084033613445379
+    "target": 1200.0,
+    "fraction": 0.01
    },
    {
     "id": "km1257",
@@ -280,88 +266,74 @@
     "fraction": 0.00954653937947494
    },
    {
-    "id": "km1019",
+    "id": "km1407",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1285.0,
-    "fraction": 0.00933852140077821
+    "target": 1407.0,
+    "fraction": 0.008528784648187633
    },
    {
-    "id": "km1400",
+    "id": "km1508",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1400.0,
-    "fraction": 0.008571428571428572
+    "target": 1508.0,
+    "fraction": 0.007957559681697613
    },
    {
-    "id": "km1480",
-    "earnedAt": null,
-    "current": 12.0,
-    "target": 1480.0,
-    "fraction": 0.008108108108108109
-   },
-   {
-    "id": "km1530",
-    "earnedAt": null,
-    "current": 12.0,
-    "target": 1530.0,
-    "fraction": 0.00784313725490196
-   },
-   {
-    "id": "km1670",
+    "id": "km1609",
     "earnedAt": null,
     "current": 12.0,
     "target": 1609.0,
     "fraction": 0.0074580484773151025
    },
    {
-    "id": "km1940",
+    "id": "km1697",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1706.0,
-    "fraction": 0.007033997655334115
+    "target": 1697.0,
+    "fraction": 0.007071302298173247
    },
    {
-    "id": "km1790",
+    "id": "km1770",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1790.0,
-    "fraction": 0.0067039106145251395
+    "target": 1770.0,
+    "fraction": 0.006779661016949152
    },
    {
-    "id": "km1935",
+    "id": "km1854",
     "earnedAt": null,
     "current": 12.0,
-    "target": 1935.0,
-    "fraction": 0.006201550387596899
+    "target": 1854.0,
+    "fraction": 0.006472491909385114
    },
    {
-    "id": "km2080",
+    "id": "km2000",
     "earnedAt": null,
     "current": 12.0,
-    "target": 2080.0,
-    "fraction": 0.0057692307692307696
+    "target": 2000.0,
+    "fraction": 0.006
    },
    {
-    "id": "km1800",
+    "id": "km2092",
     "earnedAt": null,
     "current": 12.0,
-    "target": 2105.0,
-    "fraction": 0.005700712589073635
+    "target": 2092.0,
+    "fraction": 0.0057361376673040155
    },
    {
-    "id": "km2220",
+    "id": "km2201",
     "earnedAt": null,
     "current": 12.0,
-    "target": 2220.0,
-    "fraction": 0.005405405405405406
+    "target": 2201.0,
+    "fraction": 0.005452067242162653
    },
    {
     "id": "km2300",
     "earnedAt": null,
     "current": 12.0,
-    "target": 2360.0,
-    "fraction": 0.005084745762711864
+    "target": 2300.0,
+    "fraction": 0.0052173913043478265
    },
    {
     "id": "km2414",
@@ -371,25 +343,18 @@
     "fraction": 0.004971002485501243
    },
    {
-    "id": "km2565",
+    "id": "km2500",
     "earnedAt": null,
     "current": 12.0,
-    "target": 2480.0,
-    "fraction": 0.004838709677419355
+    "target": 2500.0,
+    "fraction": 0.0048
    },
    {
-    "id": "km2540",
+    "id": "km2700",
     "earnedAt": null,
     "current": 12.0,
-    "target": 2540.0,
-    "fraction": 0.004724409448818898
-   },
-   {
-    "id": "km2715",
-    "earnedAt": null,
-    "current": 12.0,
-    "target": 2650.0,
-    "fraction": 0.004528301886792453
+    "target": 2700.0,
+    "fraction": 0.0044444444444444444
    },
    {
     "id": "km2762",
@@ -406,11 +371,11 @@
     "fraction": 0.004188481675392671
    },
    {
-    "id": "km3060",
+    "id": "km3058",
     "earnedAt": null,
     "current": 12.0,
-    "target": 3060.0,
-    "fraction": 0.00392156862745098
+    "target": 3058.0,
+    "fraction": 0.003924133420536298
    },
    {
     "id": "km3235",
@@ -427,11 +392,18 @@
     "fraction": 0.0034383954154727794
    },
    {
-    "id": "km4000",
+    "id": "km3940",
     "earnedAt": null,
     "current": 12.0,
-    "target": 4000.0,
-    "fraction": 0.003
+    "target": 3940.0,
+    "fraction": 0.003045685279187817
+   },
+   {
+    "id": "km4023",
+    "earnedAt": null,
+    "current": 12.0,
+    "target": 4023.0,
+    "fraction": 0.002982848620432513
    },
    {
     "id": "km4500",
@@ -448,7 +420,7 @@
     "fraction": 0.0025
    },
    {
-    "id": "km5200",
+    "id": "km5523",
     "earnedAt": null,
     "current": 12.0,
     "target": 5523.0,
@@ -460,6 +432,13 @@
     "current": 12.0,
     "target": 6128.0,
     "fraction": 0.0019582245430809398
+   },
+   {
+    "id": "km6500",
+    "earnedAt": null,
+    "current": 12.0,
+    "target": 6500.0,
+    "fraction": 0.0018461538461538461
    },
    {
     "id": "km7200",
@@ -474,6 +453,13 @@
     "current": 12.0,
     "target": 8047.0,
     "fraction": 0.00149123897104511
+   },
+   {
+    "id": "km9656",
+    "earnedAt": null,
+    "current": 12.0,
+    "target": 9656.0,
+    "fraction": 0.0012427506213753107
    },
    {
     "id": "km10000",
@@ -644,19 +630,19 @@
   "closest": [
    "d20",
    "s21",
-   "km24"
+   "km212"
   ],
   "closest10": [
    "d20",
    "s21",
+   "km212",
    "km24",
    "km30",
    "seria3",
    "gry3",
    "km447",
    "km53",
-   "gry5",
-   "km63"
+   "gry5"
   ]
  }
 }
