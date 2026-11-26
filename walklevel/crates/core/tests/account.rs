@@ -635,12 +635,12 @@ fn register_login_and_token_only_in_vault() {
 fn register_uses_terms_version_from_server() {
     let dir = tempfile::tempdir().expect("katalog");
     let server = FakeServer::new();
-    server.state().terms_current = "2026-11-27".into();
-    server.state().terms_games = "2026-11-27".into();
+    server.state().terms_current = "2026-11-26".into();
+    server.state().terms_games = "2026-11-26".into();
     let (mut account, _) = standalone(&server, dir.path());
     signed_in(&mut account, "p1");
-    assert_eq!(account.state.terms, "2026-11-27");
-    assert_eq!(server.state().users["u1"].terms, json!("2026-11-27"));
+    assert_eq!(account.state.terms, "2026-11-26");
+    assert_eq!(server.state().users["u1"].terms, json!("2026-11-26"));
 }
 
 #[test]
@@ -1272,8 +1272,8 @@ fn game_fields_go_only_after_accepting_current_terms_name_always() {
     for key in ["gra", "gra_id", "tryb", "gra_publiczna"] {
         assert!(a.get(key).is_none(), "{key} przed akceptacją regulaminu");
     }
-    server.state().terms_current = "2026-11-27".into();
-    server.state().terms_games = "2026-11-27".into();
+    server.state().terms_current = "2026-11-26".into();
+    server.state().terms_games = "2026-11-26".into();
     account.refresh().expect("odświeżenie");
     assert!(account.state.terms_outdated() && !account.state.games_allowed());
     // bez akceptacji nowej wersji dalej nic o grach
@@ -1336,8 +1336,8 @@ fn accepting_new_terms_resends_whole_history_once_newer_in_batches() {
     // serwer bez pól gier (`poziomy` puste) - nic jeszcze raz
     assert!(!account.state.games_allowed() && !account.state.resend_due());
     assert_eq!(account.upload(&h, Some(&shared), now()).ok(), Some(0));
-    server.state().terms_current = "2026-11-27".into();
-    server.state().terms_games = "2026-11-27".into();
+    server.state().terms_current = "2026-11-26".into();
+    server.state().terms_games = "2026-11-26".into();
     account.refresh().expect("odświeżenie");
     account.accept_terms().expect("akceptacja");
     server.state().requests.clear();
@@ -1356,11 +1356,11 @@ fn accepting_new_terms_resends_whole_history_once_newer_in_batches() {
     assert_eq!(s["zmieniono_utc_s"].as_f64(), Some(at));
     assert!(at > before && s["gra_id"] == "aaaaaaaaaa");
     assert!(server.session(&uuid_of("obcy")).is_none());
-    assert_eq!(account.state.resent_terms, "2026-11-27");
+    assert_eq!(account.state.resent_terms, "2026-11-26");
     // raz na wersję regulaminu, także po ponownym otwarciu konta
     assert_eq!(account.upload(&h, Some(&shared), at + 10.0).ok(), Some(0));
     let saved = account::load_state(&dir.path().join("konto.json"));
-    assert_eq!(saved.resent_terms, "2026-11-27");
+    assert_eq!(saved.resent_terms, "2026-11-26");
 }
 
 // --- wiele osób ----------------------------------------------------------------------------
@@ -1717,8 +1717,8 @@ fn local_newer_version_wins_over_older_from_server() {
 #[test]
 fn known_game_keeps_local_profile_and_unknown_named_game_becomes_profile() {
     let (server, mut a, mut b) = two_computers();
-    server.state().terms_current = "2026-11-27".into();
-    server.state().terms_games = "2026-11-27".into();
+    server.state().terms_current = "2026-11-26".into();
+    server.state().terms_games = "2026-11-26".into();
     for c in [&mut a, &mut b] {
         c.account().refresh().expect("odświeżenie");
         let person = c.person.clone();
@@ -1791,8 +1791,8 @@ fn terms_accepted_on_other_computer_also_resend_history_here() {
     s.profile_name = "Gra z pracy".into();
     save(&b.history, s);
     assert_eq!(b.upload(), 1);
-    server.state().terms_current = "2026-11-27".into();
-    server.state().terms_games = "2026-11-27".into();
+    server.state().terms_current = "2026-11-26".into();
+    server.state().terms_games = "2026-11-26".into();
     a.account().refresh().expect("odświeżenie");
     a.account().accept_terms().expect("regulamin");
     b.account().refresh().expect("odświeżenie"); // akceptacja przyszła z serwera
@@ -2121,11 +2121,11 @@ fn session_hidden_on_one_computer_stays_hidden_on_the_other() {
 #[test]
 fn games_need_server_levels_version_and_accepted_terms_not_older() {
     let mut st = account::AccountState {
-        terms: "2026-11-27".into(),
+        terms: "2026-11-26".into(),
         ..account::AccountState::default()
     };
     assert!(!st.games_allowed()); // serwer jeszcze nie przyjmuje pól gier
-    st.terms_games = "2026-11-27".into();
+    st.terms_games = "2026-11-26".into();
     assert!(st.games_allowed() && st.resend_due());
     st.terms = "2026-11-25".into();
     assert!(!st.games_allowed()); // zaakceptowana starsza wersja
@@ -2135,7 +2135,7 @@ fn games_need_server_levels_version_and_accepted_terms_not_older() {
     assert!(!st.resend_due()); // historia już poszła z grami
     // zapis i odczyt z konto.json
     let v = serde_json::to_value(&st).expect("json");
-    assert_eq!(v["terms_games"], "2026-11-27");
+    assert_eq!(v["terms_games"], "2026-11-26");
     assert_eq!(account::AccountState::from_value(&v), st);
 }
 
@@ -2143,14 +2143,14 @@ fn games_need_server_levels_version_and_accepted_terms_not_older() {
 fn levels_version_comes_from_terms_route_on_register_and_refresh() {
     let dir = tempfile::tempdir().expect("katalog");
     let server = FakeServer::new();
-    server.state().terms_current = "2026-11-27".into();
+    server.state().terms_current = "2026-11-26".into();
     let (mut account, _) = standalone(&server, dir.path());
     signed_in(&mut account, "p1");
     assert_eq!(account.state.terms_games, "");
     assert!(!account.state.games_allowed());
-    server.state().terms_games = "2026-11-27".into();
+    server.state().terms_games = "2026-11-26".into();
     account.refresh().expect("odświeżenie");
-    assert_eq!(account.state.terms_games, "2026-11-27");
+    assert_eq!(account.state.terms_games, "2026-11-26");
     assert!(account.state.games_allowed());
     // logowanie na drugim komputerze: od razu, bez czekania na odświeżenie
     let dir2 = tempfile::tempdir().expect("katalog");
@@ -2158,8 +2158,8 @@ fn levels_version_comes_from_terms_route_on_register_and_refresh() {
     other
         .login("ola@example.pl", PASSWORD, "p2")
         .expect("logowanie");
-    assert_eq!(other.state.terms_games, "2026-11-27");
-    assert_eq!(other.state.terms, "2026-11-27");
+    assert_eq!(other.state.terms_games, "2026-11-26");
+    assert_eq!(other.state.terms, "2026-11-26");
     assert!(other.state.games_allowed());
 }
 
