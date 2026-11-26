@@ -18,6 +18,7 @@ import json
 import logging
 import re
 import threading
+import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
@@ -43,6 +44,7 @@ VISIBILITY = ("prywatna", "znajomi", "publiczna")
 PROFILE_VISIBILITY = ("ukryty", "znajomi", "publiczny")
 GAMES_VISIBILITY = ("ja", "znajomi", "wszyscy")
 GAME_NAME_MAX = 40
+REJECTED_RETRY_S = 24 * 3600.0  # sesja odrzucona przez serwer: ponowienie po dobie
 TERMS_VERSION = "2026-11-25"  # data regulaminu i polityki prywatności konta online
 NAME_MIN, NAME_MAX = 3, 24
 # Pseudonim jak na serwerze: łacinka z polskimi literami, cyfry, spacja, _, - i kropka, bez
@@ -380,13 +382,21 @@ class Account:
                 )
                 for s in pending
             ]
+            # bez internetu: wyjątek, nic nie jest oznaczone - pójdzie przy następnej próbie
             rejected = self.client.upload_sessions(payload)
-            # odrzucone też zapisujemy jako wysłane - bez pętli; zmieniona sesja pójdzie znowu
-            history.mark_sent(pending)
-            for uuid, reason in rejected.items():
-                log.warning("Konto: serwer odrzucił sesję %s: %s", uuid[:13], reason)
-            log.info("Konto: wysłano %d sesji (odrzucone %d)", len(pending), len(rejected))
-            return len(pending) - len(rejected)
+            refused = [
+                (s, rejected[canonical_uuid(s.id)])
+                for s in pending
+                if canonical_uuid(s.id) in rejected
+            ]
+            gone = {s.id for s, _reason in refused}
+            history.mark_sent([s for s in pending if s.id not in gone])
+            # odrzucone: bez pętli wysyłek, ale ponowienie za dobę (serwer mógł zmienić zasady)
+            history.mark_rejected(refused, time.time() + REJECTED_RETRY_S)
+            for s, reason in refused:
+                log.warning("Konto: serwer odrzucił sesję %s: %s", s.id[:13], reason)
+            log.info("Konto: wysłano %d sesji (odrzucone %d)", len(pending), len(refused))
+            return len(pending) - len(refused)
         finally:
             self.lock.release()
 

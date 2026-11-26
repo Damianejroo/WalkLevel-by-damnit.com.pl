@@ -8,7 +8,7 @@ Wersja dokłada nowe użycie danych, więc obowiązuje konto dopiero po akceptac
 ## Nagłówek
 
 - „Dotyczy tylko konta online w aplikacji Bieżnia Gamingowa.” ->
-  „Dotyczy tylko konta online w aplikacji WalkLevel (dawniej Bieżnia Gamingowa).”
+  „Dotyczy tylko konta online w aplikacji WalkLevel.”
 
 ## W skrócie
 

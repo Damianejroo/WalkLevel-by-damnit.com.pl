@@ -271,6 +271,7 @@ QPushButton#seg:checked {{ background: transparent; color: {t.on_accent}; }}
 QFrame#segbox {{ background: {t.bg}; border: 2px solid {t.control}; border-radius: {RADIUS}px; }}
 QPlainTextEdit {{ background: {t.bg}; border: 2px solid {t.control}; border-radius: {RADIUS}px;
     font-family: "Cascadia Mono", "Consolas"; font-size: {px(13)}; padding: 6px; }}
+QPlainTextEdit[error="true"] {{ border-color: {t.danger}; }}
 QPlainTextEdit#prose {{ font-family: "{FONT}", "{FONT_FALLBACK}"; font-size: {px(15)};
     padding: 8px; }}
 QSlider {{ min-height: {CONTROL_H}px; }}

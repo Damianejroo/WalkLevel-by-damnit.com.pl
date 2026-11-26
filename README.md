@@ -1,6 +1,6 @@
 # WalkingPad X21 PC Gaming by damnit.com.pl
 
-**WalkLevel** (dawniej Bieżnia Gamingowa) to aplikacja na Windows, która zamienia chodzenie po bieżni na sterowanie
+**WalkLevel** to aplikacja na Windows, która zamienia chodzenie po bieżni na sterowanie
 w grach: chód to **W**, bieg to **Shift + W** (oba klawisze można zmienić). Łączy się z bieżnią przez Bluetooth i sama ją
 wyszukuje. Obsługiwane bieżnie: **KingSmith WalkingPad** (np. X21, X23) i bieżnie ze standardem **Bluetooth FTMS**
 (np. **Urevo SpaceWalk 5L**); model rozpoznaje sama. Jest też tryb **Trening** (zwykłe sterowanie bieżnią z komputera)

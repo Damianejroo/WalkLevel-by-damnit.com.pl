@@ -362,7 +362,7 @@ def test_report_page_prepares_email_without_endpoint(
     window.report_endpoint = ""  # bez adresu serwera: e-mail z paczką
     window.pages.go(window.REPORT)
     window.send_report()
-    assert "kilku słowach" in window.report_status.text()  # pusty opis nie przechodzi
+    assert "jedno zdanie" in window.report_error.text()  # pusty opis nie przechodzi
     window.report_text.setPlainText("Bieżnia rozłącza się po 2 minutach")
     window.send_report()
     for _ in range(100):
@@ -2431,3 +2431,20 @@ def test_app_notices_email_confirmed_in_browser(window: gui.App, tmp_path: Path)
     window.on_app_state(Qt.ApplicationState.ApplicationActive)
     window.tick()
     assert window.account.state.verified
+
+
+def test_too_short_report_says_why_next_to_the_field(window: gui.App) -> None:
+    window.pages.go(window.REPORT)
+    window.report_text.setPlainText("test")
+    sent: list[Any] = []
+    window.run_task = lambda *a: sent.append(a)  # type: ignore[method-assign]
+    window.send_report()
+    assert not sent  # nie wysłano
+    assert window.report_error.isVisibleTo(current(window))
+    assert "1 znak" in window.report_error.text()
+    assert window.report_text.property("error")
+    window.report_text.setPlainText("test 2")  # wystarczy - błąd znika sam
+    assert not window.report_error.isVisibleTo(current(window))
+    assert not window.report_text.property("error")
+    window.send_report()
+    assert sent

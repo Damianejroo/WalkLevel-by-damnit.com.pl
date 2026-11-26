@@ -1,4 +1,4 @@
-"""WalkLevel (dawniej Bieżnia Gamingowa) - sterowanie w grach chodzeniem po bieżni,
+"""WalkLevel - sterowanie w grach chodzeniem po bieżni,
 poziomy i osiągnięcia za przebyte kilometry.
 
 © 2026 damnit.com.pl Damian Skrzypiec, licencja GPL-3.0-or-later.
