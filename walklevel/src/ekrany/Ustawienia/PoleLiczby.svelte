@@ -29,28 +29,37 @@
     lokalna = null;
   });
 
+  /** Zwraca false, gdy wartość już jest na granicy (nic do zmiany). */
   function ustaw(v: number) {
     const n = Math.round(Math.min(max, Math.max(min, v)) * 10) / 10;
-    if (n === biezaca) return;
+    if (n === biezaca) return false;
     lokalna = n;
     onzmiana(n);
+    return true;
   }
 
   // --- przytrzymanie − / + ---
+  // Puszczenie łapie też okno: przycisk na granicy staje się `disabled` i sam może nie dostać
+  // pointerup - powtarzanie nie może wtedy chodzić dalej. Na granicy powtarzanie się kończy.
   let zegar: ReturnType<typeof setTimeout> | undefined;
   let powtorzenia = 0;
   function trzymaj(kierunek: 1 | -1) {
+    pusc();
     powtorzenia = 0;
-    ustaw(biezaca + kierunek * 0.1);
+    if (!ustaw(biezaca + kierunek * 0.1)) return;
     const dalej = () => {
       powtorzenia++;
-      ustaw(biezaca + kierunek * (powtorzenia > 6 ? 0.5 : 0.1));
+      if (!ustaw(biezaca + kierunek * (powtorzenia > 6 ? 0.5 : 0.1))) return pusc();
       zegar = setTimeout(dalej, 70);
     };
     zegar = setTimeout(dalej, 350);
+    window.addEventListener('pointerup', pusc);
+    window.addEventListener('pointercancel', pusc);
   }
   function pusc() {
     clearTimeout(zegar);
+    window.removeEventListener('pointerup', pusc);
+    window.removeEventListener('pointercancel', pusc);
   }
   $effect(() => pusc);
 
@@ -61,9 +70,11 @@
 
   function zatwierdz() {
     if (edycja === null) return;
-    const n = Number(edycja.replace(',', '.').replace(/[^\d.]/g, ''));
+    // puste pole nie zeruje wartości; 0 można wpisać, gdy dopuszcza je `min` (np. „Chód od”)
+    const tekst = edycja.replace(',', '.').replace(/[^\d.]/g, '');
+    const n = Number(tekst);
     edycja = null;
-    if (Number.isFinite(n) && n > 0) ustaw(n);
+    if (tekst && Number.isFinite(n)) ustaw(n);
   }
   function klawisz(e: KeyboardEvent) {
     const krok = { ArrowUp: 0.1, ArrowRight: 0.1, ArrowDown: -0.1, ArrowLeft: -0.1, PageUp: 0.5, PageDown: -0.5 }[e.key];

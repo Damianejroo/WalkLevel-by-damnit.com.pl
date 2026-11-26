@@ -51,9 +51,18 @@
 </script>
 
 {#if tryb === 'treadmill' || tryb === 'keyboard'}
+  {@const klawisze = tryb === 'keyboard'}
   <Rzad>
-    <PrzyciskKlawisza rola="walk" nazwaRoli={t('ustawienia.chodzenie.klawisz_chodu')} klawisz={s.walkKey.label || s.walkKey.name} />
-    <PrzyciskKlawisza rola="run" nazwaRoli={t('ustawienia.chodzenie.klawisz_biegu')} klawisz={s.runKey.label || s.runKey.name} />
+    <PrzyciskKlawisza
+      rola="walk"
+      nazwaRoli={t(klawisze ? 'ustawienia.klawisze.klawisz_chodu' : 'ustawienia.chodzenie.klawisz_chodu')}
+      klawisz={s.walkKey.label || s.walkKey.name}
+    />
+    <PrzyciskKlawisza
+      rola="run"
+      nazwaRoli={t(klawisze ? 'ustawienia.klawisze.klawisz_biegu' : 'ustawienia.chodzenie.klawisz_biegu')}
+      klawisz={s.runKey.label || s.runKey.name}
+    />
   </Rzad>
 {/if}
 

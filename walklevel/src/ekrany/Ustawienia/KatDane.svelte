@@ -19,7 +19,6 @@
       szeroki
       wariant="przytrzymaj"
       napis={t('ustawienia.dane.przywroc')}
-      title="{t('ustawienia.dane.przywroc')}. {t('wspolne.przytrzymaj_podpowiedz')}"
       onclick={() => wykonaj(api.backupRestoreLatest())}
     />
   {/if}

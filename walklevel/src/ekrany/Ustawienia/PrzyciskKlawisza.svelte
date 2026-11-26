@@ -105,7 +105,7 @@
     szeroki
     {napis}
     {napisy}
-    etykieta={t('klawisz.dostepnosc', { rola: nazwaRoli, klawisz })}
+    etykieta={czeka ? napis : t('klawisz.dostepnosc', { rola: nazwaRoli, klawisz })}
     title={t('klawisz.podpowiedz')}
     onclick={zacznij}
   />

@@ -60,10 +60,30 @@
 
   /** Napis przy krawędzi nie wychodzi poza oś: 0% do lewej, 100% do prawej. */
   const kotwica = (at: number) => (at <= 4 ? '0%' : at >= 96 ? '-100%' : '-50%');
+
+  // Progi mogą stać 5% od siebie: napis, który nachodziłby na poprzedni widoczny, jest ukryty
+  // (wartości są też w wierszach prędkości pod osią). Szerokości mierzone, bez zgadywania.
+  let szerToru = $state(0);
+  const szerProcentow = $state<number[]>([]);
+  const szerPredkosci = $state<number[]>([]);
+  function widoczne(szerokosci: number[]): boolean[] {
+    let prawy = -Infinity;
+    return progi.map((at, i) => {
+      const x = (at / 100) * szerToru;
+      const w = szerokosci[i] ?? 0;
+      const k = kotwica(at);
+      const lewy = k === '0%' ? x : k === '-100%' ? x - w : x - w / 2;
+      const ok = i === 0 || lewy >= prawy + 6;
+      if (ok) prawy = lewy + w;
+      return ok;
+    });
+  }
+  const pokazProcent = $derived(widoczne(szerProcentow));
+  const pokazPredkosc = $derived(widoczne(szerPredkosci));
 </script>
 
 <div class="os" role="group" aria-label={etykieta}>
-  <div class="tor" bind:this={tor}>
+  <div class="tor" bind:this={tor} bind:clientWidth={szerToru}>
     {#each progi as at, i (i)}
       {@const koniec = progi[i + 1] ?? 100}
       <span
@@ -74,8 +94,20 @@
       ></span>
     {/each}
     {#each progi as at, i (i)}
-      <span class="procent liczba" style:left="{at}%" style:translate="{kotwica(at)} 0">{at}%</span>
-      <span class="predkosc liczba jedna-linia" style:left="{at}%" style:translate="{kotwica(at)} 0">{predkosci[i] ?? ''}</span>
+      <span
+        class="procent liczba"
+        class:ukryty={!pokazProcent[i]}
+        style:left="{at}%"
+        style:translate="{kotwica(at)} 0"
+        bind:offsetWidth={szerProcentow[i]}>{at}%</span
+      >
+      <span
+        class="predkosc liczba jedna-linia"
+        class:ukryty={!pokazPredkosc[i]}
+        style:left="{at}%"
+        style:translate="{kotwica(at)} 0"
+        bind:offsetWidth={szerPredkosci[i]}>{predkosci[i] ?? ''}</span
+      >
       {#if i > 0}
         <button
           type="button"
@@ -97,7 +129,12 @@
       {/if}
     {/each}
     {#if galka !== null}
-      <span class="galka" aria-hidden="true" style:left="{Math.round(Math.min(1, Math.max(0, galka)) * 100)}%"></span>
+      <!-- telemetria 10-20 Hz: tylko transform (szerokość toru = 100cqw osi - 2 x 18 px) -->
+      <span
+        class="galka"
+        aria-hidden="true"
+        style:transform="translateX(calc((100cqw - 36px) * {Math.min(1, Math.max(0, galka))} - 6px))"
+      ></span>
     {/if}
   </div>
 </div>
@@ -154,12 +191,13 @@
   }
   .kolko:hover .znak,
   .ciagniety .znak { transform: scale(1.15); }
+  .ukryty { visibility: hidden; }
   .galka {
     position: absolute;
     top: 18px;
+    left: 0;
     width: 0;
     height: 0;
-    translate: -6px 0;
     border-inline: 6px solid transparent;
     border-bottom: 8px solid var(--text);
     transition: transform var(--t-color) linear;
