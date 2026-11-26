@@ -31,3 +31,7 @@ node_modules/
 /walklevel/src-tauri/gen/
 /walklevel/narzedzia/
 /walklevel/dist-instalator/
+
+# zrzuty z testu widoków (npm run test:ui) - generowane lokalnie, nie w repo
+/walklevel/docs/zrzuty/
+/walklevel/docs/zrzuty-e2e/
