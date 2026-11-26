@@ -176,11 +176,26 @@ fn check_dir(defs: &Definitions, dir: &Path, skip: &[&str]) -> Vec<String> {
     names
 }
 
+/// Definicje v1 (0.5.x) - kopia w fixturach, bo wbudowane są już v2.
+fn v1() -> Definitions {
+    Definitions::load_file(&fixtures_dir().join("definicje-v1.json")).expect("definicje v1")
+}
+
 #[test]
 fn evaluate_matches_python_fixtures() {
-    let defs = Definitions::builtin().expect("wbudowane definicje");
-    let names = check_dir(defs, &fixtures_dir(), &["definicje.json"]);
+    let skip = ["definicje.json", "definicje-v1.json"];
+    let names = check_dir(&v1(), &fixtures_dir(), &skip);
     assert!(names.len() >= 18, "za mało fixtur: {names:?}");
+}
+
+#[test]
+fn builtin_v2_matches_python() {
+    let defs = Definitions::builtin().expect("wbudowane definicje");
+    let dir = fixtures_dir().join("v2");
+    let text = std::fs::read_to_string(dir.join("wynik_definicji.json")).expect("fixtura");
+    check_definitions(defs, &serde_json::from_str(&text).expect("json"));
+    let names = check_dir(defs, &dir, &["wynik_definicji.json"]);
+    assert!(names.len() >= 9, "za mało fixtur: {names:?}");
 }
 
 #[test]
@@ -194,10 +209,9 @@ fn other_definitions_file_matches_python() {
 }
 
 #[test]
-fn definitions_match_python() {
-    let d = Definitions::builtin().expect("wbudowane definicje");
+fn definitions_v1_match_python() {
     let text = std::fs::read_to_string(fixtures_dir().join("definicje.json")).expect("fixtura");
-    check_definitions(d, &serde_json::from_str(&text).expect("json"));
+    check_definitions(&v1(), &serde_json::from_str(&text).expect("json"));
 }
 
 fn check_definitions(d: &Definitions, x: &Value) {
@@ -255,5 +269,134 @@ fn check_definitions(d: &Definitions, x: &Value) {
             pair[1],
             "next_rank({level})"
         );
+    }
+}
+
+// --- reguły definicji v2 (docs/analiza-szlak.md) ---------------------------------------------
+
+/// Znaki, które umie narysować odznaka (docs/wyglad.md, `odznaki.glyph()`); plus `wieniecNN`.
+const MARKS: &[&str] = &[
+    "stopy",
+    "kopula",
+    "helm",
+    "miecz",
+    "dycha",
+    "licznik",
+    "luki",
+    "mur",
+    "lisc",
+    "gora",
+    "wulkan",
+    "pudlo",
+    "wglab",
+    "kostka",
+    "biegacz",
+    "glob",
+    "plomien",
+    "pad",
+    "portale",
+    "dom",
+    "ksiezyc",
+    "slonce",
+    "druzyna",
+    "fala",
+    "portal",
+    "brama",
+    "drzwi",
+    "celownik",
+    "cytadela",
+    "gwiazda",
+    "dysk",
+    "pierscien",
+    "planeta",
+    "wieza",
+    "drzewo",
+    "kolo",
+    "czerw",
+    "radiacja",
+    "korona",
+];
+
+fn known_mark(mark: &str) -> bool {
+    MARKS.contains(&mark)
+        || mark
+            .strip_prefix("wieniec")
+            .is_some_and(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit()))
+}
+
+#[test]
+fn v2_keeps_every_v1_id_and_the_rest_of_the_file() {
+    let (old, new) = (v1(), Definitions::builtin().expect("wbudowane definicje"));
+    assert_eq!((old.version, new.version), (1, 2));
+    assert_eq!(new.achievements.len(), 82);
+    assert_eq!(new.trail().len(), 61);
+    for a in &old.achievements {
+        let b = new.by_id(&a.id);
+        assert!(b.is_some(), "zniknęło id {}", a.id);
+        if a.kind != "dystans" {
+            assert_eq!(Some(a), b, "osiągnięcie spoza szlaku zmienione: {}", a.id);
+        }
+    }
+    assert_eq!(
+        (old.xp_per_km, &old.rarity_xp, &old.rarities),
+        (new.xp_per_km, &new.rarity_xp, &new.rarities)
+    );
+    assert_eq!((&old.levels, &old.ranks), (&new.levels, &new.ranks));
+}
+
+#[test]
+fn v2_trail_rarity_grows_with_km_and_fits_the_bounds() {
+    let d = Definitions::builtin().expect("wbudowane definicje");
+    // górna granica km rzadkości przy 5 km dziennie: 14 / 91 / 365 / 912 dni, dalej bez granicy
+    let bound = |rarity: &str| match rarity {
+        "pospolite" => Some(70.0),
+        "rzadkie" => Some(455.0),
+        "epickie" => Some(1825.0),
+        "heroiczne" => Some(4560.0),
+        _ => None,
+    };
+    let tier = |r: &str| d.rarities.iter().position(|x| x == r).expect("rzadkość");
+    let trail = d.trail();
+    for w in trail.windows(2) {
+        assert!(
+            tier(&w[0].rarity) <= tier(&w[1].rarity),
+            "rzadkość maleje: {} -> {}",
+            w[0].id,
+            w[1].id
+        );
+    }
+    for a in &trail {
+        let km = a.km().expect("km");
+        let t = tier(&a.rarity);
+        if t + 1 < d.rarities.len() {
+            let max = bound(&a.rarity).expect("granica rzadkości");
+            assert!(km <= max, "{} ({km} km) za daleko na {}", a.id, a.rarity);
+        }
+        if t > 0 {
+            // poprzednia rzadkość kończy się przed tym przystankiem
+            let min = bound(&d.rarities[t - 1]).expect("granica rzadkości");
+            assert!(km > min, "{} ({km} km) za blisko na {}", a.id, a.rarity);
+        }
+    }
+    let km: Vec<f64> = trail.iter().filter_map(|a| a.km()).collect();
+    let max_gap = km
+        .windows(2)
+        .filter(|w| w[1] <= 2865.0)
+        .map(|w| w[1] - w[0])
+        .fold(0.0, f64::max);
+    assert!(max_gap <= 150.0, "odstęp {max_gap} km do Mordoru");
+    // Skyrim nadal wypada na 6. km, Erangel na 12.
+    let at = |id: &str| d.by_id(id).and_then(|a| a.km()).expect("przystanek");
+    assert!(5.0 < at("km57") && at("km57") <= 6.0);
+    assert!(11.0 < at("km113") && at("km113") <= 12.0);
+}
+
+#[test]
+fn every_badge_mark_can_be_drawn() {
+    for d in [&v1(), Definitions::builtin().expect("wbudowane definicje")] {
+        for a in &d.achievements {
+            let what = format!("v{}: {} ma nieznany znak {}", d.version, a.id, a.mark);
+            assert!(known_mark(&a.mark), "{what}");
+        }
     }
 }

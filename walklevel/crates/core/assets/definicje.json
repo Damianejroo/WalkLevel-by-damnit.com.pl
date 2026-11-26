@@ -1,5 +1,5 @@
 {
- "wersja": 1,
+ "wersja": 2,
  "opis": "WalkLevel: definicje poziomów, rang i osiągnięć. Wspólne dla aplikacji i serwera. Zmiana progu = nowa wersja; zdobytych nie odbieramy.",
  "xp_za_km": 100,
  "xp_za_rzadkosc": {
@@ -349,7 +349,7 @@
    "rzadkosc": "pospolite",
    "znak": "helm",
    "nazwa": "Skyrim na piechotę",
-   "klimat": "Mniej więcej tyle ma Skyrim z zachodu na wschód. Cała prowincja przebyta pieszo.",
+   "klimat": "Mniej więcej tyle ma mapa Skyrima w grze z zachodu na wschód. Cała prowincja, w skali gry, przebyta pieszo.",
    "warunek": "Przejdź łącznie 5,7 km."
   },
   {
@@ -379,7 +379,7 @@
    "rzadkosc": "pospolite",
    "znak": "radiacja",
    "nazwa": "Przez Zonę",
-   "klimat": "Zona ze Stalkera ma około 30 km promienia. Z Kordonu pod samą Elektrownię.",
+   "klimat": "Zona ze Stalkera to strefa wokół elektrowni o promieniu około 30 km. Z Kordonu na południu pod samą Elektrownię.",
    "warunek": "Przejdź łącznie 30 km."
   },
   {
@@ -391,6 +391,66 @@
    "nazwa": "Cytadela od końca do końca",
    "klimat": "Stacja Cytadela z Mass Effect ma 44,7 km długości, od końca do końca.",
    "warunek": "Przejdź łącznie 44,7 km."
+  },
+  {
+   "id": "km53",
+   "typ": "dystans",
+   "km": 53,
+   "rzadkosc": "pospolite",
+   "znak": "gora",
+   "nazwa": "Przełęcz Chilkoot",
+   "klimat": "Szlakiem przez przełęcz Chilkoot Buck z „Zewu krwi” Londona idzie ku Klondike. Od Dyea do jeziora Bennett to 53 km.",
+   "warunek": "Przejdź łącznie 53 km."
+  },
+  {
+   "id": "km63",
+   "typ": "dystans",
+   "km": 63,
+   "rzadkosc": "pospolite",
+   "znak": "dysk",
+   "nazwa": "Krawędź Valheim",
+   "klimat": "Świat Valheim to dysk o promieniu 10 km. Dookoła, wzdłuż samej krawędzi, wychodzi prawie 63 km.",
+   "warunek": "Przejdź łącznie 63 km."
+  },
+  {
+   "id": "km70",
+   "typ": "dystans",
+   "km": 70,
+   "rzadkosc": "pospolite",
+   "znak": "miecz",
+   "nazwa": "Cuszima wzdłuż",
+   "klimat": "Wyspa Cuszima, na której dzieje się Ghost of Tsushima, ma w rzeczywistości około 70 km z północy na południe.",
+   "warunek": "Przejdź łącznie 70 km."
+  },
+  {
+   "id": "km805",
+   "typ": "dystans",
+   "km": 80.5,
+   "rzadkosc": "rzadkie",
+   "znak": "kolo",
+   "nazwa": "Słoniem do Allahabadu",
+   "klimat": "W „W 80 dni dookoła świata” brakuje 50 mil torów między Kholby a Allahabadem. Tę lukę Phileas Fogg pokonuje na grzbiecie słonia.",
+   "warunek": "Przejdź łącznie 80,5 km."
+  },
+  {
+   "id": "km100",
+   "typ": "dystans",
+   "km": 100,
+   "rzadkosc": "rzadkie",
+   "znak": "biegacz",
+   "nazwa": "Srebrny Jogger",
+   "klimat": "Srebrny medal Jogger w Pokémon GO wymaga 100 km przebytych pieszo z telefonem w kieszeni.",
+   "warunek": "Przejdź łącznie 100 km."
+  },
+  {
+   "id": "km115",
+   "typ": "dystans",
+   "km": 115,
+   "rzadkosc": "rzadkie",
+   "znak": "fala",
+   "nazwa": "Prom w Bucklebury",
+   "klimat": "Etap drogi Froda: prom przez Brandywinę na wschodnim skraju Shire.",
+   "warunek": "Przejdź łącznie 115 km."
   },
   {
    "id": "km160",
@@ -413,6 +473,36 @@
    "warunek": "Przejdź łącznie 200 km."
   },
   {
+   "id": "km215",
+   "typ": "dystans",
+   "km": 215,
+   "rzadkosc": "rzadkie",
+   "znak": "dom",
+   "nazwa": "Pod Rozbrykanym Kucykiem",
+   "klimat": "Etap drogi Froda: gospoda w Bree, pierwszy nocleg za granicą Shire.",
+   "warunek": "Przejdź łącznie 215 km."
+  },
+  {
+   "id": "km246",
+   "typ": "dystans",
+   "km": 246,
+   "rzadkosc": "rzadkie",
+   "znak": "biegacz",
+   "nazwa": "Z Aten do Sparty",
+   "klimat": "Według „Dziejów” Herodota posłaniec Filippides dobiegł z Aten do Sparty w dwa dni. Spartathlon na tej trasie liczy 246 km.",
+   "warunek": "Przejdź łącznie 246 km."
+  },
+  {
+   "id": "km276",
+   "typ": "dystans",
+   "km": 276,
+   "rzadkosc": "rzadkie",
+   "znak": "planeta",
+   "nazwa": "Dookoła Pol",
+   "klimat": "Najmniejszy księżyc Joola z Kerbal Space Program ma 44 km promienia, więc jego równik to około 276 km.",
+   "warunek": "Przejdź łącznie 276 km."
+  },
+  {
    "id": "km318",
    "typ": "dystans",
    "km": 318,
@@ -433,6 +523,26 @@
    "warunek": "Przejdź łącznie 377 km."
   },
   {
+   "id": "km385",
+   "typ": "dystans",
+   "km": 385,
+   "rzadkosc": "rzadkie",
+   "znak": "gora",
+   "nazwa": "Wichrowy Czub",
+   "klimat": "Etap drogi Froda: ruiny strażnicy na samotnym wzgórzu przy Wielkim Gościńcu.",
+   "warunek": "Przejdź łącznie 385 km."
+  },
+  {
+   "id": "km408",
+   "typ": "dystans",
+   "km": 408,
+   "rzadkosc": "rzadkie",
+   "znak": "planeta",
+   "nazwa": "Dookoła Bop",
+   "klimat": "Bop, nieregularny księżyc Joola z Kerbal Space Program, ma 65 km promienia. Równik to około 408 km.",
+   "warunek": "Przejdź łącznie 408 km."
+  },
+  {
    "id": "km483",
    "typ": "dystans",
    "km": 483,
@@ -441,6 +551,16 @@
    "nazwa": "Patrol na Murze",
    "klimat": "Mur zamyka północ Westeros od morza do morza. Patrol przez całą długość zaliczony.",
    "warunek": "Przejdź łącznie 483 km."
+  },
+  {
+   "id": "km1150",
+   "typ": "dystans",
+   "km": 580,
+   "rzadkosc": "epickie",
+   "znak": "wieza",
+   "nazwa": "Fosa Cailin",
+   "klimat": "Etap Drogi Królewskiej z Winterfell na południe: ruiny twierdzy na bagnach Przesmyku, brama Północy.",
+   "warunek": "Przejdź łącznie 580 km."
   },
   {
    "id": "km628",
@@ -463,14 +583,14 @@
    "warunek": "Przejdź łącznie 737 km."
   },
   {
-   "id": "km880",
+   "id": "km817",
    "typ": "dystans",
-   "km": 880,
+   "km": 817,
    "rzadkosc": "epickie",
-   "znak": "gora",
-   "nazwa": "Przełęcz Caradhrasu",
-   "klimat": "Etap wyprawy Drużyny: śnieżna przełęcz, która nie wpuściła ich w góry.",
-   "warunek": "Przejdź łącznie 880 km."
+   "znak": "planeta",
+   "nazwa": "Dookoła Ike",
+   "klimat": "Księżyc Duny z Kerbal Space Program ma 130 km promienia, więc jego równik to prawie 817 km.",
+   "warunek": "Przejdź łącznie 817 km."
   },
   {
    "id": "km950",
@@ -483,24 +603,34 @@
    "warunek": "Przejdź łącznie 950 km."
   },
   {
-   "id": "km1019",
+   "id": "km1000",
    "typ": "dystans",
-   "km": 1019,
+   "km": 1000,
    "rzadkosc": "epickie",
-   "znak": "brama",
-   "nazwa": "Wrota Morii",
-   "klimat": "Z Rivendell pod zachodnią ścianę Morii, przez śniegi Caradhrasu.",
-   "warunek": "Przejdź łącznie 1 019 km."
+   "znak": "biegacz",
+   "nazwa": "Złoty Jogger",
+   "klimat": "Złoty medal Jogger w Pokémon GO wymaga 1 000 km. Platynowy dopiero dziesięć razy tyle.",
+   "warunek": "Przejdź łącznie 1 000 km."
   },
   {
-   "id": "km1150",
+   "id": "km1046",
    "typ": "dystans",
-   "km": 1150,
+   "km": 1046,
    "rzadkosc": "epickie",
-   "znak": "wieza",
-   "nazwa": "Fosa Cailin",
-   "klimat": "Etap Drogi Królewskiej: ruiny twierdzy na bagnach Przesmyku, brama Północy.",
-   "warunek": "Przejdź łącznie 1 150 km."
+   "znak": "mur",
+   "nazwa": "Z Winterfell na Mur",
+   "klimat": "Według pomiarów map Droga Królewska z Winterfell do Czarnego Zamku liczy około 650 mil.",
+   "warunek": "Przejdź łącznie 1 046 km."
+  },
+  {
+   "id": "km880",
+   "typ": "dystans",
+   "km": 1190,
+   "rzadkosc": "epickie",
+   "znak": "gora",
+   "nazwa": "Przełęcz Caradhrasu",
+   "klimat": "Etap wyprawy Drużyny: śnieżna przełęcz, która nie wpuściła ich w góry.",
+   "warunek": "Przejdź łącznie 1 190 km."
   },
   {
    "id": "km1257",
@@ -513,6 +643,16 @@
    "warunek": "Przejdź łącznie 1 257 km."
   },
   {
+   "id": "km1019",
+   "typ": "dystans",
+   "km": 1285,
+   "rzadkosc": "epickie",
+   "znak": "brama",
+   "nazwa": "Wrota Morii",
+   "klimat": "Z Rivendell pod zachodnią ścianę Morii, przez śniegi Caradhrasu.",
+   "warunek": "Przejdź łącznie 1 285 km."
+  },
+  {
    "id": "km1400",
    "typ": "dystans",
    "km": 1400,
@@ -521,6 +661,16 @@
    "nazwa": "Mroczna Puszcza",
    "klimat": "Etap wyprawy Bilba: ścieżka przez las, z której nie wolno było zejść.",
    "warunek": "Przejdź łącznie 1 400 km."
+  },
+  {
+   "id": "km1480",
+   "typ": "dystans",
+   "km": 1480,
+   "rzadkosc": "epickie",
+   "znak": "drzewo",
+   "nazwa": "Lothlórien",
+   "klimat": "Etap Drużyny: złoty las elfów nad Srebrną Żyłą, w którym zima jakby nie miała wstępu.",
+   "warunek": "Przejdź łącznie 1 480 km."
   },
   {
    "id": "km1530",
@@ -535,32 +685,42 @@
   {
    "id": "km1670",
    "typ": "dystans",
-   "km": 1670,
+   "km": 1609,
    "rzadkosc": "epickie",
-   "znak": "wieza",
-   "nazwa": "Bliźniaki",
-   "klimat": "Etap Drogi Królewskiej: dwa zamki Freyów po obu stronach Zielonych Wideł i most między nimi.",
-   "warunek": "Przejdź łącznie 1 670 km."
-  },
-  {
-   "id": "km1800",
-   "typ": "dystans",
-   "km": 1800,
-   "rzadkosc": "epickie",
-   "znak": "fala",
-   "nazwa": "Wodogrzmoty Rauros",
-   "klimat": "Wielkie wodogrzmoty na Anduinie, do których Drużyna dopłynęła łodziami elfów.",
-   "warunek": "Przejdź łącznie 1 800 km."
+   "znak": "pierscien",
+   "nazwa": "Ściana Pierścienia",
+   "klimat": "Ściany na brzegach Pierścienia z powieści Nivena mają około 1 000 mil wysokości. Tyle w pionie, gdyby dało się po nich iść.",
+   "warunek": "Przejdź łącznie 1 609 km."
   },
   {
    "id": "km1940",
    "typ": "dystans",
-   "km": 1940,
-   "rzadkosc": "heroiczne",
+   "km": 1706,
+   "rzadkosc": "epickie",
    "znak": "fala",
    "nazwa": "Rubinowy Bród",
-   "klimat": "Etap Drogi Królewskiej: płytki bród na Tridencie, w którym podobno wciąż leżą rubiny.",
-   "warunek": "Przejdź łącznie 1 940 km."
+   "klimat": "Etap Drogi Królewskiej z Winterfell na południe: płytki bród na Tridencie, w którym podobno wciąż leżą rubiny.",
+   "warunek": "Przejdź łącznie 1 706 km."
+  },
+  {
+   "id": "km1790",
+   "typ": "dystans",
+   "km": 1790,
+   "rzadkosc": "epickie",
+   "znak": "fala",
+   "nazwa": "Brunatne Pola",
+   "klimat": "Etap Drużyny: łodzie elfów płyną Anduinem wzdłuż pustych, martwych Brunatnych Pól.",
+   "warunek": "Przejdź łącznie 1 790 km."
+  },
+  {
+   "id": "km1935",
+   "typ": "dystans",
+   "km": 1935,
+   "rzadkosc": "heroiczne",
+   "znak": "fala",
+   "nazwa": "Progi Sarn Gebir",
+   "klimat": "Etap Drużyny: skaliste progi na Anduinie, przed którymi łodzie trzeba przenieść brzegiem.",
+   "warunek": "Przejdź łącznie 1 935 km."
   },
   {
    "id": "km2080",
@@ -568,29 +728,39 @@
    "km": 2080,
    "rzadkosc": "heroiczne",
    "znak": "gora",
-   "nazwa": "Emyn Muil",
-   "klimat": "Etap drogi Froda i Sama: labirynt ostrych skał nad Anduinem.",
+   "nazwa": "Argonath",
+   "klimat": "Etap Drużyny: Anduin wpływa między wzgórza Emyn Muil, a nad wodą stoją dwa kamienne posągi dawnych królów.",
    "warunek": "Przejdź łącznie 2 080 km."
+  },
+  {
+   "id": "km1800",
+   "typ": "dystans",
+   "km": 2105,
+   "rzadkosc": "heroiczne",
+   "znak": "fala",
+   "nazwa": "Wodogrzmoty Rauros",
+   "klimat": "Wielkie wodogrzmoty na Anduinie, do których Drużyna dopłynęła łodziami elfów.",
+   "warunek": "Przejdź łącznie 2 105 km."
   },
   {
    "id": "km2220",
    "typ": "dystans",
    "km": 2220,
    "rzadkosc": "heroiczne",
-   "znak": "wieza",
-   "nazwa": "Harrenhal",
-   "klimat": "Etap Drogi Królewskiej: największy zamek Westeros, stopiony smoczym ogniem.",
+   "znak": "gora",
+   "nazwa": "Zejście z Emyn Muil",
+   "klimat": "Etap drogi Froda i Sama: po kilku dniach błądzenia po skałach zejście z urwiska po elfickiej linie.",
    "warunek": "Przejdź łącznie 2 220 km."
   },
   {
    "id": "km2300",
    "typ": "dystans",
-   "km": 2300,
+   "km": 2360,
    "rzadkosc": "heroiczne",
    "znak": "fala",
    "nazwa": "Martwe Bagna",
    "klimat": "Etap drogi Froda i Sama: bagna ze światełkami, za którymi nie wolno iść.",
-   "warunek": "Przejdź łącznie 2 300 km."
+   "warunek": "Przejdź łącznie 2 360 km."
   },
   {
    "id": "km2414",
@@ -599,28 +769,48 @@
    "rzadkosc": "heroiczne",
    "znak": "korona",
    "nazwa": "Królewska Przystań",
-   "klimat": "Z Winterfell do stolicy Westeros jest około 1 500 mil. Cała Droga Królewska za tobą.",
+   "klimat": "Według pomiarów map z Winterfell do stolicy Westeros jest około 1 500 mil Drogi Królewskiej.",
    "warunek": "Przejdź łącznie 2 414 km."
   },
   {
    "id": "km2565",
    "typ": "dystans",
-   "km": 2565,
+   "km": 2480,
    "rzadkosc": "heroiczne",
    "znak": "brama",
    "nazwa": "Czarna Brama",
    "klimat": "Etap drogi Froda i Sama: zamknięte wrota Mordoru.",
-   "warunek": "Przejdź łącznie 2 565 km."
+   "warunek": "Przejdź łącznie 2 480 km."
+  },
+  {
+   "id": "km2540",
+   "typ": "dystans",
+   "km": 2540,
+   "rzadkosc": "heroiczne",
+   "znak": "lisc",
+   "nazwa": "Ithilien",
+   "klimat": "Etap drogi Froda i Sama: zielona, pachnąca ziołami kraina Gondoru tuż pod górami Mordoru.",
+   "warunek": "Przejdź łącznie 2 540 km."
   },
   {
    "id": "km2715",
    "typ": "dystans",
-   "km": 2715,
+   "km": 2650,
    "rzadkosc": "heroiczne",
    "znak": "gora",
    "nazwa": "Schody Cirith Ungol",
    "klimat": "Etap drogi Froda i Sama: kręte schody wykute w skałach Ephel Dúath.",
-   "warunek": "Przejdź łącznie 2 715 km."
+   "warunek": "Przejdź łącznie 2 650 km."
+  },
+  {
+   "id": "km2762",
+   "typ": "dystans",
+   "km": 2762,
+   "rzadkosc": "heroiczne",
+   "znak": "kolo",
+   "nazwa": "Omsk",
+   "klimat": "Według Verne’a Omsk leży mniej więcej w połowie drogi kuriera carskiego z Moskwy do Irkucka.",
+   "warunek": "Przejdź łącznie 2 762 km."
   },
   {
    "id": "km2865",
@@ -659,8 +849,18 @@
    "rzadkosc": "heroiczne",
    "znak": "kolo",
    "nazwa": "Szlak do Oregonu",
-   "klimat": "Cały szlak z gry The Oregon Trail, wozem i pieszo przez prerię.",
+   "klimat": "Historyczny Szlak Oregoński, po którym prowadzi gra The Oregon Trail, liczył około 2 170 mil. Wozem i pieszo przez prerię.",
    "warunek": "Przejdź łącznie 3 490 km."
+  },
+  {
+   "id": "km4000",
+   "typ": "dystans",
+   "km": 4000,
+   "rzadkosc": "heroiczne",
+   "znak": "planeta",
+   "nazwa": "Valles Marineris",
+   "klimat": "Wielki kanion Marsa, znany z marsjańskiej trylogii Robinsona, ma około 4 000 km długości.",
+   "warunek": "Przejdź łącznie 4 000 km."
   },
   {
    "id": "km4500",
@@ -679,18 +879,18 @@
    "rzadkosc": "legendarne",
    "znak": "mur",
    "nazwa": "Z Muru do Dorne",
-   "klimat": "Westeros od Muru po południowe wybrzeże Dorne, około 3 000 mil.",
+   "klimat": "Westeros od Muru po południowe wybrzeże Dorne, około 3 000 mil w skali map, w której Mur ma 300 mil.",
    "warunek": "Przejdź łącznie 4 800 km."
   },
   {
    "id": "km5200",
    "typ": "dystans",
-   "km": 5200,
+   "km": 5523,
    "rzadkosc": "legendarne",
    "znak": "kolo",
    "nazwa": "Kurier carski",
-   "klimat": "Droga Michała Strogowa z powieści Verne’a: z Moskwy do Irkucka przez całą Syberię.",
-   "warunek": "Przejdź łącznie 5 200 km."
+   "klimat": "Droga Michała Strogowa z powieści Verne’a: 5 200 wiorst z Moskwy do Irkucka przez całą Syberię.",
+   "warunek": "Przejdź łącznie 5 523 km."
   },
   {
    "id": "km6128",
@@ -721,6 +921,16 @@
    "nazwa": "Od Osi do Krawędzi",
    "klimat": "Świat Dysku Pratchetta ma około 10 000 mil średnicy. Od środka aż do wodospadu na krawędzi.",
    "warunek": "Przejdź łącznie 8 047 km."
+  },
+  {
+   "id": "km10000",
+   "typ": "dystans",
+   "km": 10000,
+   "rzadkosc": "legendarne",
+   "znak": "biegacz",
+   "nazwa": "Platynowy Jogger",
+   "klimat": "Najwyższy stopień medalu Jogger w Pokémon GO: 10 000 km przebytych pieszo.",
+   "warunek": "Przejdź łącznie 10 000 km."
   },
   {
    "id": "s3",

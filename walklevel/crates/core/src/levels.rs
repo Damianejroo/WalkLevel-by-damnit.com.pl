@@ -1,8 +1,8 @@
 //! Poziomy, rangi i osiągnięcia WalkLevel liczone z historii sesji - port bieznia/poziomy.
 //!
-//! Definicje (progi, teksty, tabela 100 poziomów) są w `assets/definicje.json` - ten sam plik
-//! z wersją co w 0.5.x, wspólny dla aplikacji i serwera. Tu tylko liczenie: czyste funkcje
-//! bez interfejsu i bez bazy.
+//! Definicje (progi, teksty, tabela 100 poziomów) są w `assets/definicje.json` - od 0.6.0
+//! wersja 2 (docs/definicje-v2.json, docs/analiza-szlak.md), format pliku ten sam co w 0.5.x,
+//! wspólny dla aplikacji i serwera. Tu tylko liczenie: czyste funkcje bez interfejsu i bez bazy.
 //!
 //! Zasady (te same co na serwerze):
 //! - liczą się sesje z bieżni, bez symulatora;
@@ -26,7 +26,7 @@ use thiserror::Error;
 
 use crate::model::Session;
 
-/// Definicje wbudowane w program (kopia bieznia/poziomy/definicje.json).
+/// Definicje wbudowane w program (wersja 2, kopia docs/definicje-v2.json).
 pub const BUILTIN_DEFINITIONS: &str = include_str!("../assets/definicje.json");
 
 /// Sekundy w dobie.
@@ -842,6 +842,77 @@ pub fn evaluate(defs: &Definitions, walks: &[Walk], opts: &EvalOptions) -> Statu
     }
 }
 
+// --- kolejka popupów ----------------------------------------------------------------------------
+
+/// Najwięcej popupów osiągnięć z jednego przeliczenia (próg zbiorczego popupu z 0.5.x).
+pub const MAX_POPUPS_AT_ONCE: usize = 4;
+
+/// Nowe osiągnięcia z jednego przeliczenia rozdzielone na popupy.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PopupQueue<'a> {
+    /// pokazywane pojedynczo, od najstarszego
+    pub single: Vec<&'a Progress>,
+    /// reszta do jednego zbiorczego popupu „+N kolejnych”, od najstarszego (puste - bez niego)
+    pub grouped: Vec<&'a Progress>,
+}
+
+impl PopupQueue<'_> {
+    /// Ile popupów osiągnięć to daje (pojedyncze + ewentualny zbiorczy).
+    pub fn popups(&self) -> usize {
+        self.single.len() + usize::from(!self.grouped.is_empty())
+    }
+}
+
+/// Kolejka popupów dla nowych osiągnięć (np. kilka progów szlaku w jednej sesji).
+///
+/// Kolejność od najstarszego (`earned_at`, brak czasu jak 0 w 0.5.x; przy równym czasie
+/// kolejność definicji). Do `max` nowych - każde osobno. Więcej - najwyżej `max` popupów
+/// razem: `max - 1` najrzadszych osobno (przy równej rzadkości starsze), reszta w jednym
+/// zbiorczym. Popup awansu dokłada wywołujący, poza tym limitem.
+pub fn popup_queue<'a>(
+    defs: &Definitions,
+    new: impl IntoIterator<Item = &'a Progress>,
+    max: usize,
+) -> PopupQueue<'a> {
+    let order = |p: &Progress| {
+        defs.achievements
+            .iter()
+            .position(|a| a.id == p.achievement.id)
+            .unwrap_or(usize::MAX)
+    };
+    let mut all: Vec<&Progress> = new.into_iter().collect();
+    all.sort_by(|a, b| {
+        cmp_f64(a.earned_at.unwrap_or(0.0), b.earned_at.unwrap_or(0.0))
+            .then_with(|| order(a).cmp(&order(b)))
+    });
+    if all.len() <= max {
+        return PopupQueue {
+            single: all,
+            grouped: Vec::new(),
+        };
+    }
+    // nieznana rzadkość liczy się jak najczęstsza
+    let tier = |p: &Progress| {
+        defs.rarities
+            .iter()
+            .position(|r| *r == p.achievement.rarity)
+            .map_or(0, |i| i + 1)
+    };
+    let mut by_rarity: Vec<usize> = (0..all.len()).collect();
+    // sortowanie stabilne: przy równej rzadkości zostaje kolejność od najstarszego
+    by_rarity.sort_by_key(|&i| std::cmp::Reverse(tier(all[i])));
+    let mut picked = vec![false; all.len()];
+    for &i in by_rarity.iter().take(max.saturating_sub(1)) {
+        picked[i] = true;
+    }
+    let (single, grouped): (Vec<_>, Vec<_>) =
+        all.into_iter().zip(picked).partition(|&(_, chosen)| chosen);
+    PopupQueue {
+        single: single.into_iter().map(|(p, _)| p).collect(),
+        grouped: grouped.into_iter().map(|(p, _)| p).collect(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     //! Port tests/test_poziomy.py (bez testu migracji bazy 0.3 - to moduł history).
@@ -946,7 +1017,7 @@ mod tests {
             .filter(|w| w[1] <= 2865.0)
             .map(|w| w[1] - w[0])
             .fold(0.0, f64::max);
-        assert!(max_gap <= 152.0); // do Mordoru przystanek co ok. 30 dni przy 5 km dziennie
+        assert!(max_gap <= 150.0); // do Mordoru przystanek co ok. 30 dni przy 5 km dziennie
     }
 
     #[test]
@@ -1162,6 +1233,85 @@ mod tests {
             Definitions::load_file(&dir.path().join("brak.json")),
             Err(LevelsError::Read { .. })
         ));
+    }
+
+    fn got(id: &str, earned_at: Option<f64>) -> Progress {
+        let mut p = Progress::new(defs().by_id(id).expect("osiągnięcie").clone());
+        p.earned_at = earned_at;
+        p
+    }
+
+    fn ids(v: &[&Progress]) -> Vec<String> {
+        v.iter().map(|p| p.achievement.id.clone()).collect()
+    }
+
+    #[test]
+    fn popups_up_to_the_limit_go_from_the_oldest() {
+        let list = [
+            got("km57", Some(T0 + 50.0)),
+            got("km2", Some(T0 + 10.0)),
+            got("km1", Some(T0 + 10.0)), // ten sam czas - kolejność definicji
+            got("noc", None),            // bez czasu jak 0 w 0.5.x
+        ];
+        let q = popup_queue(defs(), &list, MAX_POPUPS_AT_ONCE);
+        assert_eq!(ids(&q.single), ["noc", "km1", "km2", "km57"]);
+        assert!(q.grouped.is_empty());
+        assert_eq!(q.popups(), 4);
+        let empty = popup_queue(defs(), Vec::<&Progress>::new(), MAX_POPUPS_AT_ONCE);
+        assert_eq!((empty.popups(), empty.single.len()), (0, 0));
+    }
+
+    #[test]
+    fn many_new_achievements_keep_the_rarest_and_group_the_rest() {
+        let list = [
+            got("km30", Some(T0 + 5.0)),
+            got("km483", Some(T0 + 4.0)),
+            got("km2", Some(T0 + 3.0)),
+            got("km160", Some(T0 + 2.0)),
+            got("km1", Some(T0 + 1.0)),
+        ];
+        let q = popup_queue(defs(), &list, MAX_POPUPS_AT_ONCE);
+        // 3 najrzadsze (przy równej rzadkości starsze) osobno, od najstarszego
+        assert_eq!(ids(&q.single), ["km1", "km160", "km483"]);
+        assert_eq!(ids(&q.grouped), ["km2", "km30"]);
+        assert_eq!(q.popups(), MAX_POPUPS_AT_ONCE);
+        // limit 2 - jak 0.5.x: najrzadsze i zbiorczy
+        let q2 = popup_queue(defs(), &list, 2);
+        assert_eq!(ids(&q2.single), ["km483"]);
+        assert_eq!(q2.grouped.len(), 4);
+        // limit 1 i 0 - tylko zbiorczy
+        for max in [0, 1] {
+            let q = popup_queue(defs(), &list, max);
+            assert!(q.single.is_empty());
+            assert_eq!(ids(&q.grouped), ["km1", "km160", "km2", "km483", "km30"]);
+        }
+    }
+
+    #[test]
+    fn unknown_rarity_counts_as_the_most_common() {
+        let mut odd = got("km160", Some(T0 + 1.0));
+        odd.achievement.rarity = "nowa".into();
+        let list = [odd, got("km1", Some(T0 + 2.0)), got("km2", Some(T0 + 3.0))];
+        let q = popup_queue(defs(), &list, 2);
+        assert_eq!(ids(&q.single), ["km1"]);
+        assert_eq!(ids(&q.grouped), ["km160", "km2"]);
+    }
+
+    #[test]
+    fn one_long_first_session_queues_its_trail_stops() {
+        // jedna sesja 12 km z v2: km1, km2, km57, km113 i inne progi naraz
+        let walks = [Walk {
+            end: T0 + 3.0 * 3600.0,
+            ..walk_full(0, 12.0, 0, "g1", "gra", 0)
+        }];
+        let s = evaluate(defs(), &walks, &at(T0 + DAY));
+        let new = s.earned();
+        assert!(new.len() > MAX_POPUPS_AT_ONCE, "{:?}", ids(&new));
+        let q = popup_queue(defs(), new.iter().copied(), MAX_POPUPS_AT_ONCE);
+        assert_eq!(q.popups(), MAX_POPUPS_AT_ONCE);
+        assert_eq!(q.single.len() + q.grouped.len(), new.len());
+        let times: Vec<f64> = q.single.iter().filter_map(|p| p.earned_at).collect();
+        assert!(times.windows(2).all(|w| w[0] <= w[1]));
     }
 
     #[test]
