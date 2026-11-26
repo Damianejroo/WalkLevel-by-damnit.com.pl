@@ -783,6 +783,36 @@ impl Store {
             .unwrap_or(person.profile()))
     }
 
+    /// Profil gry z innego komputera (synchronizacja konta online): osoba `person_id`
+    /// dostaje profil o id `id` z serwera i tą nazwą - domyślne ustawienia, ikona i kolor,
+    /// bez zmiany aktywnego profilu (zapisuje). `online` - „Pokazuj tę grę na koncie online”.
+    /// Nic nie robi (false), gdy profil o tym id już jest albo nie ma takiej osoby.
+    pub fn add_synced_profile(
+        &mut self,
+        person_id: &str,
+        id: &str,
+        name: &str,
+        online: bool,
+    ) -> Result<bool, StoreError> {
+        if self.find_profile(id).is_some() {
+            return Ok(false);
+        }
+        let Some(person) = self.people.iter_mut().find(|p| p.id == person_id) else {
+            return Ok(false);
+        };
+        let name = match name.trim() {
+            "" => "Profil",
+            n => n,
+        };
+        person.profiles.push(Profile {
+            glyph: Some(DEFAULT_GLYPH.to_string()),
+            online,
+            ..Profile::new(id.to_string(), name.to_string())
+        });
+        self.save()?;
+        Ok(true)
+    }
+
     /// Zmiana profilu aktywnej osoby (zapisuje).
     pub fn update_profile(
         &mut self,

@@ -1494,6 +1494,7 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 |---|---|---|---|
 | `online.pokaz_haslo` | (nowy) | Pokaż hasło | Przycisk z okiem w polu hasła (logowanie, rejestracja, Moje konto). |
 | `ranking.ty` | (nowy) | (Ty) | Dopisek przy własnym pseudonimie w rankingu i na liście osób. |
+| `online.poziom_ukryty` | (nowy) | Poziom ukryty | Podpowiedź przy neutralnym awatarze zamiast odznaki poziomu (znajomi, ranking, osoby z kontem) i wiersz w profilu osoby: serwer nie podaje poziomu bez zgody tej osoby. |
 | `ranking.wiersz.kroki_slowo` | (nowy) | {kroki:krok/kroki/kroków} | Słowo pod liczbą kroków w kolumnie statystyk (liczba osobno, krojem liczb). |
 | `ranking.wiersz.km` | (nowy) | {km} km | Druga linia statystyk w wierszu rankingu i gry. |
 | `ranking.wiersz.lacznie` | (nowy) | łącznie | Słowo przy kilometrach w rankingu poziomów. |

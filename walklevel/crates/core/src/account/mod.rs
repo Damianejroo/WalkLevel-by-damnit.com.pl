@@ -40,8 +40,8 @@ pub use api::{
     friendly,
 };
 pub use state::{AccountState, STATE_FILE, load_state, load_states, save_state, save_states};
-pub use sync::{AccountTimers, Every, LiveUpdate, SyncReport, SyncTarget, live_update};
-pub use upload::{DELETED_ELSEWHERE, UploadSession, session_payload};
+pub use sync::{AccountTimers, Every, LiveUpdate, NewGame, SyncReport, SyncTarget, live_update};
+pub use upload::{DELETED_ELSEWHERE, UploadSession, game_name, session_payload, valid_game_id};
 pub use vault::{MemoryStore, TARGET, TokenStore, default_store, vault_target};
 
 use state::StateFile;
@@ -392,11 +392,12 @@ impl Account {
     // --- logowanie -----------------------------------------------------------------------
 
     /// Zalogowano (rejestracja, logowanie, odświeżenie): token i dane użytkownika. Inne konto
-    /// niż dotąd kasuje kursor synchronizacji.
+    /// niż dotąd kasuje kursor synchronizacji i znacznik ponownej wysyłki po regulaminie.
     pub fn signed_in(&mut self, auth: &Auth, person: &str) -> Result<User> {
         self.keep_token(&auth.token);
         if self.state.user_id != auth.user.id {
             self.state.sync_cursor.clear();
+            self.state.resent_terms.clear();
             self.sync_missing = false;
         }
         self.state.user_id.clone_from(&auth.user.id);
@@ -578,8 +579,9 @@ impl Account {
 
     // --- ustawienia konta ----------------------------------------------------------------
 
-    /// Akceptacja obowiązującego regulaminu; sesje idą jeszcze raz (np. z nazwami gier).
-    pub fn accept_terms(&mut self, history: &History) -> Result<()> {
+    /// Akceptacja obowiązującego regulaminu. Najbliższa wysyłka ([`Account::upload`]) oznaczy
+    /// całą historię do ponownej wysyłki - z grami i nowszym `zmieniono_utc_s`.
+    pub fn accept_terms(&mut self) -> Result<()> {
         let version = self.state.terms_current.clone();
         if version.is_empty() {
             return Ok(());
@@ -591,9 +593,7 @@ impl Account {
         let result = self.client.update_profile(&patch);
         self.handle(result)?;
         self.state.terms = version;
-        self.save()?;
-        history.forget_sent()?;
-        Ok(())
+        self.save()
     }
 
     pub fn set_games_visibility(&mut self, value: &str) -> Result<()> {

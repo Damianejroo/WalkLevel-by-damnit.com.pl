@@ -468,6 +468,21 @@ impl History {
         Ok(())
     }
 
+    /// Sesje osoby z profilem gry (z bieżni) do ponownej wysyłki w nowszej wersji:
+    /// `zmieniono_utc_s` = `now`, więc [`History::unsent`] znów je zwróci, a serwer, który
+    /// zostawia nowszą wersję, je nadpisze (nowy regulamin, przełącznik „Pokazuj tę grę”).
+    /// `profile` - tylko sesje tego profilu. Sesje bez profilu (pobrane z innego komputera
+    /// bez znanej gry) zostają: tu nie ma o nich nic nowego, a nowszy czas nadpisałby na
+    /// serwerze pełniejszą wersję z ich komputera. Zwraca liczbę oznaczonych.
+    pub fn mark_for_resend(&self, person: &str, profile: Option<&str>, now: f64) -> Result<usize> {
+        let n = self.db.execute(
+            "UPDATE sesje SET zmieniono_utc_s = ?1 WHERE osoba = ?2 AND zrodlo = 'bieznia' \
+             AND profil != '' AND (?3 IS NULL OR profil = ?3) AND zmieniono_utc_s < ?1",
+            (now, person, profile),
+        )?;
+        Ok(n)
+    }
+
     /// Id sesji ukrytych online.
     pub fn hidden_online(&self) -> Result<HashSet<String>> {
         let mut st = self.db.prepare("SELECT id FROM ukryte_online")?;

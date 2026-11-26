@@ -3,7 +3,9 @@
   // Tytuł „Konto online”, pseudonim jako podpis. Zakładki Znajomi / Ranking / Osoby z kontem /
   // Moje konto: każda montowana przy pierwszym otwarciu i potem tylko chowana (stały ekran).
   // Dane z rdzenia (stan.online, stan.account); przy wejściu na ekran i zmianie zakładki ciche
-  // odświeżenie (online_load bez force). Błąd wczytania - komunikat z „Spróbuj ponownie” w miejscu.
+  // odświeżenie (online_load bez force), a na otwartej zakładce Znajomi co 10 s („idzie teraz”):
+  // dane podmieniane w miejscu, najwyżej jedno zapytanie naraz. Błąd wczytania - komunikat
+  // z „Spróbuj ponownie” w miejscu (błąd cichego odświeżenia zostawia ostatnią listę).
   import { untrack } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import Strona from '../lib/ui/Strona.svelte';
@@ -42,16 +44,32 @@
 
   // --- wczytywanie: przy wejściu, zmianie zakładki i zmianie osoby ---
   let bledy = $state<Partial<Record<OnlineTab, string>>>({});
-  async function wczytaj(z: OnlineTab, force: boolean) {
+  // trwające pobranie (zakładka) - odświeżenie co 10 s nie dubluje zapytań
+  let trwa: OnlineTab | null = null;
+  async function wczytaj(z: OnlineTab, force: boolean, cicho = false) {
     if (z === 'me') return; // Moje konto to wycinek account - nic do pobrania
-    const w = await sprobuj(api.onlineLoad(z, force));
-    bledy[z] = w.ok ? '' : w.blad || Object.values(w.pola)[0] || '';
+    if (trwa === z || (cicho && trwa)) return;
+    trwa = z;
+    try {
+      const w = await sprobuj(api.onlineLoad(z, force));
+      if (w.ok || !cicho) bledy[z] = w.ok ? '' : w.blad || Object.values(w.pola)[0] || '';
+    } finally {
+      if (trwa === z) trwa = null;
+    }
   }
   $effect(() => {
     if (!aktywny || !konto.loggedIn) return;
     const z = zakladka;
     void stan.online.personId;
     untrack(() => wczytaj(z, false));
+  });
+  const ODSWIEZ_ZNAJOMYCH_MS = 10_000;
+  $effect(() => {
+    if (!aktywny || !konto.loggedIn || zakladka !== 'friends') return;
+    const zegar = setInterval(() => {
+      if (!document.hidden) void wczytaj('friends', false, true);
+    }, ODSWIEZ_ZNAJOMYCH_MS);
+    return () => clearInterval(zegar);
   });
 
   function otworzProfil(userId: string) {

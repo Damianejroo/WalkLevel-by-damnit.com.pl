@@ -735,7 +735,7 @@ export interface OnlineStats extends PeriodTotals { games: GameTotals[] | null }
 export interface LiveState { kmh: number; steps: number }
 export interface Friend {
   id: string; name: string;
-  level: number | null;
+  level: number | null;        // null - serwer nie podaje poziomu bez zgody tej osoby: UI pokazuje neutralny awatar „Poziom ukryty”
   live: LiveState | null;      // idzie teraz
   week: PeriodTotals;
 }
@@ -1355,7 +1355,7 @@ Symulator: `settings_set('simulator', true|false)`. Klawisze wolniej/szybciej (p
 | `game_pick` | `kind: String` (`"folder"`/`"file"`) (okno) | `Option<GamePick>` | `ikony.resolve` + ikona 128 px + kolor z ikony; nic nie znaleziono → `notFound` „Nie znalazłem pliku gry w tym miejscu.” |
 | `game_pick_discard` | `pick_id: String` | `()` | usuwa tymczasową ikonę (wyjście bez zapisu) |
 | `profile_create` | `draft: ProfileDraft` | `String` (id) | `add_profile` + aktywacja + `apply_profile` |
-| `profile_update` | `profile_id: String`, `patch: ProfilePatch` | `()` | `update_profile`; `online` zmieniony → `history.forget_sent()` (sesje pójdą jeszcze raz); kolor aktywnego profilu zmienia akcent |
+| `profile_update` | `profile_id: String`, `patch: ProfilePatch` | `()` | `update_profile`; `online` zmieniony → `history.mark_for_resend(osoba, profil, now)` (sesje tej gry pójdą jeszcze raz, nowsze - z nowym `gra_publiczna`); kolor aktywnego profilu zmienia akcent |
 | `profile_duplicate` | `profile_id: String` | `String` (id kopii) | „<nazwa> (kopia)” z kopią ikony |
 | `profile_remove` | `profile_id: String` | `()` | ostatniego się nie da (`invalid`) |
 
@@ -1402,7 +1402,7 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 | `account_set_profile_visibility` | `value: String` (`ukryty`/`znajomi`/`publiczny`) | `()` | PATCH profilu; „Zapisano.” |
 | `account_set_games_visibility` | `value: String` (`ja`/`znajomi`/`wszyscy`) | `()` | PATCH profilu |
 | `account_rename` | `name: String` | `()` | `check_name` → `invalid`; PATCH profilu |
-| `account_accept_terms` | - | `()` | akceptuje `termsCurrent`, `forget_sent`, wysyłka od razu; toast „Dziękujemy - regulamin zaakceptowany.” |
+| `account_accept_terms` | - | `()` | akceptuje `termsCurrent`, wysyłka od razu (pierwsza wysyłka po akceptacji nowej wersji oznacza historię do ponownej wysyłki - docs/synchro.md „Gry na koncie”); toast „Dziękujemy - regulamin zaakceptowany.” |
 | `account_upload_now` | - | `u32` (wysłane) | „Wyślij teraz” |
 | `account_export_my_data` | - | `String` (ścieżka) | `dane/moje-dane-konto-YYYYmmdd-HHMMSS.json` |
 
@@ -1410,7 +1410,7 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 
 | Komenda | Argumenty | Wynik | Skutek |
 |---|---|---|---|
-| `online_load` | `tab: String` (`friends`/`ranking`/`people`/`me`), `force: bool` | `()` | `friends`: statystyki tygodnia + znajomi + zaproszenia; `ranking`: ranking z bieżącym zakresem; `people`: lista z `peopleQuery`. Bez `force` dane już w pamięci odświeżane po cichu (bez „Ładuję…”). Wyniki w `online` |
+| `online_load` | `tab: String` (`friends`/`ranking`/`people`/`me`), `force: bool` | `()` | `friends`: statystyki tygodnia + znajomi + zaproszenia; `ranking`: ranking z bieżącym zakresem; `people`: lista z `peopleQuery`. Bez `force` dane już w pamięci odświeżane po cichu (bez „Ładuję…”). Wyniki w `online`. UI na otwartej zakładce Znajomi (ekran aktywny, okno widoczne) woła `friends` bez `force` co 10 s - najwyżej jedno zapytanie naraz, błąd cichego odświeżenia zostawia ostatnią listę |
 | `online_ranking_scope` | `scope: String` (`tydzien`/`miesiac`/`razem`/`poziom`) | `()` | zmienia zakres i ładuje |
 | `online_people_search` | `search: String` (≤ 24 zn.), `page: u32` | `()` | `peopleQuery` + ładowanie |
 | `online_person_open` | `user_id: String` | `OnlinePerson` | `online.person` + `wl:nawigacja {to:'onlinePerson', reason:'personOpened'}` |
@@ -1815,6 +1815,9 @@ CREATE TABLE IF NOT EXISTS poziom_osoby (osoba TEXT PRIMARY KEY, poziom INTEGER 
 - `unsent(osoba)`: sesje osoby z `zrodlo = 'bieznia'`, których nie ma w `wyslane` z
   `zmieniono_utc_s >=` sesji, i nie są w `odrzucone` z terminem `ponow_utc_s > now`
   (ponowienie po 24 h). `forget_sent()` czyści `wyslane` i `odrzucone`.
+  `mark_for_resend(osoba, profil?, now)`: `zmieniono_utc_s = now` dla sesji osoby z bieżni
+  z niepustym profilem (opcjonalnie jednego profilu) - wracają do `unsent` w nowszej wersji,
+  którą serwer nadpisze (docs/synchro.md „Gry na koncie”).
 - Osiągnięć raz zapisanych w `osiagniecia` nie usuwamy (poza „wyczyść historię osoby”).
   `poziom_osoby` - ostatni pokazany poziom (brak = pierwsze liczenie: jeden popup
   podsumowujący zamiast stosu).
@@ -1830,7 +1833,8 @@ CREATE TABLE IF NOT EXISTS poziom_osoby (osoba TEXT PRIMARY KEY, poziom INTEGER 
    "user_id": "…", "name": "Olek", "email": "olek@example.com", "verified": true,
    "person": "a1b2c3d4e5", "upload": true, "visibility": "znajomi", "live": false,
    "profile_visibility": "znajomi", "terms": "2026-11-25", "remember": true,
-   "terms_current": "2026-11-25", "games_visibility": "znajomi"
+   "terms_current": "2026-11-25", "games_visibility": "znajomi",
+   "sync_cursor": "…", "resent_terms": "2026-12-01"
   }
  ]
 }
@@ -1841,6 +1845,9 @@ CREATE TABLE IF NOT EXISTS poziom_osoby (osoba TEXT PRIMARY KEY, poziom INTEGER 
 - Format 1 (starsza wersja z jednym kontem): plik to sam obiekt z polami jak wyżej → jedno
   konto. Nieznane pola pomijamy przy odczycie; złe `visibility` → `znajomi`, złe
   `profile_visibility` → `znajomi`.
+- `sync_cursor` (0.6.0) i `resent_terms` (0.6.1) zapisywane tylko niepuste; 0.5.x je pomija.
+  `resent_terms` - wersja regulaminu, po której akceptacji historia poszła jeszcze raz z grami;
+  brak = `2026-11-25` (pierwsza wersja, bez gier). Zmiana konta (inny `user_id`) czyści oba.
 - Konto z `remember = true`, a bez tokenu w sejfie (inny użytkownik Windows, wyczyszczony
   sejf) → traktowane jak wylogowane (`_forget`), osoba zostaje.
 

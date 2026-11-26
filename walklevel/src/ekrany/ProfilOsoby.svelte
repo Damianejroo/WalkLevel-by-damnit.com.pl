@@ -107,6 +107,7 @@
     <Karta>
       <ul class="fakty">
         {#if osoba.since}<li>{t('profil_online.od', { data: data(osoba.since) })}</li>{/if}
+        {#if poziom === null && !osoba.me}<li>{t('online.poziom_ukryty')}</li>{/if}
         {#if osoba.treadmillModel}<li class="dane">{t('profil_online.bieznia', { model: osoba.treadmillModel })}</li>{/if}
         {#if !osoba.me}<li>{znajomy ? t('profil_online.znajomy') : t('profil_online.nieznajomy')}</li>{/if}
       </ul>

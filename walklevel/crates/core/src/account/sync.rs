@@ -10,7 +10,9 @@
 //!   sesji, których serwer już nie zwrócił (niewysłane zostają i pójdą).
 //!
 //! Pobrane sesje należą do osoby powiązanej z kontem; konflikt rozstrzyga `zmieniono_utc_s`
-//! (serwer wygrywa tylko nowszą wersją). Pobranych nie odsyłamy.
+//! (serwer wygrywa tylko nowszą wersją). Pobranych nie odsyłamy. Gra z serwera: lokalny profil
+//! po `gra_id`, a gdy go nie ma - nowy profil z nazwą `gra` i tym samym id
+//! ([`SyncReport::new_games`]; profil zakłada aplikacja w osoby.json).
 //!
 //! Moduł nie ma własnych wątków ani zegarów systemowych: aplikacja co klatkę pyta
 //! [`AccountTimers`], czy już czas, i woła [`Account::sync`] / [`Account::upload`] z wątku
@@ -20,6 +22,7 @@ use std::collections::{HashMap, HashSet};
 
 use serde::Serialize;
 
+use super::upload::{game_name, valid_game_id};
 use super::{Account, KontoErrorKind, RemoteSession, Result, VISIBILITY, local_session_id};
 use crate::history::{History, Session};
 
@@ -57,6 +60,17 @@ pub struct SyncTarget<'a> {
     pub profiles: &'a HashMap<String, String>,
 }
 
+/// Gra z serwera bez lokalnego profilu - aplikacja zakłada profil osoby z tym id i nazwą.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewGame {
+    /// `gra_id` z serwera (id profilu z innego komputera)
+    pub id: String,
+    pub name: String,
+    /// `gra_publiczna` - przełącznik „Pokazuj tę grę na koncie online”
+    pub public: bool,
+}
+
 /// Wynik synchronizacji.
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -71,6 +85,8 @@ pub struct SyncReport {
     pub full: bool,
     /// serwer bez trasy synchronizacji (404) - nic nie pobrano
     pub unsupported: bool,
+    /// gry z pobranych sesji, których osoba nie ma lokalnie (bez powtórzeń, ostatnia nazwa)
+    pub new_games: Vec<NewGame>,
 }
 
 impl SyncReport {
@@ -81,8 +97,11 @@ impl SyncReport {
     }
 }
 
-/// Sesja z serwera w postaci lokalnej (osoba z konta, profil znany lokalnie albo pusty).
-/// `local` - ta sama sesja w historii (jej profil zostaje, gdy serwer nie zna gry).
+/// Sesja z serwera w postaci lokalnej (osoba z konta). Profil: lokalny po `gra_id`; nieznany
+/// `gra_id` z nazwą - ten sam id i nazwa z serwera (profil założy aplikacja,
+/// [`SyncReport::new_games`]); bez tego - profil tej samej sesji w historii (`local`), sama
+/// nazwa `gra`, a w ostateczności „gra z innego komputera”. Tryb z serwera; pusty (serwer
+/// sprzed regulaminu z grami) - tryb lokalnej sesji albo "gra".
 pub fn session_from_server(
     remote: &RemoteSession,
     id: &str,
@@ -90,24 +109,26 @@ pub fn session_from_server(
     target: &SyncTarget<'_>,
     local: Option<&Session>,
 ) -> Session {
-    let known = (!remote.game_id.is_empty())
-        .then(|| target.profiles.get(&remote.game_id))
-        .flatten();
-    let (profile, profile_name) = match (known, local) {
-        (Some(name), _) => (remote.game_id.clone(), name.clone()),
-        (None, Some(l)) if !l.profile.is_empty() => (l.profile.clone(), l.profile_name.clone()),
-        (None, _) if !remote.game.trim().is_empty() => (String::new(), remote.game.clone()),
-        (None, _) => (String::new(), OTHER_COMPUTER_GAME.to_string()),
+    let game_id = valid_game_id(&remote.game_id).then_some(remote.game_id.as_str());
+    let known = game_id.and_then(|g| target.profiles.get(g));
+    let name = game_name(&remote.game);
+    let (profile, profile_name) = match (game_id, known, local) {
+        (Some(g), Some(local_name), _) => (g.to_string(), local_name.clone()),
+        (Some(g), None, _) if !name.is_empty() => (g.to_string(), name),
+        (_, _, Some(l)) if !l.profile.is_empty() => (l.profile.clone(), l.profile_name.clone()),
+        (Some(g), None, _) => (g.to_string(), OTHER_COMPUTER_GAME.to_string()),
+        (None, _, _) if !name.is_empty() => (String::new(), name),
+        (None, _, _) => (String::new(), OTHER_COMPUTER_GAME.to_string()),
     };
     let visibility = if VISIBILITY.contains(&remote.visibility.as_str()) {
         remote.visibility.clone()
     } else {
         "prywatna".into()
     };
-    let mode = if remote.mode == "trening" {
-        "trening"
-    } else {
-        "gra"
+    let mode = match (remote.mode.as_str(), local) {
+        ("trening", _) => "trening",
+        ("", Some(l)) if l.mode == "trening" => "trening",
+        _ => "gra",
     };
     Session {
         id: id.to_string(),
@@ -216,6 +237,20 @@ impl Account {
                 let hidden = s.visibility == "prywatna" && self.state.visibility != "prywatna";
                 if history.upsert_from_server(&s, hidden)? {
                     report.saved += 1;
+                    let unknown = s.profile == remote.game_id
+                        && !target.profiles.contains_key(&s.profile)
+                        && !game_name(&remote.game).is_empty();
+                    if unknown {
+                        let game = NewGame {
+                            id: s.profile.clone(),
+                            name: s.profile_name.clone(),
+                            public: remote.game_public,
+                        };
+                        match report.new_games.iter_mut().find(|g| g.id == game.id) {
+                            Some(g) => *g = game,
+                            None => report.new_games.push(game),
+                        }
+                    }
                 }
             }
             for tomb in &page.deleted {

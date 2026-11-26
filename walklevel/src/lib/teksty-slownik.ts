@@ -1008,6 +1008,7 @@ export const SLOWNIK = {
   "szlak.przystanki": "Przystanki szlaku",
   "online.pokaz_haslo": "Pokaż hasło",
   "ranking.ty": "(Ty)",
+  "online.poziom_ukryty": "Poziom ukryty",
   "ranking.wiersz.kroki_slowo": "{kroki:krok/kroki/kroków}",
   "ranking.wiersz.km": "{km} km",
   "ranking.wiersz.lacznie": "łącznie",

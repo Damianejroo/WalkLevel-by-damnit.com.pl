@@ -126,22 +126,42 @@ fn session(v: &Value) -> Session {
 
 #[test]
 fn upload_payload_matches_python() {
+    // 0.6.1: nazwa gry idzie zawsze (po regulaminie z grami), przełącznik profilu to
+    // `gra_publiczna` - poza tymi dwoma polami sesja jak w 0.5.x
     let data = fixture();
     let all = cases(&data, "payloads");
     assert!(all.len() > 50);
     for case in all {
-        let got = session_payload(
-            &session(&case["session"]),
-            s(&case["visibility"]),
-            case["game"].as_bool().expect("game"),
-            case["details"].as_bool(),
-        );
-        let got = serde_json::to_value(&got).expect("json");
+        let game = case["game"].as_bool().expect("game");
+        let games = case["details"].as_bool().unwrap_or(game);
+        let session = session(&case["session"]);
+        let got = session_payload(&session, s(&case["visibility"]), games, game);
+        let mut got = serde_json::to_value(&got).expect("json");
+        let has_id = got.get("gra_id").is_some();
+        let fields = got.as_object_mut().expect("obiekt");
         assert_eq!(
-            got, case["payload"],
-            "{} {:?}",
-            case["name"], case["details"]
+            fields.remove("gra_publiczna"),
+            has_id.then_some(Value::Bool(game)),
+            "{}",
+            case["name"]
         );
+        let name = fields.remove("gra");
+        if has_id && !account::game_name(&session.profile_name).is_empty() {
+            assert!(name.is_some(), "{}: nazwa gry zawsze", case["name"]);
+        }
+        let mut want = case["payload"].clone();
+        if let Some(w) = want.as_object_mut() {
+            w.remove("gra");
+        }
+        assert_eq!(got, want, "{} {:?}", case["name"], case["details"]);
+        if game && games {
+            assert_eq!(
+                name,
+                case["payload"].get("gra").cloned(),
+                "{}",
+                case["name"]
+            );
+        }
     }
 }
 

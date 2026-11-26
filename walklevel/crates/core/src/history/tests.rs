@@ -389,6 +389,92 @@ fn unsent_sent_rejected_and_hidden() {
 }
 
 #[test]
+fn mark_for_resend_bumps_only_sessions_with_game_profile() {
+    let h = mem();
+    let mut a = row(
+        "a",
+        "p1",
+        "A",
+        "aaaaaaaaaa",
+        "Gra A",
+        10.0,
+        20.0,
+        10,
+        0.1,
+        10.0,
+    );
+    let mut b = row(
+        "b",
+        "p1",
+        "A",
+        "bbbbbbbbbb",
+        "Gra B",
+        30.0,
+        40.0,
+        10,
+        0.1,
+        10.0,
+    );
+    let mut other = row(
+        "c",
+        "p1",
+        "A",
+        "",
+        "gra z innego komputera",
+        50.0,
+        60.0,
+        10,
+        0.1,
+        10.0,
+    );
+    let mut sim = row(
+        "d",
+        "p1",
+        "A",
+        "aaaaaaaaaa",
+        "Gra A",
+        70.0,
+        80.0,
+        10,
+        0.1,
+        10.0,
+    );
+    sim.source = "symulator".into();
+    let mut stranger = row(
+        "e",
+        "p2",
+        "B",
+        "aaaaaaaaaa",
+        "Gra A",
+        90.0,
+        95.0,
+        10,
+        0.1,
+        10.0,
+    );
+    for s in [&mut a, &mut b, &mut other, &mut sim, &mut stranger] {
+        h.save(s).unwrap();
+    }
+    let all: Vec<Session> = ["a", "b", "c", "e"]
+        .iter()
+        .map(|id| h.session(id).unwrap().unwrap())
+        .collect();
+    h.mark_sent(&all).unwrap();
+    assert!(h.unsent("p1", 100.0).unwrap().is_empty());
+    let later = now_unix() + 100.0;
+    assert_eq!(
+        h.mark_for_resend("p1", Some("bbbbbbbbbb"), later).unwrap(),
+        1
+    );
+    let ids = |v: Vec<Session>| v.into_iter().map(|s| s.id).collect::<Vec<_>>();
+    assert_eq!(ids(h.unsent("p1", 100.0).unwrap()), ["b"]);
+    assert_eq!(h.session("b").unwrap().unwrap().updated, later);
+    assert_eq!(h.mark_for_resend("p1", None, later + 1.0).unwrap(), 2);
+    assert_eq!(ids(h.unsent("p1", 100.0).unwrap()), ["a", "b"]);
+    assert!(h.unsent("p2", 100.0).unwrap().is_empty());
+}
+
+#[test]
 fn earned_and_shown_level() {
     let h = mem();
     assert_eq!(h.shown_level("p1").unwrap(), None);

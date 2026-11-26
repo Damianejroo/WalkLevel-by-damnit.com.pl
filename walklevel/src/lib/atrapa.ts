@@ -499,7 +499,8 @@ export function utworzAtrape(): Silnik {
   const tydzien = (k: number): K.PeriodTotals => ({ steps: k, distanceKm: k / 1350, activeS: k * 0.55, sessions: Math.max(1, Math.round(k / 6000)) });
   const znajomi: K.Friend[] = [
     { id: 'u-ola', name: 'OlaBiega', level: 14, live: { kmh: 3.4, steps: 2140 }, week: tydzien(31240) },
-    { id: 'u-kuba', name: 'KubaWędrowiec', level: 9, live: null, week: tydzien(18420) },
+    // poziom ukryty: serwer nie podaje go bez zgody tej osoby
+    { id: 'u-kuba', name: 'KubaWędrowiec', level: null, live: null, week: tydzien(18420) },
     { id: 'u-marta', name: 'Marta_z_Gór', level: 23, live: null, week: tydzien(52310) },
     { id: 'u-tomek', name: dlugie ? 'Tomasz_o_dlugim_nicku24' : 'Tomek', level: 3, live: null, week: tydzien(4120) },
   ];
@@ -1204,6 +1205,12 @@ export function utworzAtrape(): Silnik {
         wyslij('online');
       }
       pozniej(400, () => {
+        // odświeżenie znajomych co 10 s: „idzie teraz” rośnie, lista podmieniana w miejscu
+        const ola = znajomi[0];
+        if (tab === 'friends' && ola.live) {
+          ola.live = { kmh: ola.live.kmh, steps: ola.live.steps + 12 };
+          online.friends = znajomi.map((f) => ({ ...f }));
+        }
         if (tab === 'ranking') online.ranking = ranking(online.ranking?.scope ?? 'tydzien');
         if (tab === 'people') komendy.online_people_search(online.peopleQuery);
         online.loading = [];
@@ -1228,7 +1235,7 @@ export function utworzAtrape(): Silnik {
       const ja = a.userId === account.userId;
       const person: K.OnlinePerson = {
         id: String(a.userId), name: ja ? account.name : f?.name ?? 'AniaNaBieżni', me: ja,
-        level: ja ? levels?.level ?? 1 : f?.level ?? 31, xp: 25300, achievementsCount: 17,
+        level: ja ? levels?.level ?? 1 : f ? f.level : 31, xp: f && f.level === null ? null : 25300, achievementsCount: 17,
         achievements: (levels?.progress ?? []).filter((x) => x.earnedAt !== null).slice(0, 17).map((x) => ({ id: x.id, earnedAt: x.earnedAt! })),
         since: teraz() - 200 * 86400, treadmillModel: model, friend: !!f,
         week: f?.week ?? tydzien(41230), total: { steps: 812400, distanceKm: 601.8, activeS: 1_300_000, sessions: 214 },

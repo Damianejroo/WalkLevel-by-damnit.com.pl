@@ -1,10 +1,13 @@
 //! Wysyłka sesji na konto - port `session_payload` i `Account.upload` z bieznia/konto.
 //!
 //! Idą tylko sesje osoby powiązanej z kontem, z bieżni (bez symulatora), nowe albo zmienione
-//! od wysyłki. Bez nazw osób i profili gier - nazwa gry tylko po akceptacji regulaminu
-//! z grami i tylko dla profili z włączonym „Pokazuj tę grę na koncie online”. Paczki po 100;
-//! odrzucone nie wracają w kółko, ale po dobie próbujemy jeszcze raz. Sesja usunięta na innym
-//! komputerze (odrzucenie z [`DELETED_ELSEWHERE`]) znika też tutaj.
+//! od wysyłki. Bez nazw osób. Tryb, identyfikator i nazwa gry dopiero po akceptacji
+//! obowiązującej wersji regulaminu (z grami); nazwę gry serwer pokazuje tylko właścicielowi,
+//! innym - gdy `gra_publiczna` (przełącznik „Pokazuj tę grę na koncie online”). Po akceptacji
+//! nowej wersji cała historia osoby idzie raz jeszcze z nowszym `zmieniono_utc_s`
+//! ([`Account::upload`], docs/synchro.md). Paczki po 100; odrzucone nie wracają w kółko, ale po
+//! dobie próbujemy jeszcze raz. Sesja usunięta na innym komputerze (odrzucenie
+//! z [`DELETED_ELSEWHERE`]) znika też tutaj.
 
 use std::sync::LazyLock;
 
@@ -18,6 +21,17 @@ use crate::history::{History, Session};
 pub const DELETED_ELSEWHERE: &str = "Sesja została usunięta na innym komputerze.";
 
 static GAME_ID: LazyLock<Option<Regex>> = LazyLock::new(|| Regex::new(r"^[0-9a-f]{10}$").ok());
+
+/// Stały identyfikator gry w postaci id profilu (10 znaków hex, `store::new_id`).
+pub fn valid_game_id(id: &str) -> bool {
+    GAME_ID.as_ref().is_some_and(|re| re.is_match(id))
+}
+
+/// Nazwa gry do wysłania i z serwera: pojedyncze spacje, najwyżej [`GAME_NAME_MAX`] znaków.
+pub fn game_name(name: &str) -> String {
+    let name = name.split_whitespace().collect::<Vec<_>>().join(" ");
+    name.chars().take(GAME_NAME_MAX).collect()
+}
 
 /// Sesja w postaci, w jakiej idzie na serwer (kolejność pól jak w 0.5.x).
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -43,21 +57,17 @@ pub struct UploadSession {
     pub gra_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub gra: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub gra_publiczna: Option<bool>,
 }
 
 /// Sesja do wysłania.
 ///
-/// `details` = Some(true) (zaakceptowana wersja regulaminu z grami i poziomami): tryb
-/// (gra/trening) i stały identyfikator gry - zawsze, bo liczą się z nich osiągnięcia za gry.
-/// `game` = true: do tego czytelna nazwa gry (przełącznik „Pokazuj tę grę na koncie online”).
-/// `details` = None - jak `game`.
-pub fn session_payload(
-    s: &Session,
-    visibility: &str,
-    game: bool,
-    details: Option<bool>,
-) -> UploadSession {
-    let details = details.unwrap_or(game);
+/// `games` (zaakceptowana obowiązująca wersja regulaminu z grami): tryb (gra/trening), a gdy
+/// sesja ma profil gry - stały identyfikator i nazwa gry (zawsze; serwer pokazuje ją tylko
+/// właścicielowi) oraz `gra_publiczna` = `public` (przełącznik „Pokazuj tę grę na koncie
+/// online”: nazwę widzą też inni). Bez `games` - nic o grach.
+pub fn session_payload(s: &Session, visibility: &str, games: bool, public: bool) -> UploadSession {
     let mut out = UploadSession {
         start_utc_s: s.start,
         koniec_utc_s: s.end,
@@ -77,24 +87,22 @@ pub fn session_payload(
         tryb: None,
         gra_id: None,
         gra: None,
+        gra_publiczna: None,
     };
-    if details {
+    if games {
         let mode = if s.mode == "trening" {
             "trening"
         } else {
             "gra"
         };
         out.tryb = Some(mode.to_string());
-        if GAME_ID.as_ref().is_some_and(|re| re.is_match(&s.profile)) {
+        if valid_game_id(&s.profile) {
             out.gra_id = Some(s.profile.clone());
-            let name = s
-                .profile_name
-                .split_whitespace()
-                .collect::<Vec<_>>()
-                .join(" ");
-            if game && !name.is_empty() {
-                out.gra = Some(name.chars().take(GAME_NAME_MAX).collect());
+            let name = game_name(&s.profile_name);
+            if !name.is_empty() {
+                out.gra = Some(name);
             }
+            out.gra_publiczna = Some(public);
         }
     }
     out
@@ -107,7 +115,12 @@ fn same_reason(reason: &str, expected: &str) -> bool {
 impl Account {
     /// Nowe i zmienione sesje powiązanej osoby. Przerwana wysyłka - dokończy następna (bez
     /// internetu: błąd, nic nie jest oznaczone). `shared_games(profil_id)`: czy nazwę tej gry
-    /// wolno pokazać (przełącznik przy profilu). Zwraca liczbę przyjętych sesji.
+    /// pokazywać innym (przełącznik przy profilu); `None` - bez pól gier. Zwraca liczbę
+    /// przyjętych sesji.
+    ///
+    /// Pierwsza wysyłka po akceptacji nowej wersji regulaminu (tu albo na innym komputerze)
+    /// oznacza historię osoby do ponownej wysyłki z `zmieniono_utc_s` = `now`
+    /// ([`History::mark_for_resend`]) - serwer nadpisze sesje i doda pola gier.
     pub fn upload(
         &mut self,
         history: &History,
@@ -118,12 +131,19 @@ impl Account {
         if !(state.logged_in() && state.upload && !state.person.is_empty()) {
             return Ok(0);
         }
+        let games = state.games_allowed() && shared_games.is_some();
+        if games && state.resent_for_terms() != state.terms {
+            let n = history.mark_for_resend(&state.person, None, now)?;
+            log::info!("Konto: nowy regulamin - {n} sesji pójdzie jeszcze raz (z grami)");
+            self.state.resent_terms.clone_from(&self.state.terms);
+            self.save()?;
+        }
+        let state = &self.state;
         let pending = history.unsent(&state.person, now)?;
         if pending.is_empty() {
             return Ok(0);
         }
         let hidden = history.hidden_online()?;
-        let games = state.games_allowed() && shared_games.is_some();
         let payload: Vec<UploadSession> = pending
             .iter()
             .map(|s| {
@@ -132,8 +152,8 @@ impl Account {
                 } else {
                     state.visibility.as_str()
                 };
-                let game = games && shared_games.is_some_and(|f| f(&s.profile));
-                session_payload(s, visibility, game, Some(games))
+                let public = shared_games.is_some_and(|f| f(&s.profile));
+                session_payload(s, visibility, games, public)
             })
             .collect();
         let result = self.client.upload_sessions(&payload);

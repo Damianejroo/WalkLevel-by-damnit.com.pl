@@ -346,6 +346,9 @@ pub fn sync_person(core: &Core, person: String) {
             profiles: &profiles,
         };
         let report = ctx.accounts.get(&p).sync(history, &target, now_unix())?;
+        if !report.new_games.is_empty() {
+            lock(&c.0.app).synced_profiles(&p, &report.new_games);
+        }
         if report.changed() {
             log::info!(
                 "Konto: pobrano zmiany z serwera (zapisane {}, usunięte {})",
@@ -628,10 +631,7 @@ pub fn upload_now(core: &Core) -> CmdResult<u32> {
 }
 
 pub fn accept_terms(core: &Core) -> CmdResult<()> {
-    simple(core, "terms", None, |acc, h| match h {
-        Some(h) => acc.accept_terms(h),
-        None => Err(history_missing()),
-    })?;
+    simple(core, "terms", None, |acc, _| acc.accept_terms())?;
     lock(&core.0.app).toast(crate::teksty::t("konto.regulamin.dziekujemy", &[]));
     core.flush();
     let _ = upload_now(core);

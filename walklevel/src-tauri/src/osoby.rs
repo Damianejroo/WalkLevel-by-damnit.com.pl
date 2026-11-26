@@ -4,6 +4,8 @@
 use std::path::Path;
 
 use serde_json::json;
+use walklevel_core::account::NewGame;
+use walklevel_core::history::now_unix;
 use walklevel_core::store::{self, NewProfile, ProfileChanges, Store, names, palette};
 use walklevel_core::{icons, store::names::NameRng};
 
@@ -318,7 +320,8 @@ impl App {
             && p.online != online_before
             && let Some(h) = self.history.as_ref()
         {
-            let _ = h.forget_sent(); // sesje pójdą jeszcze raz (z nazwą gry albo bez)
+            // sesje tej gry pójdą jeszcze raz (nowsze) - z nowym `gra_publiczna`
+            let _ = h.mark_for_resend(&store.person().id, Some(profile_id), now_unix());
         }
         if store.profile().id == profile_id {
             self.settings
@@ -333,6 +336,27 @@ impl App {
             SliceName::History,
         ]);
         Ok(())
+    }
+
+    /// Gry z innego komputera (synchronizacja konta): profile osoby `person` z id i nazwą
+    /// z serwera, domyślne ustawienia (docs/synchro.md).
+    pub fn synced_profiles(&mut self, person: &str, games: &[NewGame]) {
+        let Some(store) = self.store.as_mut() else {
+            return;
+        };
+        let mut added = 0;
+        for g in games {
+            match store.add_synced_profile(person, &g.id, &g.name, g.public) {
+                Ok(true) => added += 1,
+                Ok(false) => {}
+                Err(e) => log::warn!("Profil gry z konta ({}): {e}", g.id),
+            }
+        }
+        if added > 0 {
+            log::info!("Konto: {added} profili gier z innego komputera");
+            self.people_rev += 1;
+            self.mark(&[SliceName::People]);
+        }
     }
 
     pub fn profile_duplicate(&mut self, profile_id: &str) -> CmdResult<String> {

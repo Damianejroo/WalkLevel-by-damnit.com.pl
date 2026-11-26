@@ -704,3 +704,44 @@ fn empty_icon_name_is_kept_on_copy() {
     let dup = store.duplicate_profile(&id).unwrap().unwrap();
     assert_eq!(dup.icon_file.as_deref(), Some(""));
 }
+
+#[test]
+fn synced_profile_goes_to_given_person_with_server_id_and_defaults() {
+    let (_dir, mut store) = store();
+    let first_id = store.person().id.clone();
+    let active = store.profile().id.clone();
+    let second = store
+        .add_person("Nocna Wędrowniczka", "Orchidea", Some(&first_id))
+        .unwrap()
+        .id
+        .clone();
+    assert!(
+        store
+            .add_synced_profile(&first_id, "cccccccccc", " Wiedźmin 3 ", false)
+            .unwrap()
+    );
+    // ten sam id drugi raz albo nieznana osoba - nic
+    assert!(
+        !store
+            .add_synced_profile(&first_id, "cccccccccc", "Inna", true)
+            .unwrap()
+    );
+    assert!(
+        !store
+            .add_synced_profile("brak", "dddddddddd", "Gra", true)
+            .unwrap()
+    );
+    assert_eq!(store.person().id, second); // aktywna osoba bez zmian
+    let reloaded = Store::load(store.path()).unwrap();
+    let first = reloaded.people().iter().find(|p| p.id == first_id).unwrap();
+    let p = first
+        .profiles()
+        .iter()
+        .find(|p| p.id == "cccccccccc")
+        .unwrap();
+    assert_eq!(p.name, "Wiedźmin 3");
+    assert!(!p.online && p.settings.is_empty());
+    assert_eq!(p.glyph.as_deref(), Some(DEFAULT_GLYPH));
+    assert_eq!(p.color, palette::DEFAULT);
+    assert_eq!(first.active_profile_id(), active);
+}

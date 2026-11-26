@@ -297,6 +297,8 @@ pub struct RemoteSession {
     pub mode: String,
     pub game_id: String,
     pub game: String,
+    /// nazwa gry widoczna dla innych (przełącznik „Pokazuj tę grę na koncie online”)
+    pub game_public: bool,
 }
 
 impl RemoteSession {
@@ -320,6 +322,7 @@ impl RemoteSession {
             mode: text(v, "tryb"),
             game_id: text(v, "gra_id"),
             game: text(v, "gra"),
+            game_public: v.get("gra_publiczna").is_some_and(truthy),
         }
     }
 }
@@ -738,7 +741,9 @@ impl Client {
             "kmh": (kmh * 10.0).round() / 10.0,
             "kroki": steps,
             "ruch_s": active_s.trunc() as i64,
-            "sesja_uuid": session_uuid,
+            // jak przy wysyłce sesji: postać z kreskami (lokalnie id to 32 znaki hex) - serwer
+            // odrzucał stan na żywo z 0.6.0 („Nieprawidłowy identyfikator sesji”)
+            "sesja_uuid": super::canonical_uuid(session_uuid),
         });
         self.call("PUT", "/api/bieznia/stan", Some(&body), &[], true)?;
         Ok(())

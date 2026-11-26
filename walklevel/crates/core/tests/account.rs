@@ -1115,7 +1115,7 @@ fn walking_offline_uploads_everything_when_internet_returns() {
 }
 
 #[test]
-fn game_names_go_only_after_accepting_current_terms_and_per_profile() {
+fn game_fields_go_only_after_accepting_current_terms_name_always() {
     let dir = tempfile::tempdir().expect("katalog");
     let server = FakeServer::new();
     let h = open_history(dir.path());
@@ -1126,27 +1126,103 @@ fn game_names_go_only_after_accepting_current_terms_and_per_profile() {
     let mut s2 = session("b", "p1");
     s2.profile = "bbbbbbbbbb".into();
     s2.profile_name = "Tajna gra".into();
+    s2.mode = "trening".into();
     save(&h, s2);
     let (mut account, _) = standalone(&server, dir.path());
     signed_in(&mut account, "p1");
     let shared = |pid: &str| pid == "aaaaaaaaaa";
     account.upload(&h, Some(&shared), now()).expect("wysyłka");
     let a = server.session(&uuid_of("a")).expect("a");
-    assert!(a.get("gra").is_none() && a.get("gra_id").is_none() && a.get("tryb").is_none());
+    for key in ["gra", "gra_id", "tryb", "gra_publiczna"] {
+        assert!(a.get(key).is_none(), "{key} przed akceptacją regulaminu");
+    }
     server.state().terms_current = "2026-11-27".into();
     account.refresh().expect("odświeżenie");
     assert!(account.state.terms_outdated() && !account.state.games_allowed());
-    account.accept_terms(&h).expect("akceptacja");
-    assert!(account.state.games_allowed());
+    // bez akceptacji nowej wersji dalej nic o grach
+    let mut s3 = session("c", "p1");
+    s3.profile = "aaaaaaaaaa".into();
+    save(&h, s3);
     account.upload(&h, Some(&shared), now()).expect("wysyłka");
+    assert!(
+        server
+            .session(&uuid_of("c"))
+            .expect("c")
+            .get("gra")
+            .is_none()
+    );
+    account.accept_terms().expect("akceptacja");
+    assert!(account.state.games_allowed());
+    account
+        .upload(&h, Some(&shared), now() + 10.0)
+        .expect("wysyłka");
     let a = server.session(&uuid_of("a")).expect("a");
     assert_eq!(
         (a["gra"].clone(), a["gra_id"].clone(), a["tryb"].clone()),
         (json!("Cyberpunk 2077"), json!("aaaaaaaaaa"), json!("gra"))
     );
+    assert_eq!(a["gra_publiczna"], true);
     let b = server.session(&uuid_of("b")).expect("b");
-    assert!(b.get("gra").is_none()); // nazwa gry ukryta w profilu
-    assert_eq!(b["gra_id"], "bbbbbbbbbb"); // do osiągnięć za gry
+    // nazwa gry zawsze (widzi ją tylko właściciel), przełącznik profilu = gra_publiczna
+    assert_eq!(
+        (b["gra"].clone(), b["gra_id"].clone(), b["tryb"].clone()),
+        (json!("Tajna gra"), json!("bbbbbbbbbb"), json!("trening"))
+    );
+    assert_eq!(b["gra_publiczna"], false);
+}
+
+#[test]
+fn accepting_new_terms_resends_whole_history_once_newer_in_batches() {
+    let dir = tempfile::tempdir().expect("katalog");
+    let server = FakeServer::new();
+    let h = open_history(dir.path());
+    for i in 0..150 {
+        let mut s = session(&format!("{:032x}", i + 1), "p1");
+        s.profile = "aaaaaaaaaa".into();
+        save(&h, s);
+    }
+    // sesja z innego komputera bez znanej gry - nie idzie jeszcze raz (nic tu o niej nowego)
+    let mut other = session("obcy", "p1");
+    other.profile = String::new();
+    other.profile_name = "gra z innego komputera".into();
+    other.updated = 50.0;
+    h.upsert_from_server(&other, false).expect("pobrana");
+    let (mut account, _) = standalone(&server, dir.path());
+    signed_in(&mut account, "p1");
+    let shared = |_: &str| true;
+    assert_eq!(account.upload(&h, Some(&shared), now()).ok(), Some(150));
+    let before = server
+        .session(&uuid_of(&format!("{:032x}", 1)))
+        .expect("sesja")["zmieniono_utc_s"]
+        .as_f64()
+        .expect("czas");
+    // pierwsza wersja regulaminu (bez gier) - nic jeszcze raz
+    assert_eq!(account.state.resent_for_terms(), account::TERMS_VERSION);
+    assert_eq!(account.upload(&h, Some(&shared), now()).ok(), Some(0));
+    server.state().terms_current = "2026-11-27".into();
+    account.refresh().expect("odświeżenie");
+    account.accept_terms().expect("akceptacja");
+    server.state().requests.clear();
+    let at = now() + 10.0;
+    assert_eq!(account.upload(&h, Some(&shared), at).ok(), Some(150));
+    let posts = server
+        .state()
+        .requests
+        .iter()
+        .filter(|r| r.method == "POST" && r.path == "/api/bieznia/sesje")
+        .count();
+    assert_eq!(posts, 2); // paczki po 100
+    let s = server
+        .session(&uuid_of(&format!("{:032x}", 1)))
+        .expect("sesja");
+    assert_eq!(s["zmieniono_utc_s"].as_f64(), Some(at));
+    assert!(at > before && s["gra_id"] == "aaaaaaaaaa");
+    assert!(server.session(&uuid_of("obcy")).is_none());
+    assert_eq!(account.state.resent_terms, "2026-11-27");
+    // raz na wersję regulaminu, także po ponownym otwarciu konta
+    assert_eq!(account.upload(&h, Some(&shared), at + 10.0).ok(), Some(0));
+    let saved = account::load_state(&dir.path().join("konto.json"));
+    assert_eq!(saved.resent_terms, "2026-11-27");
 }
 
 // --- wiele osób ----------------------------------------------------------------------------
@@ -1501,16 +1577,13 @@ fn local_newer_version_wins_over_older_from_server() {
 }
 
 #[test]
-fn known_game_keeps_local_profile_and_shared_name_arrives() {
+fn known_game_keeps_local_profile_and_unknown_named_game_becomes_profile() {
     let (server, mut a, mut b) = two_computers();
     server.state().terms_current = "2026-11-27".into();
     for c in [&mut a, &mut b] {
         c.account().refresh().expect("odświeżenie");
         let person = c.person.clone();
-        c.accounts
-            .get(&person)
-            .accept_terms(&c.history)
-            .expect("regulamin");
+        c.accounts.get(&person).accept_terms().expect("regulamin");
     }
     let mut s = session("g1", "pa");
     s.profile = "aaaaaaaaaa".into();
@@ -1522,8 +1595,14 @@ fn known_game_keeps_local_profile_and_shared_name_arrives() {
     save(&a.history, s);
     let mut s = session("g3", "pa");
     s.mode = "trening".into();
+    s.profile = "cccccccccc".into();
+    s.profile_name = "Wiedźmin 3".into();
     save(&a.history, s);
-    let shared = |_: &str| true;
+    let mut s = session("g4", "pa");
+    s.profile = "dddddddddd".into();
+    s.profile_name = "Prywatna gra".into();
+    save(&a.history, s);
+    let shared = |pid: &str| pid != "dddddddddd";
     let person = a.person.clone();
     a.accounts
         .get(&person)
@@ -1531,22 +1610,126 @@ fn known_game_keeps_local_profile_and_shared_name_arrives() {
         .expect("wysyłka");
     b.profiles
         .insert("aaaaaaaaaa".into(), "Cyberpunk (laptop)".into());
-    assert_eq!(b.sync().saved, 3);
+    let report = b.sync();
+    assert_eq!(report.saved, 4);
     let g = |sid: &str| {
-        b.history
+        let s = b
+            .history
             .session(&hexid(sid))
             .expect("baza")
-            .expect("sesja")
+            .expect("sesja");
+        (s.profile, s.profile_name, s.mode)
     };
+    let game =
+        |id: &str, name: &str, mode: &str| (id.to_string(), name.to_string(), mode.to_string());
+    assert_eq!(g("g1"), game("aaaaaaaaaa", "Cyberpunk (laptop)", "gra"));
+    assert_eq!(g("g2"), game("cccccccccc", "Wiedźmin 3", "gra"));
+    assert_eq!(g("g3"), game("cccccccccc", "Wiedźmin 3", "trening"));
+    assert_eq!(g("g4"), game("dddddddddd", "Prywatna gra", "gra"));
+    // nowe profile do założenia: bez powtórzeń, bez znanej gry, z przełącznikiem z serwera
     assert_eq!(
-        (g("g1").profile, g("g1").profile_name),
-        ("aaaaaaaaaa".into(), "Cyberpunk (laptop)".into())
+        report.new_games,
+        vec![
+            account::NewGame {
+                id: "cccccccccc".into(),
+                name: "Wiedźmin 3".into(),
+                public: true,
+            },
+            account::NewGame {
+                id: "dddddddddd".into(),
+                name: "Prywatna gra".into(),
+                public: false,
+            },
+        ]
+    );
+}
+
+#[test]
+fn terms_accepted_on_other_computer_also_resend_history_here() {
+    let (server, mut a, mut b) = two_computers();
+    let mut s = session("w1", "pb");
+    s.profile = "eeeeeeeeee".into();
+    s.profile_name = "Gra z pracy".into();
+    save(&b.history, s);
+    assert_eq!(b.upload(), 1);
+    server.state().terms_current = "2026-11-27".into();
+    a.account().refresh().expect("odświeżenie");
+    a.account().accept_terms().expect("regulamin");
+    b.account().refresh().expect("odświeżenie"); // akceptacja przyszła z serwera
+    assert!(b.account().state.games_allowed());
+    let shared = |_: &str| true;
+    let person = b.person.clone();
+    let sent = b
+        .accounts
+        .get(&person)
+        .upload(&b.history, Some(&shared), now() + 10.0)
+        .expect("wysyłka");
+    assert_eq!(sent, 1);
+    let w = server.session(&uuid_of("w1")).expect("w1");
+    assert_eq!(
+        (w["gra"].clone(), w["gra_id"].clone()),
+        (json!("Gra z pracy"), json!("eeeeeeeeee"))
+    );
+}
+
+#[test]
+fn session_from_server_game_and_mode_rules() {
+    let profiles = HashMap::from([("aaaaaaaaaa".to_string(), "Cyberpunk".to_string())]);
+    let target = SyncTarget {
+        person_name: "Ola",
+        profiles: &profiles,
+    };
+    let remote = |game_id: &str, game: &str, mode: &str| account::RemoteSession {
+        uuid: uuid_of("r"),
+        game_id: game_id.into(),
+        game: game.into(),
+        mode: mode.into(),
+        visibility: "znajomi".into(),
+        ..account::RemoteSession::default()
+    };
+    let mut local = session("r", "p1");
+    local.profile = "bbbbbbbbbb".into();
+    local.profile_name = "Lokalna".into();
+    local.mode = "trening".into();
+    let from = |r: &account::RemoteSession, l: Option<&Session>| {
+        let s = account::sync::session_from_server(r, &hexid("r"), "p1", &target, l);
+        (s.profile, s.profile_name, s.mode)
+    };
+    let x = |id: &str, name: &str, mode: &str| (id.to_string(), name.to_string(), mode.to_string());
+    // po gra_id - lokalna nazwa profilu
+    assert_eq!(
+        from(&remote("aaaaaaaaaa", "Inna", "gra"), None),
+        x("aaaaaaaaaa", "Cyberpunk", "gra")
+    );
+    // nieznany gra_id z nazwą - ten sam id, nazwa z serwera (pojedyncze spacje)
+    assert_eq!(
+        from(
+            &remote("cccccccccc", " Nowa   gra ", "trening"),
+            Some(&local)
+        ),
+        x("cccccccccc", "Nowa gra", "trening")
+    );
+    // bez gier z serwera (sprzed regulaminu): profil i tryb lokalnej sesji
+    assert_eq!(
+        from(&remote("", "", ""), Some(&local)),
+        x("bbbbbbbbbb", "Lokalna", "trening")
+    );
+    // gra_id bez nazwy i bez lokalnej sesji - ten id, „gra z innego komputera”
+    assert_eq!(
+        from(&remote("cccccccccc", "", "gra"), None),
+        x("cccccccccc", account::sync::OTHER_COMPUTER_GAME, "gra")
+    );
+    // zły format gra_id - jak brak
+    assert_eq!(
+        from(&remote("../zle", "Gra", ""), None),
+        x("", "Gra", "gra")
     );
     assert_eq!(
-        (g("g2").profile, g("g2").profile_name),
-        (String::new(), "Wiedźmin 3".into())
+        from(&remote("", "", ""), None),
+        x("", account::sync::OTHER_COMPUTER_GAME, "gra")
     );
-    assert_eq!(g("g3").mode, "trening");
+    // tryb z serwera wygrywa z lokalnym
+    assert_eq!(from(&remote("", "", "gra"), Some(&local)).2, "gra");
 }
 
 #[test]

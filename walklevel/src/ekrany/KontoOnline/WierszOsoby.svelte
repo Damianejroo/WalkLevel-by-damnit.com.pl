@@ -2,8 +2,11 @@
   // Wiersz osoby z kontem (docs/wyglad.md 8.11): [miejsce] | odznaka poziomu 34 | pseudonim jako
   // link (podkreślenie przy najechaniu, bez tła) + ranga wersalikami + dodatkowe linie | koniec
   // (statystyki albo przycisk). Cały wiersz nie jest przyciskiem - klik tylko w pseudonim.
+  // Bez poziomu (serwer nie podaje go bez zgody tej osoby) - neutralny awatar osoby
+  // z podpowiedzią „Poziom ukryty” zamiast pustej odznaki.
   import type { Snippet } from 'svelte';
   import OdznakaRzadkosci, { rzadkoscPoziomu } from '../../lib/ui/OdznakaRzadkosci.svelte';
+  import Ikona from '../../lib/ui/Ikona.svelte';
   import { stan } from '../../lib/stan.svelte';
   import { t } from '../../lib/teksty';
   import { rangaPoziomu } from './pomocnicze';
@@ -35,7 +38,9 @@
     <span class="miejsce liczba">{t('ranking.miejsce', { liczba: miejsce })}</span>
   {/if}
   {#if poziom === null}
-    <OdznakaRzadkosci rzadkosc="pospolite" rozmiar={34} zablokowana />
+    <span class="awatar" title={t('online.poziom_ukryty')}>
+      <Ikona nazwa="konto" rozmiar={16} etykieta={t('online.poziom_ukryty')} />
+    </span>
   {:else}
     <OdznakaRzadkosci
       {rzadkosc}
@@ -80,6 +85,16 @@
   .ja { background: var(--surface-2); border-radius: 8px; }
 
   .miejsce { font-size: var(--fs-base); text-align: end; }
+  .awatar {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-2);
+  }
+  .ja .awatar { background: var(--surface-3); }
   .osoba { display: flex; flex-direction: column; min-width: 0; }
   .nazwa { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
   .link,
