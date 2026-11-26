@@ -1,0 +1,1592 @@
+{
+ "parse": [
+  {
+   "input": {
+    "format": 1,
+    "id": "kingsmith-x21",
+    "name": "KingSmith WalkingPad X21",
+    "driver": "kingsmith",
+    "match": [
+     "KS-HDSY-X21"
+    ],
+    "capabilities": {
+     "speed_min": 0.5,
+     "speed_max": 12.0,
+     "start_speed": 1.0,
+     "telemetry_s": 2.0
+    }
+   },
+   "profile": {
+    "id": "kingsmith-x21",
+    "name": "KingSmith WalkingPad X21",
+    "driver": "kingsmith",
+    "match": [
+     "KS-HDSY-X21"
+    ],
+    "capabilities": [
+     [
+      "speed_max",
+      12.0
+     ],
+     [
+      "speed_min",
+      0.5
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "telemetry_s",
+      2.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "kingsmith-x23",
+    "name": "KingSmith WalkingPad X23",
+    "driver": "kingsmith",
+    "match": [
+     "KS-NACH-MXG"
+    ],
+    "options": {
+     "table": "v7"
+    }
+   },
+   "profile": {
+    "id": "kingsmith-x23",
+    "name": "KingSmith WalkingPad X23",
+    "driver": "kingsmith",
+    "match": [
+     "KS-NACH-MXG"
+    ],
+    "capabilities": [],
+    "options": [
+     [
+      "table",
+      "v7"
+     ]
+    ],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "kingsmith",
+    "name": "KingSmith WalkingPad",
+    "driver": "kingsmith",
+    "match": [
+     "KS-",
+     "WALKINGPAD"
+    ]
+   },
+   "profile": {
+    "id": "kingsmith",
+    "name": "KingSmith WalkingPad",
+    "driver": "kingsmith",
+    "match": [
+     "KS-",
+     "WALKINGPAD"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "urevo-spacewalk-5l",
+    "name": "Urevo SpaceWalk 5L",
+    "driver": "ftms",
+    "match": [
+     "URTM054"
+    ],
+    "capabilities": {
+     "speed_min": 1.0,
+     "speed_max": 6.0,
+     "speed_step": 0.1,
+     "start_speed": 1.0,
+     "start_delay_s": 4.0,
+     "pause": true,
+     "steps": true,
+     "telemetry_s": 1.0,
+     "min_command_gap_s": 0.8
+    }
+   },
+   "profile": {
+    "id": "urevo-spacewalk-5l",
+    "name": "Urevo SpaceWalk 5L",
+    "driver": "ftms",
+    "match": [
+     "URTM054"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "speed_max",
+      6.0
+     ],
+     [
+      "speed_min",
+      1.0
+     ],
+     [
+      "speed_step",
+      0.1
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "steps",
+      true
+     ],
+     [
+      "telemetry_s",
+      1.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "urevo",
+    "name": "Urevo",
+    "driver": "ftms",
+    "match": [
+     "URTM",
+     "UREVO",
+     "SPACEWALK"
+    ],
+    "capabilities": {
+     "start_delay_s": 4.0,
+     "pause": true,
+     "min_command_gap_s": 0.8
+    }
+   },
+   "profile": {
+    "id": "urevo",
+    "name": "Urevo",
+    "driver": "ftms",
+    "match": [
+     "URTM",
+     "UREVO",
+     "SPACEWALK"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 2,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a b",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "python"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "exec": 1
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "speed_max": 99
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "options": {
+     "x": [
+      1
+     ]
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "speed_min": 5,
+     "speed_max": 2
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "speed_min": 5
+    }
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [
+     [
+      "speed_min",
+      5.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "speed_max": 0.5
+    }
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [
+     [
+      "speed_max",
+      0.5
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "pause": 1
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "speed_min": true
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "incline": 1
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "control": false
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "steps": false,
+     "start_delay_s": 15,
+     "telemetry_s": 0.1
+    }
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [
+     [
+      "start_delay_s",
+      15.0
+     ],
+     [
+      "steps",
+      false
+     ],
+     [
+      "telemetry_s",
+      0.1
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": null,
+    "options": null
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {},
+    "options": []
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "options": {
+     "table": "v7",
+     "n": 1,
+     "f": 1.5,
+     "b": true
+    }
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [
+     [
+      "b",
+      true
+     ],
+     [
+      "f",
+      1.5
+     ],
+     [
+      "n",
+      1
+     ],
+     [
+      "table",
+      "v7"
+     ]
+    ],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "options": {
+     "x": null
+    }
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "options": [
+     1
+    ]
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [
+     "X",
+     ""
+    ]
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": "X"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": null
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [
+     "B",
+     "a"
+    ]
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [
+     "B",
+     "a"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "  Spacje  ",
+    "driver": "ftms"
+   },
+   "profile": {
+    "id": "a",
+    "name": "Spacje",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "   ",
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": 5,
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "---",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "ąę-1",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": {
+    "id": "ąę-1",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": 5,
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1.0,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": true,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": "1",
+    "id": "a",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "kingsmith"
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "kingsmith",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "symulator"
+   },
+   "profile": null
+  },
+  {
+   "input": {
+    "id": "a"
+   },
+   "profile": null
+  },
+  {
+   "input": [],
+   "profile": null
+  },
+  {
+   "input": "tekst",
+   "profile": null
+  },
+  {
+   "input": null,
+   "profile": null
+  }
+ ],
+ "lookup": [
+  {
+   "name": "URTM054",
+   "any": {
+    "id": "urevo-spacewalk-5l",
+    "name": "Urevo SpaceWalk 5L",
+    "driver": "ftms",
+    "match": [
+     "URTM054"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "speed_max",
+      6.0
+     ],
+     [
+      "speed_min",
+      1.0
+     ],
+     [
+      "speed_step",
+      0.1
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "steps",
+      true
+     ],
+     [
+      "telemetry_s",
+      1.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": null,
+   "ftms": "urevo-spacewalk-5l",
+   "known_capabilities": {
+    "speed_min": 1.0,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 4.0,
+    "acks_commands": true,
+    "pause": true,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.8,
+    "control": true
+   },
+   "model_name": "Urevo SpaceWalk 5L",
+   "looks_like": true
+  },
+  {
+   "name": "urtm054-x",
+   "any": {
+    "id": "urevo-spacewalk-5l",
+    "name": "Urevo SpaceWalk 5L",
+    "driver": "ftms",
+    "match": [
+     "URTM054"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "speed_max",
+      6.0
+     ],
+     [
+      "speed_min",
+      1.0
+     ],
+     [
+      "speed_step",
+      0.1
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "steps",
+      true
+     ],
+     [
+      "telemetry_s",
+      1.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": null,
+   "ftms": "urevo-spacewalk-5l",
+   "known_capabilities": {
+    "speed_min": 1.0,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 4.0,
+    "acks_commands": true,
+    "pause": true,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.8,
+    "control": true
+   },
+   "model_name": "Urevo SpaceWalk 5L",
+   "looks_like": true
+  },
+  {
+   "name": "URTM061",
+   "any": {
+    "id": "urevo",
+    "name": "Urevo",
+    "driver": "ftms",
+    "match": [
+     "URTM",
+     "UREVO",
+     "SPACEWALK"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": null,
+   "ftms": "urevo",
+   "known_capabilities": {
+    "speed_min": 1.0,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 4.0,
+    "acks_commands": true,
+    "pause": true,
+    "steps": false,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.8,
+    "control": true
+   },
+   "model_name": "Urevo URTM061",
+   "looks_like": true
+  },
+  {
+   "name": "KS-HDSY-X21C",
+   "any": {
+    "id": "kingsmith-x21",
+    "name": "KingSmith WalkingPad X21",
+    "driver": "kingsmith",
+    "match": [
+     "KS-HDSY-X21"
+    ],
+    "capabilities": [
+     [
+      "speed_max",
+      12.0
+     ],
+     [
+      "speed_min",
+      0.5
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "telemetry_s",
+      2.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": "kingsmith-x21",
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 12.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 2.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "KingSmith WalkingPad X21",
+   "looks_like": true
+  },
+  {
+   "name": "ks-hdsy-x21c",
+   "any": {
+    "id": "kingsmith-x21",
+    "name": "KingSmith WalkingPad X21",
+    "driver": "kingsmith",
+    "match": [
+     "KS-HDSY-X21"
+    ],
+    "capabilities": [
+     [
+      "speed_max",
+      12.0
+     ],
+     [
+      "speed_min",
+      0.5
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "telemetry_s",
+      2.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": "kingsmith-x21",
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 12.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 2.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "KingSmith WalkingPad X21",
+   "looks_like": true
+  },
+  {
+   "name": "KS-NACH-MXG",
+   "any": {
+    "id": "kingsmith-x23",
+    "name": "KingSmith WalkingPad X23",
+    "driver": "kingsmith",
+    "match": [
+     "KS-NACH-MXG"
+    ],
+    "capabilities": [],
+    "options": [
+     [
+      "table",
+      "v7"
+     ]
+    ],
+    "source": "wbudowany"
+   },
+   "kingsmith": "kingsmith-x23",
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 12.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 2.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "KingSmith WalkingPad X23",
+   "looks_like": true
+  },
+  {
+   "name": "KS-NACH-X21C",
+   "any": {
+    "id": "kingsmith",
+    "name": "KingSmith WalkingPad",
+    "driver": "kingsmith",
+    "match": [
+     "KS-",
+     "WALKINGPAD"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": "kingsmith",
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 12.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 2.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "KingSmith WalkingPad",
+   "looks_like": true
+  },
+  {
+   "name": "WalkingPad A1",
+   "any": {
+    "id": "kingsmith",
+    "name": "KingSmith WalkingPad",
+    "driver": "kingsmith",
+    "match": [
+     "KS-",
+     "WALKINGPAD"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": "kingsmith",
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 12.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 2.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "KingSmith WalkingPad",
+   "looks_like": true
+  },
+  {
+   "name": "Mi Band",
+   "any": null,
+   "kingsmith": null,
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "Mi Band",
+   "looks_like": false
+  },
+  {
+   "name": "",
+   "any": null,
+   "kingsmith": null,
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "",
+   "looks_like": false
+  },
+  {
+   "name": "UREVO",
+   "any": {
+    "id": "urevo",
+    "name": "Urevo",
+    "driver": "ftms",
+    "match": [
+     "URTM",
+     "UREVO",
+     "SPACEWALK"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": null,
+   "ftms": "urevo",
+   "known_capabilities": {
+    "speed_min": 1.0,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 4.0,
+    "acks_commands": true,
+    "pause": true,
+    "steps": false,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.8,
+    "control": true
+   },
+   "model_name": "Urevo UREVO",
+   "looks_like": true
+  },
+  {
+   "name": "SpaceWalk E1",
+   "any": {
+    "id": "urevo",
+    "name": "Urevo",
+    "driver": "ftms",
+    "match": [
+     "URTM",
+     "UREVO",
+     "SPACEWALK"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": null,
+   "ftms": "urevo",
+   "known_capabilities": {
+    "speed_min": 1.0,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 4.0,
+    "acks_commands": true,
+    "pause": true,
+    "steps": false,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.8,
+    "control": true
+   },
+   "model_name": "Urevo SpaceWalk E1",
+   "looks_like": true
+  },
+  {
+   "name": "KS-",
+   "any": {
+    "id": "kingsmith",
+    "name": "KingSmith WalkingPad",
+    "driver": "kingsmith",
+    "match": [
+     "KS-",
+     "WALKINGPAD"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   },
+   "kingsmith": "kingsmith",
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 12.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 2.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "KingSmith WalkingPad",
+   "looks_like": true
+  },
+  {
+   "name": "JBL Flip 5",
+   "any": null,
+   "kingsmith": null,
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "JBL Flip 5",
+   "looks_like": false
+  },
+  {
+   "name": "URT",
+   "any": null,
+   "kingsmith": null,
+   "ftms": null,
+   "known_capabilities": {
+    "speed_min": 0.5,
+    "speed_max": 6.0,
+    "speed_step": 0.1,
+    "start_speed": 1.0,
+    "start_delay_s": 0.0,
+    "acks_commands": false,
+    "pause": false,
+    "steps": true,
+    "incline": null,
+    "telemetry_s": 1.0,
+    "min_command_gap_s": 0.0,
+    "control": true
+   },
+   "model_name": "URT",
+   "looks_like": false
+  }
+ ],
+ "services": [
+  {
+   "uuids": [
+    "00001826-0000-1000-8000-00805f9b34fb"
+   ],
+   "looks_like": true
+  },
+  {
+   "uuids": [
+    "00001826-0000-1000-8000-00805F9B34FB"
+   ],
+   "looks_like": true
+  },
+  {
+   "uuids": [
+    "00011234-0000-1000-8000-00805f9b34fb"
+   ],
+   "looks_like": true
+  },
+  {
+   "uuids": [
+    "00021234-0000-1000-8000-00805f9b34fb"
+   ],
+   "looks_like": true
+  },
+  {
+   "uuids": [
+    "00031234-0000-1000-8000-00805f9b34fb"
+   ],
+   "looks_like": false
+  },
+  {
+   "uuids": [
+    "0000fed7-0000-1000-8000-00805f9b34fb"
+   ],
+   "looks_like": false
+  },
+  {
+   "uuids": [
+    "0000180a-0000-1000-8000-00805f9b34fb"
+   ],
+   "looks_like": false
+  },
+  {
+   "uuids": [],
+   "looks_like": false
+  }
+ ],
+ "simulator_caps": {
+  "speed_min": 0.5,
+  "speed_max": 6.0,
+  "speed_step": 0.1,
+  "start_speed": 1.0,
+  "start_delay_s": 1.0,
+  "acks_commands": true,
+  "pause": true,
+  "steps": true,
+  "incline": null,
+  "telemetry_s": 0.75,
+  "min_command_gap_s": 0.0,
+  "control": true
+ },
+ "kingsmith_caps": {
+  "speed_min": 0.5,
+  "speed_max": 12.0,
+  "speed_step": 0.1,
+  "start_speed": 1.0,
+  "start_delay_s": 0.0,
+  "acks_commands": false,
+  "pause": false,
+  "steps": true,
+  "incline": null,
+  "telemetry_s": 2.0,
+  "min_command_gap_s": 0.0,
+  "control": true
+ },
+ "ftms_caps": {
+  "speed_min": 1.0,
+  "speed_max": 6.0,
+  "speed_step": 0.1,
+  "start_speed": 1.0,
+  "start_delay_s": 0.0,
+  "acks_commands": true,
+  "pause": true,
+  "steps": false,
+  "incline": null,
+  "telemetry_s": 1.0,
+  "min_command_gap_s": 0.8,
+  "control": true
+ },
+ "default_caps": {
+  "speed_min": 0.5,
+  "speed_max": 6.0,
+  "speed_step": 0.1,
+  "start_speed": 1.0,
+  "start_delay_s": 0.0,
+  "acks_commands": false,
+  "pause": false,
+  "steps": true,
+  "incline": null,
+  "telemetry_s": 1.0,
+  "min_command_gap_s": 0.0,
+  "control": true
+ },
+ "all": [
+  {
+   "id": "kingsmith-x21",
+   "name": "KingSmith WalkingPad X21",
+   "driver": "kingsmith",
+   "match": [
+    "KS-HDSY-X21"
+   ],
+   "capabilities": [
+    [
+     "speed_max",
+     12.0
+    ],
+    [
+     "speed_min",
+     0.5
+    ],
+    [
+     "start_speed",
+     1.0
+    ],
+    [
+     "telemetry_s",
+     2.0
+    ]
+   ],
+   "options": [],
+   "source": "wbudowany"
+  },
+  {
+   "id": "kingsmith-x23",
+   "name": "KingSmith WalkingPad X23",
+   "driver": "kingsmith",
+   "match": [
+    "KS-NACH-MXG"
+   ],
+   "capabilities": [],
+   "options": [
+    [
+     "table",
+     "v7"
+    ]
+   ],
+   "source": "wbudowany"
+  },
+  {
+   "id": "kingsmith",
+   "name": "KingSmith WalkingPad",
+   "driver": "kingsmith",
+   "match": [
+    "KS-",
+    "WALKINGPAD"
+   ],
+   "capabilities": [],
+   "options": [],
+   "source": "wbudowany"
+  },
+  {
+   "id": "urevo-spacewalk-5l",
+   "name": "Urevo SpaceWalk 5L",
+   "driver": "ftms",
+   "match": [
+    "URTM054"
+   ],
+   "capabilities": [
+    [
+     "min_command_gap_s",
+     0.8
+    ],
+    [
+     "pause",
+     true
+    ],
+    [
+     "speed_max",
+     6.0
+    ],
+    [
+     "speed_min",
+     1.0
+    ],
+    [
+     "speed_step",
+     0.1
+    ],
+    [
+     "start_delay_s",
+     4.0
+    ],
+    [
+     "start_speed",
+     1.0
+    ],
+    [
+     "steps",
+     true
+    ],
+    [
+     "telemetry_s",
+     1.0
+    ]
+   ],
+   "options": [],
+   "source": "wbudowany"
+  },
+  {
+   "id": "urevo",
+   "name": "Urevo",
+   "driver": "ftms",
+   "match": [
+    "URTM",
+    "UREVO",
+    "SPACEWALK"
+   ],
+   "capabilities": [
+    [
+     "min_command_gap_s",
+     0.8
+    ],
+    [
+     "pause",
+     true
+    ],
+    [
+     "start_delay_s",
+     4.0
+    ]
+   ],
+   "options": [],
+   "source": "wbudowany"
+  }
+ ]
+}

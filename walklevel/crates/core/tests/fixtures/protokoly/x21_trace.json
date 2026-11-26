@@ -1,0 +1,7218 @@
+{
+ "device_name": "KS-NACH-X21C",
+ "events": [
+  {
+   "t": 0.0,
+   "hex": "366d4b586257463149472f58446d4b5877393d3d0d",
+   "readings": [],
+   "table": "v1",
+   "candidates": [
+    "v1",
+    "v2",
+    "v3",
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "",
+   "belt_running": null
+  },
+  {
+   "t": 1.561,
+   "hex": "444145454f4155676877694e0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "",
+   "belt_running": null
+  },
+  {
+   "t": 2.16,
+   "hex": "626d2f3149482f7544484a766467313d0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "",
+   "belt_running": null
+  },
+  {
+   "t": 2.76,
+   "hex": "36412f31634152754977684e0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "",
+   "belt_running": null
+  },
+  {
+   "t": 3.36,
+   "hex": "36412f31633261724977684e0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "",
+   "belt_running": null
+  },
+  {
+   "t": 3.96,
+   "hex": "366d4b586257463149472f58446d4b5877393d3d0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "",
+   "belt_running": null
+  },
+  {
+   "t": 4.62,
+   "hex": "646d2f5844416c76625a694d6877693177393d3d0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": null
+  },
+  {
+   "t": 5.22,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": null
+  },
+  {
+   "t": 5.461,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a696754574674497734584c6a6967645735706443694d0d",
+   "readings": [
+    {
+     "t": 5.461,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 5.58,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 5.58,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 6.36,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 6.36,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 6.601,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 6.601,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 7.08,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 7.08,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 7.92,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 7.92,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 8.58,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 8.58,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 8.641,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 8.641,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 9.42,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 9.42,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 10.14,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 10.14,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 10.621,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 10.621,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 10.92,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 10.92,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 11.64,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 11.64,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 12.42,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 12.42,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 12.602,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 12.602,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 13.201,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 13.201,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 13.921,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 13.921,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 14.582,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 14.582,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 14.7,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 14.7,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 15.48,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 15.48,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 16.261,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 16.261,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 16.562,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 16.562,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 16.98,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 16.98,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 17.761,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 17.761,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 18.601,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 18.601,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 18.602,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 18.602,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 19.26,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 19.26,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 20.041,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 20.041,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 20.522,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 20.522,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 20.821,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 20.821,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 21.541,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 21.541,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 22.321,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 22.321,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 22.502,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 22.502,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 23.101,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 23.101,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 23.881,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 23.881,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 24.482,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 24.482,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 24.601,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 24.601,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 25.441,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 25.441,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 26.161,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 26.161,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 26.881,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 26.881,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 27.302,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 27.302,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 27.721,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 27.721,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 28.441,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 28.441,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 29.161,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 29.161,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 29.282,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656694d49344e79446e4a6c626e525444472f6c3643694d4c6a6967556e2f75626d6c753631527044325245626d4e6c49776967396e2f58626b4e4562474b584f572f7a4977693d0d",
+   "readings": [
+    {
+     "t": 29.282,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 29.941,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 29.941,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 30.721,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 30.721,
+     "speed": 0.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": false
+  },
+  {
+   "t": 31.262,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856615864573554644746313656697849344e79446e4a6c626e525444472f6c364369784c6a5967556e2f75626d6c7536795276644746732f476c423656697849464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c4458694d0d",
+   "readings": [
+    {
+     "t": 31.262,
+     "speed": 1.6,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 31.441,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 31.441,
+     "speed": 1.6,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 32.281,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 32.281,
+     "speed": 1.6,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 33.001,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 33.001,
+     "speed": 1.6,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 33.242,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d645562325245624652706257556768586156645735754f57356e52476c7a64474675594155676843614364634a753941467362324a703663686768693d3d0d",
+   "readings": [
+    {
+     "t": 33.242,
+     "speed": 2.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 33.721,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 33.721,
+     "speed": 2.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 34.501,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 34.501,
+     "speed": 2.0,
+     "steps": null
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 35.283,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e566156645735754f57356e5532526c44486867685a6156645735754f57356e52476c7a64474675594155676843614364634a753941467362324a703663686768693d3d0d",
+   "readings": [
+    {
+     "t": 35.283,
+     "speed": 2.0,
+     "steps": 2
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 35.341,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 35.341,
+     "speed": 2.0,
+     "steps": 2
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 36.001,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 36.001,
+     "speed": 2.0,
+     "steps": 2
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 36.781,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 36.781,
+     "speed": 2.0,
+     "steps": 2
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 37.262,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e586156645735754f57356e5532526c444868674e566156645735754f57356e52476c7a64474675594155676843614364634a753941467362324a703663686768693d3d0d",
+   "readings": [
+    {
+     "t": 37.262,
+     "speed": 2.0,
+     "steps": 5
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 37.561,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 37.561,
+     "speed": 2.0,
+     "steps": 5
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 38.281,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 38.281,
+     "speed": 2.0,
+     "steps": 5
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 39.121,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 39.121,
+     "speed": 2.0,
+     "steps": 5
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 39.243,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755672b566156645735754f57356e5532526c444868672b436156645735754f57356e52476c7a64474675594155676843614364634a753941467362324a70366368676854694d0d",
+   "readings": [
+    {
+     "t": 39.243,
+     "speed": 2.0,
+     "steps": 8
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 39.841,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 39.841,
+     "speed": 2.0,
+     "steps": 8
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 40.621,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 40.621,
+     "speed": 2.0,
+     "steps": 8
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 41.223,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d645562325245624652706257556768543467556e2f75626d6c7536794e313663617a4977344d49464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c445869586877693d0d",
+   "readings": [
+    {
+     "t": 41.223,
+     "speed": 2.0,
+     "steps": 10
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 41.341,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 41.341,
+     "speed": 2.0,
+     "steps": 10
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 42.121,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 42.121,
+     "speed": 2.0,
+     "steps": 10
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 42.902,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 42.902,
+     "speed": 2.0,
+     "steps": 10
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 43.203,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d645562325245624652706257556768546867556e2f75626d6c7536794e313663617a4977347a49464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c4458697a6877693d0d",
+   "readings": [
+    {
+     "t": 43.203,
+     "speed": 2.0,
+     "steps": 13
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 43.621,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 43.621,
+     "speed": 2.0,
+     "steps": 13
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 44.401,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 44.401,
+     "speed": 2.0,
+     "steps": 13
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 45.122,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 45.122,
+     "speed": 2.0,
+     "steps": 13
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 45.183,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d645562325245624652706257556768545567556e2f75626d6c7536794e313663617a4977344149464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c4458697a6877693d0d",
+   "readings": [
+    {
+     "t": 45.183,
+     "speed": 2.0,
+     "steps": 16
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 45.902,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 45.902,
+     "speed": 2.0,
+     "steps": 16
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 46.682,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 46.682,
+     "speed": 2.0,
+     "steps": 16
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 47.163,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d645562325245624652706257556768544467556e2f75626d6c7536794e313663617a4977347449464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c445869316877693d0d",
+   "readings": [
+    {
+     "t": 47.163,
+     "speed": 2.0,
+     "steps": 18
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 47.402,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 47.402,
+     "speed": 2.0,
+     "steps": 18
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 48.181,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 48.181,
+     "speed": 2.0,
+     "steps": 18
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 48.962,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 48.962,
+     "speed": 2.0,
+     "steps": 18
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 49.203,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d645562325245624652706257556768546b67556e2f75626d6c7536794e313663617a4977497849464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c445869796877693d0d",
+   "readings": [
+    {
+     "t": 49.203,
+     "speed": 2.0,
+     "steps": 21
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 49.682,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 49.682,
+     "speed": 2.0,
+     "steps": 21
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 50.462,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 50.462,
+     "speed": 2.0,
+     "steps": 21
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 51.123,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567686a3467556e2f75626d6c7536794e313663617a4977497a49464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c445869416877693d0d",
+   "readings": [
+    {
+     "t": 51.123,
+     "speed": 2.0,
+     "steps": 23
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 51.242,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 51.242,
+     "speed": 2.0,
+     "steps": 23
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 51.962,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 51.962,
+     "speed": 2.0,
+     "steps": 23
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 52.742,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 52.742,
+     "speed": 2.0,
+     "steps": 23
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 53.163,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567686a6867556e2f75626d6c7536794e313663617a4977494149464a79626d3570626d64344f634e315957356a3656694d49344a79446d357759577876446d6c6c445869416877693d0d",
+   "readings": [
+    {
+     "t": 53.163,
+     "speed": 2.0,
+     "steps": 26
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 53.522,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 53.522,
+     "speed": 2.0,
+     "steps": 26
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 54.242,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 54.242,
+     "speed": 2.0,
+     "steps": 26
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 54.302,
+   "hex": "44484a7644486867446d2f6a62324a6b4943494d4c7734784e564d78687a6b73686a397368564d3268434d584e584d5868434d78686a67735454704c5558792b39554e494c2f67586855685a0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 55.022,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 55.022,
+     "speed": 2.0,
+     "steps": 26
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 55.083,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567686a5567556e2f75626d6c7536794e313663617a4977493549464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368674e7a694d0d",
+   "readings": [
+    {
+     "t": 55.083,
+     "speed": 2.0,
+     "steps": 29
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 55.802,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 55.802,
+     "speed": 2.0,
+     "steps": 29
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 56.582,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 56.582,
+     "speed": 2.0,
+     "steps": 29
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 57.063,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567686a4467556e2f75626d6c7536794e313663617a4977687849464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368672b77694d0d",
+   "readings": [
+    {
+     "t": 57.063,
+     "speed": 2.0,
+     "steps": 31
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 57.362,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 57.362,
+     "speed": 2.0,
+     "steps": 31
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 58.082,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 58.082,
+     "speed": 2.0,
+     "steps": 31
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 58.862,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 58.862,
+     "speed": 2.0,
+     "steps": 31
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 59.043,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567686a6b67556e2f75626d6c7536794e313663617a4977683149464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368672b54694d0d",
+   "readings": [
+    {
+     "t": 59.043,
+     "speed": 2.0,
+     "steps": 34
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 59.582,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 59.582,
+     "speed": 2.0,
+     "steps": 34
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 60.362,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 60.362,
+     "speed": 2.0,
+     "steps": 34
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 61.023,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567687a3467556e2f75626d6c7536794e313663617a4977683249464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368672b54694d0d",
+   "readings": [
+    {
+     "t": 61.023,
+     "speed": 2.0,
+     "steps": 37
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 61.142,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 61.142,
+     "speed": 2.0,
+     "steps": 37
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 61.922,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 61.922,
+     "speed": 2.0,
+     "steps": 37
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 62.642,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 62.642,
+     "speed": 2.0,
+     "steps": 37
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 63.004,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567687a6867556e2f75626d6c7536794e313663617a4977683549464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368676854694d68693d3d0d",
+   "readings": [
+    {
+     "t": 63.004,
+     "speed": 2.0,
+     "steps": 39
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 63.422,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 63.422,
+     "speed": 2.0,
+     "steps": 39
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 64.262,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 64.262,
+     "speed": 2.0,
+     "steps": 39
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 64.982,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 64.982,
+     "speed": 2.0,
+     "steps": 39
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 64.984,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567687a5567556e2f75626d6c7536794e313663617a4977395849464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368676854344d68693d3d0d",
+   "readings": [
+    {
+     "t": 64.984,
+     "speed": 2.0,
+     "steps": 42
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 65.702,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 65.702,
+     "speed": 2.0,
+     "steps": 42
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 66.482,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 66.482,
+     "speed": 2.0,
+     "steps": 42
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 67.023,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567687a4467556e2f75626d6c7536794e313663617a4977393149464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368676854494d68693d3d0d",
+   "readings": [
+    {
+     "t": 67.023,
+     "speed": 2.0,
+     "steps": 44
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 67.262,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 67.262,
+     "speed": 2.0,
+     "steps": 44
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 68.042,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 68.042,
+     "speed": 2.0,
+     "steps": 44
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 68.762,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 68.762,
+     "speed": 2.0,
+     "steps": 44
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 69.003,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d6455623252456246527062575567687a6b67556e2f75626d6c7536794e313663617a4977393249464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368676854494d68693d3d0d",
+   "readings": [
+    {
+     "t": 69.003,
+     "speed": 2.0,
+     "steps": 47
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 69.542,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 69.542,
+     "speed": 2.0,
+     "steps": 47
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 70.322,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 70.322,
+     "speed": 2.0,
+     "steps": 47
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 70.984,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e773467556e2f75626d6c7536794e313663617a4977554d49464a79626d3570626d64344f634e315957356a365669786843614364634a753941467362324a70366368676854684d68693d3d0d",
+   "readings": [
+    {
+     "t": 70.984,
+     "speed": 2.0,
+     "steps": 50
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 71.102,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 71.102,
+     "speed": 2.0,
+     "steps": 50
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 71.822,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 71.822,
+     "speed": 2.0,
+     "steps": 50
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 72.602,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 72.602,
+     "speed": 2.0,
+     "steps": 50
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 72.964,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e776867556e2f75626d6c7536794e313663617a4977555849464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a70366368676854394d68693d3d0d",
+   "readings": [
+    {
+     "t": 72.964,
+     "speed": 2.0,
+     "steps": 52
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 73.382,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 73.382,
+     "speed": 2.0,
+     "steps": 52
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 74.162,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 74.162,
+     "speed": 2.0,
+     "steps": 52
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 74.942,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 74.942,
+     "speed": 2.0,
+     "steps": 52
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 74.944,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e775567556e2f75626d6c7536794e313663617a4977557949464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a70366368676854554d68693d3d0d",
+   "readings": [
+    {
+     "t": 74.944,
+     "speed": 2.0,
+     "steps": 55
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 75.662,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 75.662,
+     "speed": 2.0,
+     "steps": 55
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 76.442,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 76.442,
+     "speed": 2.0,
+     "steps": 55
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 76.924,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e774467556e2f75626d6c7536794e313663617a4977553249464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a70366368676854594d68693d3d0d",
+   "readings": [
+    {
+     "t": 76.924,
+     "speed": 2.0,
+     "steps": 57
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 77.162,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 77.162,
+     "speed": 2.0,
+     "steps": 57
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 77.942,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 77.942,
+     "speed": 2.0,
+     "steps": 57
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 78.722,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 78.722,
+     "speed": 2.0,
+     "steps": 57
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 78.904,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e776b67556e2f75626d6c7536794e313663617a4977594d49464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a70366368676854594d68693d3d0d",
+   "readings": [
+    {
+     "t": 78.904,
+     "speed": 2.0,
+     "steps": 60
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 79.443,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 79.443,
+     "speed": 2.0,
+     "steps": 60
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 80.222,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 80.222,
+     "speed": 2.0,
+     "steps": 60
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 80.884,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e543467556e2f75626d6c7536794e313663617a4977597a49464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a70366368676854444d68693d3d0d",
+   "readings": [
+    {
+     "t": 80.884,
+     "speed": 2.0,
+     "steps": 63
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 81.002,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 81.002,
+     "speed": 2.0,
+     "steps": 63
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 81.783,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 81.783,
+     "speed": 2.0,
+     "steps": 63
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 82.503,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 82.503,
+     "speed": 2.0,
+     "steps": 63
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 82.864,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a744d49464a79626d3570626d64556232524562465270625755674e546867556e2f75626d6c7536794e313663617a4977597949464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a70366368676854674d68693d3d0d",
+   "readings": [
+    {
+     "t": 82.864,
+     "speed": 2.0,
+     "steps": 65
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 83.283,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 83.283,
+     "speed": 2.0,
+     "steps": 65
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 84.063,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 84.063,
+     "speed": 2.0,
+     "steps": 65
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 84.783,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 84.783,
+     "speed": 2.0,
+     "steps": 65
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 84.844,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755674e545567556e2f75626d6c7536794e313663617a4977597449464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a703663686768546b4d68693d3d0d",
+   "readings": [
+    {
+     "t": 84.844,
+     "speed": 2.5,
+     "steps": 68
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 85.563,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 85.563,
+     "speed": 2.5,
+     "steps": 68
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 86.343,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 86.343,
+     "speed": 2.5,
+     "steps": 68
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 86.824,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a743549464a79626d3570626d64556232524562465270625755674e544467556e2f75626d6c7536794e313663617a4977447849464a79626d3570626d64344f634e315957356a365669586843614364634a753941467362324a7036636867686a694d68693d3d0d",
+   "readings": [
+    {
+     "t": 86.824,
+     "speed": 2.9,
+     "steps": 71
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 87.123,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 87.123,
+     "speed": 2.9,
+     "steps": 71
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 87.843,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 87.843,
+     "speed": 2.9,
+     "steps": 71
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 88.023,
+   "hex": "44484a7644486867446d2f6a62324a6b4943494d4c7734784e564d784e7a68734e54677368584d58687769734e7a4973687a6973685449744c34313056796842546b467756437959686a467749673d3d0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 88.623,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 88.623,
+     "speed": 2.9,
+     "steps": 71
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 88.805,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e546b67556e2f75626d6c7536794e313663617a4977447a49464a79626d3570626d64344f634e315957356a3656697a6843614364634a753941467362324a7036636867686a694d68693d3d0d",
+   "readings": [
+    {
+     "t": 88.805,
+     "speed": 3.0,
+     "steps": 73
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 89.343,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 89.343,
+     "speed": 3.0,
+     "steps": 73
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 90.123,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 90.123,
+     "speed": 3.0,
+     "steps": 73
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 90.784,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e6a3467556e2f75626d6c7536794e313663617a4977444149464a79626d3570626d64344f634e315957356a3656697a6843614364634a753941467362324a7036636867686a344d68693d3d0d",
+   "readings": [
+    {
+     "t": 90.784,
+     "speed": 3.0,
+     "steps": 76
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 90.963,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 90.963,
+     "speed": 3.0,
+     "steps": 76
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 91.683,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 91.683,
+     "speed": 3.0,
+     "steps": 76
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 92.403,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 92.403,
+     "speed": 3.0,
+     "steps": 76
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 92.764,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e6a6867556e2f75626d6c7536794e313663617a4977443549464a79626d3570626d64344f634e315957356a3656697a6843614364634a753941467362324a7036636867686a494d68693d3d0d",
+   "readings": [
+    {
+     "t": 92.764,
+     "speed": 3.0,
+     "steps": 79
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 93.183,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 93.183,
+     "speed": 3.0,
+     "steps": 79
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 94.023,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 94.023,
+     "speed": 3.0,
+     "steps": 79
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 94.683,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 94.683,
+     "speed": 3.0,
+     "steps": 79
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 94.744,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e6a5567556e2f75626d6c7536794e313663617a4977677a49464a79626d3570626d64344f634e315957356a3656697a6843614364634a753941467362324a7036636867686a684d68693d3d0d",
+   "readings": [
+    {
+     "t": 94.744,
+     "speed": 3.0,
+     "steps": 83
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 95.463,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 95.463,
+     "speed": 3.0,
+     "steps": 83
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 96.243,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 96.243,
+     "speed": 3.0,
+     "steps": 83
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 96.724,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e6a4467556e2f75626d6c7536794e313663617a4977674149464a79626d3570626d64344f634e315957356a3656697a6843614364634a753941467362324a7036636867686a394d68693d3d0d",
+   "readings": [
+    {
+     "t": 96.724,
+     "speed": 3.0,
+     "steps": 86
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 96.963,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 96.963,
+     "speed": 3.0,
+     "steps": 86
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 97.743,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 97.743,
+     "speed": 3.0,
+     "steps": 86
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 98.523,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 98.523,
+     "speed": 3.0,
+     "steps": 86
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 98.765,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e6a6b67556e2f75626d6c7536794e313663617a4977673549464a79626d3570626d64344f634e315957356a3656697a6843614364634a753941467362324a7036636867686a554d68693d3d0d",
+   "readings": [
+    {
+     "t": 98.765,
+     "speed": 3.0,
+     "steps": 89
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 99.303,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 99.303,
+     "speed": 3.0,
+     "steps": 89
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 100.023,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 100.023,
+     "speed": 3.0,
+     "steps": 89
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 100.685,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e7a3467556e2f75626d6c7536794e313663617a49776b5849464a79626d3570626d64344f634e315957356a365669316843614364634a753941467362324a7036636867686a594d68693d3d0d",
+   "readings": [
+    {
+     "t": 100.685,
+     "speed": 3.0,
+     "steps": 92
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 100.803,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 100.803,
+     "speed": 3.0,
+     "steps": 92
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 101.583,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 101.583,
+     "speed": 3.0,
+     "steps": 92
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 102.303,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 102.303,
+     "speed": 3.0,
+     "steps": 92
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 102.724,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e7a6867556e2f75626d6c7536794e313663617a49776b7949464a79626d3570626d64344f634e315957356a365669316843614364634a753941467362324a7036636867686a444d68693d3d0d",
+   "readings": [
+    {
+     "t": 102.724,
+     "speed": 3.0,
+     "steps": 95
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 103.084,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 103.084,
+     "speed": 3.0,
+     "steps": 95
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 103.863,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 103.863,
+     "speed": 3.0,
+     "steps": 95
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 104.583,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 104.583,
+     "speed": 3.0,
+     "steps": 95
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 104.705,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e7a5567556e2f75626d6c7536794e313663617a49776b7449464a79626d3570626d64344f634e315957356a365669316843614364634a753941467362324a7036636867686a674d68693d3d0d",
+   "readings": [
+    {
+     "t": 104.705,
+     "speed": 3.0,
+     "steps": 98
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 105.363,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 105.363,
+     "speed": 3.0,
+     "steps": 98
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 106.143,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 106.143,
+     "speed": 3.0,
+     "steps": 98
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 106.685,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e7a4467556e2f75626d6c7536794e313663617a4977344d68566156645735754f57356e52476c7a64474675594155674e776967396e2f58626b4e4562474b584f572f7a497749356877693d0d",
+   "readings": [
+    {
+     "t": 106.685,
+     "speed": 3.0,
+     "steps": 101
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 106.863,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 106.863,
+     "speed": 3.0,
+     "steps": 101
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 107.643,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 107.643,
+     "speed": 3.0,
+     "steps": 101
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 108.423,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 108.423,
+     "speed": 3.0,
+     "steps": 101
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 108.665,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c365739676858744d49464a79626d3570626d64556232524562465270625755674e7a6b67556e2f75626d6c7536794e313663617a4977344d4e436156645735754f57356e52476c7a64474675594155674e776967396e2f58626b4e4562474b584f572f7a4977684d6877693d0d",
+   "readings": [
+    {
+     "t": 108.665,
+     "speed": 3.0,
+     "steps": 104
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 109.203,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 109.203,
+     "speed": 3.0,
+     "steps": 104
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 109.923,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 109.923,
+     "speed": 3.0,
+     "steps": 104
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 110.645,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747449464a79626d3570626d64556232524562465270625755672b773467556e2f75626d6c7536794e313663617a4977344d4e586156645735754f57356e52476c7a64474675594155674e776967396e2f58626b4e4562474b584f572f7a497768786877693d0d",
+   "readings": [
+    {
+     "t": 110.645,
+     "speed": 2.8,
+     "steps": 107
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 110.703,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 110.703,
+     "speed": 2.8,
+     "steps": 107
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 111.483,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 111.483,
+     "speed": 2.8,
+     "steps": 107
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 111.844,
+   "hex": "44484a7644486867446d2f6a62324a6b4943494d4c7734784e564d782b5444732b7749734e564d7a68546973685469354c7749794c7734582b43784e2b6b42544c55356139316742577749783958493d0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 112.204,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 112.204,
+     "speed": 2.8,
+     "steps": 107
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 112.625,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b776867556e2f75626d6c7536794e313663617a4977347868436156645735754f57356e52476c7a64474675594155674e546967396e2f58626b4e4562474b584f572f7a497768586877693d0d",
+   "readings": [
+    {
+     "t": 112.625,
+     "speed": 2.5,
+     "steps": 110
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 112.984,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 112.984,
+     "speed": 2.5,
+     "steps": 110
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 113.764,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 113.764,
+     "speed": 2.5,
+     "steps": 110
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 114.544,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 114.544,
+     "speed": 2.5,
+     "steps": 110
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 114.605,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b775567556e2f75626d6c7536794e313663617a4977347868586156645735754f57356e52476c7a64474675594155674e546967396e2f58626b4e4562474b584f572f7a4977687a6877693d0d",
+   "readings": [
+    {
+     "t": 114.605,
+     "speed": 2.5,
+     "steps": 113
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 115.264,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 115.264,
+     "speed": 2.5,
+     "steps": 113
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 116.044,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 116.044,
+     "speed": 2.5,
+     "steps": 113
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 116.585,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b774467556e2f75626d6c7536794e313663617a497734784e5a6156645735754f57356e52476c7a64474675594155674e546967396e2f58626b4e4562474b584f572f7a4977687a6877693d0d",
+   "readings": [
+    {
+     "t": 116.585,
+     "speed": 2.5,
+     "steps": 116
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 116.824,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 116.824,
+     "speed": 2.5,
+     "steps": 116
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 117.544,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 117.544,
+     "speed": 2.5,
+     "steps": 116
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 118.324,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 118.324,
+     "speed": 2.5,
+     "steps": 116
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 118.565,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b776b67556e2f75626d6c7536794e313663617a497734782b566156645735754f57356e52476c7a64474675594155674e546967396e2f58626b4e4562474b584f572f7a497768316877693d0d",
+   "readings": [
+    {
+     "t": 118.565,
+     "speed": 2.5,
+     "steps": 119
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 119.104,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 119.104,
+     "speed": 2.5,
+     "steps": 119
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 119.884,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 119.884,
+     "speed": 2.5,
+     "steps": 119
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 120.545,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b543467556e2f75626d6c7536794e313663617a49773458685a6156645735754f57356e52476c7a64474675594155674e546967396e2f58626b4e4562474b584f572f7a497768796877693d0d",
+   "readings": [
+    {
+     "t": 120.545,
+     "speed": 2.5,
+     "steps": 122
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 120.604,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 120.604,
+     "speed": 2.5,
+     "steps": 122
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 121.384,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 121.384,
+     "speed": 2.5,
+     "steps": 122
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 122.164,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 122.164,
+     "speed": 2.5,
+     "steps": 122
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 122.525,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b546867556e2f75626d6c7536794e313663617a497734584e436156645735754f57356e52476c7a64474675594155674e546967396e2f58626b4e4562474b584f572f7a497768416877693d0d",
+   "readings": [
+    {
+     "t": 122.525,
+     "speed": 2.5,
+     "steps": 124
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 122.944,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 122.944,
+     "speed": 2.5,
+     "steps": 124
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 123.724,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 123.724,
+     "speed": 2.5,
+     "steps": 124
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 124.444,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 124.444,
+     "speed": 2.5,
+     "steps": 124
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 124.505,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b545567556e2f75626d6c7536794e313663617a497734584e586156645735754f57356e52476c7a64474675594155674e546967396e2f58626b4e4562474b584f572f7a497768326877693d0d",
+   "readings": [
+    {
+     "t": 124.505,
+     "speed": 2.5,
+     "steps": 127
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 125.224,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 125.224,
+     "speed": 2.5,
+     "steps": 127
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 126.064,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 126.064,
+     "speed": 2.5,
+     "steps": 127
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 126.545,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b544467556e2f75626d6c7536794e313663617a4977347a68436156645735754f57356e52476c7a64474675594155674e6a6967396e2f58626b4e4562474b584f572f7a497768746877693d0d",
+   "readings": [
+    {
+     "t": 126.545,
+     "speed": 2.5,
+     "steps": 130
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 126.724,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 126.724,
+     "speed": 2.5,
+     "steps": 130
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 127.564,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 127.564,
+     "speed": 2.5,
+     "steps": 130
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 128.224,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 128.224,
+     "speed": 2.5,
+     "steps": 130
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 128.525,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755672b546b67556e2f75626d6c7536794e313663617a4977347a68586156645735754f57356e52476c7a64474675594155674e6a6967396e2f58626b4e4562474b584f572f7a497768356877693d0d",
+   "readings": [
+    {
+     "t": 128.525,
+     "speed": 2.5,
+     "steps": 133
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 129.004,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 129.004,
+     "speed": 2.5,
+     "steps": 133
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 129.784,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 129.784,
+     "speed": 2.5,
+     "steps": 133
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 130.445,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854697849464a79626d3570626d645464472f4d44586978687a5967556e2f75626d6c753631527044325245626d4e6c4977594d49344a79446d357759577876446d6c6c4458697a2b54694d0d",
+   "readings": [
+    {
+     "t": 130.445,
+     "speed": 2.5,
+     "steps": 136
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 130.564,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 130.564,
+     "speed": 2.5,
+     "steps": 136
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 131.284,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 131.284,
+     "speed": 2.5,
+     "steps": 136
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 132.124,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 132.124,
+     "speed": 2.5,
+     "steps": 136
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 132.485,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854697a49464a79626d3570626d645464472f4d44586978687a6b67556e2f75626d6c753631527044325245626d4e6c4977594d49344a79446d357759577876446d6c6c445869316877694d0d",
+   "readings": [
+    {
+     "t": 132.485,
+     "speed": 2.5,
+     "steps": 139
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 132.844,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 132.844,
+     "speed": 2.5,
+     "steps": 139
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 133.564,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 133.564,
+     "speed": 2.5,
+     "steps": 139
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 134.344,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 134.344,
+     "speed": 2.5,
+     "steps": 139
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 134.466,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854697949464a79626d3570626d645464472f4d445869784e774967556e2f75626d6c753631527044325245626d4e6c4977594d49344a79446d357759577876446d6c6c445869316854694d0d",
+   "readings": [
+    {
+     "t": 134.466,
+     "speed": 2.5,
+     "steps": 142
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 135.124,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 135.124,
+     "speed": 2.5,
+     "steps": 142
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 135.844,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 135.844,
+     "speed": 2.5,
+     "steps": 142
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 136.446,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854693249464a79626d3570626d645464472f4d445869784e775567556e2f75626d6c753631527044325245626d4e6c4977594d49344a79446d357759577876446d6c6c44586931686a694d0d",
+   "readings": [
+    {
+     "t": 136.446,
+     "speed": 2.5,
+     "steps": 145
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 136.624,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 136.624,
+     "speed": 2.5,
+     "steps": 145
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 137.464,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 137.464,
+     "speed": 2.5,
+     "steps": 145
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 138.184,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 138.184,
+     "speed": 2.5,
+     "steps": 145
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 138.426,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854693549464a79626d3570626d645464472f4d445869784e776767556e2f75626d6c753631527044325245626d4e6c4977594d49344a79446d357759577876446d6c6c44586931687a694d0d",
+   "readings": [
+    {
+     "t": 138.426,
+     "speed": 2.5,
+     "steps": 148
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 138.904,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 138.904,
+     "speed": 2.5,
+     "steps": 148
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 139.684,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 139.684,
+     "speed": 2.5,
+     "steps": 148
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 140.406,
+   "hex": "44484a7644486867446d2f6a62324a6b4943494d4c7734784e564d58686a5973685434784c7744734e77394d4c77347968564d584e564d78686a67735454704c5558792b39554e494c2f67586855685a0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 140.464,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 140.464,
+     "speed": 2.5,
+     "steps": 148
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 140.826,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854347849464a79626d3570626d645464472f4d445869784e543467556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869314e77694d0d",
+   "readings": [
+    {
+     "t": 140.826,
+     "speed": 2.5,
+     "steps": 151
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 141.184,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 141.184,
+     "speed": 2.5,
+     "steps": 151
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 141.965,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 141.965,
+     "speed": 2.5,
+     "steps": 151
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 142.386,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854347a49464a79626d3570626d645464472f4d445869784e543967556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869314e54694d0d",
+   "readings": [
+    {
+     "t": 142.386,
+     "speed": 2.5,
+     "steps": 154
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 142.744,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 142.744,
+     "speed": 2.5,
+     "steps": 154
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 143.465,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 143.465,
+     "speed": 2.5,
+     "steps": 154
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 144.244,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 144.244,
+     "speed": 2.5,
+     "steps": 154
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 144.366,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854347949464a79626d3570626d645464472f4d445869784e544467556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869314e54694d0d",
+   "readings": [
+    {
+     "t": 144.366,
+     "speed": 2.5,
+     "steps": 157
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 145.025,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 145.025,
+     "speed": 2.5,
+     "steps": 157
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 145.805,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 145.805,
+     "speed": 2.5,
+     "steps": 157
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 146.346,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854343249464a79626d3570626d645464472f4d445869784e546b67556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869314e6a694d0d",
+   "readings": [
+    {
+     "t": 146.346,
+     "speed": 2.5,
+     "steps": 159
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 146.525,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 146.525,
+     "speed": 2.5,
+     "steps": 159
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 147.305,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 147.305,
+     "speed": 2.5,
+     "steps": 159
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 148.085,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 148.085,
+     "speed": 2.5,
+     "steps": 159
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 148.326,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854343549464a79626d3570626d645464472f4d445869784e6a4967556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869314e7a694d0d",
+   "readings": [
+    {
+     "t": 148.326,
+     "speed": 2.5,
+     "steps": 162
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 148.805,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 148.805,
+     "speed": 2.5,
+     "steps": 162
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 149.585,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 149.585,
+     "speed": 2.5,
+     "steps": 162
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 150.307,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854497849464a79626d3570626d645464472f4d445869784e6a5567556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869312b77694d0d",
+   "readings": [
+    {
+     "t": 150.307,
+     "speed": 2.5,
+     "steps": 165
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 150.365,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 150.365,
+     "speed": 2.5,
+     "steps": 165
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 151.145,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 151.145,
+     "speed": 2.5,
+     "steps": 165
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 151.865,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 151.865,
+     "speed": 2.5,
+     "steps": 165
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 152.286,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854497a49464a79626d3570626d645464472f4d445869784e6a6767556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869312b54694d0d",
+   "readings": [
+    {
+     "t": 152.286,
+     "speed": 2.5,
+     "steps": 168
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 152.645,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 152.645,
+     "speed": 2.5,
+     "steps": 168
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 153.425,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 153.425,
+     "speed": 2.5,
+     "steps": 168
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 154.145,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 154.145,
+     "speed": 2.5,
+     "steps": 168
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 154.266,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854497949464a79626d3570626d645464472f4d445869784e7a6967556e2f75626d6c753631527044325245626d4e6c4977444d49344a79446d357759577876446d6c6c445869796877694d0d",
+   "readings": [
+    {
+     "t": 154.266,
+     "speed": 2.5,
+     "steps": 170
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 154.925,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 154.925,
+     "speed": 2.5,
+     "steps": 170
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 155.705,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 155.705,
+     "speed": 2.5,
+     "steps": 170
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 156.306,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854493249464a79626d3570626d645464472f4d445869784e7a6867556e2f75626d6c753631527044325245626d4e6c4977674d49344a79446d357759577876446d6c6c445869796877694d0d",
+   "readings": [
+    {
+     "t": 156.306,
+     "speed": 2.5,
+     "steps": 173
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 156.425,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 156.425,
+     "speed": 2.5,
+     "steps": 173
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 157.205,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 157.205,
+     "speed": 2.5,
+     "steps": 173
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 157.985,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 157.985,
+     "speed": 2.5,
+     "steps": 173
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 158.286,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854493549464a79626d3570626d645464472f4d445869784e7a5967556e2f75626d6c753631527044325245626d4e6c4977674d49344a79446d357759577876446d6c6c445869796854694d0d",
+   "readings": [
+    {
+     "t": 158.286,
+     "speed": 2.5,
+     "steps": 176
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 158.705,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 158.705,
+     "speed": 2.5,
+     "steps": 176
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 159.485,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 159.485,
+     "speed": 2.5,
+     "steps": 176
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 160.207,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854687849464a79626d3570626d645464472f4d445869784e7a6b67556e2f75626d6c753631527044325245626d4e6c4977674d49344a79446d357759577876446d6c6c44586979686a694d0d",
+   "readings": [
+    {
+     "t": 160.207,
+     "speed": 2.5,
+     "steps": 179
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 160.265,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 160.265,
+     "speed": 2.5,
+     "steps": 179
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 160.985,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 160.985,
+     "speed": 2.5,
+     "steps": 179
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 161.765,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 161.765,
+     "speed": 2.5,
+     "steps": 179
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 162.247,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854687a49464a79626d3570626d645464472f4d445869782b774967556e2f75626d6c753631527044325245626d4e6c4977674d49344a79446d357759577876446d6c6c44586979687a694d0d",
+   "readings": [
+    {
+     "t": 162.247,
+     "speed": 2.5,
+     "steps": 182
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 162.545,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 162.545,
+     "speed": 2.5,
+     "steps": 182
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 163.265,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 163.265,
+     "speed": 2.5,
+     "steps": 182
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 164.045,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 164.045,
+     "speed": 2.5,
+     "steps": 182
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 164.227,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854687949464a79626d3570626d645464472f4d445869782b775567556e2f75626d6c753631527044325245626d4e6c4977674d49344a79446d357759577876446d6c6c445869794e77694d0d",
+   "readings": [
+    {
+     "t": 164.227,
+     "speed": 2.5,
+     "steps": 185
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 164.825,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 164.825,
+     "speed": 2.5,
+     "steps": 185
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 165.605,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 165.605,
+     "speed": 2.5,
+     "steps": 185
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 166.207,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854683249464a79626d3570626d645464472f4d445869782b776767556e2f75626d6c753631527044325245626d4e6c4977674d49344a79446d357759577876446d6c6c445869794e54694d0d",
+   "readings": [
+    {
+     "t": 166.207,
+     "speed": 2.5,
+     "steps": 188
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 166.325,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 166.325,
+     "speed": 2.5,
+     "steps": 188
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 167.105,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 167.105,
+     "speed": 2.5,
+     "steps": 188
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 167.885,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 167.885,
+     "speed": 2.5,
+     "steps": 188
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 168.187,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854683549464a79626d3570626d645464472f4d445869782b546967556e2f75626d6c753631527044325245626d4e6c4977674d49344a79446d357759577876446d6c6c445869794e6a694d0d",
+   "readings": [
+    {
+     "t": 168.187,
+     "speed": 2.5,
+     "steps": 190
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 168.605,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 168.605,
+     "speed": 2.5,
+     "steps": 190
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 169.326,
+   "hex": "44484a7644486867446d2f6a62324a6b4943494d4c7734784e564d584e5455736854394d4c776b734e54594d4c773435685a4d584e564d78686a67735454704c5558792b39554e494c2f67586855685a0d",
+   "readings": [],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 169.445,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 169.445,
+     "speed": 2.5,
+     "steps": 190
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 170.165,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 170.165,
+     "speed": 2.5,
+     "steps": 190
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 170.167,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854397849464a79626d3570626d645464472f4d445869782b546867556e2f75626d6c753631527044325245626d4e6c49776b4d49344a79446d357759577876446d6c6c445869794e6a694d0d",
+   "readings": [
+    {
+     "t": 170.167,
+     "speed": 2.5,
+     "steps": 193
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 170.885,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 170.885,
+     "speed": 2.5,
+     "steps": 193
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 171.665,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 171.665,
+     "speed": 2.5,
+     "steps": 193
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 172.147,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747949464a79626d3570626d64556232524562465270625755676854397a49464a79626d3570626d645464472f4d445869782b545967556e2f75626d6c753631527044325245626d4e6c49776b4d49344a79446d357759577876446d6c6c445869794e7a694d0d",
+   "readings": [
+    {
+     "t": 172.147,
+     "speed": 2.5,
+     "steps": 196
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 172.446,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 172.446,
+     "speed": 2.5,
+     "steps": 196
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 173.165,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 173.165,
+     "speed": 2.5,
+     "steps": 196
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 173.946,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 173.946,
+     "speed": 2.5,
+     "steps": 196
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 174.127,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854397949464a79626d3570626d645464472f4d445869782b546b67556e2f75626d6c753631527044325245626d4e6c49776b4d49344a79446d357759577876446d6c6c445869792b77694d0d",
+   "readings": [
+    {
+     "t": 174.127,
+     "speed": 2.3,
+     "steps": 199
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 174.725,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 174.725,
+     "speed": 2.3,
+     "steps": 199
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 175.506,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 175.506,
+     "speed": 2.3,
+     "steps": 199
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 176.167,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854393249464a79626d3570626d645464472f4d4458695868774967556e2f75626d6c753631527044325245626d4e6c49776b4d49344a79446d357759577876446d6c6c445869792b54694d0d",
+   "readings": [
+    {
+     "t": 176.167,
+     "speed": 2.3,
+     "steps": 202
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 176.226,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 176.226,
+     "speed": 2.3,
+     "steps": 202
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 177.006,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 177.006,
+     "speed": 2.3,
+     "steps": 202
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 177.846,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 177.846,
+     "speed": 2.3,
+     "steps": 202
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 178.087,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854393549464a79626d3570626d645464472f4d4458695868775567556e2f75626d6c753631527044325245626d4e6c49776b4d49344a79446d357759577876446d6c6c445869416877694d0d",
+   "readings": [
+    {
+     "t": 178.087,
+     "speed": 2.3,
+     "steps": 205
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 178.506,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 178.506,
+     "speed": 2.3,
+     "steps": 205
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 179.286,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 179.286,
+     "speed": 2.3,
+     "steps": 205
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 180.066,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 180.066,
+     "speed": 2.3,
+     "steps": 205
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 180.067,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854557849464a79626d3570626d645464472f4d4458695868776767556e2f75626d6c753631527044325245626d4e6c49776b4d49344a79446d357759577876446d6c6c445869416854694d0d",
+   "readings": [
+    {
+     "t": 180.067,
+     "speed": 2.3,
+     "steps": 208
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 180.786,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 180.786,
+     "speed": 2.3,
+     "steps": 208
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 181.566,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 181.566,
+     "speed": 2.3,
+     "steps": 208
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 182.047,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854557a49464a79626d3570626d645464472f4d4458695868546967556e2f75626d6c753631527044325245626d4e6c49776b4d49344a79446d357759577876446d6c6c445869416854694d0d",
+   "readings": [
+    {
+     "t": 182.047,
+     "speed": 2.3,
+     "steps": 210
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 182.346,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 182.346,
+     "speed": 2.3,
+     "steps": 210
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 183.126,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 183.126,
+     "speed": 2.3,
+     "steps": 210
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 183.846,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 183.846,
+     "speed": 2.3,
+     "steps": 210
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 184.027,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854557949464a79626d3570626d645464472f4d4458695868546867556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a494d68693d3d0d",
+   "readings": [
+    {
+     "t": 184.027,
+     "speed": 2.3,
+     "steps": 213
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 184.626,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 184.626,
+     "speed": 2.3,
+     "steps": 213
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 185.406,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 185.406,
+     "speed": 2.3,
+     "steps": 213
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 186.007,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854553249464a79626d3570626d645464472f4d4458695868545567556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a684d68693d3d0d",
+   "readings": [
+    {
+     "t": 186.007,
+     "speed": 2.3,
+     "steps": 215
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 186.126,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 186.126,
+     "speed": 2.3,
+     "steps": 215
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 186.906,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 186.906,
+     "speed": 2.3,
+     "steps": 215
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 187.686,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 187.686,
+     "speed": 2.3,
+     "steps": 215
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 188.047,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854553549464a79626d3570626d645464472f4d4458695868546767556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a394d68693d3d0d",
+   "readings": [
+    {
+     "t": 188.047,
+     "speed": 2.3,
+     "steps": 218
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 188.466,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 188.466,
+     "speed": 2.3,
+     "steps": 218
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 189.186,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 189.186,
+     "speed": 2.3,
+     "steps": 218
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 189.969,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854597849464a79626d3570626d645464472f4d44586958686a3467556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a554d68693d3d0d",
+   "readings": [
+    {
+     "t": 189.969,
+     "speed": 2.3,
+     "steps": 221
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 190.026,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 190.026,
+     "speed": 2.3,
+     "steps": 221
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 190.746,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 190.746,
+     "speed": 2.3,
+     "steps": 221
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 191.466,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 191.466,
+     "speed": 2.3,
+     "steps": 221
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 192.007,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854597a49464a79626d3570626d645464472f4d44586958686a3967556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a594d68693d3d0d",
+   "readings": [
+    {
+     "t": 192.007,
+     "speed": 2.3,
+     "steps": 224
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 192.246,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 192.246,
+     "speed": 2.3,
+     "steps": 224
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 192.966,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 192.966,
+     "speed": 2.3,
+     "steps": 224
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 193.746,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 193.746,
+     "speed": 2.3,
+     "steps": 224
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 193.987,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854597949464a79626d3570626d645464472f4d44586958686a4467556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a594d68693d3d0d",
+   "readings": [
+    {
+     "t": 193.987,
+     "speed": 2.3,
+     "steps": 227
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 194.586,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 194.586,
+     "speed": 2.3,
+     "steps": 227
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 195.306,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 195.306,
+     "speed": 2.3,
+     "steps": 227
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 195.968,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854593249464a79626d3570626d645464472f4d44586958686a6b67556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a444d68693d3d0d",
+   "readings": [
+    {
+     "t": 195.968,
+     "speed": 2.3,
+     "steps": 229
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 196.026,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 196.026,
+     "speed": 2.3,
+     "steps": 229
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 196.806,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 196.806,
+     "speed": 2.3,
+     "steps": 229
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 197.586,
+   "hex": "44412f58646d2f584458694d77393d3d0d",
+   "readings": [
+    {
+     "t": 197.586,
+     "speed": 2.3,
+     "steps": 229
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  },
+  {
+   "t": 197.948,
+   "hex": "44484a7644486867626d2f3162472f6b4977696739414b7564484a7662347976364755676856617764634a58365735315532616c36573967685a747a49464a79626d3570626d64556232524562465270625755676854593549464a79626d3570626d645464472f4d44586958687a4967556e2f75626d6c753631527044325245626d4e6c4977344d6843614364634a753941467362324a70366368674e6a674d68693d3d0d",
+   "readings": [
+    {
+     "t": 197.948,
+     "speed": 2.3,
+     "steps": 232
+    }
+   ],
+   "table": "v5",
+   "candidates": [
+    "v5"
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": null,
+   "firmware": "0004",
+   "belt_running": true
+  }
+ ],
+ "counts": {
+  "polls": 0,
+  "acks": 254,
+  "frames": 364,
+  "undecoded": 0,
+  "commands": 0
+ },
+ "final_table": "v5"
+}
