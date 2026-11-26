@@ -1437,3 +1437,13 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: bieznie
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `bieznia.sygnal.silny` | (nowy) | silny | `{sygnal}` w wierszu urządzenia, rssi ≥ -60. |
+| `bieznia.sygnal.sredni` | (nowy) | średni | rssi od -61 do -75. |
+| `bieznia.sygnal.slaby` | (nowy) | słaby | rssi poniżej -75. |
+| `bieznia.lista.twoja_podpis` | (nowy) | {model} · Twoja bieżnia · sygnał {sygnal} | Wiersz zapamiętanej bieżni na liście wyników skanowania. |
+| `modele.dodatkowy` | dodany | dodatkowy | Profil bieżni spoza aplikacji (pobrany albo dodany z pliku), można go usunąć. |

@@ -972,4 +972,9 @@ export const SLOWNIK = {
   "nazwy.osoba_domyslna": "Gracz",
   "nazwy.profil_domyslny": "Domyślny",
   "nazwy.profil": "Profil",
+  "bieznia.sygnal.silny": "silny",
+  "bieznia.sygnal.sredni": "średni",
+  "bieznia.sygnal.slaby": "słaby",
+  "bieznia.lista.twoja_podpis": "{model} · Twoja bieżnia · sygnał {sygnal}",
+  "modele.dodatkowy": "dodatkowy",
 } as const;

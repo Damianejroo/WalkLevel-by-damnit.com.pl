@@ -53,6 +53,9 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   pusto: { konto: false, historia: false, bieznia: 'brak' },
   pierwsze: { pierwsze: true, konto: false, historia: false, bieznia: 'brak' },
   dlugie: { dlugie: true, tryb: 'training', wlaczone: true },
+  // ekran „Wybierz bieżnię”: lista znalezionych urządzeń od startu i trwające skanowanie
+  'lista-biezni': {},
+  skanowanie: { bieznia: 'skanowanie' },
 };
 
 function czytajScenariusz(): Scenariusz {
@@ -287,6 +290,18 @@ export function utworzAtrape(): Silnik {
     settings.simulator = s === 'symulator';
   }
   przeliczBieznie();
+  if (p.get('stan') === 'lista-biezni') {
+    device.devices = [
+      { address: 'C8:47:8C:12:34:56', name: settings.deviceName, rssi: -58, treadmill: true, model },
+      { address: 'D1:22:33:44:55:66', name: 'URTM051', rssi: -71, treadmill: true, model: 'Urevo SpaceWalk 5L' },
+      { address: 'E2:22:33:44:55:77', name: 'FS-BT-T4-WALKINGPAD-PRO-2024', rssi: -79, treadmill: true, model: 'FS-BT-T4-WALKINGPAD-PRO-2024' },
+      { address: 'A0:11:22:33:44:55', name: 'Mi Band 7', rssi: -80, treadmill: false, model: 'Mi Band 7' },
+      { address: 'A0:11:22:33:44:57', name: 'Słuchawki_Bluetooth_o_bardzo_długiej_nazwie_bez_spacji', rssi: -66, treadmill: false, model: '' },
+      { address: 'A0:11:22:33:44:56', name: '', rssi: -88, treadmill: false, model: '' },
+    ];
+    device.scanText = t('bieznia.lista.znalezione', { liczba: 3, razem: 3 });
+  }
+  if (device.scanning) device.scanText = t('bieznia.lista.szukam');
 
   // ---------------- sterowanie ----------------
   const control: K.ControlView = {
