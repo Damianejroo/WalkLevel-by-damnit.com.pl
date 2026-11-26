@@ -233,9 +233,8 @@ mod tests {
 
     #[test]
     fn palette_has_20_distinct_colours_and_mint_is_app_default() {
-        let mut names = names();
-        names.dedup();
-        assert_eq!(names.len(), 20);
+        let unique: std::collections::HashSet<&str> = names().into_iter().collect();
+        assert_eq!(unique.len(), 20);
         let mint = color(Some("Mięta"));
         assert_eq!((mint.dark, mint.light), ("#8fc2b0", "#2f5d50"));
         assert_eq!(color(Some("nie ma takiego")).name, "Mięta");

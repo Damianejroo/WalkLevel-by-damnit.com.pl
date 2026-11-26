@@ -701,7 +701,8 @@ impl Store {
         if let Some(n) = name.filter(|n| !n.is_empty()) {
             dup.name = n;
         }
-        if let Some(icon) = &src.icon_file {
+        // jak `if src.icon_file:` w 0.5.x - pusta nazwa zostaje bez kopiowania
+        if let Some(icon) = src.icon_file.as_deref().filter(|f| !f.is_empty()) {
             dup.icon_file = self.copy_icon(icon, &dup.id);
         }
         dup

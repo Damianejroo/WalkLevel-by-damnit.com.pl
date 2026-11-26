@@ -41,7 +41,8 @@ LEGACY = {
 
 
 def dump(name: str, data: object) -> None:
-    (OUT / name).write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", "utf-8")
+    text = json.dumps(data, indent=1, ensure_ascii=False) + "\n"
+    (OUT / name).write_text(text, "utf-8", newline="\n")
 
 
 def realistic_store(tmp: Path) -> str:
@@ -180,6 +181,21 @@ def palette_cases() -> dict:
                 else:
                     c = (rng.randint(0, 255), rng.randint(0, 255), rng.randint(0, 255))
                 px.append((*c, rng.choice((0, 100, 127, 128, 200, 255))))
+        pixel_cases.append({"piksele": px, "kolor": paleta.from_rgb_pixels(px).name})
+    # przypadki brzegowe: remis koszyków (wygrywa pierwszy), progi alfy, jasności i 8%
+    edge = [
+        [(255, 0, 0, 255)] * 10 + [(0, 0, 255, 255)] * 10,
+        [(0, 0, 255, 255)] * 10 + [(255, 0, 0, 255)] * 10,
+        [(255, 0, 0, 127)] * 10,
+        [(255, 0, 0, 128)] * 10,
+        [(31, 0, 0, 255)] * 10,
+        [(255, 235, 235, 255)] * 10,
+        [(200, 0, 0, 255)] * 8 + [(128, 128, 128, 255)] * 92,
+        [(200, 0, 0, 255)] * 7 + [(128, 128, 128, 255)] * 93,
+        [(255, 0, 5, 255)] * 5,
+        [(0, 255, 255, 255)] * 5,
+    ]
+    for px in edge:
         pixel_cases.append({"piksele": px, "kolor": paleta.from_rgb_pixels(px).name})
     hues = [h / 2 for h in range(0, 720, 3)] + [-10.0, 365.5, 720.0]
     return {

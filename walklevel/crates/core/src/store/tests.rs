@@ -539,3 +539,126 @@ fn python_truthiness_helpers() {
     assert_eq!(py_str(&json!(2.5)), "2.5");
     assert!(is_new_id(&json!(new_id())));
 }
+
+/// Id (10 znaków hex, też w nazwie ikony „<id>.png”) zamienione na kolejne „ID<n>” według
+/// pierwszego wystąpienia - porównanie struktury z odwołaniami bez losowych wartości.
+fn canonical_ids(v: &Value, seen: &mut Vec<String>) -> Value {
+    match v {
+        Value::String(s) => {
+            let (id, suffix) = s
+                .strip_suffix(".png")
+                .map_or((s.as_str(), ""), |i| (i, ".png"));
+            if is_new_id(&json!(id)) {
+                let n = seen.iter().position(|x| x == id).unwrap_or_else(|| {
+                    seen.push(id.to_string());
+                    seen.len() - 1
+                });
+                json!(format!("ID{n}{suffix}"))
+            } else {
+                v.clone()
+            }
+        }
+        Value::Array(a) => Value::Array(a.iter().map(|x| canonical_ids(x, seen)).collect()),
+        Value::Object(o) => Value::Object(
+            o.iter()
+                .map(|(k, x)| (k.clone(), canonical_ids(x, seen)))
+                .collect(),
+        ),
+        other => other.clone(),
+    }
+}
+
+/// Te same operacje co realistic_store() w walklevel/tools/fixtures/dane.py dają ten sam plik.
+#[test]
+fn operations_match_python_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = Store::default_path(&dir.path().join("dane"));
+    let mut store = Store::create(&path, "Szalony Biegacz", "Morski", Some(&legacy())).unwrap();
+    store
+        .set(
+            "training_levels",
+            json!([{"name": "Lekko", "speed": 2.5}, {"name": "Szybko", "speed": 5.0}]),
+        )
+        .unwrap();
+    store
+        .set("window_geometry", json!("AdnQywADAAAAAAJTAAABLQ=="))
+        .unwrap();
+    let from = store.profile().id.clone();
+    let cp = store
+        .add_profile(
+            "Cyberpunk 2077",
+            NewProfile {
+                icon_color: Some("Banan".into()),
+                icon_file: Some("cp.png".into()),
+                exe: Some(r"D:\Gry\Cyberpunk 2077\bin\x64\Cyberpunk2077.exe".into()),
+                copy_from: Some(from),
+                ..Default::default()
+            },
+        )
+        .unwrap()
+        .id
+        .clone();
+    store.set("run_on", json!(5.5)).unwrap();
+    store
+        .update_profile(
+            &cp,
+            ProfileChanges {
+                online: Some(false),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    store
+        .add_profile(
+            "Minecraft",
+            NewProfile {
+                color: Some("Zieleń".into()),
+                glyph: Some("\u{e7fc}".into()),
+                activate: false,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    store.set("large_text", json!(true)).unwrap();
+    let first = store.people()[0].id.clone();
+    let second = store
+        .add_person("Nocna Wędrowniczka", "Orchidea", Some(&first))
+        .unwrap()
+        .clone();
+    store.set("theme", json!("light")).unwrap();
+    store.switch_profile(&second.profiles()[1].id).unwrap();
+    store.set("walk_speed", json!(3.25)).unwrap();
+    store.switch_person(&first).unwrap();
+
+    let cases = fixture("wczytanie.json");
+    let real = cases
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["nazwa"] == "realny_0_5")
+        .unwrap();
+    let python: Value = serde_json::from_str(real["wejscie"].as_str().unwrap()).unwrap();
+    let rust: Value = serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+    assert_eq!(
+        canonical_ids(&rust, &mut Vec::new()),
+        canonical_ids(&python, &mut Vec::new())
+    );
+}
+
+#[test]
+fn empty_icon_name_is_kept_on_copy() {
+    // 0.5.x: `if src.icon_file:` - pusta nazwa ikony nie jest kopiowana, zostaje pusta
+    let (_dir, mut store) = store();
+    let id = store.profile().id.clone();
+    store
+        .update_profile(
+            &id,
+            ProfileChanges {
+                icon_file: Some(Some(String::new())),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    let dup = store.duplicate_profile(&id).unwrap().unwrap();
+    assert_eq!(dup.icon_file.as_deref(), Some(""));
+}
