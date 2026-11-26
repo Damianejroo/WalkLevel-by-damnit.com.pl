@@ -1,9 +1,21 @@
-import { mount } from 'svelte'
-import './app.css'
-import App from './App.svelte'
+import { mount } from 'svelte';
+import './styles/tokeny.css';
+import './styles/baza.css';
+import App from './App.svelte';
 
-const app = mount(App, {
-  target: document.getElementById('app')!,
-})
+const root = document.documentElement;
+// Motyw przed pierwszym malowaniem (potem ustawia go App z ustawień osoby).
+root.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+// Tło okna nieprzezroczyste, dopóki okno nie ma włączonej Miki (tauri.conf.json windowEffects).
+root.classList.add('no-mica');
+// WebView2: bez menu kontekstowego przeglądarki (kontrakt 7.1).
+if ('__TAURI_INTERNALS__' in window) addEventListener('contextmenu', (e) => e.preventDefault());
 
-export default app
+// Podgląd w przeglądarce: ?szer=420 - aplikacja w kolumnie o szerokości okna Tauri.
+const szer = Number(new URLSearchParams(location.search).get('szer'));
+if (szer >= 320) {
+  root.style.setProperty('--podglad-szer', `${szer}px`);
+  root.classList.add('podglad-szer');
+}
+
+export default mount(App, { target: document.getElementById('app')! });

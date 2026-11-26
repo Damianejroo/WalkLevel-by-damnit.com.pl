@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "check": "node tests-ui/teksty.mjs --sprawdz && svelte-check --tsconfig ./tsconfig.app.json --fail-on-warnings && tsc -p tsconfig.node.json",
+    "teksty": "node tests-ui/teksty.mjs",
+    "test:ui": "node tests-ui/sprawdz.mjs",
     "tauri": "tauri"
   },
   "devDependencies": {
@@ -15,6 +17,7 @@
     "@tauri-apps/cli": "^2.12.6",
     "@tsconfig/svelte": "^5.0.8",
     "@types/node": "^24.19.2",
+    "playwright-core": "^1.65.1",
     "svelte": "^5.57.3",
     "svelte-check": "^4.7.7",
     "typescript": "~6.0.3",

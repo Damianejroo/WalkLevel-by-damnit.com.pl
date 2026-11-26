@@ -1,89 +1,104 @@
-<script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from './assets/vite.svg'
-  import heroImg from './assets/hero.png'
-  import Counter from './lib/Counter.svelte'
+<script lang="ts">
+  // Okno główne: jedno okno, ekrany montowane raz (przy pierwszym wejściu) i potem tylko chowane
+  // (docs/wyglad.md 6.3). Przejście: wejście opacity + translateX 8 px (wstecz -8 px) 220 ms,
+  // wyjście opacity 180 ms. Stan rdzenia - src/lib/stan.svelte.ts.
+  import { onMount, untrack } from 'svelte';
+  import { SvelteSet } from 'svelte/reactivity';
+  import Toast from './lib/ui/Toast.svelte';
+  import { EKRANY } from './ekrany/rejestr';
+  import { stan, ui, uruchom, schowajKomunikat, type Trasa } from './lib/stan.svelte';
+  import { ustawAkcent, ustawDuzyTekst, ustawMotyw } from './lib/wyglad';
+  import { t } from './lib/teksty';
+
+  let bladStartu = $state(false);
+  const odwiedzone = new SvelteSet<Trasa>(['main']);
+  let biezaca = $state<Trasa>('main');
+  let wychodzi = $state<Trasa | null>(null);
+  let zegarWyjscia: ReturnType<typeof setTimeout> | undefined;
+
+  onMount(() => {
+    const ciemny = matchMedia('(prefers-color-scheme: dark)');
+    const zmiana = () => (ui.ciemnySystem = ciemny.matches);
+    zmiana();
+    ciemny.addEventListener('change', zmiana);
+    uruchom().catch((e) => {
+      console.error('Start interfejsu nie powiódł się', e);
+      bladStartu = true;
+    });
+    return () => ciemny.removeEventListener('change', zmiana);
+  });
+
+  // Wygląd z ustawień osoby i profilu: tylko podmiana zmiennych CSS
+  $effect(() => {
+    if (!ui.gotowy) return;
+    const motyw = stan.settings.theme;
+    ustawMotyw(motyw === 'system' ? (ui.ciemnySystem ? 'dark' : 'light') : motyw);
+    ustawAkcent(stan.settings.profileColor, stan.statics.palette);
+    ustawDuzyTekst(stan.settings.largeText);
+    document.documentElement.dataset.gotowe = '1';
+  });
+
+  // Zmiana ekranu: poprzedni wygasa, nowy wjeżdża; odwiedzone zostają zamontowane
+  $effect(() => {
+    const nowa = ui.trasa;
+    untrack(() => {
+      if (nowa === biezaca) return;
+      odwiedzone.add(nowa);
+      wychodzi = biezaca;
+      biezaca = nowa;
+      clearTimeout(zegarWyjscia);
+      zegarWyjscia = setTimeout(() => (wychodzi = null), 180);
+    });
+  });
+
+  const parametry = (trasa: Trasa) => ui.stos.findLast((w) => w.trasa === trasa)?.parametry ?? {};
 </script>
 
-<section id="center">
-  <div class="hero">
-    <img src={heroImg} class="base" width="170" height="179" alt="" />
-    <img src={svelteLogo} class="framework" alt="Svelte logo" />
-    <img src={viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/App.svelte</code> and save to test <code>HMR</code></p>
-  </div>
-  <Counter />
-</section>
+<main class="okno">
+  {#if ui.gotowy}
+    {#each odwiedzone as trasa (trasa)}
+      {@const Ekran = EKRANY[trasa].komponent}
+      <div
+        class="ekran"
+        data-ekran={trasa}
+        data-stan={trasa === biezaca ? 'aktywny' : trasa === wychodzi ? 'wychodzi' : 'ukryty'}
+        style:--wl-przesun="{ui.kierunek * 8}px"
+        inert={trasa !== biezaca}
+      >
+        <Ekran parametry={parametry(trasa)} aktywny={trasa === biezaca} />
+      </div>
+    {/each}
+  {:else if bladStartu}
+    <p class="blad-startu">{t('wspolne.blad_nieznany')}</p>
+  {/if}
+</main>
 
-<div class="ticks"></div>
+<Toast toast={ui.toast} onzamknij={() => schowajKomunikat()} />
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#documentation-icon"></use>
-    </svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank" rel="noreferrer">
-          <img class="logo" src={viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://svelte.dev/" target="_blank" rel="noreferrer">
-          <img class="button-icon" src={svelteLogo} alt="" />
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#social-icon"></use>
-    </svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li>
-        <a href="https://github.com/vitejs/vite" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#github-icon"></use>
-          </svg>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a href="https://chat.vite.dev/" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#discord-icon"></use>
-          </svg>
-          Discord
-        </a>
-      </li>
-      <li>
-        <a href="https://x.com/vite_js" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#x-icon"></use>
-          </svg>
-          X.com
-        </a>
-      </li>
-      <li>
-        <a href="https://bsky.app/profile/vite.dev" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#bluesky-icon"></use>
-          </svg>
-          Bluesky
-        </a>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<div class="ticks"></div>
-<section id="spacer"></section>
+<style>
+  .okno {
+    display: grid;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .ekran {
+    grid-area: 1 / 1;
+    min-width: 0;
+    min-height: 0;
+  }
+  .ekran[data-stan='aktywny'] { animation: wl-wejscie var(--t-in) var(--ease-enter); }
+  .ekran[data-stan='wychodzi'] {
+    animation: wl-wyjscie var(--t-out) var(--ease-exit) forwards;
+    pointer-events: none;
+  }
+  .ekran[data-stan='ukryty'] { visibility: hidden; }
+  .blad-startu {
+    align-self: center;
+    justify-self: center;
+    max-width: 420px;
+    padding: var(--sp-4);
+    color: var(--text-2);
+    text-align: center;
+  }
+</style>
