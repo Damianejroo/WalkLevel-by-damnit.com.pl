@@ -220,7 +220,8 @@
     "name": "A",
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznany format profilu 2"
   },
   {
    "input": {
@@ -229,7 +230,8 @@
     "name": "A",
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "brak poprawnego id (litery, cyfry, myślniki)"
   },
   {
    "input": {
@@ -238,7 +240,8 @@
     "name": "A",
     "driver": "python"
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznany moduł 'python' (dozwolone: kingsmith, ftms)"
   },
   {
    "input": {
@@ -250,7 +253,8 @@
      "exec": 1
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznana możliwość 'exec'"
   },
   {
    "input": {
@@ -262,7 +266,8 @@
      "speed_max": 99
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "speed_max: 99 poza zakresem 0.5-30.0"
   },
   {
    "input": {
@@ -276,7 +281,8 @@
      ]
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "options: tylko proste wartości"
   },
   {
    "input": {
@@ -289,7 +295,8 @@
      "speed_max": 2
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "speed_min musi być mniejsze od speed_max"
   },
   {
    "input": {
@@ -351,7 +358,8 @@
      "pause": 1
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "pause: oczekiwano true/false"
   },
   {
    "input": {
@@ -363,7 +371,8 @@
      "speed_min": true
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "speed_min: oczekiwano liczby"
   },
   {
    "input": {
@@ -375,7 +384,8 @@
      "incline": 1
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznana możliwość 'incline'"
   },
   {
    "input": {
@@ -387,7 +397,8 @@
      "control": false
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznana możliwość 'control'"
   },
   {
    "input": {
@@ -420,6 +431,185 @@
       0.1
      ]
     ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "speed_step": 0.005
+    }
+   },
+   "profile": null,
+   "error": "speed_step: 0.005 poza zakresem 0.01-1.0"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "min_command_gap_s": -1
+    }
+   },
+   "profile": null,
+   "error": "min_command_gap_s: -1 poza zakresem 0.0-5.0"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "telemetry_s": "1"
+    }
+   },
+   "profile": null,
+   "error": "telemetry_s: oczekiwano liczby"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "capabilities": {
+     "speed_max": 25.0
+    }
+   },
+   "profile": {
+    "id": "a",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [
+     [
+      "speed_max",
+      25.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 2.5,
+    "id": "a",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null,
+   "error": "nieznany format profilu 2.5"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": null
+   },
+   "profile": null,
+   "error": "nieznany moduł None (dozwolone: kingsmith, ftms)"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": [
+     "ftms"
+    ]
+   },
+   "profile": null,
+   "error": "nieznany moduł ['ftms'] (dozwolone: kingsmith, ftms)"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": {
+     "a": [
+      1,
+      true,
+      null,
+      1.5
+     ]
+    }
+   },
+   "profile": null,
+   "error": "nieznany moduł {'a': [1, True, None, 1.5]} (dozwolone: kingsmith, ftms)"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "it's"
+   },
+   "profile": null,
+   "error": "nieznany moduł \"it's\" (dozwolone: kingsmith, ftms)"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": "A",
+    "driver": "a\"b'c\\\n\t"
+   },
+   "profile": null,
+   "error": "nieznany moduł 'a\"b\\'c\\\\\\n\\t' (dozwolone: kingsmith, ftms)"
+  },
+  {
+   "input": {
+    "format": [
+     1
+    ],
+    "id": "a",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": null,
+   "error": "nieznany format profilu [1]"
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "a",
+    "name": " Nazwa ",
+    "driver": "ftms"
+   },
+   "profile": {
+    "id": "a",
+    "name": "Nazwa",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   }
+  },
+  {
+   "input": {
+    "format": 1,
+    "id": "Ab-9-",
+    "name": "A",
+    "driver": "ftms"
+   },
+   "profile": {
+    "id": "Ab-9-",
+    "name": "A",
+    "driver": "ftms",
+    "match": [],
+    "capabilities": [],
     "options": [],
     "source": "wbudowany"
    }
@@ -512,7 +702,8 @@
      "x": null
     }
    },
-   "profile": null
+   "profile": null,
+   "error": "options: tylko proste wartości"
   },
   {
    "input": {
@@ -524,7 +715,8 @@
      1
     ]
    },
-   "profile": null
+   "profile": null,
+   "error": "options: tylko proste wartości"
   },
   {
    "input": {
@@ -537,7 +729,8 @@
      ""
     ]
    },
-   "profile": null
+   "profile": null,
+   "error": "match: lista początków nazw Bluetooth"
   },
   {
    "input": {
@@ -547,7 +740,8 @@
     "driver": "ftms",
     "match": "X"
    },
-   "profile": null
+   "profile": null,
+   "error": "match: lista początków nazw Bluetooth"
   },
   {
    "input": {
@@ -557,7 +751,8 @@
     "driver": "ftms",
     "match": null
    },
-   "profile": null
+   "profile": null,
+   "error": "match: lista początków nazw Bluetooth"
   },
   {
    "input": {
@@ -607,7 +802,8 @@
     "name": "   ",
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "brak nazwy modelu"
   },
   {
    "input": {
@@ -616,7 +812,8 @@
     "name": 5,
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "brak nazwy modelu"
   },
   {
    "input": {
@@ -625,7 +822,8 @@
     "name": "A",
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "brak poprawnego id (litery, cyfry, myślniki)"
   },
   {
    "input": {
@@ -634,7 +832,8 @@
     "name": "A",
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "brak poprawnego id (litery, cyfry, myślniki)"
   },
   {
    "input": {
@@ -660,7 +859,8 @@
     "name": "A",
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "brak poprawnego id (litery, cyfry, myślniki)"
   },
   {
    "input": {
@@ -703,7 +903,8 @@
     "name": "A",
     "driver": "ftms"
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznany format profilu '1'"
   },
   {
    "input": {
@@ -729,25 +930,369 @@
     "name": "A",
     "driver": "symulator"
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznany moduł 'symulator' (dozwolone: kingsmith, ftms)"
   },
   {
    "input": {
     "id": "a"
    },
-   "profile": null
+   "profile": null,
+   "error": "nieznany format profilu None"
   },
   {
    "input": [],
-   "profile": null
+   "profile": null,
+   "error": "profil musi być obiektem JSON"
   },
   {
    "input": "tekst",
-   "profile": null
+   "profile": null,
+   "error": "profil musi być obiektem JSON"
   },
   {
    "input": null,
-   "profile": null
+   "profile": null,
+   "error": "profil musi być obiektem JSON"
+  }
+ ],
+ "user_dir": {
+  "files": {
+   "a.json": "7b22666f726d6174223a20312c20226964223a2022647570222c20226e616d65223a20224d61c582612041222c2022647269766572223a202266746d73222c20226d61746368223a205b2244555041225d7d",
+   "B.json": "7b22666f726d6174223a20312c20226964223a2022647570222c20226e616d65223a20224475c5bc612042222c2022647269766572223a202266746d73222c20226d61746368223a205b2244555042225d7d",
+   "c.json": "7b6e6965206a736f6e",
+   "d.json": "efbbbf7b22666f726d6174223a20312c20226964223a2022626f6d222c20226e616d65223a2022424f4d222c2022647269766572223a202266746d73222c20226d61746368223a205b22424f4d225d7d",
+   "indeks.json": "7b22666f726d6174223a20312c20226964223a2022696e64656b73222c20226e616d65223a2022496e64656b73222c2022647269766572223a202266746d73222c20226d61746368223a205b22494458225d7d",
+   ".json": "7b22666f726d6174223a20312c20226964223a20226b726f706b61222c20226e616d65223a20224b726f706b61222c2022647269766572223a202266746d73222c20226d61746368223a205b22444f54225d7d",
+   "E.JSON": "7b22666f726d6174223a20312c20226964223a202264757a65222c20226e616d65223a20224475c5bc6520726f7a737a65727a656e6965222c2022647269766572223a202266746d73222c20226d61746368223a205b22455854225d7d",
+   "f.json.txt": "7b22666f726d6174223a20312c20226964223a2022747874222c20226e616d65223a202254656b7374222c2022647269766572223a202266746d73222c20226d61746368223a205b22545854225d7d",
+   "h.json": "7b22666f726d6174223a20312c20226964223a2022757265766f222c20226e616d65223a2022557265766f20706f646d69656e696f6e65222c2022647269766572223a202266746d73222c20226d61746368223a205b225552544d225d7d",
+   "i.json": "5b5d",
+   "j.json": "7b22666f726d6174223a20312c20226964223a2022ff227d",
+   "k.json": "7b22666f726d6174223a20312c20226964223a20227a77796b6c79222c20226e616d65223a20225a77796bc58279222c2022647269766572223a202266746d73222c20226d61746368223a205b225a57225d7d"
+  },
+  "all": [
+   {
+    "id": "kingsmith-x21",
+    "name": "KingSmith WalkingPad X21",
+    "driver": "kingsmith",
+    "match": [
+     "KS-HDSY-X21"
+    ],
+    "capabilities": [
+     [
+      "speed_max",
+      12.0
+     ],
+     [
+      "speed_min",
+      0.5
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "telemetry_s",
+      2.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   {
+    "id": "kingsmith-x23",
+    "name": "KingSmith WalkingPad X23",
+    "driver": "kingsmith",
+    "match": [
+     "KS-NACH-MXG"
+    ],
+    "capabilities": [],
+    "options": [
+     [
+      "table",
+      "v7"
+     ]
+    ],
+    "source": "wbudowany"
+   },
+   {
+    "id": "kingsmith",
+    "name": "KingSmith WalkingPad",
+    "driver": "kingsmith",
+    "match": [
+     "KS-",
+     "WALKINGPAD"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "wbudowany"
+   },
+   {
+    "id": "urevo-spacewalk-5l",
+    "name": "Urevo SpaceWalk 5L",
+    "driver": "ftms",
+    "match": [
+     "URTM054"
+    ],
+    "capabilities": [
+     [
+      "min_command_gap_s",
+      0.8
+     ],
+     [
+      "pause",
+      true
+     ],
+     [
+      "speed_max",
+      6.0
+     ],
+     [
+      "speed_min",
+      1.0
+     ],
+     [
+      "speed_step",
+      0.1
+     ],
+     [
+      "start_delay_s",
+      4.0
+     ],
+     [
+      "start_speed",
+      1.0
+     ],
+     [
+      "steps",
+      true
+     ],
+     [
+      "telemetry_s",
+      1.0
+     ]
+    ],
+    "options": [],
+    "source": "wbudowany"
+   },
+   {
+    "id": "urevo",
+    "name": "Urevo podmienione",
+    "driver": "ftms",
+    "match": [
+     "URTM"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "dodatkowy"
+   },
+   {
+    "id": "kropka",
+    "name": "Kropka",
+    "driver": "ftms",
+    "match": [
+     "DOT"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "dodatkowy"
+   },
+   {
+    "id": "dup",
+    "name": "Duża B",
+    "driver": "ftms",
+    "match": [
+     "DUPB"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "dodatkowy"
+   },
+   {
+    "id": "duze",
+    "name": "Duże rozszerzenie",
+    "driver": "ftms",
+    "match": [
+     "EXT"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "dodatkowy"
+   },
+   {
+    "id": "zwykly",
+    "name": "Zwykły",
+    "driver": "ftms",
+    "match": [
+     "ZW"
+    ],
+    "capabilities": [],
+    "options": [],
+    "source": "dodatkowy"
+   }
+  ]
+ },
+ "index": [
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022612e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d2c207b22706c696b223a2022622e6a736f6e222c2022736861323536223a202241424142414241424142414241424142414241424142414241424142414241424142414241424142414241424142414241424142414241424142414241424142227d5d7d",
+   "entries": [
+    [
+     "a.json",
+     "abababababababababababababababababababababababababababababababab"
+    ],
+    [
+     "b.json",
+     "abababababababababababababababababababababababababababababababab"
+    ]
+   ]
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b5d7d",
+   "entries": []
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a207b7d7d",
+   "entries": []
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a2022227d",
+   "entries": []
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a206e756c6c7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a20226162227d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a207b2261223a20317d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20747275652c202270726f66696c65223a205b5d7d",
+   "entries": []
+  },
+  {
+   "hex": "7b22666f726d6174223a20312e302c202270726f66696c65223a205b5d7d",
+   "entries": []
+  },
+  {
+   "hex": "7b22666f726d6174223a202231222c202270726f66696c65223a205b5d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20322c202270726f66696c65223a205b5d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20317d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b2270726f66696c65223a205b5d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "5b5d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "6e756c6c",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022612e6a736f6e227d5d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022612e6a736f6e222c2022736861323536223a20357d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b22612e6a736f6e225d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b5b312c20325d5d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a20222e2e2f782e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022782f792e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022615c5c622e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022433a782e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022696e64656b732e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022782e4a534f4e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a20222e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "entries": [
+    [
+     ".json",
+     "abababababababababababababababababababababababababababababababab"
+    ]
+   ]
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a20226120622e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "entries": [
+    [
+     "a b.json",
+     "abababababababababababababababababababababababababababababababab"
+    ]
+   ]
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022612e6a736f6e222c2022736861323536223a20226162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022612e6a736f6e222c2022736861323536223a2022c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485c485227d5d7d",
+   "entries": [
+    [
+     "a.json",
+     "ąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąąą"
+    ]
+   ]
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a20352c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d5d7d",
+   "error": "Lista modeli zawiera niepoprawny wpis - przerwano."
+  },
+  {
+   "hex": "7b22666f726d6174223a20312c202270726f66696c65223a205b7b22706c696b223a2022612e6a736f6e222c2022736861323536223a202261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162227d2c207b2278223a20317d5d7d",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "7b",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "",
+   "error": "Nieznany format listy modeli - zaktualizuj aplikację."
+  },
+  {
+   "hex": "20207b22666f726d6174223a20312c202270726f66696c65223a205b5d7d2020",
+   "entries": []
   }
  ],
  "lookup": [

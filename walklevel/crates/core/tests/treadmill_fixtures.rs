@@ -141,6 +141,53 @@ fn kingsmith_encode_decode_match_python() {
 }
 
 #[test]
+fn kingsmith_base64_padding_matches_python() {
+    let data = fixture("kingsmith.json");
+    let cases = data["decode_padding"].as_array().expect("dopełnienie");
+    assert!(cases.len() > 700);
+    for case in cases {
+        let frame = bytes(&case["hex"]);
+        assert_eq!(
+            ks::decode(&frame, "v1").as_deref(),
+            case["text"].as_str(),
+            "{}",
+            String::from_utf8_lossy(&frame)
+        );
+    }
+}
+
+#[test]
+fn kingsmith_replies_drive_state_like_python() {
+    let data = fixture("x21_trace.json");
+    let mut telemetry = ks::Telemetry::new(&ks::table_order("KS-HDSY-X21C"));
+    for step in data["handle"].as_array().expect("odpowiedzi") {
+        let text = step["text"].as_str().expect("tekst");
+        let reading = telemetry.handle(text, f(&step["t"]));
+        let actual: Vec<Value> = reading
+            .iter()
+            .map(|r| json!([r.speed_kmh, r.steps]))
+            .collect();
+        assert_same(&json!(actual), &step["readings"], text);
+        assert_eq!(telemetry.run_state, step["run_state"].as_i64(), "{text}");
+        assert_eq!(
+            telemetry.control_mode,
+            step["control_mode"].as_i64(),
+            "{text}"
+        );
+        assert_eq!(telemetry.last_error, step["last_error"].as_i64(), "{text}");
+        assert_eq!(
+            telemetry.firmware,
+            step["firmware"].as_str().expect("firmware")
+        );
+        assert_eq!(telemetry.last_speed, f(&step["last_speed"]), "{text}");
+        assert_eq!(telemetry.last_steps, step["last_steps"].as_i64(), "{text}");
+        let belt = telemetry.belt_speed().map(|(s, t)| vec![s, t]);
+        assert_same(&json!(belt), &step["belt_speed"], text);
+        assert_eq!(telemetry.belt_running(), step["belt_running"].as_bool());
+    }
+}
+
+#[test]
 fn kingsmith_texts_match_python() {
     let data = fixture("kingsmith.json");
     for case in data["known"].as_array().expect("known") {
@@ -310,6 +357,13 @@ fn ftms_frames_and_commands_match_python() {
             case["hex"].as_str().unwrap_or(""),
         );
     }
+    for case in data["firmware"].as_array().expect("firmware") {
+        assert_eq!(
+            ftms::decode_firmware(&bytes(&case["hex"])),
+            case["text"].as_str().expect("tekst"),
+            "{case}"
+        );
+    }
     for case in data["set_speed"].as_array().expect("speed") {
         assert_eq!(
             ftms::encode_set_speed(f(&case["kmh"])).ok(),
@@ -400,12 +454,17 @@ fn urevo_trace_drives_state_like_python() {
 fn profiles_match_python() {
     let data = fixture("profiles.json");
     for case in data["parse"].as_array().expect("parse") {
-        let parsed = profiles::parse_profile(&case["input"], profiles::SOURCE_BUILTIN).ok();
+        let parsed = profiles::parse_profile(&case["input"], profiles::SOURCE_BUILTIN);
         assert_same(
-            &profile_py(parsed.as_ref()),
+            &profile_py(parsed.as_ref().ok()),
             &case["profile"],
             &case["input"].to_string(),
         );
+        // komunikat trafia do użytkownika przy dodawaniu profilu z pliku
+        if let Some(message) = case["error"].as_str() {
+            let actual = parsed.err().map(|e| e.to_string());
+            assert_eq!(actual.as_deref(), Some(message), "{}", case["input"]);
+        }
     }
     let registry = ProfileRegistry::builtin();
     let all: Vec<Value> = registry.all().iter().map(|p| profile_py(Some(p))).collect();
@@ -463,6 +522,21 @@ fn profiles_match_python() {
         &data["default_caps"],
         "domyślne",
     );
+}
+
+/// Folder dodatkowych profili: te same pliki, ta sama lista co `all_profiles()` w Pythonie
+/// (fixtura z Windows: `*.json` bez wielkości liter, kolejność plików jak `sorted(Path)`).
+#[cfg(windows)]
+#[test]
+fn user_profile_folder_loads_like_python() {
+    let data = fixture("profiles.json");
+    let dir = tempfile::tempdir().expect("folder");
+    for (name, hex) in data["user_dir"]["files"].as_object().expect("pliki") {
+        std::fs::write(dir.path().join(name), bytes(hex)).expect("zapis");
+    }
+    let registry = ProfileRegistry::load(dir.path());
+    let all: Vec<Value> = registry.all().iter().map(|p| profile_py(Some(p))).collect();
+    assert_same(&json!(all), &data["user_dir"]["all"], "folder profili");
 }
 
 #[test]

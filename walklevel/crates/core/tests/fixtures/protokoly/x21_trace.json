@@ -7214,5 +7214,577 @@
   "undecoded": 0,
   "commands": 0
  },
- "final_table": "v5"
+ "final_table": "v5",
+ "handle": [
+  {
+   "t": 0.0,
+   "text": "servers 0",
+   "readings": [],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": null,
+   "belt_running": null
+  },
+  {
+   "t": 0.5,
+   "text": "version 0014",
+   "readings": [],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": null,
+   "belt_running": null
+  },
+  {
+   "t": 0.6,
+   "text": "version 0015",
+   "readings": [],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": null,
+   "belt_running": null
+  },
+  {
+   "t": 0.7,
+   "text": "version",
+   "readings": [],
+   "run_state": null,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": null,
+   "belt_running": null
+  },
+  {
+   "t": 1.0,
+   "text": "props CurrentSpeed 2.5",
+   "readings": [
+    [
+     2.5,
+     null
+    ]
+   ],
+   "run_state": 1,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 2.5,
+   "last_steps": null,
+   "belt_speed": [
+    2.5,
+    1.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 2.0,
+   "text": "servers 0",
+   "readings": [
+    [
+     2.5,
+     null
+    ]
+   ],
+   "run_state": 1,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 2.5,
+   "last_steps": null,
+   "belt_speed": [
+    2.5,
+    1.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 6.9,
+   "text": "servers getProp 1 2 7",
+   "readings": [
+    [
+     2.5,
+     null
+    ]
+   ],
+   "run_state": 1,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 2.5,
+   "last_steps": null,
+   "belt_speed": [
+    2.5,
+    1.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 7.1,
+   "text": "servers 0",
+   "readings": [],
+   "run_state": 1,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 2.5,
+   "last_steps": null,
+   "belt_speed": [
+    2.5,
+    1.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 7.5,
+   "text": "props runState 0",
+   "readings": [
+    [
+     0.0,
+     null
+    ]
+   ],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": null,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 8.0,
+   "text": "props Error -5000",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": -5000,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 8.1,
+   "text": "props Error 12",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": 12,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 8.2,
+   "text": "props Error x",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": 12,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 8.3,
+   "text": "props Error",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": 12,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 8.4,
+   "text": "props Error -5000 extra",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": 12,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 8.5,
+   "text": "props Error +5_000",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": 5000,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 8.6,
+   "text": "props Error -4999",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": null,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    7.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 9.0,
+   "text": "props ControlMode 1",
+   "readings": [
+    [
+     0.0,
+     null
+    ]
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": null,
+   "belt_speed": [
+    0.0,
+    9.0
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 9.5,
+   "text": "props RunningSteps 123.9",
+   "readings": [
+    [
+     0.0,
+     123
+    ]
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": 123,
+   "belt_speed": [
+    0.0,
+    9.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 10.0,
+   "text": "props CurrentSpeed -1",
+   "readings": [
+    [
+     0.0,
+     123
+    ]
+   ],
+   "run_state": 0,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": 123,
+   "belt_speed": [
+    0.0,
+    10.0
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 10.5,
+   "text": "props runState 1 CurrentSpeed 3.0",
+   "readings": [
+    [
+     3.0,
+     123
+    ]
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 3.0,
+   "last_steps": 123,
+   "belt_speed": [
+    3.0,
+    10.5
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 11.0,
+   "text": "props CurrentSpeed 0 runState 1",
+   "readings": [
+    [
+     0.0,
+     123
+    ]
+   ],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": 123,
+   "belt_speed": [
+    0.0,
+    11.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 11.5,
+   "text": "shake 00",
+   "readings": [],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": 123,
+   "belt_speed": [
+    0.0,
+    11.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 12.0,
+   "text": "format error",
+   "readings": [],
+   "run_state": 1,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": 123,
+   "belt_speed": [
+    0.0,
+    11.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 12.5,
+   "text": "props runState 2",
+   "readings": [
+    [
+     0.0,
+     123
+    ]
+   ],
+   "run_state": 2,
+   "control_mode": 1,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": 123,
+   "belt_speed": [
+    0.0,
+    12.5
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 13.0,
+   "text": "props ControlMode 0 runState 1.9",
+   "readings": [
+    [
+     0.0,
+     123
+    ]
+   ],
+   "run_state": 1,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": 123,
+   "belt_speed": [
+    0.0,
+    13.0
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 13.5,
+   "text": "props RunningSteps -7.5 spm 90",
+   "readings": [
+    [
+     0.0,
+     -7
+    ]
+   ],
+   "run_state": 1,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": -7,
+   "belt_speed": [
+    0.0,
+    13.5
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 14.0,
+   "text": "props mcu_version 1.2.3",
+   "readings": [],
+   "run_state": 1,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": -7,
+   "belt_speed": [
+    0.0,
+    13.5
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 14.1,
+   "text": "props a b",
+   "readings": [],
+   "run_state": 1,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": -7,
+   "belt_speed": [
+    0.0,
+    13.5
+   ],
+   "belt_running": true
+  },
+  {
+   "t": 15.0,
+   "text": "props runState 0 CurrentSpeed 2.0",
+   "readings": [
+    [
+     0.0,
+     -7
+    ]
+   ],
+   "run_state": 0,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": -7,
+   "belt_speed": [
+    0.0,
+    15.0
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 19.0,
+   "text": "servers 0",
+   "readings": [
+    [
+     0.0,
+     -7
+    ]
+   ],
+   "run_state": 0,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": -7,
+   "belt_speed": [
+    0.0,
+    15.0
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 21.0,
+   "text": "servers 0",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": -7,
+   "belt_speed": [
+    0.0,
+    15.0
+   ],
+   "belt_running": false
+  },
+  {
+   "t": 21.5,
+   "text": "net 1",
+   "readings": [],
+   "run_state": 0,
+   "control_mode": 0,
+   "last_error": -4999,
+   "firmware": "0014",
+   "last_speed": 0.0,
+   "last_steps": -7,
+   "belt_speed": [
+    0.0,
+    15.0
+   ],
+   "belt_running": false
+  }
+ ]
 }

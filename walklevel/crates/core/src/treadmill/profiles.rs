@@ -206,15 +206,52 @@ fn py_truthy(value: &Value) -> bool {
     }
 }
 
-/// `repr()` wartości JSON w Pythonie (do komunikatów).
+/// `repr()` wartości JSON w Pythonie (do komunikatów): None/True/False, teksty w apostrofach
+/// (w cudzysłowie, gdy zawierają tylko apostrof), listy i słowniki ze spacją po przecinku.
 fn py_repr(value: Option<&Value>) -> String {
     match value {
         None | Some(Value::Null) => "None".into(),
         Some(Value::Bool(true)) => "True".into(),
         Some(Value::Bool(false)) => "False".into(),
-        Some(Value::String(s)) => format!("'{s}'"),
-        Some(other) => other.to_string(),
+        Some(Value::String(s)) => py_str_repr(s),
+        Some(Value::Number(n)) => n.to_string(),
+        Some(Value::Array(items)) => {
+            let parts: Vec<String> = items.iter().map(|v| py_repr(Some(v))).collect();
+            format!("[{}]", parts.join(", "))
+        }
+        Some(Value::Object(map)) => {
+            let parts: Vec<String> = map
+                .iter()
+                .map(|(k, v)| format!("{}: {}", py_str_repr(k), py_repr(Some(v))))
+                .collect();
+            format!("{{{}}}", parts.join(", "))
+        }
     }
+}
+
+fn py_str_repr(text: &str) -> String {
+    let quote = if text.contains('\'') && !text.contains('"') {
+        '"'
+    } else {
+        '\''
+    };
+    let mut out = String::from(quote);
+    for c in text.chars() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if c == quote => {
+                out.push('\\');
+                out.push(c);
+            }
+            c if (c as u32) < 0x20 || c == '\x7f' => out.push_str(&format!("\\x{:02x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push(quote);
+    out
 }
 
 fn py_float_repr(value: f64) -> String {
@@ -365,31 +402,37 @@ pub fn parse_profile_bytes(data: &[u8], source: &str) -> Result<ModelProfile, Pr
     parse_profile(&value, source)
 }
 
-/// Pliki *.json z folderu (bez indeks.json), posortowane po nazwie.
+/// Klucz sortowania nazw plików jak `sorted(Path)` w Pythonie: na Windows bez wielkości liter.
+fn file_sort_key(name: &str) -> String {
+    if cfg!(windows) {
+        name.to_lowercase()
+    } else {
+        name.to_string()
+    }
+}
+
+/// Pliki *.json z folderu (bez indeks.json), posortowane jak w Pythonie. Wzorzec `*.json` jak
+/// glob w pathlib: pasuje też sama ".json", a na Windows wielkość liter nie ma znaczenia.
 fn json_files(directory: &Path) -> Vec<PathBuf> {
     let Ok(entries) = std::fs::read_dir(directory) else {
         return Vec::new();
     };
-    let mut files: Vec<PathBuf> = entries
+    let mut files: Vec<(String, PathBuf)> = entries
         .filter_map(Result::ok)
         .map(|e| e.path())
         .filter(|p| p.is_file())
-        .filter(|p| {
-            let ext = p
-                .extension()
-                .map(|e| e.to_string_lossy().to_string())
-                .unwrap_or_default();
-            // na Windows wzorzec *.json nie rozróżnia wielkości liter (jak glob w Pythonie)
-            if cfg!(windows) {
-                ext.eq_ignore_ascii_case("json")
+        .filter_map(|p| {
+            let name = p.file_name()?.to_string_lossy().to_string();
+            let matches = if cfg!(windows) {
+                name.to_lowercase().ends_with(".json")
             } else {
-                ext == "json"
-            }
+                name.ends_with(".json")
+            };
+            (matches && name != INDEX).then_some((name, p))
         })
-        .filter(|p| p.file_name().is_some_and(|n| n != INDEX))
         .collect();
-    files.sort_by_key(|p| p.file_name().map(|n| n.to_string_lossy().to_string()));
-    files
+    files.sort_by_cached_key(|(name, _)| file_sort_key(name));
+    files.into_iter().map(|(_, p)| p).collect()
 }
 
 fn merge(found: &mut Vec<ModelProfile>, profile: ModelProfile) {
@@ -774,10 +817,14 @@ fn parse_index(data: &[u8]) -> Result<Vec<(String, String)>, DownloadError> {
     if !format_ok {
         return Err(DownloadError::BadIndex);
     }
-    let list = obj
-        .get("profile")
-        .and_then(Value::as_array)
-        .ok_or(DownloadError::BadIndex)?;
+    // Python iteruje po `index["profile"]`: pusty obiekt albo pusty tekst = pusta lista
+    let empty = Vec::new();
+    let list = match obj.get("profile") {
+        Some(Value::Array(list)) => list,
+        Some(Value::Object(map)) if map.is_empty() => &empty,
+        Some(Value::String(s)) if s.is_empty() => &empty,
+        _ => return Err(DownloadError::BadIndex),
+    };
     let mut entries = Vec::new();
     for entry in list {
         let entry = entry.as_object().ok_or(DownloadError::BadIndex)?;
@@ -834,7 +881,7 @@ fn json_bytes_equal(a: &[u8], b: &[u8]) -> bool {
 /// Lista modeli dla plików (nazwa, treść) - jak build_index w Pythonie.
 pub fn build_index(files: &[(String, Vec<u8>)]) -> Value {
     let mut sorted: Vec<&(String, Vec<u8>)> = files.iter().filter(|(n, _)| n != INDEX).collect();
-    sorted.sort_by(|a, b| a.0.cmp(&b.0));
+    sorted.sort_by_cached_key(|(name, _)| file_sort_key(name));
     let profile: Vec<Value> = sorted
         .iter()
         .map(|(name, data)| serde_json::json!({"plik": name, "sha256": sha256(data)}))
@@ -934,6 +981,31 @@ mod tests {
             written.replace("\r\n", "\n"),
             BUILTIN_INDEX.replace("\r\n", "\n")
         );
+    }
+
+    /// Lista modeli jak `_parse_index` w Pythonie (fixtura z walklevel/tools/fixtures).
+    #[test]
+    fn index_parsing_matches_python() {
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/fixtures/protokoly/profiles.json"
+        );
+        let data: Value =
+            serde_json::from_str(&std::fs::read_to_string(path).expect("fixtura")).expect("JSON");
+        let cases = data["index"].as_array().expect("index");
+        assert!(cases.len() > 30);
+        for case in cases {
+            let raw = hex::decode(case["hex"].as_str().expect("hex")).expect("hex");
+            let actual = match parse_index(&raw) {
+                Ok(entries) => json!({"entries": entries}),
+                Err(e) => json!({"error": e.to_string()}),
+            };
+            let mut expected = case.clone();
+            if let Some(obj) = expected.as_object_mut() {
+                obj.remove("hex");
+            }
+            assert_eq!(actual, expected, "{}", String::from_utf8_lossy(&raw));
+        }
     }
 
     #[test]

@@ -11,7 +11,9 @@ więc ponowne uruchomienie daje te same pliki.
 from __future__ import annotations
 
 import asyncio
+import itertools
 import json
+import tempfile
 import math
 import random
 from dataclasses import asdict, replace
@@ -175,9 +177,20 @@ def kingsmith_fixture() -> dict[str, Any]:
                 junk = b"x" * rng.choice([100, ks.MAX_BUFFER, ks.MAX_BUFFER + 1])
                 feeds.append({"hex": junk.hex(), "frames": [f.hex() for f in fb.feed(junk)]})
         buffers.append(feeds)
+    # Dopełnienie base64 (validate=True): wszystkie ramki 1-4 znaków z małego alfabetu
+    # i losowe dłuższe - tablica v1 (dekodowanie jest takie samo dla każdej tablicy).
+    small = b"AQgw="
+    plain = [bytes(p) for n in range(1, 5) for p in itertools.product(small, repeat=n)]
+    extra = random.Random(7)  # osobne ziarno - reszta fixtur bez zmian
+    plain += [bytes(extra.choice(small) for _ in range(extra.randrange(5, 13))) for _ in range(300)]
+    padding = []
+    for p in plain:
+        frame = p.translate(bytes.maketrans(ks.PLAINTEXT, ks.TABLES["v1"]))
+        padding.append({"hex": frame.hex(), "text": ks.decode(frame, "v1")})
     return {
         "encode": encode,
         "decode": decode,
+        "decode_padding": padding,
         "known": known,
         "props": props,
         "speed_command": speed,
@@ -232,7 +245,80 @@ def x21_trace_fixture() -> dict[str, Any]:
         "events": events,
         "counts": dict(driver.counts),
         "final_table": driver.codec.table,
+        "handle": kingsmith_handle_fixture(),
     }
+
+
+# Pewne odpowiedzi bieżni (po odszyfrowaniu) z czasem - stan taśmy, błędy, podtrzymanie.
+HANDLE_TEXTS = [
+    (0.0, "servers 0"),
+    (0.5, "version 0014"),
+    (0.6, "version 0015"),
+    (0.7, "version"),
+    (1.0, "props CurrentSpeed 2.5"),
+    (2.0, "servers 0"),
+    (6.9, "servers getProp 1 2 7"),
+    (7.1, "servers 0"),
+    (7.5, "props runState 0"),
+    (8.0, "props Error -5000"),
+    (8.1, "props Error 12"),
+    (8.2, "props Error x"),
+    (8.3, "props Error"),
+    (8.4, "props Error -5000 extra"),
+    (8.5, "props Error +5_000"),
+    (8.6, "props Error -4999"),
+    (9.0, "props ControlMode 1"),
+    (9.5, "props RunningSteps 123.9"),
+    (10.0, "props CurrentSpeed -1"),
+    (10.5, "props runState 1 CurrentSpeed 3.0"),
+    (11.0, "props CurrentSpeed 0 runState 1"),
+    (11.5, "shake 00"),
+    (12.0, "format error"),
+    (12.5, "props runState 2"),
+    (13.0, "props ControlMode 0 runState 1.9"),
+    (13.5, "props RunningSteps -7.5 spm 90"),
+    (14.0, "props mcu_version 1.2.3"),
+    (14.1, "props a b"),
+    (15.0, "props runState 0 CurrentSpeed 2.0"),
+    (19.0, "servers 0"),
+    (21.0, "servers 0"),
+    (21.5, "net 1"),
+]
+
+
+def kingsmith_handle_fixture() -> list[dict[str, Any]]:
+    clock = _Clock()
+    ks_driver.time.monotonic = lambda: clock.t  # type: ignore[attr-defined]
+    readings: list[list[Any]] = []
+    channel = ks_driver.Channel("00011234-0000-1000-8000-00805f9b34fb", None, None)
+    driver = ks_driver.KingSmithDriver(
+        None,  # type: ignore[arg-type]
+        [channel],
+        "KS-HDSY-X21C",
+        lambda s, k: readings.append([s, k]),
+        None,
+    )
+    out = []
+    for t, text in HANDLE_TEXTS:
+        clock.t = t
+        before = len(readings)
+        driver._handle(text)
+        out.append(
+            {
+                "t": t,
+                "text": text,
+                "readings": readings[before:],
+                "run_state": driver.run_state,
+                "control_mode": driver.control_mode,
+                "last_error": driver.last_error,
+                "firmware": driver.info.firmware,
+                "last_speed": driver.last_speed,
+                "last_steps": driver.last_steps,
+                "belt_speed": list(b) if (b := driver.belt_speed()) else None,
+                "belt_running": driver.belt_running(),
+            }
+        )
+    return out
 
 
 # --- FTMS --------------------------------------------------------------------------------
@@ -276,8 +362,18 @@ def ftms_fixture() -> dict[str, Any]:
         s = ftms.decode_speed_range(raw)
         i = ftms.decode_incline_range(raw)
         ranges.append({"hex": raw.hex(), "speed": list(s) if s else None, "incline": list(i) if i else None})
+    # Firmware z 0x2A26 - jak FtmsDriver.start()
+    firmware_raw = [
+        b"V90.08.15\x00\x00 ", b"", b"\x00\x00", b" V1 \n", b"V1\x00 \n\x00", b"\xffV1\x80",
+        b"\tV1\t", b"\x1cV1\x1f", b"V\x001", b"\x00 \x00V2", b"\r\n",
+    ]
+    firmware = [
+        {"hex": r.hex(), "text": r.decode("ascii", "replace").strip("\x00 ").strip()}
+        for r in firmware_raw
+    ]
     return {
         "decode": decode,
+        "firmware": firmware,
         "set_speed": set_speed,
         "set_incline": set_incline,
         "responses": responses,
@@ -348,6 +444,91 @@ def profile_dict(p: profile.ModelProfile | None) -> dict[str, Any] | None:
     }
 
 
+def _profile_bytes(pid: str, name: str, match: str) -> bytes:
+    data = {"format": 1, "id": pid, "name": name, "driver": "ftms", "match": [match]}
+    return json.dumps(data, ensure_ascii=False).encode("utf-8")
+
+
+def user_dir_fixture() -> dict[str, Any]:
+    """Folder dodatkowych profili (Windows: *.json bez wielkości liter, kolejność jak Path)."""
+    files = {
+        "a.json": _profile_bytes("dup", "Mała A", "DUPA"),
+        "B.json": _profile_bytes("dup", "Duża B", "DUPB"),
+        "c.json": b"{nie json",
+        "d.json": b"\xef\xbb\xbf" + _profile_bytes("bom", "BOM", "BOM"),
+        "indeks.json": _profile_bytes("indeks", "Indeks", "IDX"),
+        ".json": _profile_bytes("kropka", "Kropka", "DOT"),
+        "E.JSON": _profile_bytes("duze", "Duże rozszerzenie", "EXT"),
+        "f.json.txt": _profile_bytes("txt", "Tekst", "TXT"),
+        "h.json": _profile_bytes("urevo", "Urevo podmienione", "URTM"),
+        "i.json": b"[]",
+        "j.json": b'{"format": 1, "id": "\xff"}',
+        "k.json": _profile_bytes("zwykly", "Zwykły", "ZW"),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        for name, data in files.items():
+            (folder / name).write_bytes(data)
+        old = profile.USER_DIR
+        profile.USER_DIR = folder
+        try:
+            found = [profile_dict(p) for p in profile.all_profiles(reload=True)]
+        finally:
+            profile.USER_DIR = old
+            profile.all_profiles(reload=True)
+    return {"files": {n: d.hex() for n, d in files.items()}, "all": found}
+
+
+def index_fixture() -> list[dict[str, Any]]:
+    from bieznia.sterowniki import pobieranie
+
+    digest = "ab" * 32
+    entry = lambda name, d=digest: {"plik": name, "sha256": d}  # noqa: E731
+    cases: list[Any] = [
+        {"format": 1, "profile": [entry("a.json"), entry("b.json", "AB" * 32)]},
+        {"format": 1, "profile": []},
+        {"format": 1, "profile": {}},
+        {"format": 1, "profile": ""},
+        {"format": 1, "profile": None},
+        {"format": 1, "profile": "ab"},
+        {"format": 1, "profile": {"a": 1}},
+        {"format": True, "profile": []},
+        {"format": 1.0, "profile": []},
+        {"format": "1", "profile": []},
+        {"format": 2, "profile": []},
+        {"format": 1},
+        {"profile": []},
+        [],
+        None,
+        {"format": 1, "profile": [{"plik": "a.json"}]},
+        {"format": 1, "profile": [{"plik": "a.json", "sha256": 5}]},
+        {"format": 1, "profile": ["a.json"]},
+        {"format": 1, "profile": [[1, 2]]},
+        {"format": 1, "profile": [entry("../x.json")]},
+        {"format": 1, "profile": [entry("x/y.json")]},
+        {"format": 1, "profile": [entry("a\\b.json")]},
+        {"format": 1, "profile": [entry("C:x.json")]},
+        {"format": 1, "profile": [entry("indeks.json")]},
+        {"format": 1, "profile": [entry("x.JSON")]},
+        {"format": 1, "profile": [entry(".json")]},
+        {"format": 1, "profile": [entry("a b.json")]},
+        {"format": 1, "profile": [entry("a.json", "ab")]},
+        {"format": 1, "profile": [entry("a.json", "ą" * 64)]},
+        {"format": 1, "profile": [{"plik": 5, "sha256": digest}]},
+        {"format": 1, "profile": [entry("a.json"), {"x": 1}]},
+    ]
+    raws = [json.dumps(c, ensure_ascii=False).encode("utf-8") for c in cases]
+    raws += [b"{", b"", b"  {\"format\": 1, \"profile\": []}  "]
+    out = []
+    for raw in raws:
+        try:
+            result: Any = {"entries": [list(e) for e in pobieranie._parse_index(raw)]}
+        except pobieranie.ProfileDownloadError as exc:
+            result = {"error": str(exc)}
+        out.append({"hex": raw.hex(), **result})
+    return out
+
+
 def profiles_fixture() -> dict[str, Any]:
     base = {"format": 1, "id": "a", "name": "A", "driver": "ftms"}
     cases: list[Any] = [
@@ -370,6 +551,19 @@ def profiles_fixture() -> dict[str, Any]:
         dict(base, capabilities={"incline": 1}),
         dict(base, capabilities={"control": False}),
         dict(base, capabilities={"steps": False, "start_delay_s": 15, "telemetry_s": 0.1}),
+        dict(base, capabilities={"speed_step": 0.005}),
+        dict(base, capabilities={"min_command_gap_s": -1}),
+        dict(base, capabilities={"telemetry_s": "1"}),
+        dict(base, capabilities={"speed_max": 2.5e1}),
+        dict(base, format=2.5),
+        dict(base, driver=None),
+        dict(base, driver=["ftms"]),
+        dict(base, driver={"a": [1, True, None, 1.5]}),
+        dict(base, driver="it's"),
+        dict(base, driver="a\"b'c\\\n\t"),
+        dict(base, format=[1]),
+        dict(base, name=" Nazwa "),
+        dict(base, id="Ab-9-"),
         dict(base, capabilities=None, options=None),
         dict(base, capabilities={}, options=[]),
         dict(base, options={"table": "v7", "n": 1, "f": 1.5, "b": True}),
@@ -400,8 +594,8 @@ def profiles_fixture() -> dict[str, Any]:
     for case in cases:
         try:
             parsed.append({"input": case, "profile": profile_dict(profile.parse_profile(case))})
-        except profile.ProfileError:
-            parsed.append({"input": case, "profile": None})
+        except profile.ProfileError as exc:
+            parsed.append({"input": case, "profile": None, "error": str(exc)})
     profile.all_profiles(reload=True)
     names = [
         "URTM054", "urtm054-x", "URTM061", "KS-HDSY-X21C", "ks-hdsy-x21c", "KS-NACH-MXG",
@@ -434,6 +628,8 @@ def profiles_fixture() -> dict[str, Any]:
     services = [{"uuids": u, "looks_like": ster.looks_like_treadmill(None, u)} for u in uuids]
     return {
         "parse": parsed,
+        "user_dir": user_dir_fixture(),
+        "index": index_fixture(),
         "lookup": lookup,
         "services": services,
         "simulator_caps": caps_dict(ster.known_capabilities("cokolwiek", simulated=True)),

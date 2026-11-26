@@ -525,6 +525,11 @@ pub struct Telemetry {
     pub state_changes: u64,
     /// rośnie przy każdej odszyfrowanej ramce (bieżnia żyje)
     pub replies: u64,
+    /// czas ostatniej odszyfrowanej ramki (0 = jeszcze żadnej, jak `last_reply` w Pythonie)
+    pub last_reply_at: f64,
+    /// kanał (UUID usługi), z którego przyszła pierwsza odszyfrowana ramka - potem polecenia
+    /// idą tylko nim (None = wysyłaj wszystkimi)
+    pub active: Option<String>,
     buffers: BTreeMap<String, FrameBuffer>,
 }
 
@@ -543,6 +548,8 @@ impl Telemetry {
             counts: Counts::default(),
             state_changes: 0,
             replies: 0,
+            last_reply_at: 0.0,
+            active: None,
             buffers: BTreeMap::new(),
         }
     }
@@ -593,7 +600,15 @@ impl Telemetry {
                     if decoded.trusted { "" } else { "  (niepewne)" }
                 );
             }
+            if self.active.is_none() {
+                self.active = Some(channel.to_string());
+                log::info!(
+                    "Bieżnia odpowiada (usługa {channel}, tablica {})",
+                    self.codec.describe()
+                );
+            }
             self.replies += 1;
+            self.last_reply_at = now;
             if decoded.trusted {
                 // niepewny tekst mógłby mieć przekłamaną cyfrę prędkości
                 readings.extend(self.handle(&decoded.text, now));
@@ -624,8 +639,8 @@ impl Telemetry {
         if props.get("runState") == Some(&0.0) {
             self.last_speed = 0.0; // taśma zatrzymana
         }
-        if let Some(steps) = props.get("RunningSteps") {
-            self.last_steps = Some(py_int(*steps));
+        if let Some(steps) = props.get("RunningSteps").and_then(|s| py_int(*s)) {
+            self.last_steps = Some(steps);
         }
         // Każda ramka z danymi = żywa bieżnia, nawet jeśli prędkość się nie zmieniła.
         Some(self.reading())
@@ -656,11 +671,11 @@ impl Telemetry {
         }
         let props = parse_props(text);
         if let Some(state) = props.get("runState") {
-            self.run_state = Some(py_int(*state));
+            self.run_state = py_int(*state).or(self.run_state);
             self.state_changes += 1;
         }
         if let Some(mode) = props.get("ControlMode") {
-            self.control_mode = Some(py_int(*mode));
+            self.control_mode = py_int(*mode).or(self.control_mode);
             self.state_changes += 1;
         }
         if props.get("CurrentSpeed").copied().unwrap_or(0.0) > 0.0 && self.run_state.is_none() {
@@ -669,16 +684,14 @@ impl Telemetry {
     }
 }
 
-/// `int(liczba)` - obcięcie w stronę zera (nieskończoność i NaN jako 0).
-fn py_int(value: f64) -> i64 {
-    if value.is_finite() {
-        value.trunc() as i64
-    } else {
-        0
-    }
+/// `int(liczba)` - obcięcie w stronę zera. Nieskończoność i NaN: None (Python rzuca wyjątek
+/// i stan zostaje bez zmian - nie udajemy, że taśma stoi).
+fn py_int(value: f64) -> Option<i64> {
+    value.is_finite().then(|| value.trunc() as i64)
 }
 
 /// `int(tekst)` z Pythona: liczba całkowita, opcjonalny znak, podkreślenia między cyframi.
+/// Poza zakresem i64 - wartość skrajna (Python ma dowolnie duże liczby; i tak to nie odmowa).
 fn py_int_text(text: &str) -> Option<i64> {
     let digits = text.trim_start_matches(['+', '-']);
     if digits.is_empty()
@@ -691,7 +704,17 @@ fn py_int_text(text: &str) -> Option<i64> {
     if !digits.bytes().all(|b| b.is_ascii_digit() || b == b'_') {
         return None;
     }
-    text.replace('_', "").parse().ok()
+    let cleaned = text.replace('_', "");
+    match cleaned.parse() {
+        Ok(value) => Some(value),
+        // jeden znak przed cyframi (dwa, np. "+-5", Python odrzuca)
+        Err(_) if text.len() - digits.len() <= 1 => Some(if text.starts_with('-') {
+            i64::MIN
+        } else {
+            i64::MAX
+        }),
+        Err(_) => None,
+    }
 }
 
 #[cfg(test)]
@@ -827,5 +850,26 @@ mod tests {
         assert_eq!(py_float("0x10"), None);
         assert_eq!(py_int_text("-5000"), Some(-5000));
         assert_eq!(py_int_text("1.5"), None);
+        assert_eq!(py_int_text("+5_000"), Some(5000));
+        assert_eq!(py_int_text("+-5"), None);
+        assert_eq!(py_int_text("99999999999999999999"), Some(i64::MAX));
+        assert_eq!(py_int_text("-99999999999999999999"), Some(i64::MIN));
+        assert_eq!(py_int(f64::INFINITY), None);
+        assert_eq!(py_int(-7.5), Some(-7));
+    }
+
+    #[test]
+    fn telemetry_keeps_state_on_garbage_numbers_and_tracks_active_channel() {
+        let mut t = Telemetry::new(&["v1"]);
+        t.handle("props runState 1 ControlMode 1", 1.0);
+        t.handle("props runState inf ControlMode nan", 2.0);
+        assert_eq!((t.run_state, t.control_mode), (Some(1), Some(1)));
+        t.handle("props Error 99999999999999999999", 3.0);
+        assert_eq!(t.last_error, Some(i64::MAX)); // błąd, ale nie odmowa producenta
+        let msg = encode("version 0014", "v1").expect("v1");
+        t.feed("00011234", &msg, 4.0);
+        t.feed("00001234", &msg, 5.0);
+        assert_eq!(t.active.as_deref(), Some("00011234"));
+        assert_eq!((t.last_reply_at, t.firmware.as_str()), (5.0, "0014"));
     }
 }
