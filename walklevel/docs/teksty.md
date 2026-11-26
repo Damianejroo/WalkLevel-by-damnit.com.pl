@@ -1437,3 +1437,22 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: Kopia danych
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `kopia.import.wybierz` | (nowy) | Wybierz plik kopii… | Ekran wczytania bez wybranego pliku (okno wyboru zamknięte bez wyboru). |
+| `kopia.import.wybierz_opis` | (nowy) | Wybierz plik kopii WalkLevel zapisany na tym albo innym komputerze. Przed wczytaniem zobaczysz, co jest w środku. | |
+| `kopia.import.inny_plik` | (nowy) | Inny plik… | Przy nazwie wybranego pliku. |
+| `kopia.import.osoby_sa` | (nowy) | Osoby, które już są na tym komputerze | Tytuł karty, gdy w pliku jest więcej niż jedna taka osoba (dla jednej: `kopia.import.konflikt`). |
+| `kopia.import.jako_nowa_opis` | (nowy) | Dodaj jako nową osobę: osoba z pliku pojawi się obok obecnej, z numerem przy nazwie i z własnymi profilami gier oraz wynikami. | Pod `kopia.import.polacz_opis`. |
+| `kopia.import.wynik.tytul` | (nowy) | Wczytano kopię | Karta po wczytaniu (zamiast samego komunikatu). |
+| `kopia.import.wynik.nowe_osoby` | (nowy) | Nowe osoby | Kafelek. |
+| `kopia.import.wynik.polaczone` | (nowy) | Połączone osoby | Kafelek. |
+| `kopia.import.wynik.nowe_profile` | (nowy) | Nowe profile gier | Kafelek. |
+| `kopia.import.wynik.nowe_sesje` | (nowy) | Nowe sesje | Kafelek. |
+| `kopia.import.zakoncz` | (nowy) | Gotowe | Powrót do Ustawień po wczytaniu. |
+| `kopia.import.przed.tytul` | (nowy) | Dane sprzed wczytania kopii | Karta z przywracaniem (gdy jest kopia `przed-importem-*`). |
+| `kopia.import.przed.opis` | (nowy) | Zapisano je przed ostatnim wczytaniem kopii. Przywrócenie cofa to wczytanie i wszystko, co zmieniło się od tamtej chwili, także nowe sesje. | Pod nim przycisk z przytrzymaniem `kopia.import.przed.przywroc`. |
+| `kopia.import.przed.przywroc` | (nowy) | Przywróć te dane | Przycisk z przytrzymaniem w karcie `kopia.import.przed.tytul` (pełny napis `ustawienia.dane.przywroc` nie mieści się w wąskim oknie). |
