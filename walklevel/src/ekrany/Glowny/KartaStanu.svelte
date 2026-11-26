@@ -28,9 +28,9 @@
   const napisy = $derived(NAPISY.includes(status.actionLabel) ? NAPISY : [...NAPISY, status.actionLabel]);
 </script>
 
-<section class="kontener"><div class="stan" aria-live="polite">
+<section class="kontener"><div class="stan">
   <span class="kropka {kropka}" class:pulsuje={status.busy} aria-hidden="true"></span>
-  <span class="teksty">
+  <span class="teksty" aria-live="polite">
     <span class="tytul jedna-linia" title={status.title}>{status.title}</span>
     <span class="podtytul jedna-linia" title={status.sub}>{status.sub}</span>
   </span>

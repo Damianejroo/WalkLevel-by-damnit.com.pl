@@ -29,13 +29,23 @@
   // --- pasek ---
   const osoba = $derived(stan.people.people.find((o) => o.id === stan.people.activePersonId));
   const wieleOsob = $derived(stan.people.people.length > 1);
+  const aktualizacja = $derived(stan.update.available);
+  // Pod nazwą: postęp aktualizacji („Sprawdzam…”, „Pobieram 0.6.1: 45%”) albo „Dostępna wersja
+  // 0.6.1” (docs/teksty.md 18.1, jak w 0.5.x), inaczej wersja z osobą.
+  const statusAktualizacji = $derived(
+    stan.update.busy || stan.update.installing
+      ? stan.update.status
+      : aktualizacja
+        ? stan.update.status || t('aktualizacja.dostepna_krotko', { nowa_wersja: aktualizacja })
+        : '',
+  );
   const podpis = $derived(
-    wieleOsob && osoba
-      ? t('app.osoba_i_wersja', { osoba: osoba.name, wersja: stan.app.version })
-      : t('app.wersja', { wersja: stan.app.version }),
+    statusAktualizacji ||
+      (wieleOsob && osoba
+        ? t('app.osoba_i_wersja', { osoba: osoba.name, wersja: stan.app.version })
+        : t('app.wersja', { wersja: stan.app.version })),
   );
   const zmianaOsoby = $derived(wieleOsob && !!osoba && stan.settings.showPersonSwitch);
-  const aktualizacja = $derived(stan.update.available);
   const pokazAktualizacje = $derived(!!aktualizacja || stan.update.busy);
   // przy 420 px pełny pasek (osoba + 5 ikon) ledwo się mieści - ikony trochę węższe
   const ciasno = $derived(zmianaOsoby && pokazAktualizacje && stan.account.loggedIn);

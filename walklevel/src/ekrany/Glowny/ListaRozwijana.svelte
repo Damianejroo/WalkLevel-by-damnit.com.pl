@@ -72,6 +72,13 @@
     link.onclick();
   }
 
+  // Tab poza listę zamyka ją (fokus zostaje tam, dokąd przeszedł)
+  function wyjscie(e: FocusEvent) {
+    const dokad = e.relatedTarget as Node | null;
+    // klik w wyzwalacz zamyka listę sam (przełącza), tu by ją od razu otworzył ponownie
+    if (dokad && !lista?.contains(dokad) && !wyzwalacz?.contains(dokad)) zamknij(false);
+  }
+
   function klawisz(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -122,6 +129,7 @@
     style:width="{polozenie.width}px"
     style:max-height="{polozenie.maxHeight}px"
     onkeydown={klawisz}
+    onfocusout={wyjscie}
   >
     <div role="radiogroup" aria-label={etykieta}>
       {#each pozycje as p (p.id)}
