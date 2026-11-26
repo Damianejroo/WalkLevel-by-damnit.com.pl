@@ -753,7 +753,8 @@ export interface Friend {
   xp: number | null;           // 0.6.2; null jak level
   description: string | null;  // 0.6.2: opis dla znajomych (pusty = null)
   live: LiveState | null;      // idzie teraz
-  week: PeriodTotals;
+  week: PeriodTotals;          // ten tydzień (od poniedziałku, czas polski)
+  today: PeriodTotals | null;  // 0.6.2: `dzis`; null - serwer nie podał
 }
 export interface InvitationPerson { id: string; name: string }
 export interface Invitation { id: string; person: InvitationPerson; createdAt: number | null }
@@ -1195,7 +1196,7 @@ pub struct OnlineStats { #[serde(flatten)] pub totals: PeriodTotals, pub games: 
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct LiveState { pub kmh: f64, pub steps: i64 }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
-pub struct Friend { pub id: String, pub name: String, pub level: Option<u32>, pub live: Option<LiveState>, pub week: PeriodTotals }
+pub struct Friend { pub id: String, pub name: String, pub level: Option<u32>, pub xp: Option<i64>, pub description: Option<String>, pub live: Option<LiveState>, pub week: PeriodTotals, pub today: Option<PeriodTotals> } // 0.6.2: xp, description (`opis`), today (`dzis`)
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct InvitationPerson { pub id: String, pub name: String }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
@@ -1222,6 +1223,7 @@ pub struct OnlinePerson {
     pub week: Option<PeriodTotals>, pub total: Option<PeriodTotals>,
     pub games: Option<Vec<GameTotals>>, pub games_hidden: bool,
     pub description: Option<String>, // 0.6.2: `opis` - tylko znajomy i właściciel
+    pub today: Option<PeriodTotals>, // 0.6.2: `dzis` (doba, czas polski); None - nie pokazywać
 }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct RegistrationCode { pub code: String, pub valid_until: Option<f64> }
@@ -1392,7 +1394,7 @@ Wszystkie zmiany osób i profili emitują `people` (i `settings`, gdy dotyczą a
 
 | Komenda | Argumenty | Wynik | Skutek |
 |---|---|---|---|
-| `history_query` | `query: HistoryQuery` | `HistoryView` | najpierw `tracker.flush()` (bieżąca sesja też widać). Zakres: `day` = od dziś 00:00 (wykres godzinowy), `week` 7 dni, `month` 30 dni, `all` od 0 (wykres z 30 dni). Wykres dzienny: `week` → 7 słupków, `month`/`all` → 30. UI woła ponownie, gdy zmieni się `history.stamp` albo zapytanie |
+| `history_query` | `query: HistoryQuery` | `HistoryView` | najpierw `tracker.flush()` (bieżąca sesja też widać). Zakres (0.6.2 kalendarzowo, strefa komputera): `day` = od dziś 00:00 (wykres godzinowy), `week` od poniedziałku 00:00, `month` od 1. dnia miesiąca, `all` od 0 (wykres z 30 ostatnich dni). Wykres dzienny (`HistoryRange::chart_span`): `week` → pn-nd (7 słupków), `month` → wszystkie dni miesiąca; dni po dziś puste, słupek „dziś” po dacie. UI woła ponownie, gdy zmieni się `history.stamp` albo zapytanie |
 | `history_session` | `session_id: String` | `Option<SessionDetail>` | szczegóły sesji |
 | `history_session_delete` | `session_id: String` | `()` | trwająca sesja - kończona bez zapisu; usuwa z bazy (z `wyslane`, `ukryte_online`); osoba z kontem → także z serwera (w tle); toast „Sesja usunięta.” |
 | `history_session_hide_online` | `session_id: String`, `hidden: bool` | `()` | `set_hidden_online` (sesja z `zmieniono_utc_s` = teraz) + wysyłka od razu (`account_upload_now`) |

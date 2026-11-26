@@ -611,7 +611,8 @@ export interface Friend {
   xp: number | null;
   description: string | null;  // opis dla znajomych
   live: LiveState | null;      // idzie teraz
-  week: PeriodTotals;
+  week: PeriodTotals;          // ten tydzień (od poniedziałku, czas polski)
+  today: PeriodTotals | null;  // 0.6.2: dzisiaj (doba, czas polski); null - serwer nie podał
 }
 export interface InvitationPerson { id: string; name: string }
 export interface Invitation { id: string; person: InvitationPerson; createdAt: number | null }
@@ -631,8 +632,9 @@ export interface OnlinePerson {
   since: number | null;        // od_utc_s
   treadmillModel: string | null;
   friend: boolean;
-  week: PeriodTotals | null;
+  week: PeriodTotals | null;   // ten tydzień
   total: PeriodTotals | null;
+  today: PeriodTotals | null;  // 0.6.2: dzisiaj; null - nie pokazywać
   games: GameTotals[] | null;  // profil: gry[].nazwa, statystyki: gry[].gra
   otherGames: OtherGames | null; // inne_gry; null - brak
   gamesHidden: boolean;        // serwer podał "gry": null - osoba nie pokazuje podziału

@@ -930,8 +930,8 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `historia.czyja.wszyscy` | Wszyscy | Wszystkie osoby | |
 | `historia.zakres` | Zakres | Zakres | |
 | `historia.zakres.dzis` | Dziś | Dziś | |
-| `historia.zakres.7` | 7 dni | 7 dni | |
-| `historia.zakres.30` | 30 dni | 30 dni | |
+| `historia.zakres.7` | 7 dni | Ten tydzień | 0.6.2: tydzień od poniedziałku (kalendarzowy, strefa komputera). |
+| `historia.zakres.30` | 30 dni | Ten miesiąc | 0.6.2: od 1. dnia miesiąca. |
 | `historia.zakres.wszystko` | Wszystko | Wszystko | |
 | `historia.suma.kroki` | Kroki | Kroki | |
 | `historia.suma.dystans` | Dystans | Dystans | |
@@ -1206,7 +1206,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `ranking.miejsce` | {liczba}. | {liczba}. | |
 | `ranking.wiersz.poziom` | {km} km łącznie | {km} km łącznie | |
 | `ranking.wiersz.kroki` | {kroki} kroków · {km} km | {kroki} {kroki:krok/kroki/kroków} · {km} km | |
-| `ranking.opis.poziomy` | Ranking poziomów liczy wszystko od początku konta (tylko sesje wysłane na bieżąco). Tydzień i miesiąc to rankingi „na teraz”. | Ranking poziomów liczy kilometry od założenia konta. Tydzień i miesiąc pokazują bieżący okres. | Nawias „tylko sesje wysłane na bieżąco” był niezrozumiały. Jeśli to ważne (sesje sprzed konta się nie liczą), napisać wprost: „Sesje sprzed założenia konta się nie liczą.” |
+| `ranking.opis.poziomy` | Ranking poziomów liczy wszystko od początku konta (tylko sesje wysłane na bieżąco). Tydzień i miesiąc to rankingi „na teraz”. | Ranking poziomów liczy kilometry od założenia konta. Ten tydzień liczy się od poniedziałku, ten miesiąc od 1. dnia (czas polski). | Nawias „tylko sesje wysłane na bieżąco” był niezrozumiały. Jeśli to ważne (sesje sprzed konta się nie liczą), napisać wprost: „Sesje sprzed założenia konta się nie liczą.” |
 | `ranking.opis.zasady` | W rankingu są tylko sesje z bieżni (bez symulatora) widoczne dla wszystkich albo dla znajomych. Ukryte sesje i profil ukryty nie wchodzą do rankingu. | W rankingu liczą się sesje z prawdziwej bieżni, widoczne dla znajomych albo wszystkich. Sesje i profile ukryte nie są liczone. | |
 
 ### 22.8. Zakładka Osoby z kontem
@@ -1279,8 +1279,8 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `profil_online.bieznia` | Bieżnia: {model} | Bieżnia: {model} | |
 | `profil_online.znajomy` | Znajomy | Na liście znajomych | Bez rodzaju. |
 | `profil_online.nieznajomy` | Nie jesteście znajomymi | Nie jesteście znajomymi | |
-| `profil_online.7dni` | Ostatnie 7 dni | Ostatnie 7 dni | |
-| `profil_online.razem` | Razem | Razem | |
+| `profil_online.7dni` | Ostatnie 7 dni | Ten tydzień | 0.6.2: serwer liczy tydzień od poniedziałku. |
+| `profil_online.razem` | Razem | Od początku | |
 | `profil_online.wiersz` | {kroki} kroków · {km} km · {czas} | {kroki} {kroki:krok/kroki/kroków} · {km} km · {czas} | |
 | `profil_online.sesje` | sesje: {liczba} | {liczba} {liczba:sesja/sesje/sesji} | |
 | `profil_online.gry` | Gry · razem | Gry · razem | |
@@ -1724,3 +1724,13 @@ jeśli są już dane do pokazania.
 | `online.blad.ranking` | (nowy) | Nie udało się wczytać rankingu | |
 | `online.blad.osoby` | (nowy) | Nie udało się wczytać listy osób z kontem | |
 | `online.ponowi` | (nowy) | Kolejna próba za {sekundy} s | Obok „Spróbuj ponownie”, gdy aplikacja ponawia sama. |
+
+## Dodatki: dzisiaj i okresy kalendarzowe (0.6.2)
+
+Serwer i Historia liczą okresy kalendarzowo: dzisiaj (doba), ten tydzień (od poniedziałku
+0:00), ten miesiąc (od 1. dnia). Online - czas polski, Historia - strefa komputera.
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `profil_online.dzis` | (nowy) | Dzisiaj | Karta nad „Ten tydzień” w profilu osoby; tylko gdy serwer podał `dzis`. |
+| `panel.dzis_tydzien` | (nowy) | dziś {dzis} {dzis:krok/kroki/kroków} · tydzień {tydzien} | Panel znajomych, „Pozostali”, gdy dziś > 0 (inaczej `panel.tydzien`). |

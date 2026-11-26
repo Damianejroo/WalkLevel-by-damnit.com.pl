@@ -72,6 +72,14 @@ Odpowiedź 200:
   Migracja konto.json: brak `live_status` -> z `live` (true = wszystko, false = niewidoczny,
   domyślnie niewidoczny jak dotąd „Na żywo” wyłączone).
 
+Okresy (HUB, wdrożone): kalendarzowe w czasie Europe/Warsaw - `dzis` od 0:00, `tydzien` od
+poniedziałku 0:00, `miesiac` od 1. dnia, `rok` od 1 stycznia (ranking, znajomi, profil, osoby,
+statystyki; zakresy statystyk `dzis|tydzien|miesiac|rok|wszystko`). `dzis` {kroki, dystans_km,
+ruch_s, sesje} | null w `GET profil/{id}` i każdym wpisie `GET znajomi` (inni: tylko u osób
+z akceptacją regulaminu 2026-11-26, własny zawsze); null = nie pokazywać (`online::friends`,
+`online::person` -> `today: None`). Lokalna Historia liczy te okresy w strefie komputera
+(`HistoryRange::first_day`, `chart_span`).
+
 `GET /api/bieznia/znajomi` - wpis: `{id, name, tydzien{...}, poziom, xp, opis, na_zywo}`;
 `na_zywo` = `null` albo `{kmh, kroki, ruch_s, od_utc_s, dystans_km, tryb, gra}`. `poziom`, `xp`,
 `opis` = null bez zgody tej osoby; w `na_zywo` `dystans_km`/`tryb`/`gra` null bez zgody, `gra`

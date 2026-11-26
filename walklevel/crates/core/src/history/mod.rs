@@ -16,7 +16,9 @@ use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use chrono::{DateTime, Local, LocalResult, NaiveDate, NaiveTime, Offset, TimeDelta, TimeZone};
+use chrono::{
+    DateTime, Datelike, Local, LocalResult, NaiveDate, NaiveTime, Offset, TimeDelta, TimeZone,
+};
 use rusqlite::types::{Value, ValueRef};
 use rusqlite::{Connection, OptionalExtension, Row, ToSql};
 use serde::{Deserialize, Serialize};
@@ -171,7 +173,9 @@ impl GroupKey {
     }
 }
 
-/// Zakres ekranu historii: dziś, 7 dni, 30 dni, wszystko.
+/// Zakres ekranu historii: dziś, ten tydzień (od poniedziałku), ten miesiąc (od 1. dnia),
+/// wszystko - okresy kalendarzowe w strefie komputera (0.6.2: jak rankingi na serwerze, które
+/// liczą tydzień i miesiąc kalendarzowo; wcześniej 7 i 30 ostatnich dni).
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum HistoryRange {
@@ -183,37 +187,51 @@ pub enum HistoryRange {
 }
 
 impl HistoryRange {
-    /// Liczba dni zakresu (0 - wszystko).
-    pub fn days(self) -> i64 {
+    /// Pierwszy dzień okresu, w którym leży `today`: ten sam dzień, poniedziałek tego tygodnia,
+    /// 1. dzień miesiąca; `None` - wszystko.
+    pub fn first_day(self, today: NaiveDate) -> Option<NaiveDate> {
         match self {
-            HistoryRange::Day => 1,
-            HistoryRange::Week => 7,
-            HistoryRange::Month => 30,
-            HistoryRange::All => 0,
+            HistoryRange::Day => Some(today),
+            HistoryRange::Week => today.checked_sub_signed(TimeDelta::days(i64::from(
+                today.weekday().num_days_from_monday(),
+            ))),
+            HistoryRange::Month => today.with_day(1),
+            HistoryRange::All => None,
         }
     }
 
-    /// Początek zakresu: lokalna północ pierwszego dnia (0 dla "wszystko").
+    /// Początek zakresu: lokalna północ pierwszego dnia okresu (0 dla "wszystko").
     pub fn since(self, now: f64) -> Result<f64> {
         self.since_in(&Local, now)
     }
 
     pub(crate) fn since_in<Tz: TimeZone>(self, tz: &Tz, now: f64) -> Result<f64> {
-        let days = self.days();
-        if days == 0 {
-            return Ok(0.0);
-        }
-        let first = days_before(local_date(tz, now)?, days - 1)?;
-        Ok(local_midnight(tz, first))
+        Ok(self
+            .first_day(local_date(tz, now)?)
+            .map_or(0.0, |first| local_midnight(tz, first)))
     }
 
-    /// Ile dni pokazuje wykres "Kroki dziennie" dla tego zakresu.
-    pub fn chart_days(self) -> i64 {
-        match self {
-            HistoryRange::All => 30,
-            r if r.days() > 1 => r.days(),
-            _ => 7,
-        }
+    /// Dni wykresu "Kroki dziennie": pierwszy dzień i liczba słupków. Ten tydzień - pn-nd,
+    /// ten miesiąc - cały miesiąc (dni po dziś puste), dziś (wykres godzinowy, tu tylko na
+    /// wszelki wypadek) - ostatnie 7 dni, wszystko - ostatnie 30 dni.
+    pub fn chart_span(self, now: f64) -> Result<(NaiveDate, i64)> {
+        self.chart_span_in(&Local, now)
+    }
+
+    pub(crate) fn chart_span_in<Tz: TimeZone>(self, tz: &Tz, now: f64) -> Result<(NaiveDate, i64)> {
+        let today = local_date(tz, now)?;
+        Ok(match self {
+            HistoryRange::Week => (self.first_day(today).unwrap_or(today), 7),
+            HistoryRange::Month => {
+                let first = self.first_day(today).unwrap_or(today);
+                let next = first
+                    .checked_add_months(chrono::Months::new(1))
+                    .unwrap_or(first);
+                (first, (next - first).num_days().max(1))
+            }
+            HistoryRange::Day => (days_before(today, 6)?, 7),
+            HistoryRange::All => (days_before(today, 29)?, 30),
+        })
     }
 
     /// Dla "dziś" wykres jest godzinowy ([`History::by_hour`]).
@@ -653,6 +671,31 @@ impl History {
             return Ok(Vec::new());
         }
         let first = days_before(local_date(tz, now)?, days - 1)?;
+        self.days_from_in(tz, first, days, person, key)
+    }
+
+    /// Kroki dzień po dniu od `first` przez `days` dni (dni przyszłe - puste słupki).
+    pub fn days_from(
+        &self,
+        first: NaiveDate,
+        days: i64,
+        person: Option<&str>,
+        key: GroupKey,
+    ) -> Result<StepSeries> {
+        self.days_from_in(&Local, first, days, person, key)
+    }
+
+    pub(crate) fn days_from_in<Tz: TimeZone>(
+        &self,
+        tz: &Tz,
+        first: NaiveDate,
+        days: i64,
+        person: Option<&str>,
+        key: GroupKey,
+    ) -> Result<StepSeries> {
+        if days <= 0 {
+            return Ok(Vec::new());
+        }
         let since = local_midnight(tz, first);
         let mut out: StepSeries = first
             .iter_days()

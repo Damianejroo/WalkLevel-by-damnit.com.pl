@@ -441,7 +441,11 @@ export function utworzAtrape(): Silnik {
     const many = people.people.length > 1;
     const everyone = many && q.scope === 'all';
     const od0 = dzis0.getTime() / 1000;
-    const od = { day: od0, week: od0 - 6 * 86400, month: od0 - 29 * 86400, all: 0 }[q.range];
+    // okresy kalendarzowe jak w rdzeniu (0.6.2): tydzień od poniedziałku, miesiąc od 1. dnia
+    const pn0 = od0 - ((dzis0.getDay() + 6) % 7) * 86400;
+    const m0 = new Date(dzis0.getFullYear(), dzis0.getMonth(), 1).getTime() / 1000;
+    const dniMiesiaca = new Date(dzis0.getFullYear(), dzis0.getMonth() + 1, 0).getDate();
+    const od = { day: od0, week: pn0, month: m0, all: 0 }[q.range];
     const lista = sesje.filter((s) => s.start >= od && (everyone || s.personId === people.activePersonId));
     const groupKey = everyone ? 'person' : 'profile';
     const nazwa = (s: K.SessionRow) => (everyone ? s.personName : s.profileName);
@@ -451,10 +455,11 @@ export function utworzAtrape(): Silnik {
       else for (const pr of o.profiles) kolorNazwy.set(pr.name, PALETA.find((k) => k.name === pr.color)!.dark);
     }
     const hourly = q.range === 'day';
-    const ileSlupkow = hourly ? 24 : q.range === 'week' ? 7 : 30;
+    const ileSlupkow = hourly ? 24 : q.range === 'week' ? 7 : q.range === 'month' ? dniMiesiaca : 30;
+    const start0 = q.range === 'week' ? pn0 : q.range === 'month' ? m0 : od0 - 29 * 86400;
     const bars: K.HistoryChart['bars'] = [];
     for (let i = 0; i < ileSlupkow; i++) {
-      const pocz = hourly ? od0 + i * 3600 : od0 - (ileSlupkow - 1 - i) * 86400;
+      const pocz = hourly ? od0 + i * 3600 : start0 + i * 86400;
       const kon = pocz + (hourly ? 3600 : 86400);
       const czesci = new Map<string, number>();
       for (const s of lista) if (s.start >= pocz && s.start < kon) czesci.set(nazwa(s), (czesci.get(nazwa(s)) ?? 0) + s.steps);
@@ -542,17 +547,19 @@ export function utworzAtrape(): Silnik {
   const zywo = (kmh: number, minut: number, mode: K.SessionMode | null, game: string | null, km: number | null): K.LiveState => ({
     kmh, steps: Math.round(minut * 95), activeS: minut * 60, since: teraz() - minut * 60, distanceKm: km, mode, game,
   });
-  const znajomy = (id: string, name: string, xp: number | null, live: K.LiveState | null, week: number, description: string | null = null): K.Friend => ({
+  const znajomy = (id: string, name: string, xp: number | null, live: K.LiveState | null, week: number, description: string | null = null, dzis: number | null = null): K.Friend => ({
     id, name, level: xp === null ? null : poziomZXp(xp), xp, description, live, week: tydzien(week),
+    today: dzis === null ? null : tydzien(dzis),
   });
   // panel znajomych 0.6.2: chodzą z grą, w Treningu i z ukrytą grą („W grze”), opis, ukryty poziom
   const znajomi: K.Friend[] = [
-    znajomy('u-ola', 'OlaBiega', 50290, zywo(3.4, 27, 'gra', dlugie ? 'The Elder Scrolls V: Skyrim Special Edit' : 'World of Warcraft', 1.52), 31240),
+    znajomy('u-ola', 'OlaBiega', 50290, zywo(3.4, 27, 'gra', dlugie ? 'The Elder Scrolls V: Skyrim Special Edit' : 'World of Warcraft', 1.52), 31240, null, 2140),
     // poziom ukryty: serwer nie podaje go (ani XP) bez zgody tej osoby
     znajomy('u-kuba', 'KubaWędrowiec', null, zywo(4.2, 34, 'trening', null, 2.36), 18420),
     znajomy('u-wera', 'WeraNaBieżni', 158400, zywo(5.1, 48, 'gra', null, 4.05), 68400),
-    znajomy('u-marta', 'Marta_z_Gór', 117900, null, 52310, dlugie ? 'Opis_bez_spacji_na_czterdziesci_znakow_x' : 'Do Mordoru i z powrotem'),
-    znajomy('u-tomek', dlugie ? 'Tomasz_o_dlugim_nicku24' : 'Tomek', 4100, null, 4120),
+    znajomy('u-marta', 'Marta_z_Gór', 117900, null, 52310, dlugie ? 'Opis_bez_spacji_na_czterdziesci_znakow_x' : 'Do Mordoru i z powrotem', 6200),
+    // dziś już chodził (kroki dziś i w tygodniu), opis nie zasłania wyniku
+    znajomy('u-tomek', dlugie ? 'Tomasz_o_dlugim_nicku24' : 'Tomek', 4100, null, dlugie ? 1234567 : 4120, null, dlugie ? 123456 : 3200),
   ];
   const ranking = (scope: K.RankingScope): { scope: K.RankingScope; rows: K.RankingRow[] } => {
     const mnoznik = { tydzien: 1, miesiac: 4.2, razem: 26, poziom: 1 }[scope];
@@ -1351,6 +1358,7 @@ export function utworzAtrape(): Silnik {
         games: f ? null : online.stats?.games ?? null, gamesHidden: !!f,
         otherGames: f ? null : { steps: 5230, distanceKm: 3.9, activeS: 2810, sessions: 3, games: 2 },
         description: ja ? account.description || null : (f?.description ?? null),
+        today: ja ? tydzien(5120) : f ? f.today : null,
       };
       online.person = person;
       wyslij('online');

@@ -88,6 +88,8 @@ pub struct Friend {
     pub description: Option<String>,
     pub live: Option<LiveState>,
     pub week: PeriodTotals,
+    /// `dzis` (doba kalendarzowa, czas polski); `None` - serwer nie podał (brak zgody, starszy)
+    pub today: Option<PeriodTotals>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -173,6 +175,8 @@ pub struct OnlinePerson {
     pub friend: bool,
     pub week: Option<PeriodTotals>,
     pub total: Option<PeriodTotals>,
+    /// `dzis` - jak w liście znajomych
+    pub today: Option<PeriodTotals>,
     pub games: Option<Vec<GameTotals>>,
     /// gry poza listą `games` (bez nazw); `None` - brak
     pub other_games: Option<OtherGames>,
@@ -360,6 +364,10 @@ pub fn friends(v: &Value) -> Vec<Friend> {
             description: some_text(f, "opis"),
             live: f.get("na_zywo").filter(|l| l.is_object()).map(live_state),
             week: period(f.get("tydzien")),
+            today: f
+                .get("dzis")
+                .filter(|d| d.is_object())
+                .map(|d| period(Some(d))),
         })
         .collect()
 }
@@ -483,6 +491,7 @@ pub fn person(v: &Value, my_id: &str) -> OnlinePerson {
         friend: flag(v, "znajomy"),
         week: totals("tydzien"),
         total: totals("razem"),
+        today: totals("dzis"),
         games: games(v.get("gry")),
         other_games: other_games(v.get("inne_gry")),
         games_hidden: v.get("gry").is_some_and(Value::is_null),

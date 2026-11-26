@@ -74,8 +74,12 @@
     const [, m, d] = etykieta.split('-');
     return `${Number(d)}.${Number(m)}`;
   }
-  /** Słupek dzienny: ostatni to dziś (zakresy kończą się dzisiaj - kontrakt 6.6). */
-  const jestDzis = (i: number) => (wykres.hourly ? i === godzinaTeraz : i === ile - 1);
+  /** Słupek dzienny „dziś” po dacie (0.6.2: ten tydzień i miesiąc kalendarzowo - dni po dziś
+   *  są puste, dziś nie musi być ostatnie). */
+  const dzisIso = $derived(
+    `${teraz.getFullYear()}-${String(teraz.getMonth() + 1).padStart(2, '0')}-${String(teraz.getDate()).padStart(2, '0')}`,
+  );
+  const jestDzis = (i: number) => (wykres.hourly ? i === godzinaTeraz : wykres.bars[i]?.label === dzisIso);
   const kiedy = (i: number) =>
     wykres.hourly ? `${Number(wykres.bars[i].label)}:00` : dzienMiesiac(wykres.bars[i].label);
 

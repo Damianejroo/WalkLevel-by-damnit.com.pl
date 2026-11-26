@@ -119,9 +119,40 @@ fn friends_0_6_2_xp_description_and_live_game() {
         (k.mode.as_deref(), k.distance_km),
         (Some("trening"), Some(300.0))
     );
+    assert_eq!(f[0].today, None); // serwer bez „dzis” (starszy) - brak
     let out = serde_json::to_value(&f[0]).expect("json");
     assert_eq!(out["live"]["distanceKm"], json!(1.52));
     assert_eq!(out["description"], json!("Do Mordoru"));
+}
+
+#[test]
+fn today_totals_for_friends_and_profile() {
+    let f = online::friends(&json!([
+        {"id": "a", "name": "A", "tydzien": {"kroki": 9000},
+         "dzis": {"kroki": 3200, "dystans_km": 2.4, "ruch_s": 1500, "sesje": 2}},
+        {"id": "b", "name": "B", "dzis": null},
+        {"id": "c", "name": "C"}
+    ]));
+    let a = f[0].today.as_ref().expect("dziś");
+    assert_eq!(
+        (a.steps, a.distance_km, a.active_s, a.sessions),
+        (3200, 2.4, 1500.0, Some(2))
+    );
+    assert_eq!((f[1].today.as_ref(), f[2].today.as_ref()), (None, None));
+    assert_eq!(
+        serde_json::to_value(&f[0]).expect("json")["today"]["steps"],
+        json!(3200)
+    );
+    let p = online::person(
+        &json!({"id": "u2", "dzis": {"kroki": 10}, "tydzien": {"kroki": 20}}),
+        "u1",
+    );
+    assert_eq!(p.today.as_ref().map(|d| d.steps), Some(10));
+    assert_eq!(
+        online::person(&json!({"id": "u2", "dzis": null}), "u1").today,
+        None
+    );
+    assert_eq!(online::person(&json!({"id": "u2"}), "u1").today, None);
 }
 
 #[test]
@@ -153,6 +184,7 @@ fn friend(id: &str, name: &str) -> Friend {
         description: None,
         live: None,
         week: PeriodTotals::default(),
+        today: None,
     }
 }
 

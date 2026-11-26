@@ -129,6 +129,11 @@
       {/if}
     </Karta>
 
+    {#if osoba.today}
+      <Karta tytul={t('profil_online.dzis')} podpis={sesje(osoba.today)} podpisZPrawej>
+        <p class="wynik">{wiersz(osoba.today)}</p>
+      </Karta>
+    {/if}
     {#if osoba.week}
       <Karta tytul={t('profil_online.7dni')} podpis={sesje(osoba.week)} podpisZPrawej>
         <p class="wynik">{wiersz(osoba.week)}</p>

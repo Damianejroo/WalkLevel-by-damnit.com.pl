@@ -538,7 +538,8 @@ impl App {
         let series = if hourly {
             h.by_hour(person, key, now)?
         } else {
-            h.by_day(range.chart_days(), person, key, now)?
+            let (first, days) = range.chart_span(now)?;
+            h.days_from(first, days, person, key)?
         };
         let mut names: Vec<String> = series
             .iter()

@@ -511,18 +511,28 @@ fn ranges_since_and_chart() {
             .unwrap()
             .timestamp() as f64
     };
+    // środa 25.11.2026: tydzień od poniedziałku 23.11, miesiąc od 1.11 (okresy kalendarzowe)
     assert_eq!(HistoryRange::Day.since_in(&tz, now).unwrap(), midnight(25));
-    assert_eq!(HistoryRange::Week.since_in(&tz, now).unwrap(), midnight(19));
-    let month = tz
-        .with_ymd_and_hms(2026, 10, 27, 0, 0, 0)
-        .unwrap()
-        .timestamp() as f64;
-    assert_eq!(HistoryRange::Month.since_in(&tz, now).unwrap(), month);
+    assert_eq!(HistoryRange::Week.since_in(&tz, now).unwrap(), midnight(23));
+    assert_eq!(HistoryRange::Month.since_in(&tz, now).unwrap(), midnight(1));
     assert_eq!(HistoryRange::All.since_in(&tz, now).unwrap(), 0.0);
-    assert_eq!(HistoryRange::Day.chart_days(), 7);
-    assert_eq!(HistoryRange::Week.chart_days(), 7);
-    assert_eq!(HistoryRange::Month.chart_days(), 30);
-    assert_eq!(HistoryRange::All.chart_days(), 30);
+    let d = |m: u32, day: u32| NaiveDate::from_ymd_opt(2026, m, day).unwrap();
+    assert_eq!(
+        HistoryRange::Week.chart_span_in(&tz, now).unwrap(),
+        (d(11, 23), 7)
+    );
+    assert_eq!(
+        HistoryRange::Month.chart_span_in(&tz, now).unwrap(),
+        (d(11, 1), 30)
+    );
+    assert_eq!(
+        HistoryRange::All.chart_span_in(&tz, now).unwrap(),
+        (d(10, 27), 30)
+    );
+    assert_eq!(
+        HistoryRange::Day.chart_span_in(&tz, now).unwrap(),
+        (d(11, 19), 7)
+    );
     assert!(HistoryRange::Day.hourly() && !HistoryRange::Week.hourly());
     let r: HistoryRange = serde_json::from_str("\"month\"").unwrap();
     assert_eq!(r, HistoryRange::Month);
@@ -716,7 +726,9 @@ fn python_v5_database_gives_same_results() {
     let now = want["now"].as_f64().unwrap();
     let (_dir, h) = open_copy("v5.db");
 
-    let since_week = HistoryRange::Week.since_in(&tz, now).unwrap();
+    // fixtura z Pythona liczy 7 ostatnich dni (0.5.x); 0.6.2 zakres „Ten tydzień” jest od
+    // poniedziałku - zgodność sum sprawdzamy na tym samym oknie co Python
+    let since_week = local_midnight(&tz, days_before(local_date(&tz, now).unwrap(), 6).unwrap());
     let mut hidden: Vec<String> = h.hidden_online().unwrap().into_iter().collect();
     hidden.sort();
     let earned: serde_json::Map<String, Value> = ["p1", "p2"]
@@ -924,6 +936,41 @@ fn midnight_on_dst_change_days_like_python() {
     assert_eq!(
         HistoryRange::Day.since_in(&gap_west, now).unwrap(),
         utc(1, 3) as f64
+    );
+}
+
+/// Granice okresów kalendarzowych: niedziela 23:59 to jeszcze stary tydzień, poniedziałek 0:00
+/// już nowy; 1. dzień miesiąca zaczyna miesiąc; zmiana czasu na letni w niedzielę nie przesuwa
+/// początku tygodnia (Europe/Warsaw: 29.03.2026, 2:00 -> 3:00).
+#[test]
+fn calendar_periods_reset_on_monday_and_first_day() {
+    let utc = |m: u32, d: u32, h: u32, min: u32| {
+        chrono::Utc
+            .with_ymd_and_hms(2026, m, d, h, min, 0)
+            .unwrap()
+            .timestamp()
+    };
+    // UTC+1 do 29.03 1:00 UTC, potem UTC+2
+    let warsaw = OneShift::new(1, 2, utc(3, 29, 1, 0));
+    let sunday_late = utc(3, 29, 21, 59) as f64; // nd 23:59 czasu letniego
+    let monday = utc(3, 29, 22, 0) as f64; // pn 30.03 0:00 czasu letniego
+    let week_old = HistoryRange::Week.since_in(&warsaw, sunday_late).unwrap();
+    let week_new = HistoryRange::Week.since_in(&warsaw, monday).unwrap();
+    assert_eq!(week_old, utc(3, 22, 23, 0) as f64); // pn 23.03 0:00 czasu zimowego
+    assert_eq!(week_new, monday);
+    assert_eq!(HistoryRange::Day.since_in(&warsaw, monday).unwrap(), monday);
+    // 31.03 23:59 - jeszcze marzec; 1.04 0:00 - kwiecień od zera
+    let march_end = utc(3, 31, 21, 59) as f64;
+    let april = utc(3, 31, 22, 0) as f64;
+    assert_eq!(
+        HistoryRange::Month.since_in(&warsaw, march_end).unwrap(),
+        utc(2, 28, 23, 0) as f64
+    );
+    assert_eq!(HistoryRange::Month.since_in(&warsaw, april).unwrap(), april);
+    let (first, days) = HistoryRange::Month.chart_span_in(&warsaw, april).unwrap();
+    assert_eq!(
+        (first, days),
+        (NaiveDate::from_ymd_opt(2026, 4, 1).unwrap(), 30)
     );
 }
 

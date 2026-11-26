@@ -49,6 +49,12 @@
     if (f.live.mode === 'gra') return f.live.game ? t('panel.gra', { gra: f.live.game, kmh }) : t('panel.w_grze', { kmh });
     return t('panel.chodzi', { kmh });
   });
+  // „dziś 3 200 kroków · tydzień 31 240”, gdy serwer podał dzisiejsze kroki (> 0)
+  const tydzien = $derived(
+    f.today && f.today.steps > 0
+      ? t('panel.dzis_tydzien', { dzis: f.today.steps, tydzien: f.week.steps })
+      : t('panel.tydzien', { kroki: f.week.steps }),
+  );
   const licznik = $derived(
     f.live && zywo.zSesji !== null
       ? t('panel.xp_sesja', { xp: liczba(zywo.zSesji) })
@@ -111,7 +117,7 @@
         {:else if f.description}
           <span class="jedna-linia dane opis">{f.description}</span>
         {:else}
-          <span class="jedna-linia">{t('panel.tydzien', { kroki: f.week.steps })}</span>
+          <span class="jedna-linia" title={tydzien}>{tydzien}</span>
         {/if}
       </span>
       {#if postep !== null && zywo.xp !== null}
