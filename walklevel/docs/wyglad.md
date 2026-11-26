@@ -119,19 +119,20 @@ Proponowany plik: `walklevel/src/lib/styl/tokeny.css` (jedyne źródło wartośc
   --scrollbar-w: 8px;
 
   /* ruch (sekcja 6) */
-  --t-press: 80ms;
-  --t-color: 120ms;
-  --t-switch: 160ms;
-  --t-theme: 160ms;
-  --t-out: 180ms;
-  --t-in: 220ms;
-  --t-slide: 260ms;
-  --t-morph: 280ms;
-  --t-gauge: 420ms;
+  /* 26.11: skrócone o ok. 40% i krzywe z szybkim startem - poprzednie „pływały” */
+  --t-press: 60ms;
+  --t-color: 90ms;
+  --t-switch: 110ms;
+  --t-theme: 120ms;
+  --t-out: 100ms;
+  --t-in: 140ms;
+  --t-slide: 140ms;
+  --t-morph: 160ms;
+  --t-gauge: 260ms;
   --t-hold: 1000ms;
-  --ease-enter: cubic-bezier(0.2, 0.8, 0.2, 1);   /* EASE_IN z 0.5.x: wejście, szybki start */
-  --ease-exit: cubic-bezier(0.4, 0, 1, 1);        /* EASE_OUT: wyjście */
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);    /* EASE_SMOOTH: zmiana na miejscu */
+  --ease-enter: cubic-bezier(0.25, 1, 0.5, 1);    /* wejście: od razu rusza, krótki dojazd */
+  --ease-exit: cubic-bezier(0.5, 0, 0.75, 0);     /* wyjście: przyspiesza i znika */
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);   /* zmiana na miejscu: jak wejście */
 
   /* rzadkość odznak – wypełnienie (oba motywy) */
   --rarity-pospolite: #9aa5b1;
@@ -411,19 +412,19 @@ U+202F (`12 345`), jednostka po niełamliwej spacji U+00A0 (`2,5 km/h`) – licz
 
 | Zdarzenie | Czas | Krzywa | Właściwości |
 |---|---|---|---|
-| Najechanie, zmiana koloru | `--t-color` 120 | liniowa | `background-color`, `color`, `border-color` (tylko kolor – nie układ) |
-| Wciśnięcie | `--t-press` 80 | liniowa | kolor tła |
-| Gałka przełącznika | `--t-switch` 160 | `--ease-enter` | `transform: translateX` |
-| Zmiana motywu / koloru profilu | `--t-theme` 160 | `--ease-enter` | przenikanie zrzutów (View Transitions, `opacity`) |
-| Wejście strony | `--t-in` 220 | `--ease-enter` | `opacity` 0→1, `transform: translateX(8px→0)` (wstecz: -8px) |
-| Wyjście strony | `--t-out` 180 | `--ease-exit` | `opacity` 1→0 |
-| Podświetlenie segmentowanego | `--t-slide` 260 | `--ease-smooth` | `transform: translate` wskaźnika |
-| Rozwinięcie kategorii / zmiana karty trybu | `--t-morph` 280 | `--ease-smooth` | treść: `opacity` + `translateY(-4px→0)`; elementy pod spodem: FLIP `translateY` |
-| Strzałka kategorii | 160 | `--ease-smooth` | `transform: rotate(0→90deg)` |
-| Wskaźnik prędkości | `--t-gauge` 420 | `--ease-enter` | rysowanie w SVG/canvas (wyjątek, 6.2) |
-| Pasek XP po zmianie | 420 | `--ease-enter` | `transform: scaleX` |
-| Popup nad grą | wejście 220 / wyjście 180, widoczny 6000 | enter / exit | `opacity`, `translateY(12px→0)` |
-| Toast | wejście 220 / wyjście 180, widoczny 4000 | enter / exit | `opacity`, `translateY(8px→0)` |
+| Najechanie, zmiana koloru | `--t-color` 90 | liniowa | `background-color`, `color`, `border-color` (tylko kolor – nie układ) |
+| Wciśnięcie | `--t-press` 60 | liniowa | kolor tła |
+| Gałka przełącznika | `--t-switch` 110 | `--ease-enter` | `transform: translateX` |
+| Zmiana motywu / koloru profilu | `--t-theme` 120 | `--ease-enter` | przenikanie zrzutów (View Transitions, `opacity`) |
+| Wejście strony | `--t-in` 140 | `--ease-enter` | `opacity` 0→1, `transform: translateX(8px→0)` (wstecz: -8px) |
+| Wyjście strony | `--t-out` 100 | `--ease-exit` | `opacity` 1→0 |
+| Podświetlenie segmentowanego | `--t-slide` 140 | `--ease-smooth` | `transform: translate` wskaźnika |
+| Rozwinięcie kategorii / zmiana karty trybu | `--t-morph` 160 | `--ease-smooth` | treść: `opacity` + `translateY(-4px→0)`; elementy pod spodem: FLIP `translateY` |
+| Strzałka kategorii | `--t-switch` 110 | `--ease-smooth` | `transform: rotate(0→90deg)` |
+| Wskaźnik prędkości | `--t-gauge` 260 | `--ease-enter` | rysowanie w SVG/canvas (wyjątek, 6.2) |
+| Pasek XP po zmianie | `--t-gauge` 260 | `--ease-enter` | `transform: scaleX` |
+| Popup nad grą | wejście 140 / wyjście 100, widoczny 6000 | enter / exit | `opacity`, `translateY(12px→0)` |
+| Toast | wejście 140 / wyjście 100, widoczny 4000 | enter / exit | `opacity`, `translateY(8px→0)` |
 | Przytrzymanie (akcja niebezpieczna) | `--t-hold` 1000 | liniowa | `transform: scaleX` wypełnienia |
 | Kropka „szukam” | 1000, pętla | `--ease-smooth` | `opacity` 1↔0.35 |
 

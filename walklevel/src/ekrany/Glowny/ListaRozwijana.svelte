@@ -176,7 +176,7 @@
     border-radius: var(--r-lg);
     background: var(--surface-2);
     box-shadow: var(--shadow-pop);
-    animation: wl-rozwin 160ms var(--ease-enter);
+    animation: wl-rozwin var(--t-in) var(--ease-enter);
   }
   .pozycja,
   .link {

@@ -14,7 +14,7 @@
 
   let items = $state<PopupItem[]>([]);
   const spokojnie = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const przesuniecie = { duration: spokojnie ? 0 : 220, easing: cubicOut };
+  const przesuniecie = { duration: spokojnie ? 0 : 140, easing: cubicOut };
 
   onMount(() => {
     let zamkniete = false;

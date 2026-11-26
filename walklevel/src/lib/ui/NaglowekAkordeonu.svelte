@@ -109,7 +109,7 @@
     display: grid;
     place-items: center;
     color: var(--text-2);
-    transition: transform 160ms var(--ease-smooth);
+    transition: transform var(--t-switch) var(--ease-smooth);
   }
   .otwarty .strzalka { transform: rotate(90deg); }
   .tresc {

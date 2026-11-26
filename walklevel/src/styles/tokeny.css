@@ -67,19 +67,20 @@
   --scrollbar-w: 8px;
 
   /* ruch (wyglad.md, rozdz. 6) */
-  --t-press: 80ms;
-  --t-color: 120ms;
-  --t-switch: 160ms;
-  --t-theme: 160ms;
-  --t-out: 180ms;
-  --t-in: 220ms;
-  --t-slide: 260ms;
-  --t-morph: 280ms;
-  --t-gauge: 420ms;
+  /* krótko i z szybkim startem: ruch ma potwierdzić klik, nie płynąć (26.11: „zbyt pływające”) */
+  --t-press: 60ms;
+  --t-color: 90ms;
+  --t-switch: 110ms;
+  --t-theme: 120ms;
+  --t-out: 100ms;
+  --t-in: 140ms;
+  --t-slide: 140ms;
+  --t-morph: 160ms;
+  --t-gauge: 260ms;
   --t-hold: 1000ms;
-  --ease-enter: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-exit: cubic-bezier(0.5, 0, 0.75, 0);
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
 
   /* rzadkość odznak - wypełnienie (oba motywy) */
   --rarity-pospolite: #9aa5b1;

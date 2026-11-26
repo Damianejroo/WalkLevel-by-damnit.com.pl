@@ -14,7 +14,7 @@
 <div class="warstwa" role="status" aria-live="polite">
   {#if toast}
     {#key toast.id}
-      <button type="button" class="toast" class:blad={toast.kind === 'error'} onclick={onzamknij} out:fade={{ duration: 180 }}>
+      <button type="button" class="toast" class:blad={toast.kind === 'error'} onclick={onzamknij} out:fade={{ duration: 100 }}>
         {toast.text}
       </button>
     {/key}
