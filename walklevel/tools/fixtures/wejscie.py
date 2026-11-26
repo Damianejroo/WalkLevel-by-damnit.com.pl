@@ -20,6 +20,7 @@ from bieznia.outputs import keyboard
 
 OUT = Path(__file__).resolve().parents[2] / "crates" / "core" / "tests" / "fixtures" / "wejscie"
 rng = random.Random(20261126)
+rng2 = random.Random(20261127)  # przypadki dopisane po przeglądzie (nie zmieniają starych)
 
 
 def key_json(k: Key) -> dict:
@@ -94,6 +95,22 @@ def gen_keys() -> None:
         {"scan": 0x11, "extended": [0]},
         {"scan": [1]},
         {"scan": {"a": 1}},
+        # po przeglądzie: nazwa nie-napisem (str() z Pythona), liczby w innych zapisach
+        {"scan": 0x11, "name": 1.5},
+        {"scan": 0x11, "name": 5.0},
+        {"scan": 0x11, "name": 1e16},
+        {"scan": 0x11, "name": 1.5e-7},
+        {"scan": 0x11, "name": 0.0001},
+        {"scan": 0x11, "name": 1e22},
+        {"scan": 0x11, "name": 123456789.125},
+        {"scan": 0x11, "name": -2.5e-5},
+        {"scan": 0x11, "name": True},
+        {"scan": 0x11, "name": -7},
+        {"scan": 0x11, "vk": -5},
+        {"scan": 0x11, "vk": 1e3},
+        {"scan": 1e2, "name": "d"},
+        {"scan": "-0", "name": "zero"},
+        {"scan": "+17", "name": "plus"},
     ]
     from_dict = []
     for data in inputs:
@@ -161,6 +178,36 @@ def gen_pad() -> None:
         [[0, 1.0, 3], [50, 2.0]], [[0], [50, 2.0]], [[0, None], [50, 2.0]], [[0, True], [50, 2.0]],
         [[0, 1.0], [50, 2.0], [100, 3.0]], [[0, 1.0], [50, 2.0], [100, 3.0], [100, 4.0]],
         {"a": 1},
+        # po przeglądzie: skrajne liczby, napisy, bool, zaokrąglanie remisów
+        [[0, 1.0], [50, 2.0], [-1e30, 3.0]],
+        [[0, 1.0], [50, 2.0], [1e30, 3.0]],
+        [[0, 1.0], [-1e30, 2.0]],
+        [[" 0 ", " 1.5 "], ["50", "2"]],
+        [[0, "nan"], [50, 2.0]],
+        [[0, "inf"], [50, 2.0]],
+        [[0, "1e0"], [50, 2.0]],
+        [[0, " 2.5\n"], [50, 2.0]],
+        [["1.0", 1.0], [50, 2.0]],
+        [[False, 1.0], [50, 2.0]],
+        [[True, 1.0], [50, 2.0]],
+        [[0, False], [50, 2.0]],
+        ["05", "62"],
+        ["05", "6"],
+        ["ab", "cd"],
+        [[0, 2.25], [50, 2.35]],
+        [[0, 2.45], [50, 0.55]],
+        [[0, 0.45], [50, 0.65]],
+        [[0, 1.05], [50, 1.15]],
+        [[0, 11.95], [50, 12.049999]],
+        [[0, 1.0], [5, 2.0], [10, 3.0], [15, 4.0], [100, 5.0]],
+        [[0, 1.0], [100, 2.0], [105, 3.0]],
+        [[-0.5, 1.0], [50, 2.0]],
+    ] + [
+        [
+            [0, round(rng2.uniform(0.3, 12.3), rng2.choice([1, 2, 3, 6]))],
+            [rng2.randrange(1, 101), round(rng2.uniform(0.3, 12.3), rng2.choice([2, 3, 6]))],
+        ]
+        for _ in range(300)
     ] + [[list(s) for s in steps] for steps in pad.PRESETS.values()]
     parse_steps = [{"input": data, "output": [list(s) for s in pad.parse_steps(data)]}
                    for data in steps_inputs]
@@ -261,6 +308,39 @@ def gen_send() -> None:
             steps.append({"t": repr(t), "action": action})  # napis: dokładna wartość float
         runs.append({"walk": key_json(walk), "run": key_json(run), "fail_at": sorted(fail_at),
                      "steps": steps, "sent": sent})
+
+    # po przeglądzie: ten sam klawisz chodu i biegu (w Pythonie jeden wpis w _down)
+    same = Key(0x11, False, "W", 0x57)
+    for _case in range(5):
+        fail_at2 = set(rng2.sample(range(40), rng2.choice([0, 2])))
+        sent2: list[list] = []
+        calls2 = [0]
+        now2 = [0.0]
+
+        def fake_send2(scan: int, down: bool, ext: bool = False) -> None:
+            i = calls2[0]
+            calls2[0] += 1
+            if i in fail_at2:
+                raise OSError("odrzucone")
+            sent2.append([scan, down, ext])
+
+        keyboard.send_scancode = fake_send2  # type: ignore[assignment]
+        out = keyboard.KeyboardOutput(same, same, clock=lambda: now2[0])
+        steps = []
+        t = 0.0
+        for _ in range(rng2.randrange(20, 40)):
+            t += rng2.choice([0.016, 0.05, 0.1, 0.3])
+            now2[0] = t
+            action = rng2.choice(["idle", "walk", "run", "run", "release"])
+            if action == "release":
+                out.release_all()
+            else:
+                ctrl = {"idle": Control.idle(), "walk": Control(3.0, 0.2, True, False),
+                        "run": Control(7.0, 0.7, True, True)}[action]
+                out.apply(ctrl)
+            steps.append({"t": repr(t), "action": action})
+        runs.append({"walk": key_json(same), "run": key_json(same), "fail_at": sorted(fail_at2),
+                     "steps": steps, "sent": sent2})
 
     hot = []
     for case in range(15):

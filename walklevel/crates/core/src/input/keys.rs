@@ -249,15 +249,26 @@ fn py_str(v: &Value) -> String {
         Value::Bool(true) => "True".into(),
         Value::Bool(false) => "False".into(),
         Value::Null => "None".into(),
-        Value::Number(n) if n.is_f64() => {
-            let f = n.as_f64().unwrap_or(0.0);
-            if f.fract() == 0.0 && f.abs() < 1e16 {
-                format!("{f:.1}")
-            } else {
-                f.to_string()
-            }
-        }
+        Value::Number(n) if n.is_f64() => py_float_repr(n.as_f64().unwrap_or(0.0)),
         other => other.to_string(),
+    }
+}
+
+/// `repr(float)` z Pythona: najkrótszy zapis, notacja wykładnicza poniżej 1e-4 i od 1e16
+/// („1e+16”, „1.5e-07”), liczby całkowite z „.0”.
+fn py_float_repr(f: f64) -> String {
+    let abs = f.abs();
+    if f != 0.0 && !(1e-4..1e16).contains(&abs) {
+        let sci = format!("{f:e}"); // np. "1.5e-7"
+        let (mantissa, exp) = sci.split_once('e').unwrap_or((&sci, "0"));
+        let exp: i32 = exp.parse().unwrap_or(0);
+        let sign = if exp < 0 { '-' } else { '+' };
+        return format!("{mantissa}e{sign}{:02}", exp.abs());
+    }
+    if f.fract() == 0.0 {
+        format!("{f:.1}")
+    } else {
+        f.to_string()
     }
 }
 

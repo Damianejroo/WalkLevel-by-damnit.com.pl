@@ -189,7 +189,8 @@ fn try_parse_steps(data: &Value) -> Option<Vec<PadStep>> {
     }
     for pair in steps.windows(2) {
         let (a, b) = (pair[0].0, pair[1].0);
-        if b - a < MIN_GAP || b > 100 {
+        // saturating: w Pythonie liczby nie mają zakresu (np. -1e30 po int() nie przepełnia)
+        if b.saturating_sub(a) < MIN_GAP || b > 100 {
             return None;
         }
     }
@@ -485,7 +486,13 @@ impl PadReader {
             let spawned = std::thread::Builder::new()
                 .name("pad-szukanie".into())
                 .spawn(move || {
-                    let list = find();
+                    // Jak w Pythonie: błąd szukania = pusta lista, a `scanning` zawsze wraca na
+                    // false (inaczej po jednym błędzie pad nie byłby już nigdy szukany).
+                    let list = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| find()))
+                        .unwrap_or_else(|_| {
+                            log::error!("Szukanie pada nie powiodło się");
+                            Vec::new()
+                        });
                     if let Ok(mut slot) = found.lock() {
                         *slot = Some(list);
                     }
@@ -674,6 +681,52 @@ mod tests {
         }
         assert!(state.is_some());
         assert_eq!(reader.name().as_deref(), Some("DualSense (Bluetooth)"));
+    }
+
+    #[test]
+    fn failed_background_scan_is_retried_later() {
+        let calls = Arc::new(Mutex::new(0));
+        let c = calls.clone();
+        let find: PadFinder = Arc::new(move || {
+            let n = {
+                let mut n = c.lock().unwrap();
+                *n += 1;
+                *n
+            };
+            if n == 1 {
+                panic!("błąd szukania (test)");
+            }
+            vec![fake("DualSense (USB)").0]
+        });
+        let clock = Arc::new(Mutex::new(0.0f64));
+        let c2 = clock.clone();
+        let mut reader = PadReader::new(find, Box::new(move || *c2.lock().unwrap()), true);
+        let wait = |reader: &mut PadReader| {
+            for _ in 0..200 {
+                if let Some(s) = reader.read() {
+                    return Some(s);
+                }
+                if !reader.scanning.load(Ordering::SeqCst) && reader.found.lock().unwrap().is_none()
+                {
+                    return None;
+                }
+                std::thread::sleep(Duration::from_millis(5));
+            }
+            None
+        };
+        assert!(wait(&mut reader).is_none());
+        assert!(!reader.scanning.load(Ordering::SeqCst));
+        *clock.lock().unwrap() = RESCAN_S;
+        let mut state = None;
+        for _ in 0..200 {
+            state = reader.read();
+            if state.is_some() {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        assert!(state.is_some());
+        assert_eq!(*calls.lock().unwrap(), 2);
     }
 
     #[test]

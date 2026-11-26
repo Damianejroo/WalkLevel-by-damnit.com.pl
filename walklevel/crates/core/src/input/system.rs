@@ -110,12 +110,20 @@ pub fn foreground_center() -> Option<(i32, i32)> {
         let mut rect = RECT::default();
         // SAFETY: uchwyt z GetForegroundWindow, rect to poprawny wskaźnik na lokalną strukturę.
         unsafe { GetWindowRect(hwnd, &mut rect) }.ok()?;
-        Some(((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2))
+        Some(rect_center(rect.left, rect.top, rect.right, rect.bottom))
     }
     #[cfg(not(windows))]
     {
         None
     }
+}
+
+/// Środek prostokąta jak `//` w Pythonie: zaokrąglenie w dół także dla ujemnych współrzędnych
+/// (monitor po lewej od głównego), a nie w stronę zera.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn rect_center(left: i32, top: i32, right: i32, bottom: i32) -> (i32, i32) {
+    let mid = |a: i32, b: i32| ((i64::from(a) + i64::from(b)).div_euclid(2)) as i32;
+    (mid(left, right), mid(top, bottom))
 }
 
 #[cfg(test)]
@@ -135,6 +143,14 @@ mod tests {
                 28
             }
         );
+    }
+
+    #[test]
+    fn center_rounds_down_like_python() {
+        assert_eq!(rect_center(0, 0, 1921, 1081), (960, 540));
+        // monitor po lewej: (-1920 + -1) // 2 == -961 w Pythonie
+        assert_eq!(rect_center(-1920, -1081, -1, 0), (-961, -541));
+        assert_eq!(rect_center(i32::MAX, 0, i32::MAX, 0), (i32::MAX, 0));
     }
 
     #[test]

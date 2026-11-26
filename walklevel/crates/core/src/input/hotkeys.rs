@@ -123,12 +123,17 @@ impl<K: KeyState> Hotkeys<K> {
                 Binding::Combo(_, mods) => mods.iter().map(|m| m.vk()).collect(),
                 _ => Vec::new(),
             };
-            actions.push(Action {
+            let action = Action {
                 name,
                 vk,
                 mods,
                 was_down: false,
-            });
+            };
+            // powtórzona akcja zastępuje wcześniejszą (jak klucz słownika w Pythonie)
+            match actions.iter().position(|a: &Action| a.name == action.name) {
+                Some(i) => actions[i] = action,
+                None => actions.push(action),
+            }
         }
         let mut hotkeys = Hotkeys { actions, keys };
         for i in 0..hotkeys.actions.len() {
@@ -318,6 +323,22 @@ mod tests {
         kb.set(&[0x11, 0x10, F8]);
         assert_eq!(h.poll(), ["toggle"]);
         assert!(h.poll().is_empty());
+    }
+
+    #[test]
+    fn repeated_action_uses_the_last_binding() {
+        let kb = FakeKeyboard::default();
+        let mut h = hk(
+            &[
+                ("toggle", Binding::Name("F8".into())),
+                ("toggle", Binding::Vk(0x24)),
+            ],
+            &kb,
+        );
+        kb.set(&[F8]);
+        assert!(h.poll().is_empty());
+        kb.set(&[0x24]);
+        assert_eq!(h.poll(), ["toggle"]);
     }
 
     #[test]

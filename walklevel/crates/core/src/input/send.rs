@@ -152,18 +152,24 @@ impl<S: KeySender> KeyboardOutput<S> {
     }
 
     fn set(&mut self, which: Which, down: bool) {
-        let state = match which {
-            Which::Walk => self.walk_down,
-            Which::Run => self.run_down,
+        // Ten sam klawisz chodu i biegu ma jeden wspólny stan (w Pythonie jeden wpis w słowniku).
+        let shared = self.walk == self.run;
+        let is_walk = which == Which::Walk || shared;
+        let state = if is_walk {
+            self.walk_down
+        } else {
+            self.run_down
         };
         if state == down || !self.send(which, down) {
             return;
         }
-        match which {
-            Which::Walk => self.walk_down = down,
-            Which::Run => self.run_down = down,
+        if is_walk {
+            self.walk_down = down;
         }
-        if which == Which::Walk && down {
+        if which == Which::Run || shared {
+            self.run_down = down;
+        }
+        if is_walk && down {
             let now = (self.clock)();
             self.walk_since = now;
             self.last_repeat = now;
