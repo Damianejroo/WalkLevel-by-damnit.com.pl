@@ -64,6 +64,8 @@ export const appSnapshot = () => wywolaj<K.AppSnapshot>('app_snapshot');
 export const uiReady = (window: K.WindowLabel) => wywolaj<void>('ui_ready', { window });
 export const appQuit = () => wywolaj<void>('app_quit');
 export const windowShowMain = () => wywolaj<void>('window_show_main');
+/** Tło okna głównego i WebView2 w kolorze motywu (--bg), żeby odsłonięte przy zmianie rozmiaru miejsce nie prześwitywało. */
+export const windowTheme = (dark: boolean) => wywolaj<void>('window_theme', { dark });
 export const openFolder = (kind: K.FolderKind) => wywolaj<void>('open_folder', { kind });
 export const openLink = (kind: K.LinkKind) => wywolaj<void>('open_link', { kind });
 export const logTail = () => wywolaj<string[]>('log_tail');

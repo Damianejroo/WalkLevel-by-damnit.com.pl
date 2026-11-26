@@ -15,6 +15,7 @@
   import { idz, stan, wykonaj } from '../lib/stan.svelte';
   import { t } from '../lib/teksty';
   import { potrzebujeZnajomych, xpTeraz } from '../lib/znajomi.svelte';
+  import { zmienPanel } from '../lib/panel.svelte';
   import { bladPseudonimu, rangaPoziomu, sprobuj } from './KontoOnline/pomocnicze';
   import type { Friend } from '../lib/typy';
 
@@ -168,7 +169,8 @@
     };
   });
 
-  const zwin = () => wykonaj(api.settingsSet('friendsPanelCollapsed', !stan.settings.friendsPanelCollapsed));
+  // zwinięcie / rozwinięcie z przejściem bez drgań (lib/panel.svelte.ts)
+  const zwin = () => zmienPanel('friendsPanelCollapsed', !waski);
   const tytulZwijania = $derived(waski ? t('panel.rozwin') : t('panel.zwin'));
 </script>
 

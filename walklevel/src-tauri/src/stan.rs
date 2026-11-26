@@ -665,7 +665,8 @@ impl App {
     /// Układ panelu znajomych z ustawień (szerokość i minimalna szerokość okna).
     pub fn panel_layout(&self) -> crate::okna::PanelLayout {
         crate::okna::PanelLayout {
-            on: self.b("friends_panel"),
+            // bez adresu serwera kont panelu nie ma (interfejs go nie pokazuje)
+            on: self.b("friends_panel") && self.accounts_enabled,
             collapsed: self.b("friends_panel_collapsed"),
             left: self.s("friends_panel_side") == "left",
         }

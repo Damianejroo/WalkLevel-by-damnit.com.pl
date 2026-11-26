@@ -415,7 +415,7 @@ U+202F (`12 345`), jednostka po niełamliwej spacji U+00A0 (`2,5 km/h`) – licz
 | Wciśnięcie | `--t-press` 60 | liniowa | kolor tła |
 | Gałka przełącznika | `--t-switch` 110 | `--ease-enter` | `transform: translateX` |
 | Zmiana motywu | 0 | – | natychmiast, cały ekran naraz (na klatkę `bez-przejsc`); przenikanie zrzutów szło przez szarą klatkę i zamrażało obraz |
-| Wejście ekranu | 100 | `--ease-enter` | `opacity` 0,5→1, `transform: translateX(4px→0)` (wstecz: -4px) |
+| Wejście ekranu | 100 | `--ease-enter` | tylko `opacity` 0,5→1, bez przesuwu (0.6.2: przesuw o 4 px wyglądał jak drgnięcie okna) |
 | Wyjście ekranu | 0 | – | poprzedni ekran znika od razu (przenikanie dwóch ekranów wyglądało jak lag) |
 | Podświetlenie segmentowanego | `--t-slide` 140 | `--ease-smooth` | `transform: translate` wskaźnika |
 | Rozwinięcie kategorii / zmiana karty trybu | `--t-morph` 160 | `--ease-smooth` | treść: `opacity` + `translateY(-4px→0)`; elementy pod spodem: FLIP `translateY` |
@@ -889,6 +889,11 @@ podgląd profilu – dane), tło `--surface-2`.
   (`--ink`), 74 px od dołu, z „Cofnij” przy usuwaniu znajomego.
 - Zwinięcie zwęża okno o 224 px (rozwinięcie poszerza), główna kolumna stoi; ikonę zwijania
   panelu z lewej odbijamy w poziomie. Ruch tylko `opacity`/`transform` (wejście menu 160 ms).
+- Przejście (lib/panel.svelte.ts): na czas zmiany rozmiaru okna główna kolumna ma zamrożoną
+  szerokość w px, panel (slot w kolorze `--surface`) bierze resztę. Zwijanie: najpierw pasek,
+  po klatce okno węższe; rozwijanie: najpierw okno szersze, po zdarzeniu `resize` pełny panel.
+  Rozmiar i położenie (panel z lewej) jednym `SetWindowPos`. Tło okna i WebView2 = `--bg`
+  motywu (`window_theme`), więc odsłonięty na chwilę fragment okna nie prześwituje.
 - Nic nie wystaje przy oknie 720 z pełnym panelem i dużym tekstem, w obu motywach.
 
 ---

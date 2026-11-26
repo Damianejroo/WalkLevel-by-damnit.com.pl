@@ -10,6 +10,8 @@ use tauri::{
     PhysicalSize, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
 };
 
+use tauri::window::Color;
+
 use crate::widoki::{NavRequest, PopupsView, SliceEvent, Telemetry, Toast};
 
 pub const MAIN: &str = "main";
@@ -25,6 +27,15 @@ pub const PANEL_BAR_W: f64 = 64.0;
 /// Minimalna szerokość okna z pełnym panelem i z paskiem (bez panelu - [`MIN_W`]).
 pub const MIN_W_PANEL_FULL: f64 = 720.0;
 pub const MIN_W_PANEL_BAR: f64 = 484.0;
+
+/// Tło motywu (`--bg` z src/styles/tokeny.css): ciemny #151514, jasny #fbfaf7.
+pub fn theme_color(dark: bool) -> Color {
+    if dark {
+        Color(0x15, 0x15, 0x14, 0xff)
+    } else {
+        Color(0xfb, 0xfa, 0xf7, 0xff)
+    }
+}
 
 /// Układ panelu znajomych (ustawienia `friends_panel*`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -96,6 +107,8 @@ pub enum Okno {
     MainAlwaysOnTop(bool),
     /// panel znajomych: układ przed i po (minimalna szerokość, rozmiar, przesunięcie okna)
     MainPanel(PanelLayout, PanelLayout),
+    /// tło okna głównego i WebView2 w kolorze motywu (true - ciemny)
+    MainBackground(bool),
     BubbleVisible(bool, Option<[f64; 2]>),
     /// rozmiar okna przycisku za układem
     BubbleSize(BubbleLayout),
@@ -173,6 +186,11 @@ fn apply(app: &AppHandle, r: Okno) {
                 let _ = w.set_always_on_top(on);
             }
         }
+        Okno::MainBackground(dark) => {
+            if let Some(w) = app.get_webview_window(MAIN) {
+                let _ = w.set_background_color(Some(theme_color(dark)));
+            }
+        }
         Okno::MainPanel(before, after) => {
             if let Some(w) = app.get_webview_window(MAIN) {
                 resize_for_panel(&w, before, after);
@@ -229,6 +247,8 @@ pub fn create_windows(app: &AppHandle, webview_dir: &Path) -> tauri::Result<()> 
         .title(title)
         .inner_size(DEFAULT_W, DEFAULT_H)
         .min_inner_size(MIN_W, MIN_H)
+        // ciemne tło od startu (okno i tak jest ukryte do `ui_ready`, potem tło idzie za motywem)
+        .background_color(theme_color(true))
         .resizable(true)
         .visible(false)
         .data_directory(webview_dir.to_path_buf())
@@ -460,16 +480,54 @@ fn resize_for_panel(w: &WebviewWindow, before: PanelLayout, after: PanelLayout) 
     if new_width < width {
         let _ = w.set_min_size(Some(min));
     }
-    if (new_width - width).abs() >= 0.5 {
-        let _ = w.set_size(LogicalSize::new(new_width, height));
-    }
-    if shift.abs() >= 0.5 {
-        let x = pos.x as f64 / k + shift;
-        let y = pos.y as f64 / k;
-        let _ = w.set_position(LogicalPosition::new(x, y));
+    if (new_width - width).abs() >= 0.5 || shift.abs() >= 0.5 {
+        // rozmiar i położenie jednym SetWindowPos (panel z lewej: bez klatki z przesuniętą
+        // główną kolumną między zmianą rozmiaru a przesunięciem)
+        let dw = ((new_width - width) * k).round() as i32;
+        let dx = (shift * k).round() as i32;
+        if !move_and_resize(w, dx, dw) {
+            let _ = w.set_size(LogicalSize::new(new_width, height));
+            let x = pos.x as f64 / k + shift;
+            let _ = w.set_position(LogicalPosition::new(x, pos.y as f64 / k));
+        }
     }
     if new_width >= width {
         let _ = w.set_min_size(Some(min));
+    }
+}
+
+/// Przesunięcie o `dx` i zmiana szerokości o `dw` (piksele fizyczne) jednym `SetWindowPos`.
+/// `false` - nie udało się (wtedy osobno rozmiar i położenie przez Tauri).
+fn move_and_resize(w: &WebviewWindow, dx: i32, dw: i32) -> bool {
+    #[cfg(windows)]
+    {
+        use windows::Win32::Foundation::RECT;
+        use windows::Win32::UI::WindowsAndMessaging::{
+            GetWindowRect, SWP_NOACTIVATE, SWP_NOZORDER, SetWindowPos,
+        };
+        let Ok(hwnd) = w.hwnd() else { return false };
+        // SAFETY: uchwyt okna z Tauri; tylko odczyt prostokąta i zmiana położenia/rozmiaru.
+        unsafe {
+            let mut r = RECT::default();
+            if GetWindowRect(hwnd, &mut r).is_err() {
+                return false;
+            }
+            SetWindowPos(
+                hwnd,
+                None,
+                r.left + dx,
+                r.top,
+                (r.right - r.left + dw).max(1),
+                r.bottom - r.top,
+                SWP_NOZORDER | SWP_NOACTIVATE,
+            )
+            .is_ok()
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (w, dx, dw);
+        false
     }
 }
 

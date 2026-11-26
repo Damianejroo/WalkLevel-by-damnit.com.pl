@@ -9,6 +9,7 @@
   import { stan, ui, wykonaj } from '../../lib/stan.svelte';
   import { rozwinMotyw, ustawMotyw } from '../../lib/wyglad';
   import * as api from '../../lib/api';
+  import { zmienPanel } from '../../lib/panel.svelte';
   import type { PanelSide, SettingKey, ThemeChoice } from '../../lib/typy';
 
   const osoba = $derived(stan.people.people.find((o) => o.id === stan.people.activePersonId));
@@ -72,7 +73,7 @@
     tytul={t('ustawienia.wyglad.panel')}
     opis={t('ustawienia.wyglad.panel_opis')}
     wlaczony={stan.settings.friendsPanel}
-    onzmiana={(v) => wykonaj(api.settingsSet('friendsPanel', v))}
+    onzmiana={(v) => zmienPanel('friendsPanel', v)}
   />
   {#if stan.settings.friendsPanel}
     <div class="grupa">

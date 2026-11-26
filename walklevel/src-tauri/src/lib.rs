@@ -380,6 +380,7 @@ pub fn run() {
             komendy::account_set_upload,
             komendy::account_set_visibility,
             komendy::account_set_live_status,
+            komendy::window_theme,
             komendy::account_set_description,
             komendy::account_set_profile_visibility,
             komendy::account_set_games_visibility,

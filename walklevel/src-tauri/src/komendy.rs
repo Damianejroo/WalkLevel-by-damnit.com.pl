@@ -38,6 +38,13 @@ pub async fn app_snapshot(core: State<'_, Core>) -> CmdResult<Value> {
     Ok(core.snapshot())
 }
 
+/// Tło okna głównego w kolorze motywu (UI zna motyw „jak Windows”).
+#[tauri::command]
+pub async fn window_theme(core: State<'_, Core>, dark: bool) -> CmdResult<()> {
+    core.with(|a| a.window(Okno::MainBackground(dark)));
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn ui_ready(core: State<'_, Core>, window: String) -> CmdResult<()> {
     if window != "main" {

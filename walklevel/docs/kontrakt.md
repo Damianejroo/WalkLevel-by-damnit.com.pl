@@ -1319,6 +1319,7 @@ Poniżej `T` to typ wyniku; `()` = `void`.
 | `ui_ready` | `window: String` (`"main"`/`"popup"`/`"przycisk"`) | `()` | `main`: pokazuje okno główne w zapamiętanym miejscu (`window_geometry`), potem rusza połączenie z bieżnią/skan; przy `firstRun` wysyła `wl:nawigacja {to:'wizard', reason:'firstRun'}` |
 | `app_quit` | - | `()` | zamykanie jak `App.quit()`: chowa okno, puszcza klawisze, **zatrzymuje taśmę** (`stop_belt_now`, do 8 s), zapisuje geometrię, zamyka historię, `WindowRequest::Quit` |
 | `window_show_main` | - | `()` | z przycisku (prawy klik) albo z popupu - `showNormal` + raise + focus |
+| `window_theme` | `dark: bool` | `()` | 0.6.2: tło okna głównego i WebView2 = `--bg` motywu (`WindowRequest::MainBackground`); UI woła przy starcie i każdej zmianie motywu |
 | `open_folder` | `kind: FolderKind` | `()` | `dane` / `logi` / `zgloszenia` / `nagrania` w folderze danych (tworzy, jeśli brak) |
 | `open_link` | `kind: LinkKind` | `()` | strona autora / polityka prywatności / kod / regulamin konta (adresy z rdzenia) |
 | `log_tail` | - | `Vec<String>` | ostatnie 500 linii Dziennika (po ponownym otwarciu okna) |

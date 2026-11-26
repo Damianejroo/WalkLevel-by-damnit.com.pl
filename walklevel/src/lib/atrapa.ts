@@ -844,6 +844,7 @@ export function utworzAtrape(): Silnik {
       if (a.window === 'main' && sc.pierwsze) pozniej(50, () => emituj('wl:nawigacja', { to: 'wizard', reason: 'firstRun' }));
     },
     app_quit: () => loguj('Zamykanie (atrapa: okno zostaje otwarte)'),
+    window_theme: () => {},
     window_show_main: () => undefined,
     open_folder: (a) => loguj(`Otwórz folder: ${String(a.kind)} (atrapa)`),
     open_link: (a) => loguj(`Otwórz adres: ${String(a.kind)} (atrapa)`),
