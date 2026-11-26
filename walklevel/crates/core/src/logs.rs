@@ -319,9 +319,10 @@ pub fn install_panic_hook() {
                 .location()
                 .map(|l| format!(" ({l})"))
                 .unwrap_or_default();
+            // jak w Pythonie: główny wątek bez nazwy, inne z nazwą albo "?"
             let head = match std::thread::current().name() {
-                Some("main") | None => "Nieobsłużony błąd".to_string(),
-                Some(name) => format!("Nieobsłużony błąd w wątku {name}"),
+                Some("main") => "Nieobsłużony błąd".to_string(),
+                name => format!("Nieobsłużony błąd w wątku {}", name.unwrap_or("?")),
             };
             let trace = std::backtrace::Backtrace::force_capture();
             logger.critical(format!("{head}\n{payload}{place}\n{trace}").trim_end());
@@ -608,5 +609,13 @@ mod tests {
         log::warn!(target: "bieznia", "drugi folder");
         assert!(read(&other.path().join("logs"), MAIN_FILE).contains("drugi folder"));
         assert!(!read(&logs, MAIN_FILE).contains("drugi folder"));
+
+        // bez nazwy wątku: "w wątku ?" jak threading.excepthook w Pythonie
+        assert!(std::thread::spawn(|| panic!("bez nazwy")).join().is_err());
+        let main = read(&other.path().join("logs"), MAIN_FILE);
+        assert!(main.contains("CRITICAL bieznia.blad: Nieobsłużony błąd w wątku ?"));
+
+        // zamyka pliki logu, żeby folder tymczasowy dał się usunąć (Windows)
+        *ACTIVE.write().unwrap() = None;
     }
 }

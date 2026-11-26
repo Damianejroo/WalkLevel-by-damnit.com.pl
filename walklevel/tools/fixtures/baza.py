@@ -14,8 +14,9 @@ import tempfile
 import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from unittest import mock
 
-from bieznia import logs, settings
+from bieznia import logs, paths, settings
 from bieznia.config import load_config
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -80,12 +81,9 @@ RECORDS = [
 
 
 def record(ns: int, level: int, name: str, msg: str) -> logging.LogRecord:
-    rec = logging.LogRecord(name, level, __file__, 1, msg, None, None)
-    rec.created = ns / 1e9
-    rec.msecs = (ns % 1_000_000_000) // 1_000_000 + 0.0
-    if rec.msecs == 999.0 and int(rec.created) != ns // 1_000_000_000:
-        rec.msecs = 0.0
-    return rec
+    # prawdziwy LogRecord z podstawionym zegarem: created/msecs liczy sam Python
+    with mock.patch("time.time_ns", return_value=ns):
+        return logging.LogRecord(name, level, __file__, 1, msg, None, None)
 
 
 def line_cases() -> None:
@@ -154,7 +152,33 @@ def rotation_cases() -> None:
     save("rotation.json", {"messages": MESSAGES, "cases": out})
 
 
+def data_dir_cases() -> None:
+    """paths.data_dir() w wersji exe (FROZEN) i z kodu przy różnych zmiennych środowiska."""
+    cwd = r"D:\repo"
+    cases = [
+        (True, r"C:\Users\a\AppData\Local", r"C:\Users\a"),
+        (True, "", r"C:\Users\a"),
+        (True, None, r"C:\Users\b"),
+        (False, r"C:\Users\a\AppData\Local", r"C:\Users\a"),
+    ]
+    out = []
+    for frozen, local, profile in cases:
+        env = {"USERPROFILE": profile}
+        if local is not None:
+            env["LOCALAPPDATA"] = local
+        with (
+            mock.patch.dict("os.environ", env, clear=True),
+            mock.patch.object(paths, "FROZEN", frozen),
+            mock.patch.object(Path, "cwd", return_value=Path(cwd)),
+        ):
+            result = str(paths.data_dir())
+        item = {"frozen": frozen, "local_app_data": local, "user_profile": profile}
+        out.append({**item, "cwd": cwd, "result": result})
+    save("data_dir.json", out)
+
+
 if __name__ == "__main__":
+    data_dir_cases()
     config_cases()
     settings_cases()
     line_cases()

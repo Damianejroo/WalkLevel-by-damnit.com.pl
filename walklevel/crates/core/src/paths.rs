@@ -184,6 +184,28 @@ mod tests {
     }
 
     #[test]
+    fn data_dir_matches_python() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/baza/data_dir.json");
+        let cases: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+        let text = |v: &serde_json::Value| v.as_str().map(OsString::from);
+        for case in cases.as_array().unwrap() {
+            let dir = resolve_data_dir(
+                case["frozen"].as_bool().unwrap(),
+                None,
+                text(&case["local_app_data"]),
+                text(&case["user_profile"]),
+                Path::new(case["cwd"].as_str().unwrap()),
+            );
+            assert_eq!(
+                dir,
+                PathBuf::from(case["result"].as_str().unwrap()),
+                "{case}"
+            );
+        }
+    }
+
+    #[test]
     fn dev_uses_current_dir() {
         let cwd = Path::new(r"D:\repo");
         assert_eq!(resolve_data_dir(false, None, os(r"C:\L"), None, cwd), cwd);

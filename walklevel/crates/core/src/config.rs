@@ -14,6 +14,8 @@ use serde_json::{Map, Value};
 pub const DEFAULT_FILE: &str = "config.toml";
 /// Lokalne nadpisania w folderze danych (nie trafiają do gita ani do wydania).
 pub const LOCAL_FILE: &str = "config.local.toml";
+/// Regulamin konta online, gdy config.toml nie ma `[konto] regulamin` (jak w 0.5.x).
+pub const DEFAULT_TERMS_URL: &str = "https://bieznia.damnit-live.pl/bieznia";
 
 /// Klucze ustawień zapisywanych w oknie i sekcja config.toml, do której należą
 /// (1:1 z `SECTIONS` w bieznia/settings.py).
@@ -111,16 +113,21 @@ impl Config {
             .filter(|s| !s.trim().is_empty())
     }
 
-    /// Link do regulaminu konta online (`[konto] regulamin`).
+    /// Link do regulaminu konta online (`[konto] regulamin`); bez tego klucza adres
+    /// [`DEFAULT_TERMS_URL`] (jak w Pythonie), None tylko przy pustym wpisie.
     pub fn terms_url(&self) -> Option<&str> {
-        self.str_value("konto", "regulamin")
-            .filter(|s| !s.trim().is_empty())
+        match self.section("konto").and_then(|k| k.get("regulamin")) {
+            None => Some(DEFAULT_TERMS_URL),
+            Some(value) => value.as_str().filter(|s| !s.trim().is_empty()),
+        }
     }
 
-    /// Adres wysyłki zgłoszeń (`[zgloszenia] adres`); None = zgłoszenie mailem.
+    /// Adres wysyłki zgłoszeń (`[zgloszenia] adres` bez spacji na brzegach, jak `strip()`
+    /// w Pythonie); None = zgłoszenie mailem.
     pub fn reports_url(&self) -> Option<&str> {
         self.str_value("zgloszenia", "adres")
-            .filter(|s| !s.trim().is_empty())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
     }
 
     /// Dokłada ustawienia z okna (patrz [`apply_settings`]).
@@ -329,6 +336,27 @@ mod tests {
         fs::write(tmp.path().join("config.local.toml"), "to nie jest = = toml").unwrap();
         let broken = load_config(tmp.path(), tmp.path()).unwrap_err();
         assert!(broken.to_string().contains("config.local.toml"), "{broken}");
+    }
+
+    #[test]
+    fn urls_like_python() {
+        let config = |v: Value| Config {
+            values: v.as_object().unwrap().clone(),
+        };
+        // brak klucza regulaminu: adres domyślny jak w oknie 0.5.x
+        let none = config(json!({}));
+        assert_eq!(none.terms_url(), Some(DEFAULT_TERMS_URL));
+        assert_eq!(none.account_url(), None);
+        assert_eq!(none.reports_url(), None);
+        let set = config(json!({
+            "konto": {"adres": "  ", "regulamin": "https://x/r"},
+            "zgloszenia": {"adres": " https://x/z \n"},
+        }));
+        assert_eq!(set.terms_url(), Some("https://x/r"));
+        assert_eq!(set.account_url(), None); // pusty po strip(): konto wyłączone
+        assert_eq!(set.reports_url(), Some("https://x/z"));
+        let empty = config(json!({"konto": {"regulamin": ""}}));
+        assert_eq!(empty.terms_url(), None);
     }
 
     #[test]
