@@ -16,6 +16,7 @@
 //! moduł nie uruchamia własnych wątków.
 
 pub mod api;
+pub mod online;
 pub mod state;
 pub mod sync;
 pub mod upload;
@@ -38,7 +39,7 @@ pub use api::{
     friendly,
 };
 pub use state::{AccountState, STATE_FILE, load_state, load_states, save_state, save_states};
-pub use sync::{AccountTimers, Every, SyncReport, SyncTarget};
+pub use sync::{AccountTimers, Every, LiveUpdate, SyncReport, SyncTarget, live_update};
 pub use upload::{DELETED_ELSEWHERE, UploadSession, session_payload};
 pub use vault::{MemoryStore, TARGET, TokenStore, default_store, vault_target};
 
@@ -898,6 +899,14 @@ impl Accounts {
             .find(|a| a.state.user_id == user_id)
             .map(|a| a.state.person.clone())
             .unwrap_or_default()
+    }
+
+    /// Inna osoba niż `person`, do której jest już przypięte konto `user_id` (jedno konto,
+    /// jedna osoba) - logowanie dla `person` trzeba wtedy odrzucić.
+    pub fn taken_by(&self, user_id: &str, person: &str) -> Option<String> {
+        self.logged_in()
+            .find(|a| a.state.user_id == user_id && a.state.person != person)
+            .map(|a| a.state.person.clone())
     }
 
     /// Osoba usunięta z aplikacji - jej konto zostaje na serwerze, tu wylogowane.

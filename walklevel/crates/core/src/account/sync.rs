@@ -348,6 +348,49 @@ impl AccountTimers {
     }
 }
 
+/// Od tej prędkości (km/h) w trakcie sesji osoba „idzie” w stanie na żywo.
+pub const LIVE_MIN_KMH: f64 = 0.05;
+
+/// Stan na żywo do wysłania przy kolejnym tyknięciu zegara [`LIVE_EVERY_S`].
+#[derive(Debug, Clone, PartialEq)]
+pub enum LiveUpdate {
+    Walking {
+        kmh: f64,
+        steps: i64,
+        active_s: f64,
+        session_id: String,
+    },
+    /// koniec ruchu - wyczyścić stan na serwerze (raz)
+    Stopped,
+}
+
+/// Co wysłać teraz: ruch, gdy trwa sesja i prędkość > [`LIVE_MIN_KMH`]; po ruchu jeden raz
+/// [`LiveUpdate::Stopped`]; potem nic. `live_on` - ostatnio wysłano ruch.
+pub fn live_update(
+    live_on: &mut bool,
+    session_id: Option<String>,
+    kmh: f64,
+    steps: i64,
+    active_s: f64,
+) -> Option<LiveUpdate> {
+    match session_id {
+        Some(session_id) if kmh > LIVE_MIN_KMH => {
+            *live_on = true;
+            Some(LiveUpdate::Walking {
+                kmh,
+                steps,
+                active_s,
+                session_id,
+            })
+        }
+        _ if *live_on => {
+            *live_on = false;
+            Some(LiveUpdate::Stopped)
+        }
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

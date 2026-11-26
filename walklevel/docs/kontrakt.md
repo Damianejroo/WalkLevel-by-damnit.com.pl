@@ -1153,6 +1153,8 @@ pub struct AccountView {
     pub busy: Vec<String>, pub message: String, pub verify_polling: bool, pub pending_uploads: u32,
 }
 
+// Dane online (PeriodTotals ... RegistrationCode) i ich odczyt z odpowiedzi serwera:
+// walklevel_core::account::online (rdzeń), src-tauri tylko je przekazuje.
 #[derive(Debug, Clone, Default, Serialize)] #[serde(rename_all = "camelCase")]
 pub struct PeriodTotals { pub steps: i64, pub distance_km: f64, pub active_s: f64, pub sessions: Option<i64> }
 #[derive(Debug, Clone, Serialize)] #[serde(rename_all = "camelCase")]

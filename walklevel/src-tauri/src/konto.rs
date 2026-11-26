@@ -9,7 +9,9 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use serde_json::Value;
-use walklevel_core::account::{self, Account, Accounts, KontoError, KontoErrorKind, SyncTarget};
+use walklevel_core::account::{
+    self, Account, Accounts, KontoError, KontoErrorKind, LiveUpdate, SyncTarget, online,
+};
 use walklevel_core::history::{History, now_unix};
 
 use crate::stan::{App, Core, KontoWidok, lock};
@@ -229,17 +231,8 @@ pub fn tick(core: &Core) {
             let speed = app.bridge.state().control.speed;
             let stats = app.tracker.live(now);
             let current = app.tracker.current().map(|s| s.id.clone());
-            match current {
-                Some(sid) if speed > 0.05 => {
-                    app.live_on = true;
-                    live = Some(Some((speed, stats.steps.unwrap_or(0), stats.active_s, sid)));
-                }
-                _ if app.live_on => {
-                    app.live_on = false;
-                    live = Some(None);
-                }
-                _ => {}
-            }
+            let steps = stats.steps.unwrap_or(0);
+            live = account::live_update(&mut app.live_on, current, speed, steps, stats.active_s);
         }
         (
             refresh.then(|| logged.clone()),
@@ -272,8 +265,13 @@ pub fn tick(core: &Core) {
         background(core, person, "live", move |ctx| {
             let acc = ctx.accounts.get(&p);
             match live {
-                Some((kmh, steps, active, sid)) => acc.live(kmh, steps, active, &sid),
-                None => acc.clear_live(),
+                LiveUpdate::Walking {
+                    kmh,
+                    steps,
+                    active_s,
+                    session_id,
+                } => acc.live(kmh, steps, active_s, &session_id),
+                LiveUpdate::Stopped => acc.clear_live(),
             }
         });
     }
@@ -364,12 +362,7 @@ fn signed_in(
     person: &str,
     user_id: &str,
 ) -> account::Result<()> {
-    let taken = ctx
-        .accounts
-        .logged_in()
-        .find(|a| a.state.user_id == user_id && a.state.person != person)
-        .map(|a| a.state.person.clone());
-    if let Some(taken) = taken {
+    if let Some(taken) = ctx.accounts.taken_by(user_id, person) {
         if !person.is_empty() {
             ctx.accounts.get(person).logout();
         }
@@ -387,8 +380,7 @@ fn signed_in(
             let Some(store) = app.store.as_mut() else {
                 return Err(not_logged_in());
             };
-            let colors = walklevel_core::store::palette::COLORS.len();
-            let color = walklevel_core::store::palette::COLORS[store.people().len() % colors].name;
+            let color = walklevel_core::store::palette::next_for(store.people().len()).name;
             let id = store
                 .add_person(&acc.state.name, color, None)
                 .map_err(|e| KontoError::new(KontoErrorKind::Io, &e.to_string(), 0))?
@@ -668,199 +660,12 @@ pub fn delete_session_online(core: &Core, person: String, session_id: String) {
 
 // --- dane online ---------------------------------------------------------------------------
 
-fn num(v: &Value, key: &str) -> f64 {
-    v.get(key).and_then(Value::as_f64).unwrap_or(0.0)
-}
-
-fn int(v: &Value, key: &str) -> i64 {
-    v.get(key).and_then(Value::as_f64).unwrap_or(0.0) as i64
-}
-
-fn text(v: &Value, key: &str) -> String {
-    match v.get(key) {
-        Some(Value::String(s)) => s.clone(),
-        Some(Value::Number(n)) => n.to_string(),
-        _ => String::new(),
-    }
-}
-
-fn level(v: &Value) -> Option<u32> {
-    v.get("poziom")
-        .and_then(Value::as_f64)
-        .filter(|l| *l >= 1.0)
-        .map(|l| (l as u32).min(100))
-}
-
-fn period(v: Option<&Value>) -> PeriodTotals {
-    let Some(v) = v.filter(|v| v.is_object()) else {
-        return PeriodTotals::default();
-    };
-    PeriodTotals {
-        steps: int(v, "kroki"),
-        distance_km: num(v, "dystans_km"),
-        active_s: num(v, "ruch_s"),
-        sessions: v.get("sesje").and_then(Value::as_f64).map(|s| s as i64),
-    }
-}
-
-fn games(v: Option<&Value>) -> Option<Vec<GameTotals>> {
-    let list = v?.as_array()?;
-    Some(
-        list.iter()
-            .filter(|g| g.is_object())
-            .map(|g| GameTotals {
-                game: text(g, "gra").trim().to_string(),
-                game_id: Some(text(g, "gra_id")).filter(|s| !s.is_empty()),
-                steps: int(g, "kroki"),
-                distance_km: num(g, "dystans_km"),
-                active_s: num(g, "ruch_s"),
-            })
-            .collect(),
-    )
-}
-
-fn friends(v: &Value) -> Vec<Friend> {
-    v.as_array()
-        .map(|l| {
-            l.iter()
-                .filter(|f| f.is_object())
-                .map(|f| Friend {
-                    id: text(f, "id"),
-                    name: text(f, "name"),
-                    level: level(f),
-                    live: f
-                        .get("na_zywo")
-                        .filter(|l| l.is_object())
-                        .map(|l| LiveState {
-                            kmh: num(l, "kmh"),
-                            steps: int(l, "kroki"),
-                        }),
-                    week: period(f.get("tydzien")),
-                })
-                .collect()
-        })
+/// Id użytkownika konta wybranej osoby ("" - niezalogowana).
+fn my_user_id(app: &App) -> String {
+    app.konta
+        .get(&app.person_id())
+        .map(|k| k.state.user_id.clone())
         .unwrap_or_default()
-}
-
-fn invitation_list(v: Option<&Value>) -> Vec<Invitation> {
-    v.and_then(Value::as_array)
-        .map(|l| {
-            l.iter()
-                .map(|i| {
-                    let who = i.get("osoba").cloned().unwrap_or(Value::Null);
-                    let mut name = text(&who, "name");
-                    if name.is_empty() {
-                        name = text(i, "name");
-                    }
-                    Invitation {
-                        id: text(i, "id"),
-                        person: InvitationPerson {
-                            id: text(&who, "id"),
-                            name: if name.is_empty() { "?".into() } else { name },
-                        },
-                        created_at: i.get("utworzono_utc_s").and_then(Value::as_f64),
-                    }
-                })
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
-fn ranking(v: &Value, scope: &str, my_id: &str, known: &HashMap<String, String>) -> Ranking {
-    let rows = v
-        .as_array()
-        .map(|l| {
-            l.iter()
-                .map(|r| {
-                    let me = r.get("ja").and_then(Value::as_bool).unwrap_or(false);
-                    let name = text(r, "name");
-                    let mut id = if me { my_id.to_string() } else { text(r, "id") };
-                    if id.is_empty() {
-                        // serwer nie odsyła id w rankingu - znajomych po pseudonimie
-                        id = known.get(&name).cloned().unwrap_or_default();
-                    }
-                    RankingRow {
-                        place: int(r, "miejsce") as u32,
-                        id,
-                        name,
-                        me,
-                        level: level(r),
-                        steps: int(r, "kroki"),
-                        distance_km: num(r, "dystans_km"),
-                    }
-                })
-                .collect()
-        })
-        .unwrap_or_default();
-    Ranking {
-        scope: scope.into(),
-        rows,
-    }
-}
-
-fn people_page(v: &Value) -> PeoplePage {
-    PeoplePage {
-        page: v.get("strona").and_then(Value::as_u64).unwrap_or(1) as u32,
-        has_next: v.get("nastepna").and_then(Value::as_bool).unwrap_or(false),
-        people: v
-            .get("osoby")
-            .and_then(Value::as_array)
-            .map(|l| {
-                l.iter()
-                    .map(|p| PeopleItem {
-                        id: text(p, "id"),
-                        name: text(p, "name"),
-                        level: level(p),
-                        week_steps: p.get("tydzien").map_or(0, |w| int(w, "kroki")),
-                        place: p.get("miejsce").and_then(Value::as_u64).map(|m| m as u32),
-                        friend: p.get("znajomy").and_then(Value::as_bool).unwrap_or(false),
-                    })
-                    .collect()
-            })
-            .unwrap_or_default(),
-    }
-}
-
-fn online_person(v: &Value, my_id: &str) -> OnlinePerson {
-    let id = text(v, "id");
-    let achievements = v
-        .get("osiagniecia_lista")
-        .and_then(Value::as_array)
-        .map(|l| {
-            l.iter()
-                .map(|a| EarnedOnline {
-                    id: text(a, "id"),
-                    earned_at: num(a, "zdobyte_utc_s"),
-                })
-                .collect()
-        });
-    let count = match v.get("osiagniecia") {
-        Some(Value::Number(n)) => n.as_f64().map(|n| n as u32),
-        Some(Value::Array(a)) => Some(a.len() as u32),
-        _ => None,
-    };
-    OnlinePerson {
-        me: !id.is_empty() && id == my_id,
-        name: text(v, "name"),
-        level: level(v),
-        xp: v.get("xp").and_then(Value::as_f64).map(|x| x as i64),
-        achievements_count: count,
-        achievements,
-        since: v.get("od_utc_s").and_then(Value::as_f64),
-        treadmill_model: Some(text(v, "bieznia_model")).filter(|s| !s.is_empty()),
-        friend: v.get("znajomy").and_then(Value::as_bool).unwrap_or(false),
-        week: v
-            .get("tydzien")
-            .filter(|t| t.is_object())
-            .map(|t| period(Some(t))),
-        total: v
-            .get("razem")
-            .filter(|t| t.is_object())
-            .map(|t| period(Some(t))),
-        games: games(v.get("gry")),
-        games_hidden: v.get("gry").is_some_and(Value::is_null),
-        id,
-    }
 }
 
 fn set_loading(core: &Core, key: &str, on: bool) {
@@ -929,7 +734,7 @@ pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
                 "loadFriends",
                 has_friends && !force,
                 |a| a.client_mut().friends(),
-                |app, v| app.online.friends = Some(friends(v)),
+                |app, v| app.online.friends = Some(online::friends(v)),
             )?;
             load(
                 core,
@@ -937,12 +742,7 @@ pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
                 "loadInvitations",
                 has_inv && !force,
                 |a| a.client_mut().invitations(),
-                |app, v| {
-                    app.online.invitations = Some(Invitations {
-                        incoming: invitation_list(v.get("przychodzace")),
-                        sent: invitation_list(v.get("wyslane")),
-                    });
-                },
+                |app, v| app.online.invitations = Some(online::invitations(v)),
             )?;
             load(
                 core,
@@ -950,12 +750,7 @@ pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
                 "loadStats",
                 has_stats && !force,
                 |a| a.client_mut().stats("tydzien"),
-                |app, v| {
-                    app.online.stats = Some(OnlineStats {
-                        totals: period(Some(v)),
-                        games: games(v.get("gry")),
-                    });
-                },
+                |app, v| app.online.stats = Some(online::stats(v)),
             )
         }
         "ranking" => {
@@ -967,19 +762,9 @@ pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
                 has_rank && !force,
                 move |a| a.client_mut().ranking(&s),
                 move |app, v| {
-                    let my = app
-                        .konta
-                        .get(&app.person_id())
-                        .map(|k| k.state.user_id.clone())
-                        .unwrap_or_default();
-                    let known: HashMap<String, String> = app
-                        .online
-                        .friends
-                        .iter()
-                        .flatten()
-                        .map(|f| (f.name.clone(), f.id.clone()))
-                        .collect();
-                    app.online.ranking = Some(ranking(v, &scope, &my, &known));
+                    let friends = app.online.friends.as_deref().unwrap_or_default();
+                    let ranking = online::ranking(v, &scope, &my_user_id(app), friends);
+                    app.online.ranking = Some(ranking);
                 },
             )
         }
@@ -989,7 +774,7 @@ pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
             "loadPeople",
             has_people && !force,
             move |a| a.client_mut().people(&query.search, query.page),
-            |app, v| app.online.people = Some(people_page(v)),
+            |app, v| app.online.people = Some(online::people_page(v)),
         ),
         "me" => Ok(()),
         _ => Err(CmdError::unexpected("Nieznana zakładka.")),
@@ -1025,12 +810,7 @@ pub fn person_open(core: &Core, user_id: String) -> CmdResult<OnlinePerson> {
         false,
         move |a| a.client_mut().profile(&id),
         |app, v| {
-            let my = app
-                .konta
-                .get(&app.person_id())
-                .map(|k| k.state.user_id.clone())
-                .unwrap_or_default();
-            app.online.person = Some(online_person(v, &my));
+            app.online.person = Some(online::person(v, &my_user_id(app)));
             app.nav("onlinePerson", "personOpened", None);
         },
     )?;
@@ -1053,20 +833,16 @@ fn invite(
         let r = fetch(acc);
         acc.handle(r)
     })?;
-    let who = v.get("osoba").map(|o| text(o, "name")).unwrap_or_default();
-    let state = text(&v, "stan");
-    lock(&core.0.app).toast(if state == "przyjeta" {
-        crate::teksty::t("znajomi.przyjeto", &[("pseudonim", &who)])
+    let answer = online::invite_answer(&v);
+    let key = if answer.accepted {
+        "znajomi.przyjeto"
     } else {
-        crate::teksty::t("znajomi.zaproszono", &[("pseudonim", &who)])
-    });
+        "znajomi.zaproszono"
+    };
+    lock(&core.0.app).toast(crate::teksty::t(key, &[("pseudonim", &answer.name)]));
     core.flush();
     let _ = online_load(core, "friends", true);
-    Ok(if state == "przyjeta" {
-        state
-    } else {
-        "oczekuje".into()
-    })
+    Ok(answer.state().into())
 }
 
 pub fn invite_name(core: &Core, name: String) -> CmdResult<String> {
@@ -1104,13 +880,7 @@ pub fn registration_code(core: &Core) -> CmdResult<RegistrationCode> {
         let r = acc.client_mut().registration_code();
         acc.handle(r)
     })?;
-    let code = RegistrationCode {
-        code: text(&v, "kod"),
-        valid_until: v
-            .get("wazny_do_utc_s")
-            .or_else(|| v.get("wazny_do"))
-            .and_then(Value::as_f64),
-    };
+    let code = online::registration_code(&v);
     let mut app = lock(&core.0.app);
     app.online.reg_code = Some(code.clone());
     app.mark(&[SliceName::Online]);

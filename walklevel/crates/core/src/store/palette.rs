@@ -86,6 +86,11 @@ pub fn run_alt() -> &'static Color {
     &COLORS[RUN_ALT_INDEX]
 }
 
+/// Kolor kolejnej osoby, gdy jest ich już `count` (po kolei z palety, w kółko).
+pub fn next_for(count: usize) -> &'static Color {
+    &COLORS[count % COLORS.len()]
+}
+
 /// Kolor po nazwie; nieznana nazwa albo brak - Mięta.
 pub fn color(name: Option<&str>) -> &'static Color {
     let name = name.unwrap_or("");
