@@ -108,18 +108,22 @@ fn apply(app: &AppHandle, r: Okno) {
                 let _ = w.set_always_on_top(on);
             }
         }
-        Okno::BubbleVisible(on, pos) => {
+        Okno::BubbleVisible(true, pos) => {
+            if let Some(w) = window(app, BUBBLE, build_bubble) {
+                place_bubble(app, &w, pos);
+                show_no_activate(&w);
+            }
+        }
+        // wyłączony przycisk nie trzyma osobnego procesu WebView2 (pozycja zapisana po
+        // przeciągnięciu; ponowne włączenie tworzy okno od nowa)
+        Okno::BubbleVisible(false, _) => {
             if let Some(w) = app.get_webview_window(BUBBLE) {
-                if on {
-                    place_bubble(app, &w, pos);
-                    show_no_activate(&w);
-                } else {
-                    let _ = w.hide();
-                }
+                let _ = w.hide();
+                let _ = w.destroy();
             }
         }
         Okno::PopupShow => {
-            if let Some(w) = app.get_webview_window(POPUP) {
+            if let Some(w) = window(app, POPUP, build_popup) {
                 place_popup(app, &w);
                 show_no_activate(&w);
             }
@@ -135,9 +139,16 @@ fn apply(app: &AppHandle, r: Okno) {
 
 // --- tworzenie okien ------------------------------------------------------------------------
 
-/// Okno główne (ukryte do `ui_ready`), popup i przycisk - wszystkie z danymi WebView2
-/// w `<folder danych>\webview` (nie mieszają się z `dane/` i nie trafiają do kopii).
+/// Folder danych WebView2 wszystkich okien (`<folder danych>\webview` - nie miesza się
+/// z `dane/` i nie trafia do kopii).
+struct WebviewDir(PathBuf);
+
+/// Okno główne (ukryte do `ui_ready`). Popup i przycisk powstają dopiero, gdy są potrzebne
+/// (pierwsze powiadomienie, włączenie przycisku) - każde okno to osobny proces WebView2.
+/// Strona nowego okna sama pobiera stan przy starcie (`popup_ready` / `app_snapshot`),
+/// więc zdarzenia wysłane przed jej załadowaniem nie giną.
 pub fn create_windows(app: &AppHandle, webview_dir: &Path) -> tauri::Result<()> {
+    app.manage(WebviewDir(webview_dir.to_path_buf()));
     let title = format!("WalkLevel {} by damnit.com.pl", env!("CARGO_PKG_VERSION"));
     let main = WebviewWindowBuilder::new(app, MAIN, WebviewUrl::App("index.html".into()))
         .title(title)
@@ -148,13 +159,34 @@ pub fn create_windows(app: &AppHandle, webview_dir: &Path) -> tauri::Result<()> 
         .data_directory(webview_dir.to_path_buf())
         .build()?;
     harden_webview(&main);
+    Ok(())
+}
 
-    let popup = WebviewWindowBuilder::new(app, POPUP, WebviewUrl::App("popup.html".into()))
-        .title(crate::teksty::t(
-            "powiadomienie.tytul_okna",
-            &[("tytul", &crate::teksty::t("osiagniecia.tytul", &[]))],
-        ))
-        .inner_size(POPUP_W, POPUP_H)
+/// Istniejące okno `label` albo nowe z `build` (w wątku okien).
+fn window(
+    app: &AppHandle,
+    label: &str,
+    build: fn(&AppHandle, PathBuf) -> tauri::Result<WebviewWindow>,
+) -> Option<WebviewWindow> {
+    if let Some(w) = app.get_webview_window(label) {
+        return Some(w);
+    }
+    let dir = app.state::<WebviewDir>().0.clone();
+    build(app, dir)
+        .map_err(|e| log::warn!("Okno {label}: {e}"))
+        .ok()
+}
+
+/// Okno pomocnicze nad grą: przezroczyste, bez ramki, bez fokusu i paska zadań.
+fn overlay<'a>(
+    app: &'a AppHandle,
+    label: &str,
+    page: &str,
+    title: String,
+    dir: PathBuf,
+) -> WebviewWindowBuilder<'a, tauri::Wry, AppHandle> {
+    WebviewWindowBuilder::new(app, label, WebviewUrl::App(page.into()))
+        .title(title)
         .transparent(true)
         .decorations(false)
         .shadow(false)
@@ -164,29 +196,31 @@ pub fn create_windows(app: &AppHandle, webview_dir: &Path) -> tauri::Result<()> 
         .focused(false)
         .focusable(false)
         .visible(false)
-        .data_directory(webview_dir.to_path_buf())
+        .data_directory(dir)
+}
+
+fn build_popup(app: &AppHandle, dir: PathBuf) -> tauri::Result<WebviewWindow> {
+    let title = crate::teksty::t(
+        "powiadomienie.tytul_okna",
+        &[("tytul", &crate::teksty::t("osiagniecia.tytul", &[]))],
+    );
+    let popup = overlay(app, POPUP, "popup.html", title, dir)
+        .inner_size(POPUP_W, POPUP_H)
         .build()?;
     let _ = popup.set_ignore_cursor_events(true);
     overlay_style(&popup, true);
     harden_webview(&popup);
+    Ok(popup)
+}
 
-    let bubble = WebviewWindowBuilder::new(app, BUBBLE, WebviewUrl::App("przycisk.html".into()))
-        .title(crate::teksty::t("dymek.tytul_okna", &[]))
+fn build_bubble(app: &AppHandle, dir: PathBuf) -> tauri::Result<WebviewWindow> {
+    let title = crate::teksty::t("dymek.tytul_okna", &[]);
+    let bubble = overlay(app, BUBBLE, "przycisk.html", title, dir)
         .inner_size(BUBBLE_SIZE, BUBBLE_SIZE)
-        .transparent(true)
-        .decorations(false)
-        .shadow(false)
-        .always_on_top(true)
-        .skip_taskbar(true)
-        .resizable(false)
-        .focused(false)
-        .focusable(false)
-        .visible(false)
-        .data_directory(webview_dir.to_path_buf())
         .build()?;
     overlay_style(&bubble, false);
     harden_webview(&bubble);
-    Ok(())
+    Ok(bubble)
 }
 
 /// Wersja wydana: bez klawiszy przeglądarki (F5, Ctrl+R, F12...) i bez menu kontekstowego.
