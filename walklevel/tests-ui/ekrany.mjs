@@ -7,7 +7,7 @@ export const MOTYWY = ['jasny', 'ciemny'];
 export const WYSOKOSC = 900;
 
 export const EKRANY = [
-  { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie'] },
+  { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie', 'klawisze', 'pad', 'chodzenie', 'proba', 'symulator', 'szukanie', 'ponawiam', 'bt-wylaczony', 'rozlaczona'] },
   { ekran: 'settings', scenariusze: ['domyslny'] },
   { ekran: 'history', scenariusze: ['domyslny'] },
   { ekran: 'achievements', scenariusze: ['domyslny'] },

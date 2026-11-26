@@ -972,4 +972,10 @@ export const SLOWNIK = {
   "nazwy.osoba_domyslna": "Gracz",
   "nazwy.profil_domyslny": "Domyślny",
   "nazwy.profil": "Profil",
+  "glowny.osoby.lista": "Osoby na tym komputerze",
+  "glowny.sterowanie.lista": "Profile gier",
+  "glowny.sterowanie.tryby": "Tryb sterowania",
+  "glowny.licznik.kadencja_krotko": "Kroki/min",
+  "glowny.strefy.puszczona_krotko": "0%",
+  "tryb.chodzenie.opis_proba": "tryb próbny, postać stoi",
 } as const;
