@@ -953,3 +953,69 @@ fn days_before(day: NaiveDate, n: i64) -> Result<NaiveDate> {
 fn iso(d: NaiveDate) -> String {
     d.format("%Y-%m-%d").to_string()
 }
+
+// --- synchronizacja z serwerem (konto online, docs/synchro.md) ------------------------------
+
+impl History {
+    /// Sesja pobrana z serwera: zastępuje lokalną, gdy jej `updated` (zmieniono_utc_s z
+    /// serwera) jest większe; przy równości albo starszej zostaje lokalna. Zapisana wersja
+    /// jest oznaczona jako wysłana (pobranych nie odsyłamy) i znika z odrzuconych. Czas
+    /// `updated` zostaje ten z serwera (inaczej niż w [`History::save`]). `hide_online` -
+    /// zapisana wersja trafia też do ukrytych online (bez wymuszania ponownej wysyłki, inaczej
+    /// niż [`History::set_hidden_online`]). Zwraca, czy historia się zmieniła.
+    pub fn upsert_from_server(&self, s: &Session, hide_online: bool) -> Result<bool> {
+        let tx = self.db.unchecked_transaction()?;
+        let local: Option<f64> = tx
+            .query_row(
+                "SELECT zmieniono_utc_s FROM sesje WHERE id = ?",
+                [&s.id],
+                |r| real(r, 0),
+            )
+            .optional()?;
+        let newer = local.is_none_or(|at| s.updated > at);
+        if newer {
+            tx.execute(
+                &format!("INSERT OR REPLACE {}", *INSERT),
+                bind(s).as_slice(),
+            )?;
+            tx.execute("DELETE FROM odrzucone WHERE id = ?", [&s.id])?;
+            if hide_online {
+                tx.execute("INSERT OR IGNORE INTO ukryte_online VALUES (?)", [&s.id])?;
+            }
+        }
+        if newer || local == Some(s.updated) {
+            // ta wersja jest już na serwerze - nie wysyłać jej z powrotem
+            tx.execute(
+                "INSERT INTO wyslane VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET \
+                 zmieniono_utc_s = MAX(zmieniono_utc_s, excluded.zmieniono_utc_s)",
+                (&s.id, s.updated),
+            )?;
+        }
+        tx.commit()?;
+        Ok(newer)
+    }
+
+    /// Nagrobek z serwera (sesja usunięta na innym komputerze): usuwa sesję z historii,
+    /// kolejki wysyłki, odrzuconych i ukrytych online. Zwraca, czy sesja tu była.
+    pub fn delete_from_server(&self, session_id: &str) -> Result<bool> {
+        let tx = self.db.unchecked_transaction()?;
+        let removed = tx.execute("DELETE FROM sesje WHERE id = ?", [session_id])?;
+        tx.execute("DELETE FROM wyslane WHERE id = ?", [session_id])?;
+        tx.execute("DELETE FROM odrzucone WHERE id = ?", [session_id])?;
+        tx.execute("DELETE FROM ukryte_online WHERE id = ?", [session_id])?;
+        tx.commit()?;
+        Ok(removed > 0)
+    }
+
+    /// Wysłane sesje osoby w bieżącej wersji: id -> `updated` sesji w historii (do pełnego
+    /// pobrania po 410: czego serwer już nie ma, a było wysłane - usunąć). Sesja zmieniona
+    /// po wysyłce liczy się jako niewysłana - tu jej nie ma (zostaje i pójdzie na serwer).
+    pub fn sent_ids(&self, person: &str) -> Result<HashMap<String, f64>> {
+        let mut st = self.db.prepare(
+            "SELECT s.id, s.zmieniono_utc_s FROM sesje s JOIN wyslane w ON w.id = s.id \
+             WHERE s.osoba = ? AND w.zmieniono_utc_s >= s.zmieniono_utc_s",
+        )?;
+        let rows = st.query_map([person], |r| Ok((text(r, 0)?, real(r, 1)?)))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+}
