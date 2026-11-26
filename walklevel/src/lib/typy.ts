@@ -9,6 +9,7 @@ export type Direction = 'keyboard' | 'gamepad' | 'treadmill' | 'training'; // Kl
 export type OutputKind = 'dry' | 'keys';           // podgląd / naciska klawisze w grze
 export type ThemeChoice = 'system' | 'light' | 'dark';
 export type PadIdle = 'stop' | 'slow' | 'zero';    // gałka puszczona: stop / prędkość skoku 1 / 0 km/h (test)
+export type KeyIdle = 'slow' | 'stop';             // Klawisze, bez klawisza: tempo „bez klawisza” / taśma stoi
 export type KeyRole = 'walk' | 'run' | 'toggle' | 'faster' | 'slower'; // faster/slower: symulator i poziom Treningu
 export type ColorName =                            // nazwy z bieznia/paleta.py (zapisywane w plikach)
   | 'Czerwień' | 'Koral' | 'Pomarańcz' | 'Morela' | 'Banan' | 'Limonka' | 'Zieleń' | 'Szmaragd'
@@ -294,6 +295,8 @@ export interface Settings {
   idleSpeed: number;           // Klawisze: bez klawisza
   walkSpeed: number;           // Klawisze: chód
   runSpeed: number;            // Klawisze: chód + bieg
+  keyHoldS: number;            // Klawisze: sekundy trzymania, zanim taśma przyspieszy (0, 1, 2 albo 3; 0 - od razu; puszczenie od razu)
+  keyIdle: KeyIdle;            // Klawisze: bez klawisza wolne tempo albo stop taśmy (domyślnie slow)
   padSteps: PadStep[];         // 2..5 skoków
   padIdle: PadIdle;
   trainingLevels: [number, number, number, number];
@@ -307,7 +310,7 @@ export type SettingKey =
   | 'beltControl' | 'quickStop' | 'togglePad' | 'simulator' | 'record' | 'detailedLogs'
   | 'theme' | 'largeText' | 'alwaysOnTop' | 'floatingButton' | 'showPersonSwitch'
   | 'showProfileSwitch' | 'achievementPopups' | 'achievementSound'
-  | 'direction' | 'output' | 'idleSpeed' | 'walkSpeed' | 'runSpeed' | 'padIdle';
+  | 'direction' | 'output' | 'idleSpeed' | 'walkSpeed' | 'runSpeed' | 'keyHoldS' | 'keyIdle' | 'padIdle';
 
 // ============================================================================
 // Wycinek: people - osoby i profile gier
@@ -643,6 +646,7 @@ export interface BubbleView {   // okno "przycisk"
   theme: ThemeChoice;
   accent: ColorName;            // kolor profilu
   training: boolean;            // tryb Trening: przy kółku +, − i Stop (okno 88 × 84 zamiast 56 × 56)
+  stop: boolean;                // poza Treningiem: taśma jedzie (histereza 1 s), bieżnia przyjmuje stop - pod kółkiem Stop (okno 56 × 84)
   trainingLevel: 0 | 1 | 2 | 3;
   fasterLabel: string;          // nazwy klawiszy szybciej/wolniej do podpowiedzi + i −
   slowerLabel: string;

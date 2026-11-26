@@ -19,8 +19,8 @@ pub use engine::{
 pub use crate::py::round_tenth;
 pub use speed::{Control, MappingConfig, MappingError, STOPPED_KMH, SpeedMapper};
 pub use steering::{
-    BeltCommand, BeltSteering, Direction, Frame, FrameInput, Held, PAD_SETTLE_S, PAD_STOP_SETTLE_S,
-    PadIdle, PadStep, STEP_HYSTERESIS, SteeringSettings, StepPicker, TRAINING_LEVELS,
-    clamp_training_level, pad_preset, parse_pad_steps, parse_training_level, parse_training_levels,
-    step_training_level,
+    BeltCommand, BeltSteering, Direction, Frame, FrameInput, Held, KEY_HOLD_MAX_S, KeyIdle,
+    PAD_SETTLE_S, PAD_STOP_SETTLE_S, PadIdle, PadStep, STEP_HYSTERESIS, SteeringSettings,
+    StepPicker, TRAINING_LEVELS, clamp_training_level, pad_preset, parse_key_hold,
+    parse_pad_steps, parse_training_level, parse_training_levels, step_training_level,
 };

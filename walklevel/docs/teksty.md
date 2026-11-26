@@ -495,7 +495,7 @@ Nazwy kategorii i kart są celem ścieżek „Ustawienia > …” we wszystkich 
 |---|---|---|---|
 | `ustawienia.klawisze.klawisz_chodu` | Chód | Klawisz chodu | |
 | `ustawienia.klawisze.klawisz_biegu` | Bieg | Klawisz biegu | |
-| `ustawienia.klawisze.bez` | Bez klawisza / taśma zwalnia do | Bez klawisza / taśma zwalnia do | Pole z km/h. |
+| `ustawienia.klawisze.bez` | Bez klawisza / taśma zwalnia do | Bez klawisza / Tempo, gdy nie trzymasz klawisza i po wyłączeniu sterowania. | Pole z km/h przy „Klawisz puszczony: Wolne tempo” (0.6.1). |
 | `ustawienia.klawisze.chod` | {klawisz_chodu} / chód | {klawisz_chodu} / tempo chodu | |
 | `ustawienia.klawisze.bieg` | {klawisz_biegu} + {klawisz_chodu} / bieg | {klawisz_chodu} + {klawisz_biegu} / tempo biegu | |
 | `ustawienia.klawisze.opis` | (nowy) | Trzymany klawisz ustawia prędkość taśmy. Gra też dostaje te klawisze. | Dziś tryb nie ma żadnego opisu w Ustawieniach. Jeśli gra nie dostaje klawiszy w tym trybie, drugie zdanie usunąć (sprawdzić w kodzie 0.6.0). |
@@ -1626,3 +1626,20 @@ wcześniej wpisu.
 | `modele.blad_folder` | Brak folderu danych na profile bieżni. | Nie da się zapisać profilu bieżni: brak folderu danych. | |
 | `modele.blad_zapisu` | Nie da się zapisać profilu: {szczegoly} | Nie da się zapisać profilu bieżni. ({szczegoly}) | |
 | `wspolne.blad_zapisu` | Błąd zapisu na dysku: {szczegoly} | Nie udało się zapisać na dysku. Sprawdź, czy jest wolne miejsce, i spróbuj ponownie. ({szczegoly}) | |
+
+## Dodatki: tryb Klawisze i przycisk na ekranie (0.6.1)
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `ustawienia.klawisze.puszczony` | (nowy) | Klawisz puszczony | Grupa z wyborem w trybie Klawisze (ustawienie `key_idle`). |
+| `ustawienia.klawisze.puszczony.wolno` | (nowy) | Wolne tempo | Taśma jedzie tempem „Bez klawisza” (jak do 0.6.0). |
+| `ustawienia.klawisze.puszczony.stop` | (nowy) | Taśma staje | Puszczony klawisz zatrzymuje taśmę; wpisany też zamiast liczby w polu „Bez klawisza”. |
+| `ustawienia.klawisze.bez_stoi` | (nowy) | Puść klawisz, a taśma stanie. Wciśnij, a ruszy. | Opis pola „Bez klawisza” przy „Taśma staje”, bieżnia z rozruchem poniżej 2 s. |
+| `ustawienia.klawisze.bez_stoi_rozruch` | (nowy) | Puść klawisz, a taśma stanie. Wciśnij, a ruszy (rozruch ok. {sekundy} s). | Jw., rozruch bieżni od 2 s (`caps.startDelayS`). |
+| `ustawienia.klawisze.przytrzymanie` | (nowy) | Przyspieszaj po przytrzymaniu | Grupa z wyborem (ustawienie `key_hold_s`). |
+| `ustawienia.klawisze.przytrzymanie.od_razu` | (nowy) | Od razu | Bez opóźnienia (jak do 0.6.0). |
+| `ustawienia.klawisze.przytrzymanie.sekundy` | (nowy) | {sekundy} s | 1, 2 albo 3 s. |
+| `ustawienia.klawisze.przytrzymanie_opis` | (nowy) | Taśma przyspiesza dopiero, gdy trzymasz klawisz tyle sekund - krótkie kliknięcie nic nie zmienia. Puszczenie działa od razu. Gra dostaje klawisze bez opóźnienia. | Pod wyborem. |
+| `glowny.wskaznik.klawisze.stoi` | (nowy) | Bez klawisza · taśma stoi | Podpis wskaźnika przy „Taśma staje”. |
+| `glowny.podpowiedz.klawisze_stop` | (nowy) | Trzymaj {klawisz_chodu}, a taśma ruszy. Puść, a stanie. | Podpowiedź karty sterowania przy „Taśma staje” (zamiast `glowny.podpowiedz.klawisze`). |
+| `dymek.stop_dostepnosc` | (nowy) | Zatrzymaj taśmę | Stop pod kółkiem poza Treningiem, gdy taśma jedzie (napis jak `dymek.trening.stop`). Włączone sterowanie się wyłącza. |

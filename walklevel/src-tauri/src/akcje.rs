@@ -43,6 +43,8 @@ impl App {
             "idleSpeed" => "idle_speed",
             "walkSpeed" => "walk_speed",
             "runSpeed" => "run_speed",
+            "keyHoldS" => "key_hold_s",
+            "keyIdle" => "key_idle",
             "padIdle" => "pad_idle",
             _ => return Err(CmdError::unexpected("Tego ustawienia nie da się zmienić.")),
         };
@@ -51,6 +53,7 @@ impl App {
             "direction" => Some(&["keyboard", "gamepad", "treadmill", "training"]),
             "output" => Some(&["dry", "keys"]),
             "pad_idle" => Some(&["stop", "slow", "zero"]),
+            "key_idle" => Some(&["slow", "stop"]),
             _ => None,
         };
         let value = match (file_key, &value) {
@@ -63,7 +66,20 @@ impl App {
                 }
                 json!(round_tenth(kmh))
             }
-            (_, Value::Bool(_)) if allowed.is_none() && !file_key.ends_with("_speed") => value,
+            ("key_hold_s", Value::Number(n)) => {
+                let s = n.as_f64().ok_or_else(bad)?;
+                if !(0.0..=walklevel_core::mapping::KEY_HOLD_MAX_S).contains(&s) {
+                    return Err(bad());
+                }
+                json!(walklevel_core::mapping::parse_key_hold(&value))
+            }
+            (_, Value::Bool(_))
+                if allowed.is_none()
+                    && !file_key.ends_with("_speed")
+                    && file_key != "key_hold_s" =>
+            {
+                value
+            }
             _ => return Err(bad()),
         };
         if self.settings.get(file_key) == Some(&value) {
@@ -105,7 +121,7 @@ impl App {
             }
             "output" => self.apply_keys_output(),
             "quick_stop" => self.apply_mapping(),
-            "idle_speed" | "walk_speed" | "run_speed" | "pad_idle" => {
+            "idle_speed" | "walk_speed" | "run_speed" | "pad_idle" | "key_hold_s" | "key_idle" => {
                 self.belt_target = None;
                 self.steering.forget_target();
             }

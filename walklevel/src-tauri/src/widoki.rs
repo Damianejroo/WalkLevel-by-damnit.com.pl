@@ -310,6 +310,8 @@ pub struct Settings {
     pub idle_speed: f64,
     pub walk_speed: f64,
     pub run_speed: f64,
+    pub key_hold_s: f64,
+    pub key_idle: String,
     pub pad_steps: Vec<(u32, f64)>,
     pub pad_idle: String,
     pub training_levels: [f64; 4],
@@ -721,6 +723,9 @@ pub struct BubbleView {
     pub accent: String,
     /// tryb Trening: przy kółku +, − i Stop (okno większe, okna::BUBBLE_TRAINING_*)
     pub training: bool,
+    /// poza Treningiem: taśma jedzie (histereza 1 s) i przyjmuje stop - pod kółkiem Stop
+    /// (okno 56 × 84, okna::BUBBLE_STOP_H)
+    pub stop: bool,
     /// poziom Treningu 0-3
     pub training_level: u32,
     /// nazwy klawiszy szybciej/wolniej (podpowiedzi + i −)

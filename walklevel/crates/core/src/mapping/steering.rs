@@ -15,6 +15,8 @@ pub const PAD_SETTLE_S: f64 = 0.15;
 pub const PAD_STOP_SETTLE_S: f64 = 0.4;
 /// Przy cofaniu gałki mały zapas (ułamek wychylenia), żeby skok nie migał.
 pub const STEP_HYSTERESIS: f64 = 0.04;
+/// Klawisze: najdłuższe przytrzymanie przed przyspieszeniem (s); wybór: od razu, 1, 2, 3 s.
+pub const KEY_HOLD_MAX_S: f64 = 3.0;
 /// Domyślne poziomy treningu (km/h).
 pub const TRAINING_LEVELS: [f64; 4] = [1.5, 2.5, 3.5, 4.5];
 
@@ -114,6 +116,41 @@ impl PadIdle {
             Self::Zero => "zero",
         }
     }
+}
+
+/// Klawisze: co robi taśma, gdy nie jest trzymany klawisz chodu (ustawienie "key_idle").
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum KeyIdle {
+    /// jedzie wolno - tempem „bez klawisza” (`idle_speed`, jak do 0.6.0)
+    #[default]
+    Slow,
+    /// staje; klawisz chodu ją budzi
+    Stop,
+}
+
+impl KeyIdle {
+    /// Wartość z ustawień; nieznana -> wolno.
+    pub fn from_setting(value: &str) -> Self {
+        match value {
+            "stop" => Self::Stop,
+            _ => Self::Slow,
+        }
+    }
+
+    /// Wartość do zapisu w ustawieniach.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Slow => "slow",
+            Self::Stop => "stop",
+        }
+    }
+}
+
+/// Przytrzymanie klawisza przed przyspieszeniem z ustawień: 0-3 pełne sekundy; zła wartość - 0.
+pub fn parse_key_hold(data: &Value) -> f64 {
+    let v = data.as_f64().filter(|v| v.is_finite()).unwrap_or(0.0);
+    v.clamp(0.0, KEY_HOLD_MAX_S).round()
 }
 
 /// Strefa wskaźnika: bez ruchu, chód albo bieg.
@@ -273,6 +310,11 @@ pub struct SteeringSettings {
     pub idle_speed: f64,
     pub walk_speed: f64,
     pub run_speed: f64,
+    /// Klawisze: tyle sekund nieprzerwanego trzymania, zanim klawisz zmieni prędkość taśmy
+    /// (puszczenie działa od razu); 0 - od razu. Klawisze w grze bez opóźnienia.
+    pub key_hold_s: f64,
+    /// Klawisze: puszczony klawisz chodu - wolne tempo albo stop taśmy
+    pub key_idle: KeyIdle,
     pub pad_steps: Vec<PadStep>,
     pub pad_idle: PadIdle,
     pub training_levels: [f64; 4],
@@ -287,6 +329,8 @@ impl Default for SteeringSettings {
             idle_speed: 1.0,
             walk_speed: 1.5,
             run_speed: 2.5,
+            key_hold_s: 0.0,
+            key_idle: KeyIdle::Slow,
             pad_steps: default_steps(),
             pad_idle: PadIdle::Stop,
             training_levels: TRAINING_LEVELS,
@@ -310,6 +354,13 @@ impl SteeringSettings {
     /// Pad z puszczoną gałką = stop: taśmę uruchamia dopiero ruch gałki.
     pub fn pad_stops_belt(&self) -> bool {
         self.direction == Direction::Gamepad && self.pad_idle == PadIdle::Stop
+    }
+
+    /// Bez ruchu taśma stoi (pad z „stop” albo Klawisze z „taśma stoi”): taśmę uruchamia
+    /// dopiero gałka albo klawisz chodu, nie włączenie sterowania.
+    pub fn stops_when_idle(&self) -> bool {
+        self.pad_stops_belt()
+            || (self.direction == Direction::Keyboard && self.key_idle == KeyIdle::Stop)
     }
 
     /// Prędkość z trzymanych klawiszy: chód + bieg, sam chód albo nic (sam bieg to nie bieg).
@@ -382,7 +433,8 @@ pub struct Frame {
     pub pad_step: usize,
     /// pad: skok trzyma się już chwilę (można wysłać); inne tryby zawsze true
     pub settled: bool,
-    /// pad: gałka puszczona przy „stop” - taśma stoi
+    /// pad: gałka puszczona przy „stop”, Klawisze: bez klawisza przy „taśma stoi” - taśma
+    /// stoi (albo zaraz stanie)
     pub pad_stopped: bool,
     pub command: Option<BeltCommand>,
 }
@@ -405,6 +457,11 @@ pub struct BeltSteering {
     pad_step_since: f64,
     /// od kiedy jadąca taśma ma inną prędkość niż wysłany poziom treningu
     mismatch_since: Option<f64>,
+    /// Klawisze: od kiedy nieprzerwanie trzymany jest chód i (osobno) bieg
+    walk_since: Option<f64>,
+    run_since: Option<f64>,
+    /// Klawisze przy „taśma stoi”: od kiedy nie ma chodu (stop po [`PAD_STOP_SETTLE_S`])
+    key_idle_since: Option<f64>,
 }
 
 impl Default for BeltSteering {
@@ -422,6 +479,9 @@ impl BeltSteering {
             pad_step: 0,
             pad_step_since: 0.0,
             mismatch_since: None,
+            walk_since: None,
+            run_since: None,
+            key_idle_since: None,
         }
     }
 
@@ -476,7 +536,7 @@ impl BeltSteering {
         let changed = on != was_enabled;
         self.belt_target = BeltTarget::Unknown; // po zmianie prędkość idzie od nowa
         let commands_possible = settings.belt_control && belt_allowed;
-        let pad_stop = settings.pad_stops_belt(); // taśmę uruchamia dopiero ruch gałki
+        let pad_stop = settings.stops_when_idle(); // taśmę uruchamia dopiero gałka / klawisz
         let training = settings.direction == Direction::Training; // trening zawsze steruje
         let mut out = Vec::new();
         if changed && !on {
@@ -533,13 +593,49 @@ impl BeltSteering {
         )
     }
 
+    /// Klawisze: chód liczy się po `key_hold_s` nieprzerwanego trzymania, bieg - gdy do tego
+    /// klawisz biegu jest trzymany `key_hold_s` (od jego wciśnięcia). Puszczenie od razu.
+    /// Przy „taśma stoi” brak chodu = stop, ale dopiero po [`PAD_STOP_SETTLE_S`] (szybkie
+    /// klikanie nie zatrzymuje i nie uruchamia taśmy w kółko).
+    fn keyboard_target(
+        &mut self,
+        settings: &SteeringSettings,
+        input: &FrameInput,
+    ) -> (f64, Held, bool, bool) {
+        let now = input.now;
+        let track = |since: &mut Option<f64>, down: bool| {
+            if down {
+                since.get_or_insert(now);
+            } else {
+                *since = None;
+            }
+        };
+        track(&mut self.walk_since, input.walk_down);
+        track(&mut self.run_since, input.run_down);
+        let held = |since: Option<f64>| since.is_some_and(|t| now - t >= settings.key_hold_s);
+        let walk = held(self.walk_since);
+        let run = walk && held(self.run_since);
+        let (target, zone) = settings.keyboard_target(walk, run);
+        if settings.key_idle == KeyIdle::Stop && zone == Held::Idle {
+            let since = *self.key_idle_since.get_or_insert(now);
+            return (0.0, Held::Idle, now - since >= PAD_STOP_SETTLE_S, true);
+        }
+        self.key_idle_since = None;
+        (target, zone, true, false)
+    }
+
+    /// Stop raz (taśma już zatrzymana - nic).
+    fn send_stop(&mut self) -> Option<BeltCommand> {
+        if self.belt_target == BeltTarget::Stopped {
+            return None;
+        }
+        self.belt_target = BeltTarget::Stopped;
+        Some(BeltCommand::Stop)
+    }
+
     fn send_pad(&mut self, settings: &SteeringSettings, target: f64) -> Option<BeltCommand> {
         if self.pad_step == 0 && settings.pad_idle == PadIdle::Stop {
-            if self.belt_target == BeltTarget::Stopped {
-                return None;
-            }
-            self.belt_target = BeltTarget::Stopped;
-            return Some(BeltCommand::Stop);
+            return self.send_stop();
         }
         if self.sent(target) {
             return None;
@@ -557,10 +653,7 @@ impl BeltSteering {
         let direction = settings.direction;
         let (target, held, settled, pad_stopped) = match direction {
             Direction::Gamepad => self.pad_target(settings, input),
-            Direction::Keyboard => {
-                let (t, h) = settings.keyboard_target(input.walk_down, input.run_down);
-                (t, h, true, false)
-            }
+            Direction::Keyboard => self.keyboard_target(settings, input),
             Direction::Training => {
                 let (t, h) = settings.training_target();
                 (t, h, true, false)
@@ -574,11 +667,14 @@ impl BeltSteering {
         }
         let command = if sends && direction == Direction::Gamepad {
             self.send_pad(settings, target)
+        } else if sends && pad_stopped {
+            self.send_stop() // Klawisze przy „taśma stoi”
         } else if sends && !self.sent(target) {
             self.belt_target = BeltTarget::Speed(target);
             Some(BeltCommand::SetSpeed {
                 kmh: target,
-                start_if_stopped: false,
+                // klawisz chodu budzi taśmę zatrzymaną przez „taśma stoi”
+                start_if_stopped: settings.stops_when_idle(),
             })
         } else {
             None
@@ -750,6 +846,133 @@ mod tests {
             b.set_control(&s, true, false, true),
             vec![BeltCommand::Stop]
         );
+    }
+
+    #[test]
+    fn key_hold_delays_speed_up_but_release_is_immediate() {
+        let s = SteeringSettings {
+            key_hold_s: 3.0,
+            ..SteeringSettings::default()
+        };
+        let mut b = BeltSteering::new();
+        let keys = |now: f64, walk: bool, run: bool| FrameInput {
+            walk_down: walk,
+            run_down: run,
+            ..at(now)
+        };
+        assert_eq!(b.frame(&s, &keys(0.0, false, false)).command, speed(1.0));
+        // krótkie kliknięcie nic nie zmienia
+        assert_eq!(b.frame(&s, &keys(1.0, true, false)).command, None);
+        assert_eq!(b.frame(&s, &keys(2.0, true, false)).held, Held::Idle);
+        assert_eq!(b.frame(&s, &keys(2.5, false, false)).command, None);
+        // nieprzerwane trzymanie liczy się od nowa
+        assert_eq!(b.frame(&s, &keys(3.0, true, false)).command, None);
+        assert_eq!(b.frame(&s, &keys(5.9, true, false)).command, None);
+        assert_eq!(b.frame(&s, &keys(6.0, true, false)).command, speed(1.5));
+        // bieg: Shift też trzymany 3 s, od swojego wciśnięcia
+        assert_eq!(b.frame(&s, &keys(7.0, true, true)).command, None);
+        assert_eq!(b.frame(&s, &keys(10.0, true, true)).command, speed(2.5));
+        // puszczenie Shift i W - od razu
+        assert_eq!(b.frame(&s, &keys(10.1, true, false)).command, speed(1.5));
+        assert_eq!(b.frame(&s, &keys(10.2, false, false)).command, speed(1.0));
+        // próg 0 = jak dziś
+        let now = SteeringSettings::default();
+        assert_eq!(b.frame(&now, &keys(11.0, true, false)).command, speed(1.5));
+        assert_eq!(b.frame(&now, &keys(11.1, true, true)).command, speed(2.5));
+        assert_eq!(b.frame(&now, &keys(11.2, false, false)).command, speed(1.0));
+    }
+
+    #[test]
+    fn key_idle_stop_stops_once_and_walk_key_wakes_belt() {
+        let s = SteeringSettings {
+            key_idle: KeyIdle::Stop,
+            ..SteeringSettings::default()
+        };
+        let mut b = BeltSteering::new();
+        // włączenie nie uruchamia taśmy - zrobi to klawisz chodu
+        assert_eq!(b.set_control(&s, false, true, true), vec![]);
+        let keys = |now: f64, walk: bool| FrameInput {
+            walk_down: walk,
+            ..at(now)
+        };
+        assert_eq!(b.frame(&s, &keys(0.0, false)).command, None);
+        let f = b.frame(&s, &keys(0.5, false));
+        assert_eq!((f.command, f.pad_stopped), (Some(BeltCommand::Stop), true));
+        assert_eq!(b.frame(&s, &keys(1.0, false)).command, None); // jeden Stop
+        let wake = Some(BeltCommand::SetSpeed {
+            kmh: 1.5,
+            start_if_stopped: true,
+        });
+        assert_eq!(b.frame(&s, &keys(1.1, true)).command, wake);
+        // szybkie klikanie: puszczenie krótsze niż chwila - bez Stop i bez ponownego startu
+        for i in 0..5 {
+            let t = 1.2 + f64::from(i) * 0.2;
+            assert_eq!(b.frame(&s, &keys(t, false)).command, None);
+            assert_eq!(b.frame(&s, &keys(t + 0.1, true)).command, None);
+        }
+        assert_eq!(b.frame(&s, &keys(3.0, false)).command, None);
+        assert_eq!(
+            b.frame(&s, &keys(3.5, false)).command,
+            Some(BeltCommand::Stop)
+        );
+        assert_eq!(
+            b.set_control(&s, true, false, true),
+            vec![BeltCommand::Stop]
+        );
+        // „wolno” = jak dziś: bez klawisza tempo jałowe, start przy włączeniu
+        let slow = SteeringSettings::default();
+        let mut b = BeltSteering::new();
+        assert_eq!(
+            b.set_control(&slow, false, true, true),
+            vec![BeltCommand::Start]
+        );
+        assert_eq!(b.frame(&slow, &keys(0.0, false)).command, speed(1.0));
+        assert_eq!(b.frame(&slow, &keys(1.0, false)).command, None);
+        assert_eq!(b.frame(&slow, &keys(1.1, true)).command, speed(1.5));
+    }
+
+    #[test]
+    fn toggle_without_belt_control_stops_belt_when_keys_idle_stop() {
+        // F8 bez „start i stop z aplikacji”: przy „taśma stoi” stop, przy „wolno” jak dziś
+        let stop = SteeringSettings {
+            belt_control: false,
+            key_idle: KeyIdle::Stop,
+            ..SteeringSettings::default()
+        };
+        let mut b = BeltSteering::new();
+        assert_eq!(b.set_control(&stop, false, true, true), vec![]);
+        assert_eq!(
+            b.set_control(&stop, true, false, true),
+            vec![BeltCommand::Stop]
+        );
+        assert_eq!(
+            b.set_control(&stop, true, false, false),
+            vec![BeltCommand::Stop]
+        );
+        let slow = SteeringSettings {
+            key_idle: KeyIdle::Slow,
+            ..stop
+        };
+        assert_eq!(b.set_control(&slow, false, true, true), vec![]);
+        assert_eq!(
+            b.set_control(&slow, true, false, true),
+            vec![BeltCommand::SetSpeed {
+                kmh: 1.0,
+                start_if_stopped: false
+            }]
+        );
+    }
+
+    #[test]
+    fn key_hold_setting_is_validated() {
+        assert_eq!(parse_key_hold(&json!(3)), 3.0);
+        assert_eq!(parse_key_hold(&json!(1.2)), 1.0);
+        assert_eq!(parse_key_hold(&json!(1.6)), 2.0);
+        assert_eq!(parse_key_hold(&json!(9)), 3.0);
+        assert_eq!(parse_key_hold(&json!(-1)), 0.0);
+        assert_eq!(parse_key_hold(&json!("3")), 0.0);
+        assert_eq!(KeyIdle::from_setting("stop"), KeyIdle::Stop);
+        assert_eq!(KeyIdle::from_setting("zero"), KeyIdle::Slow);
     }
 
     #[test]

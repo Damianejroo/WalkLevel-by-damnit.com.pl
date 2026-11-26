@@ -104,6 +104,7 @@ export const trainingStop = () => wywolaj<void>('training_stop');
 export const deviceScan = () => wywolaj<void>('device_scan');
 export const deviceConnect = (address: string, name: string) => wywolaj<void>('device_connect', { address, name });
 export const deviceDisconnect = () => wywolaj<void>('device_disconnect');
+export const deviceBeltStop = () => wywolaj<void>('device_belt_stop');
 export const deviceForget = () => wywolaj<void>('device_forget');
 export const deviceStatusAction = () => wywolaj<void>('device_status_action');
 export const modelsRefresh = () => wywolaj<void>('models_refresh');

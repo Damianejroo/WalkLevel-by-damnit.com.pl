@@ -11,7 +11,7 @@
   import { liczba } from '../../lib/format';
   import { stan, zywo, wykonaj } from '../../lib/stan.svelte';
   import * as api from '../../lib/api';
-  import type { Direction, OutputKind, PadIdle, SettingKey, Settings } from '../../lib/typy';
+  import type { Direction, KeyIdle, OutputKind, PadIdle, SettingKey, Settings } from '../../lib/typy';
 
   let { tryb }: { tryb: Direction } = $props();
 
@@ -29,6 +29,22 @@
     { wartosc: 'keys', napis: napisyWyjscia[0] },
     { wartosc: 'dry', napis: napisyWyjscia[1] },
   ];
+
+  // --- Klawisze: puszczony klawisz i przytrzymanie przed przyspieszeniem (0.6.1) ---
+  const opcjePuszczonego: { wartosc: KeyIdle; napis: string }[] = [
+    { wartosc: 'slow', napis: t('ustawienia.klawisze.puszczony.wolno') },
+    { wartosc: 'stop', napis: t('ustawienia.klawisze.puszczony.stop') },
+  ];
+  const opcjePrzytrzymania = [0, 1, 2, 3].map((sekundy) => ({
+    wartosc: sekundy,
+    napis: sekundy === 0 ? t('ustawienia.klawisze.przytrzymanie.od_razu') : t('ustawienia.klawisze.przytrzymanie.sekundy', { sekundy }),
+  }));
+  /** Opis pola „Bez klawisza” przy „Taśma staje”: z rozruchem, gdy bieżnia rusza co najmniej 2 s. */
+  const opisStoi = $derived(
+    caps.startDelayS >= 2
+      ? t('ustawienia.klawisze.bez_stoi_rozruch', { sekundy: Math.round(caps.startDelayS) })
+      : t('ustawienia.klawisze.bez_stoi'),
+  );
 
   // --- Pad ---
   const opcjeLiczby = ([2, 3, 4, 5] as const).map((n) => ({ wartosc: n, napis: String(n) }));
@@ -98,9 +114,28 @@
   {@const bez = tl('ustawienia.klawisze.bez')}
   {@const chod = tl('ustawienia.klawisze.chod', { klawisz_chodu: s.walkKey.name })}
   {@const bieg = tl('ustawienia.klawisze.bieg', { klawisz_chodu: s.walkKey.name, klawisz_biegu: s.runKey.name })}
-  <PoleLiczby tytul={bez[0]} opis={bez[1]} wartosc={s.idleSpeed} min={caps.speedMin} max={caps.speedMax} onzmiana={(v) => zapisz('idleSpeed', v)} />
+  {@const stoi = s.keyIdle === 'stop'}
   <PoleLiczby tytul={chod[0]} opis={chod[1]} wartosc={s.walkSpeed} min={caps.speedMin} max={caps.speedMax} onzmiana={(v) => zapisz('walkSpeed', v)} />
   <PoleLiczby tytul={bieg[0]} opis={bieg[1]} wartosc={s.runSpeed} min={caps.speedMin} max={caps.speedMax} onzmiana={(v) => zapisz('runSpeed', v)} />
+  <div class="grupa">
+    <span class="etykieta">{t('ustawienia.klawisze.puszczony')}</span>
+    <Segmentowy opcje={opcjePuszczonego} wartosc={s.keyIdle} etykieta={t('ustawienia.klawisze.puszczony')} onzmiana={(v) => zapisz('keyIdle', v)} />
+  </div>
+  <!-- przy „Taśma staje” to samo pole z napisem zamiast liczby - bez zmiany wysokości układu -->
+  <PoleLiczby
+    tytul={bez[0]}
+    opis={stoi ? opisStoi : bez[1]}
+    wartosc={s.idleSpeed}
+    min={caps.speedMin}
+    max={caps.speedMax}
+    stala={stoi ? t('ustawienia.klawisze.puszczony.stop') : undefined}
+    onzmiana={(v) => zapisz('idleSpeed', v)}
+  />
+  <div class="grupa">
+    <span class="etykieta">{t('ustawienia.klawisze.przytrzymanie')}</span>
+    <Segmentowy opcje={opcjePrzytrzymania} wartosc={s.keyHoldS} etykieta={t('ustawienia.klawisze.przytrzymanie')} onzmiana={(v) => zapisz('keyHoldS', v)} />
+    <p class="opis">{t('ustawienia.klawisze.przytrzymanie_opis')}</p>
+  </div>
 {:else if tryb === 'training'}
   <p class="opis">
     {t('ustawienia.trening.opis', {

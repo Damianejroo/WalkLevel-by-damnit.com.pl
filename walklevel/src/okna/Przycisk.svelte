@@ -1,9 +1,12 @@
 <script lang="ts">
   // Przycisk na ekranie (bańka 56 × 56, docs/wyglad.md 9.7, kontrakt 7.3): koło; wyłączone -
   // tło powierzchni i ramka kontrolki; włączone - wypełnienie akcentem (bieg: kolor biegu),
-  // ikona postaci i pod nią prędkość taśmy, gdy dane płyną. Jedyny element widoku = jedyny akcent.
+  // ikona postaci i pod nią prędkość taśmy, gdy taśma jedzie (także przy wyłączonym sterowaniu).
+  // Jedyny element widoku = jedyny akcent.
   // Tryb Trening: obok kółka kolumna + / numer poziomu / − i pod spodem Stop (okno 88 × 84,
   // rozmiar ustawia rdzeń - okna.rs BUBBLE_TRAINING_*); małe przyciski neutralne, Stop jak 8.1 „stop”.
+  // Poza Treningiem, gdy taśma jedzie (bubble.stop, histereza w rdzeniu): pod kółkiem ten sam
+  // Stop (okno 56 × 84, okna.rs BUBBLE_STOP_H) - device_belt_stop.
   // Dane: wl:telemetria (enabled, mode, speedKmh, live) i wycinek „bubble” (motyw, kolor profilu,
   // tryb Trening i poziom).
   import { onMount } from 'svelte';
@@ -29,10 +32,11 @@
   let ciemnySystem = $state(matchMedia('(prefers-color-scheme: dark)').matches);
   let uruchomione = $state(false);
 
-  const pokazPredkosc = $derived(wlaczone && naZywo);
+  const pokazPredkosc = $derived(naZywo && predkosc > 0.05);
   const tekstPredkosci = $derived(liczba(predkosc, 1));
   const stanSlowo = $derived(t(wlaczone ? 'dymek.stan.wl' : 'dymek.stan.wyl'));
   const trening = $derived(wyglad?.training ?? false);
+  const zeStopem = $derived(!trening && (wyglad?.stop ?? false));
   const poziom = $derived(wyglad?.trainingLevel ?? 0);
   const POZIOMY = 4;
   const tekstWyzej = $derived(t('dymek.trening.wyzej', { klawisz_szybciej: wyglad?.fasterLabel ?? '' }));
@@ -95,9 +99,11 @@
     if (wyglad && paleta.length) ustawAkcent(wyglad.accent, paleta);
     if (uruchomione) document.documentElement.dataset.gotowe = '1';
   });
-  // Podgląd w przeglądarce: prostokąt okna jak w Tauri (56 × 56 albo 88 × 84 w Treningu)
+  // Podgląd w przeglądarce: prostokąt okna jak w Tauri (56 × 56, 56 × 84 ze Stopem albo 88 × 84
+  // w Treningu)
   $effect(() => {
     document.documentElement.classList.toggle('trening', trening);
+    document.documentElement.classList.toggle('ze-stopem', zeStopem);
   });
 
   // ---------------- klik, prawy klik, przeciąganie ----------------
@@ -165,7 +171,7 @@
   }
 </script>
 
-<div class="uklad" class:trening style:transform={podgladX || podgladY ? `translate(${podgladX}px, ${podgladY}px)` : undefined}>
+<div class="uklad" class:trening class:ze-stopem={zeStopem} style:transform={podgladX || podgladY ? `translate(${podgladX}px, ${podgladY}px)` : undefined}>
 <button
   type="button"
   class="przycisk"
@@ -219,6 +225,14 @@
     title={t('dymek.trening.stop_dostepnosc')}
     onclick={() => wyslij(api.trainingStop())}
   >{t('dymek.trening.stop')}</button>
+{:else if zeStopem}
+  <button
+    type="button"
+    class="stop"
+    aria-label={t('dymek.stop_dostepnosc')}
+    title={t('dymek.stop_dostepnosc')}
+    onclick={() => wyslij(api.deviceBeltStop())}
+  >{t('dymek.trening.stop')}</button>
 {/if}
 </div>
 
@@ -236,10 +250,12 @@
   }
   :global(html.podglad-okna #app) { width: 56px; height: 56px; }
   :global(html.podglad-okna.trening #app) { width: 88px; height: 84px; }
+  :global(html.podglad-okna.ze-stopem #app) { width: 56px; height: 84px; }
 
   /* Trening: kółko 56 + kolumna 28 (+, poziom, −), pod spodem Stop 24; odstępy 4 px */
   .uklad { display: grid; grid-template-columns: 56px; gap: 4px; width: max-content; }
   .uklad.trening { grid-template-columns: 56px 28px; grid-template-rows: 56px 24px; }
+  .uklad.ze-stopem { grid-template-rows: 56px 24px; }
 
   .przycisk {
     display: block;

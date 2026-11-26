@@ -6,6 +6,7 @@
 //   tryb=keyboard|gamepad|treadmill|training   bieznia=<StanBiezni>   konto=0|1   historia=0|1
 //   wlaczone=0|1   motyw=jasny|ciemny   tekst=duzy
 //   poziom=1..4 (poziom Treningu)   demo=1 (okno popup: przykładowe powiadomienia w kolejce)
+//   jedzie=1 (taśma jedzie przy wyłączonym sterowaniu, np. pilotem - Stop przy przycisku)
 // Przykład: /?stan=trening&ekran=main&szer=420&motyw=jasny
 import type * as K from './typy';
 import type { Silnik } from './api';
@@ -30,11 +31,15 @@ interface Scenariusz {
   historia: boolean;
   pierwsze: boolean;
   dlugie: boolean;
+  /** Klawisze: puszczony klawisz zatrzymuje taśmę, przytrzymanie 3 s (ustawienia 0.6.1) */
+  klawiszStop: boolean;
+  /** taśma jedzie mimo wyłączonego sterowania (pilot) */
+  jedzie: boolean;
 }
 
 const BAZA: Scenariusz = {
   tryb: 'keyboard', bieznia: 'strumien', wlaczone: false, wyjscie: 'keys',
-  konto: true, historia: true, pierwsze: false, dlugie: false,
+  konto: true, historia: true, pierwsze: false, dlugie: false, klawiszStop: false, jedzie: false,
 };
 
 export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
@@ -61,6 +66,10 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   'ustawienia-trening': { tryb: 'training' },
   'ustawienia-wylogowany': { konto: false, bieznia: 'brak' },
   'ustawienia-dlugie': { dlugie: true, tryb: 'gamepad' },
+  'ustawienia-klawisze-stop': { klawiszStop: true },
+  // Klawisze przy „Taśma staje” na ekranie głównym; przycisk na ekranie z jadącą taśmą
+  'klawisze-stop': { tryb: 'keyboard', wlaczone: true, klawiszStop: true },
+  jedzie: { tryb: 'keyboard', jedzie: true },
   // Kopia danych: okno wyboru pliku zamknięte bez wyboru, jest kopia sprzed wczytania (utworzAtrape)
   'kopia-wybor': {},
   // ekran „Wybierz bieżnię”: lista znalezionych urządzeń od startu i trwające skanowanie
@@ -75,7 +84,7 @@ function czytajScenariusz(): Scenariusz {
   if (tryb === 'keyboard' || tryb === 'gamepad' || tryb === 'treadmill' || tryb === 'training') s.tryb = tryb;
   const bieznia = p.get('bieznia');
   if (bieznia) s.bieznia = bieznia as StanBiezni;
-  for (const pole of ['konto', 'historia', 'wlaczone'] as const) {
+  for (const pole of ['konto', 'historia', 'wlaczone', 'jedzie'] as const) {
     const v = p.get(pole);
     if (v !== null) s[pole] = v === '1';
   }
@@ -232,6 +241,7 @@ export function utworzAtrape(): Silnik {
     walkKey: klawisz('W', 0x11, 0x57), runKey: klawisz('Shift', 0x2a, 0x10),
     standBelow: 1.2, runOn: 3.4, runOff: 2.8,
     idleSpeed: 1.0, walkSpeed: 1.5, runSpeed: 2.5,
+    keyHoldS: sc.klawiszStop ? 3 : 0, keyIdle: sc.klawiszStop ? 'stop' : 'slow',
     padSteps: dlugie ? [[0, 1], [25, 1.5], [50, 2.5], [75, 3.5], [100, 4.5]] : [[0, 1], [25, 1.5], [50, 2.5], [100, 4]],
     padIdle: 'stop',
     trainingLevels: dlugie ? [6.5, 8.5, 10.5, 12.5] : [2, 3, 4, 5],
@@ -338,7 +348,7 @@ export function utworzAtrape(): Silnik {
     control.hint =
       d === 'treadmill'
         ? t(settings.output === 'dry' ? 'glowny.podpowiedz.chodzenie_proba' : 'glowny.podpowiedz.chodzenie', zm)
-        : d === 'keyboard' ? t('glowny.podpowiedz.klawisze', zm)
+        : d === 'keyboard' ? t(settings.keyIdle === 'stop' ? 'glowny.podpowiedz.klawisze_stop' : 'glowny.podpowiedz.klawisze', zm)
           : d === 'gamepad' ? t('glowny.podpowiedz.pad', zm) : t('glowny.podpowiedz.trening', zm);
     let opis = t(settings.beltControl ? 'glowny.sterowanie.opis.tasma' : 'glowny.sterowanie.opis.bez_tasmy');
     if (control.padButtonLabel) opis = t('glowny.sterowanie.opis.z_padem', { opis, przycisk_pada: control.padButtonLabel });
@@ -565,9 +575,14 @@ export function utworzAtrape(): Silnik {
     ],
     busy: false, status: '',
   };
+  // taśma jedzie przy wyłączonym sterowaniu (scenariusz „jedzie”) - do pierwszego Stopu
+  let jedziePilotem = sc.jedzie;
+  const jedzieNaStart = (stanBiezni === 'strumien' || stanBiezni === 'symulator') && (control.enabled || jedziePilotem);
   const bubble: K.BubbleView = {
     visible: false, enabled: control.enabled, theme: settings.theme, accent: settings.profileColor,
-    training: settings.direction === 'training', trainingLevel: settings.trainingLevel,
+    training: settings.direction === 'training',
+    stop: settings.direction !== 'training' && jedzieNaStart && caps.control,
+    trainingLevel: settings.trainingLevel,
     fasterLabel: settings.fasterKey.label, slowerLabel: settings.slowerKey.label,
   };
   const logi: string[] = [];
@@ -647,10 +662,12 @@ export function utworzAtrape(): Silnik {
     const tasma = (v: number) => t('glowny.wskaznik.tasma_kmh', { kmh: kmh(v) });
     if (control.enabled) {
       if (s.direction === 'keyboard') {
-        cel = [s.idleSpeed, s.walkSpeed, s.runSpeed][faza];
+        const stoi = s.keyIdle === 'stop';
+        cel = [stoi ? 0 : s.idleSpeed, s.walkSpeed, s.runSpeed][faza];
         active = faza;
         mode = (['idle', 'walk', 'run'] as const)[faza];
-        caption = t((['glowny.wskaznik.klawisze.bez', 'glowny.wskaznik.klawisze.chod', 'glowny.wskaznik.klawisze.bieg'] as const)[faza], { kmh: kmh(cel), klawisz_chodu: s.walkKey.name, klawisz_biegu: s.runKey.name });
+        const bez = stoi ? 'glowny.wskaznik.klawisze.stoi' : 'glowny.wskaznik.klawisze.bez';
+        caption = t(([bez, 'glowny.wskaznik.klawisze.chod', 'glowny.wskaznik.klawisze.bieg'] as const)[faza], { kmh: kmh(cel), klawisz_chodu: s.walkKey.name, klawisz_biegu: s.runKey.name });
       } else if (s.direction === 'training') {
         cel = s.trainingLevels[s.trainingLevel];
         active = s.trainingLevel;
@@ -672,6 +689,7 @@ export function utworzAtrape(): Silnik {
             : t(active === 1 ? 'glowny.wskaznik.chodzenie.chod' : 'glowny.wskaznik.chodzenie.bieg', { klawisz_chodu: s.walkKey.name, klawisz_biegu: s.runKey.name });
       }
     }
+    if (!control.enabled && jedziePilotem) cel = s.idleSpeed;
     if (!live) {
       cel = 0;
       mode = 'offline';
@@ -694,6 +712,12 @@ export function utworzAtrape(): Silnik {
         : null,
     };
     emituj('wl:telemetria', tel);
+    // przycisk na ekranie: Stop pod kółkiem, gdy taśma jedzie (rdzeń: z histerezą 1 s)
+    const stop = !bubble.training && live && predkosc > 0.05 && caps.control;
+    if (stop !== bubble.stop) {
+      bubble.stop = stop;
+      wyslij('bubble');
+    }
   }, 100);
 
   // ---------------- powiadomienia nad grą (okno popup) ----------------
@@ -804,7 +828,7 @@ export function utworzAtrape(): Silnik {
         przeliczSterowanie();
         bubble.training = settings.direction === 'training';
       }
-      if (key === 'output') przeliczSterowanie();
+      if (key === 'output' || key === 'keyIdle') przeliczSterowanie();
       if (key === 'simulator') {
         stanBiezni = a.value ? 'symulator' : 'strumien';
         przeliczBieznie();
@@ -925,6 +949,10 @@ export function utworzAtrape(): Silnik {
       wyslij('settings', 'bubble');
     },
     training_stop: () => komendy.control_set({ on: false }),
+    device_belt_stop: () => {
+      jedziePilotem = false;
+      komendy.control_set({ on: false });
+    },
 
     device_scan: () => {
       stanBiezni = 'skanowanie';

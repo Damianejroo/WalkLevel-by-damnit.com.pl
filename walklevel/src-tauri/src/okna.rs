@@ -25,6 +25,16 @@ pub const BUBBLE_SIZE: f64 = 56.0;
 /// (odstępy 4 px; układ w src/okna/Przycisk.svelte).
 pub const BUBBLE_TRAINING_W: f64 = BUBBLE_SIZE + 4.0 + 28.0;
 pub const BUBBLE_TRAINING_H: f64 = BUBBLE_SIZE + 4.0 + 24.0;
+/// Poza Treningiem, gdy taśma jedzie: kółko i pod nim Stop 24 px (56 × 84).
+pub const BUBBLE_STOP_H: f64 = BUBBLE_TRAINING_H;
+
+/// Układ okna przycisku: samo kółko, kółko ze Stopem, Trening (+, poziom, −, Stop).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BubbleLayout {
+    Plain,
+    Stop,
+    Training,
+}
 /// 3 popupy po 96 px z odstępami 10 px
 pub const POPUP_W: f64 = 380.0;
 pub const POPUP_H: f64 = 3.0 * 96.0 + 2.0 * 10.0;
@@ -38,8 +48,8 @@ pub enum Okno {
     ShowMain,
     MainAlwaysOnTop(bool),
     BubbleVisible(bool, Option<[f64; 2]>),
-    /// rozmiar okna przycisku: `true` - Trening (z +, − i Stop)
-    BubbleSize(bool),
+    /// rozmiar okna przycisku za układem
+    BubbleSize(BubbleLayout),
     PopupShow,
     PopupHide,
     Quit,
@@ -128,9 +138,9 @@ fn apply(app: &AppHandle, r: Okno) {
                 let _ = w.destroy();
             }
         }
-        Okno::BubbleSize(training) => {
+        Okno::BubbleSize(layout) => {
             if let Some(w) = app.get_webview_window(BUBBLE) {
-                resize_bubble(app, &w, training);
+                resize_bubble(app, &w, layout);
             }
         }
         Okno::PopupShow => {
@@ -412,11 +422,11 @@ fn place_bubble(app: &AppHandle, w: &WebviewWindow, pos: Option<[f64; 2]>) {
 /// Rozmiar okna przycisku. Kółko zostaje w lewym górnym rogu okna (tam, gdzie było), większe
 /// okno rośnie w prawo i w dół; gdy wyszłoby poza obszar roboczy monitora - przesuwa się do
 /// środka (bez zapisu pozycji).
-fn resize_bubble(app: &AppHandle, w: &WebviewWindow, training: bool) {
-    let (width, height) = if training {
-        (BUBBLE_TRAINING_W, BUBBLE_TRAINING_H)
-    } else {
-        (BUBBLE_SIZE, BUBBLE_SIZE)
+fn resize_bubble(app: &AppHandle, w: &WebviewWindow, layout: BubbleLayout) {
+    let (width, height) = match layout {
+        BubbleLayout::Training => (BUBBLE_TRAINING_W, BUBBLE_TRAINING_H),
+        BubbleLayout::Stop => (BUBBLE_SIZE, BUBBLE_STOP_H),
+        BubbleLayout::Plain => (BUBBLE_SIZE, BUBBLE_SIZE),
     };
     let _ = w.set_size(LogicalSize::new(width, height));
     let (Ok(k), Ok(p)) = (w.scale_factor(), w.outer_position()) else {

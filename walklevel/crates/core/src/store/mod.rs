@@ -82,6 +82,8 @@ pub const PROFILE_KEYS: &[&str] = &[
     "idle_speed",
     "walk_speed",
     "run_speed",
+    "key_hold_s",
+    "key_idle",
     "pad_steps",
     "pad_idle",
     "training_levels",

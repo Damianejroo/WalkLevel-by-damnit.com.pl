@@ -243,8 +243,11 @@ pub struct App {
     pub updated_from: Option<String>,
     pub window_focused: bool,
     pub bubble_dragging: bool,
-    /// rozmiar okna przycisku ostatnio wysłany do okien (Trening: większe; None - nieznany)
-    pub bubble_training: Option<bool>,
+    /// układ okna przycisku ostatnio wysłany do okien (None - nieznany)
+    pub bubble_layout: Option<crate::okna::BubbleLayout>,
+    /// taśma jedzie (z histerezą 1 s, `track_bubble_moving`) - poza Treningiem Stop pod kółkiem
+    pub bubble_moving: bool,
+    pub bubble_moving_since: Option<f64>,
     /// ostatnio wysłana karta statusu bieżni (żeby nie wysyłać jej 4 razy na sekundę)
     pub status_key: String,
     pub frame: u64,
@@ -368,6 +371,9 @@ pub fn normalize(mut s: Map<String, Value>) -> Map<String, Value> {
         }
     };
     one_of(&mut s, "pad_idle", &["stop", "slow", "zero"], "stop");
+    one_of(&mut s, "key_idle", &["slow", "stop"], "slow");
+    let hold = walklevel_core::mapping::parse_key_hold(s.get("key_hold_s").unwrap_or(&Value::Null));
+    s.insert("key_hold_s".into(), json!(hold));
     one_of(
         &mut s,
         "direction",
@@ -479,7 +485,7 @@ impl App {
 
     pub fn window(&mut self, w: Okno) {
         if matches!(w, Okno::BubbleVisible(..)) {
-            self.bubble_training = None; // nowe okno ma rozmiar podstawowy
+            self.bubble_layout = None; // nowe okno ma rozmiar podstawowy
         }
         self.out.push(Wyjscie::Okno(w));
     }
@@ -792,6 +798,8 @@ impl App {
             idle_speed: self.f("idle_speed"),
             walk_speed: self.f("walk_speed"),
             run_speed: self.f("run_speed"),
+            key_hold_s: self.f("key_hold_s"),
+            key_idle: self.s("key_idle"),
             pad_steps: steps,
             pad_idle: self.s("pad_idle"),
             training_levels: levels,
@@ -1088,6 +1096,7 @@ impl App {
             teksty::output_hint(
                 &direction,
                 &self.s("output"),
+                self.s("key_idle") == "stop",
                 &self.walk_key.name,
                 &self.run_key.name,
                 &slower,
@@ -1227,6 +1236,7 @@ impl App {
                 .as_ref()
                 .map_or(palette::DEFAULT.to_string(), |s| s.profile().color.clone()),
             training: self.s("direction") == "training",
+            stop: self.bubble_stop(),
             training_level: walklevel_core::mapping::parse_training_level(
                 self.settings.get("training_level").unwrap_or(&Value::Null),
             ) as u32,
@@ -1235,16 +1245,29 @@ impl App {
         }
     }
 
-    /// Rozmiar okna przycisku za trybem: w Treningu miejsce na +, − i Stop. Prośba idzie
-    /// tylko przy zmianie (i po każdym utworzeniu okna - `window` zeruje `bubble_training`).
+    /// Poza Treningiem Stop pod kółkiem, gdy taśma jedzie, a bieżnia przyjmuje stop.
+    fn bubble_stop(&self) -> bool {
+        self.s("direction") != "training" && self.bubble_moving && self.caps.control
+    }
+
+    /// Rozmiar okna przycisku za trybem: w Treningu miejsce na +, − i Stop, poza nim na Stop,
+    /// gdy taśma jedzie. Prośba idzie tylko przy zmianie (i po każdym utworzeniu okna -
+    /// `window` zeruje `bubble_layout`).
     pub fn sync_bubble_size(&mut self) {
+        use crate::okna::BubbleLayout;
         if !self.b("floating_button") {
             return;
         }
-        let training = self.s("direction") == "training";
-        if self.bubble_training != Some(training) {
-            self.bubble_training = Some(training);
-            self.window(Okno::BubbleSize(training));
+        let layout = if self.s("direction") == "training" {
+            BubbleLayout::Training
+        } else if self.bubble_stop() {
+            BubbleLayout::Stop
+        } else {
+            BubbleLayout::Plain
+        };
+        if self.bubble_layout != Some(layout) {
+            self.bubble_layout = Some(layout);
+            self.window(Okno::BubbleSize(layout));
         }
     }
 

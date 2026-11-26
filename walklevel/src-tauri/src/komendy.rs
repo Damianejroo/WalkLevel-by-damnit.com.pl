@@ -240,6 +240,13 @@ pub async fn training_stop(core: State<'_, Core>) -> CmdResult<()> {
 
 // --- 6.4 bieżnia ------------------------------------------------------------------------------
 
+/// Stop z przycisku na ekranie poza Treningiem: wyłącza sterowanie (gdy włączone) i zatrzymuje taśmę.
+#[tauri::command]
+pub async fn device_belt_stop(core: State<'_, Core>) -> CmdResult<()> {
+    core.with(|a| a.belt_stop());
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn device_scan(core: State<'_, Core>) -> CmdResult<()> {
     core.with(|a| a.start_scan());

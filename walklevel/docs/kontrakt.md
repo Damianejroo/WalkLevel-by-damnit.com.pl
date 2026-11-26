@@ -162,6 +162,7 @@ export type Direction = 'keyboard' | 'gamepad' | 'treadmill' | 'training'; // Kl
 export type OutputKind = 'dry' | 'keys';           // podgląd / naciska klawisze w grze
 export type ThemeChoice = 'system' | 'light' | 'dark';
 export type PadIdle = 'stop' | 'slow' | 'zero';    // gałka puszczona: stop / prędkość skoku 1 / 0 km/h (test)
+export type KeyIdle = 'slow' | 'stop';             // Klawisze, bez klawisza: tempo „bez klawisza” / taśma stoi
 export type KeyRole = 'walk' | 'run' | 'toggle' | 'faster' | 'slower'; // faster/slower: symulator i poziom Treningu
 export type ColorName =                            // nazwy z bieznia/paleta.py (zapisywane w plikach)
   | 'Czerwień' | 'Koral' | 'Pomarańcz' | 'Morela' | 'Banan' | 'Limonka' | 'Zieleń' | 'Szmaragd'
@@ -447,6 +448,8 @@ export interface Settings {
   idleSpeed: number;           // Klawisze: bez klawisza
   walkSpeed: number;           // Klawisze: chód
   runSpeed: number;            // Klawisze: chód + bieg
+  keyHoldS: number;            // Klawisze: sekundy trzymania, zanim taśma przyspieszy (0, 1, 2 albo 3; 0 - od razu; puszczenie od razu)
+  keyIdle: KeyIdle;            // Klawisze: bez klawisza wolne tempo albo stop taśmy (domyślnie slow)
   padSteps: PadStep[];         // 2..5 skoków
   padIdle: PadIdle;
   trainingLevels: [number, number, number, number];
@@ -460,7 +463,7 @@ export type SettingKey =
   | 'beltControl' | 'quickStop' | 'togglePad' | 'simulator' | 'record' | 'detailedLogs'
   | 'theme' | 'largeText' | 'alwaysOnTop' | 'floatingButton' | 'showPersonSwitch'
   | 'showProfileSwitch' | 'achievementPopups' | 'achievementSound'
-  | 'direction' | 'output' | 'idleSpeed' | 'walkSpeed' | 'runSpeed' | 'padIdle';
+  | 'direction' | 'output' | 'idleSpeed' | 'walkSpeed' | 'runSpeed' | 'keyHoldS' | 'keyIdle' | 'padIdle';
 
 // ============================================================================
 // Wycinek: people - osoby i profile gier
@@ -796,6 +799,7 @@ export interface BubbleView {   // okno "przycisk"
   theme: ThemeChoice;
   accent: ColorName;            // kolor profilu
   training: boolean;            // tryb Trening: przy kółku +, − i Stop (okno 88 × 84 zamiast 56 × 56)
+  stop: boolean;                // poza Treningiem: taśma jedzie (histereza 1 s), bieżnia przyjmuje stop - pod kółkiem Stop (okno 56 × 84)
   trainingLevel: 0 | 1 | 2 | 3;
   fasterLabel: string;          // nazwy klawiszy szybciej/wolniej do podpowiedzi + i −
   slowerLabel: string;
@@ -1303,7 +1307,7 @@ Poniżej `T` to typ wyniku; `()` = `void`.
 
 | Komenda | Argumenty | Wynik | Skutek / uwagi |
 |---|---|---|---|
-| `settings_set` | `key: SettingKey (String)`, `value: Value` | `()` | zapis do właściwej części osoby.json (8.1). Walidacja jak `normalize()`; zły typ/wartość → `invalid`. Skutki uboczne: `alwaysOnTop` → `WindowRequest::MainAlwaysOnTop`; `floatingButton` → `BubbleVisible`; `simulator` → `on_simulator` (połączenie z symulatorem albo z zapamiętaną bieżnią); `record` → nagrywanie; `detailedLogs` → poziom logu `bieznia.ble`; `direction` → `apply_direction` (wyjście `dry` dla trybów sterujących taśmą), `belt_target = None`; `output` → `Bridge.set_output`; `idle/walk/runSpeed` → zaokrąglenie do 0,1, `belt_target = None`; `padIdle` → `belt_target = None`; `achievementSound = true` → od razu odtwarza dźwięk osiągnięcia; `togglePad: ''` → usuwa przycisk pada |
+| `settings_set` | `key: SettingKey (String)`, `value: Value` | `()` | zapis do właściwej części osoby.json (8.1). Walidacja jak `normalize()`; zły typ/wartość → `invalid`. Skutki uboczne: `alwaysOnTop` → `WindowRequest::MainAlwaysOnTop`; `floatingButton` → `BubbleVisible`; `simulator` → `on_simulator` (połączenie z symulatorem albo z zapamiętaną bieżnią); `record` → nagrywanie; `detailedLogs` → poziom logu `bieznia.ble`; `direction` → `apply_direction` (wyjście `dry` dla trybów sterujących taśmą), `belt_target = None`; `output` → `Bridge.set_output`; `idle/walk/runSpeed` → zaokrąglenie do 0,1, `belt_target = None`; `keyHoldS` → 0-3, zaokrąglenie do pełnych sekund, `belt_target = None`; `keyIdle` (`slow`/`stop`) i `padIdle` → `belt_target = None`; `achievementSound = true` → od razu odtwarza dźwięk osiągnięcia; `togglePad: ''` → usuwa przycisk pada |
 | `thresholds_set` | `which: String` (`"walk"`/`"run"`), `kmh: f64` | `()` | `on_threshold`: zmieniony próg wygrywa, drugi przesuwa się o 0,8 (≤ `maxSpeed`), `runOff = runOn - 0.6`, zaokr. 0,1 |
 | `pad_steps_count` | `count: u8` (2-5) | `()` | gotowe skoki `PRESETS[count]` |
 | `pad_step_set` | `index: u8`, `at: Option<u8>`, `kmh: Option<f64>` | `()` | `on_pad_at` / `on_pad_speed`; walidacja `parse_steps` (pierwszy 0, odstęp ≥ 5, ≤ 100, 0,5-12 km/h) → `invalid` |
@@ -1324,6 +1328,7 @@ Zmiana koloru profilu to `profile_update(id, { color })`; wygląd przelicza UI (
 | `training_level_set` | `level: u8` | `()` | ustawia poziom; gdy sterowanie wyłączone - włącza je (taśma rusza) |
 | `training_level_step` | `step: i8` (±1) | `()` | klawisze szybciej/wolniej (domyślnie F7/F6) w trybie Trening robią to samo w pętli; wołane też z okna przycisku (+/−) |
 | `training_stop` | - | `()` | wyłącza sterowanie (taśma staje), a gdy już wyłączone - sam stop taśmy; wołane też z okna przycisku (Stop) |
+| `device_belt_stop` | - | `()` | Stop z okna przycisku poza Treningiem (`bubble.stop`): włączone sterowanie się wyłącza, potem zawsze `BeltCommand::Stop` (także w Klawiszach z „Wolne tempo” i bez „start i stop z aplikacji”) |
 
 ### 6.4 Bieżnia
 
@@ -1455,6 +1460,7 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 | `bubble_drag_start` | przycisk | - | `()` | rdzeń zaczyna śledzić `WindowEvent::Moved`; po puszczeniu (`bubble_drag_end`) zapisuje `floatingPos` |
 | `bubble_drag_end` | przycisk | - | `()` | zapis pozycji (piksele logiczne), sprawdzenie, czy na ekranie |
 | `training_level_step`, `training_stop` | przycisk | jak w 6.4 | `()` | przyciski +, − i Stop przy kółku w trybie Trening (`bubble.training`) |
+| `device_belt_stop` | przycisk | jak w 6.4 | `()` | Stop pod kółkiem poza Treningiem, gdy taśma jedzie (`bubble.stop`) |
 | `popup_ready` | popup | - | `PopupsView` | stan przy starcie okna popupu |
 
 Przesuwanie przycisku wykonuje JS przez `getCurrentWindow().startDragging()` po przesunięciu
@@ -1488,6 +1494,7 @@ control_toggle() -> CmdResult<()>
 training_level_set(level: u8) -> CmdResult<()>
 training_level_step(step: i8) -> CmdResult<()>
 training_stop() -> CmdResult<()>
+device_belt_stop() -> CmdResult<()>
 
 device_scan() -> CmdResult<()>
 device_connect(address: String, name: String) -> CmdResult<()>
@@ -1641,13 +1648,19 @@ Odpowiednik `FloatingToggle`.
   `floating_pos` (jeśli punkt + 28 px jest na którymś ekranie), inaczej przy prawej krawędzi
   ekranu głównego, w połowie wysokości, 24 px od brzegu.
 - Rysowanie (SVG w `przycisk.svelte`): koło; włączone - wypełnienie akcentem (bieg: kolor biegu),
-  ikona postaci; gdy `enabled && live` - pod ikoną prędkość („2,5”); wyłączone - tło
+  ikona postaci; gdy taśma jedzie (`live && speedKmh > 0,05`, także przy wyłączonym
+  sterowaniu, 0.6.1) - pod ikoną prędkość („2,5”); wyłączone - tło
   powierzchni, ramka kontrolki. Dane: `wl:telemetria` (`enabled`, `mode`, `speedKmh`, `live`)
   + wycinek `bubble` (motyw, akcent, widoczność, tryb Trening i poziom).
 - Tryb Trening: obok kółka kolumna 28 px (+ / numer poziomu / −, jedna ramka `--control`), pod
   spodem Stop 24 px (wariant „stop”: ramka i tekst `--danger`). + → `training_level_step(1)`,
   − → `training_level_step(-1)` (wyłączone na poziomie 4 / 1), Stop → `training_stop`. Klik
   nie aktywuje okna (ten sam `WS_EX_NOACTIVATE`).
+- Poza Treningiem (0.6.1): gdy taśma jedzie (`bubble.stop`: dane na żywo i > 0,05 km/h przez
+  1 s - histereza w pętli, okno nie miga) i bieżnia przyjmuje stop (`caps.control`), pod kółkiem
+  ten sam Stop, okno 56 × 84 (`okna.rs` `BubbleLayout::Stop`, `BUBBLE_STOP_H`); Stop →
+  `device_belt_stop` (włączone sterowanie się wyłącza, taśma staje). Rozmiar okna zmienia się
+  tylko przy zmianie układu (`sync_bubble_size`).
 - Lewy klik → `bubble_click`; prawy → `bubble_open`; przeciąganie → `startDragging()`
   i `bubble_drag_start/end`. Podpowiedź (title): „Sterowanie: włączone/wyłączone · Kliknij -
   wyłącz/włącz · Prawy przycisk - okno · Przeciągnij - przesuń”.
@@ -1753,6 +1766,8 @@ ewentualnie z ustawieniami 0.2 z `dane/ustawienia.json` (tylko czytane, nigdy ni
 | `idle_speed` | `idleSpeed` | profil | `1.0` | float |
 | `walk_speed` | `walkSpeed` | profil | `1.5` | float |
 | `run_speed` | `runSpeed` | profil | `2.5` | float |
+| `key_hold_s` | `keyHoldS` | profil | `0` | 0, 1, 2 albo 3 s (Klawisze: trzymanie przed przyspieszeniem, chód i osobno bieg od swojego wciśnięcia; puszczenie od razu; klawisze w grze bez opóźnienia) |
+| `key_idle` | `keyIdle` | profil | `"slow"` | `slow` / `stop` (Klawisze, bez klawisza: tempo `idle_speed` albo stop po 0,4 s; W budzi taśmę `SetSpeed{start_if_stopped}`; włączenie sterowania nie uruchamia taśmy, wyłączenie ją zatrzymuje) |
 | `pad_steps` | `padSteps` | profil | `[[0,1.0],[25,1.5],[50,2.5],[100,4.0]]` | 2-5 par, pierwszy `at = 0`, rosnąco co ≥ 5, ≤ 100, prędkość 0,5-12; inaczej 4 domyślne |
 | `pad_idle` | `padIdle` | profil | `"stop"` | `stop`/`slow`/`zero`, inaczej `stop` |
 | `training_levels` | `trainingLevels` | profil | `[1.5, 2.5, 3.5, 4.5]` | dokładnie 4, każdy 0,5-20, zaokr. 0,1; inaczej domyślne |

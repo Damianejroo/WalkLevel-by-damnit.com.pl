@@ -7,12 +7,12 @@ export const MOTYWY = ['jasny', 'ciemny'];
 export const WYSOKOSC = 900;
 
 export const EKRANY = [
-  { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie', 'klawisze', 'pad', 'chodzenie', 'proba', 'symulator', 'szukanie', 'ponawiam', 'bt-wylaczony', 'rozlaczona', 'dlugie-pad'] },
+  { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie', 'klawisze', 'pad', 'chodzenie', 'proba', 'symulator', 'szukanie', 'ponawiam', 'bt-wylaczony', 'rozlaczona', 'dlugie-pad', 'klawisze-stop'] },
   { ekran: 'settings', scenariusze: ['domyslny'] },
   { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie'] },
   {
     ekran: 'settings',
-    scenariusze: ['domyslny', 'ustawienia', 'ustawienia-chodzenie', 'ustawienia-trening', 'ustawienia-wylogowany', 'ustawienia-dlugie'],
+    scenariusze: ['domyslny', 'ustawienia', 'ustawienia-chodzenie', 'ustawienia-trening', 'ustawienia-wylogowany', 'ustawienia-dlugie', 'ustawienia-klawisze-stop'],
   },
   { ekran: 'history', scenariusze: ['domyslny'] },
   { ekran: 'history', scenariusze: ['domyslny', 'pusto', 'dlugie'] },
@@ -66,7 +66,10 @@ export const OKNA = [
       // Trening: okno 88 × 84 (kółko + kolumna +/poziom/− i Stop, okna.rs BUBBLE_TRAINING_*)
       { nazwa: 'chod', zapytanie: 'stan=trening&poziom=1', okno: { szer: 88, wys: 84 } },
       { nazwa: 'bieg', zapytanie: 'stan=trening&poziom=4', okno: { szer: 88, wys: 84 } },
-      { nazwa: 'klawisze', zapytanie: 'stan=klawisze' },
+      // poza Treningiem, gdy taśma jedzie: Stop pod kółkiem, okno 56 × 84 (okna.rs BUBBLE_STOP_H)
+      { nazwa: 'klawisze', zapytanie: 'stan=klawisze', okno: { szer: 56, wys: 84 } },
+      { nazwa: 'jedzie-wylaczony', zapytanie: 'stan=jedzie', okno: { szer: 56, wys: 84 } },
+      { nazwa: 'pad-jedzie', zapytanie: 'stan=pad', okno: { szer: 56, wys: 84 } },
       { nazwa: 'bez-danych', zapytanie: 'stan=klawisze&bieznia=rozlaczona' },
     ],
   },

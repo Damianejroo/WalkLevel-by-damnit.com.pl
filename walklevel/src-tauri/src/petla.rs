@@ -9,7 +9,8 @@ use std::time::{Duration, Instant};
 use serde_json::{Value, json};
 use walklevel_core::input::{Binding, Hotkeys, Key, KeyboardOutput, SystemKeys};
 use walklevel_core::mapping::{
-    self, BeltCommand, Control, Direction, FrameInput, Held, PadIdle, Reading, SteeringSettings,
+    self, BeltCommand, Control, Direction, FrameInput, Held, KeyIdle, PadIdle, Reading,
+    SteeringSettings,
 };
 use walklevel_core::treadmill::{self, Link, WorkerEvent};
 
@@ -86,6 +87,9 @@ fn treadmill_caption(run: bool, walk: bool, dry: bool) -> (GaugeMode, i32, &'sta
     }
 }
 
+/// Przycisk na ekranie: tyle sekund stanu „jedzie”/„stoi”, zanim zmieni się okno (Stop pod kółkiem).
+pub const BUBBLE_MOVING_HOLD_S: f64 = 1.0;
+
 impl App {
     pub fn steering_settings(&self) -> SteeringSettings {
         SteeringSettings {
@@ -94,6 +98,10 @@ impl App {
             idle_speed: self.f("idle_speed"),
             walk_speed: self.f("walk_speed"),
             run_speed: self.f("run_speed"),
+            key_hold_s: mapping::parse_key_hold(
+                self.settings.get("key_hold_s").unwrap_or(&Value::Null),
+            ),
+            key_idle: KeyIdle::from_setting(&self.s("key_idle")),
             pad_steps: mapping::parse_pad_steps(
                 self.settings.get("pad_steps").unwrap_or(&Value::Null),
             ),
@@ -200,6 +208,32 @@ impl App {
             self.set_control(false);
         } else {
             self.belt(BeltCommand::Stop);
+        }
+    }
+
+    /// Stop z przycisku na ekranie (poza Treningiem): taśma staje zawsze - włączone sterowanie
+    /// najpierw się wyłącza (inaczej klawisz albo gałka zaraz by ją znów uruchomiły).
+    pub fn belt_stop(&mut self) {
+        if self.bridge.state().enabled {
+            self.set_control(false);
+        }
+        self.belt_target = None;
+        self.belt(BeltCommand::Stop);
+    }
+
+    /// Przycisk na ekranie: taśma jedzie (dane na żywo, > 0,05 km/h). Zmiana stanu dopiero, gdy
+    /// trzyma się [`BUBBLE_MOVING_HOLD_S`] - okno nie zmienia rozmiaru przy chwilowym odczycie.
+    fn track_bubble_moving(&mut self, now: f64, live: bool, kmh: f64) {
+        let moving = live && kmh > 0.05;
+        if moving == self.bubble_moving {
+            self.bubble_moving_since = None;
+            return;
+        }
+        let since = *self.bubble_moving_since.get_or_insert(now);
+        if now - since >= BUBBLE_MOVING_HOLD_S {
+            self.bubble_moving = moving;
+            self.bubble_moving_since = None;
+            self.mark(&[SliceName::Bubble]);
         }
     }
 
@@ -452,6 +486,7 @@ impl App {
         }
         let reading = self.pending_reading.take();
         let state = self.bridge.tick(now, false, reading).clone();
+        self.track_bubble_moving(now, state.live, state.control.speed);
 
         let settings = self.steering_settings();
         let key_down = |k: &Key| {
@@ -548,6 +583,7 @@ impl App {
                     let (zone, key) = match frame.held {
                         Held::Run => (2, "glowny.wskaznik.klawisze.bieg"),
                         Held::Walk => (1, "glowny.wskaznik.klawisze.chod"),
+                        Held::Idle if frame.pad_stopped => (0, "glowny.wskaznik.klawisze.stoi"),
                         Held::Idle => (0, "glowny.wskaznik.klawisze.bez"),
                     };
                     (held_mode(frame.held), zone, teksty::t(key, &vars))

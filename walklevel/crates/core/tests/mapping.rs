@@ -211,6 +211,7 @@ fn settings_from(v: &Value) -> SteeringSettings {
         pad_idle: PadIdle::from_setting(v["pad_idle"].as_str().expect("pad_idle")),
         training_levels: parse_training_levels(&v["training_levels"]),
         training_level: v["training_level"].as_u64().expect("training_level") as usize,
+        ..SteeringSettings::default()
     }
 }
 

@@ -38,6 +38,7 @@ pub fn status_texts(state: &str, vars: &[(&str, &str)]) -> (String, String, Stri
 pub fn output_hint(
     direction: &str,
     output: &str,
+    key_stop: bool,
     walk: &str,
     run: &str,
     slower: &str,
@@ -51,6 +52,7 @@ pub fn output_hint(
     ];
     let key = match direction {
         "gamepad" => "glowny.podpowiedz.pad",
+        "keyboard" if key_stop => "glowny.podpowiedz.klawisze_stop",
         "keyboard" => "glowny.podpowiedz.klawisze",
         "training" => "glowny.podpowiedz.trening",
         _ if output == "keys" => "glowny.podpowiedz.chodzenie",
@@ -152,7 +154,7 @@ mod tests {
     const KEYS: [&str; 4] = ["W", "Shift", "F6", "F7"];
 
     fn hint(direction: &str, output: &str) -> String {
-        output_hint(direction, output, KEYS[0], KEYS[1], KEYS[2], KEYS[3])
+        output_hint(direction, output, false, KEYS[0], KEYS[1], KEYS[2], KEYS[3])
     }
 
     #[test]
@@ -184,6 +186,10 @@ mod tests {
         for d in ["training", "treadmill", "keyboard", "gamepad"] {
             assert!(!hint(d, "dry").contains('{'), "{d}");
         }
+        assert_eq!(
+            output_hint("keyboard", "dry", true, KEYS[0], KEYS[1], KEYS[2], KEYS[3]),
+            "Trzymaj W, a taśma ruszy. Puść, a stanie."
+        );
     }
 
     #[test]

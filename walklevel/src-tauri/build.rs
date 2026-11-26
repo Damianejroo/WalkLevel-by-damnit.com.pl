@@ -23,6 +23,7 @@ const COMMANDS: &[&str] = &[
     "training_level_set",
     "training_level_step",
     "training_stop",
+    "device_belt_stop",
     "device_scan",
     "device_connect",
     "device_disconnect",

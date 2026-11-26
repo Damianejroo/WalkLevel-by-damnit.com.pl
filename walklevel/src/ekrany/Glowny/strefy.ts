@@ -56,14 +56,17 @@ export function ukladStref(s: Settings, maxSpeed: number): UkladStref {
   }
 
   if (s.direction === 'keyboard') {
-    const p = [s.idleSpeed, s.walkSpeed, s.runSpeed];
+    // „Taśma staje”: bez klawisza 0 km/h i żeton „stop” (jak pad z puszczoną gałką)
+    const stoi = s.keyIdle === 'stop';
+    const p = [stoi ? 0 : s.idleSpeed, s.walkSpeed, s.runSpeed];
     const vmax = Math.max(3.5, Math.max(...p) * 1.4);
+    const bez = zeton(t('glowny.strefy.bez_klawisza', { kmh: kmh(p[0]) }), 'stop');
     return {
       strefy: przedzialy(p, ['stop', 'walk', 'run'], vmax),
-      progi: p.map((v, i) => ({ v, tekst: kmh(v), strefa: i })),
+      progi: p.flatMap((v, i) => (v > 0 ? [{ v, tekst: kmh(v), strefa: i }] : [])),
       vmax,
       zetony: [
-        zeton(t('glowny.strefy.bez_klawisza', { kmh: kmh(p[0]) }), 'stop'),
+        stoi ? { ...bez, wartosc: t('glowny.strefy.stop') } : bez,
         zeton(t('glowny.strefy.klawisz', { ...klawisze, kmh: kmh(p[1]) }), 'walk'),
         zeton(t('glowny.strefy.klawisz_bieg', { ...klawisze, kmh: kmh(p[2]) }), 'run'),
       ],
