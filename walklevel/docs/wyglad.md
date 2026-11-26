@@ -892,7 +892,11 @@ podgląd profilu – dane), tło `--surface-2`.
 - Przejście (lib/panel.svelte.ts): na czas zmiany rozmiaru okna główna kolumna ma zamrożoną
   szerokość w px, panel (slot w kolorze `--surface`) bierze resztę. Zwijanie: najpierw pasek,
   po klatce okno węższe; rozwijanie: najpierw okno szersze, po zdarzeniu `resize` pełny panel.
-  Rozmiar i położenie (panel z lewej) jednym `SetWindowPos`. Tło okna i WebView2 = `--bg`
+  Rozmiar i położenie (panel z lewej) jednym `SetWindowPos`. Panel z lewej zwinięty: WebView
+  jest wysunięty w lewo o 224 px poza okno (strona ma tam puste miejsce, pasek przy jego prawej
+  krawędzi), więc zwijanie i rozwijanie z lewej przesuwa tylko lewą krawędź okna, a WebView nie
+  zmienia ani rozmiaru, ani miejsca na ekranie (bez WM_SIZE dla wry w tym jednym SetWindowPos).
+  Wcześniej WebView2 przez klatkę pokazywał starą klatkę strony przy nowej lewej krawędzi. Tło okna i WebView2 = `--bg`
   motywu (`window_theme`), więc odsłonięty na chwilę fragment okna nie prześwituje.
 - Nic nie wystaje przy oknie 720 z pełnym panelem i dużym tekstem, w obu motywach.
 

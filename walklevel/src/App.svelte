@@ -26,16 +26,16 @@
   const trybPanelu = $derived(panel.widoczny);
   const stronaPanelu = $derived(panel.strona);
   // slot panelu jest w siatce, także gdy w przejściu panel jest wyłączany/włączany (puste tło)
-  const zSlotem = $derived(panel.kolumna !== null || trybPanelu !== 'wylaczony');
+  const zSlotem = $derived(panel.kolumna !== null || panel.slot > 0);
   const kolumny = $derived.by(() => {
     if (!zSlotem) return 'minmax(0, 1fr)';
     const glowna = panel.kolumna === null ? 'minmax(0, 1fr)' : `${panel.kolumna}px`;
-    const boczna = panel.kolumna === null ? `${szerokoscPanelu(trybPanelu)}px` : 'minmax(0, 1fr)';
+    const boczna = panel.kolumna === null ? `${panel.slot}px` : 'minmax(0, 1fr)';
     return stronaPanelu === 'left' ? `${boczna} ${glowna}` : `${glowna} ${boczna}`;
   });
   // komunikat (Toast) i listy rozwijane liczą się w kolumnie ekranów, nie nad panelem
   $effect(() => {
-    const w = szerokoscPanelu(trybPanelu);
+    const w = panel.slot;
     const s = document.documentElement.style;
     s.setProperty('--panel-lewo', `${stronaPanelu === 'left' ? w : 0}px`);
     s.setProperty('--panel-prawo', `${stronaPanelu === 'right' ? w : 0}px`);

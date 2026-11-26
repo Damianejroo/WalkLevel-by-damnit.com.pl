@@ -985,6 +985,8 @@ pub enum WindowRequest {
     MainPanel(PanelLayout, PanelLayout), // 0.6.2: panel znajomych przed/po - min. szerokość okna 720 (pełny) / 484 (pasek) / 420 (bez);
                                          // zwinięcie -224 px, rozwinięcie +224 (z lewej okno przesuwa się o tyle samo w drugą stronę);
                                          // zmaksymalizowane albo przyciągnięte (Aero Snap) - bez zmiany rozmiaru
+                                         // panel z lewej zwinięty: WebView wysunięty w lewo o 224 px (PanelLayout::hidden_left,
+                                         // UI: panel.ukryte) - zwijanie/rozwijanie z lewej bez zmiany WebView
     BubbleVisible(bool),
     BubbleSize(bool),                      // true - tryb Trening (88 × 84 z +, − i Stop), false - 56 × 56
     BubbleMove { x: i32, y: i32 },         // piksele logiczne (jak floating_pos w 0.5)

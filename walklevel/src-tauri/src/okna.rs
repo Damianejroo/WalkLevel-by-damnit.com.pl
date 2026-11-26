@@ -65,6 +65,19 @@ impl PanelLayout {
         }
     }
 
+    /// Panel z lewej zwinięty do paska: WebView jest o tyle szerszy od okna i wysunięty w lewo
+    /// poza nie (ukryte miejsce po pełnym panelu, strona układa je jako puste). Dzięki temu przy
+    /// zwijaniu i rozwijaniu z lewej WebView nie zmienia rozmiaru ani miejsca na ekranie - okno
+    /// przesuwa tylko lewą krawędź. Wcześniej WebView2 przez klatkę pokazywał starą klatkę strony
+    /// przyklejoną do nowej lewej krawędzi (główna kolumna przesunięta o 224 px i ucięta).
+    pub fn hidden_left(self) -> f64 {
+        if self.on && self.collapsed && self.left {
+            PANEL_FULL_W - PANEL_BAR_W
+        } else {
+            0.0
+        }
+    }
+
     /// Zmiana szerokości okna i przesunięcie w poziomie przy przejściu `self` -> `after`, żeby
     /// główna kolumna stała w miejscu: zwinięcie zwęża okno o 224 px, rozwinięcie poszerza;
     /// panel z lewej - okno przesuwa się o tyle samo w drugą stronę. Zmiana strony panelu nie
@@ -254,6 +267,7 @@ pub fn create_windows(app: &AppHandle, webview_dir: &Path) -> tauri::Result<()> 
         .data_directory(webview_dir.to_path_buf())
         .build()?;
     harden_webview(&main);
+    remember_webview(&main);
     Ok(())
 }
 
@@ -480,7 +494,11 @@ fn resize_for_panel(w: &WebviewWindow, before: PanelLayout, after: PanelLayout) 
     if new_width < width {
         let _ = w.set_min_size(Some(min));
     }
-    if (new_width - width).abs() >= 0.5 || shift.abs() >= 0.5 {
+    let moves = (new_width - width).abs() >= 0.5 || shift.abs() >= 0.5;
+    // wysunięcie WebView w lewo (panel z lewej zwinięty): przy zmianie okna nakłada je obsługa
+    // WM_SIZE w tym samym SetWindowPos; bez zmiany okna - od razu
+    set_hidden_left((after.hidden_left() * k).round() as i32, !moves);
+    if moves {
         // rozmiar i położenie jednym SetWindowPos (panel z lewej: bez klatki z przesuniętą
         // główną kolumną między zmianą rozmiaru a przesunięciem)
         let dw = ((new_width - width) * k).round() as i32;
@@ -494,6 +512,141 @@ fn resize_for_panel(w: &WebviewWindow, before: PanelLayout, after: PanelLayout) 
     if new_width >= width {
         let _ = w.set_min_size(Some(min));
     }
+}
+
+// --- WebView wysunięty w lewo (panel z lewej zwinięty) ---------------------------------------
+
+#[cfg(windows)]
+thread_local! {
+    /// Kontroler WebView2 okna głównego i wysunięcie w lewo (piksele fizyczne; wątek okien).
+    static MAIN_WEBVIEW: std::cell::RefCell<
+        Option<webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Controller>,
+    > = const { std::cell::RefCell::new(None) };
+    static HIDDEN_LEFT: std::cell::Cell<i32> = const { std::cell::Cell::new(0) };
+    /// Trwa nasz SetWindowPos przy panelu z lewej (zwijanie/rozwijanie).
+    static LEFT_MOVE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    /// Uchwyt okna głównego (do nałożenia wysunięcia bez zmiany okna).
+    static MAIN_HWND: std::cell::Cell<isize> = const { std::cell::Cell::new(0) };
+}
+
+/// Zapamiętuje kontroler WebView2 okna głównego i podpina obsługę WM_SIZE (po obsłudze wry,
+/// która ustawia WebView na cały obszar klienta, nakłada wysunięcie w lewo).
+fn remember_webview(w: &WebviewWindow) {
+    #[cfg(windows)]
+    {
+        let Ok(hwnd) = w.hwnd() else { return };
+        let hwnd_raw = hwnd.0 as isize;
+        let _ = w.with_webview(move |wv| {
+            use windows::Win32::Foundation::HWND;
+            use windows::Win32::UI::Shell::SetWindowSubclass;
+            let controller = wv.controller();
+            MAIN_WEBVIEW.with(|c| *c.borrow_mut() = Some(controller));
+            MAIN_HWND.set(hwnd_raw);
+            // SAFETY: uchwyt okna głównego z Tauri; podklasa żyje tyle co okno (bez danych).
+            unsafe {
+                let _ = SetWindowSubclass(
+                    HWND(hwnd_raw as *mut _),
+                    Some(webview_subclass),
+                    WEBVIEW_SUBCLASS_ID,
+                    0,
+                );
+            }
+        });
+    }
+    #[cfg(not(windows))]
+    let _ = w;
+}
+
+#[cfg(windows)]
+const WEBVIEW_SUBCLASS_ID: usize = 0x574c_0062;
+
+#[cfg(windows)]
+unsafe extern "system" fn webview_subclass(
+    hwnd: windows::Win32::Foundation::HWND,
+    msg: u32,
+    wparam: windows::Win32::Foundation::WPARAM,
+    lparam: windows::Win32::Foundation::LPARAM,
+    _id: usize,
+    _data: usize,
+) -> windows::Win32::Foundation::LRESULT {
+    use windows::Win32::Foundation::LRESULT;
+    use windows::Win32::UI::Shell::DefSubclassProc;
+    use windows::Win32::UI::WindowsAndMessaging::{SIZE_MINIMIZED, WM_SIZE, WM_WINDOWPOSCHANGED};
+    // Nasze przesunięcie lewej krawędzi (panel z lewej): bez WM_SIZE dla wry - ten ustawiłby
+    // WebView na nową szerokość i strona narysowałaby klatkę w złym miejscu. WebView zostaje
+    // w tym samym miejscu ekranu i rozmiarze (granice z wysunięciem nakładamy sami, od razu).
+    if msg == WM_WINDOWPOSCHANGED && LEFT_MOVE.get() {
+        apply_hidden_left(hwnd);
+        return LRESULT(0);
+    }
+    // SAFETY: wywołanie dalszej obsługi (wry, tao) z niezmienionymi argumentami.
+    let result = unsafe { DefSubclassProc(hwnd, msg, wparam, lparam) };
+    if msg == WM_SIZE && wparam.0 != SIZE_MINIMIZED as usize && HIDDEN_LEFT.get() != 0 {
+        apply_hidden_left(hwnd);
+    }
+    result
+}
+
+/// Granice WebView: obszar klienta, przy wysunięciu - od `-wysunięcie` (szerszy o tyle).
+/// Pojemnik WebView (okno-rodzic kontrolera) - na cały obszar klienta.
+#[cfg(windows)]
+fn apply_hidden_left(hwnd: windows::Win32::Foundation::HWND) {
+    use windows::Win32::Foundation::RECT;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        GetClientRect, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOZORDER, SetWindowPos,
+    };
+    let mut client = RECT::default();
+    // SAFETY: odczyt obszaru klienta okna głównego.
+    if unsafe { GetClientRect(hwnd, &mut client) }.is_err() {
+        return;
+    }
+    MAIN_WEBVIEW.with(|c| {
+        if let Some(controller) = c.borrow().as_ref() {
+            let mut container = windows::Win32::Foundation::HWND::default();
+            // SAFETY: okno-rodzic kontrolera WebView2 (pojemnik wry) w wątku okien.
+            if unsafe { controller.ParentWindow(&mut container) }.is_ok() && container != hwnd {
+                // SAFETY: zmiana rozmiaru pojemnika WebView (okno potomne okna głównego).
+                let _ = unsafe {
+                    SetWindowPos(
+                        container,
+                        None,
+                        0,
+                        0,
+                        client.right,
+                        client.bottom,
+                        SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE,
+                    )
+                };
+            }
+        }
+    });
+    let bounds = RECT {
+        left: -HIDDEN_LEFT.get(),
+        top: 0,
+        right: client.right,
+        bottom: client.bottom,
+    };
+    MAIN_WEBVIEW.with(|c| {
+        if let Some(controller) = c.borrow().as_ref() {
+            // SAFETY: kontroler WebView2 okna głównego, wywołanie w wątku okien.
+            let _ = unsafe { controller.SetBounds(bounds) };
+        }
+    });
+}
+
+/// Nowe wysunięcie WebView w lewo (piksele fizyczne). `now` - nałożyć od razu (okno się nie
+/// zmienia); inaczej nałoży je obsługa WM_SIZE w trakcie najbliższego SetWindowPos.
+fn set_hidden_left(px: i32, now: bool) {
+    #[cfg(windows)]
+    {
+        let before = HIDDEN_LEFT.replace(px);
+        let main = MAIN_HWND.get();
+        if now && before != px && main != 0 {
+            apply_hidden_left(windows::Win32::Foundation::HWND(main as *mut _));
+        }
+    }
+    #[cfg(not(windows))]
+    let _ = (px, now);
 }
 
 /// Przesunięcie o `dx` i zmiana szerokości o `dw` (piksele fizyczne) jednym `SetWindowPos`.
@@ -512,7 +665,8 @@ fn move_and_resize(w: &WebviewWindow, dx: i32, dw: i32) -> bool {
             if GetWindowRect(hwnd, &mut r).is_err() {
                 return false;
             }
-            SetWindowPos(
+            LEFT_MOVE.set(dx != 0);
+            let ok = SetWindowPos(
                 hwnd,
                 None,
                 r.left + dx,
@@ -521,7 +675,9 @@ fn move_and_resize(w: &WebviewWindow, dx: i32, dw: i32) -> bool {
                 r.bottom - r.top,
                 SWP_NOZORDER | SWP_NOACTIVATE,
             )
-            .is_ok()
+            .is_ok();
+            LEFT_MOVE.set(false);
+            ok
         }
     }
     #[cfg(not(windows))]
@@ -821,5 +977,16 @@ mod tests {
         assert_eq!(FULL.resize_to(off), (-288.0, 0.0));
         assert_eq!(FULL.resize_to(left), (0.0, 0.0)); // zmiana strony - bez zmiany rozmiaru
         assert_eq!(FULL.resize_to(FULL), (0.0, 0.0));
+        // WebView wysunięty w lewo tylko przy zwiniętym panelu z lewej
+        assert_eq!(left_bar.hidden_left(), 224.0);
+        assert_eq!(
+            (left.hidden_left(), bar.hidden_left(), off.hidden_left()),
+            (0.0, 0.0, 0.0)
+        );
+        let left_off = PanelLayout {
+            on: false,
+            ..left_bar
+        };
+        assert_eq!(left_off.hidden_left(), 0.0);
     }
 }
