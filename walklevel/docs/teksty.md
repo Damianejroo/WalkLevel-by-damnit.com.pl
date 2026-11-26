@@ -1448,3 +1448,10 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 | `glowny.licznik.kadencja_krotko` | Kroki/min | Kroki/min | Tytuł kafelka; pełna nazwa dla czytnika ekranu to `glowny.licznik.kadencja`. |
 | `glowny.strefy.puszczona_krotko` | 0% | 0% | Nazwa pierwszego żetonu trybu Pad przy 5 stopniach (krótsza niż „Gałka puszczona”). |
 | `tryb.chodzenie.opis_proba` | (nowy) | tryb próbny, postać stoi | Opis kafelka Chodzenie w trybie próbnym (gra nie dostaje klawiszy). |
+## Dodatki: Ustawienia
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `ustawienia.osoby.wiersz_bez_konta` | (nowy) | {liczba} {liczba:profil gry/profile gier/profili gier} · dziś {kroki} {kroki:krok/kroki/kroków} | Wiersz osoby bez konta online (`ustawienia.osoby.wiersz` bez części „· konto …”). |
+| `ustawienia.sterowanie.aktywny_tryb` | (nowy) | aktywny tryb | Podpowiedź przy kropce przed nazwą trybu, który działa teraz (zamiast „✓”). |
+| `ustawienia.wlaczanie.pad_rola` | (nowy) | Przycisk pada | Rola przycisku pada: „Przycisk pada: Panel dotykowy”. |
