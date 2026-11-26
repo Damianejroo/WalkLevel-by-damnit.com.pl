@@ -1,0 +1,438 @@
+[
+ {
+  "nazwa": "realny_0_5",
+  "wejscie": "{\n \"wersja\": 1,\n \"aktywna\": \"6fd3bce379\",\n \"pytaj_przy_starcie\": true,\n \"wspolne\": {\n  \"device_address\": \"A0:24:42:30:E5:B3\",\n  \"belt_control\": true,\n  \"toggle_key\": {\n   \"scan\": 66,\n   \"extended\": false,\n   \"name\": \"F8\",\n   \"vk\": 119\n  },\n  \"window_geometry\": \"AdnQywADAAAAAAJTAAABLQ==\"\n },\n \"osoby\": [\n  {\n   \"id\": \"6fd3bce379\",\n   \"nazwa\": \"Szalony Biegacz\",\n   \"kolor\": \"Morski\",\n   \"wyglad\": {\n    \"theme\": \"dark\",\n    \"floating_button\": true,\n    \"large_text\": true\n   },\n   \"aktywny_profil\": \"be77cac0c7\",\n   \"profile\": [\n    {\n     \"id\": \"df621c9853\",\n     \"nazwa\": \"Domyślny\",\n     \"kolor\": \"Mięta\",\n     \"kolor_z_ikony\": null,\n     \"glif\": \"\",\n     \"ikona\": null,\n     \"exe\": null,\n     \"ustawienia\": {\n      \"direction\": \"gamepad\",\n      \"pad_idle\": \"stop\",\n      \"walk_speed\": 2.0,\n      \"training_levels\": [\n       {\n        \"name\": \"Lekko\",\n        \"speed\": 2.5\n       },\n       {\n        \"name\": \"Szybko\",\n        \"speed\": 5.0\n       }\n      ]\n     },\n     \"gra_online\": true\n    },\n    {\n     \"id\": \"be77cac0c7\",\n     \"nazwa\": \"Cyberpunk 2077\",\n     \"kolor\": \"Banan\",\n     \"kolor_z_ikony\": \"Banan\",\n     \"glif\": null,\n     \"ikona\": \"cp.png\",\n     \"exe\": \"D:\\\\Gry\\\\Cyberpunk 2077\\\\bin\\\\x64\\\\Cyberpunk2077.exe\",\n     \"ustawienia\": {\n      \"direction\": \"gamepad\",\n      \"pad_idle\": \"stop\",\n      \"walk_speed\": 2.0,\n      \"training_levels\": [\n       {\n        \"name\": \"Lekko\",\n        \"speed\": 2.5\n       },\n       {\n        \"name\": \"Szybko\",\n        \"speed\": 5.0\n       }\n      ],\n      \"run_on\": 5.5\n     },\n     \"gra_online\": false\n    },\n    {\n     \"id\": \"8de3a8da11\",\n     \"nazwa\": \"Minecraft\",\n     \"kolor\": \"Zieleń\",\n     \"kolor_z_ikony\": null,\n     \"glif\": \"\",\n     \"ikona\": null,\n     \"exe\": null,\n     \"ustawienia\": {},\n     \"gra_online\": true\n    }\n   ]\n  },\n  {\n   \"id\": \"128d87b369\",\n   \"nazwa\": \"Nocna Wędrowniczka\",\n   \"kolor\": \"Orchidea\",\n   \"wyglad\": {\n    \"theme\": \"light\",\n    \"floating_button\": true,\n    \"large_text\": true\n   },\n   \"aktywny_profil\": \"eb1d9bad18\",\n   \"profile\": [\n    {\n     \"id\": \"5f48de7f70\",\n     \"nazwa\": \"Domyślny\",\n     \"kolor\": \"Mięta\",\n     \"kolor_z_ikony\": null,\n     \"glif\": \"\",\n     \"ikona\": null,\n     \"exe\": null,\n     \"ustawienia\": {\n      \"direction\": \"gamepad\",\n      \"pad_idle\": \"stop\",\n      \"walk_speed\": 2.0,\n      \"training_levels\": [\n       {\n        \"name\": \"Lekko\",\n        \"speed\": 2.5\n       },\n       {\n        \"name\": \"Szybko\",\n        \"speed\": 5.0\n       }\n      ]\n     },\n     \"gra_online\": true\n    },\n    {\n     \"id\": \"eb1d9bad18\",\n     \"nazwa\": \"Cyberpunk 2077\",\n     \"kolor\": \"Banan\",\n     \"kolor_z_ikony\": \"Banan\",\n     \"glif\": null,\n     \"ikona\": null,\n     \"exe\": \"D:\\\\Gry\\\\Cyberpunk 2077\\\\bin\\\\x64\\\\Cyberpunk2077.exe\",\n     \"ustawienia\": {\n      \"direction\": \"gamepad\",\n      \"pad_idle\": \"stop\",\n      \"walk_speed\": 3.25,\n      \"training_levels\": [\n       {\n        \"name\": \"Lekko\",\n        \"speed\": 2.5\n       },\n       {\n        \"name\": \"Szybko\",\n        \"speed\": 5.0\n       }\n      ],\n      \"run_on\": 5.5\n     },\n     \"gra_online\": false\n    },\n    {\n     \"id\": \"9664f51f72\",\n     \"nazwa\": \"Minecraft\",\n     \"kolor\": \"Zieleń\",\n     \"kolor_z_ikony\": null,\n     \"glif\": \"\",\n     \"ikona\": null,\n     \"exe\": null,\n     \"ustawienia\": {},\n     \"gra_online\": true\n    }\n   ]\n  }\n ]\n}",
+  "wynik": {
+   "wersja": 1,
+   "aktywna": "6fd3bce379",
+   "pytaj_przy_starcie": true,
+   "wspolne": {
+    "device_address": "A0:24:42:30:E5:B3",
+    "belt_control": true,
+    "toggle_key": {
+     "scan": 66,
+     "extended": false,
+     "name": "F8",
+     "vk": 119
+    },
+    "window_geometry": "AdnQywADAAAAAAJTAAABLQ=="
+   },
+   "osoby": [
+    {
+     "id": "6fd3bce379",
+     "nazwa": "Szalony Biegacz",
+     "kolor": "Morski",
+     "wyglad": {
+      "theme": "dark",
+      "floating_button": true,
+      "large_text": true
+     },
+     "aktywny_profil": "be77cac0c7",
+     "profile": [
+      {
+       "id": "df621c9853",
+       "nazwa": "Domyślny",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {
+        "direction": "gamepad",
+        "pad_idle": "stop",
+        "walk_speed": 2.0,
+        "training_levels": [
+         {
+          "name": "Lekko",
+          "speed": 2.5
+         },
+         {
+          "name": "Szybko",
+          "speed": 5.0
+         }
+        ]
+       },
+       "gra_online": true
+      },
+      {
+       "id": "be77cac0c7",
+       "nazwa": "Cyberpunk 2077",
+       "kolor": "Banan",
+       "kolor_z_ikony": "Banan",
+       "glif": null,
+       "ikona": "cp.png",
+       "exe": "D:\\Gry\\Cyberpunk 2077\\bin\\x64\\Cyberpunk2077.exe",
+       "ustawienia": {
+        "direction": "gamepad",
+        "pad_idle": "stop",
+        "walk_speed": 2.0,
+        "training_levels": [
+         {
+          "name": "Lekko",
+          "speed": 2.5
+         },
+         {
+          "name": "Szybko",
+          "speed": 5.0
+         }
+        ],
+        "run_on": 5.5
+       },
+       "gra_online": false
+      },
+      {
+       "id": "8de3a8da11",
+       "nazwa": "Minecraft",
+       "kolor": "Zieleń",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": true
+      }
+     ]
+    },
+    {
+     "id": "128d87b369",
+     "nazwa": "Nocna Wędrowniczka",
+     "kolor": "Orchidea",
+     "wyglad": {
+      "theme": "light",
+      "floating_button": true,
+      "large_text": true
+     },
+     "aktywny_profil": "eb1d9bad18",
+     "profile": [
+      {
+       "id": "5f48de7f70",
+       "nazwa": "Domyślny",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {
+        "direction": "gamepad",
+        "pad_idle": "stop",
+        "walk_speed": 2.0,
+        "training_levels": [
+         {
+          "name": "Lekko",
+          "speed": 2.5
+         },
+         {
+          "name": "Szybko",
+          "speed": 5.0
+         }
+        ]
+       },
+       "gra_online": true
+      },
+      {
+       "id": "eb1d9bad18",
+       "nazwa": "Cyberpunk 2077",
+       "kolor": "Banan",
+       "kolor_z_ikony": "Banan",
+       "glif": null,
+       "ikona": null,
+       "exe": "D:\\Gry\\Cyberpunk 2077\\bin\\x64\\Cyberpunk2077.exe",
+       "ustawienia": {
+        "direction": "gamepad",
+        "pad_idle": "stop",
+        "walk_speed": 3.25,
+        "training_levels": [
+         {
+          "name": "Lekko",
+          "speed": 2.5
+         },
+         {
+          "name": "Szybko",
+          "speed": 5.0
+         }
+        ],
+        "run_on": 5.5
+       },
+       "gra_online": false
+      },
+      {
+       "id": "9664f51f72",
+       "nazwa": "Minecraft",
+       "kolor": "Zieleń",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": true
+      }
+     ]
+    }
+   ]
+  },
+  "flat": {
+   "direction": "gamepad",
+   "walk_speed": 2.0,
+   "theme": "dark",
+   "device_address": "A0:24:42:30:E5:B3",
+   "belt_control": true,
+   "show_person_switch": true,
+   "show_profile_switch": true,
+   "toggle_key": {
+    "scan": 66,
+    "extended": false,
+    "name": "F8",
+    "vk": 119
+   },
+   "window_geometry": "AdnQywADAAAAAAJTAAABLQ==",
+   "floating_button": true,
+   "large_text": true,
+   "pad_idle": "stop",
+   "training_levels": [
+    {
+     "name": "Lekko",
+     "speed": 2.5
+    },
+    {
+     "name": "Szybko",
+     "speed": 5.0
+    }
+   ],
+   "run_on": 5.5,
+   "profile_color": "Banan",
+   "person_color": "Morski"
+  }
+ },
+ {
+  "nazwa": "stary_niepelny",
+  "wejscie": "{\"aktywna\": \"nie-ma-takiej\", \"wspolne\": {\"device_name\": \"KS-NACH-X21C\", \"toggle_pad\": null, \"stary_klucz\": 3}, \"osoby\": [{\"id\": \"aaaaaaaaaa\", \"nazwa\": \"Ola\", \"kolor\": \"Zielony\", \"aktywny_profil\": \"zly\", \"profile\": [{\"id\": \"p1\", \"nazwa\": \"\", \"ustawienia\": {\"walk_speed\": 1, \"zly\": 2}}, \"nie-slownik\", {\"id\": \"p2\", \"nazwa\": \"Gra\", \"kolor\": \"Fuksja\", \"gra_online\": 0, \"glif\": \"\", \"kolor_z_ikony\": \"Banan\", \"exe\": \"C:\\\\g.exe\"}, {\"nazwa\": \"Bez id\", \"gra_online\": null}]}, {\"id\": 12345, \"nazwa\": 7, \"wyglad\": {\"theme\": \"dark\", \"obcy\": 1}, \"profile\": []}, {\"nazwa\": \"\", \"profile\": [{\"id\": \"q1\"}]}, 42]}",
+  "wynik": {
+   "wersja": 1,
+   "aktywna": "aaaaaaaaaa",
+   "pytaj_przy_starcie": true,
+   "wspolne": {
+    "device_name": "KS-NACH-X21C",
+    "toggle_pad": null
+   },
+   "osoby": [
+    {
+     "id": "aaaaaaaaaa",
+     "nazwa": "Ola",
+     "kolor": "Mięta",
+     "wyglad": {},
+     "aktywny_profil": "p1",
+     "profile": [
+      {
+       "id": "p1",
+       "nazwa": "Profil",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": null,
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {
+        "walk_speed": 1
+       },
+       "gra_online": true
+      },
+      {
+       "id": "p2",
+       "nazwa": "Gra",
+       "kolor": "Fuksja",
+       "kolor_z_ikony": "Banan",
+       "glif": "",
+       "ikona": null,
+       "exe": "C:\\g.exe",
+       "ustawienia": {},
+       "gra_online": false
+      },
+      {
+       "id": "<nowe-id>",
+       "nazwa": "Bez id",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": null,
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": false
+      }
+     ]
+    },
+    {
+     "id": "12345",
+     "nazwa": "7",
+     "kolor": "Mięta",
+     "wyglad": {
+      "theme": "dark"
+     },
+     "aktywny_profil": "<nowe-id>",
+     "profile": [
+      {
+       "id": "<nowe-id>",
+       "nazwa": "Domyślny",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": true
+      }
+     ]
+    },
+    {
+     "id": "<nowe-id>",
+     "nazwa": "Gracz",
+     "kolor": "Mięta",
+     "wyglad": {},
+     "aktywny_profil": "q1",
+     "profile": [
+      {
+       "id": "q1",
+       "nazwa": "Profil",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": null,
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": true
+      }
+     ]
+    }
+   ]
+  },
+  "flat": {
+   "direction": "keyboard",
+   "walk_speed": 1,
+   "theme": "system",
+   "device_address": "",
+   "belt_control": true,
+   "show_person_switch": true,
+   "show_profile_switch": true,
+   "device_name": "KS-NACH-X21C",
+   "toggle_pad": null,
+   "profile_color": "Mięta",
+   "person_color": "Mięta"
+  }
+ },
+ {
+  "nazwa": "bez_osob",
+  "wejscie": "{\"wersja\": 1, \"osoby\": []}",
+  "wynik": null,
+  "flat": null
+ },
+ {
+  "nazwa": "uszkodzony",
+  "wejscie": "{zepsuty",
+  "wynik": null,
+  "flat": null
+ },
+ {
+  "nazwa": "pytaj_falsz",
+  "wejscie": "{\"pytaj_przy_starcie\": false, \"aktywna\": \"b\", \"osoby\": [{\"id\": \"a\"}, {\"id\": \"b\", \"kolor\": \"Róż\"}]}",
+  "wynik": {
+   "wersja": 1,
+   "aktywna": "b",
+   "pytaj_przy_starcie": false,
+   "wspolne": {},
+   "osoby": [
+    {
+     "id": "a",
+     "nazwa": "Gracz",
+     "kolor": "Mięta",
+     "wyglad": {},
+     "aktywny_profil": "<nowe-id>",
+     "profile": [
+      {
+       "id": "<nowe-id>",
+       "nazwa": "Domyślny",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": true
+      }
+     ]
+    },
+    {
+     "id": "b",
+     "nazwa": "Gracz",
+     "kolor": "Róż",
+     "wyglad": {},
+     "aktywny_profil": "<nowe-id>",
+     "profile": [
+      {
+       "id": "<nowe-id>",
+       "nazwa": "Domyślny",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": true
+      }
+     ]
+    }
+   ]
+  },
+  "flat": {
+   "direction": "keyboard",
+   "walk_speed": 1.5,
+   "theme": "system",
+   "device_address": "",
+   "belt_control": true,
+   "show_person_switch": true,
+   "show_profile_switch": true,
+   "profile_color": "Mięta",
+   "person_color": "Róż"
+  }
+ },
+ {
+  "nazwa": "wspolne_null",
+  "wejscie": "{\"wspolne\": null, \"osoby\": [{\"id\": \"x\", \"wyglad\": null}]}",
+  "wynik": {
+   "wersja": 1,
+   "aktywna": "x",
+   "pytaj_przy_starcie": true,
+   "wspolne": {},
+   "osoby": [
+    {
+     "id": "x",
+     "nazwa": "Gracz",
+     "kolor": "Mięta",
+     "wyglad": {},
+     "aktywny_profil": "<nowe-id>",
+     "profile": [
+      {
+       "id": "<nowe-id>",
+       "nazwa": "Domyślny",
+       "kolor": "Mięta",
+       "kolor_z_ikony": null,
+       "glif": "",
+       "ikona": null,
+       "exe": null,
+       "ustawienia": {},
+       "gra_online": true
+      }
+     ]
+    }
+   ]
+  },
+  "flat": {
+   "direction": "keyboard",
+   "walk_speed": 1.5,
+   "theme": "system",
+   "device_address": "",
+   "belt_control": true,
+   "show_person_switch": true,
+   "show_profile_switch": true,
+   "profile_color": "Mięta",
+   "person_color": "Mięta"
+  }
+ }
+]

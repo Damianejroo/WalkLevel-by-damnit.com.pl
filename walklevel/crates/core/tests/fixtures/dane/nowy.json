@@ -1,0 +1,88 @@
+{
+ "legacy": {
+  "direction": "gamepad",
+  "pad_idle": "stop",
+  "walk_speed": 2.0,
+  "theme": "dark",
+  "floating_button": true,
+  "device_address": "A0:24:42:30:E5:B3",
+  "belt_control": true,
+  "toggle_key": {
+   "scan": 66,
+   "extended": false,
+   "name": "F8",
+   "vk": 119
+  },
+  "nieznany_klucz": 1
+ },
+ "defaults": {
+  "direction": "keyboard",
+  "walk_speed": 1.5,
+  "theme": "system",
+  "device_address": "",
+  "belt_control": true
+ },
+ "wynik": {
+  "wersja": 1,
+  "aktywna": "<nowe-id>",
+  "pytaj_przy_starcie": true,
+  "wspolne": {
+   "device_address": "A0:24:42:30:E5:B3",
+   "belt_control": true,
+   "toggle_key": {
+    "scan": 66,
+    "extended": false,
+    "name": "F8",
+    "vk": 119
+   }
+  },
+  "osoby": [
+   {
+    "id": "<nowe-id>",
+    "nazwa": "Szalony Biegacz",
+    "kolor": "Morski",
+    "wyglad": {
+     "theme": "dark",
+     "floating_button": true
+    },
+    "aktywny_profil": "<nowe-id>",
+    "profile": [
+     {
+      "id": "<nowe-id>",
+      "nazwa": "Domyślny",
+      "kolor": "Mięta",
+      "kolor_z_ikony": null,
+      "glif": "",
+      "ikona": null,
+      "exe": null,
+      "ustawienia": {
+       "direction": "gamepad",
+       "pad_idle": "stop",
+       "walk_speed": 2.0
+      },
+      "gra_online": true
+     }
+    ]
+   }
+  ]
+ },
+ "flat": {
+  "direction": "gamepad",
+  "walk_speed": 2.0,
+  "theme": "dark",
+  "device_address": "A0:24:42:30:E5:B3",
+  "belt_control": true,
+  "show_person_switch": true,
+  "show_profile_switch": true,
+  "toggle_key": {
+   "scan": 66,
+   "extended": false,
+   "name": "F8",
+   "vk": 119
+  },
+  "floating_button": true,
+  "pad_idle": "stop",
+  "profile_color": "Mięta",
+  "person_color": "Morski"
+ }
+}
