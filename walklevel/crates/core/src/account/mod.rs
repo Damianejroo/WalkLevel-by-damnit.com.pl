@@ -479,9 +479,15 @@ impl Account {
         let result = self.client.refresh();
         let auth = self.handle(result)?;
         let user = self.signed_in(&auth, "")?;
-        if let Ok(profile) = self.client.my_profile() {
-            self.apply_profile(&profile);
-            self.save()?;
+        // profil bez znaczenia dla odświeżenia (inny błąd pomijamy), ale 401 wylogowuje
+        let result = self.client.my_profile();
+        match self.handle(result) {
+            Ok(profile) => {
+                self.apply_profile(&profile);
+                self.save()?;
+            }
+            Err(e) if e.is_logged_out() => return Err(e),
+            Err(_) => {}
         }
         Ok(user)
     }

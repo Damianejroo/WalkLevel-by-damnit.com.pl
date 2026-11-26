@@ -56,6 +56,10 @@ struct State {
     purged_before: u64,
     /// najwięcej zmian na stronę (prawdziwy serwer: limit 1-500)
     page_size: usize,
+    /// te kursory -> 410 (jak `purged_before`, ale nowe kursory z tych samych zmian są dobre)
+    expired: Vec<String>,
+    /// tyle jeszcze stron synchronizacji, potem brak sieci (przerwane pobieranie)
+    sync_pages_left: Option<usize>,
 }
 
 /// Zachowuje się jak PocketBase z trasami /api/bieznia/* z uzgodnionego kontraktu.
@@ -430,7 +434,7 @@ impl FakeServer {
                 None => return error(url, 400, "Nieprawidłowy kursor."),
             }
         };
-        if !given.is_empty() && after < st.purged_before {
+        if !given.is_empty() && (after < st.purged_before || st.expired.contains(&given)) {
             return reply(
                 url,
                 410,
@@ -472,8 +476,18 @@ impl FakeServer {
 
 impl Transport for FakeServer {
     fn send(&self, request: &HttpRequest) -> Result<HttpReply, TransportError> {
-        if self.state().offline {
-            return Err(TransportError("brak sieci".into()));
+        {
+            let mut st = self.state();
+            if st.offline {
+                return Err(TransportError("brak sieci".into()));
+            }
+            let sync = request.method == "GET" && request.url.contains("/api/bieznia/sesje");
+            if sync && let Some(left) = st.sync_pages_left.as_mut() {
+                if *left == 0 {
+                    return Err(TransportError("brak sieci".into()));
+                }
+                *left -= 1;
+            }
         }
         Ok(self.handle(request))
     }
@@ -1682,4 +1696,97 @@ fn sessions_of_other_local_person_are_not_touched() {
     assert_eq!(b.sync().saved, 0);
     let kept = b.history.session(&hexid("s1")).expect("baza").expect("s1");
     assert_eq!((kept.person.as_str(), kept.steps), ("ktos-inny", 7));
+}
+
+#[test]
+fn interrupted_recovery_after_expired_cursor_is_finished_next_time() {
+    let (server, mut a, mut b) = two_computers();
+    for i in 0..4 {
+        a.walk(&format!("r{i}"), 100 + i);
+    }
+    a.upload();
+    b.sync();
+    let stale = b.account().state.sync_cursor.clone();
+    {
+        let mut st = server.state();
+        st.sessions.retain(|(_, uuid), _| *uuid != uuid_of("r3"));
+        st.expired = vec![stale.clone()];
+        st.page_size = 2;
+        st.sync_pages_left = Some(2); // 410 i pierwsza strona, druga już bez sieci
+    }
+    let later = now() + 3600.0;
+    let person = b.person.clone();
+    let target = SyncTarget {
+        person_name: "Ola w pracy",
+        profiles: &HashMap::new(),
+    };
+    let e = b
+        .accounts
+        .get(&person)
+        .sync(&b.history, &target, later)
+        .expect_err("bez sieci");
+    assert_eq!(e.kind, KontoErrorKind::Offline);
+    // nic nie usunięte, stary kursor został - następna synchronizacja znów dostanie 410
+    assert_eq!(b.steps_of("r3"), Some(103));
+    assert_eq!(b.account().state.sync_cursor, stale);
+    server.state().sync_pages_left = None;
+    let report = b.sync_at(later);
+    assert!(report.full && report.deleted == 1);
+    assert_eq!(b.steps_of("r3"), None);
+    assert_eq!(b.steps_of("r0"), Some(100));
+    assert_ne!(b.account().state.sync_cursor, stale);
+    // dalej zwykłe pobieranie od nowego kursora
+    let again = b.sync_at(later);
+    assert!(!again.full && !again.changed());
+}
+
+#[test]
+fn session_changed_after_sending_survives_expired_cursor_recovery() {
+    let (server, mut a, mut b) = two_computers();
+    a.walk("s1", 1000);
+    a.upload();
+    b.sync();
+    // B zmienia pobraną sesję (jeszcze nie wysłana), a serwer jej już nie ma
+    let mut s1 = b.history.session(&hexid("s1")).expect("baza").expect("s1");
+    s1.steps = 1100;
+    save(&b.history, s1);
+    {
+        let mut st = server.state();
+        st.sessions.clear();
+        st.purged_before = 1000;
+    }
+    let report = b.sync_at(now() + 3600.0);
+    assert_eq!(report.deleted, 0);
+    assert_eq!(b.steps_of("s1"), Some(1100)); // niewysłana wersja zostaje i pójdzie
+    assert_eq!(b.upload(), 1);
+}
+
+#[test]
+fn session_hidden_on_one_computer_stays_hidden_on_the_other() {
+    let (server, mut a, mut b) = two_computers();
+    a.walk("s1", 1000);
+    a.walk("s2", 2000);
+    a.history
+        .set_hidden_online(&hexid("s1"), true)
+        .expect("ukryj");
+    a.upload();
+    assert_eq!(b.sync().saved, 2);
+    let hidden = b.history.hidden_online().expect("ukryte");
+    assert!(hidden.contains(&hexid("s1")) && !hidden.contains(&hexid("s2")));
+    assert!(b.history.unsent("pb", now()).expect("kolejka").is_empty()); // bez odsyłania
+    // zmiana widoczności na B wysyła wszystko jeszcze raz - ukryta zostaje prywatna
+    let person = b.person.clone();
+    b.accounts
+        .get(&person)
+        .set_visibility(&b.history, "publiczna")
+        .expect("widoczność");
+    assert_eq!(b.upload(), 2);
+    assert_eq!(
+        server.session(&uuid_of("s1")).expect("s1")["widocznosc"],
+        "prywatna"
+    );
+    assert_eq!(
+        server.session(&uuid_of("s2")).expect("s2")["widocznosc"],
+        "publiczna"
+    );
 }

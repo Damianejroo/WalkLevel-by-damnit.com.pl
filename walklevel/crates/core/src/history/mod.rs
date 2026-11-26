@@ -960,9 +960,10 @@ impl History {
     /// Sesja pobrana z serwera: zastępuje lokalną, gdy jej `updated` (zmieniono_utc_s z
     /// serwera) jest większe; przy równości albo starszej zostaje lokalna. Zapisana wersja
     /// jest oznaczona jako wysłana (pobranych nie odsyłamy) i znika z odrzuconych. Czas
-    /// `updated` zostaje ten z serwera (inaczej niż w [`History::save`]). Zwraca, czy
-    /// historia się zmieniła.
-    pub fn upsert_from_server(&self, s: &Session) -> Result<bool> {
+    /// `updated` zostaje ten z serwera (inaczej niż w [`History::save`]). `hide_online` -
+    /// zapisana wersja trafia też do ukrytych online (bez wymuszania ponownej wysyłki, inaczej
+    /// niż [`History::set_hidden_online`]). Zwraca, czy historia się zmieniła.
+    pub fn upsert_from_server(&self, s: &Session, hide_online: bool) -> Result<bool> {
         let tx = self.db.unchecked_transaction()?;
         let local: Option<f64> = tx
             .query_row(
@@ -978,6 +979,9 @@ impl History {
                 bind(s).as_slice(),
             )?;
             tx.execute("DELETE FROM odrzucone WHERE id = ?", [&s.id])?;
+            if hide_online {
+                tx.execute("INSERT OR IGNORE INTO ukryte_online VALUES (?)", [&s.id])?;
+            }
         }
         if newer || local == Some(s.updated) {
             // ta wersja jest już na serwerze - nie wysyłać jej z powrotem
@@ -1003,12 +1007,13 @@ impl History {
         Ok(removed > 0)
     }
 
-    /// Wysłane sesje osoby: id -> `updated` sesji w historii (do pełnego pobrania po 410:
-    /// czego serwer już nie ma, a było wysłane - usunąć).
+    /// Wysłane sesje osoby w bieżącej wersji: id -> `updated` sesji w historii (do pełnego
+    /// pobrania po 410: czego serwer już nie ma, a było wysłane - usunąć). Sesja zmieniona
+    /// po wysyłce liczy się jako niewysłana - tu jej nie ma (zostaje i pójdzie na serwer).
     pub fn sent_ids(&self, person: &str) -> Result<HashMap<String, f64>> {
         let mut st = self.db.prepare(
             "SELECT s.id, s.zmieniono_utc_s FROM sesje s JOIN wyslane w ON w.id = s.id \
-             WHERE s.osoba = ?",
+             WHERE s.osoba = ? AND w.zmieniono_utc_s >= s.zmieniono_utc_s",
         )?;
         let rows = st.query_map([person], |r| Ok((text(r, 0)?, real(r, 1)?)))?;
         Ok(rows.collect::<rusqlite::Result<_>>()?)

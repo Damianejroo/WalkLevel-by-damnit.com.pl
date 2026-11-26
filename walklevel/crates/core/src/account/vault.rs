@@ -13,7 +13,7 @@ use std::sync::{Arc, Mutex, PoisonError};
 
 /// Cel wersji z jednym kontem (i przedrostek celów osób).
 pub const TARGET: &str = "Bieznia/konto";
-/// Najdłuższy token mieszczący się w poświadczeniu (CRED_MAX_CREDENTIAL_BLOB_SIZE / 2).
+/// Najdłuższy token mieszczący się w poświadczeniu (CRED_MAX_CREDENTIAL_BLOB_SIZE = 5 * 512).
 pub const MAX_BLOB: usize = 2560;
 /// Opis i nazwa użytkownika poświadczenia (jak w 0.5.x).
 pub const COMMENT: &str = "WalkLevel - logowanie do konta online";

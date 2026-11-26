@@ -155,7 +155,12 @@ impl Account {
         let mut cursor = self.state.sync_cursor.clone();
         report.full = cursor.is_empty();
         let mut restarted = false;
-        let mut recover = false; // po 410: usunąć wysłane, których serwer nie zwrócił
+        // po 410: usunąć wysłane, których serwer nie zwrócił. Do końca pełnego pobrania
+        // w konto.json zostaje stary (przeterminowany) kursor - przerwane pobranie (brak
+        // sieci, zamknięcie) skończy się kolejnym 410 i sprzątanie nie przepadnie.
+        let mut recover = false;
+        // ostatnia strona miała `wiecej = false` (serwer oddał wszystko)
+        let mut complete = false;
         let mut seen: HashSet<String> = HashSet::new();
         loop {
             if report.pages >= MAX_PAGES {
@@ -184,8 +189,10 @@ impl Account {
                     restarted = true;
                     recover = e.status == 410;
                     cursor.clear();
-                    self.state.sync_cursor.clear();
-                    self.save()?;
+                    if !recover {
+                        self.state.sync_cursor.clear();
+                        self.save()?;
+                    }
                     report.full = true;
                     continue;
                 }
@@ -204,7 +211,10 @@ impl Account {
                     continue; // ta sama sesja u innej osoby (np. z kopii) - nie ruszamy
                 }
                 let s = session_from_server(remote, &id, &person, target, local.as_ref());
-                if history.upsert_from_server(&s)? {
+                // sesja ukryta na innym komputerze (prywatna mimo jawnej widoczności konta)
+                // zostaje ukryta także tu - ponowna wysyłka stąd jej nie odsłoni
+                let hidden = s.visibility == "prywatna" && self.state.visibility != "prywatna";
+                if history.upsert_from_server(&s, hidden)? {
                     report.saved += 1;
                 }
             }
@@ -221,16 +231,28 @@ impl Account {
                 }
             }
             // kursor dopiero po zapisaniu strony; ten sam co wysłany - nic nowego
-            if !page.cursor.is_empty() && page.cursor != self.state.sync_cursor {
+            if !recover && !page.cursor.is_empty() && page.cursor != self.state.sync_cursor {
                 self.state.sync_cursor.clone_from(&page.cursor);
                 self.save()?;
             }
-            if !page.more || page.cursor.is_empty() || page.cursor == cursor {
+            if !page.more {
+                complete = true;
+            }
+            let stuck = page.cursor.is_empty() || page.cursor == cursor;
+            if !page.cursor.is_empty() {
+                cursor = page.cursor;
+            }
+            if complete || stuck {
                 break;
             }
-            cursor = page.cursor;
         }
         if recover {
+            if !complete {
+                // niepełna lista z serwera - nic nie usuwamy, następna synchronizacja
+                // dostanie znów 410 i spróbuje od nowa
+                log::warn!("Konto: pełne pobranie po 410 niedokończone - bez sprzątania");
+                return Ok(report);
+            }
             for (id, updated) in history.sent_ids(&person)? {
                 if !seen.contains(&id)
                     && updated < now - RECENT_KEEP_S
@@ -238,6 +260,11 @@ impl Account {
                 {
                     report.deleted += 1;
                 }
+            }
+            // sprzątanie zrobione - dopiero teraz nowy kursor (pusty przy pustym koncie)
+            if cursor != self.state.sync_cursor {
+                self.state.sync_cursor.clone_from(&cursor);
+                self.save()?;
             }
         }
         if report.changed() {
