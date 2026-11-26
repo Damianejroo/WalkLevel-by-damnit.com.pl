@@ -15,10 +15,24 @@
     children?: Snippet;
   }
   let { ikona, tytul, opis, wybrany, onclick, children }: Props = $props();
+
+  /** Strzałki przenoszą fokus na sąsiednią opcję tej samej grupy (wybór dopiero Spacją/Enterem,
+   *  bo wybranie „Wskaż folder gry” otwiera okno systemowe). */
+  function strzalki(e: KeyboardEvent) {
+    const krok = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    const ten = e.currentTarget as HTMLButtonElement;
+    const grupa = ten.closest('[role="radiogroup"]');
+    if (!krok || !grupa) return;
+    const opcje = [...grupa.querySelectorAll<HTMLButtonElement>(':scope > .opcja > .wybor')];
+    const nowy = opcje[opcje.indexOf(ten) + krok];
+    if (!nowy) return;
+    e.preventDefault();
+    nowy.focus();
+  }
 </script>
 
 <div class="opcja" class:wybrany>
-  <button type="button" class="wybor" role="radio" aria-checked={wybrany} {onclick}>
+  <button type="button" class="wybor" role="radio" aria-checked={wybrany} {onclick} onkeydown={strzalki}>
     <span class="ikona"><Ikona nazwa={ikona} rozmiar={20} /></span>
     <span class="tekst">
       <span class="tytul">{tytul}</span>

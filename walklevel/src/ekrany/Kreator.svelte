@@ -39,17 +39,27 @@
   let kierunek = $state<Direction>('keyboard');
   let pracuje = $state(false);
 
+  let postep: HTMLDivElement | undefined;
+
+  /** Nowy krok zaczyna się od góry (pasek postępu i tytuł widoczne także w niskim oknie). */
+  function naKrok(n: 1 | 2 | 3) {
+    krok = n;
+    postep?.closest('.przewijanie')?.scrollTo({ top: 0 });
+  }
+
   /** Nowy kreator przy wejściu na ekran (ekran jest montowany raz i tylko chowany). */
   async function zacznij(m: WizardMode) {
-    krok = 1;
+    naKrok(1);
     gra = null;
     nazwaGry = '';
     uzyjGry = false;
     paletaGry = false;
     kopiuj = false;
     pracuje = false;
+    // jak w 0.5: przy dodawaniu osoby i po aktualizacji z 0.2 obecny tryb, inaczej Klawisze
     const d = stan.settings.direction;
-    kierunek = m === 'add' && (d === 'keyboard' || d === 'gamepad' || d === 'treadmill') ? d : 'keyboard';
+    const zUstawien = m === 'add' || stan.app.legacy02;
+    kierunek = zUstawien && (d === 'keyboard' || d === 'gamepad' || d === 'treadmill') ? d : 'keyboard';
     const seed = await wykonaj(api.wizardSeed(m));
     if (!seed) return;
     nazwa = nazwaStartowa = seed.name;
@@ -114,7 +124,7 @@
 
   function wstecz() {
     if (krok > 1) {
-      krok = krok === 3 ? 2 : 1;
+      naKrok(krok === 3 ? 2 : 1);
       return;
     }
     porzucGre();
@@ -124,9 +134,9 @@
   async function dalej() {
     if (krok === 1) {
       nazwa = nazwa.trim() || nazwaStartowa || t('kreator.imie.domyslna');
-      krok = 2;
+      naKrok(2);
     } else if (krok === 2) {
-      krok = 3;
+      naKrok(3);
     } else {
       await zakoncz();
     }
@@ -154,7 +164,7 @@
 </script>
 
 <Strona {tytul} podpis={t('kreator.krok', { liczba: krok })} glowny={pierwszy}>
-  <div class="postep" aria-hidden="true">
+  <div class="postep" aria-hidden="true" bind:this={postep}>
     {#each [1, 2, 3] as n (n)}<span class="odcinek" class:zrobiony={n <= krok}></span>{/each}
   </div>
 
@@ -309,8 +319,14 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--sp-2);
   }
-  .sugestie { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: calc(var(--sp-1) * -1); }
-  .sugestia { display: flex; flex: 1 1 140px; min-width: 0; }
+  /* równe kolumny: 3 w rzędzie albo 2 + 1 bez rozciągania ostatniej na całą szerokość */
+  .sugestie {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: var(--sp-2);
+    margin-top: calc(var(--sp-1) * -1);
+  }
+  .sugestia { display: flex; min-width: 0; }
   .sugestia :global(.przycisk) { font-weight: var(--fw-regular); }
 
   .opcje { display: flex; flex-direction: column; gap: var(--sp-2); }
