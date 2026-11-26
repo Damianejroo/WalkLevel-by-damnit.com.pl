@@ -432,8 +432,7 @@ class SettingsScreen:
         ):
             links.append(f"<a style='color:{t.accent}' href='{url}'>{text}</a>")
         about = label(
-            f"WalkLevel {__version__} · © 2026 {__author__}<br>"
-            + " · ".join(links),
+            f"WalkLevel {__version__} · © 2026 {__author__}<br>" + " · ".join(links),
             "small",
         )
         about.setOpenExternalLinks(False)
