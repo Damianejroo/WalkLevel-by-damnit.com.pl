@@ -99,7 +99,13 @@
           dol={odcinek(i, i + 1)}
         >
           <div class="przystanek">
-            <OdznakaRzadkosci rzadkosc={w.a.rarity} znak={w.a.mark} rozmiar={44} zablokowana={!w.przebyty} />
+            <OdznakaRzadkosci
+              rzadkosc={w.a.rarity}
+              znak={w.a.mark}
+              rozmiar={44}
+              zablokowana={!w.przebyty}
+              etykieta={w.przebyty ? t('osiagniecia.zdobyte') : t('poziomy.osiagniecie.do_zdobycia')}
+            />
             <div class="tekst">
               <p class="nazwa" title={w.a.name}>{w.a.name}</p>
               <p class="rzadkosc hud" style:color="var(--rarity-{w.a.rarity}-text)">{t(`rzadkosc.${w.a.rarity}`)}</p>

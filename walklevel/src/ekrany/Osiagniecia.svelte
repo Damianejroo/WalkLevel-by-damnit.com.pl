@@ -128,6 +128,7 @@
     flex-direction: column;
     gap: var(--sp-3);
     min-width: 0;
+    container-type: inline-size;
   }
 
   .karta {
@@ -137,11 +138,11 @@
     background: var(--surface);
   }
 
-  /* Pasek rzadkości: 5 komórek w pionie, w wąskim kontenerze 3 + 2 (wyglad.md 7.3) */
+  /* Pasek rzadkości: 5 równych kolumn; w wąskim kontenerze 3 + 2 (wyglad.md 7.3), drugi rząd
+     przesunięty o pół komórki - komórki pod sobą stoją na przemian, bez nierównych odstępów */
   .rzadkosci {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: var(--sp-3) var(--sp-2);
   }
   .rzadkosc {
@@ -149,8 +150,12 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    flex: 0 1 88px;
     min-width: 0;
+  }
+  @container (max-width: 459px) {
+    .rzadkosci { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .rzadkosc { grid-column: span 2; }
+    .rzadkosc:nth-child(4) { grid-column: 2 / span 2; }
   }
   .rzadkosc :global(.odznaka) { margin-block-end: 2px; }
   .nazwa-rzadkosci {
