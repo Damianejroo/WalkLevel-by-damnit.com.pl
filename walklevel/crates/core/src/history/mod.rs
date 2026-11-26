@@ -16,7 +16,7 @@ use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use chrono::{DateTime, Duration, Local, LocalResult, NaiveDate, NaiveTime, Offset, TimeZone};
+use chrono::{DateTime, Local, LocalResult, NaiveDate, NaiveTime, Offset, TimeDelta, TimeZone};
 use rusqlite::types::{Value, ValueRef};
 use rusqlite::{Connection, OptionalExtension, Row, ToSql};
 use serde::{Deserialize, Serialize};
@@ -122,6 +122,8 @@ pub enum HistoryError {
     Io(#[from] std::io::Error),
     #[error("nieprawidłowy czas: {0}")]
     Time(f64),
+    #[error("nieprawidłowa liczba dni: {0}")]
+    Days(i64),
 }
 
 pub type Result<T> = std::result::Result<T, HistoryError>;
@@ -202,7 +204,7 @@ impl HistoryRange {
         if days == 0 {
             return Ok(0.0);
         }
-        let first = local_date(tz, now)? - Duration::days(days - 1);
+        let first = days_before(local_date(tz, now)?, days - 1)?;
         Ok(local_midnight(tz, first))
     }
 
@@ -598,6 +600,7 @@ impl History {
     }
 
     /// Kroki dziennie z ostatnich `days` dni (do dziś włącznie): [(dzień, {nazwa: kroki})].
+    /// Nazwy w dniu posortowane alfabetycznie (w Pythonie: kolejność sesji od najnowszej).
     pub fn by_day(
         &self,
         days: i64,
@@ -616,10 +619,15 @@ impl History {
         key: GroupKey,
         now: f64,
     ) -> Result<StepSeries> {
-        let first = local_date(tz, now)? - Duration::days(days - 1);
+        if days <= 0 {
+            return Ok(Vec::new());
+        }
+        let first = days_before(local_date(tz, now)?, days - 1)?;
         let since = local_midnight(tz, first);
-        let mut out: StepSeries = (0..days.max(0))
-            .map(|i| (iso(first + Duration::days(i)), BTreeMap::new()))
+        let mut out: StepSeries = first
+            .iter_days()
+            .take(usize::try_from(days).unwrap_or(usize::MAX))
+            .map(|d| (iso(d), BTreeMap::new()))
             .collect();
         let index: HashMap<String, usize> = out
             .iter()
@@ -775,9 +783,28 @@ impl History {
 fn sum(ss: &[Session]) -> Totals {
     Totals {
         steps: ss.iter().map(|s| s.steps).sum(),
-        distance_km: ss.iter().map(|s| s.distance_km).sum(),
-        active_s: ss.iter().map(|s| s.active_s).sum(),
+        distance_km: py_sum(ss.iter().map(|s| s.distance_km)),
+        active_s: py_sum(ss.iter().map(|s| s.active_s)),
     }
+}
+
+/// Suma liczb jak `sum()` w Pythonie 3.12+ (algorytm Neumaiera) - wynik co do bitu ten sam.
+/// Zwykłe dodawanie po kolei różni się od Pythona na ostatnich bitach.
+fn py_sum(xs: impl IntoIterator<Item = f64>) -> f64 {
+    let (mut total, mut c) = (0.0_f64, 0.0_f64);
+    for x in xs {
+        let t = total + x;
+        if total.abs() >= x.abs() {
+            c += (total - t) + x;
+        } else {
+            c += (x - t) + total;
+        }
+        total = t;
+    }
+    if c != 0.0 && c.is_finite() {
+        total += c;
+    }
+    total
 }
 
 fn bind(s: &Session) -> [&dyn ToSql; 20] {
@@ -867,13 +894,22 @@ fn int(r: &Row, i: usize) -> rusqlite::Result<i64> {
 
 // --- czas lokalny (jak datetime.fromtimestamp w Pythonie) ---------------------------------
 
+/// Jak datetime.fromtimestamp: mikrosekundy zaokrąglane połówkami do parzystej
+/// (23:59:59.9999996 to już następny dzień).
 fn to_local<Tz: TimeZone>(tz: &Tz, ts: f64) -> Result<DateTime<Tz>> {
     if !ts.is_finite() {
         return Err(HistoryError::Time(ts));
     }
-    let secs = ts.floor();
-    let nanos = (((ts - secs) * 1e9) as u32).min(999_999_999);
-    DateTime::from_timestamp(secs as i64, nanos)
+    let mut secs = ts.trunc();
+    let mut us = ((ts - secs) * 1e6).round_ties_even();
+    if us >= 1e6 {
+        us -= 1e6;
+        secs += 1.0;
+    } else if us < 0.0 {
+        us += 1e6;
+        secs -= 1.0;
+    }
+    DateTime::from_timestamp(secs as i64, (us as u32).min(999_999) * 1000)
         .map(|d| d.with_timezone(tz))
         .ok_or(HistoryError::Time(ts))
 }
@@ -883,16 +919,35 @@ fn local_date<Tz: TimeZone>(tz: &Tz, ts: f64) -> Result<NaiveDate> {
 }
 
 /// Lokalna północ dnia jako czas uniksowy (jak datetime.combine(d, min.time()).timestamp():
-/// przy podwójnej godzinie wcześniejsza, przy brakującej - przesunięcie sprzed zmiany).
+/// przy podwójnej godzinie wcześniejsza, przy brakującej - przesunięcie sprzed zmiany,
+/// czyli chwila samej zmiany czasu; port local_to_seconds z CPythona dla fold=0).
 fn local_midnight<Tz: TimeZone>(tz: &Tz, day: NaiveDate) -> f64 {
     let midnight = day.and_time(NaiveTime::MIN);
     match tz.from_local_datetime(&midnight) {
         LocalResult::Single(d) | LocalResult::Ambiguous(d, _) => d.timestamp() as f64,
-        LocalResult::None => match tz.from_local_datetime(&(midnight + Duration::hours(1))) {
-            LocalResult::Single(d) | LocalResult::Ambiguous(d, _) => d.timestamp() as f64 - 3600.0,
-            LocalResult::None => midnight.and_utc().timestamp() as f64,
-        },
+        LocalResult::None => {
+            let t = midnight.and_utc().timestamp();
+            let offset = |u: i64| {
+                DateTime::from_timestamp(u, 0).map_or(0, |d| {
+                    i64::from(
+                        tz.offset_from_utc_datetime(&d.naive_utc())
+                            .fix()
+                            .local_minus_utc(),
+                    )
+                })
+            };
+            let u1 = t - offset(t);
+            let u2 = t - offset(u1);
+            u1.max(u2) as f64
+        }
     }
+}
+
+/// `n` dni przed `day` (ujemne `n` - po), bez paniki przy wyjściu poza zakres dat.
+fn days_before(day: NaiveDate, n: i64) -> Result<NaiveDate> {
+    TimeDelta::try_days(n)
+        .and_then(|d| day.checked_sub_signed(d))
+        .ok_or(HistoryError::Days(n))
 }
 
 fn iso(d: NaiveDate) -> String {

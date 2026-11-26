@@ -701,3 +701,252 @@ fn python_v5_database_gives_same_results() {
     });
     assert_close(&got, &want, "v5");
 }
+
+// --- dodatkowe po przeglądzie: sumy, tracker z Pythona, zmiana czasu, zaokrąglanie ----
+
+#[test]
+fn sums_match_python_bit_for_bit() {
+    let want = load_json("sums.json");
+    let cases = want["cases"].as_array().unwrap();
+    assert!(cases.len() > 100);
+    for (i, c) in cases.iter().enumerate() {
+        let xs: Vec<f64> = c["in"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|b| f64::from_bits(b.as_u64().unwrap()))
+            .collect();
+        let got = py_sum(xs.iter().copied());
+        let exp = f64::from_bits(c["sum"].as_u64().unwrap());
+        assert_eq!(
+            got.to_bits(),
+            exp.to_bits(),
+            "przypadek {i}: {got} != {exp}"
+        );
+    }
+    // ta sama suma w totals (0.1 * 10 = 1.0 jak w Pythonie, zwykłe dodawanie daje 0.999...)
+    let h = mem();
+    for i in 0..10 {
+        let mut s = row(
+            &format!("s{i}"),
+            "p1",
+            "A",
+            "g1",
+            "PEAK",
+            f64::from(i),
+            1e3,
+            1,
+            0.1,
+            0.1,
+        );
+        h.save(&mut s).unwrap();
+    }
+    let t = h.totals(0.0, None).unwrap();
+    assert_eq!(t.distance_km, 1.0);
+    assert_eq!(t.active_s, 1.0);
+    assert_eq!(h.by_group(0.0, None, GroupKey::Profile).unwrap()[0].1, t);
+}
+
+/// Zdarzenia SessionTracker z Pythona odtworzone w Rust: stan po każdym i zapisane sesje.
+#[test]
+fn tracker_replays_python_events() {
+    let want = load_json("tracker.json");
+    let events = want["events"].as_array().unwrap();
+    let states = want["states"].as_array().unwrap();
+    assert_eq!(events.len(), states.len());
+    let h = mem();
+    let (w, mut t) = Walker::new(0.0);
+    let f = |v: &Value| v.as_f64().unwrap();
+    let st = |v: &Value| v.as_str().unwrap().to_string();
+    for (i, (e, state)) in events.iter().zip(states).enumerate() {
+        *w.t.lock().unwrap() = f(&e["t"]);
+        match e["op"].as_str().unwrap() {
+            "update" => t
+                .update(
+                    &h,
+                    f(&e["speed"]),
+                    e["steps"].as_i64(),
+                    f(&e["dist"]),
+                    f(&e["act"]),
+                )
+                .unwrap(),
+            "owner" => {
+                let a = e["args"].as_array().unwrap();
+                t.set_owner(&h, &st(&a[0]), &st(&a[1]), &st(&a[2]), &st(&a[3]))
+                    .unwrap();
+            }
+            "source" => {
+                let s = &e["src"];
+                let src = SessionSource {
+                    model: st(&s["model"]),
+                    driver: st(&s["driver"]),
+                    profile: st(&s["profile"]),
+                    firmware: st(&s["firmware"]),
+                    app_version: st(&s["app_version"]),
+                    source: st(&s["source"]),
+                };
+                t.set_source(&h, src).unwrap();
+            }
+            "mode" => t.set_mode(&h, e["mode"].as_str().unwrap()).unwrap(),
+            "flush" => t.flush(&h).unwrap(),
+            "finish" => t.finish(&h).unwrap(),
+            other => panic!("nieznane zdarzenie {other}"),
+        }
+        let got = match t.current() {
+            None => json!([h.count().unwrap()]),
+            Some(s) => json!([
+                h.count().unwrap(),
+                s.steps,
+                s.distance_km,
+                s.active_s,
+                s.start,
+                s.end,
+                s.firmware
+            ]),
+        };
+        assert_close(&got, state, &format!("zdarzenie {i} ({})", e["op"]));
+    }
+    let mut saved = all(&h);
+    saved.sort_by(|a, b| a.start.total_cmp(&b.start));
+    for s in &saved {
+        assert_eq!(s.id.len(), 32);
+        assert_eq!(s.tz_offset_min, utc_offset_min(s.start));
+    }
+    let got: Vec<Value> = saved
+        .into_iter()
+        .map(|s| {
+            let mut v = serde_json::to_value(s).unwrap();
+            let m = v.as_object_mut().unwrap();
+            for k in ["id", "updated", "tzOffsetMin"] {
+                m.remove(k);
+            }
+            v
+        })
+        .collect();
+    assert_close(&Value::Array(got), &want["sessions"], "sesje");
+}
+
+/// Strefa z jedną zmianą czasu w chwili `at` (UTC): przed nią `pre`, od niej `post`.
+#[derive(Debug, Clone, Copy)]
+struct OneShift {
+    pre: FixedOffset,
+    post: FixedOffset,
+    at: i64,
+}
+
+impl OneShift {
+    fn new(pre_h: i32, post_h: i32, at: i64) -> Self {
+        Self {
+            pre: FixedOffset::east_opt(pre_h * 3600).unwrap(),
+            post: FixedOffset::east_opt(post_h * 3600).unwrap(),
+            at,
+        }
+    }
+
+    fn at_utc(&self, utc: i64) -> FixedOffset {
+        if utc < self.at { self.pre } else { self.post }
+    }
+}
+
+impl TimeZone for OneShift {
+    type Offset = FixedOffset;
+
+    fn from_offset(offset: &FixedOffset) -> Self {
+        Self {
+            pre: *offset,
+            post: *offset,
+            at: 0,
+        }
+    }
+
+    fn offset_from_local_date(&self, local: &NaiveDate) -> LocalResult<FixedOffset> {
+        self.offset_from_local_datetime(&local.and_time(NaiveTime::MIN))
+    }
+
+    fn offset_from_local_datetime(
+        &self,
+        local: &chrono::NaiveDateTime,
+    ) -> LocalResult<FixedOffset> {
+        let l = local.and_utc().timestamp();
+        let mut ok: Vec<(i64, FixedOffset)> = [self.pre, self.post]
+            .into_iter()
+            .map(|o| (l - i64::from(o.local_minus_utc()), o))
+            .filter(|(u, o)| self.at_utc(*u) == *o)
+            .collect();
+        ok.sort_by_key(|(u, _)| *u);
+        ok.dedup();
+        match ok.as_slice() {
+            [] => LocalResult::None,
+            [(_, o)] => LocalResult::Single(*o),
+            [(_, a), (_, b), ..] => LocalResult::Ambiguous(*a, *b),
+        }
+    }
+
+    fn offset_from_utc_date(&self, utc: &NaiveDate) -> FixedOffset {
+        self.at_utc(utc.and_time(NaiveTime::MIN).and_utc().timestamp())
+    }
+
+    fn offset_from_utc_datetime(&self, utc: &chrono::NaiveDateTime) -> FixedOffset {
+        self.at_utc(utc.and_utc().timestamp())
+    }
+}
+
+/// Zmiana czasu o północy: jak datetime.combine(dzień, 0:00).timestamp() w Pythonie (fold=0).
+#[test]
+fn midnight_on_dst_change_days_like_python() {
+    let utc = |d: u32, h: u32| {
+        chrono::Utc
+            .with_ymd_and_hms(2026, 11, d, h, 0, 0)
+            .unwrap()
+            .timestamp()
+    };
+    let day = NaiveDate::from_ymd_opt(2026, 11, 1).unwrap();
+    // brak północy (UTC-3 -> UTC-2 o 0:00): północ to chwila zmiany, czyli 0:00 według UTC-3
+    let gap_west = OneShift::new(-3, -2, utc(1, 3));
+    assert_eq!(local_midnight(&gap_west, day), utc(1, 3) as f64);
+    // brak północy (UTC+1 -> UTC+2 o 0:00)
+    let gap_east = OneShift::new(1, 2, utc(1, 0) - 3600);
+    assert_eq!(local_midnight(&gap_east, day), (utc(1, 0) - 3600) as f64);
+    // podwójna północ (UTC+2 -> UTC+1 o 1:00): wcześniejsza z dwóch
+    let twice = OneShift::new(2, 1, utc(1, 0) - 3600);
+    assert_eq!(local_midnight(&twice, day), (utc(1, 0) - 7200) as f64);
+    // zakres "dziś" w dniu zmiany zaczyna się od tej samej chwili
+    let now = utc(1, 18) as f64;
+    assert_eq!(
+        HistoryRange::Day.since_in(&gap_west, now).unwrap(),
+        utc(1, 3) as f64
+    );
+}
+
+/// datetime.fromtimestamp zaokrągla do mikrosekund połówkami do parzystej.
+#[test]
+fn timestamp_rounding_like_python() {
+    use chrono::Datelike;
+    let midnight = chrono::Utc
+        .with_ymd_and_hms(2026, 11, 26, 0, 0, 0)
+        .unwrap()
+        .timestamp() as f64;
+    let day = |ts: f64| local_date(&chrono::Utc, ts).unwrap().day();
+    assert_eq!(day(midnight - 4e-7), 26); // 23:59:59.9999996 -> 0:00:00.000000
+    assert_eq!(day(midnight - 1.5e-6), 25);
+    assert_eq!(day(-0.25), 31); // 1969-12-31 23:59:59.75
+    assert!(local_date(&chrono::Utc, f64::NAN).is_err());
+    assert!(local_date(&chrono::Utc, 1e300).is_err());
+}
+
+#[test]
+fn by_day_edge_counts_return_errors_not_panics() {
+    let h = mem();
+    let tz = FixedOffset::east_opt(3600).unwrap();
+    let day = |n| h.by_day_in(&tz, n, None, GroupKey::Profile, 1e9);
+    assert!(day(0).unwrap().is_empty());
+    assert!(day(-5).unwrap().is_empty());
+    assert!(matches!(day(i64::MAX), Err(HistoryError::Days(_))));
+    let days = day(3).unwrap();
+    let names: Vec<&str> = days.iter().map(|(d, _)| d.as_str()).collect();
+    assert_eq!(names, ["2001-09-07", "2001-09-08", "2001-09-09"]);
+    assert!(
+        h.by_hour_in(&tz, None, GroupKey::Profile, f64::INFINITY)
+            .is_err()
+    );
+}
