@@ -455,5 +455,434 @@
    ]
   },
   "error": "Wydanie na GitHubie nie ma poprawnego numeru wersji."
+ },
+ {
+  "case": "tag_ze_spacjami",
+  "input": {
+   "tag_name": " v0.3.0 ",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "release": {
+   "version": " v0.3.0 ",
+   "notes": "Poprawki połączenia",
+   "url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 10010,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "opis_z_separatorami",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "\u001f Notatki \u001c\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Notatki",
+   "url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 10010,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "opis_liczba",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": 5,
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "5",
+   "url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 10010,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "rozmiar_zero",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 0
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 0,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "rozmiar_prawda",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": true
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 1,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "rozmiar_tekst_ze_spacjami",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": " 12 "
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 12,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "rozmiar_z_plusem",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": "+7"
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 7,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "suma_liczba",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": 12345,
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Wydanie nie ma sumy kontrolnej - nie instaluję."
+ },
+ {
+  "case": "suma_pusta",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe",
+     "digest": "",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Wydanie nie ma sumy kontrolnej - nie instaluję."
+ },
+ {
+  "case": "pusty_adres",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "ftp",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "ftp://github.com/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "z_loginem",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://u:p@github.com/x/Bieznia-Setup-0.3.0.exe",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "https://u:p@github.com/x/Bieznia-Setup-0.3.0.exe",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 10010,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "kropka_na_koncu_hosta",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com./x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "schemat_wielkimi",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "HTTPS://github.com/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "HTTPS://github.com/x",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 10010,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "host_kodowany_procentami",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://git%68ub.com/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "ukosnik_wsteczny",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com\\@evil.example/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "bez_ukosnikow",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https:github.com/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "trzy_ukosniki",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https:///github.com/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "spacja_na_poczatku",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "  https://github.com/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "  https://github.com/x",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 10010,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "spacja_na_koncu_hosta",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com ",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
+ },
+ {
+  "case": "tab_w_adresie",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://git\thub.com/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "release": {
+   "version": "0.3.0",
+   "notes": "Poprawki połączenia",
+   "url": "https://git\thub.com/x",
+   "sha256": "fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+   "size": 10010,
+   "name": "Bieznia-Setup-0.3.0.exe"
+  }
+ },
+ {
+  "case": "podobny_host",
+  "input": {
+   "tag_name": "v0.3.0",
+   "body": "  Poprawki połączenia\n",
+   "assets": [
+    {
+     "name": "Bieznia-Setup-0.3.0.exe",
+     "browser_download_url": "https://github.com.evil.example/x",
+     "digest": "sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e",
+     "size": 10010
+    }
+   ]
+  },
+  "error": "Nieoczekiwany adres pobierania - przerwano dla bezpieczeństwa."
  }
 ]

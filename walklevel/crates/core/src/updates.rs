@@ -10,6 +10,11 @@
 //! Bez kliknięcia nic nie jest pobierane ani instalowane. Sieć idzie przez [`HttpClient`],
 //! więc testy podstawiają własne odpowiedzi. [`ReqwestClient`] jest blokujący - w aplikacji
 //! wywołuj te funkcje z wątku roboczego (np. `spawn_blocking`), nie z zadania async.
+//!
+//! Świadome różnice względem 0.5.x (tam kończyły się wyjątkiem albo były luką): adres musi
+//! wskazywać ten sam host także według parsera reqwest; nazwa zasobu z końcowym "\n" nie
+//! pasuje; dziwny `size` (ujemny, nieliczbowy) to rozmiar nieznany; `assets` innego typu niż
+//! lista to brak instalatora; błąd tworzenia folderu to zwykły [`UpdateError::DownloadFailed`].
 
 use std::fs::{self, File};
 use std::io::{self, Read, Write};
@@ -97,7 +102,9 @@ pub enum TransportError {
 
 /// Odpowiedź HTTP: adres końcowy (po przekierowaniach) i treść do czytania strumieniowo.
 pub struct HttpResponse {
+    /// Adres po wszystkich przekierowaniach (sprawdzany tak jak adres początkowy).
     pub final_url: String,
+    /// Treść odpowiedzi.
     pub body: Box<dyn Read + Send>,
 }
 
@@ -164,12 +171,18 @@ pub struct Release {
     pub name: String,
 }
 
+/// Odpowiednik `str.strip()` z Pythona: białe znaki Unicode oraz separatory U+001C..U+001F
+/// (Python liczy je jako białe, Rust nie).
+fn py_strip(text: &str) -> &str {
+    text.trim_matches(|c: char| c.is_whitespace() || ('\u{1c}'..='\u{1f}').contains(&c))
+}
+
 /// "v1.2.3" / "1.2.3" -> (1, 2, 3). Wszystko inne (np. "dev") to (0, 0, 0), czyli najstarsza.
 pub fn parse_version(text: &str) -> (u64, u64, u64) {
     let Some(re) = VERSION.as_ref() else {
         return (0, 0, 0);
     };
-    let Some(caps) = re.captures(text.trim()) else {
+    let Some(caps) = re.captures(py_strip(text)) else {
         return (0, 0, 0);
     };
     let part = |i: usize| caps.get(i).and_then(|m| m.as_str().parse::<u64>().ok());
@@ -223,18 +236,49 @@ fn py_size(value: Option<&Value>) -> u64 {
             .as_u64()
             .or_else(|| n.as_f64().filter(|f| *f >= 0.0).map(|f| f.trunc() as u64))
             .unwrap_or(0),
-        Some(Value::String(s)) => s.trim().parse::<u64>().unwrap_or(0),
+        Some(Value::String(s)) => py_strip(s).parse::<u64>().unwrap_or(0),
         Some(Value::Bool(true)) => 1,
         _ => 0,
     }
 }
 
+/// Schemat i host tak, jak widzi je `urllib.parse.urlparse` w 0.5.x (małe litery).
+fn py_scheme_host(url: &str) -> Option<(String, String)> {
+    let url: String = url
+        .trim_start_matches(|c: char| c <= ' ')
+        .chars()
+        .filter(|c| !matches!(c, '\t' | '\r' | '\n'))
+        .collect();
+    let (scheme, rest) = url.split_once(':')?;
+    let valid_scheme = scheme
+        .chars()
+        .next()
+        .is_some_and(|c| c.is_ascii_alphabetic())
+        && scheme
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'));
+    let authority = rest.strip_prefix("//").filter(|_| valid_scheme)?;
+    let netloc = authority.split(['/', '?', '#']).next().unwrap_or_default();
+    let hostinfo = netloc.rsplit('@').next().unwrap_or_default();
+    let host = match hostinfo.split_once('[') {
+        Some((_, bracketed)) => bracketed.split(']').next().unwrap_or_default(),
+        None => hostinfo.split(':').next().unwrap_or_default(),
+    };
+    (!host.is_empty()).then(|| (scheme.to_lowercase(), host.to_lowercase()))
+}
+
+/// Tylko https i host GitHuba - zarówno według reguł 0.5.x (`urlparse`), jak i według parsera,
+/// którym reqwest naprawdę łączy (np. `\` czy `%68` w adresie nie przemyci innego hosta).
 fn check_url(url: &str) -> Result<(), UpdateError> {
+    let Some((scheme, host)) = py_scheme_host(url) else {
+        return Err(UpdateError::UnexpectedUrl);
+    };
     let parsed = reqwest::Url::parse(url).map_err(|_| UpdateError::UnexpectedUrl)?;
-    let host_ok = parsed
-        .host_str()
-        .is_some_and(|host| ALLOWED_HOSTS.contains(&host));
-    if parsed.scheme() == "https" && host_ok {
+    let allowed = scheme == "https"
+        && ALLOWED_HOSTS.contains(&host.as_str())
+        && parsed.scheme() == "https"
+        && parsed.host_str() == Some(host.as_str());
+    if allowed {
         Ok(())
     } else {
         Err(UpdateError::UnexpectedUrl)
@@ -283,7 +327,7 @@ pub fn parse_release(data: &Value) -> Result<Release, UpdateError> {
         check_url(&url)?;
         return Ok(Release {
             version: version.trim_start_matches('v').to_owned(),
-            notes: py_str_or_empty(data.get("body")).trim().to_owned(),
+            notes: py_strip(&py_str_or_empty(data.get("body"))).to_owned(),
             url,
             sha256,
             size: py_size(asset.get("size")),
@@ -312,7 +356,9 @@ pub fn fetch_latest(client: &dyn HttpClient) -> Result<Release, UpdateError> {
             log::warn!("Aktualizacje: przerwany odczyt odpowiedzi: {e}");
             UpdateError::Network
         })?;
-    let data: Value = serde_json::from_slice(&raw).map_err(|e| {
+    // json.loads(bytes) w Pythonie pomija BOM UTF-8.
+    let json = raw.strip_prefix(b"\xEF\xBB\xBF").unwrap_or(&raw);
+    let data: Value = serde_json::from_slice(json).map_err(|e| {
         log::warn!("Aktualizacje: odpowiedź GitHuba to nie JSON: {e}");
         UpdateError::Network
     })?;
@@ -787,5 +833,113 @@ mod tests {
                 Err(e) => assert_eq!(case["error"], e.to_string(), "{name}"),
             }
         }
+    }
+
+    /// Odpowiedź klienta testowego wg opisu przypadku z fixtury (status / brak sieci / treść).
+    fn fake_for(case: &Value, body: Option<Vec<u8>>) -> Fake {
+        let status = case["status"].as_u64().map(|s| s as u16);
+        let final_url = case["final_url"].as_str().map(str::to_owned);
+        Fake::new(move |url| {
+            if let Some(code) = status {
+                return Err(TransportError::Status(code));
+            }
+            let Some(data) = body.clone() else {
+                return Err(TransportError::Other("brak sieci".into()));
+            };
+            Ok(HttpResponse {
+                final_url: final_url.clone().unwrap_or_else(|| url.to_owned()),
+                body: Box::new(Cursor::new(data)),
+            })
+        })
+    }
+
+    #[test]
+    fn fetch_matches_python() {
+        let data: Value =
+            serde_json::from_str(include_str!("../tests/fixtures/updates/fetch.json")).unwrap();
+        for case in data.as_array().unwrap() {
+            let name = case["case"].as_str().unwrap();
+            let body = case["body"].as_str().map(|text| {
+                let pad = case["pad"].as_u64().unwrap_or(0) as usize;
+                let split = text.len() - text.chars().last().map_or(0, char::len_utf8);
+                format!("{}{}{}", &text[..split], " ".repeat(pad), &text[split..]).into_bytes()
+            });
+            match fetch_latest(&fake_for(case, body)) {
+                Ok(r) => assert_eq!(case["version"], r.version, "{name}"),
+                Err(e) => assert_eq!(case["error"], e.to_string(), "{name}"),
+            }
+        }
+    }
+
+    #[test]
+    fn download_matches_python() {
+        let data: Value =
+            serde_json::from_str(include_str!("../tests/fixtures/updates/download.json")).unwrap();
+        let mut payload = b"MZ".to_vec();
+        for _ in 0..data["payload_repeat"].as_u64().unwrap() {
+            payload.extend_from_slice(b"instalator");
+        }
+        for case in data["cases"].as_array().unwrap() {
+            let name = case["case"].as_str().unwrap();
+            let release = Release {
+                version: "0.3.0".into(),
+                notes: String::new(),
+                url: case["url"].as_str().unwrap_or(URL).to_owned(),
+                sha256: hex::encode(Sha256::digest(&payload)),
+                size: case["size"].as_u64().unwrap_or(payload.len() as u64),
+                name: "Bieznia-Setup-0.3.0.exe".into(),
+            };
+            let mut body = payload.clone();
+            body.extend_from_slice(case["extra"].as_str().unwrap_or("").as_bytes());
+            let body = (!case["network"].as_bool().unwrap_or(false)).then_some(body);
+            let dir = tempfile::tempdir().unwrap();
+            let mut calls: Vec<Vec<u64>> = Vec::new();
+            let result = download(&release, Some(dir.path()), &fake_for(case, body), |d, t| {
+                calls.push(vec![d, t])
+            });
+            match result {
+                Ok(path) => {
+                    assert_eq!(case["file"], path.file_name().unwrap().to_str().unwrap());
+                    assert_eq!(fs::read(&path).unwrap(), payload, "{name}");
+                }
+                Err(e) => assert_eq!(case["error"], e.to_string(), "{name}"),
+            }
+            let mut files: Vec<String> = fs::read_dir(dir.path())
+                .unwrap()
+                .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+                .collect();
+            files.sort();
+            assert_eq!(
+                serde_json::to_value(files).unwrap(),
+                case["files"],
+                "{name}"
+            );
+            assert_eq!(
+                serde_json::to_value(calls).unwrap(),
+                case["progress"],
+                "{name}"
+            );
+        }
+    }
+
+    // --- świadome różnice względem 0.5.x (Python zachowuje się tu gorzej) ---
+
+    #[test]
+    fn url_must_point_where_reqwest_connects() {
+        // urlparse widzi tu host github.com, a reqwest połączyłby się z evil.example.
+        assert!(check_url("https://evil.example\\@github.com/x").is_err());
+        assert!(check_url("https://github.com\\@evil.example/x").is_err());
+        assert!(check_url("https://git%68ub.com/x").is_err());
+        assert!(check_url("https://release-assets.githubusercontent.com/a?b=c").is_ok());
+    }
+
+    #[test]
+    fn asset_name_with_trailing_newline_is_skipped() {
+        // W Pythonie `$` dopuszcza końcowe "\n" i nazwa pliku z "\n" psuła pobieranie.
+        let data = release_json(serde_json::json!({"name": "Bieznia-Setup-0.3.0.exe\n"}));
+        assert!(matches!(
+            parse_release(&data),
+            Err(UpdateError::MissingInstaller)
+        ));
     }
 }
