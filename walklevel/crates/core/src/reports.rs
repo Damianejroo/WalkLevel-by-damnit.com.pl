@@ -115,7 +115,9 @@ impl ReportFolders {
 /// Dane wpisane w oknie i opis środowiska, które trafiają do `zgloszenie.json`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ReportInfo {
+    /// opis problemu (pole "opis", bez białych znaków na brzegach)
     pub description: String,
+    /// opcjonalny kontakt (pole "kontakt")
     pub contact: String,
     /// wersja aplikacji
     pub version: String,
@@ -427,19 +429,33 @@ fn py_str(value: &Value) -> String {
     }
 }
 
-/// `repr(float)` z Pythona dla zwykłych wartości (3.0 -> "3.0", 2.5 -> "2.5").
+/// `repr(float)` z Pythona: 3.0 -> "3.0", 2.5 -> "2.5", 1e16 -> "1e+16", 1e-05 -> "1e-05".
 pub(crate) fn py_float(value: f64) -> String {
-    if value.is_finite() && value.fract() == 0.0 && value.abs() < 1e16 {
-        format!("{value:.1}")
+    if value.is_nan() {
+        return "nan".to_string();
+    }
+    if value.is_infinite() {
+        return if value > 0.0 { "inf" } else { "-inf" }.to_string();
+    }
+    let sci = format!("{value:e}");
+    let (mantissa, exp) = sci.split_once('e').unwrap_or((&sci, "0"));
+    let exp: i32 = exp.parse().unwrap_or(0);
+    if (-4..16).contains(&exp) {
+        let plain = value.to_string();
+        if plain.contains('.') {
+            plain
+        } else {
+            format!("{plain}.0")
+        }
     } else {
-        value.to_string()
+        let sign = if exp < 0 { '-' } else { '+' };
+        format!("{mantissa}e{sign}{:02}", exp.abs())
     }
 }
 
-/// Pole `key` słownika JSON jako `str(data.get(key) or "")`.
-fn json_field(raw: &[u8], key: &str) -> String {
-    let text = String::from_utf8_lossy(raw);
-    match serde_json::from_str::<Value>(&text) {
+/// Pole `key` słownika JSON (tekst już zdekodowany) jako `str(data.get(key) or "")`.
+fn json_field_str(text: &str, key: &str) -> String {
+    match serde_json::from_str::<Value>(text) {
         Ok(Value::Object(map)) => match map.get(key) {
             Some(value) if !py_falsy(value) => py_str(value),
             _ => String::new(),
@@ -448,11 +464,19 @@ fn json_field(raw: &[u8], key: &str) -> String {
     }
 }
 
+/// Pole `key` odpowiedzi serwera - błędne bajty UTF-8 zastąpione (`decode(errors="replace")`).
+fn json_field(raw: &[u8], key: &str) -> String {
+    json_field_str(&String::from_utf8_lossy(raw), key)
+}
+
 /// Adres wybranej bieżni z ustawień (`device_address`) - jego nie maskujemy,
-/// przydaje się w diagnozie. Brak pliku albo zły JSON - pusty.
+/// przydaje się w diagnozie. Brak pliku, zły UTF-8 albo zły JSON - pusty (jak w 0.5.x).
 pub fn device_address(settings: &Path) -> String {
-    match fs::read(settings) {
-        Ok(raw) => normalize_mac(&json_field(&raw, "device_address")),
+    let Ok(raw) = fs::read(settings) else {
+        return String::new();
+    };
+    match std::str::from_utf8(&raw) {
+        Ok(text) => normalize_mac(&json_field_str(text, "device_address")),
         Err(_) => String::new(),
     }
 }
@@ -717,8 +741,15 @@ fn http_error(status: u16, body: &[u8]) -> ReportError {
     })
 }
 
+/// Schemat adresu jak `urllib.parse.urlparse(...).scheme == "https"`: bez spacji i znaków
+/// sterujących na początku oraz bez tabulatorów i końców linii w środku.
 fn is_https(endpoint: &str) -> bool {
-    endpoint
+    let cleaned: String = endpoint
+        .trim_start_matches(|c: char| c <= ' ')
+        .chars()
+        .filter(|c| !matches!(c, '\t' | '\r' | '\n'))
+        .collect();
+    cleaned
         .split_once(':')
         .is_some_and(|(scheme, _)| scheme.eq_ignore_ascii_case("https"))
 }
@@ -733,8 +764,18 @@ fn post(
     content_type: &str,
     version: &str,
 ) -> Result<String, ReportError> {
+    // przekierowania jak urllib w 0.5.x: 307/308 bez ponownego wysłania paczki (błąd z kodem),
+    // 301/302/303 zamieniane na GET, najwyżej 10
+    let redirects = reqwest::redirect::Policy::custom(|attempt| {
+        if matches!(attempt.status().as_u16(), 307 | 308) || attempt.previous().len() > 10 {
+            attempt.stop()
+        } else {
+            attempt.follow()
+        }
+    });
     let client = reqwest::blocking::Client::builder()
         .timeout(Duration::from_secs(TIMEOUT_S))
+        .redirect(redirects)
         .build()
         .map_err(|_| network_error())?;
     let response = client
@@ -745,10 +786,12 @@ fn post(
         .send()
         .map_err(|_| network_error())?;
     let status = response.status();
-    let raw = response.bytes().map_err(|_| network_error())?;
     if !status.is_success() {
+        // treść błędu nieczytelna - bez komunikatu serwera, jak w 0.5.x
+        let raw = response.bytes().map(|b| b.to_vec()).unwrap_or_default();
         return Err(http_error(status.as_u16(), &raw));
     }
+    let raw = response.bytes().map_err(|_| network_error())?;
     Ok(json_field(&raw, "id"))
 }
 

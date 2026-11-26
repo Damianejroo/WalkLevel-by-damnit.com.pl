@@ -510,7 +510,7 @@
    "contact": " nick#1 ",
    "period_s": 21600,
    "entries": {
-    "zgloszenie.json": "ewogICJvcGlzIjogIkJpZcW8bmlhIHNpxJkgcm96xYLEhWN6YSIsCiAgImtvbnRha3QiOiAibmljayMxIiwKICAid2Vyc2phIjogIjAuNi4wIiwKICAid2luZG93cyI6ICJXaW5kb3dzLTExLTEwLjAuMjYzMDAtU1AwIiwKICAicHl0aG9uIjogIjMuMTMuMTMiLAogICJjemFzIjogIjIwMjYtMTEtMjZUMDE6MTc6MzAiLAogICJva3Jlc19sb2dvd19oIjogNi4wCn0=",
+    "zgloszenie.json": "ewogICJvcGlzIjogIkJpZcW8bmlhIHNpxJkgcm96xYLEhWN6YSIsCiAgImtvbnRha3QiOiAibmljayMxIiwKICAid2Vyc2phIjogIjAuNi4wIiwKICAid2luZG93cyI6ICJXaW5kb3dzLTExLTEwLjAuMjYzMDAtU1AwIiwKICAicHl0aG9uIjogIjMuMTMuMTMiLAogICJjemFzIjogIjIwMjYtMTEtMjZUMDE6MzA6MTgiLAogICJva3Jlc19sb2dvd19oIjogNi4wCn0=",
     "podsumowanie.txt": "cG9sZWNlbmlhIHByenlqxJl0ZTogMSDCtyBiZXogcmVha2NqaTogMCDCtyByb3rFgsSFY3plbmlhOiAwIMK3IGLFgsSZZHk6IDEKCjIwMjYtMTEtMjAgMTE6MzA6MDAgSU5GTyAgICBiaWV6bmlhLmJsZTogU3RhcnQ6IHByenlqxJl0eSBwbyAxLjYgcywgYmllxbxuaWEgQUE6QkI6Q0M6REQ6RUU6RkYKMjAyNi0xMS0yMCAxMTozMTo0MCBFUlJPUiAgIGJpZXpuaWE6IG9iY2EgWFg6WFg6WFg6WFg6WFg6WFggdyAlVVNFUlBST0ZJTEUlL0FwcERhdGEK",
     "logs/bieznia.log": "MjAyNi0xMS0yMCAxMTozMDowMCBJTkZPICAgIGJpZXpuaWEuYmxlOiBTdGFydDogcHJ6eWrEmXR5IHBvIDEuNiBzLCBiaWXFvG5pYSBBQTpCQjpDQzpERDpFRTpGRgoyMDI2LTExLTIwIDExOjMxOjQwIEVSUk9SICAgYmllem5pYTogb2JjYSBYWDpYWDpYWDpYWDpYWDpYWCB3ICVVU0VSUFJPRklMRSUvQXBwRGF0YQpUcmFjZWJhY2s6IGRhbHN6YSBsaW5pYQo=",
     "logs/bluetooth.log": "MjAyNi0xMS0yMCAxMTo1ODoyMCBERUJVRyA8PCBYWDpYWDpYWDpYWDpYWDpYWAo=",
@@ -551,7 +551,7 @@
    "contact": "",
    "period_s": 3600,
    "entries": {
-    "zgloszenie.json": "ewogICJvcGlzIjogIngiLAogICJrb250YWt0IjogIiIsCiAgIndlcnNqYSI6ICIwLjYuMCIsCiAgIndpbmRvd3MiOiAiV2luZG93cy0xMS0xMC4wLjI2MzAwLVNQMCIsCiAgInB5dGhvbiI6ICIzLjEzLjEzIiwKICAiY3phcyI6ICIyMDI2LTExLTI2VDAxOjE3OjMwIiwKICAib2tyZXNfbG9nb3dfaCI6IDEuMAp9",
+    "zgloszenie.json": "ewogICJvcGlzIjogIngiLAogICJrb250YWt0IjogIiIsCiAgIndlcnNqYSI6ICIwLjYuMCIsCiAgIndpbmRvd3MiOiAiV2luZG93cy0xMS0xMC4wLjI2MzAwLVNQMCIsCiAgInB5dGhvbiI6ICIzLjEzLjEzIiwKICAiY3phcyI6ICIyMDI2LTExLTI2VDAxOjMwOjE4IiwKICAib2tyZXNfbG9nb3dfaCI6IDEuMAp9",
     "podsumowanie.txt": "cG9sZWNlbmlhIHByenlqxJl0ZTogMSDCtyBiZXogcmVha2NqaTogMCDCtyByb3rFgsSFY3plbmlhOiAwIMK3IGLFgsSZZHk6IDEKCjIwMjYtMTEtMjAgMTE6MzA6MDAgSU5GTyAgICBiaWV6bmlhLmJsZTogU3RhcnQ6IHByenlqxJl0eSBwbyAxLjYgcywgYmllxbxuaWEgWFg6WFg6WFg6WFg6WFg6WFgKMjAyNi0xMS0yMCAxMTozMTo0MCBFUlJPUiAgIGJpZXpuaWE6IG9iY2EgWFg6WFg6WFg6WFg6WFg6WFggdyAlVVNFUlBST0ZJTEUlL0FwcERhdGEK",
     "logs/bieznia.log": "MjAyNi0xMS0yMCAxMTozMDowMCBJTkZPICAgIGJpZXpuaWEuYmxlOiBTdGFydDogcHJ6eWrEmXR5IHBvIDEuNiBzLCBiaWXFvG5pYSBYWDpYWDpYWDpYWDpYWDpYWAoyMDI2LTExLTIwIDExOjMxOjQwIEVSUk9SICAgYmllem5pYTogb2JjYSBYWDpYWDpYWDpYWDpYWDpYWCB3ICVVU0VSUFJPRklMRSUvQXBwRGF0YQpUcmFjZWJhY2s6IGRhbHN6YSBsaW5pYQo=",
     "dane/ustawienia.json": "bmllIGpzb24="
@@ -589,7 +589,7 @@
    "contact": "",
    "period_s": 604800,
    "entries": {
-    "zgloszenie.json": "ewogICJvcGlzIjogInR5ZHppZcWEIiwKICAia29udGFrdCI6ICIiLAogICJ3ZXJzamEiOiAiMC42LjAiLAogICJ3aW5kb3dzIjogIldpbmRvd3MtMTEtMTAuMC4yNjMwMC1TUDAiLAogICJweXRob24iOiAiMy4xMy4xMyIsCiAgImN6YXMiOiAiMjAyNi0xMS0yNlQwMToxNzozMCIsCiAgIm9rcmVzX2xvZ293X2giOiAxNjguMAp9",
+    "zgloszenie.json": "ewogICJvcGlzIjogInR5ZHppZcWEIiwKICAia29udGFrdCI6ICIiLAogICJ3ZXJzamEiOiAiMC42LjAiLAogICJ3aW5kb3dzIjogIldpbmRvd3MtMTEtMTAuMC4yNjMwMC1TUDAiLAogICJweXRob24iOiAiMy4xMy4xMyIsCiAgImN6YXMiOiAiMjAyNi0xMS0yNlQwMTozMDoxOCIsCiAgIm9rcmVzX2xvZ293X2giOiAxNjguMAp9",
     "podsumowanie.txt": "cG9sZWNlbmlhIHByenlqxJl0ZTogMSDCtyBiZXogcmVha2NqaTogMCDCtyByb3rFgsSFY3plbmlhOiAwIMK3IGLFgsSZZHk6IDEKCjIwMjYtMTEtMjAgMTE6MzA6MDAgSU5GTyAgICBiaWV6bmlhLmJsZTogU3RhcnQ6IHByenlqxJl0eSBwbyAxLjYgcywgYmllxbxuaWEgWFg6WFg6WFg6WFg6WFg6WFgKMjAyNi0xMS0yMCAxMTozMTo0MCBFUlJPUiAgIGJpZXpuaWE6IG9iY2EgWFg6WFg6WFg6WFg6WFg6WFggdyAlVVNFUlBST0ZJTEUlL0FwcERhdGEK",
     "logs/bieznia.log": "MjAyNi0xMS0xNyAxMjowMDowMCBJTkZPICBzdGFyZSAlVVNFUlBST0ZJTEUlXHgKMjAyNi0xMS0yMCAxMTozMDowMCBJTkZPICAgIGJpZXpuaWEuYmxlOiBTdGFydDogcHJ6eWrEmXR5IHBvIDEuNiBzLCBiaWXFvG5pYSBYWDpYWDpYWDpYWDpYWDpYWAoyMDI2LTExLTIwIDExOjMxOjQwIEVSUk9SICAgYmllem5pYTogb2JjYSBYWDpYWDpYWDpYWDpYWDpYWCB3ICVVU0VSUFJPRklMRSUvQXBwRGF0YQpUcmFjZWJhY2s6IGRhbHN6YSBsaW5pYQo=",
     "logs/bieznia.log.1": "YmV6IGRhdAo="
@@ -622,7 +622,7 @@
    "contact": "",
    "period_s": 5580,
    "entries": {
-    "zgloszenie.json": "ewogICJvcGlzIjogInR5bGtvIGJsdWV0b290aCIsCiAgImtvbnRha3QiOiAiIiwKICAid2Vyc2phIjogIjAuNi4wIiwKICAid2luZG93cyI6ICJXaW5kb3dzLTExLTEwLjAuMjYzMDAtU1AwIiwKICAicHl0aG9uIjogIjMuMTMuMTMiLAogICJjemFzIjogIjIwMjYtMTEtMjZUMDE6MTc6MzAiLAogICJva3Jlc19sb2dvd19oIjogMS42Cn0=",
+    "zgloszenie.json": "ewogICJvcGlzIjogInR5bGtvIGJsdWV0b290aCIsCiAgImtvbnRha3QiOiAiIiwKICAid2Vyc2phIjogIjAuNi4wIiwKICAid2luZG93cyI6ICJXaW5kb3dzLTExLTEwLjAuMjYzMDAtU1AwIiwKICAicHl0aG9uIjogIjMuMTMuMTMiLAogICJjemFzIjogIjIwMjYtMTEtMjZUMDE6MzA6MTgiLAogICJva3Jlc19sb2dvd19oIjogMS42Cn0=",
     "podsumowanie.txt": "cG9sZWNlbmlhIHByenlqxJl0ZTogMCDCtyBiZXogcmVha2NqaTogMCDCtyByb3rFgsSFY3plbmlhOiAwIMK3IGLFgsSZZHk6IDAKCgo=",
     "logs/bluetooth.log": "YmV6IGRhdAo="
    },
@@ -648,13 +648,37 @@
    "contact": "",
    "period_s": 21600,
    "entries": {
-    "zgloszenie.json": "ewogICJvcGlzIjogInB1c3RvIiwKICAia29udGFrdCI6ICIiLAogICJ3ZXJzamEiOiAiMC42LjAiLAogICJ3aW5kb3dzIjogIldpbmRvd3MtMTEtMTAuMC4yNjMwMC1TUDAiLAogICJweXRob24iOiAiMy4xMy4xMyIsCiAgImN6YXMiOiAiMjAyNi0xMS0yNlQwMToxNzozMCIsCiAgIm9rcmVzX2xvZ293X2giOiA2LjAKfQ=="
+    "zgloszenie.json": "ewogICJvcGlzIjogInB1c3RvIiwKICAia29udGFrdCI6ICIiLAogICJ3ZXJzamEiOiAiMC42LjAiLAogICJ3aW5kb3dzIjogIldpbmRvd3MtMTEtMTAuMC4yNjMwMC1TUDAiLAogICJweXRob24iOiAiMy4xMy4xMyIsCiAgImN6YXMiOiAiMjAyNi0xMS0yNlQwMTozMDoxOCIsCiAgIm9rcmVzX2xvZ293X2giOiA2LjAKfQ=="
    },
    "info": {
     "opis": "pusto",
     "kontakt": "",
     "wersja": "0.6.0",
     "okres_logow_h": 6.0
+   },
+   "info_keys": [
+    "opis",
+    "kontakt",
+    "wersja",
+    "windows",
+    "python",
+    "czas",
+    "okres_logow_h"
+   ]
+  },
+  {
+   "files": [],
+   "description": "　 \"cytat\" \\ ukośnik\ttab\u0001\u001f   😀 €\n",
+   "contact": "a\"b\\c",
+   "period_s": 900,
+   "entries": {
+    "zgloszenie.json": "ewogICJvcGlzIjogIlwiY3l0YXRcIiBcXCB1a2/Fm25pa1x0dGFiXHUwMDAxXHUwMDFmfyDigKgg8J+YgCDigqwiLAogICJrb250YWt0IjogImFcImJcXGMiLAogICJ3ZXJzamEiOiAiMC42LjAiLAogICJ3aW5kb3dzIjogIldpbmRvd3MtMTEtMTAuMC4yNjMwMC1TUDAiLAogICJweXRob24iOiAiMy4xMy4xMyIsCiAgImN6YXMiOiAiMjAyNi0xMS0yNlQwMTozMDoxOCIsCiAgIm9rcmVzX2xvZ293X2giOiAwLjIKfQ=="
+   },
+   "info": {
+    "opis": "\"cytat\" \\ ukośnik\ttab\u0001\u001f   😀 €",
+    "kontakt": "a\"b\\c",
+    "wersja": "0.6.0",
+    "okres_logow_h": 0.2
    },
    "info_keys": [
     "opis",
@@ -1027,11 +1051,12 @@
     "    00002ad4  64 00 b0 04 0a 00",
     "",
     "== Powiadomienia przez 12 s ==",
-    "   0.03s << 00002acd  04 00 a0 00",
-    "   0.03s << 00002ad9  ",
+    "   0.01s << 00002acd  04 00 a0 00",
+    "   0.01s << 00002ad9  ",
     "    nie da się subskrybować 00002ada-0000-1000-8000-00805f9b34fb: odmowa",
     ""
-   ]
+   ],
+   "crlf": true
   },
   {
    "name": "z_adresem",
@@ -1122,7 +1147,8 @@
     "",
     "== Powiadomienia przez 12 s ==",
     ""
-   ]
+   ],
+   "crlf": true
   },
   {
    "name": "brak_biezni",
@@ -1156,7 +1182,8 @@
     "",
     "Nie znaleziono bieżni - brak połączenia do zbadania.",
     ""
-   ]
+   ],
+   "crlf": true
   },
   {
    "name": "zniknela",
@@ -1224,7 +1251,8 @@
     "== Połączenie z AA:BB:CC:DD:EE:FF ==",
     "Urządzenie zniknęło przed połączeniem.",
     ""
-   ]
+   ],
+   "crlf": true
   },
   {
    "name": "blad",
@@ -1239,7 +1267,202 @@
     "== Skan (8 s) ==",
     "BŁĄD: RuntimeError: boom",
     ""
-   ]
+   ],
+   "crlf": true
+  }
+ ],
+ "floats": [
+  {
+   "value": 0.0,
+   "repr": "0.0"
+  },
+  {
+   "value": -0.0,
+   "repr": "-0.0"
+  },
+  {
+   "value": 3.0,
+   "repr": "3.0"
+  },
+  {
+   "value": 2.5,
+   "repr": "2.5"
+  },
+  {
+   "value": 0.30000000000000004,
+   "repr": "0.30000000000000004"
+  },
+  {
+   "value": 0.0001,
+   "repr": "0.0001"
+  },
+  {
+   "value": 1e-05,
+   "repr": "1e-05"
+  },
+  {
+   "value": 1.5e-07,
+   "repr": "1.5e-07"
+  },
+  {
+   "value": 123456789012345.6,
+   "repr": "123456789012345.6"
+  },
+  {
+   "value": 1000000000000000.0,
+   "repr": "1000000000000000.0"
+  },
+  {
+   "value": 9999999999999998.0,
+   "repr": "9999999999999998.0"
+  },
+  {
+   "value": 1e+16,
+   "repr": "1e+16"
+  },
+  {
+   "value": 1.25e+22,
+   "repr": "1.25e+22"
+  },
+  {
+   "value": -2.5e-300,
+   "repr": "-2.5e-300"
+  },
+  {
+   "value": 6.3,
+   "repr": "6.3"
+  }
+ ],
+ "device_address": [
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6ICJhYS1iYi1jYy1kZC1lZS1mZiJ9",
+   "output": "AA:BB:CC:DD:EE:FF"
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6ICIgIEFBOmJiOkNDOmRkOkVFOmZmIFxuIn0=",
+   "output": "AA:BB:CC:DD:EE:FF"
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IG51bGx9",
+   "output": ""
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6ICIifQ==",
+   "output": ""
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IDB9",
+   "output": ""
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IDEyfQ==",
+   "output": "12"
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IDEyLjB9",
+   "output": "12.0"
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IDFlMTZ9",
+   "output": "1E+16"
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IHRydWV9",
+   "output": "TRUE"
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IGZhbHNlfQ==",
+   "output": ""
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6IFtdfQ==",
+   "output": ""
+  },
+  {
+   "settings": "eyJpbm5lIjogMX0=",
+   "output": ""
+  },
+  {
+   "settings": "WyJkZXZpY2VfYWRkcmVzcyJd",
+   "output": ""
+  },
+  {
+   "settings": "bmllIGpzb24=",
+   "output": ""
+  },
+  {
+   "settings": "",
+   "output": ""
+  },
+  {
+   "settings": "77u/eyJkZXZpY2VfYWRkcmVzcyI6ICJhYTpiYjpjYzpkZDplZTpmZiJ9",
+   "output": ""
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6ICJhYTpiYjpjYzpkZDplZTpmZiIsICJuYXp3YSI6ICL/In0=",
+   "output": ""
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6ICJhIiwgImRldmljZV9hZGRyZXNzIjogImItYyJ9",
+   "output": "B:C"
+  },
+  {
+   "settings": "eyJkZXZpY2VfYWRkcmVzcyI6ICJzdHJhw59lIn0=",
+   "output": "STRASSE"
+  }
+ ],
+ "https": [
+  {
+   "endpoint": "https://example.com/z",
+   "https": true
+  },
+  {
+   "endpoint": "HTTPS://example.com/z",
+   "https": true
+  },
+  {
+   "endpoint": "http://example.com/z",
+   "https": false
+  },
+  {
+   "endpoint": "  https://example.com/z",
+   "https": true
+  },
+  {
+   "endpoint": "\u0000\u001fhttps://example.com/z",
+   "https": true
+  },
+  {
+   "endpoint": "ht\ttps://example.com/z",
+   "https": true
+  },
+  {
+   "endpoint": "htt\r\nps://example.com/z",
+   "https": true
+  },
+  {
+   "endpoint": "https:example.com",
+   "https": true
+  },
+  {
+   "endpoint": "ftp://example.com",
+   "https": false
+  },
+  {
+   "endpoint": "example.com",
+   "https": false
+  },
+  {
+   "endpoint": "",
+   "https": false
+  },
+  {
+   "endpoint": "1https://x",
+   "https": false
+  },
+  {
+   "endpoint": " https://x",
+   "https": false
   }
  ]
 }

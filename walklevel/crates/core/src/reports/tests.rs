@@ -233,14 +233,63 @@ fn reports_match_python() {
         let mut sorted = python_keys.clone();
         sorted.sort();
         assert_eq!(keys, sorted, "paczka {i}");
+        // zapis bajt w bajt jak json.dumps(ensure_ascii=False, indent=2) - bez pola "python",
+        // z czasem i systemem z tego uruchomienia
         let raw = String::from_utf8(zip_entries(&path)["zgloszenie.json"].clone()).expect("utf8");
-        let order: Vec<usize> = python_keys
-            .iter()
-            .map(|k| raw.find(&format!("\"{k}\"")).expect("klucz"))
-            .collect();
-        assert!(
-            order.windows(2).all(|w| w[0] < w[1]),
-            "kolejność pól: {raw}"
+        let python_raw = String::from_utf8(b64(&case["entries"]["zgloszenie.json"])).expect("utf8");
+        let python_json: Value = serde_json::from_str(&python_raw).expect("json");
+        let expected_raw = python_raw
+            .split('\n')
+            .filter(|line| !line.starts_with("  \"python\": "))
+            .collect::<Vec<_>>()
+            .join("\n")
+            .replace(s(&python_json["czas"]), s(&json["czas"]))
+            .replace(
+                &format!("\"windows\": \"{}\"", s(&python_json["windows"])),
+                "\"windows\": \"Windows-test\"",
+            );
+        assert_eq!(raw, expected_raw, "paczka {i}");
+    }
+}
+
+#[test]
+fn py_float_matches_python_repr() {
+    let fx = fixture();
+    for case in fx["floats"].as_array().expect("liczby") {
+        let value = case["value"].as_f64().expect("liczba");
+        assert_eq!(py_float(value), s(&case["repr"]), "{value:e}");
+    }
+    assert_eq!(py_float(f64::NAN), "nan");
+    assert_eq!(py_float(f64::NEG_INFINITY), "-inf");
+}
+
+#[test]
+fn device_address_matches_python() {
+    let fx = fixture();
+    for case in fx["device_address"].as_array().expect("ustawienia") {
+        let dir = tempfile::tempdir().expect("tmp");
+        let path = dir.path().join("ustawienia.json");
+        fs::write(&path, b64(&case["settings"])).expect("zapis");
+        assert_eq!(
+            device_address(&path),
+            s(&case["output"]),
+            "{}",
+            String::from_utf8_lossy(&b64(&case["settings"]))
+        );
+    }
+    let dir = tempfile::tempdir().expect("tmp");
+    assert_eq!(device_address(&dir.path().join("brak.json")), "");
+}
+
+#[test]
+fn https_check_matches_python_urlparse() {
+    let fx = fixture();
+    for case in fx["https"].as_array().expect("adresy") {
+        let endpoint = s(&case["endpoint"]);
+        assert_eq!(
+            is_https(endpoint),
+            case["https"].as_bool().expect("tak/nie"),
+            "{endpoint:?}"
         );
     }
 }
@@ -455,6 +504,18 @@ fn diagnostics_text_matches_python() {
             .map(|l| without_stamp(s(l)))
             .collect();
         assert_eq!(ours, python, "scenariusz {}", s(&sc["name"]));
+        if cfg!(windows) {
+            let dir = tempfile::tempdir().expect("tmp");
+            let path = r.save(&dir.path().join("d.txt")).expect("zapis");
+            let raw = fs::read(&path).expect("odczyt");
+            let crlf = raw.windows(2).filter(|w| w == b"\r\n").count();
+            let lf = raw.iter().filter(|&&b| b == b'\n').count();
+            assert_eq!(
+                crlf == lf,
+                sc["crlf"].as_bool().expect("crlf"),
+                "końce linii"
+            );
+        }
     }
 }
 
@@ -487,7 +548,9 @@ fn diagnostics_header_kingsmith_and_save() {
     let path = diagnostics::report_path(&dir.path().join("logs"));
     assert!(file_name(&path).starts_with("diagnostyka-"));
     r.save(&path).expect("zapis");
-    assert_eq!(fs::read_to_string(&path).expect("odczyt"), text);
+    let saved = fs::read_to_string(&path).expect("odczyt");
+    assert_eq!(saved.replace("\r\n", "\n"), text);
+    assert_eq!(saved.contains("\r\n"), cfg!(windows));
 }
 
 // --- testy przeniesione z tests/test_zgloszenia.py ---------------------------------------
@@ -817,6 +880,17 @@ fn send_report_returns_number_and_maps_errors() {
             .expect_err("503")
             .to_string()
             .contains("Zapisz paczkę")
+    );
+
+    // 307 jak w urllib: bez ponownego wysłania paczki, błąd z kodem (nagłówek Location
+    // doklejony do linii statusu)
+    let (url, _rx) = local_server(
+        "307 Temporary Redirect\r\nLocation: /gdzie-indziej",
+        r#"{"message": ""}"#,
+    );
+    assert_eq!(
+        send_local(&url, None, &path).expect_err("307").to_string(),
+        "Serwer odrzucił zgłoszenie (kod 307)."
     );
 
     // nikt nie słucha na porcie - komunikat o internecie

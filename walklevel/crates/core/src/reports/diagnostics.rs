@@ -240,12 +240,22 @@ impl DiagnosticReport {
         format!("{}\n", self.lines.join("\n"))
     }
 
-    /// Zapisuje raport (UTF-8), tworząc folder. Zwraca ścieżkę.
+    /// Zapisuje raport (UTF-8), tworząc folder. Zwraca ścieżkę. Na Windows końce linii
+    /// CRLF - jak `write_text` w trybie tekstowym w 0.5.x.
     pub fn save(&self, path: &Path) -> io::Result<PathBuf> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
-        fs::write(path, self.text())?;
+        fs::write(path, file_text(&self.text()))?;
         Ok(path.to_path_buf())
+    }
+}
+
+/// Tekst w postaci zapisywanej na dysk (CRLF na Windows).
+fn file_text(text: &str) -> String {
+    if cfg!(windows) {
+        text.replace('\n', "\r\n")
+    } else {
+        text.to_string()
     }
 }

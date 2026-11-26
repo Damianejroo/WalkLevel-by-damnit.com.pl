@@ -246,6 +246,12 @@ def report_cases(tmp: Path) -> list[dict[str, Any]]:
         ),
         ([file("logs/bluetooth.log", "bez dat\n", 60)], "tylko bluetooth", "", 5580),
         ([], "pusto", "", 6 * 3600),
+        (
+            [],
+            '　 "cytat" \\ ukośnik\ttab\x01\x1f\x7f   😀 €\n',
+            "a\"b\\c",
+            900,
+        ),
     ]
     real_time = zgloszenia.time.time
     zgloszenia.time.time = lambda: NOW  # type: ignore[assignment]
@@ -547,8 +553,74 @@ def diagnostics_cases(tmp: Path) -> list[dict[str, Any]]:
         path = tmp / f"diag{i}" / "diagnostyka.txt"
         asyncio.run(diagnostics.run_diagnostics(path, sc["address"]))
         lines = path.read_text(encoding="utf-8").split("\n")
-        out.append({**sc, "lines": lines[2:]})  # bez nagłówka z datą i wersjami
+        raw = path.read_bytes()
+        out.append(
+            {
+                **sc,
+                "lines": lines[2:],  # bez nagłówka z datą i wersjami
+                "crlf": raw.count(b"\r\n") == raw.count(b"\n"),  # zapis w trybie tekstowym
+            }
+        )
     return out
+
+
+# --- drobne zgodności: repr(float), adres z ustawień, schemat adresu ----------------
+def float_cases() -> list[dict[str, Any]]:
+    values = [0.0, -0.0, 3.0, 2.5, 0.1 + 0.2, 1e-4, 1e-5, 1.5e-7, 123456789012345.6, 1e15,
+              9999999999999998.0, 1e16, 1.25e22, -2.5e-300, 6.3]
+    return [{"value": v, "repr": repr(v)} for v in values]
+
+
+def device_cases(tmp: Path) -> list[dict[str, str]]:
+    inputs = [
+        b'{"device_address": "aa-bb-cc-dd-ee-ff"}',
+        b'{"device_address": "  AA:bb:CC:dd:EE:ff \\n"}',
+        b'{"device_address": null}',
+        b'{"device_address": ""}',
+        b'{"device_address": 0}',
+        b'{"device_address": 12}',
+        b'{"device_address": 12.0}',
+        b'{"device_address": 1e16}',
+        b'{"device_address": true}',
+        b'{"device_address": false}',
+        b'{"device_address": []}',
+        b'{"inne": 1}',
+        b'["device_address"]',
+        b"nie json",
+        b"",
+        b'\xef\xbb\xbf{"device_address": "aa:bb:cc:dd:ee:ff"}',
+        b'{"device_address": "aa:bb:cc:dd:ee:ff", "nazwa": "\xff"}',
+        b'{"device_address": "a", "device_address": "b-c"}',
+        b'{"device_address": "stra\xc3\x9fe"}',
+    ]
+    out = []
+    for i, raw in enumerate(inputs):
+        root = tmp / f"device{i}"
+        (root / "dane").mkdir(parents=True)
+        (root / "dane" / "ustawienia.json").write_bytes(raw)
+        out.append({"settings": b64(raw), "output": zgloszenia.device_address(root)})
+    return out
+
+
+def https_cases() -> list[dict[str, Any]]:
+    import urllib.parse
+
+    endpoints = [
+        "https://example.com/z",
+        "HTTPS://example.com/z",
+        "http://example.com/z",
+        "  https://example.com/z",
+        "\x00\x1fhttps://example.com/z",
+        "ht\ttps://example.com/z",
+        "htt\r\nps://example.com/z",
+        "https:example.com",
+        "ftp://example.com",
+        "example.com",
+        "",
+        "1https://x",
+        " https://x",
+    ]
+    return [{"endpoint": e, "https": urllib.parse.urlparse(e).scheme == "https"} for e in endpoints]
 
 
 def main() -> None:
@@ -575,6 +647,9 @@ def main() -> None:
             "send": send_cases(tmp),
             "mailto": mailto_cases(),
             "diagnostics": diagnostics_cases(tmp),
+            "floats": float_cases(),
+            "device_address": device_cases(tmp),
+            "https": https_cases(),
         }
     (OUT / "zgloszenia.json").write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Zapisano {OUT / 'zgloszenia.json'}")
