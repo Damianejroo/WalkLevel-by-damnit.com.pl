@@ -287,8 +287,9 @@ impl App {
                     let d = &treadmills[0];
                     self.connect_device(d.address.clone(), d.name.clone());
                 } else {
+                    // lista bieżni otwiera się tylko z przycisku Szukaj bieżni (status_action),
+                    // nigdy sama po skanie w tle (pierwszy start, zapomniana bieżnia)
                     self.auto_connect = false;
-                    self.nav("devices", "scan", None);
                 }
                 self.mark(&[SliceName::Device]);
             }
@@ -297,7 +298,6 @@ impl App {
                 self.scanning = false;
                 self.auto_connect = false;
                 self.scan_text = text;
-                self.nav("devices", "scan", None);
                 self.mark(&[SliceName::Device]);
             }
             WorkerEvent::Device {

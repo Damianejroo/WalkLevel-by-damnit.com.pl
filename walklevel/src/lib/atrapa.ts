@@ -908,7 +908,6 @@ export function utworzAtrape(): Silnik {
         przeliczBieznie();
         device.scanning = false;
         wyslij('device');
-        emituj('wl:nawigacja', { to: 'devices', reason: 'scan' });
       });
     },
     device_connect: (a) => {
@@ -939,7 +938,11 @@ export function utworzAtrape(): Silnik {
     },
     device_status_action: () => {
       const akcja = device.status.action;
-      if (akcja === 'scan') return komendy.device_scan({});
+      if (akcja === 'scan') {
+        // jak rdzeń: listę otwiera tylko przycisk Szukaj bieżni, nie sam wynik skanu
+        emituj('wl:nawigacja', { to: 'devices', reason: 'scan' });
+        return komendy.device_scan({});
+      }
       if (akcja === 'disconnect' || akcja === 'cancel') return komendy.device_disconnect({});
       if (akcja === 'simulatorOff') return komendy.settings_set({ key: 'simulator', value: false });
       return komendy.device_connect({ address: settings.deviceAddress, name: settings.deviceName });

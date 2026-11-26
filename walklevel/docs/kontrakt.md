@@ -1317,7 +1317,7 @@ Zmiana koloru profilu to `profile_update(id, { color })`; wygląd przelicza UI (
 
 | Komenda | Argumenty | Wynik | Skutek |
 |---|---|---|---|
-| `device_scan` | - | `()` | czyści listę, `device.scanning = true`, skan 6 s; wynik w `device.devices`; jedna bieżnia przy pierwszym starcie bez zapamiętanej → łączy sama; inaczej `wl:nawigacja {to:'devices', reason:'scan'}` |
+| `device_scan` | - | `()` | czyści listę, `device.scanning = true`, skan 6 s; wynik w `device.devices`; jedna bieżnia przy pierwszym starcie bez zapamiętanej → łączy sama; wynik skanu NIGDY sam nie otwiera listy - `wl:nawigacja {to:'devices', reason:'scan'}` wysyła tylko `device_status_action` (przycisk Szukaj bieżni) |
 | `device_connect` | `address: String`, `name: String` | `()` | zapamiętuje bieżnię (wyłącza symulator), łączy, możliwości z profilu modelu od razu |
 | `device_disconnect` | - | `()` | rozłącza (nie zapomina) |
 | `device_forget` | - | `()` | rozłącza i czyści `deviceAddress`/`deviceName` |
