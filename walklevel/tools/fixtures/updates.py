@@ -20,7 +20,7 @@ from bieznia import aktualizacje as akt
 OUT = Path("walklevel/crates/core/tests/fixtures/updates")
 
 SHA = hashlib.sha256(b"MZ" + b"instalator" * 1000).hexdigest()
-URL = "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe"
+URL = "https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe"
 
 VERSIONS = [
     "v1.2.10",

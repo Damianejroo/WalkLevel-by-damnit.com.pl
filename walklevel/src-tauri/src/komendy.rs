@@ -108,8 +108,8 @@ pub async fn open_link(core: State<'_, Core>, kind: String) -> CmdResult<()> {
         .to_string();
     let url = match kind.as_str() {
         "strona" => "https://damnit.com.pl".to_string(),
-        "prywatnosc" => "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl/blob/main/POLITYKA-PRYWATNOSCI.md".to_string(),
-        "kod" => "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl".to_string(),
+        "prywatnosc" => "https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/blob/main/POLITYKA-PRYWATNOSCI.md".to_string(),
+        "kod" => "https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl".to_string(),
         "regulamin" => terms,
         _ => return Err(CmdError::unexpected("Nieznany adres.")),
     };

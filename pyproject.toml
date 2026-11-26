@@ -15,7 +15,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://damnit.com.pl"
-Repository = "https://github.com/Damianejroo/WalkingPad-X21-PC-Gaming-by-damnit.com.pl"
+Repository = "https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl"
 
 [dependency-groups]
 dev = [
