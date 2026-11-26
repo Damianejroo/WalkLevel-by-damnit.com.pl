@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Ustawienia > Wygląd i okno: kolor profilu gry, motyw, duży tekst, okno, przycisk na ekranie
-  // (docs/teksty.md 11.1, 16). Kolor zapisuje się w aktywnym profilu (profile_update).
+  // Ustawienia > Wygląd i okno: kolor profilu gry, motyw, duży tekst, okno, przycisk na ekranie,
+  // panel znajomych (docs/teksty.md 11.1, 16, dodatki 0.6.2). Kolor zapisuje się w aktywnym profilu (profile_update).
   import Karta from '../../lib/ui/Karta.svelte';
   import Przelacznik from '../../lib/ui/Przelacznik.svelte';
   import Segmentowy from '../../lib/ui/Segmentowy.svelte';
@@ -9,7 +9,7 @@
   import { stan, ui, wykonaj } from '../../lib/stan.svelte';
   import { rozwinMotyw, ustawMotyw } from '../../lib/wyglad';
   import * as api from '../../lib/api';
-  import type { SettingKey, ThemeChoice } from '../../lib/typy';
+  import type { PanelSide, SettingKey, ThemeChoice } from '../../lib/typy';
 
   const osoba = $derived(stan.people.people.find((o) => o.id === stan.people.activePersonId));
   const profil = $derived(osoba?.profiles.find((p) => p.id === stan.people.activeProfileId));
@@ -19,6 +19,10 @@
     { wartosc: 'system', napis: t('ustawienia.wyglad.motyw.system') },
     { wartosc: 'light', napis: t('ustawienia.wyglad.motyw.jasny') },
     { wartosc: 'dark', napis: t('ustawienia.wyglad.motyw.ciemny') },
+  ];
+  const strony: { wartosc: PanelSide; napis: string }[] = [
+    { wartosc: 'left', napis: t('ustawienia.wyglad.panel_strona.lewa') },
+    { wartosc: 'right', napis: t('ustawienia.wyglad.panel_strona.prawa') },
   ];
   const PRZELACZNIKI = [
     ['largeText', 'ustawienia.wyglad.duzy_tekst', 'ustawienia.wyglad.duzy_tekst_opis'],
@@ -63,6 +67,30 @@
       onzmiana={(v) => wykonaj(api.settingsSet(klucz, v))}
     />
   {/each}
+  <!-- panel znajomych (0.6.2): wł./wył., strona, powiadomienie (domyślnie wyłączone) -->
+  <Przelacznik
+    tytul={t('ustawienia.wyglad.panel')}
+    opis={t('ustawienia.wyglad.panel_opis')}
+    wlaczony={stan.settings.friendsPanel}
+    onzmiana={(v) => wykonaj(api.settingsSet('friendsPanel', v))}
+  />
+  {#if stan.settings.friendsPanel}
+    <div class="grupa">
+      <span class="etykieta">{t('ustawienia.wyglad.panel_strona')}</span>
+      <Segmentowy
+        opcje={strony}
+        wartosc={stan.settings.friendsPanelSide}
+        etykieta={t('ustawienia.wyglad.panel_strona')}
+        onzmiana={(v) => wykonaj(api.settingsSet('friendsPanelSide', v))}
+      />
+    </div>
+    <Przelacznik
+      tytul={t('ustawienia.wyglad.panel_powiadom')}
+      opis={t('ustawienia.wyglad.panel_powiadom_opis')}
+      wlaczony={stan.settings.friendsNotify}
+      onzmiana={(v) => wykonaj(api.settingsSet('friendsNotify', v))}
+    />
+  {/if}
 </Karta>
 
 <style>

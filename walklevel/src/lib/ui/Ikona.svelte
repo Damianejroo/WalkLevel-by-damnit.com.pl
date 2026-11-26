@@ -7,7 +7,7 @@
     w_dol: '', w_prawo: '', zaznacz: '', edytuj: '', dodaj: '', minus: '',
     plik: '', losuj: '', pole_zaznaczone: '', pole_puste: '', pole_czesciowo: '',
     konto: '', gwiazda: '', wyglad: '', dane: '', pomoc: '', bieznia: '',
-    zamknij: '',
+    zamknij: '', w_gore: '', zwin_panel: '', rozwin_panel: '',
   } as const;
   export type NazwaIkony = keyof typeof IKONY;
 </script>

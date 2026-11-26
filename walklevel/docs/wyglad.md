@@ -467,6 +467,11 @@ od razu (WebView2 bierze to z Windows: Ułatwienia dostępu > Efekty animacji �
 ### 7.1 Liczby
 
 - Okno Tauri: `minWidth: 420`, `minHeight: 640`, domyślnie 740 × 890 (jak `DEFAULT_W/H`).
+- 0.6.2, panel znajomych (8.16) obok kolumny ekranów: minimalna szerokość okna **720** z pełnym
+  panelem (288 px), **484** z paskiem (64 px), **420** bez panelu (`setMinSize` w okna.rs).
+  Kolumna ekranów ma zawsze co najmniej 420 px - te same zasady co wyżej. Gdy okno mimo to jest
+  węższe (podgląd, mały ekran), interfejs pokazuje pasek zamiast pełnego panelu, a przy 420 px
+  chowa panel.
 - Kolumna treści: `width: min(100%, var(--content-max))` = **maks. 680 px**, wyśrodkowana;
   pasek tytułu strony w tej samej kolumnie. Tło (Mica) na całe okno. Szersze okno nie
   rozciąga kart, wierszy ani wykresu.
@@ -864,6 +869,27 @@ podgląd profilu – dane), tło `--surface-2`.
   pojawią się tu same.”
 - Dostępność: `role="img"`, `aria-label` z podsumowaniem („Dziś 5 432 kroki, najwięcej o
   18:00”) + ukryta tabela z wartościami dla czytników ekranu.
+
+### 8.16 Panel znajomych (`PanelZnajomych.svelte`, 0.6.2)
+
+- Stały komponent obok kolumny ekranów (z prawej domyślnie, z lewej z Ustawień), tło
+  `--surface`, linia `--line` od strony ekranów. Bez akcentu (rozdz. 3).
+- Pełny 288 px: nagłówek 60 px (`--pagebar-h`): „Znajomi” 15/700 + podpis 13 `--text-2`
+  („3 z 5 chodzą teraz”); ikony 40 × 40 tylko plus (szukaj/zaproś) i zwiń. Pole po plusie:
+  filtruje listę, pseudonim spoza listy (od 3 znaków) daje „Zaproś „nick” do znajomych”.
+- Lista: zaproszenia do mnie (ramka `--line`, Odrzuć/Przyjmij 36 px), grupy „Chodzą teraz · N”
+  i „Pozostali · N” 13/600 `--text-2`. Wiersz 56 px: odznaka 34 | pseudonim 15/600, czynność 13
+  `--text-2` ze znakiem chodu E805 (Trening E945) w kolorze tekstu - nie zielona kropka; nazwa gry
+  pogrubiona; pasek XP 8 px (`--ink`, bez podziałki) + licznik 11/700 („+152 XP” z sesji albo
+  „67%” do poziomu). Poziom ukryty - neutralny awatar jak w 8.11, bez paska. Hover `--surface-2`.
+- Wąski pasek 64 px: same odznaki (34) wyśrodkowane, znak chodu 16 px w rogu odznaki, rozdzielacz
+  1 px `--line` między grupami, pełna informacja w podpowiedzi.
+- Stopka 64 px: moja odznaka, pseudonim i status; menu jak lista rozwijana 8.14 (radio z
+  opisem 12 `--text-2`, pole „Opis dla znajomych”). Komunikat w panelu jak Toast 8.12
+  (`--ink`), 74 px od dołu, z „Cofnij” przy usuwaniu znajomego.
+- Zwinięcie zwęża okno o 224 px (rozwinięcie poszerza), główna kolumna stoi; ikonę zwijania
+  panelu z lewej odbijamy w poziomie. Ruch tylko `opacity`/`transform` (wejście menu 160 ms).
+- Nic nie wystaje przy oknie 720 z pełnym panelem i dużym tekstem, w obu motywach.
 
 ---
 

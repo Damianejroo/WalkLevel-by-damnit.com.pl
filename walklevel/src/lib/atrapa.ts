@@ -5,6 +5,7 @@
 // Scenariusze z adresu: ?stan=<nazwa> (SCENARIUSZE niżej) oraz pojedyncze nadpisania:
 //   tryb=keyboard|gamepad|treadmill|training   bieznia=<StanBiezni>   konto=0|1   historia=0|1
 //   wlaczone=0|1   motyw=jasny|ciemny   tekst=duzy
+//   panel=pelny|waski|wylaczony   strona=lewa|prawa (panel znajomych 0.6.2)
 //   poziom=1..4 (poziom Treningu)   demo=1 (okno popup: przykładowe powiadomienia w kolejce)
 //   jedzie=1 (taśma jedzie przy wyłączonym sterowaniu, np. pilotem - Stop przy przycisku)
 // Przykład: /?stan=trening&ekran=main&szer=420&motyw=jasny
@@ -35,11 +36,16 @@ interface Scenariusz {
   klawiszStop: boolean;
   /** taśma jedzie mimo wyłączonego sterowania (pilot) */
   jedzie: boolean;
+  /** panel znajomych (0.6.2) i jego strona; duży tekst */
+  panel: 'pelny' | 'waski' | 'wylaczony';
+  strona: 'prawa' | 'lewa';
+  duzyTekst: boolean;
 }
 
 const BAZA: Scenariusz = {
   tryb: 'keyboard', bieznia: 'strumien', wlaczone: false, wyjscie: 'keys',
   konto: true, historia: true, pierwsze: false, dlugie: false, klawiszStop: false, jedzie: false,
+  panel: 'pelny', strona: 'prawa', duzyTekst: false,
 };
 
 export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
@@ -76,6 +82,14 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   // ekran „Wybierz bieżnię”: lista znalezionych urządzeń od startu i trwające skanowanie
   'lista-biezni': {},
   skanowanie: { bieznia: 'skanowanie' },
+  // panel znajomych (0.6.2): pasek, z lewej, wyłączony, duży tekst, bez konta, długie nazwy
+  'panel-waski': { panel: 'waski' },
+  'panel-lewa': { strona: 'lewa' },
+  'panel-lewa-waski': { strona: 'lewa', panel: 'waski' },
+  'panel-wylaczony': { panel: 'wylaczony' },
+  'panel-duzy': { duzyTekst: true },
+  'panel-bez-konta': { konto: false },
+  'panel-dlugie': { dlugie: true, duzyTekst: true },
 };
 
 function czytajScenariusz(): Scenariusz {
@@ -89,6 +103,10 @@ function czytajScenariusz(): Scenariusz {
     const v = p.get(pole);
     if (v !== null) s[pole] = v === '1';
   }
+  const panel = p.get('panel');
+  if (panel === 'pelny' || panel === 'waski' || panel === 'wylaczony') s.panel = panel;
+  if (p.get('strona') === 'lewa' || p.get('strona') === 'prawa') s.strona = p.get('strona') as Scenariusz['strona'];
+  if (p.get('tekst') === 'duzy') s.duzyTekst = true;
   return s;
 }
 
@@ -235,9 +253,12 @@ export function utworzAtrape(): Silnik {
     toggleKey: klawisz('F8', 0x42, 0x77), fasterKey: klawisz('F7', 0x41, 0x76), slowerKey: klawisz('F6', 0x40, 0x75), togglePad: '',
     simulator: sc.bieznia === 'symulator', record: false, detailedLogs: false,
     theme: motyw === 'jasny' ? 'light' : motyw === 'ciemny' ? 'dark' : 'system',
-    largeText: p.get('tekst') === 'duzy',
+    largeText: sc.duzyTekst,
     alwaysOnTop: false, floatingButton: false, showPersonSwitch: true, showProfileSwitch: true,
     achievementPopups: true, achievementSound: true,
+    // panel znajomych: ?panel=pelny|waski|wylaczony, ?strona=lewa|prawa, ?powiadom=1
+    friendsPanel: sc.panel !== 'wylaczony', friendsPanelSide: sc.strona === 'lewa' ? 'left' : 'right',
+    friendsPanelCollapsed: sc.panel === 'waski', friendsNotify: p.get('powiadom') === '1',
     direction: sc.tryb, output: sc.wyjscie,
     walkKey: klawisz('W', 0x11, 0x57), runKey: klawisz('Shift', 0x2a, 0x10),
     standBelow: 1.2, runOn: 3.4, runOff: 2.8,

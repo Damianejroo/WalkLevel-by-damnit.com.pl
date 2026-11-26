@@ -286,6 +286,11 @@ export interface Settings {
   showProfileSwitch: boolean;
   achievementPopups: boolean;  // NOWE w zapisie (0.5 trzymało tylko w pamięci - rozdz. 10)
   achievementSound: boolean;   // NOWE w zapisie
+  friendsNotify: boolean;      // 0.6.2: komunikat w oknie, gdy znajomy zacznie chodzić (domyślnie false)
+  // --- panel znajomych (0.6.2, wspólne - okno jest jedno) ---
+  friendsPanel: boolean;       // panel z boku okna (domyślnie true)
+  friendsPanelSide: PanelSide; // domyślnie 'right'
+  friendsPanelCollapsed: boolean; // zwinięty do paska 64 px (okno węższe o 224 px)
   // --- profil gry (osoby.json profil.ustawienia) ---
   direction: Direction;
   output: OutputKind;
@@ -312,6 +317,7 @@ export type SettingKey =
   | 'beltControl' | 'quickStop' | 'togglePad' | 'simulator' | 'record' | 'detailedLogs'
   | 'theme' | 'largeText' | 'alwaysOnTop' | 'floatingButton' | 'showPersonSwitch'
   | 'showProfileSwitch' | 'achievementPopups' | 'achievementSound'
+  | 'friendsPanel' | 'friendsPanelSide' | 'friendsPanelCollapsed' | 'friendsNotify'
   | 'direction' | 'output' | 'idleSpeed' | 'walkSpeed' | 'runSpeed' | 'keyHoldS' | 'keyIdle' | 'padIdle';
 
 // ============================================================================

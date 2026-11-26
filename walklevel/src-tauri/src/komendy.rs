@@ -54,6 +54,9 @@ pub async fn ui_ready(core: State<'_, Core>, window: String) -> CmdResult<()> {
                 (v.len() == 4).then(|| [v[0], v[1], v[2], v[3]])
             });
         app.window(Okno::ShowMainAt(geometry));
+        // minimalna szerokość okna z panelem znajomych (zapamiętane okno mogło być węższe)
+        let panel = app.panel_layout();
+        app.window(Okno::MainPanel(panel, panel));
         if app.b("always_on_top") {
             app.window(Okno::MainAlwaysOnTop(true));
         }

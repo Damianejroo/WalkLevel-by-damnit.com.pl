@@ -340,6 +340,10 @@ pub fn defaults_from(config: &Config) -> Map<String, Value> {
         "achievement_sound",
         get_or(&ui, "achievement_sound", json!(false)),
     );
+    put("friends_panel", json!(true));
+    put("friends_panel_side", json!("right"));
+    put("friends_panel_collapsed", json!(false));
+    put("friends_notify", json!(false));
     normalize(d)
 }
 
@@ -384,6 +388,7 @@ pub fn normalize(mut s: Map<String, Value>) -> Map<String, Value> {
     );
     one_of(&mut s, "output", &["dry", "keys"], "dry");
     one_of(&mut s, "theme", &["system", "light", "dark"], "system");
+    one_of(&mut s, "friends_panel_side", &["right", "left"], "right");
     if !s.get("toggle_pad").is_some_and(Value::is_string) {
         s.insert("toggle_pad".into(), json!(""));
     }
@@ -418,6 +423,9 @@ pub fn normalize(mut s: Map<String, Value>) -> Map<String, Value> {
         "show_profile_switch",
         "achievement_popups",
         "achievement_sound",
+        "friends_panel",
+        "friends_panel_collapsed",
+        "friends_notify",
     ] {
         if !s.get(key).is_some_and(Value::is_boolean) {
             let v = truthy(s.get(key));
@@ -654,6 +662,15 @@ impl App {
         self.mark(&SliceName::ALL);
     }
 
+    /// Układ panelu znajomych z ustawień (szerokość i minimalna szerokość okna).
+    pub fn panel_layout(&self) -> crate::okna::PanelLayout {
+        crate::okna::PanelLayout {
+            on: self.b("friends_panel"),
+            collapsed: self.b("friends_panel_collapsed"),
+            left: self.s("friends_panel_side") == "left",
+        }
+    }
+
     pub fn floating_pos(&self) -> Option<[f64; 2]> {
         let a = self.settings.get("floating_pos")?.as_array()?;
         Some([a.first()?.as_f64()?, a.get(1)?.as_f64()?])
@@ -790,6 +807,10 @@ impl App {
             show_profile_switch: self.b("show_profile_switch"),
             achievement_popups: self.b("achievement_popups"),
             achievement_sound: self.b("achievement_sound"),
+            friends_panel: self.b("friends_panel"),
+            friends_panel_side: self.s("friends_panel_side"),
+            friends_panel_collapsed: self.b("friends_panel_collapsed"),
+            friends_notify: self.b("friends_notify"),
             direction: self.s("direction"),
             output: self.s("output"),
             walk_key: Self::key_binding(&self.walk_key),

@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { build, preview } from 'vite';
 import { chromium } from 'playwright-core';
-import { EKRANY, MOTYWY, OKNA, SZEROKOSCI, WYSOKOSC } from './ekrany.mjs';
+import { DOMYSLNE, EKRANY, MOTYWY, OKNA, SZEROKOSCI, WYSOKOSC } from './ekrany.mjs';
 
 const katalog = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const zrzuty = path.join(katalog, 'docs', 'zrzuty');
@@ -46,8 +46,9 @@ try {
       strona.on('console', (m) => m.type() === 'error' && konsola.push(m.text()));
       strona.on('pageerror', (e) => konsola.push(String(e)));
 
-      for (const { ekran, scenariusze } of EKRANY) {
+      for (const { ekran, scenariusze, szerokosci = DOMYSLNE } of EKRANY) {
         if (tylkoEkran && ekran !== tylkoEkran) continue;
+        if (!szerokosci.includes(szer)) continue;
         for (const scenariusz of scenariusze) {
           const nazwa = `${ekran}-${scenariusz}-${szer}-${motyw}`;
           konsola = [];

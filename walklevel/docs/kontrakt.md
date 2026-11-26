@@ -981,6 +981,9 @@ pub enum NavReason { Scan, FirstRun, SignedIn, PersonOpened, Settings }
 pub enum WindowRequest {
     ShowMain,                              // przycisk prawym / „otwórz okno”: showNormal + raise + focus
     MainAlwaysOnTop(bool),
+    MainPanel(PanelLayout, PanelLayout), // 0.6.2: panel znajomych przed/po - min. szerokość okna 720 (pełny) / 484 (pasek) / 420 (bez);
+                                         // zwinięcie -224 px, rozwinięcie +224 (z lewej okno przesuwa się o tyle samo w drugą stronę);
+                                         // zmaksymalizowane albo przyciągnięte (Aero Snap) - bez zmiany rozmiaru
     BubbleVisible(bool),
     BubbleSize(bool),                      // true - tryb Trening (88 × 84 z +, − i Stop), false - 56 × 56
     BubbleMove { x: i32, y: i32 },         // piksele logiczne (jak floating_pos w 0.5)
@@ -1325,7 +1328,7 @@ Poniżej `T` to typ wyniku; `()` = `void`.
 
 | Komenda | Argumenty | Wynik | Skutek / uwagi |
 |---|---|---|---|
-| `settings_set` | `key: SettingKey (String)`, `value: Value` | `()` | zapis do właściwej części osoby.json (8.1). Walidacja jak `normalize()`; zły typ/wartość → `invalid`. Skutki uboczne: `alwaysOnTop` → `WindowRequest::MainAlwaysOnTop`; `floatingButton` → `BubbleVisible`; `simulator` → `on_simulator` (połączenie z symulatorem albo z zapamiętaną bieżnią); `record` → nagrywanie; `detailedLogs` → poziom logu `bieznia.ble`; `direction` → `apply_direction` (wyjście `dry` dla trybów sterujących taśmą), `belt_target = None`; `output` → `Bridge.set_output`; `idle/walk/runSpeed` → zaokrąglenie do 0,1, `belt_target = None`; `keyHoldS` → 0-3, zaokrąglenie do pełnych sekund, `belt_target = None`; `keyIdle` (`slow`/`stop`) i `padIdle` → `belt_target = None`; `achievementSound = true` → od razu odtwarza dźwięk osiągnięcia; `togglePad: ''` → usuwa przycisk pada |
+| `settings_set` | `key: SettingKey (String)`, `value: Value` | `()` | zapis do właściwej części osoby.json (8.1). Walidacja jak `normalize()`; zły typ/wartość → `invalid`. Skutki uboczne: `alwaysOnTop` → `WindowRequest::MainAlwaysOnTop`; `floatingButton` → `BubbleVisible`; `simulator` → `on_simulator` (połączenie z symulatorem albo z zapamiętaną bieżnią); `record` → nagrywanie; `detailedLogs` → poziom logu `bieznia.ble`; `direction` → `apply_direction` (wyjście `dry` dla trybów sterujących taśmą), `belt_target = None`; `output` → `Bridge.set_output`; `idle/walk/runSpeed` → zaokrąglenie do 0,1, `belt_target = None`; `keyHoldS` → 0-3, zaokrąglenie do pełnych sekund, `belt_target = None`; `keyIdle` (`slow`/`stop`) i `padIdle` → `belt_target = None`; `achievementSound = true` → od razu odtwarza dźwięk osiągnięcia; `friendsPanel`/`friendsPanelCollapsed`/`friendsPanelSide` → `WindowRequest::MainPanel(przed, po)` (także przy `ui_ready`: minimalna szerokość); `togglePad: ''` → usuwa przycisk pada |
 | `thresholds_set` | `which: String` (`"walk"`/`"run"`), `kmh: f64` | `()` | `on_threshold`: zmieniony próg wygrywa, drugi przesuwa się o 0,8 (≤ `maxSpeed`), `runOff = runOn - 0.6`, zaokr. 0,1 |
 | `pad_steps_count` | `count: u8` (2-5) | `()` | gotowe skoki `PRESETS[count]` |
 | `pad_step_set` | `index: u8`, `at: Option<u8>`, `kmh: Option<f64>` | `()` | `on_pad_at` / `on_pad_speed`; walidacja `parse_steps` (pierwszy 0, odstęp ≥ 5, ≤ 100, 0,5-12 km/h) → `invalid` |
@@ -1776,6 +1779,10 @@ ewentualnie z ustawieniami 0.2 z `dane/ustawienia.json` (tylko czytane, nigdy ni
 | `show_profile_switch` | `showProfileSwitch` | wyglad | `true` | bool |
 | `achievement_popups` | `achievementPopups` | wyglad (**nowe**) | `true` | bool |
 | `achievement_sound` | `achievementSound` | wyglad (**nowe**) | `false` | bool |
+| `friends_notify` | `friendsNotify` | wyglad (0.6.2) | `false` | bool - komunikat w oknie, gdy znajomy zacznie chodzić |
+| `friends_panel` | `friendsPanel` | wspolne (0.6.2) | `true` | bool - panel znajomych z boku okna |
+| `friends_panel_side` | `friendsPanelSide` | wspolne (0.6.2) | `"right"` | `right`/`left` |
+| `friends_panel_collapsed` | `friendsPanelCollapsed` | wspolne (0.6.2) | `false` | bool - pasek 64 px |
 | `direction` | `direction` | profil | `"keyboard"` | 4 wartości, inaczej `keyboard` |
 | `output` | `output` | profil | `"dry"` | `dry`/`keys`, inaczej `dry` |
 | `walk_key` | `walkKey` | profil | W `{scan: 0x11, extended: false, name: "W", vk: 0x57}` | `Key.from_dict` (scan 1-255) |
@@ -1869,7 +1876,7 @@ CREATE TABLE IF NOT EXISTS poziom_osoby (osoba TEXT PRIMARY KEY, poziom INTEGER 
    "person": "a1b2c3d4e5", "upload": true, "visibility": "znajomi", "live": false,
    "profile_visibility": "znajomi", "terms": "2026-11-25", "remember": true,
    "terms_current": "2026-11-25", "games_visibility": "znajomi",
-   "sync_cursor": "…", "terms_games": "2026-11-27", "resent_terms": "2026-11-27"
+   "sync_cursor": "…", "terms_games": "2026-11-26", "resent_terms": "2026-11-26"
   }
  ]
 }

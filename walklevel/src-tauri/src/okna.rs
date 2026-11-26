@@ -19,6 +19,53 @@ pub const BUBBLE: &str = "przycisk";
 pub const DEFAULT_W: f64 = 740.0;
 pub const DEFAULT_H: f64 = 890.0;
 pub const MIN_W: f64 = 420.0;
+/// Panel znajomych (0.6.2, docs/wyglad.md 8.16): pełny 288 px, zwinięty pasek 64 px.
+pub const PANEL_FULL_W: f64 = 288.0;
+pub const PANEL_BAR_W: f64 = 64.0;
+/// Minimalna szerokość okna z pełnym panelem i z paskiem (bez panelu - [`MIN_W`]).
+pub const MIN_W_PANEL_FULL: f64 = 720.0;
+pub const MIN_W_PANEL_BAR: f64 = 484.0;
+
+/// Układ panelu znajomych (ustawienia `friends_panel*`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PanelLayout {
+    pub on: bool,
+    pub collapsed: bool,
+    /// panel z lewej strony okna
+    pub left: bool,
+}
+
+impl PanelLayout {
+    /// Szerokość panelu w oknie (px logiczne).
+    pub fn width(self) -> f64 {
+        match (self.on, self.collapsed) {
+            (false, _) => 0.0,
+            (true, true) => PANEL_BAR_W,
+            (true, false) => PANEL_FULL_W,
+        }
+    }
+
+    /// Najmniejsza szerokość okna z tym układem.
+    pub fn min_window(self) -> f64 {
+        match (self.on, self.collapsed) {
+            (false, _) => MIN_W,
+            (true, true) => MIN_W_PANEL_BAR,
+            (true, false) => MIN_W_PANEL_FULL,
+        }
+    }
+
+    /// Zmiana szerokości okna i przesunięcie w poziomie przy przejściu `self` -> `after`, żeby
+    /// główna kolumna stała w miejscu: zwinięcie zwęża okno o 224 px, rozwinięcie poszerza;
+    /// panel z lewej - okno przesuwa się o tyle samo w drugą stronę. Zmiana strony panelu nie
+    /// zmienia rozmiaru.
+    pub fn resize_to(self, after: PanelLayout) -> (f64, f64) {
+        if self.left != after.left {
+            return (0.0, 0.0);
+        }
+        let delta = after.width() - self.width();
+        (delta, if after.left { -delta } else { 0.0 })
+    }
+}
 pub const MIN_H: f64 = 560.0;
 pub const BUBBLE_SIZE: f64 = 56.0;
 /// Tryb Trening: kółko + kolumna 28 px (+, poziom, −) obok i rząd Stop 24 px pod spodem
@@ -47,6 +94,8 @@ pub enum Okno {
     ShowMainAt(Option<[i64; 4]>),
     ShowMain,
     MainAlwaysOnTop(bool),
+    /// panel znajomych: układ przed i po (minimalna szerokość, rozmiar, przesunięcie okna)
+    MainPanel(PanelLayout, PanelLayout),
     BubbleVisible(bool, Option<[f64; 2]>),
     /// rozmiar okna przycisku za układem
     BubbleSize(BubbleLayout),
@@ -122,6 +171,11 @@ fn apply(app: &AppHandle, r: Okno) {
         Okno::MainAlwaysOnTop(on) => {
             if let Some(w) = app.get_webview_window(MAIN) {
                 let _ = w.set_always_on_top(on);
+            }
+        }
+        Okno::MainPanel(before, after) => {
+            if let Some(w) = app.get_webview_window(MAIN) {
+                resize_for_panel(&w, before, after);
             }
         }
         Okno::BubbleVisible(true, pos) => {
@@ -379,6 +433,85 @@ fn place_main(w: &WebviewWindow, geometry: Option<[i64; 4]>) {
     let _ = w.set_size(LogicalSize::new(width, height));
 }
 
+/// Okno pod panel znajomych: minimalna szerokość z układu `after`; zmiana szerokości (i przy
+/// panelu z lewej położenia) tylko dla zwykłego okna - zmaksymalizowane albo przyciągnięte do
+/// krawędzi ekranu zostaje, jak jest (panel tylko się zwija). Zwężenie: najpierw minimum, potem
+/// rozmiar; poszerzenie odwrotnie.
+fn resize_for_panel(w: &WebviewWindow, before: PanelLayout, after: PanelLayout) {
+    let min = LogicalSize::new(after.min_window(), MIN_H);
+    let fixed = w.is_maximized().unwrap_or(false) || is_snapped(w);
+    log::info!("Okno: panel {before:?} -> {after:?}, bez zmiany rozmiaru: {fixed}");
+    let (Ok(k), Ok(pos), Ok(size)) = (w.scale_factor(), w.outer_position(), w.inner_size()) else {
+        let _ = w.set_min_size(Some(min));
+        return;
+    };
+    let width = size.width as f64 / k;
+    let height = size.height as f64 / k;
+    let (delta, shift) = if fixed {
+        (0.0, 0.0)
+    } else {
+        before.resize_to(after)
+    };
+    let mut new_width = (width + delta).max(after.min_window());
+    if fixed {
+        new_width = width;
+    }
+    let shift = shift - (new_width - width - delta).max(0.0) * f64::from(u8::from(after.left));
+    if new_width < width {
+        let _ = w.set_min_size(Some(min));
+    }
+    if (new_width - width).abs() >= 0.5 {
+        let _ = w.set_size(LogicalSize::new(new_width, height));
+    }
+    if shift.abs() >= 0.5 {
+        let x = pos.x as f64 / k + shift;
+        let y = pos.y as f64 / k;
+        let _ = w.set_position(LogicalPosition::new(x, y));
+    }
+    if new_width >= width {
+        let _ = w.set_min_size(Some(min));
+    }
+}
+
+/// Okno przyciągnięte do krawędzi (Aero Snap): Windows trzyma wtedy w `rcNormalPosition`
+/// prostokąt sprzed przyciągnięcia - inny ROZMIAR niż bieżący. Porównujemy tylko rozmiar
+/// (położenie jest we współrzędnych obszaru roboczego, zależnych od paska zadań i monitorów).
+fn is_snapped(w: &WebviewWindow) -> bool {
+    #[cfg(windows)]
+    {
+        use windows::Win32::Foundation::RECT;
+        use windows::Win32::UI::WindowsAndMessaging::{
+            GetWindowPlacement, GetWindowRect, IsIconic, IsZoomed, WINDOWPLACEMENT,
+        };
+        let Ok(hwnd) = w.hwnd() else { return false };
+        // SAFETY: tylko odczyt położenia okna z Tauri.
+        unsafe {
+            if IsZoomed(hwnd).as_bool() || IsIconic(hwnd).as_bool() {
+                return false;
+            }
+            let mut placement = WINDOWPLACEMENT {
+                length: std::mem::size_of::<WINDOWPLACEMENT>() as u32,
+                ..Default::default()
+            };
+            let mut rect = RECT::default();
+            if GetWindowPlacement(hwnd, &mut placement).is_err()
+                || GetWindowRect(hwnd, &mut rect).is_err()
+            {
+                return false;
+            }
+            let n = placement.rcNormalPosition;
+            let off = |a: i32, b: i32| (a - b).abs() > 2;
+            off(rect.right - rect.left, n.right - n.left)
+                || off(rect.bottom - rect.top, n.bottom - n.top)
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = w;
+        false
+    }
+}
+
 /// Geometria okna głównego do zapamiętania: [x, y, szer., wys.] w pikselach logicznych.
 /// `None`, gdy okno zminimalizowane, zmaksymalizowane albo poza ekranami.
 pub fn main_geometry(app: &AppHandle) -> Option<[i64; 4]> {
@@ -598,4 +731,37 @@ pub fn windows_version() -> String {
 /// Folder danych WebView2.
 pub fn webview_dir(data: &Path) -> PathBuf {
     data.join("webview")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const FULL: PanelLayout = PanelLayout {
+        on: true,
+        collapsed: false,
+        left: false,
+    };
+
+    #[test]
+    fn panel_collapse_narrows_window_and_left_panel_moves_it() {
+        let bar = PanelLayout {
+            collapsed: true,
+            ..FULL
+        };
+        let off = PanelLayout { on: false, ..FULL };
+        assert_eq!(
+            (FULL.min_window(), bar.min_window(), off.min_window()),
+            (720.0, 484.0, 420.0)
+        );
+        assert_eq!(FULL.resize_to(bar), (-224.0, 0.0)); // z prawej: okno węższe, x bez zmian
+        assert_eq!(bar.resize_to(FULL), (224.0, 0.0));
+        let left = PanelLayout { left: true, ..FULL };
+        let left_bar = PanelLayout { left: true, ..bar };
+        assert_eq!(left.resize_to(left_bar), (-224.0, 224.0)); // główna kolumna stoi
+        assert_eq!(left_bar.resize_to(left), (224.0, -224.0));
+        assert_eq!(FULL.resize_to(off), (-288.0, 0.0));
+        assert_eq!(FULL.resize_to(left), (0.0, 0.0)); // zmiana strony - bez zmiany rozmiaru
+        assert_eq!(FULL.resize_to(FULL), (0.0, 0.0));
+    }
 }

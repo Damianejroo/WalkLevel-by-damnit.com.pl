@@ -24,7 +24,9 @@
 <style>
   .warstwa {
     position: fixed;
-    inset-inline: 0;
+    /* w kolumnie ekranów, obok panelu znajomych (App.svelte ustawia --panel-lewo/-prawo) */
+    left: var(--panel-lewo, 0px);
+    right: var(--panel-prawo, 0px);
     bottom: 20px;
     z-index: 20;
     display: grid;

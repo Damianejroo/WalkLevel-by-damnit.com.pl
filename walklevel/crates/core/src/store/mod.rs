@@ -57,6 +57,10 @@ pub const SHARED_KEYS: &[&str] = &[
     "detailed_logs",
     "last_version",
     "window_geometry",
+    // panel znajomych (0.6.2): okno jest wspólne, więc i jego układ
+    "friends_panel",
+    "friends_panel_side",
+    "friends_panel_collapsed",
 ];
 /// Klucze wyglądu - osobne dla każdej osoby.
 pub const LOOK_KEYS: &[&str] = &[
@@ -69,6 +73,7 @@ pub const LOOK_KEYS: &[&str] = &[
     "show_profile_switch",
     "achievement_popups",
     "achievement_sound",
+    "friends_notify",
 ];
 /// Klucze sterowania - osobne dla każdego profilu gry.
 pub const PROFILE_KEYS: &[&str] = &[

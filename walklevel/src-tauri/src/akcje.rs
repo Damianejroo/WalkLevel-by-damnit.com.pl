@@ -38,6 +38,10 @@ impl App {
             "showProfileSwitch" => "show_profile_switch",
             "achievementPopups" => "achievement_popups",
             "achievementSound" => "achievement_sound",
+            "friendsPanel" => "friends_panel",
+            "friendsPanelSide" => "friends_panel_side",
+            "friendsPanelCollapsed" => "friends_panel_collapsed",
+            "friendsNotify" => "friends_notify",
             "direction" => "direction",
             "output" => "output",
             "idleSpeed" => "idle_speed",
@@ -54,6 +58,7 @@ impl App {
             "output" => Some(&["dry", "keys"]),
             "pad_idle" => Some(&["stop", "slow", "zero"]),
             "key_idle" => Some(&["slow", "stop"]),
+            "friends_panel_side" => Some(&["right", "left"]),
             _ => None,
         };
         let value = match (file_key, &value) {
@@ -100,9 +105,24 @@ impl App {
             }
             _ => {}
         }
+        let panel_before = self.panel_layout();
         self.change(file_key, value.clone());
         match file_key {
             "always_on_top" => self.window(Okno::MainAlwaysOnTop(on)),
+            // zwinięcie / rozwinięcie / wyłączenie panelu zmienia szerokość okna (główna kolumna
+            // stoi), strona panelu - tylko jego miejsce
+            "friends_panel" | "friends_panel_collapsed" | "friends_panel_side" => {
+                let after = self.panel_layout();
+                log::info!(
+                    "Panel znajomych: {}",
+                    match (after.on, after.collapsed) {
+                        (false, _) => "wyłączony",
+                        (true, true) => "pasek",
+                        (true, false) => "pełny",
+                    }
+                );
+                self.window(Okno::MainPanel(panel_before, after));
+            }
             "floating_button" => {
                 let pos = self.floating_pos();
                 self.window(Okno::BubbleVisible(on, pos));

@@ -2,7 +2,10 @@
 // Nowy ekran: dopisz { ekran: '<trasa>', scenariusze: [...] }. Trasy: src/lib/stan.svelte.ts,
 // scenariusze: SCENARIUSZE w src/lib/atrapa.ts.
 
-export const SZEROKOSCI = [420, 740, 1400];
+// Wpis może mieć własne `szerokosci` (panel znajomych: 720 = minimum okna z pełnym panelem,
+// 484 = z paskiem); bez nich - DOMYSLNE.
+export const DOMYSLNE = [420, 740, 1400];
+export const SZEROKOSCI = [420, 484, 720, 740, 1400];
 export const MOTYWY = ['jasny', 'ciemny'];
 export const WYSOKOSC = 900;
 
@@ -49,6 +52,14 @@ export const EKRANY = [
   { ekran: 'session', scenariusze: ['domyslny'] },
   { ekran: 'account', scenariusze: ['wylogowany', 'domyslny'] },
   { ekran: 'wzornik', scenariusze: ['domyslny', 'dlugie'] },
+  // panel znajomych (0.6.2): pełny / pasek / wyłączony, lewa / prawa, bez konta, duży tekst
+  {
+    ekran: 'main',
+    szerokosci: [484, 720, 740, 1400],
+    scenariusze: ['domyslny', 'panel-waski', 'panel-lewa', 'panel-lewa-waski', 'panel-wylaczony', 'panel-duzy', 'panel-bez-konta', 'panel-dlugie'],
+  },
+  { ekran: 'online', szerokosci: [720], scenariusze: ['domyslny', 'panel-duzy'] },
+  { ekran: 'settings', szerokosci: [720], scenariusze: ['ustawienia', 'panel-duzy'] },
 ];
 
 // Osobne okna (docs/kontrakt.md 7.2-7.3): strona <strona>?demo=1&<zapytanie>, okno stałego rozmiaru

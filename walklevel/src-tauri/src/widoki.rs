@@ -300,6 +300,14 @@ pub struct Settings {
     pub show_profile_switch: bool,
     pub achievement_popups: bool,
     pub achievement_sound: bool,
+    /// panel znajomych z boku okna (0.6.2)
+    pub friends_panel: bool,
+    /// "right" / "left"
+    pub friends_panel_side: String,
+    /// zwinięty do paska 64 px
+    pub friends_panel_collapsed: bool,
+    /// komunikat w oknie, gdy znajomy zacznie chodzić
+    pub friends_notify: bool,
     pub direction: String,
     pub output: String,
     pub walk_key: KeyBinding,
