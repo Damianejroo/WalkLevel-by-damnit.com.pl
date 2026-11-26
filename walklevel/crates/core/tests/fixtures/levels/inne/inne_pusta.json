@@ -1,0 +1,156 @@
+{
+ "name": "inne_pusta",
+ "input": {
+  "sessions": [],
+  "now": 1767225600.0,
+  "friends": 0,
+  "referrals": 0,
+  "earnedBefore": {},
+  "restPerWeek": 1
+ },
+ "expected": {
+  "walks": [],
+  "km": 0.0,
+  "xp": 13,
+  "level": 2,
+  "rank": "Trzeci",
+  "nextRank": "Trzeci",
+  "levelFloor": 0,
+  "levelCeiling": 50,
+  "levelFraction": 0.26,
+  "kmToNextLevel": 1.0,
+  "progress": [
+   {
+    "id": "k1",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "k05",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 0.5,
+    "fraction": 0.0
+   },
+   {
+    "id": "k3",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "s3dni",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "s4dni",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 4.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gry2a",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gry2b",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gry3a",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "jedna",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2.5,
+    "fraction": 0.0
+   },
+   {
+    "id": "zawsze",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "pozno",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "kroki",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1000.5,
+    "fraction": 0.0
+   },
+   {
+    "id": "sesja2",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "znaj2",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "pol0",
+    "earnedAt": 1767225600.0,
+    "current": 0.0,
+    "target": 0.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "nowe",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "tren",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "pierwsza",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   }
+  ],
+  "earned": [
+   "pol0"
+  ],
+  "closest": [],
+  "closest10": []
+ }
+}
