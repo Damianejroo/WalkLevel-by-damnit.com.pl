@@ -1,7 +1,0 @@
-{
-  "format": 1,
-  "id": "kingsmith",
-  "name": "KingSmith WalkingPad",
-  "driver": "kingsmith",
-  "match": ["KS-", "WALKINGPAD"]
-}

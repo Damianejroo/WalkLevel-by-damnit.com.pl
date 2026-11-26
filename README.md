@@ -127,38 +127,43 @@ Szczegóły: [Polityka prywatności](POLITYKA-PRYWATNOSCI.md) i
 
 ## Dla programisty
 
-```powershell
-uv sync                                   # środowisko z narzędziami
-uv run python -m bieznia                  # okno (z kodu, bez instalacji)
-uv run python -m bieznia --headless       # bez okna (symulator, logi w konsoli)
-uv run python -m bieznia --diagnostyka    # tylko raport Bluetooth
-uv run pytest; uv run ruff check; uv run ruff format; uv run mypy
-uv run python packaging/zbuduj.py 0.2.0   # exe + instalator (instalator wymaga Inno Setup)
-```
-
-### Wydanie nowej wersji dla testera
+WalkLevel od 0.6.0 to Tauri 2 + Svelte 5 + Rust (folder `walklevel/`, zasady w
+`walklevel/CLAUDE.md`). Potrzebne: Rust (stable), Node.js, WebView2.
 
 ```powershell
-git tag -a v0.2.1 -m "Poprawione łączenie z bieżnią po wybudzeniu"
-git push origin v0.2.1
+cd walklevel
+npm ci
+npm run dev                                  # interfejs w przeglądarce z atrapą rdzenia
+npx tauri dev                                # aplikacja z prawdziwym rdzeniem
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
+npm run check; npm run test:ui               # typy i test widoków (Edge)
+.\packaging\zbuduj.ps1 -Wersja 0.6.2         # exe + instalator (wymaga Inno Setup)
 ```
 
-GitHub Actions uruchamia testy, buduje `Bieznia.exe` (PyInstaller) i instalator (Inno Setup),
-dodaje poświadczenie pochodzenia i publikuje wydanie z opisem z tagu (ok. 5 min). Potem
-wystarczy powiedzieć testerowi, żeby kliknął **Aktualizuj**.
+### Wydanie nowej wersji
+
+```powershell
+git tag -a v0.6.2 -m "Co się zmieniło"
+git push origin v0.6.2
+```
+
+GitHub Actions uruchamia testy, buduje exe i instalator (`walklevel/packaging/zbuduj.ps1`,
+Inno Setup), dodaje poświadczenie pochodzenia i publikuje wydanie z opisem z tagu. Aplikacja
+znajdzie je przyciskiem **Aktualizuj**.
 
 ### Struktura
 
-- `bieznia/ble/` - Bluetooth: protokół KingSmith, FTMS, sterowniki, wątek połączenia
-  z ponawianiem, raport diagnostyczny
-- `bieznia/engine.py`, `mapping.py` - prędkość > W / Shift, bezpieczniki, liczniki
-- `bieznia/gui/` - okno PySide6: tokeny i motywy, kontrolki (`komponenty.py`), kontroler (`app.py`)
-- `bieznia/gui/ekrany/` - ekrany: główny, ustawienia, profil gry, osoby i konfigurator, historia, kopia
-- `bieznia/dane.py`, `historia.py`, `kopia.py` - osoby i profile (`dane/osoby.json`), historia kroków (SQLite `dane/historia.db`), eksport i import `.bieznia`
-- `bieznia/paleta.py`, `nazwy.py`, `ikony.py` - 20 kolorów, losowe nazwy osób, ikona i kolor z pliku gry
-- `bieznia/aktualizacje.py` - aktualizacja z GitHub Releases (SHA-256, tylko hosty GitHuba)
-- `bieznia/zgloszenia.py` - paczka z logami i wysyłka zgłoszenia
-- `packaging/` - ikona, specyfikacja PyInstaller, instalator Inno Setup, skrypt budowania
+- `walklevel/crates/core` - cały rdzeń bez interfejsu: bieżnia (KingSmith, FTMS, Bluetooth),
+  sterowanie i klawisze, historia (SQLite `dane/historia.db`), osoby i profile
+  (`dane/osoby.json`), poziomy i osiągnięcia, konto online i synchronizacja, kopie `.bieznia`,
+  zgłoszenia, aktualizacje
+- `walklevel/crates/core/assets/profile` - profile modeli bieżni (JSON); stąd aplikacja
+  pobiera też nowe modele
+- `walklevel/src-tauri` - okna, komendy i zdarzenia Tauri
+- `walklevel/src` - interfejs Svelte, `walklevel/docs` - kontrakt, wygląd, teksty, analizy
+- `walklevel/packaging` - ikona, grafiki i skrypt instalatora Inno Setup
+- `strona` - regulamin konta online i szablony maili
 
 ### Zgłoszenia prosto do autora
 
@@ -176,15 +181,15 @@ X21 mówi własnym, szyfrowanym protokołem KingSmith (opisanym w otwartym stero
 tablicą (7 wariantów) - aplikacja wykrywa ją z odpowiedzi bieżni i nigdy nie podaje prędkości
 z niepewnie odszyfrowanej ramki. Prędkość jest odpytywana co 0,75 s, bo przy stałym tempie
 bieżnia sama nic nie wysyła. Start to `props ControlMode 1` + `props runState 1` (do trzech
-prób, gdy bieżnia odpowie błędem), stop to `props runState 0`, prędkość to `props CurrentSpeed 1.5` (jak w QZ). Zapasowo obsługiwany jest
-standard FTMS (tylko odczyt).
+prób, gdy bieżnia odpowie błędem), stop to `props runState 0`, prędkość to `props CurrentSpeed 1.5` (jak w QZ). Obsługiwany jest też
+standard FTMS (np. Urevo SpaceWalk), z odczytem i sterowaniem prędkością.
 
 ## Bezpieczeństwo
 
 - aktualizacja tylko po kliknięciu, tylko z wydań tego repozytorium i tylko z hostów GitHuba;
   instalator jest uruchamiany dopiero po zgodności sumy SHA-256 podanej przez GitHub,
 - wydania budują się w GitHub Actions z przypiętych wersji (akcje po commitach, Inno Setup
-  po sumie SHA-256, biblioteki z `uv.lock` z sumami) i mają poświadczenie pochodzenia
+  po sumie SHA-256, biblioteki z `Cargo.lock` i `package-lock.json`) i mają poświadczenie pochodzenia
   (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/WalkLevel-by-damnit.com.pl`),
 - instalacja i działanie bez administratora; aplikacja startuje z wyłączonym sterowaniem,
   wysyła do bieżni tylko start, stop i prędkość (gdy sterowanie jest włączone) i puszcza W/Shift po utracie

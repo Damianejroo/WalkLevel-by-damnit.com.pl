@@ -50,39 +50,3 @@ jobs:
           if ($LASTEXITCODE) { throw "npm run build" }
           npm run test:ui -- --bez-zrzutow
           if ($LASTEXITCODE) { throw "test:ui" }
-
-  # Wersja 0.5.x w Pythonie (bieznia/) - zostaje w repo; profile bieżni z bieznia/sterowniki/profile
-  # pobiera też 0.6.0 („Sprawdź nowe modele”)
-  test:
-    runs-on: windows-latest
-    timeout-minutes: 20
-    env:
-      QT_QPA_PLATFORM: offscreen # testy okna bez ekranu
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
-        with:
-          version: "0.13.9"
-      - name: Zależności (zgodne z uv.lock)
-        run: uv sync --locked
-      - name: Lint
-        run: uv run ruff check
-      - name: Formatowanie
-        run: uv run ruff format --check
-      - name: Typy
-        run: uv run mypy
-      - name: Testy
-        run: uv run pytest -q
-      - name: Test dymny exe (budowa + uruchomienie bez okna)
-        shell: pwsh
-        run: |
-          uv run python packaging/zbuduj.py 0.0.1
-          $data = Join-Path $env:RUNNER_TEMP "dane-exe"
-          $env:LOCALAPPDATA = $data
-          $replay = Join-Path $pwd "tests/dane/krotkie.jsonl"
-          $p = Start-Process build/dist/Bieznia/Bieznia.exe -ArgumentList '--headless','--replay',$replay -Wait -PassThru
-          $log = Get-Content (Join-Path $data "Bieznia/logs/bieznia.log") -Raw -Encoding utf8
-          Write-Output $log
-          if ($p.ExitCode -ne 0 -or $log -notmatch 'Źródło zakończone') { throw "Exe nie działa (kod $($p.ExitCode))" }

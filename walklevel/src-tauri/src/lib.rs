@@ -31,7 +31,7 @@ use walklevel_core::treadmill::{self, ProfileRegistry};
 use crate::stan::{App, Core, lock};
 
 /// Domyślny config.toml wbudowany w program (gdy obok exe nie ma pliku).
-const EMBEDDED_CONFIG: &str = include_str!("../../../config.toml");
+const EMBEDDED_CONFIG: &str = include_str!("../../config.toml");
 
 fn load_config(paths: &AppPaths) -> Config {
     let (config, embedded) = config::load_config_or(&paths.resources, &paths.data, EMBEDDED_CONFIG);

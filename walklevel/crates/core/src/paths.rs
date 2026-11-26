@@ -143,12 +143,12 @@ fn exe_dir() -> Option<PathBuf> {
         .map(Path::to_path_buf)
 }
 
-/// Katalog główny repozytorium (walklevel/crates/core -> trzy poziomy wyżej).
+/// Katalog walklevel/ (z kodu: tam leży config.toml) - walklevel/crates/core -> dwa poziomy wyżej.
 fn repo_root() -> PathBuf {
     let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
     manifest
         .ancestors()
-        .nth(3)
+        .nth(2)
         .unwrap_or(manifest)
         .to_path_buf()
 }

@@ -639,7 +639,7 @@ pub const TIMEOUT_S: u64 = 15;
 
 /// Adres folderu profili w repozytorium (gałąź main).
 pub fn default_base_url() -> String {
-    format!("https://raw.githubusercontent.com/{REPOSITORY}/{BRANCH}/bieznia/sterowniki/profile")
+    format!("https://raw.githubusercontent.com/{REPOSITORY}/{BRANCH}/walklevel/crates/core/assets/profile")
 }
 
 /// Błąd pobierania albo dodawania profilu - komunikat dla użytkownika.
