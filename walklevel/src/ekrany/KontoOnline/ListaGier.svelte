@@ -1,13 +1,14 @@
 <script lang="ts">
   // Podział wyników na gry (docs/wyglad.md 9.4): nazwa gry z wielokropkiem | kroki i „km · czas”
-  // w dwóch liniach do prawej. Od największej liczby kroków.
-  import type { GameTotals } from '../../lib/typy';
+  // w dwóch liniach do prawej. Od największej liczby kroków; na końcu „Inne gry (N)” (profil osoby:
+  // gry poza listą, bez nazw).
+  import type { GameTotals, OtherGames } from '../../lib/typy';
   import Statystyki from './Statystyki.svelte';
   import { czas, t } from '../../lib/teksty';
   import { liczba } from '../../lib/format';
   import { km1 } from './pomocnicze';
 
-  let { gry }: { gry: GameTotals[] } = $props();
+  let { gry, inne = null }: { gry: GameTotals[]; inne?: OtherGames | null } = $props();
   const posortowane = $derived([...gry].sort((a, b) => b.steps - a.steps));
 </script>
 
@@ -23,6 +24,17 @@
       />
     </li>
   {/each}
+  {#if inne}
+    {@const nazwa = t('profil_online.inne_gry', { liczba: inne.games })}
+    <li class="gra">
+      <span class="nazwa jedna-linia bez-nazwy" title={nazwa}>{nazwa}</span>
+      <Statystyki
+        liczba={liczba(inne.steps)}
+        jednostka={t('ranking.wiersz.kroki_slowo', { kroki: inne.steps })}
+        dol={`${t('ranking.wiersz.km', { km: km1(inne.distanceKm) })} · ${czas(inne.activeS)}`}
+      />
+    </li>
+  {/if}
 </ul>
 
 <style>

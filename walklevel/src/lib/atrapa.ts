@@ -70,6 +70,7 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   // Klawisze przy „Taśma staje” na ekranie głównym; przycisk na ekranie z jadącą taśmą
   'klawisze-stop': { tryb: 'keyboard', wlaczone: true, klawiszStop: true },
   jedzie: { tryb: 'keyboard', jedzie: true },
+  obcy: {},
   // Kopia danych: okno wyboru pliku zamknięte bez wyboru, jest kopia sprzed wczytania (utworzAtrape)
   'kopia-wybor': {},
   // ekran „Wybierz bieżnię”: lista znalezionych urządzeń od startu i trwające skanowanie
@@ -527,7 +528,7 @@ export function utworzAtrape(): Silnik {
   };
   const pustyOnline = (): K.OnlineView => ({
     personId: people.activePersonId, loading: [], stats: null, friends: null, invitations: null, ranking: null,
-    people: null, peopleQuery: { search: '', page: 1 }, person: null, regCode: null,
+    people: null, peopleQuery: { search: '', page: 1 }, person: null, regCode: null, achievementStats: null,
   });
   const online: K.OnlineView = pustyOnline();
   if (account.loggedIn) {
@@ -1227,6 +1228,18 @@ export function utworzAtrape(): Silnik {
     online_load: (a) => {
       if (!account.loggedIn) throw blad('loggedOut', t('konto.blad.niezalogowany'));
       const tab = a.tab as K.OnlineTab;
+      if (tab === 'achievements') {
+        // procent graczy dla co trzeciego osiągnięcia (prawdziwy serwer: od 25 kont)
+        if (!online.achievementStats) {
+          const percent: Record<string, number> = {};
+          defs.achievements.forEach((x, i) => {
+            if (i % 3 === 0) percent[x.id] = Math.round(((i * 37) % 97) * 10 + 5) / 10;
+          });
+          online.achievementStats = { accounts: 214, percent };
+          wyslij('online');
+        }
+        return;
+      }
       const pierwszy = tab === 'friends' ? online.friends === null : tab === 'ranking' ? online.ranking === null : online.people === null;
       if (pierwszy || a.force) {
         online.loading = tab === 'friends' ? ['stats', 'friends', 'invitations'] : tab === 'ranking' ? ['ranking'] : ['people'];
@@ -1268,6 +1281,7 @@ export function utworzAtrape(): Silnik {
         since: teraz() - 200 * 86400, treadmillModel: model, friend: !!f,
         week: f?.week ?? tydzien(41230), total: { steps: 812400, distanceKm: 601.8, activeS: 1_300_000, sessions: 214 },
         games: f ? null : online.stats?.games ?? null, gamesHidden: !!f,
+        otherGames: f ? null : { steps: 5230, distanceKm: 3.9, activeS: 2810, sessions: 3, games: 2 },
       };
       online.person = person;
       wyslij('online');
@@ -1409,7 +1423,8 @@ export function utworzAtrape(): Silnik {
   // Podgląd profilu osoby bez klikania (?ekran=onlinePerson): profil znajomego; &osoba=ja - własny,
   // &osoba=obcy - osoba spoza znajomych (z podziałem na gry)
   if (account.loggedIn && p.get('ekran') === 'onlinePerson') {
-    const kto = p.get('osoba');
+    // scenariusz „obcy” (test:ui): profil spoza znajomych z podziałem na gry i „Inne gry”
+    const kto = p.get('osoba') ?? (p.get('stan') === 'obcy' ? 'obcy' : null);
     void komendy.online_person_open({ userId: kto === 'ja' ? account.userId : kto === 'obcy' ? 'u-ania' : 'u-ola' });
   }
 

@@ -141,8 +141,8 @@
     <Karta tytul={gry.tytul} podpis={gry.podpis}>
       {#if osoba.gamesHidden}
         <p class="opis">{t('profil_online.gry_ukryte')}</p>
-      {:else if osoba.games?.length}
-        <div class="gry"><ListaGier gry={osoba.games} /></div>
+      {:else if osoba.games?.length || osoba.otherGames}
+        <div class="gry"><ListaGier gry={osoba.games ?? []} inne={osoba.otherGames} /></div>
       {:else}
         <p class="opis">{t('profil_online.gry_brak')}</p>
       {/if}

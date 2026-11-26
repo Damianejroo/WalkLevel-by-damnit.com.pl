@@ -1114,4 +1114,6 @@ export const SLOWNIK = {
   "glowny.wskaznik.klawisze.stoi": "Bez klawisza · taśma stoi",
   "glowny.podpowiedz.klawisze_stop": "Trzymaj {klawisz_chodu}, a taśma ruszy. Puść, a stanie.",
   "dymek.stop_dostepnosc": "Zatrzymaj taśmę",
+  "profil_online.inne_gry": "Inne gry ({liczba})",
+  "osiagniecia.procent_graczy": "Ma to {procent}% graczy",
 } as const;

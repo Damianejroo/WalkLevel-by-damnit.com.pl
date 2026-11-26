@@ -569,7 +569,7 @@ export interface AccountView {
 
 export interface OnlineView {
   personId: string;
-  loading: Array<'stats' | 'friends' | 'invitations' | 'ranking' | 'people' | 'person'>;
+  loading: Array<'stats' | 'friends' | 'invitations' | 'ranking' | 'people' | 'person' | 'achievementStats'>;
   stats: OnlineStats | null;               // „Moje wyniki online · ten tydzień”
   friends: Friend[] | null;
   invitations: Invitations | null;
@@ -578,7 +578,12 @@ export interface OnlineView {
   peopleQuery: { search: string; page: number };
   person: OnlinePerson | null;             // ostatnio otwarty profil
   regCode: RegistrationCode | null;
+  achievementStats: AchievementStats | null; // ekran Osiągnięcia: online_load('achievements'), najwyżej raz na dobę
 }
+/** GET osiagniecia/statystyki: poniżej progu kont serwer nie podaje procentów (accounts null, percent {}). */
+export interface AchievementStats { accounts: number | null; percent: Record<string, number> }
+/** Profil osoby: gry poza listą (inne_gry) - wiersz „Inne gry (N)” bez nazw. */
+export interface OtherGames { steps: number; distanceKm: number; activeS: number; sessions: number | null; games: number }
 export interface PeriodTotals { steps: number; distanceKm: number; activeS: number; sessions: number | null }
 export interface GameTotals { game: string; gameId: string | null; steps: number; distanceKm: number; activeS: number } // game '' = „bez gry”
 export interface OnlineStats extends PeriodTotals { games: GameTotals[] | null }
@@ -609,7 +614,8 @@ export interface OnlinePerson {
   friend: boolean;
   week: PeriodTotals | null;
   total: PeriodTotals | null;
-  games: GameTotals[] | null;
+  games: GameTotals[] | null;  // profil: gry[].nazwa, statystyki: gry[].gra
+  otherGames: OtherGames | null; // inne_gry; null - brak
   gamesHidden: boolean;        // serwer podał "gry": null - osoba nie pokazuje podziału
 }
 export interface RegistrationCode { code: string; validUntil: number | null }
@@ -745,7 +751,7 @@ export type WindowLabel = 'main' | 'popup' | 'przycisk';
 export type ThresholdWhich = 'walk' | 'run';
 export type WizardMode = WizardResult['mode'];
 export type GamePickKind = 'folder' | 'file';
-export type OnlineTab = 'friends' | 'ranking' | 'people' | 'me';
+export type OnlineTab = 'friends' | 'ranking' | 'people' | 'me' | 'achievements'; // achievements: statystyki osiągnięć (ekran Osiągnięcia)
 export type InviteState = 'oczekuje' | 'przyjeta';
 export type VerificationResult = 'wyslano' | 'potwierdzony';
 export type NavReason = NavRequest['reason'];

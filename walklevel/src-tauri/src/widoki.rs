@@ -639,7 +639,8 @@ pub struct AccountView {
 
 // dane online z serwera - typy i ich odczyt w rdzeniu
 pub use walklevel_core::account::online::{
-    Friend, Invitations, OnlinePerson, OnlineStats, PeoplePage, Ranking, RegistrationCode,
+    AchievementStats, Friend, Invitations, OnlinePerson, OnlineStats, PeoplePage, Ranking,
+    RegistrationCode,
 };
 
 #[derive(Debug, Clone, Serialize)]
@@ -671,6 +672,8 @@ pub struct OnlineView {
     pub people_query: PeopleQuery,
     pub person: Option<OnlinePerson>,
     pub reg_code: Option<RegistrationCode>,
+    /// ile procent kont ma każde osiągnięcie (ekran Osiągnięcia; pobierane najwyżej raz na dobę)
+    pub achievement_stats: Option<AchievementStats>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

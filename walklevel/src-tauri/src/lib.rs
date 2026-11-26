@@ -164,6 +164,7 @@ fn build_app(paths: AppPaths, config: Config, clock: treadmill::Clock) -> App {
         verify_checked_at: 0.0,
         live_on: false,
         online: Default::default(),
+        achievement_stats_at: 0.0,
         ranking_scope: "tydzien".into(),
         update: Default::default(),
         report: Default::default(),

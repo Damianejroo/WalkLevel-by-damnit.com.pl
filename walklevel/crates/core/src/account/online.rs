@@ -29,6 +29,28 @@ pub struct GameTotals {
     pub active_s: f64,
 }
 
+/// Pozostałe gry profilu osoby (`inne_gry`: bez nazw - wiersz „Inne gry (N)”).
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OtherGames {
+    pub steps: i64,
+    pub distance_km: f64,
+    pub active_s: f64,
+    pub sessions: Option<i64>,
+    /// ile gier
+    pub games: u32,
+}
+
+/// Ile procent kont ma każde osiągnięcie (`GET osiagniecia/statystyki`). Poniżej progu kont
+/// serwer nie podaje procentów (`accounts` = `None`, pusta mapa).
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AchievementStats {
+    pub accounts: Option<u32>,
+    /// id osiągnięcia -> procent kont (0-100)
+    pub percent: HashMap<String, f64>,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OnlineStats {
@@ -137,6 +159,8 @@ pub struct OnlinePerson {
     pub week: Option<PeriodTotals>,
     pub total: Option<PeriodTotals>,
     pub games: Option<Vec<GameTotals>>,
+    /// gry poza listą `games` (bez nazw); `None` - brak
+    pub other_games: Option<OtherGames>,
     pub games_hidden: bool,
 }
 
@@ -213,14 +237,19 @@ pub fn period(v: Option<&Value>) -> PeriodTotals {
     }
 }
 
-/// Podział na gry; nie-lista (także `null` - podział ukryty) - `None`.
+/// Podział na gry; nie-lista (także `null` - podział ukryty) - `None`. Nazwa gry: `gra`
+/// (statystyki) albo `nazwa` (profil osoby).
 pub fn games(v: Option<&Value>) -> Option<Vec<GameTotals>> {
     let list = v?.as_array()?;
     Some(
         list.iter()
             .filter(|g| g.is_object())
             .map(|g| GameTotals {
-                game: text(g, "gra").trim().to_string(),
+                game: Some(text(g, "gra"))
+                    .filter(|s| !s.trim().is_empty())
+                    .unwrap_or_else(|| text(g, "nazwa"))
+                    .trim()
+                    .to_string(),
                 game_id: Some(text(g, "gra_id")).filter(|s| !s.is_empty()),
                 steps: int(g, "kroki"),
                 distance_km: num(g, "dystans_km"),
@@ -228,6 +257,41 @@ pub fn games(v: Option<&Value>) -> Option<Vec<GameTotals>> {
             })
             .collect(),
     )
+}
+
+/// Pozostałe gry profilu (`inne_gry`); nie-obiekt albo zero gier - `None`.
+pub fn other_games(v: Option<&Value>) -> Option<OtherGames> {
+    let v = v.filter(|v| v.is_object())?;
+    let totals = period(Some(v));
+    let games = int(v, "gier").max(0) as u32;
+    (games > 0).then_some(OtherGames {
+        steps: totals.steps,
+        distance_km: totals.distance_km,
+        active_s: totals.active_s,
+        sessions: totals.sessions,
+        games,
+    })
+}
+
+/// Procent kont z każdym osiągnięciem; liczby spoza 0-100 i inne typy pomijamy.
+pub fn achievement_stats(v: &Value) -> AchievementStats {
+    let percent = v
+        .get("procent")
+        .and_then(Value::as_object)
+        .map(|m| {
+            m.iter()
+                .filter_map(|(id, p)| {
+                    p.as_f64()
+                        .filter(|p| (0.0..=100.0).contains(p))
+                        .map(|p| (id.clone(), p))
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    AchievementStats {
+        accounts: v.get("kont").and_then(Value::as_f64).map(|n| n as u32),
+        percent,
+    }
 }
 
 /// Statystyki zalogowanej osoby (`GET statystyki`).
@@ -379,6 +443,7 @@ pub fn person(v: &Value, my_id: &str) -> OnlinePerson {
         week: totals("tydzien"),
         total: totals("razem"),
         games: games(v.get("gry")),
+        other_games: other_games(v.get("inne_gry")),
         games_hidden: v.get("gry").is_some_and(Value::is_null),
         id,
     }

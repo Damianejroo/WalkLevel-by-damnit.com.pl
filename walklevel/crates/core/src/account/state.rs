@@ -6,8 +6,9 @@
 //! tylko zalogowane konta z przypiętą osobą. Nieznane pola pomijamy przy odczycie.
 //! 0.6.0 dopisuje `sync_cursor` (kursor synchronizacji z serwera, tylko gdy niepusty) -
 //! 0.5.x tego pola nie zna i je pomija (zgubiony kursor = pełne pobranie, bez szkody).
-//! 0.6.1 dopisuje `resent_terms` (wersja regulaminu, po której akceptacji historia poszła
-//! jeszcze raz z grami; tylko gdy niepusty, brak = [`TERMS_VERSION`] - wersja bez gier).
+//! 0.6.1 dopisuje `terms_games` (z `GET regulamin` pole `poziomy`: wersja regulaminu, od której
+//! serwer zapisuje pola gier i pokazuje poziomy) i `resent_terms` (wersja, po której akceptacji
+//! historia poszła jeszcze raz z grami) - oba tylko niepuste.
 
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -16,7 +17,7 @@ use std::sync::{Mutex, PoisonError};
 use serde::Serialize;
 use serde_json::Value;
 
-use super::{GAMES_VISIBILITY, PROFILE_VISIBILITY, TERMS_VERSION, VISIBILITY};
+use super::{GAMES_VISIBILITY, PROFILE_VISIBILITY, VISIBILITY};
 
 /// Plik stanu kont względem folderu danych.
 pub const STATE_FILE: &str = "dane/konto.json";
@@ -48,8 +49,11 @@ pub struct AccountState {
     /// kursor synchronizacji z serwera (docs/synchro.md); pusty - pełne pobranie
     #[serde(skip_serializing_if = "String::is_empty")]
     pub sync_cursor: String,
-    /// wersja regulaminu, po której akceptacji cała historia poszła jeszcze raz (z grami);
-    /// pusty - [`TERMS_VERSION`] (pierwsza wersja, bez gier: nic do ponownej wysyłki)
+    /// wersja regulaminu, od której serwer zapisuje pola gier (`poziomy` z `GET regulamin`);
+    /// pusty - serwer jeszcze ich nie przyjmuje
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub terms_games: String,
+    /// wersja regulaminu, po której akceptacji cała historia poszła jeszcze raz (z grami)
     #[serde(skip_serializing_if = "String::is_empty")]
     pub resent_terms: String,
 }
@@ -71,6 +75,7 @@ impl Default for AccountState {
             terms_current: String::new(),
             games_visibility: "znajomi".into(),
             sync_cursor: String::new(),
+            terms_games: String::new(),
             resent_terms: String::new(),
         }
     }
@@ -94,19 +99,17 @@ impl AccountState {
         !self.terms_current.is_empty() && self.terms != self.terms_current
     }
 
-    /// Nazwy gier wychodzą dopiero po akceptacji wersji regulaminu, która je opisuje
-    /// (serwer zna mechanizm wersji, a konto ma wersję aktualną).
+    /// Pola gier (tryb, gra, gra_publiczna) wychodzą dopiero, gdy serwer je przyjmuje
+    /// (`terms_games` niepuste), a konto zaakceptowało tę wersję regulaminu albo nowszą
+    /// (wersje to daty RRRR-MM-DD - porównanie napisów).
     pub fn games_allowed(&self) -> bool {
-        !self.terms_current.is_empty() && self.terms == self.terms_current
+        !self.terms_games.is_empty() && !self.terms.is_empty() && self.terms >= self.terms_games
     }
 
-    /// Wersja regulaminu, po której historia poszła już jeszcze raz ([`Self::resent_terms`]).
-    pub fn resent_for_terms(&self) -> &str {
-        if self.resent_terms.is_empty() {
-            TERMS_VERSION
-        } else {
-            &self.resent_terms
-        }
+    /// Historia jeszcze nie poszła z grami od wersji `terms_games` - pierwsza wysyłka wyśle ją
+    /// raz jeszcze (raz na zmianę `poziomy` po stronie serwera).
+    pub fn resend_due(&self) -> bool {
+        self.games_allowed() && self.resent_terms < self.terms_games
     }
 
     /// Odczyt wyrozumiały (zły typ pola - wartość domyślna); złe `visibility`
@@ -133,6 +136,7 @@ impl AccountState {
             terms_current: s("terms_current", &d.terms_current),
             games_visibility: s("games_visibility", &d.games_visibility),
             sync_cursor: s("sync_cursor", ""),
+            terms_games: s("terms_games", ""),
             resent_terms: s("resent_terms", ""),
         };
         if !VISIBILITY.contains(&state.visibility.as_str()) {

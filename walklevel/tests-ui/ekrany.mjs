@@ -23,7 +23,7 @@ export const EKRANY = [
   { ekran: 'online', scenariusze: ['domyslny'] },
   { ekran: 'onlinePerson', scenariusze: ['domyslny'] },
   { ekran: 'online', scenariusze: ['domyslny', 'dlugie', 'wylogowany'] },
-  { ekran: 'onlinePerson', scenariusze: ['domyslny', 'dlugie'] },
+  { ekran: 'onlinePerson', scenariusze: ['domyslny', 'dlugie', 'obcy'] },
   { ekran: 'report', scenariusze: ['domyslny'] },
   { ekran: 'log', scenariusze: ['domyslny'] },
   { ekran: 'report', scenariusze: ['domyslny', 'zgloszenie-wysylanie', 'zgloszenie-wyslano', 'zgloszenie-email'] },

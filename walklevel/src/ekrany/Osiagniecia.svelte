@@ -25,6 +25,11 @@
       teraz = new Date();
       if (ui.kierunek === 1) tresc?.closest('.przewijanie')?.scrollTo({ top: 0 });
       void wykonaj(api.levelsRefresh());
+      // „Ma to X% graczy”: z konta online, rdzeń pobiera najwyżej raz na dobę; bez konta albo
+      // sieci - bez dopisku
+      if (stan.account.loggedIn) {
+        api.onlineLoad('achievements', false).catch((e: unknown) => console.warn('Statystyki osiągnięć', e));
+      }
     });
   });
 
@@ -82,6 +87,7 @@
           <WierszOsiagniecia
             {pozycja}
             {teraz}
+            procent={stan.online.achievementStats?.percent[pozycja.a.id]}
             xp={defs.rarityXp[pozycja.a.rarity]}
             zwiezly={zwiezle && !pozycja.zdobyte}
           />

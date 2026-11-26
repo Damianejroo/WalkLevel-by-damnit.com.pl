@@ -275,6 +275,23 @@ pub struct ProfilePatch {
     pub games_visibility: Option<String>,
 }
 
+/// Obowiązujący regulamin (`GET regulamin`).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Terms {
+    pub version: String,
+    /// `poziomy`: wersja, od której serwer zapisuje pola gier i pokazuje poziomy ("" - jeszcze nie)
+    pub games: String,
+}
+
+/// Odpowiedź na wysyłkę sesji.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct UploadReply {
+    /// uuid -> powód
+    pub rejected: HashMap<String, String>,
+    /// serwer ma nowszą albo tę samą wersję (`pominiete`)
+    pub skipped: usize,
+}
+
 /// Sesja z serwera (trasa synchronizacji, docs/synchro.md). `uuid` z kreskami.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct RemoteSession {
@@ -625,17 +642,23 @@ impl Client {
     }
 
     /// Obowiązująca wersja regulaminu (trasa publiczna); "" gdy serwer jej jeszcze nie ma.
-    pub fn terms_version(&mut self) -> String {
-        match self.call("GET", "/api/bieznia/regulamin", None, &[], false) {
-            Ok(v) => match v.get("wersja") {
-                Some(w) if truthy(w) => match w {
-                    Value::String(s) => s.clone(),
-                    other => other.to_string(),
-                },
-                _ => String::new(),
+    /// `GET regulamin`: obowiązująca wersja i `poziomy` (od której wersji serwer zapisuje pola
+    /// gier i pokazuje poziomy; "" - jeszcze nie). Brak trasy albo sieci - `None`.
+    pub fn terms(&mut self) -> Option<Terms> {
+        let v = self
+            .call("GET", "/api/bieznia/regulamin", None, &[], false)
+            .ok()?;
+        let field = |key: &str| match v.get(key) {
+            Some(w) if truthy(w) => match w {
+                Value::String(s) => s.clone(),
+                other => other.to_string(),
             },
-            Err(_) => String::new(),
-        }
+            _ => String::new(),
+        };
+        Some(Terms {
+            version: field("wersja"),
+            games: field("poziomy"),
+        })
     }
 
     /// Link potwierdzający na adres konta -> "wyslano" albo "potwierdzony" (już był).
@@ -665,23 +688,33 @@ impl Client {
     // --- sesje ---------------------------------------------------------------------------
 
     /// Paczkami po [`BATCH`]. Zwraca odrzucone sesje {uuid: powód} - zła sesja nie wywraca
-    /// paczki, a serwer zostawia nowszą wersję (wyższe zmieniono_utc_s).
+    /// paczki - i liczbę pominiętych: serwer nadpisuje tylko NOWSZYM `zmieniono_utc_s`
+    /// (zapisana wersja nowsza albo równa - uuid w `pominiete`).
     pub fn upload_sessions<T: Serialize>(
         &mut self,
         sessions: &[T],
-    ) -> Result<HashMap<String, String>, KontoError> {
-        let mut rejected = HashMap::new();
+    ) -> Result<UploadReply, KontoError> {
+        let mut reply = UploadReply::default();
         for chunk in sessions.chunks(BATCH) {
             let body = json!({ "sesje": chunk });
             let result = self.post("/api/bieznia/sesje", Some(&body))?;
             if let Some(items) = result.get("odrzucone").and_then(Value::as_array) {
                 for item in items.iter().filter(|i| i.is_object()) {
                     let reason: String = text(item, "powod").chars().take(120).collect();
-                    rejected.insert(text(item, "uuid"), reason);
+                    reply.rejected.insert(text(item, "uuid"), reason);
                 }
             }
+            reply.skipped += result
+                .get("pominiete")
+                .and_then(Value::as_array)
+                .map_or(0, Vec::len);
         }
-        Ok(rejected)
+        Ok(reply)
+    }
+
+    /// Statystyki osiągnięć: ile procent kont ma każde (`GET osiagniecia/statystyki`).
+    pub fn achievement_stats(&mut self) -> Result<Value, KontoError> {
+        self.get("/api/bieznia/osiagniecia/statystyki", &[])
     }
 
     /// Sesja usunięta z konta (404 = serwer jej nie miał - też dobrze).

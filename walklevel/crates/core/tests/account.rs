@@ -48,6 +48,8 @@ struct State {
     requests: Vec<Logged>,
     too_old: bool,
     terms_current: String,
+    /// `poziomy` w GET regulamin: od tej wersji serwer zapisuje pola gier ("" - jeszcze nie)
+    terms_games: String,
     issued: u64,
     offline: bool,
     /// serwer bez trasy synchronizacji (404)
@@ -188,7 +190,11 @@ impl FakeServer {
             return if st.terms_current.is_empty() {
                 error(&url, 404, "nie ma")
             } else {
-                reply(&url, 200, json!({"wersja": st.terms_current}))
+                reply(
+                    &url,
+                    200,
+                    json!({"wersja": st.terms_current, "poziomy": st.terms_games}),
+                )
             };
         }
         if path == "/api/collections/users/auth-with-password" {
@@ -387,6 +393,7 @@ impl FakeServer {
         let sessions = body["sesje"].as_array().cloned().unwrap_or_default();
         assert!(sessions.len() <= 100, "paczka większa niż 100 sesji");
         let mut rejected = Vec::new();
+        let mut skipped = Vec::new();
         let mut saved = 0;
         for s in sessions {
             let uuid = s["uuid"].as_str().unwrap_or("").to_string();
@@ -402,9 +409,11 @@ impl FakeServer {
                 if st
                     .sessions
                     .get(&key)
-                    .is_some_and(|(old, _)| at(old) > at(&s))
+                    .is_some_and(|(old, _)| at(old) >= at(&s))
                 {
-                    continue; // serwer zostawia nowszą wersję
+                    // serwer nadpisuje tylko NOWSZĄ wersją (kontrakt HUB)
+                    skipped.push(json!(uuid));
+                    continue;
                 }
                 st.seq += 1;
                 let seq = st.seq;
@@ -417,7 +426,7 @@ impl FakeServer {
         reply(
             url,
             200,
-            json!({"zapisane": saved, "pominiete": [], "odrzucone": rejected}),
+            json!({"zapisane": saved, "pominiete": skipped, "odrzucone": rejected}),
         )
     }
 
@@ -618,6 +627,7 @@ fn register_uses_terms_version_from_server() {
     let dir = tempfile::tempdir().expect("katalog");
     let server = FakeServer::new();
     server.state().terms_current = "2026-11-27".into();
+    server.state().terms_games = "2026-11-27".into();
     let (mut account, _) = standalone(&server, dir.path());
     signed_in(&mut account, "p1");
     assert_eq!(account.state.terms, "2026-11-27");
@@ -994,9 +1004,18 @@ fn hidden_session_goes_private_and_visibility_change_resends() {
         server.session(&uuid_of("a")).expect("a")["widocznosc"],
         "prywatna"
     );
-    account.set_visibility(&h, "publiczna").expect("widoczność");
-    assert!(account.set_visibility(&h, "wszyscy").is_err());
+    let before = server.session(&uuid_of("b")).expect("b")["zmieniono_utc_s"]
+        .as_f64()
+        .expect("czas");
+    let at = now() + 10.0;
+    account
+        .set_visibility(&h, "publiczna", at)
+        .expect("widoczność");
+    assert!(account.set_visibility(&h, "wszyscy", at).is_err());
     assert_eq!(account.upload(&h, None, now()).ok(), Some(2));
+    // serwer nadpisuje tylko nowszą wersją - zmiana widoczności idzie z nowszym czasem
+    let b = server.session(&uuid_of("b")).expect("b");
+    assert!(b["zmieniono_utc_s"].as_f64().expect("czas") > before);
     assert_eq!(
         server.session(&uuid_of("b")).expect("b")["widocznosc"],
         "publiczna"
@@ -1137,6 +1156,7 @@ fn game_fields_go_only_after_accepting_current_terms_name_always() {
         assert!(a.get(key).is_none(), "{key} przed akceptacją regulaminu");
     }
     server.state().terms_current = "2026-11-27".into();
+    server.state().terms_games = "2026-11-27".into();
     account.refresh().expect("odświeżenie");
     assert!(account.state.terms_outdated() && !account.state.games_allowed());
     // bez akceptacji nowej wersji dalej nic o grach
@@ -1196,10 +1216,11 @@ fn accepting_new_terms_resends_whole_history_once_newer_in_batches() {
         .expect("sesja")["zmieniono_utc_s"]
         .as_f64()
         .expect("czas");
-    // pierwsza wersja regulaminu (bez gier) - nic jeszcze raz
-    assert_eq!(account.state.resent_for_terms(), account::TERMS_VERSION);
+    // serwer bez pól gier (`poziomy` puste) - nic jeszcze raz
+    assert!(!account.state.games_allowed() && !account.state.resend_due());
     assert_eq!(account.upload(&h, Some(&shared), now()).ok(), Some(0));
     server.state().terms_current = "2026-11-27".into();
+    server.state().terms_games = "2026-11-27".into();
     account.refresh().expect("odświeżenie");
     account.accept_terms().expect("akceptacja");
     server.state().requests.clear();
@@ -1580,6 +1601,7 @@ fn local_newer_version_wins_over_older_from_server() {
 fn known_game_keeps_local_profile_and_unknown_named_game_becomes_profile() {
     let (server, mut a, mut b) = two_computers();
     server.state().terms_current = "2026-11-27".into();
+    server.state().terms_games = "2026-11-27".into();
     for c in [&mut a, &mut b] {
         c.account().refresh().expect("odświeżenie");
         let person = c.person.clone();
@@ -1653,6 +1675,7 @@ fn terms_accepted_on_other_computer_also_resend_history_here() {
     save(&b.history, s);
     assert_eq!(b.upload(), 1);
     server.state().terms_current = "2026-11-27".into();
+    server.state().terms_games = "2026-11-27".into();
     a.account().refresh().expect("odświeżenie");
     a.account().accept_terms().expect("regulamin");
     b.account().refresh().expect("odświeżenie"); // akceptacja przyszła z serwera
@@ -1965,7 +1988,7 @@ fn session_hidden_on_one_computer_stays_hidden_on_the_other() {
     let person = b.person.clone();
     b.accounts
         .get(&person)
-        .set_visibility(&b.history, "publiczna")
+        .set_visibility(&b.history, "publiczna", now() + 10.0)
         .expect("widoczność");
     assert_eq!(b.upload(), 2);
     assert_eq!(
@@ -1976,4 +1999,88 @@ fn session_hidden_on_one_computer_stays_hidden_on_the_other() {
         server.session(&uuid_of("s2")).expect("s2")["widocznosc"],
         "publiczna"
     );
+}
+
+#[test]
+fn games_need_server_levels_version_and_accepted_terms_not_older() {
+    let mut st = account::AccountState {
+        terms: "2026-11-27".into(),
+        ..account::AccountState::default()
+    };
+    assert!(!st.games_allowed()); // serwer jeszcze nie przyjmuje pól gier
+    st.terms_games = "2026-11-27".into();
+    assert!(st.games_allowed() && st.resend_due());
+    st.terms = "2026-11-25".into();
+    assert!(!st.games_allowed()); // zaakceptowana starsza wersja
+    st.terms = "2027-01-10".into();
+    assert!(st.games_allowed()); // nowsza też wystarcza
+    st.resent_terms = "2027-01-10".into();
+    assert!(!st.resend_due()); // historia już poszła z grami
+    // zapis i odczyt z konto.json
+    let v = serde_json::to_value(&st).expect("json");
+    assert_eq!(v["terms_games"], "2026-11-27");
+    assert_eq!(account::AccountState::from_value(&v), st);
+}
+
+#[test]
+fn levels_version_comes_from_terms_route_on_register_and_refresh() {
+    let dir = tempfile::tempdir().expect("katalog");
+    let server = FakeServer::new();
+    server.state().terms_current = "2026-11-27".into();
+    let (mut account, _) = standalone(&server, dir.path());
+    signed_in(&mut account, "p1");
+    assert_eq!(account.state.terms_games, "");
+    assert!(!account.state.games_allowed());
+    server.state().terms_games = "2026-11-27".into();
+    account.refresh().expect("odświeżenie");
+    assert_eq!(account.state.terms_games, "2026-11-27");
+    assert!(account.state.games_allowed());
+    // logowanie na drugim komputerze: od razu, bez czekania na odświeżenie
+    let dir2 = tempfile::tempdir().expect("katalog");
+    let (mut other, _) = standalone(&server, dir2.path());
+    other
+        .login("ola@example.pl", PASSWORD, "p2")
+        .expect("logowanie");
+    assert_eq!(other.state.terms_games, "2026-11-27");
+    assert_eq!(other.state.terms, "2026-11-27");
+    assert!(other.state.games_allowed());
+}
+
+#[test]
+fn skipped_sessions_count_as_sent_without_loop() {
+    let dir = tempfile::tempdir().expect("katalog");
+    let server = FakeServer::new();
+    let h = open_history(dir.path());
+    let s = save(&h, session("a", "p1"));
+    let (mut account, _) = standalone(&server, dir.path());
+    signed_in(&mut account, "p1");
+    assert_eq!(account.upload(&h, None, now()).ok(), Some(1));
+    // na serwerze nowsza wersja z innego komputera; tu ta sama sesja wraca do kolejki
+    let uid = server.state().users.keys().next().cloned().expect("konto");
+    let key = (uid, uuid_of("a"));
+    server.state().sessions.get_mut(&key).expect("sesja").0["zmieniono_utc_s"] =
+        json!(s.updated + 100.0);
+    h.forget_sent().expect("kolejka");
+    assert_eq!(account.upload(&h, None, now()).ok(), Some(1)); // pominięta = wysłana
+    assert_eq!(account.upload(&h, None, now()).ok(), Some(0)); // bez pętli
+    assert_eq!(
+        server.session(&uuid_of("a")).expect("a")["zmieniono_utc_s"],
+        json!(s.updated + 100.0)
+    );
+}
+
+#[test]
+fn hiding_one_session_online_sends_it_newer() {
+    let dir = tempfile::tempdir().expect("katalog");
+    let server = FakeServer::new();
+    let h = open_history(dir.path());
+    let s = save(&h, session("a", "p1"));
+    let (mut account, _) = standalone(&server, dir.path());
+    signed_in(&mut account, "p1");
+    account.upload(&h, None, now()).expect("wysyłka");
+    h.set_hidden_online(&hexid("a"), true).expect("ukryj");
+    assert_eq!(account.upload(&h, None, now()).ok(), Some(1));
+    let a = server.session(&uuid_of("a")).expect("a");
+    assert_eq!(a["widocznosc"], "prywatna");
+    assert!(a["zmieniono_utc_s"].as_f64().expect("czas") > s.updated);
 }

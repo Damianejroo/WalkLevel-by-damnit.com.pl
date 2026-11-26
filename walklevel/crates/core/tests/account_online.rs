@@ -236,3 +236,54 @@ fn live_state_walking_then_one_stop() {
     assert!(!on);
     assert_eq!(live_update(&mut on, None, 0.0, 0, 0.0), None);
 }
+
+#[test]
+fn profile_games_by_name_with_other_games_row() {
+    let p = online::person(
+        &json!({
+            "id": "u2",
+            "gry": [
+                {"nazwa": " Elden   Ring ", "kroki": 900, "dystans_km": 0.7, "ruch_s": 600, "sesje": 2},
+                {"nazwa": "Skyrim", "gra_id": "aaaaaaaaaa", "publiczna": true, "kroki": 300}
+            ],
+            "inne_gry": {"kroki": 120, "dystans_km": 0.1, "ruch_s": 90, "sesje": 1, "gier": 2}
+        }),
+        "u1",
+    );
+    let games = p.games.expect("gry");
+    assert_eq!(games[0].game, "Elden   Ring");
+    assert_eq!(games[1].game_id.as_deref(), Some("aaaaaaaaaa"));
+    let other = p.other_games.expect("inne gry");
+    assert_eq!(
+        (other.steps, other.sessions, other.games),
+        (120, Some(1), 2)
+    );
+    let out = serde_json::to_value(online::person(
+        &json!({"id": "u2", "gry": null, "inne_gry": null}),
+        "u1",
+    ))
+    .expect("json");
+    assert!(out["otherGames"].is_null() && out["gamesHidden"] == json!(true));
+    // zero gier w „inne_gry” - bez wiersza
+    let p = online::person(&json!({"inne_gry": {"kroki": 5, "gier": 0}}), "u1");
+    assert_eq!(p.other_games, None);
+}
+
+#[test]
+fn achievement_stats_percent_only_from_enough_accounts() {
+    let s = online::achievement_stats(&json!({
+        "kont": 40, "od_kont": 25,
+        "procent": {"a1": 12.5, "a2": "zle", "a3": 140, "a4": 0}
+    }));
+    assert_eq!(s.accounts, Some(40));
+    assert_eq!(s.percent.len(), 2);
+    assert_eq!(s.percent["a1"], 12.5);
+    assert_eq!(s.percent["a4"], 0.0);
+    let few = online::achievement_stats(&json!({"kont": null, "od_kont": 25, "procent": {}}));
+    assert_eq!(few.accounts, None);
+    assert!(few.percent.is_empty());
+    assert_eq!(
+        online::achievement_stats(&json!("x")),
+        online::AchievementStats::default()
+    );
+}

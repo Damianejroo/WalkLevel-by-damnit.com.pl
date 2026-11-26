@@ -722,7 +722,7 @@ export interface AccountView {
 
 export interface OnlineView {
   personId: string;
-  loading: Array<'stats' | 'friends' | 'invitations' | 'ranking' | 'people' | 'person'>;
+  loading: Array<'stats' | 'friends' | 'invitations' | 'ranking' | 'people' | 'person' | 'achievementStats'>;
   stats: OnlineStats | null;               // „Moje wyniki online · ten tydzień”
   friends: Friend[] | null;
   invitations: Invitations | null;
@@ -731,7 +731,12 @@ export interface OnlineView {
   peopleQuery: { search: string; page: number };
   person: OnlinePerson | null;             // ostatnio otwarty profil
   regCode: RegistrationCode | null;
+  achievementStats: AchievementStats | null; // ekran Osiągnięcia: online_load('achievements'), najwyżej raz na dobę
 }
+/** GET osiagniecia/statystyki: poniżej progu kont serwer nie podaje procentów (accounts null, percent {}). */
+export interface AchievementStats { accounts: number | null; percent: Record<string, number> }
+/** Profil osoby: gry poza listą (inne_gry) - wiersz „Inne gry (N)” bez nazw. */
+export interface OtherGames { steps: number; distanceKm: number; activeS: number; sessions: number | null; games: number }
 export interface PeriodTotals { steps: number; distanceKm: number; activeS: number; sessions: number | null }
 export interface GameTotals { game: string; gameId: string | null; steps: number; distanceKm: number; activeS: number } // game '' = „bez gry”
 export interface OnlineStats extends PeriodTotals { games: GameTotals[] | null }
@@ -762,7 +767,8 @@ export interface OnlinePerson {
   friend: boolean;
   week: PeriodTotals | null;
   total: PeriodTotals | null;
-  games: GameTotals[] | null;
+  games: GameTotals[] | null;  // profil: gry[].nazwa, statystyki: gry[].gra
+  otherGames: OtherGames | null; // inne_gry; null - brak
   gamesHidden: boolean;        // serwer podał "gry": null - osoba nie pokazuje podziału
 }
 export interface RegistrationCode { code: string; validUntil: number | null }
@@ -1373,7 +1379,7 @@ Wszystkie zmiany osób i profili emitują `people` (i `settings`, gdy dotyczą a
 | `history_query` | `query: HistoryQuery` | `HistoryView` | najpierw `tracker.flush()` (bieżąca sesja też widać). Zakres: `day` = od dziś 00:00 (wykres godzinowy), `week` 7 dni, `month` 30 dni, `all` od 0 (wykres z 30 dni). Wykres dzienny: `week` → 7 słupków, `month`/`all` → 30. UI woła ponownie, gdy zmieni się `history.stamp` albo zapytanie |
 | `history_session` | `session_id: String` | `Option<SessionDetail>` | szczegóły sesji |
 | `history_session_delete` | `session_id: String` | `()` | trwająca sesja - kończona bez zapisu; usuwa z bazy (z `wyslane`, `ukryte_online`); osoba z kontem → także z serwera (w tle); toast „Sesja usunięta.” |
-| `history_session_hide_online` | `session_id: String`, `hidden: bool` | `()` | `set_hidden_online` + wysyłka od razu (`account_upload_now`) |
+| `history_session_hide_online` | `session_id: String`, `hidden: bool` | `()` | `set_hidden_online` (sesja z `zmieniono_utc_s` = teraz) + wysyłka od razu (`account_upload_now`) |
 
 ### 6.7 Poziomy i osiągnięcia
 
@@ -1402,7 +1408,7 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 | `account_check_verified` | `force: bool` | `bool` | ręcznie / po powrocie okna (najwyżej co 10 s bez `force`); potwierdzenie → toast |
 | `account_set_remember` | `on: bool` | `()` | token do Menedżera poświadczeń albo tylko w pamięci |
 | `account_set_upload` | `on: bool` | `()` | lokalnie |
-| `account_set_visibility` | `value: String` (`prywatna`/`znajomi`/`publiczna`) | `()` | `history.forget_sent()` - wszystko pójdzie z nową widocznością |
+| `account_set_visibility` | `value: String` (`prywatna`/`znajomi`/`publiczna`) | `()` | `history.mark_all_for_resend(osoba, teraz)` - wszystkie sesje osoby pójdą z nową widocznością i nowszym `zmieniono_utc_s` (serwer nadpisuje tylko nowszą wersją) |
 | `account_set_live` | `on: bool` | `()` | wyłączenie → `clear_live` na serwerze |
 | `account_set_profile_visibility` | `value: String` (`ukryty`/`znajomi`/`publiczny`) | `()` | PATCH profilu; „Zapisano.” |
 | `account_set_games_visibility` | `value: String` (`ja`/`znajomi`/`wszyscy`) | `()` | PATCH profilu |
@@ -1415,7 +1421,7 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 
 | Komenda | Argumenty | Wynik | Skutek |
 |---|---|---|---|
-| `online_load` | `tab: String` (`friends`/`ranking`/`people`/`me`), `force: bool` | `()` | `friends`: statystyki tygodnia + znajomi + zaproszenia; `ranking`: ranking z bieżącym zakresem; `people`: lista z `peopleQuery`. Bez `force` dane już w pamięci odświeżane po cichu (bez „Ładuję…”). Wyniki w `online`. UI na otwartej zakładce Znajomi (ekran aktywny, okno widoczne) woła `friends` bez `force` co 10 s - najwyżej jedno zapytanie naraz, błąd cichego odświeżenia zostawia ostatnią listę |
+| `online_load` | `tab: String` (`friends`/`ranking`/`people`/`me`/`achievements`), `force: bool` | `()` | `friends`: statystyki tygodnia + znajomi + zaproszenia; `ranking`: ranking z bieżącym zakresem; `people`: lista z `peopleQuery`; `achievements`: `GET osiagniecia/statystyki` do `online.achievementStats` (po cichu, najwyżej raz na dobę - ekran Osiągnięcia: „Ma to X% graczy”). Bez `force` dane już w pamięci odświeżane po cichu (bez „Ładuję…”). Wyniki w `online`. UI na otwartej zakładce Znajomi (ekran aktywny, okno widoczne) woła `friends` bez `force` co 10 s - najwyżej jedno zapytanie naraz, błąd cichego odświeżenia zostawia ostatnią listę |
 | `online_ranking_scope` | `scope: String` (`tydzien`/`miesiac`/`razem`/`poziom`) | `()` | zmienia zakres i ładuje |
 | `online_people_search` | `search: String` (≤ 24 zn.), `page: u32` | `()` | `peopleQuery` + ładowanie |
 | `online_person_open` | `user_id: String` | `OnlinePerson` | `online.person` + `wl:nawigacja {to:'onlinePerson', reason:'personOpened'}` |
@@ -1849,7 +1855,7 @@ CREATE TABLE IF NOT EXISTS poziom_osoby (osoba TEXT PRIMARY KEY, poziom INTEGER 
    "person": "a1b2c3d4e5", "upload": true, "visibility": "znajomi", "live": false,
    "profile_visibility": "znajomi", "terms": "2026-11-25", "remember": true,
    "terms_current": "2026-11-25", "games_visibility": "znajomi",
-   "sync_cursor": "…", "resent_terms": "2026-12-01"
+   "sync_cursor": "…", "terms_games": "2026-11-27", "resent_terms": "2026-11-27"
   }
  ]
 }
@@ -1860,9 +1866,10 @@ CREATE TABLE IF NOT EXISTS poziom_osoby (osoba TEXT PRIMARY KEY, poziom INTEGER 
 - Format 1 (starsza wersja z jednym kontem): plik to sam obiekt z polami jak wyżej → jedno
   konto. Nieznane pola pomijamy przy odczycie; złe `visibility` → `znajomi`, złe
   `profile_visibility` → `znajomi`.
-- `sync_cursor` (0.6.0) i `resent_terms` (0.6.1) zapisywane tylko niepuste; 0.5.x je pomija.
-  `resent_terms` - wersja regulaminu, po której akceptacji historia poszła jeszcze raz z grami;
-  brak = `2026-11-25` (pierwsza wersja, bez gier). Zmiana konta (inny `user_id`) czyści oba.
+- `sync_cursor` (0.6.0), `terms_games` i `resent_terms` (0.6.1) zapisywane tylko niepuste;
+  0.5.x je pomija. `terms_games` - `poziomy` z `GET regulamin` (od tej wersji serwer zapisuje pola
+  gier; pusty - jeszcze nie); `resent_terms` - wersja, po której akceptacji historia poszła
+  jeszcze raz z grami. Zmiana konta (inny `user_id`) czyści kursor i `resent_terms`.
 - Konto z `remember = true`, a bez tokenu w sejfie (inny użytkownik Windows, wyczyszczony
   sejf) → traktowane jak wylogowane (`_forget`), osoba zostaje.
 

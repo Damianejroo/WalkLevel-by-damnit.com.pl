@@ -483,6 +483,17 @@ impl History {
         Ok(n)
     }
 
+    /// Wszystkie sesje osoby z bieżni do ponownej wysyłki w nowszej wersji (zmiana widoczności
+    /// konta dotyczy każdej sesji, także pobranych z innego komputera). Zwraca liczbę oznaczonych.
+    pub fn mark_all_for_resend(&self, person: &str, now: f64) -> Result<usize> {
+        let n = self.db.execute(
+            "UPDATE sesje SET zmieniono_utc_s = ?1 WHERE osoba = ?2 AND zrodlo = 'bieznia' \
+             AND zmieniono_utc_s < ?1",
+            (now, person),
+        )?;
+        Ok(n)
+    }
+
     /// Id sesji ukrytych online.
     pub fn hidden_online(&self) -> Result<HashSet<String>> {
         let mut st = self.db.prepare("SELECT id FROM ukryte_online")?;
@@ -491,7 +502,8 @@ impl History {
     }
 
     /// Ukryta sesja zostaje u Ciebie, a online jest prywatna (nikt jej nie widzi).
-    /// Zmiana wymusza ponowną wysyłkę tej sesji.
+    /// Zmiana wymusza ponowną wysyłkę tej sesji w nowszej wersji (`zmieniono_utc_s` = teraz -
+    /// serwer nadpisuje tylko nowszą).
     pub fn set_hidden_online(&self, session_id: &str, hidden: bool) -> Result<()> {
         let tx = self.db.unchecked_transaction()?;
         if hidden {
@@ -503,6 +515,10 @@ impl History {
             tx.execute("DELETE FROM ukryte_online WHERE id = ?", [session_id])?;
         }
         tx.execute("DELETE FROM wyslane WHERE id = ?", [session_id])?;
+        tx.execute(
+            "UPDATE sesje SET zmieniono_utc_s = MAX(zmieniono_utc_s, ?) WHERE id = ?",
+            (now_unix(), session_id),
+        )?;
         tx.commit()?;
         Ok(())
     }

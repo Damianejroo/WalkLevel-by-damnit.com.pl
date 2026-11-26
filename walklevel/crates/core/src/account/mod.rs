@@ -36,8 +36,8 @@ use crate::teksty::t;
 
 pub use api::{
     Auth, ChangesPage, Client, HttpReply, HttpRequest, ProfilePatch, RANKING_SCOPES, RemoteSession,
-    ReqwestTransport, Tombstone, Transport, TransportError, User, check_base_url, field_errors,
-    friendly,
+    ReqwestTransport, Terms, Tombstone, Transport, TransportError, UploadReply, User,
+    check_base_url, field_errors, friendly,
 };
 pub use state::{AccountState, STATE_FILE, load_state, load_states, save_state, save_states};
 pub use sync::{AccountTimers, Every, LiveUpdate, NewGame, SyncReport, SyncTarget, live_update};
@@ -430,10 +430,12 @@ impl Account {
         if let Some((field, problem)) = checks.iter().find(|(_, p)| !p.is_empty()) {
             return Err(KontoError::invalid_field(field, problem));
         }
-        let mut version = self.client.terms_version(); // obowiązująca z serwera
+        let terms = self.client.terms().unwrap_or_default(); // obowiązująca z serwera
+        let mut version = terms.version;
         if version.is_empty() {
             version = TERMS_VERSION.to_string();
         }
+        self.state.terms_games = terms.games;
         let auth = self
             .client
             .register(code, email.trim(), password, name, &version)?;
@@ -443,7 +445,17 @@ impl Account {
 
     pub fn login(&mut self, email: &str, password: &str, person: &str) -> Result<User> {
         let auth = self.client.login(email.trim(), password)?;
-        self.signed_in(&auth, person)
+        let user = self.signed_in(&auth, person)?;
+        // regulamin i ustawienia konta od razu (inaczej pola gier czekałyby na odświeżenie);
+        // błąd nie psuje logowania - poprawi je odświeżenie
+        if let Some(terms) = self.client.terms() {
+            self.state.terms_games = terms.games;
+        }
+        if let Ok(profile) = self.client.my_profile() {
+            self.apply_profile(&profile);
+        }
+        self.save()?;
+        Ok(user)
     }
 
     /// Wylogowanie: stan na żywo na serwerze czyszczony (bez znaczenia, czy się uda).
@@ -485,6 +497,10 @@ impl Account {
         let result = self.client.refresh();
         let auth = self.handle(result)?;
         let user = self.signed_in(&auth, "")?;
+        // od której wersji regulaminu serwer przyjmuje pola gier (brak odpowiedzi - bez zmian)
+        if let Some(terms) = self.client.terms() {
+            self.state.terms_games = terms.games;
+        }
         // profil bez znaczenia dla odświeżenia (inny błąd pomijamy), ale 401 wylogowuje
         let result = self.client.my_profile();
         match self.handle(result) {
@@ -644,14 +660,17 @@ impl Account {
         self.save()
     }
 
-    /// Widoczność wysyłanych sesji; wszystkie sesje pójdą jeszcze raz - z nową widocznością.
-    pub fn set_visibility(&mut self, history: &History, visibility: &str) -> Result<()> {
+    /// Widoczność wysyłanych sesji; wszystkie sesje osoby pójdą jeszcze raz - z nową
+    /// widocznością i nowszym `zmieniono_utc_s` = `now` (serwer nadpisuje tylko nowszą wersją).
+    pub fn set_visibility(&mut self, history: &History, visibility: &str, now: f64) -> Result<()> {
         if !VISIBILITY.contains(&visibility) {
             return Err(KontoError::invalid(&t("wspolne.blad_nieznany", &[])));
         }
         self.state.visibility = visibility.to_string();
         self.save()?;
-        history.forget_sent()?;
+        if !self.state.person.is_empty() {
+            history.mark_all_for_resend(&self.state.person, now)?;
+        }
         Ok(())
     }
 

@@ -132,7 +132,7 @@ impl Account {
             return Ok(0);
         }
         let games = state.games_allowed() && shared_games.is_some();
-        if games && state.resent_for_terms() != state.terms {
+        if games && state.resend_due() {
             let n = history.mark_for_resend(&state.person, None, now)?;
             log::info!("Konto: nowy regulamin - {n} sesji pójdzie jeszcze raz (z grami)");
             self.state.resent_terms.clone_from(&self.state.terms);
@@ -157,7 +157,12 @@ impl Account {
             })
             .collect();
         let result = self.client.upload_sessions(&payload);
-        let rejected = self.handle(result)?;
+        let reply = self.handle(result)?;
+        if reply.skipped > 0 {
+            // serwer ma nowszą wersję (przyjdzie synchronizacją) - oznaczone jako wysłane
+            log::info!("Konto: serwer pominął {} sesji (ma nowsze)", reply.skipped);
+        }
+        let rejected = reply.rejected;
         let mut accepted = Vec::new();
         let mut refused: Vec<(&Session, &str)> = Vec::new();
         let mut gone = 0_u32;

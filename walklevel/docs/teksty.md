@@ -1643,3 +1643,10 @@ wcześniej wpisu.
 | `glowny.wskaznik.klawisze.stoi` | (nowy) | Bez klawisza · taśma stoi | Podpis wskaźnika przy „Taśma staje”. |
 | `glowny.podpowiedz.klawisze_stop` | (nowy) | Trzymaj {klawisz_chodu}, a taśma ruszy. Puść, a stanie. | Podpowiedź karty sterowania przy „Taśma staje” (zamiast `glowny.podpowiedz.klawisze`). |
 | `dymek.stop_dostepnosc` | (nowy) | Zatrzymaj taśmę | Stop pod kółkiem poza Treningiem, gdy taśma jedzie (napis jak `dymek.trening.stop`). Włączone sterowanie się wyłącza. |
+
+## Dodatki: pola konta online pod regulamin 2026-11-27 (0.6.1)
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `profil_online.inne_gry` | (nowy) | Inne gry ({liczba}) | Ostatni wiersz podziału na gry w profilu osoby (`inne_gry`: gry bez nazw). |
+| `osiagniecia.procent_graczy` | (nowy) | Ma to {procent}% graczy | Stopka osiągnięcia na ekranie Osiągnięcia (konto online, od 25 kont). |

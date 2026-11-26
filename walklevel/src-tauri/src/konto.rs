@@ -716,6 +716,9 @@ fn load(
     Ok(())
 }
 
+/// Statystyki osiągnięć zmieniają się wolno - pobranie najwyżej raz na tyle sekund.
+const ACHIEVEMENT_STATS_EVERY_S: f64 = 24.0 * 3600.0;
+
 pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
     let (has_friends, has_stats, has_inv, has_rank, has_people, scope, query) = {
         let app = lock(&core.0.app);
@@ -780,6 +783,29 @@ pub fn online_load(core: &Core, tab: &str, force: bool) -> CmdResult<()> {
             move |a| a.client_mut().people(&query.search, query.page),
             |app, v| app.online.people = Some(online::people_page(v)),
         ),
+        "achievements" => {
+            // ekran Osiągnięcia: procent graczy z osiągnięciem - najwyżej raz na dobę
+            let now = now_unix();
+            let fresh = {
+                let app = lock(&core.0.app);
+                app.online.achievement_stats.is_some()
+                    && now - app.achievement_stats_at < ACHIEVEMENT_STATS_EVERY_S
+            };
+            if fresh {
+                return Ok(());
+            }
+            load(
+                core,
+                "achievementStats",
+                "loadAchievementStats",
+                true,
+                |a| a.client_mut().achievement_stats(),
+                move |app, v| {
+                    app.online.achievement_stats = Some(online::achievement_stats(v));
+                    app.achievement_stats_at = now;
+                },
+            )
+        }
         "me" => Ok(()),
         _ => Err(CmdError::unexpected("Nieznana zakładka.")),
     }
@@ -915,7 +941,7 @@ pub fn forget_person(core: &Core, person: &str) {
 /// Ustawienie konta zmieniające widoczność sesji (`forget_sent` w historii).
 pub fn set_visibility(core: &Core, value: String) -> CmdResult<()> {
     simple(core, "profile", None, move |acc, h| match h {
-        Some(h) => acc.set_visibility(h, &value),
+        Some(h) => acc.set_visibility(h, &value, now_unix()),
         None => Err(history_missing()),
     })
 }

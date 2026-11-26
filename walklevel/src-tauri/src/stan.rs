@@ -231,6 +231,8 @@ pub struct App {
     pub verify_checked_at: f64,
     pub live_on: bool,
     pub online: OnlineView,
+    /// kiedy pobrano `online.achievement_stats` (czas uniksowy; cache na dobę)
+    pub achievement_stats_at: f64,
     pub ranking_scope: String,
 
     pub update: UpdateView,

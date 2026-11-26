@@ -15,8 +15,10 @@
     zwiezly?: boolean;
     /** Dziś (do „zdobyte wczoraj”), odświeżane przy wejściu na ekran. */
     teraz: Date;
+    /** Ile procent graczy ma to osiągnięcie (konto online; brak - bez dopisku). */
+    procent?: number;
   }
-  let { pozycja, xp, zwiezly = false, teraz }: Props = $props();
+  let { pozycja, xp, zwiezly = false, teraz, procent }: Props = $props();
 
   const a = $derived(pozycja.a);
   const p = $derived(pozycja.p);
@@ -26,6 +28,7 @@
     [
       pozycja.zdobyte && p.earnedAt ? t('poziomy.osiagniecie.zdobyte', { kiedy: kiedy(p.earnedAt, teraz) }) : '',
       t('poziomy.osiagniecie.xp', { xp: liczba(xp) }),
+      procent === undefined ? '' : t('osiagniecia.procent_graczy', { procent: liczba(procent, procent < 10 ? 1 : 0) }),
     ]
       .filter(Boolean)
       .join(' · '),
