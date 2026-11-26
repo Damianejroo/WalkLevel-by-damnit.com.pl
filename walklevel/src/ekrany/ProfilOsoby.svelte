@@ -79,9 +79,9 @@
 
 <Strona tytul={t('profil_online.tytul')} podpis={osoba?.name ?? ''}>
   {#if !osoba}
-    <p class="opis">{stan.online.loading.includes('person') ? t('online.laduje') : '–'}</p>
+    <p class="opis uwaga">{stan.online.loading.includes('person') ? t('online.laduje') : '–'}</p>
   {:else}
-    {#if osoba.me}<p class="opis">{t('profil_online.moj_opis')}</p>{/if}
+    {#if osoba.me}<p class="opis uwaga">{t('profil_online.moj_opis')}</p>{/if}
 
     {#if poziom !== null}
       <KartaPoziomu {poziom} {xp} rozmiar={70} podpowiedz={ranga?.about ?? ''} />
@@ -147,12 +147,14 @@
       {/if}
     </Karta>
 
-    <p class="opis">{osoba.me ? t('profil_online.moje_ukryte') : t('profil_online.cudze_ukryte')}</p>
+    <p class="opis uwaga">{osoba.me ? t('profil_online.moje_ukryte') : t('profil_online.cudze_ukryte')}</p>
   {/if}
 </Strona>
 
 <style>
-  .opis { font-size: var(--fs-sm); color: var(--text-2); line-height: var(--lh-body); padding-inline: 2px; }
+  .opis { font-size: var(--fs-sm); color: var(--text-2); line-height: var(--lh-body); }
+  /* notatki poza kartami - lekko wcięte jak w pozostałych ekranach; w kartach bez wcięcia */
+  .uwaga { padding-inline: 2px; }
   .osiagniecia { display: flex; flex-direction: column; }
   .fakty { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-md); color: var(--text-2); line-height: var(--lh-body); }
   .przyciski { display: flex; flex-wrap: wrap; gap: var(--sp-2); }

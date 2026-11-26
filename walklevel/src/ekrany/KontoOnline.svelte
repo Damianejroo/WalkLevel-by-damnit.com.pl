@@ -28,6 +28,8 @@
   const zAdresu = new URLSearchParams(location.search).get('zakladka');
 
   let zakladka = $state<OnlineTab>(jestZakladka(zAdresu) ? zAdresu : 'friends');
+  // wybrana zakładka renderuje się od razu (bez pustej klatki przed efektem), potem zostaje
+  // zamontowana i przy kolejnych zmianach tylko chowana
   const odwiedzone = new SvelteSet<OnlineTab>();
   $effect(() => {
     odwiedzone.add(zakladka);
@@ -104,7 +106,7 @@
     {/if}
 
     {#each ZAKLADKI as z (z)}
-      {#if odwiedzone.has(z)}
+      {#if odwiedzone.has(z) || z === zakladka}
         <div class="panel" hidden={z !== zakladka}>
           {#if z === 'friends'}
             <ZakladkaZnajomi glowna={!konto.termsOutdated} onotworz={otworzProfil} />
@@ -113,7 +115,7 @@
           {:else if z === 'people'}
             <ZakladkaOsoby onotworz={otworzProfil} />
           {:else}
-            <ZakladkaKonto onotworz={otworzProfil} />
+            <ZakladkaKonto widoczna={aktywny && zakladka === 'me'} onotworz={otworzProfil} />
           {/if}
         </div>
       {/if}
@@ -123,7 +125,7 @@
 
 <style>
   .opis { font-size: var(--fs-sm); color: var(--text-2); line-height: var(--lh-body); }
-  .blad { font-size: var(--fs-sm); line-height: var(--lh-body); }
+  .blad { font-size: var(--fs-sm); color: var(--danger); line-height: var(--lh-body); }
   .przyciski { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
   .przyciski > :global(button) { flex: 0 1 auto; }
   .panel { display: flex; flex-direction: column; min-width: 0; animation: wl-rozwin var(--t-in) var(--ease-enter); }

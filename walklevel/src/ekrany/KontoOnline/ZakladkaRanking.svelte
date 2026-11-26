@@ -32,9 +32,11 @@
     ),
   );
 
-  function zmien(s: RankingScope) {
+  async function zmien(s: RankingScope) {
     wybrany = s;
-    wykonaj(api.onlineRankingScope(s));
+    // błąd (toast z wykonaj) - wraca zakres z danych, żeby wiersze nie zostały przygaszone
+    const ok = await wykonaj(api.onlineRankingScope(s).then(() => true));
+    if (!ok && wybrany === s) wybrany = null;
   }
 </script>
 

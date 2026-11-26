@@ -44,7 +44,8 @@
   <span class="osoba">
     <span class="nazwa">
       {#if onotworz}
-        <button type="button" class="link jedna-linia" title={t('profil_online.pokaz')} onclick={onotworz}>{nazwa}</button>
+        <!-- title z pełnym pseudonimem: przy wielokropku to jedyne miejsce z całą nazwą -->
+        <button type="button" class="link jedna-linia" title={nazwa} onclick={onotworz}>{nazwa}</button>
       {:else}
         <span class="tekst-nazwy jedna-linia" title={nazwa}>{nazwa}</span>
       {/if}

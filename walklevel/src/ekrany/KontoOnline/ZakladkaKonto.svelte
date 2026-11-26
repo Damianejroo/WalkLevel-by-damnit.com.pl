@@ -14,7 +14,12 @@
   import type { AccountAction, GamesVisibility, ProfileVisibility, SessionVisibility } from '../../lib/typy';
   import { bladHasla, bladPseudonimu, sprobuj, wersjaRegulaminu } from './pomocnicze';
 
-  let { onotworz }: { onotworz: (userId: string) => void } = $props();
+  interface Props {
+    /** Zakładka jest na ekranie - po schowaniu hasła znikają z pól (ekran zostaje zamontowany). */
+    widoczna: boolean;
+    onotworz: (userId: string) => void;
+  }
+  let { widoczna, onotworz }: Props = $props();
 
   const konto = $derived(stan.account);
   const zasady = $derived(stan.statics.account);
@@ -74,6 +79,13 @@
     bladUsuniecia = w.pola.password ?? w.blad;
     if (w.ok) hasloUsuniecia = '';
   }
+
+  $effect(() => {
+    if (widoczna) return;
+    stare = nowe = nowe2 = hasloUsuniecia = '';
+    bledyHasla = { stare: '', nowe: '', nowe2: '', ogolny: '' };
+    bladUsuniecia = '';
+  });
 </script>
 
 <div class="zakladka">
