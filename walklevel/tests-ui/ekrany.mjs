@@ -9,7 +9,7 @@ export const WYSOKOSC = 900;
 export const EKRANY = [
   { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie'] },
   { ekran: 'settings', scenariusze: ['domyslny'] },
-  { ekran: 'history', scenariusze: ['domyslny'] },
+  { ekran: 'history', scenariusze: ['domyslny', 'pusto', 'dlugie'] },
   { ekran: 'achievements', scenariusze: ['domyslny'] },
   { ekran: 'trail', scenariusze: ['domyslny'] },
   { ekran: 'online', scenariusze: ['domyslny'] },
@@ -23,7 +23,7 @@ export const EKRANY = [
   { ekran: 'devices', scenariusze: ['domyslny'] },
   { ekran: 'profile', scenariusze: ['domyslny'] },
   { ekran: 'person', scenariusze: ['domyslny'] },
-  { ekran: 'session', scenariusze: ['domyslny'] },
+  { ekran: 'session', scenariusze: ['domyslny', 'dlugie'] },
   { ekran: 'account', scenariusze: ['wylogowany'] },
   { ekran: 'wzornik', scenariusze: ['domyslny', 'dlugie'] },
 ];

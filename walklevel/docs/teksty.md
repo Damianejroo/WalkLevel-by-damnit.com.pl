@@ -1437,3 +1437,15 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
     niedostępna historia, sesja odrzucona przez serwer, brak XP z symulatora, niepotwierdzony
     stop taśmy (tylko w dzienniku).
 11. **Jeden wykrzyknik:** „dziękuję!” po wysłaniu zgłoszenia.
+
+## Dodatki: historia
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `historia.sesje.wiersz_moja` | (nowy) | {dzien} {godzina} · {profil} / {kroki} {kroki:krok/kroki/kroków} · {czas} · {kmh} km/h | Wiersz sesji w historii jednej osoby (bez nazwy osoby). |
+| `historia.wykres.teraz` | teraz | teraz | Oś wykresu godzinowego, bieżąca godzina. W 0.5.2 wpisane w kod. |
+| `historia.wykres.dni_tygodnia` | pn wt śr cz pt sb nd | pn wt śr cz pt sb nd | Oś wykresu 7 dni. Skróty od poniedziałku, rozdzielone spacją. |
+| `historia.wykres.slupek` | (nowy) | {kiedy} · {kroki} {kroki:krok/kroki/kroków} | Podpowiedź po najechaniu na słupek, np. „13:00 · 1 234 kroki”. |
+| `historia.wykres.opis` | (nowy) | Razem {kroki} {kroki:krok/kroki/kroków}, najwięcej: {kiedy}. | Opis wykresu dla czytnika ekranu. |
+| `sesja.online.kto` | (nowy) | Kto ją widzi: {kto}. Zmienisz to w Konto online > Moje konto. | `{kto}` z `moje.widocznosc.*`. Tylko dla wybranej osoby z kontem. |
+| `sesja.usun.opis_lokalnie` | (nowy) | Sesja zniknie z historii na tym komputerze. Tego nie da się cofnąć. Przytrzymaj przycisk, żeby usunąć. | Wariant `sesja.usun.opis` dla osoby bez konta online. |
