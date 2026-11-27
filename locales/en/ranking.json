@@ -1,0 +1,21 @@
+{
+  "@@locale": "en",
+  "ranking.zakres": "Ranking range",
+  "ranking.zakres.tydzien": "This week",
+  "ranking.zakres.miesiac": "This month",
+  "ranking.zakres.zawsze": "All time",
+  "ranking.zakres.poziomy": "Levels",
+  "ranking.tytul.poziomy": "Level ranking",
+  "ranking.tytul.kroki_zawsze": "Step ranking · all time",
+  "ranking.tytul.kroki": "Step ranking",
+  "ranking.pusto": "No one has results in this period yet.",
+  "ranking.miejsce": "{liczba}.",
+  "ranking.wiersz.poziom": "{km} km in total",
+  "ranking.wiersz.kroki": "{kroki} {kroki, plural, one {step} other {steps}} · {km} km",
+  "ranking.opis.poziomy": "The level ranking counts kilometres since the account was created. This week counts from Monday, this month from the 1st (Polish time).",
+  "ranking.opis.zasady": "The ranking counts sessions on a real treadmill that are visible to friends or everyone. Hidden sessions and profiles are not counted.",
+  "ranking.ty": "(you)",
+  "ranking.wiersz.kroki_slowo": "{kroki, plural, one {step} other {steps}}",
+  "ranking.wiersz.km": "{km} km",
+  "ranking.wiersz.lacznie": "in total"
+}
