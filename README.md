@@ -159,8 +159,8 @@ Windows Settings > Apps > WalkLevel > Uninstall. People, profiles, step history 
 
 ## Levels and achievements
 
-Every kilometre on the treadmill is 100 XP. Levels 1-100 have 39 ranks: characters from games
-and books, from those who walked the least to those who walked the most. Level 100 comes after
+Every kilometre on the treadmill is 100 XP. Levels 1-100 have 39 ranks: characters from games,
+fantasy and science fiction, from those who walked the least to those who walked the most. Level 100 comes after
 about 5 years at 5 km a day. Achievements (86) come in five tiers: common, rare, epic, heroic and
 legendary, and each one adds XP by its tier. Most of them (65) form a distance trail through
 worlds from games and books. The rest are for long sessions, steps in a day, day streaks (at

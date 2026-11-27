@@ -125,13 +125,13 @@
   },
   {
    "level": 2,
-   "name": "Robinson Crusoe",
-   "about": "Dwadzieścia osiem lat na jednej wyspie. Zna każdą jej ścieżkę."
+   "name": "Pac-Man",
+   "about": "Na wszystkich poziomach automatu z 1980 roku krąży po tym samym labiryncie."
   },
   {
    "level": 3,
-   "name": "Sim z The Sims",
-   "about": "Najdalsze wyprawy: do lodówki i do skrzynki na listy."
+   "name": "Ori",
+   "about": "Burza zdmuchnęła go z Drzewa Ducha jak liść."
   },
   {
    "level": 4,
@@ -1630,11 +1630,11 @@
   ],
   [
    2,
-   "Robinson Crusoe"
+   "Pac-Man"
   ],
   [
    3,
-   "Sim z The Sims"
+   "Ori"
   ],
   [
    4,
@@ -2036,11 +2036,11 @@
   ],
   [
    1,
-   "Robinson Crusoe"
+   "Pac-Man"
   ],
   [
    2,
-   "Sim z The Sims"
+   "Ori"
   ],
   [
    3,

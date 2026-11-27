@@ -150,7 +150,7 @@ Ustawienia Windows > Aplikacje > WalkLevel > Odinstaluj. Osoby, profile, histori
 
 ## Poziomy i osiągnięcia
 
-Każdy kilometr na bieżni to 100 XP. Poziomy 1-100 mają 39 rang - postaci z gier i książek,
+Każdy kilometr na bieżni to 100 XP. Poziomy 1-100 mają 39 rang - postaci z gier, fantasy i science fiction,
 od tych, które chodziły najmniej, po te, które przeszły najwięcej. Poziom 100 wypada po ok. 5 latach
 przy 5 km dziennie. Osiągnięcia (86) mają pięć stopni: pospolite, rzadkie, epickie, heroiczne
 i legendarne, a każde dodaje XP zależnie od stopnia. Większość (65) to szlak dystansu przez

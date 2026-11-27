@@ -8,19 +8,19 @@
   "@levels.rank.1.about": {
     "description": "Opis rangi od poziomu 1: ile ta postać chodzi."
   },
-  "levels.rank.2.name": "Robinson Crusoe",
+  "levels.rank.2.name": "Pac-Man",
   "@levels.rank.2.name": {
     "description": "Nazwa rangi od poziomu 2 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.2.about": "Dwadzieścia osiem lat na jednej wyspie. Zna każdą jej ścieżkę.",
+  "levels.rank.2.about": "Na wszystkich poziomach automatu z 1980 roku krąży po tym samym labiryncie.",
   "@levels.rank.2.about": {
     "description": "Opis rangi od poziomu 2: ile ta postać chodzi."
   },
-  "levels.rank.3.name": "Sim z The Sims",
+  "levels.rank.3.name": "Ori",
   "@levels.rank.3.name": {
     "description": "Nazwa rangi od poziomu 3 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.3.about": "Najdalsze wyprawy: do lodówki i do skrzynki na listy.",
+  "levels.rank.3.about": "Burza zdmuchnęła go z Drzewa Ducha jak liść.",
   "@levels.rank.3.about": {
     "description": "Opis rangi od poziomu 3: ile ta postać chodzi."
   },
