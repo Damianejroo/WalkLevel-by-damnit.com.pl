@@ -14,5 +14,21 @@
   "instalator.skrot": "WalkLevel",
   "@instalator.skrot": {
     "description": "Skrót w menu Start i na pulpicie. Instalator nadal usuwa stare skróty „Bieżnia” i „Bieżnia Gamingowa” (to nazwy plików, nie tekst dla gracza)."
+  },
+  "instalator.languages": "Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Wygląd i okno > Język.",
+  "@instalator.languages": {
+    "description": "Od 0.6.4: nad listą języków aplikacji, przed `instalator.gotowe2`."
+  },
+  "instalator.english-built-in": "English (wbudowany)",
+  "@instalator.english-built-in": {
+    "description": "Od 0.6.4: stała pozycja listy języków. Inne języki mają na liście swoją nazwę z `locales/languages.json`."
+  },
+  "instalator.languages-type": "Wybrane języki",
+  "@instalator.languages-type": {
+    "description": "Od 0.6.4: jedyny typ instalacji; Inno go nie pokazuje, gdy typ jest jeden."
+  },
+  "instalator.webview2-missing": "Brakuje składnika Microsoft Edge WebView2, z którego korzysta okno WalkLevel. Zainstaluj go ze strony https://developer.microsoft.com/microsoft-edge/webview2/ i uruchom WalkLevel ponownie.",
+  "@instalator.webview2-missing": {
+    "description": "Okno po instalacji, gdy w Windows nie ma WebView2."
   }
 }

@@ -98,6 +98,9 @@ Dopiero potem `npx tauri dev`.
   `Bieznia.exe` i przepina skróty. Aktualizator szuka najpierw `WalkLevel-Setup-…`, potem
   `Bieznia-Setup-…`, a wydanie 0.6.4 ma też kopię pod starą nazwą dla 0.6.3
   (`LEGACY_INSTALLER_COPY` w `release.yml`).
+- Od 0.6.4 instalator pyta o swój język i o języki aplikacji
+  ([docs/i18n.pl.md](i18n.pl.md#instalator)). Nazwa języka Inno `polish` zostaje jak w 0.6.3, więc
+  aktualizacja zachowuje polski jako język instalatora, a tym użytkownikom polski jest zaznaczony.
 - Nagłówek User-Agent zostaje `Bieznia/<wersja>` (serwer kont może go rozpoznawać).
 - Od 0.6.4 aktualizator instaluje tylko instalator podpisany kluczem właściciela
   ([docs/release-signing.pl.md](release-signing.pl.md)).
