@@ -1,0 +1,23 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "przycisk",
+  "description": "Pływający przycisk: telemetria, wycinek bubble, przeciąganie okna, komendy bubble_* i w trybie Trening poziom +/− i Stop, poza nim Stop taśmy.",
+  "windows": [
+    "przycisk"
+  ],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-start-dragging",
+    "allow-bubble-click",
+    "allow-bubble-open",
+    "allow-bubble-drag-start",
+    "allow-bubble-drag-end",
+    "allow-training-level-step",
+    "allow-training-stop",
+    "allow-device-belt-stop",
+    "allow-app-snapshot",
+    "allow-ui-ready",
+    "allow-log-ui-error"
+  ]
+}

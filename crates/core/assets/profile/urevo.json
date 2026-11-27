@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "id": "urevo",
+  "name": "Urevo",
+  "driver": "ftms",
+  "match": ["URTM", "UREVO", "SPACEWALK"],
+  "capabilities": {
+    "start_delay_s": 4.0,
+    "pause": true,
+    "min_command_gap_s": 0.8
+  }
+}

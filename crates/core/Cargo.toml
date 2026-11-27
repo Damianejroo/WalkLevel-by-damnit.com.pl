@@ -1,0 +1,31 @@
+[package]
+name = "walklevel-core"
+description = "Rdzeń WalkLevel: bieżnia (BLE), sterowanie grą, historia, poziomy, konto online - bez interfejsu"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+
+[dependencies]
+base64 = "0.23.1"
+btleplug = "0.13.5"
+chrono = "0.4.45"
+futures = "0.3.34"
+hex = "0.4.3"
+log = "0.4.35"
+regex = "1.13.2"
+reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "blocking"] }
+rusqlite = { version = "0.43.0", features = ["bundled", "backup"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+sha2 = "0.11.2"
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+toml = "1.2.3"
+uuid = { version = "1.29.3", features = ["v4", "v7"] }
+windows = { version = "0.62.2", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Input_XboxController", "Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Security_Credentials"] }
+zip = { version = "9.8.2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"

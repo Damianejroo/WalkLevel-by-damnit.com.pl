@@ -1,0 +1,30 @@
+[
+  {
+    "frozen": true,
+    "local_app_data": "C:\\Users\\a\\AppData\\Local",
+    "user_profile": "C:\\Users\\a",
+    "cwd": "D:\\repo",
+    "result": "C:\\Users\\a\\AppData\\Local\\Bieznia"
+  },
+  {
+    "frozen": true,
+    "local_app_data": "",
+    "user_profile": "C:\\Users\\a",
+    "cwd": "D:\\repo",
+    "result": "C:\\Users\\a\\AppData\\Local\\Bieznia"
+  },
+  {
+    "frozen": true,
+    "local_app_data": null,
+    "user_profile": "C:\\Users\\b",
+    "cwd": "D:\\repo",
+    "result": "C:\\Users\\b\\AppData\\Local\\Bieznia"
+  },
+  {
+    "frozen": false,
+    "local_app_data": "C:\\Users\\a\\AppData\\Local",
+    "user_profile": "C:\\Users\\a",
+    "cwd": "D:\\repo",
+    "result": "D:\\repo"
+  }
+]

@@ -1,0 +1,14 @@
+* text=auto eol=lf
+# cmd.exe reads .bat files with LF line endings incorrectly
+*.bat text eol=crlf
+*.cmd text eol=crlf
+# test fixtures: SQLite databases and .bieznia backups
+*.db binary
+*.bieznia binary
+
+# GitHub language statistics: only the app (Rust, Svelte, TypeScript, CSS) counts
+docs/** linguist-documentation
+packaging/*.iss linguist-detectable=false
+packaging/*.ps1 linguist-detectable=false
+src/lib/texts-dictionary.ts linguist-generated
+crates/core/tests/fixtures/** linguist-generated

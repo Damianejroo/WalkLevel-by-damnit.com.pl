@@ -1,0 +1,630 @@
+{
+ "name": "v2_pusta",
+ "input": {
+  "sessions": [],
+  "now": 1767225600.0,
+  "friends": 0,
+  "referrals": 0,
+  "earnedBefore": {},
+  "restPerWeek": 1
+ },
+ "expected": {
+  "walks": [],
+  "km": 0.0,
+  "xp": 0,
+  "level": 1,
+  "rank": "Hobbit z Shire",
+  "nextRank": "Robinson Crusoe",
+  "levelFloor": 0,
+  "levelCeiling": 961,
+  "levelFraction": 0.0,
+  "kmToNextLevel": 9.61,
+  "progress": [
+   {
+    "id": "km1",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km57",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 5.7,
+    "fraction": 0.0
+   },
+   {
+    "id": "km113",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 11.3,
+    "fraction": 0.0
+   },
+   {
+    "id": "km212",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 21.2,
+    "fraction": 0.0
+   },
+   {
+    "id": "km24",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 24.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km30",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 30.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km447",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 44.7,
+    "fraction": 0.0
+   },
+   {
+    "id": "km53",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 53.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km63",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 63.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km70",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 70.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km805",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 80.5,
+    "fraction": 0.0
+   },
+   {
+    "id": "km100",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 100.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km115",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 115.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km160",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 160.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km200",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 200.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km215",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 215.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km246",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 246.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km318",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 318.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km385",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 385.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km420",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 420.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km483",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 483.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km583",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 583.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km640",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 640.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km737",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 737.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km800",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 800.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km950",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 950.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1009",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1009.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1085",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1085.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1190",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1190.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1257",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1257.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1285",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1285.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1407",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1407.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1480",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1480.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1609",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1609.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1697",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1697.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1770",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1770.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1854",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1854.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km1935",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1935.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2000",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2000.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2105",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2105.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2220",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2220.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2300",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2300.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2360",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2360.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2414",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2414.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2480",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2480.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2540",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2540.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2650",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2650.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2700",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2700.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2762",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2762.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km2865",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 2865.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km3058",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3058.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km3235",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3235.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km3490",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3490.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km3940",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3940.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km4023",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 4023.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km4500",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 4500.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km4800",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 4800.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km5523",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 5523.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km6128",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 6128.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km6500",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 6500.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km7200",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 7200.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km8047",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 8047.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km9656",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 9656.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "km10000",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 10000.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "s3",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "s10",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 10.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "s21",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 21.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "d7",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 7000.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "d12",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 12000.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "d20",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 20000.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "seria3",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "seria7",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 7.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "seria28",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 28.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "seria80",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 80.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "seria365",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 365.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gra1",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gry3",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 3.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gry5",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 5.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gra100",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 100.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "gra1000",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1000.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "trening",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "rano",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "noc",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "znajomy",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "polecenie",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   }
+  ],
+  "earned": [],
+  "closest": [],
+  "closest10": []
+ }
+}

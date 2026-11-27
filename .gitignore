@@ -1,0 +1,44 @@
+# Build output and dependencies (Rust, Node, Tauri)
+/target*/
+/dist*/
+node_modules/
+/src-tauri/gen/
+*.local
+
+# Local tools, e.g. Inno Setup for packaging/build.ps1
+/tools/inno/
+/narzedzia/
+
+# Screenshots from npm run test:ui (zrzuty: name used before 0.6.3)
+/docs/screenshots*/
+/docs/zrzuty*/
+
+
+# Data folder when running from source (current folder = data folder)
+/logs/
+/nagrania/
+/config.local.toml
+/dane/
+*.log
+
+# Leftovers of the 0.5.x Python version in old checkouts
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+/build/
+
+# Private notes and documents
+*.docx
+.narzedzia/
+build-log.txt
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.sw?

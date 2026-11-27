@@ -1,0 +1,47 @@
+[
+  {
+    "ns": 1700000000123456789,
+    "level": "INFO",
+    "name": "bieznia",
+    "msg": "Start aplikacji",
+    "main": "2023-11-14 22:13:20 INFO    bieznia: Start aplikacji",
+    "ble": "2023-11-14 22:13:20.123 Start aplikacji",
+    "console": "22:13:20 INFO    bieznia: Start aplikacji"
+  },
+  {
+    "ns": 1700000001999999999,
+    "level": "WARNING",
+    "name": "bieznia.ble",
+    "msg": "Zażółć gęślą jaźń",
+    "main": "2023-11-14 22:13:22 WARNING bieznia.ble: Zażółć gęślą jaźń",
+    "ble": "2023-11-14 22:13:22.000 Zażółć gęślą jaźń",
+    "console": "22:13:22 WARNING bieznia.ble: Zażółć gęślą jaźń"
+  },
+  {
+    "ns": 1700000002000500000,
+    "level": "ERROR",
+    "name": "walklevel_core::history",
+    "msg": "błąd: %s",
+    "main": "2023-11-14 22:13:22 ERROR   walklevel_core::history: błąd: %s",
+    "ble": "2023-11-14 22:13:22.000 błąd: %s",
+    "console": "22:13:22 ERROR   walklevel_core::history: błąd: %s"
+  },
+  {
+    "ns": 1700000003050000000,
+    "level": "CRITICAL",
+    "name": "bieznia.blad",
+    "msg": "Nieobsłużony błąd\nlinia 2",
+    "main": "2023-11-14 22:13:23 CRITICAL bieznia.blad: Nieobsłużony błąd\nlinia 2",
+    "ble": "2023-11-14 22:13:23.050 Nieobsłużony błąd\nlinia 2",
+    "console": "22:13:23 CRITICAL bieznia.blad: Nieobsłużony błąd\nlinia 2"
+  },
+  {
+    "ns": 1700000004007000000,
+    "level": "DEBUG",
+    "name": "bieznia.ble",
+    "msg": "-> 0x02 0x53 (KingSmith)",
+    "main": "2023-11-14 22:13:24 DEBUG   bieznia.ble: -> 0x02 0x53 (KingSmith)",
+    "ble": "2023-11-14 22:13:24.007 -> 0x02 0x53 (KingSmith)",
+    "console": "22:13:24 DEBUG   bieznia.ble: -> 0x02 0x53 (KingSmith)"
+  }
+]

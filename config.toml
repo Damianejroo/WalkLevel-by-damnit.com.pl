@@ -1,0 +1,104 @@
+# Domyślne ustawienia mostu. NIE edytuj tego pliku u siebie –
+# żeby coś zmienić lokalnie, utwórz obok plik config.local.toml
+# z tymi sekcjami/kluczami, które chcesz nadpisać (nie trafia do gita).
+
+[source]
+# sim    – symulowana bieżnia (F6 wolniej, F7 szybciej)
+# replay – odtwarzanie nagrania z pliku .jsonl
+type = "sim"
+replay_file = ""
+
+[output]
+# dry  – tylko pokazuje, co by zrobił (bezpieczne, nic nie naciska)
+# keys – naciska W i Shift w aktywnym oknie (np. w grze)
+type = "dry"
+# keyboard  - trzymane klawisze chodu/biegu ustawiają prędkość taśmy
+# gamepad   - wychylenie lewej gałki pada ustawia prędkość taśmy (skokami)
+# treadmill - chodzenie po bieżni naciska klawisze w grze
+direction = "keyboard"
+# Most startuje WYŁĄCZONY, włączasz go klawiszem toggle (F8).
+start_enabled = false
+
+[mapping]
+# km/h – poniżej: stoisz, nic nie jest wciśnięte
+stand_below = 0.8
+# bieg (Shift+W) włącza się od run_on, wyłącza poniżej run_off (histereza)
+run_on = 6.3
+run_off = 5.7
+# prędkość, przy której gałka pada jest wychylona na 100%
+max_speed = 12.0
+# średnia z ostatnich N odczytów
+smoothing_samples = 1
+# brak odczytu dłużej niż tyle sekund = stoisz (bezpiecznik)
+stale_after_s = 3.0
+# szybkie zatrzymanie: gwałtowne hamowanie taśmy (spadek >= brake_drop km/h na odczyt)
+# zatrzymuje postać od razu, bez czekania na pełny stop bieżni
+quick_stop = true
+brake_drop = 0.6
+# blisko progu chodu (próg + brake_near) każdy spadek = zatrzymywanie się
+brake_near = 0.6
+brake_hold_s = 3.0
+
+[hotkeys]
+# w oknie zmienisz go przyciskiem "Start/stop" (to tylko domyślny i tryb bez okna)
+toggle = "F8"
+sim_slower = "F6"
+sim_faster = "F7"
+
+[record]
+# zapisuje odczyty z bieżni do folderu nagrania/ (do odtwarzania u siebie)
+enabled = false
+
+[update]
+# skąd przycisk Aktualizuj pobiera nową wersję
+remote = "origin"
+branch = "main"
+
+[ble]
+# Zapamiętana bieżnia (ustawia się sama po pierwszym połączeniu w oknie).
+device_address = ""
+device_name = ""
+# start i stop taśmy razem z włączeniem/wyłączeniem sterowania (KingSmith)
+belt_control = true
+# tryb "Klawisze -> bieżnia": prędkość taśmy bez klawisza, z klawiszem chodu i z chodem + biegiem
+idle_speed = 1.0
+walk_speed = 1.5
+run_speed = 2.5
+# tryb "Pad -> bieżnia": [wychylenie gałki w %, prędkość km/h], od 2 do 5 skoków
+pad_steps = [[0, 1.0], [25, 1.5], [50, 2.5], [100, 4.0]]
+# gałka puszczona: stop (taśma staje, ruch gałki ją uruchamia) | slow (prędkość skoku 1)
+# | zero (test: polecenie 0 km/h bez zatrzymania)
+pad_idle = "stop"
+# tryb "Trening": cztery poziomy prędkości (km/h), zmiana klawiszami albo kliknięciem
+training_levels = [1.5, 2.5, 3.5, 4.5]
+
+[ui]
+simulator = false
+record = false
+always_on_top = false
+# mały przycisk zawsze na wierzchu: klik włącza/wyłącza sterowanie, prawy otwiera okno
+floating_button = false
+# system | light | dark
+theme = "system"
+large_text = false
+# szczegółowe logi Bluetooth (surowa rozmowa z bieżnią) - do zdalnej diagnozy
+detailed_logs = true
+
+# Poziom logs/bieznia.log: domyślnie info. Do diagnozy w config.local.toml (folder danych):
+#   [logs]
+#   level = "debug"
+# debug dopisuje też wpisy spoza Bluetooth (np. każde zapytanie do serwera kont); ramki
+# i polecenia bieżni są zawsze tylko w bluetooth.log (detailed_logs).
+
+[zgloszenia]
+# Adres HTTPS, na który przycisk Wyślij zgłoszenie wysyła paczkę z logami (POST, multipart).
+# Serwer przekazuje zgłoszenie mailem do autora i go nie przechowuje.
+# Pusty = paczka trafia do e-maila na adres kontaktowy autora.
+adres = "https://bieznia.damnit-live.pl/api/bieznia/zgloszenie"
+
+[konto]
+# Konto online jest opcjonalne: bez logowania aplikacja działa w całości lokalnie i nic nie
+# wysyła. Adres serwera kont (tylko HTTPS). Pusty = sekcji konta w ogóle nie widać.
+adres = "https://bieznia.damnit-live.pl"
+# Regulamin i polityka prywatności konta online (link w formularzu zakładania konta).
+regulamin = "https://bieznia.damnit-live.pl/bieznia"

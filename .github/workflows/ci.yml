@@ -1,0 +1,55 @@
+name: CI
+
+# Siatka bezpieczeństwa po pushu. Wydanie (release.yml) i tak powtarza testy przed budową,
+# więc zmiany w samej dokumentacji nie uruchamiają CI.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "LICENSE"]
+  pull_request:
+    paths-ignore: ["**.md", "LICENSE"]
+
+permissions:
+  contents: read
+
+# Nowszy push przerywa starszy, niedokończony przebieg - liczy się tylko ostatni stan.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # WalkLevel 0.6.0+ (Tauri 2 + Svelte + Rust) - to idzie do użytkowników
+  walklevel:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node.js 24 (skrypty .ts bez kompilacji)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Rust stable (Rust 2024) i clippy
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy
+          rustup default stable
+      - name: Rdzeń i klej Tauri (clippy, testy)
+        run: |
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+          if ($LASTEXITCODE) { throw "clippy" }
+          cargo test --workspace --locked
+          if ($LASTEXITCODE) { throw "cargo test" }
+      - name: Interfejs (typy, budowa, test widoków w Edge)
+        run: |
+          npm ci
+          if ($LASTEXITCODE) { throw "npm ci" }
+          npm run check
+          if ($LASTEXITCODE) { throw "npm run check" }
+          npm run build
+          if ($LASTEXITCODE) { throw "npm run build" }
+          npm run test:ui -- --no-screenshots
+          if ($LASTEXITCODE) { throw "test:ui" }
