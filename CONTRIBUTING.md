@@ -66,4 +66,6 @@ git tag -a v0.6.3 -F notes.txt
 git push origin v0.6.3
 ```
 
-GitHub Actions runs the checks, builds the exe and the installer, and publishes the release.
+GitHub Actions runs the checks, builds the exe and the installer, signs the installer with the
+owner's key and publishes the release. Without the signing secrets the release stops; see
+[docs/release-signing.md](docs/release-signing.md).

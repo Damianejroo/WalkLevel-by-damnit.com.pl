@@ -1897,6 +1897,8 @@
     "aktualizacja.powod.suma": "Pobrany plik się nie zgadza, więc został odrzucony. Spróbuj ponownie.",
     "aktualizacja.powod.przerwane": "Pobieranie zostało przerwane. Spróbuj ponownie.",
     "aktualizacja.powod.system": "Aktualizacja działa tylko w Windows.",
+    "aktualizacja.powod.signature-missing": "The new version is not signed by the author, so it will not be installed. Try again later.",
+    "aktualizacja.powod.signature-invalid": "The signature of the new version does not match, so it will not be installed. Report it in Settings > Help and diagnostics.",
     "aktualizacja.zaktualizowano": "Zaktualizowano WalkLevel do wersji {nowa_wersja}.",
     "dziennik.tytul": "Event log",
     "dziennik.opis": "Gdy coś nie działa, najprościej użyć Ustawienia > Pomoc i diagnostyka > Zgłoś problem. Raport diagnostyczny pomaga, gdy bieżnia się nie łączy.",

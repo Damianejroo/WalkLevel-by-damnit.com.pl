@@ -15,7 +15,7 @@ znakami. Hasło bez zmian: „Chodzisz w realu, idziesz w grze”.
 | `crates/core` | `walklevel-core`: cała logika bez interfejsu (sterowniki bieżni, sterowanie, historia, osoby i profile, poziomy, konto online, kopie, zgłoszenia, aktualizacje). Nie zależy od Tauri. Tu są testy rdzenia. |
 | `src-tauri` | Tylko klej: komendy, zdarzenia, okna. Bez logiki biznesowej. |
 | `src` | Interfejs w Svelte 5. Jedno okno, stałe ekrany sterowane stanem; ekrany montują się raz, potem są tylko chowane, bez przebudowy. |
-| `docs` | `contract.md` (typy i komendy), `design.md` (tokeny i komponenty), `texts.md` (jedyne źródło kluczy i polskich tekstów), `i18n.md` (języki i tłumaczenia), `sync.md` (synchronizacja z serwerem kont), `analysis-*.md` (analizy); w `docs/readme/` są zrzuty do README. |
+| `docs` | `contract.md` (typy i komendy), `design.md` (tokeny i komponenty), `texts.md` (jedyne źródło kluczy i polskich tekstów), `i18n.md` (języki i tłumaczenia), `sync.md` (synchronizacja z serwerem kont), `release-signing.pl.md` (podpis wydań), `analysis-*.md` (analizy); w `docs/readme/` są zrzuty do README. |
 | `locales` | Pakiety językowe: `languages.json` (lista języków), `pl/` generowany z `docs/texts.md`, pozostałe języki tłumaczone ręcznie ([docs/i18n.pl.md](i18n.pl.md)). |
 | `tests-ui` | Test widoków i generator pakietów językowych. |
 | `packaging` | Ikona, grafiki instalatora i skrypt Inno Setup. |
@@ -93,8 +93,14 @@ Dopiero potem `npx tauri dev`.
 - Wpis `Bieznia/konto` w Menedżerze poświadczeń Windows.
 - W pracy nad kodem i w testach zmienna środowiskowa `WALKLEVEL_DANE` wskazuje inny folder
   danych, żeby nie ruszać prawdziwych.
-- Instalator Inno Setup ma ten sam AppId, a plik wykonywalny nadal nazywa się `Bieznia.exe`
-  (plik instalatora: `Bieznia-Setup-X.Y.Z.exe`).
+- Instalator Inno Setup ma ten sam AppId i folder `{localappdata}\Programs\Bieznia`. Od 0.6.4
+  program to `WalkLevel.exe`, a instalator `WalkLevel-Setup-X.Y.Z.exe`; instalator usuwa stary
+  `Bieznia.exe` i przepina skróty. Aktualizator szuka najpierw `WalkLevel-Setup-…`, potem
+  `Bieznia-Setup-…`, a wydanie 0.6.4 ma też kopię pod starą nazwą dla 0.6.3
+  (`LEGACY_INSTALLER_COPY` w `release.yml`).
+- Nagłówek User-Agent zostaje `Bieznia/<wersja>` (serwer kont może go rozpoznawać).
+- Od 0.6.4 aktualizator instaluje tylko instalator podpisany kluczem właściciela
+  ([docs/release-signing.pl.md](release-signing.pl.md)).
 
 ## Bez bloatu
 

@@ -51,7 +51,7 @@ Zrzuty wersji 0.6.2 z przykładowymi danymi (osoby, znajomi i wyniki są wymyśl
 
 ## Instalacja
 
-1. Pobierz **`Bieznia-Setup-….exe`** z [najnowszego wydania](https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/latest).
+1. Pobierz **`WalkLevel-Setup-….exe`** z [najnowszego wydania](https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/latest).
 2. Uruchom instalator i kliknij **Instaluj** (jeden ekran, bez administratora). Po instalacji
    aplikacja otworzy się sama.
    Windows może pokazać okno „System Windows ochronił ten komputer” (aplikacja nie ma
@@ -199,7 +199,8 @@ git push origin v0.6.3
 ```
 
 GitHub Actions uruchamia testy, buduje exe i instalator (`packaging/build.ps1`,
-Inno Setup), dodaje poświadczenie pochodzenia i publikuje wydanie z opisem z tagu. Aplikacja
+Inno Setup), podpisuje instalator kluczem autora ([docs/release-signing.pl.md](docs/release-signing.pl.md)),
+dodaje poświadczenie pochodzenia i publikuje wydanie z opisem z tagu. Aplikacja
 znajdzie je przyciskiem **Aktualizuj**.
 
 ### Struktura
@@ -237,11 +238,14 @@ standard FTMS (np. Urevo SpaceWalk), z odczytem i sterowaniem prędkością.
 
 ## Bezpieczeństwo
 
-- aktualizacja tylko po kliknięciu, tylko z wydań tego repozytorium i tylko z hostów GitHuba;
-  instalator jest uruchamiany dopiero po zgodności sumy SHA-256 podanej przez GitHub,
+- aktualizacja tylko po kliknięciu i tylko z wydań tego repozytorium
+  (`github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/download/…` i serwery pobierania
+  GitHuba, na które to przekierowuje); instalator jest uruchamiany dopiero po zgodności sumy
+  SHA-256 podanej przez GitHub i po sprawdzeniu podpisu kluczem autora (`.sig`,
+  [docs/release-signing.pl.md](docs/release-signing.pl.md)),
 - wydania budują się w GitHub Actions z przypiętych wersji (akcje po commitach, Inno Setup
   po sumie SHA-256, biblioteki z `Cargo.lock` i `package-lock.json`) i mają poświadczenie pochodzenia
-  (`gh attestation verify Bieznia-Setup-….exe --repo damnit-damian/WalkLevel-by-damnit.com.pl`),
+  (`gh attestation verify WalkLevel-Setup-….exe --repo damnit-damian/WalkLevel-by-damnit.com.pl`),
 - instalacja i działanie bez administratora; aplikacja startuje z wyłączonym sterowaniem,
   wysyła do bieżni tylko start, stop i prędkość (gdy sterowanie jest włączone) i puszcza W/Shift po utracie
   danych, awarii albo zamknięciu,
