@@ -4,7 +4,7 @@
   "@levels.rank.1.name": {
     "description": "Nazwa rangi od poziomu 1 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.1.about": "Hobbici rzadko chodzili dalej niż do sąsiedniej wsi.",
+  "levels.rank.1.about": "Sześć posiłków dziennie zostawia hobbitowi niewiele czasu na dalekie spacery.",
   "@levels.rank.1.about": {
     "description": "Opis rangi od poziomu 1: ile ta postać chodzi."
   },
@@ -36,7 +36,7 @@
   "@levels.rank.5.name": {
     "description": "Nazwa rangi od poziomu 5 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.5.about": "Po Arrakis wożą go dryfy i ornitoptery, więc sam chodzi niewiele.",
+  "levels.rank.5.about": "Po Arrakis wożą go dryfy i ornitoptery, więc na własnych nogach chodzi niewiele.",
   "@levels.rank.5.about": {
     "description": "Opis rangi od poziomu 5: ile ta postać chodzi."
   },
@@ -68,7 +68,7 @@
   "@levels.rank.10.name": {
     "description": "Nazwa rangi od poziomu 10 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.10.about": "Lordran przeszedł wzdłuż i w dół, ginąc po drodze setki razy.",
+  "levels.rank.10.about": "Żeby zadzwonić w dwa dzwony, zszedł z kościoła na szczycie aż na bagna na dnie Lordranu.",
   "@levels.rank.10.about": {
     "description": "Opis rangi od poziomu 10: ile ta postać chodzi."
   },
@@ -84,7 +84,7 @@
   "@levels.rank.13.name": {
     "description": "Nazwa rangi od poziomu 13 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.13.about": "Cyrodiil od bramy do bramy Otchłani.",
+  "levels.rank.13.about": "Zaczynał w celi pod Cesarskim Miastem, a pierwsze wrota Otchłani zamknął pod Kvatch.",
   "@levels.rank.13.about": {
     "description": "Opis rangi od poziomu 13: ile ta postać chodzi."
   },
@@ -92,7 +92,7 @@
   "@levels.rank.15.name": {
     "description": "Nazwa rangi od poziomu 15 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.15.about": "Skyrim ma kilka kilometrów wszerz, a zadania wysyłają w każdy jego kąt.",
+  "levels.rank.15.about": "Mógłby korzystać z szybkiej podróży, ale po drodze zawsze trafia się jakaś jaskinia.",
   "@levels.rank.15.about": {
     "description": "Opis rangi od poziomu 15: ile ta postać chodzi."
   },
@@ -108,7 +108,7 @@
   "@levels.rank.19.name": {
     "description": "Nazwa rangi od poziomu 19 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.19.about": "Obudził się po stu latach i przeszedł Hyrule wzdłuż i wszerz.",
+  "levels.rank.19.about": "Szukając 120 kapliczek, przeszedł Hyrule od Great Plateau po najdalsze góry.",
   "@levels.rank.19.about": {
     "description": "Opis rangi od poziomu 19: ile ta postać chodzi."
   },
@@ -132,7 +132,7 @@
   "@levels.rank.26.name": {
     "description": "Nazwa rangi od poziomu 26 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.26.about": "Wyszedł z Krypty 101 i przeszedł całe Stołeczne Pustkowie.",
+  "levels.rank.26.about": "Pierwsze kroki poza Kryptą 101 zrobił oślepiony słońcem, którego wcześniej nigdy nie widział.",
   "@levels.rank.26.about": {
     "description": "Opis rangi od poziomu 26: ile ta postać chodzi."
   },
@@ -140,7 +140,7 @@
   "@levels.rank.31.name": {
     "description": "Nazwa rangi od poziomu 31 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.31.about": "Pół Dzikiego Zachodu przemierzył z gangiem, choć głównie w siodle.",
+  "levels.rank.31.about": "Drogę z gangiem, od zasypanego śniegiem Colter po Saint Denis, rysował w swoim dzienniku.",
   "@levels.rank.31.about": {
     "description": "Opis rangi od poziomu 31: ile ta postać chodzi."
   },
@@ -180,7 +180,7 @@
   "@levels.rank.52.name": {
     "description": "Nazwa rangi od poziomu 52 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.52.about": "Grobowce na wszystkich kontynentach, zwykle na piechotę i z liną.",
+  "levels.rank.52.about": "Szukała grobowców na wszystkich kontynentach, zwykle pieszo i z liną.",
   "@levels.rank.52.about": {
     "description": "Opis rangi od poziomu 52: ile ta postać chodzi."
   },
@@ -204,7 +204,7 @@
   "@levels.rank.62.name": {
     "description": "Nazwa rangi od poziomu 62 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.62.about": "Wiedźmin całe życie na szlaku, choć sporą część drogi zrobiła Płotka.",
+  "levels.rank.62.about": "Z Rivii wcale nie pochodzi, ale drogi Kontynentu zna od Kaer Morhen po Toussaint.",
   "@levels.rank.62.about": {
     "description": "Opis rangi od poziomu 62: ile ta postać chodzi."
   },
@@ -212,7 +212,7 @@
   "@levels.rank.65.name": {
     "description": "Nazwa rangi od poziomu 65 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.65.about": "Przemierzyła pieszo cały Zakazany Zachód.",
+  "levels.rank.65.about": "Przemierzyła pieszo cały Zakazany Zachód, od pustyń po ruiny nad oceanem.",
   "@levels.rank.65.about": {
     "description": "Opis rangi od poziomu 65: ile ta postać chodzi."
   },
@@ -220,7 +220,7 @@
   "@levels.rank.69.name": {
     "description": "Nazwa rangi od poziomu 69 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.69.about": "Przez zrujnowane Stany, od Bostonu na zachód.",
+  "levels.rank.69.about": "Przeszła zrujnowane Stany od Bostonu na zachód.",
   "@levels.rank.69.about": {
     "description": "Opis rangi od poziomu 69: ile ta postać chodzi."
   },
@@ -228,7 +228,7 @@
   "@levels.rank.72.name": {
     "description": "Nazwa rangi od poziomu 72 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.72.about": "Z Królewskiej Przystani przez całe Dorzecze, potem do Braavos i z powrotem.",
+  "levels.rank.72.about": "Z Królewskiej Przystani przeszła całe Dorzecze, potem dotarła do Braavos i wróciła.",
   "@levels.rank.72.about": {
     "description": "Opis rangi od poziomu 72: ile ta postać chodzi."
   },
@@ -236,7 +236,7 @@
   "@levels.rank.75.name": {
     "description": "Nazwa rangi od poziomu 75 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.75.about": "Z Lordaeronu przez morze do mroźnego Northrendu.",
+  "levels.rank.75.about": "Po przeklęty miecz poszedł aż na lodowce Northrendu.",
   "@levels.rank.75.about": {
     "description": "Opis rangi od poziomu 75: ile ta postać chodzi."
   },
@@ -244,7 +244,7 @@
   "@levels.rank.78.name": {
     "description": "Nazwa rangi od poziomu 78 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.78.about": "Z Arrakin w głęboką pustynię, a potem z Fremenami przez cały Arrakis.",
+  "levels.rank.78.about": "Z Arrakin uciekł w głęboką pustynię, a potem z Fremenami przemierzył cały Arrakis.",
   "@levels.rank.78.about": {
     "description": "Opis rangi od poziomu 78: ile ta postać chodzi."
   },
@@ -252,7 +252,7 @@
   "@levels.rank.81.name": {
     "description": "Nazwa rangi od poziomu 81 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.81.about": "Jaskółka, która wędrowała nie tylko po Kontynencie, ale i między światami.",
+  "levels.rank.81.about": "Uciekając przed Dzikim Gonem, trafiała do światów, z których trudno było znaleźć drogę powrotną.",
   "@levels.rank.81.about": {
     "description": "Opis rangi od poziomu 81: ile ta postać chodzi."
   },
@@ -260,7 +260,7 @@
   "@levels.rank.84.name": {
     "description": "Nazwa rangi od poziomu 84 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.84.about": "Mistrz miecza Atrydów, który miesiącami żył z Fremenami na pustyni.",
+  "levels.rank.84.about": "Mistrz miecza Atrydów spędził z Fremenami na pustyni długie miesiące.",
   "@levels.rank.84.about": {
     "description": "Opis rangi od poziomu 84: ile ta postać chodzi."
   },
@@ -268,7 +268,7 @@
   "@levels.rank.87.name": {
     "description": "Nazwa rangi od poziomu 87 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.87.about": "Włamywacz z Bag End, który wyruszył na wyprawę nawet bez chusteczki do nosa.",
+  "levels.rank.87.about": "Z trzynastoma krasnoludami poszedł z Bag End pod Samotną Górę, tam i z powrotem.",
   "@levels.rank.87.about": {
     "description": "Opis rangi od poziomu 87: ile ta postać chodzi."
   },
@@ -284,7 +284,7 @@
   "@levels.rank.92.name": {
     "description": "Nazwa rangi od poziomu 92 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.92.about": "Tragarz, który pieszo połączył Amerykę od wybrzeża do wybrzeża.",
+  "levels.rank.92.about": "Pieszo połączył Amerykę od wybrzeża do wybrzeża.",
   "@levels.rank.92.about": {
     "description": "Opis rangi od poziomu 92: ile ta postać chodzi."
   },
@@ -292,7 +292,7 @@
   "@levels.rank.95.name": {
     "description": "Nazwa rangi od poziomu 95 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.95.about": "Dziesięć lat wracał spod Troi na Itakę.",
+  "levels.rank.95.about": "Dziesięć lat wracał na Itakę.",
   "@levels.rank.95.about": {
     "description": "Opis rangi od poziomu 95: ile ta postać chodzi."
   },
@@ -308,7 +308,7 @@
   "@levels.rank.100.name": {
     "description": "Nazwa rangi od poziomu 100 (postać z gry, książki albo filmu)."
   },
-  "levels.rank.100.about": "Gandalf wędrował po Śródziemiu przez dwa tysiące lat.",
+  "levels.rank.100.about": "Wędrował po Śródziemiu dwa tysiące lat.",
   "@levels.rank.100.about": {
     "description": "Opis rangi od poziomu 100: ile ta postać chodzi."
   },
@@ -388,7 +388,7 @@
   "@levels.achievement.km30.name": {
     "description": "Nazwa osiągnięcia km30."
   },
-  "levels.achievement.km30.flavor": "Zona ze Stalkera to strefa wokół elektrowni o promieniu około 30 km. Z Kordonu na południu pod samą Elektrownię.",
+  "levels.achievement.km30.flavor": "Zona z gry S.T.A.L.K.E.R. to strefa wokół elektrowni o promieniu około 30 km. Z Kordonu na południu pod samą Elektrownię.",
   "@levels.achievement.km30.flavor": {
     "description": "Klimat osiągnięcia km30: zdanie ze świata gry albo książki."
   },
@@ -432,11 +432,11 @@
   "@levels.achievement.km63.condition": {
     "description": "Warunek osiągnięcia km63, sucho."
   },
-  "levels.achievement.km70.name": "Cuszima wzdłuż",
+  "levels.achievement.km70.name": "Tsushima wzdłuż",
   "@levels.achievement.km70.name": {
     "description": "Nazwa osiągnięcia km70."
   },
-  "levels.achievement.km70.flavor": "Wyspa Cuszima, na której dzieje się Ghost of Tsushima, ma w rzeczywistości około 70 km z północy na południe.",
+  "levels.achievement.km70.flavor": "Wyspa Tsushima, na której dzieje się Ghost of Tsushima, ma w rzeczywistości około 70 km z północy na południe.",
   "@levels.achievement.km70.flavor": {
     "description": "Klimat osiągnięcia km70: zdanie ze świata gry albo książki."
   },
@@ -448,7 +448,7 @@
   "@levels.achievement.km805.name": {
     "description": "Nazwa osiągnięcia km805."
   },
-  "levels.achievement.km805.flavor": "W „W 80 dni dookoła świata” brakuje 50 mil torów między Kholby a Allahabadem. Tę lukę Phileas Fogg pokonuje na grzbiecie słonia.",
+  "levels.achievement.km805.flavor": "W „W osiemdziesiąt dni dookoła świata” brakuje 50 mil torów między Kholby a Allahabadem. Tę lukę Phileas Fogg pokonuje na grzbiecie słonia.",
   "@levels.achievement.km805.flavor": {
     "description": "Klimat osiągnięcia km805: zdanie ze świata gry albo książki."
   },
@@ -508,7 +508,7 @@
   "@levels.achievement.km215.name": {
     "description": "Nazwa osiągnięcia km215."
   },
-  "levels.achievement.km215.flavor": "Etap drogi Froda: gospoda w Bree, pierwszy nocleg za granicą Shire.",
+  "levels.achievement.km215.flavor": "Etap drogi Froda: gospoda w Bree za granicą Shire.",
   "@levels.achievement.km215.flavor": {
     "description": "Klimat osiągnięcia km215: zdanie ze świata gry albo książki."
   },
@@ -636,7 +636,7 @@
   "@levels.achievement.km950.condition": {
     "description": "Warunek osiągnięcia km950, sucho."
   },
-  "levels.achievement.km1009.name": "Pielgrzymka Harolda Fry",
+  "levels.achievement.km1009.name": "Niezwykła wędrówka Harolda Fry",
   "@levels.achievement.km1009.name": {
     "description": "Nazwa osiągnięcia km1009."
   },
@@ -696,7 +696,7 @@
   "@levels.achievement.km1285.condition": {
     "description": "Warunek osiągnięcia km1285, sucho."
   },
-  "levels.achievement.km1407.name": "Land’s End – John o’Groats",
+  "levels.achievement.km1407.name": "Land’s End – John o’ Groats",
   "@levels.achievement.km1407.name": {
     "description": "Nazwa osiągnięcia km1407."
   },
@@ -736,7 +736,7 @@
   "@levels.achievement.km1697.name": {
     "description": "Nazwa osiągnięcia km1697."
   },
-  "levels.achievement.km1697.flavor": "Japoński szlak przyrodniczy Tōkai biegnie górami z Takao pod Tokio do Minoo pod Osaką. Według władz Tokio ma 1 697 km.",
+  "levels.achievement.km1697.flavor": "Japoński szlak przyrodniczy Tōkai biegnie górami z Takao pod Tokio do Minoh pod Osaką. Według władz Tokio ma 1 697 km.",
   "@levels.achievement.km1697.flavor": {
     "description": "Klimat osiągnięcia km1697: zdanie ze świata gry albo książki."
   },
@@ -844,7 +844,7 @@
   "@levels.achievement.km2414.name": {
     "description": "Nazwa osiągnięcia km2414."
   },
-  "levels.achievement.km2414.flavor": "W filmie „Rabbit-Proof Fence” trzy dziewczynki uciekają z ośrodka i przez dziewięć tygodni idą do domu wzdłuż płotu. To 1 500 mil, około 2 414 km.",
+  "levels.achievement.km2414.flavor": "W filmie „Polowanie na króliki” trzy dziewczynki uciekają z ośrodka i przez dziewięć tygodni idą do domu wzdłuż płotu. To 1 500 mil, około 2 414 km.",
   "@levels.achievement.km2414.flavor": {
     "description": "Klimat osiągnięcia km2414: zdanie ze świata gry albo książki."
   },
@@ -892,7 +892,7 @@
   "@levels.achievement.km2700.name": {
     "description": "Nazwa osiągnięcia km2700."
   },
-  "levels.achievement.km2700.flavor": "Robyn Davidson, której wyprawę pokazuje film „Tracks”, przeszła z wielbłądami przez australijskie pustynie z Alice Springs nad Ocean Indyjski. Około 2 700 km.",
+  "levels.achievement.km2700.flavor": "Robyn Davidson, której wyprawę pokazuje film „Ścieżki”, przeszła z wielbłądami przez australijskie pustynie z Alice Springs nad Ocean Indyjski. Około 2 700 km.",
   "@levels.achievement.km2700.flavor": {
     "description": "Klimat osiągnięcia km2700: zdanie ze świata gry albo książki."
   },
@@ -1048,7 +1048,7 @@
   "@levels.achievement.km7200.name": {
     "description": "Nazwa osiągnięcia km7200."
   },
-  "levels.achievement.km7200.flavor": "Lodowa planeta z Gwiezdnych Wojen ma 7 200 km średnicy. Na wylot, w śniegu po kolana.",
+  "levels.achievement.km7200.flavor": "Lodowa planeta z Gwiezdnych wojen ma 7 200 km średnicy. Na wylot, w śniegu po kolana.",
   "@levels.achievement.km7200.flavor": {
     "description": "Klimat osiągnięcia km7200: zdanie ze świata gry albo książki."
   },
@@ -1096,7 +1096,7 @@
   "@levels.achievement.s3.name": {
     "description": "Nazwa osiągnięcia s3."
   },
-  "levels.achievement.s3.flavor": "Gra zapisała postęp. Można iść dalej.",
+  "levels.achievement.s3.flavor": "Gra zapisała postęp.",
   "@levels.achievement.s3.flavor": {
     "description": "Klimat osiągnięcia s3: zdanie ze świata gry albo książki."
   },
@@ -1204,7 +1204,7 @@
   "@levels.achievement.seria80.name": {
     "description": "Nazwa osiągnięcia seria80."
   },
-  "levels.achievement.seria80.flavor": "Phileas Fogg z powieści Verne’a okrążył świat w 80 dni. Seria trwa tyle samo.",
+  "levels.achievement.seria80.flavor": "Phileas Fogg z powieści Verne’a „W osiemdziesiąt dni dookoła świata” okrążył świat w 80 dni. Seria trwa tyle samo.",
   "@levels.achievement.seria80.flavor": {
     "description": "Klimat osiągnięcia seria80: zdanie ze świata gry albo książki."
   },

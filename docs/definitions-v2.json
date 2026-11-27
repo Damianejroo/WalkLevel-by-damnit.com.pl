@@ -122,7 +122,7 @@
   {
    "od_poziomu": 1,
    "nazwa": "Hobbit z Shire",
-   "opis": "Hobbici rzadko chodzili dalej niż do sąsiedniej wsi."
+   "opis": "Sześć posiłków dziennie zostawia hobbitowi niewiele czasu na dalekie spacery."
   },
   {
    "od_poziomu": 2,
@@ -142,7 +142,7 @@
   {
    "od_poziomu": 5,
    "nazwa": "Baron Harkonnen",
-   "opis": "Po Arrakis wożą go dryfy i ornitoptery, więc sam chodzi niewiele."
+   "opis": "Po Arrakis wożą go dryfy i ornitoptery, więc na własnych nogach chodzi niewiele."
   },
   {
    "od_poziomu": 6,
@@ -162,7 +162,7 @@
   {
    "od_poziomu": 10,
    "nazwa": "Nieumarły Wybraniec",
-   "opis": "Lordran przeszedł wzdłuż i w dół, ginąc po drodze setki razy."
+   "opis": "Żeby zadzwonić w dwa dzwony, zszedł z kościoła na szczycie aż na bagna na dnie Lordranu."
   },
   {
    "od_poziomu": 12,
@@ -172,12 +172,12 @@
   {
    "od_poziomu": 13,
    "nazwa": "Bohater Kvatch",
-   "opis": "Cyrodiil od bramy do bramy Otchłani."
+   "opis": "Zaczynał w celi pod Cesarskim Miastem, a pierwsze wrota Otchłani zamknął pod Kvatch."
   },
   {
    "od_poziomu": 15,
    "nazwa": "Smocze Dziecię",
-   "opis": "Skyrim ma kilka kilometrów wszerz, a zadania wysyłają w każdy jego kąt."
+   "opis": "Mógłby korzystać z szybkiej podróży, ale po drodze zawsze trafia się jakaś jaskinia."
   },
   {
    "od_poziomu": 17,
@@ -187,7 +187,7 @@
   {
    "od_poziomu": 19,
    "nazwa": "Link",
-   "opis": "Obudził się po stu latach i przeszedł Hyrule wzdłuż i wszerz."
+   "opis": "Szukając 120 kapliczek, przeszedł Hyrule od Great Plateau po najdalsze góry."
   },
   {
    "od_poziomu": 21,
@@ -202,12 +202,12 @@
   {
    "od_poziomu": 26,
    "nazwa": "Samotny Wędrowiec",
-   "opis": "Wyszedł z Krypty 101 i przeszedł całe Stołeczne Pustkowie."
+   "opis": "Pierwsze kroki poza Kryptą 101 zrobił oślepiony słońcem, którego wcześniej nigdy nie widział."
   },
   {
    "od_poziomu": 31,
    "nazwa": "Arthur Morgan",
-   "opis": "Pół Dzikiego Zachodu przemierzył z gangiem, choć głównie w siodle."
+   "opis": "Drogę z gangiem, od zasypanego śniegiem Colter po Saint Denis, rysował w swoim dzienniku."
   },
   {
    "od_poziomu": 35,
@@ -232,7 +232,7 @@
   {
    "od_poziomu": 52,
    "nazwa": "Lara Croft",
-   "opis": "Grobowce na wszystkich kontynentach, zwykle na piechotę i z liną."
+   "opis": "Szukała grobowców na wszystkich kontynentach, zwykle pieszo i z liną."
   },
   {
    "od_poziomu": 55,
@@ -247,47 +247,47 @@
   {
    "od_poziomu": 62,
    "nazwa": "Geralt z Rivii",
-   "opis": "Wiedźmin całe życie na szlaku, choć sporą część drogi zrobiła Płotka."
+   "opis": "Z Rivii wcale nie pochodzi, ale drogi Kontynentu zna od Kaer Morhen po Toussaint."
   },
   {
    "od_poziomu": 65,
    "nazwa": "Aloy",
-   "opis": "Przemierzyła pieszo cały Zakazany Zachód."
+   "opis": "Przemierzyła pieszo cały Zakazany Zachód, od pustyń po ruiny nad oceanem."
   },
   {
    "od_poziomu": 69,
    "nazwa": "Ellie",
-   "opis": "Przez zrujnowane Stany, od Bostonu na zachód."
+   "opis": "Przeszła zrujnowane Stany od Bostonu na zachód."
   },
   {
    "od_poziomu": 72,
    "nazwa": "Arya Stark",
-   "opis": "Z Królewskiej Przystani przez całe Dorzecze, potem do Braavos i z powrotem."
+   "opis": "Z Królewskiej Przystani przeszła całe Dorzecze, potem dotarła do Braavos i wróciła."
   },
   {
    "od_poziomu": 75,
    "nazwa": "Arthas",
-   "opis": "Z Lordaeronu przez morze do mroźnego Northrendu."
+   "opis": "Po przeklęty miecz poszedł aż na lodowce Northrendu."
   },
   {
    "od_poziomu": 78,
    "nazwa": "Paul Atryda",
-   "opis": "Z Arrakin w głęboką pustynię, a potem z Fremenami przez cały Arrakis."
+   "opis": "Z Arrakin uciekł w głęboką pustynię, a potem z Fremenami przemierzył cały Arrakis."
   },
   {
    "od_poziomu": 81,
    "nazwa": "Ciri",
-   "opis": "Jaskółka, która wędrowała nie tylko po Kontynencie, ale i między światami."
+   "opis": "Uciekając przed Dzikim Gonem, trafiała do światów, z których trudno było znaleźć drogę powrotną."
   },
   {
    "od_poziomu": 84,
    "nazwa": "Duncan Idaho",
-   "opis": "Mistrz miecza Atrydów, który miesiącami żył z Fremenami na pustyni."
+   "opis": "Mistrz miecza Atrydów spędził z Fremenami na pustyni długie miesiące."
   },
   {
    "od_poziomu": 87,
    "nazwa": "Bilbo Baggins",
-   "opis": "Włamywacz z Bag End, który wyruszył na wyprawę nawet bez chusteczki do nosa."
+   "opis": "Z trzynastoma krasnoludami poszedł z Bag End pod Samotną Górę, tam i z powrotem."
   },
   {
    "od_poziomu": 89,
@@ -297,12 +297,12 @@
   {
    "od_poziomu": 92,
    "nazwa": "Sam Porter Bridges",
-   "opis": "Tragarz, który pieszo połączył Amerykę od wybrzeża do wybrzeża."
+   "opis": "Pieszo połączył Amerykę od wybrzeża do wybrzeża."
   },
   {
    "od_poziomu": 95,
    "nazwa": "Odyseusz",
-   "opis": "Dziesięć lat wracał spod Troi na Itakę."
+   "opis": "Dziesięć lat wracał na Itakę."
   },
   {
    "od_poziomu": 97,
@@ -312,7 +312,7 @@
   {
    "od_poziomu": 100,
    "nazwa": "Szary Pielgrzym",
-   "opis": "Gandalf wędrował po Śródziemiu przez dwa tysiące lat."
+   "opis": "Wędrował po Śródziemiu dwa tysiące lat."
   }
  ],
  "zasady": {
@@ -389,7 +389,7 @@
    "rzadkosc": "pospolite",
    "znak": "radiacja",
    "nazwa": "Przez Zonę",
-   "klimat": "Zona ze Stalkera to strefa wokół elektrowni o promieniu około 30 km. Z Kordonu na południu pod samą Elektrownię.",
+   "klimat": "Zona z gry S.T.A.L.K.E.R. to strefa wokół elektrowni o promieniu około 30 km. Z Kordonu na południu pod samą Elektrownię.",
    "warunek": "Przejdź łącznie 30 km."
   },
   {
@@ -428,8 +428,8 @@
    "km": 70,
    "rzadkosc": "pospolite",
    "znak": "miecz",
-   "nazwa": "Cuszima wzdłuż",
-   "klimat": "Wyspa Cuszima, na której dzieje się Ghost of Tsushima, ma w rzeczywistości około 70 km z północy na południe.",
+   "nazwa": "Tsushima wzdłuż",
+   "klimat": "Wyspa Tsushima, na której dzieje się Ghost of Tsushima, ma w rzeczywistości około 70 km z północy na południe.",
    "warunek": "Przejdź łącznie 70 km."
   },
   {
@@ -439,7 +439,7 @@
    "rzadkosc": "rzadkie",
    "znak": "kolo",
    "nazwa": "Słoniem do Allahabadu",
-   "klimat": "W „W 80 dni dookoła świata” brakuje 50 mil torów między Kholby a Allahabadem. Tę lukę Phileas Fogg pokonuje na grzbiecie słonia.",
+   "klimat": "W „W osiemdziesiąt dni dookoła świata” brakuje 50 mil torów między Kholby a Allahabadem. Tę lukę Phileas Fogg pokonuje na grzbiecie słonia.",
    "warunek": "Przejdź łącznie 80,5 km."
   },
   {
@@ -489,7 +489,7 @@
    "rzadkosc": "rzadkie",
    "znak": "dom",
    "nazwa": "Pod Rozbrykanym Kucykiem",
-   "klimat": "Etap drogi Froda: gospoda w Bree, pierwszy nocleg za granicą Shire.",
+   "klimat": "Etap drogi Froda: gospoda w Bree za granicą Shire.",
    "warunek": "Przejdź łącznie 215 km."
   },
   {
@@ -598,7 +598,7 @@
    "km": 1009,
    "rzadkosc": "epickie",
    "znak": "stopy",
-   "nazwa": "Pielgrzymka Harolda Fry",
+   "nazwa": "Niezwykła wędrówka Harolda Fry",
    "klimat": "W powieści Rachel Joyce emeryt Harold Fry wychodzi wysłać list i idzie dalej pieszo, z Kingsbridge do Berwick-upon-Tweed. To 627 mil, czyli około 1 009 km.",
    "warunek": "Przejdź łącznie 1 009 km."
   },
@@ -648,7 +648,7 @@
    "km": 1407,
    "rzadkosc": "epickie",
    "znak": "licznik",
-   "nazwa": "Land’s End – John o’Groats",
+   "nazwa": "Land’s End – John o’ Groats",
    "klimat": "Klasyczna wędrówka przez całą Wielką Brytanię, od cypla w Kornwalii po północny kraniec Szkocji. Drogami to tradycyjnie 874 mile, czyli 1 407 km.",
    "warunek": "Przejdź łącznie 1 407 km."
   },
@@ -679,7 +679,7 @@
    "rzadkosc": "epickie",
    "znak": "drzewo",
    "nazwa": "Szlak Tōkai",
-   "klimat": "Japoński szlak przyrodniczy Tōkai biegnie górami z Takao pod Tokio do Minoo pod Osaką. Według władz Tokio ma 1 697 km.",
+   "klimat": "Japoński szlak przyrodniczy Tōkai biegnie górami z Takao pod Tokio do Minoh pod Osaką. Według władz Tokio ma 1 697 km.",
    "warunek": "Przejdź łącznie 1 697 km."
   },
   {
@@ -769,7 +769,7 @@
    "rzadkosc": "heroiczne",
    "znak": "stopy",
    "nazwa": "Wzdłuż płotu przeciw królikom",
-   "klimat": "W filmie „Rabbit-Proof Fence” trzy dziewczynki uciekają z ośrodka i przez dziewięć tygodni idą do domu wzdłuż płotu. To 1 500 mil, około 2 414 km.",
+   "klimat": "W filmie „Polowanie na króliki” trzy dziewczynki uciekają z ośrodka i przez dziewięć tygodni idą do domu wzdłuż płotu. To 1 500 mil, około 2 414 km.",
    "warunek": "Przejdź łącznie 2 414 km."
   },
   {
@@ -809,7 +809,7 @@
    "rzadkosc": "heroiczne",
    "znak": "slonce",
    "nazwa": "Z wielbłądami do oceanu",
-   "klimat": "Robyn Davidson, której wyprawę pokazuje film „Tracks”, przeszła z wielbłądami przez australijskie pustynie z Alice Springs nad Ocean Indyjski. Około 2 700 km.",
+   "klimat": "Robyn Davidson, której wyprawę pokazuje film „Ścieżki”, przeszła z wielbłądami przez australijskie pustynie z Alice Springs nad Ocean Indyjski. Około 2 700 km.",
    "warunek": "Przejdź łącznie 2 700 km."
   },
   {
@@ -939,7 +939,7 @@
    "rzadkosc": "legendarne",
    "znak": "planeta",
    "nazwa": "Przez Hoth",
-   "klimat": "Lodowa planeta z Gwiezdnych Wojen ma 7 200 km średnicy. Na wylot, w śniegu po kolana.",
+   "klimat": "Lodowa planeta z Gwiezdnych wojen ma 7 200 km średnicy. Na wylot, w śniegu po kolana.",
    "warunek": "Przejdź łącznie 7 200 km."
   },
   {
@@ -979,7 +979,7 @@
    "rzadkosc": "pospolite",
    "znak": "plomien",
    "nazwa": "Pierwszy checkpoint",
-   "klimat": "Gra zapisała postęp. Można iść dalej.",
+   "klimat": "Gra zapisała postęp.",
    "warunek": "Przejdź 3 km w jednej sesji."
   },
   {
@@ -1073,7 +1073,7 @@
    "rzadkosc": "heroiczne",
    "znak": "glob",
    "nazwa": "W 80 dni dookoła świata",
-   "klimat": "Phileas Fogg z powieści Verne’a okrążył świat w 80 dni. Seria trwa tyle samo.",
+   "klimat": "Phileas Fogg z powieści Verne’a „W osiemdziesiąt dni dookoła świata” okrążył świat w 80 dni. Seria trwa tyle samo.",
    "warunek": "Chodź min. 2 km dziennie przez 80 dni z rzędu (1 dzień wolny na 7 nie przerywa serii)."
   },
   {

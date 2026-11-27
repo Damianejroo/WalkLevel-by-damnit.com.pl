@@ -5,7 +5,9 @@ use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
 use serde_json::Value;
-use walklevel_core::levels::{Definitions, EvalOptions, evaluate, walks_from_sessions};
+use walklevel_core::levels::{
+    Achievement, Definitions, EvalOptions, evaluate, walks_from_sessions,
+};
 use walklevel_core::model::Session;
 
 fn fixtures_dir() -> PathBuf {
@@ -338,9 +340,19 @@ fn v2_changes_only_the_trail() {
     assert_eq!((old.version, new.version), (1, 2));
     assert_eq!(new.achievements.len(), 86);
     assert_eq!(new.trail().len(), 65);
+    // teksty wolno poprawiać (0.6.4: opisy rang, klimat), reguły i progi zostają
+    let rules = |a: &Achievement| Achievement {
+        flavor: String::new(),
+        ..a.clone()
+    };
     for a in old.achievements.iter().filter(|a| a.kind != "dystans") {
-        let b = new.by_id(&a.id);
-        assert_eq!(Some(a), b, "osiągnięcie spoza szlaku zmienione: {}", a.id);
+        let b = new.by_id(&a.id).map(rules);
+        assert_eq!(
+            Some(rules(a)),
+            b,
+            "osiągnięcie spoza szlaku zmienione: {}",
+            a.id
+        );
     }
     // to samo id na szlaku v1 i v2 = ten sam próg (zdobyte wcześniej nie przychodzą „przed czasem”)
     for a in old.trail() {
@@ -352,7 +364,10 @@ fn v2_changes_only_the_trail() {
         (old.xp_per_km, &old.rarity_xp, &old.rarities),
         (new.xp_per_km, &new.rarity_xp, &new.rarities)
     );
-    assert_eq!((&old.levels, &old.ranks), (&new.levels, &new.ranks));
+    let ranks = |d: &Definitions| -> Vec<(u32, String)> {
+        d.ranks.iter().map(|r| (r.level, r.name.clone())).collect()
+    };
+    assert_eq!((&old.levels, ranks(&old)), (&new.levels, ranks(new)));
 }
 
 #[test]
