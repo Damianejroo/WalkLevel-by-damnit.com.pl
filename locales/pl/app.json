@@ -6,7 +6,7 @@
   },
   "app.haslo": "Chodzisz w realu, idziesz w grze",
   "@app.haslo": {
-    "description": "Bez zmian, bez tłumaczenia (hasło marki). Do okna „O aplikacji” i ekranu pierwszego uruchomienia."
+    "description": "Bez zmian (hasło marki). Do okna „O aplikacji” i ekranu pierwszego uruchomienia."
   },
   "app.wersja": "wersja {wersja}",
   "@app.wersja": {

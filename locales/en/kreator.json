@@ -30,7 +30,7 @@
   "kreator.tryb.tytul": "How do you want to control?",
   "kreator.tryb.opis": "For the {profil} profile. You can change it in Settings > Games and controls.",
   "kreator.tryb.klawisze": "Keys / Hold W and the belt speeds up. Let go and it slows down.",
-  "kreator.tryb.pad": "Gamepad / Tilting the stick sets the belt speed in a few steps.",
+  "kreator.tryb.pad": "Gamepad / Tilting the stick sets the belt speed in a few gears.",
   "kreator.tryb.chodzenie": "Walking / You walk on the treadmill and your character walks in the game. The game gets W, and W + Shift at a faster pace.",
   "kreator.tryb.trening": "Training / Four fixed paces without a game. Pick a level by clicking or with F7 and F6.",
   "kreator.tryb.wybrane": "{tryb}, selected"
