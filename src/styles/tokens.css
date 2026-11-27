@@ -1,0 +1,190 @@
+/* Tokeny wyglądu WalkLevel 0.6.0 - jedyne źródło kolorów, odstępów, promieni i czasów
+   (docs/design.md, rozdz. 2). Komponenty nie wpisują własnych kolorów. */
+
+/* ---------- 2.1 Wspólne (niezależne od motywu) ---------- */
+:root {
+  color-scheme: light dark;
+
+  /* kroje */
+  --font-ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-num: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", sans-serif;
+  --font-icon: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+  --font-mono: "Cascadia Mono", "Consolas", monospace;
+
+  /* „Duży tekst” w Ustawieniach: 1.15 (skaluje się tylko pismo, nie odstępy) */
+  --text-scale: 1;
+
+  /* typografia (rem; 1rem = 16px * --text-scale) */
+  --fs-cap: 0.6875rem;   /* 11 - podpisy HUD wersalikami, oś wykresu, kicker popupu */
+  --fs-xs: 0.75rem;      /* 12 - tytuł kafelka statystyki, drobne etykiety */
+  --fs-sm: 0.8125rem;    /* 13 - podpowiedzi, druga linia wiersza */
+  --fs-md: 0.875rem;     /* 14 - tekst wyciszony, segmenty */
+  --fs-base: 1rem;       /* 16 - treść, przyciski */
+  --fs-lg: 1.125rem;     /* 18 - nazwa rangi, tytuł w karcie poziomu */
+  --fs-xl: 1.25rem;      /* 20 - tytuł strony */
+  --fs-num: 1.375rem;    /* 22 - wartość kafelka statystyki (Bahnschrift) */
+  --fs-num-lg: 1.5rem;   /* 24 - suma km na szlaku */
+  --fs-gauge: 2.75rem;   /* 44 - prędkość na wskaźniku */
+
+  --lh-tight: 1.25;
+  --lh-body: 1.4;
+  --lh-caps: 1.3;        /* zapas na kreski nad Ó, Ś, Ż w Bahnschrift */
+
+  --fw-regular: 400;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* odstępy */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;          /* między kartami */
+  --sp-4: 16px;          /* margines strony */
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --card-pad: 12px 14px 14px;
+
+  /* wymiary */
+  --control-h: 44px;     /* przycisk, pole, przełącznik (pole trafienia) */
+  --segment-h: 36px;     /* segment w przełączniku segmentowanym */
+  --icon-btn: 44px;
+  --row-h: 56px;         /* slot żetonów stref / paska Treningu, wiersz listy */
+  --header-h: 64px;      /* nagłówek kategorii Ustawień */
+  --pagebar-h: 60px;     /* pasek tytułu strony (tytuł + podpis) */
+  --focus-w: 2px;
+  --focus-offset: 2px;
+
+  /* promienie */
+  --r-xs: 3px;           /* pasek XP, słupki wykresu */
+  --r-sm: 6px;           /* klawisz (KeyCap), podpowiedź */
+  --r-seg: 7px;          /* segment wewnątrz segmentowanego */
+  --r-md: 10px;          /* karta, przycisk, pole, kafelek */
+  --r-lg: 12px;          /* lista rozwijana (popover) */
+  --r-round: 999px;      /* TYLKO: tor przełącznika, awatar, kropka stanu, próbka koloru */
+
+  /* szerokość */
+  --window-min-w: 420px;
+  --content-max: 680px;
+  --scrollbar-w: 8px;
+
+  /* ruch (design.md, rozdz. 6) */
+  /* krótko i z szybkim startem: ruch ma potwierdzić klik, nie płynąć (26.11: „zbyt pływające”) */
+  --t-press: 60ms;
+  --t-color: 90ms;
+  --t-switch: 110ms;
+  --t-theme: 120ms;
+  --t-out: 100ms;
+  --t-in: 140ms;
+  --t-slide: 140ms;
+  --t-morph: 160ms;
+  --t-gauge: 260ms;
+  --ease-enter: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-exit: cubic-bezier(0.5, 0, 0.75, 0);
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* rzadkość odznak - wypełnienie (oba motywy) */
+  --rarity-pospolite: #9aa5b1;
+  --rarity-rzadkie: #4aa3ff;
+  --rarity-epickie: #b26bff;
+  --rarity-heroiczne: #ff5470;
+  --rarity-legendarne: #ffa133;
+  --on-rarity: #15171d;
+
+  /* popup nad grą - ciemny w każdym motywie */
+  --popup-bg: #15171d;
+  --popup-text: #f2f3f5;
+  --popup-text-2: #a9afbb;
+  --popup-line: rgb(255 255 255 / 0.10);
+}
+
+html { font-size: calc(100% * var(--text-scale)); }
+
+/* ---------- 2.2 Motyw ciemny ---------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #151514;
+  --bg-window: rgb(21 21 20 / 0.82);
+  --surface: #1e1e1c;
+  --surface-2: #2a2a27;
+  --surface-3: #33322e;
+  --text: #ecebe6;
+  --text-2: #a5a29a;
+  --line: #33322e;
+  --control: #7a786f;
+  --danger: #f08a84;
+  --ink: #ecebe6;
+  --on-ink: #151514;
+  --focus: #ecebe6;
+  --sel-bg: #2a2a27;
+  --sel-border: #7a786f;
+  --shadow-pop: 0 8px 24px rgb(0 0 0 / 0.40);
+
+  --accent: var(--accent-d, #8fc2b0);
+  --on-accent: #0f1f1a;
+  --run: var(--run-d, #e6b46e);
+
+  --rarity-pospolite-text: #9aa5b1;
+  --rarity-rzadkie-text: #4aa3ff;
+  --rarity-epickie-text: #b26bff;
+  --rarity-heroiczne-text: #ff5470;
+  --rarity-legendarne-text: #ffa133;
+}
+
+/* ---------- 2.3 Motyw jasny ---------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fbfaf7;
+  --bg-window: rgb(251 250 247 / 0.86);
+  --surface: #ffffff;
+  --surface-2: #f0eee8;
+  --surface-3: #e4e1d8;
+  --text: #1b1b19;
+  --text-2: #5c5951;
+  --line: #e4e1d8;
+  --control: #8a877e;
+  --danger: #a4282a;
+  --ink: #1b1b19;
+  --on-ink: #fbfaf7;
+  --focus: #1b1b19;
+  --sel-bg: #ffffff;
+  --sel-border: #8a877e;
+  --shadow-pop: 0 8px 24px rgb(0 0 0 / 0.14);
+
+  --accent: var(--accent-l, #2f5d50);
+  --on-accent: #ffffff;
+  --run: var(--run-l, #8a5410);
+
+  --rarity-pospolite-text: #657383;
+  --rarity-rzadkie-text: #006ee0;
+  --rarity-epickie-text: #9738ff;
+  --rarity-heroiczne-text: #e50026;
+  --rarity-legendarne-text: #ad5d00;
+}
+
+/* Bez Mica (Windows 10, przeglądarka): tło okna nieprzezroczyste */
+:root.no-mica { --bg-window: var(--bg); }
+
+/* ---------- 2.5 Tokeny semantyczne ---------- */
+:root[data-theme] {
+  --zone-stop: var(--text-2);
+  --zone-walk: var(--accent);
+  --zone-run: var(--run);
+  --status-ok: var(--text);
+  --status-busy: var(--text-2);
+  --status-warn: var(--run);
+  --status-error: var(--danger);
+}
+
+/* ---------- Ograniczony ruch: wszystkie czasy 0 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-press: 0ms;
+    --t-color: 0ms;
+    --t-switch: 0ms;
+    --t-theme: 0ms;
+    --t-out: 0ms;
+    --t-in: 0ms;
+    --t-slide: 0ms;
+    --t-morph: 0ms;
+    --t-gauge: 0ms;
+  }
+}

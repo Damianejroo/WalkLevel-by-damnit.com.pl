@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "popup",
+  "description": "Popup osiągnięć: zdarzenie wl:popupy i komenda popup_ready.",
+  "windows": [
+    "popup"
+  ],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "allow-popup-ready",
+    "allow-ui-ready",
+    "allow-log-ui-error"
+  ]
+}

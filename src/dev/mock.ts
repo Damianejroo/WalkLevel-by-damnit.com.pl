@@ -1,0 +1,1565 @@
+// Atrapa rdzenia do pracy nad interfejsem w zwykłej przeglądarce (npm run dev, test:ui).
+// Ładowana tylko poza Tauri (src/lib/api.ts). Udaje rdzeń: trzyma wycinki stanu, obsługuje
+// komendy z docs/contract.md rozdz. 6, wysyła zdarzenia wl:* i telemetrię 10 razy na sekundę.
+//
+// Scenariusze z adresu: ?stan=<nazwa> (SCENARIUSZE niżej) oraz pojedyncze nadpisania:
+//   tryb=keyboard|gamepad|treadmill|training   bieznia=<StanBiezni>   konto=0|1   historia=0|1
+//   wlaczone=0|1   motyw=jasny|ciemny   tekst=duzy
+//   panel=pelny|waski|wylaczony   strona=lewa|prawa (panel znajomych 0.6.2)
+//   poziom=1..4 (poziom Treningu)   demo=1 (okno popup: przykładowe powiadomienia w kolejce)
+//   jedzie=1 (taśma jedzie przy wyłączonym sterowaniu, np. pilotem - Stop przy przycisku)
+// Przykład: /?stan=trening&ekran=main&szer=420&motyw=jasny
+import type * as K from '../lib/contract';
+import type { Silnik } from '../lib/api';
+import { jestKlucz, t } from '../lib/texts';
+import { liczba } from '../lib/format';
+import { version } from '../../package.json';
+import definicjeJson from '../../docs/definitions-v2.json';
+
+// ============================================================================
+// Scenariusze
+// ============================================================================
+
+type StanBiezni =
+  | 'strumien' | 'czekam' | 'brak' | 'rozlaczona' | 'skanowanie' | 'szukanie' | 'laczenie'
+  | 'ponawiam' | 'bt' | 'nieobslugiwane' | 'symulator';
+
+interface Scenariusz {
+  tryb: K.Direction;
+  bieznia: StanBiezni;
+  wlaczone: boolean;
+  wyjscie: K.OutputKind;
+  konto: boolean;
+  historia: boolean;
+  pierwsze: boolean;
+  dlugie: boolean;
+  /** Klawisze: puszczony klawisz zatrzymuje taśmę, przytrzymanie 3 s (ustawienia 0.6.1) */
+  klawiszStop: boolean;
+  /** taśma jedzie mimo wyłączonego sterowania (pilot) */
+  jedzie: boolean;
+  /** wczytywanie danych online kończy się błędem sieci */
+  bladOnline: boolean;
+  /** panel znajomych (0.6.2) i jego strona; duży tekst */
+  panel: 'pelny' | 'waski' | 'wylaczony';
+  strona: 'prawa' | 'lewa';
+  duzyTekst: boolean;
+  /** no friend is walking now (collapsed strip without the walking counter) */
+  niktNieIdzie: boolean;
+  /** friends whose description and game name look like HTML (shown as plain text) */
+  tekstHtml: boolean;
+}
+
+const BAZA: Scenariusz = {
+  tryb: 'keyboard', bieznia: 'strumien', wlaczone: false, wyjscie: 'keys',
+  konto: true, historia: true, pierwsze: false, dlugie: false, klawiszStop: false, jedzie: false,
+  panel: 'pelny', strona: 'prawa', duzyTekst: false, bladOnline: false, niktNieIdzie: false, tekstHtml: false,
+};
+
+export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
+  domyslny: {},
+  klawisze: { tryb: 'keyboard', wlaczone: true },
+  pad: { tryb: 'gamepad', wlaczone: true },
+  chodzenie: { tryb: 'treadmill', wlaczone: true },
+  proba: { tryb: 'treadmill', wyjscie: 'dry', wlaczone: true },
+  trening: { tryb: 'training', wlaczone: true },
+  'brak-biezni': { bieznia: 'brak' },
+  rozlaczona: { bieznia: 'rozlaczona' },
+  szukanie: { bieznia: 'szukanie' },
+  ponawiam: { bieznia: 'ponawiam' },
+  'bt-wylaczony': { bieznia: 'bt' },
+  symulator: { bieznia: 'symulator', wlaczone: true },
+  wylogowany: { konto: false },
+  pusto: { konto: false, historia: false, bieznia: 'brak' },
+  pierwsze: { pierwsze: true, konto: false, historia: false, bieznia: 'brak' },
+  dlugie: { dlugie: true, tryb: 'training', wlaczone: true },
+  'dlugie-pad': { dlugie: true, tryb: 'gamepad', wlaczone: true },
+  // Ustawienia ze wszystkimi kategoriami otwartymi (src/screens/settings-screen.svelte: stan=ustawienia*)
+  ustawienia: {},
+  'ustawienia-chodzenie': { tryb: 'treadmill' },
+  'ustawienia-trening': { tryb: 'training' },
+  'ustawienia-wylogowany': { konto: false, bieznia: 'brak' },
+  'ustawienia-dlugie': { dlugie: true, tryb: 'gamepad' },
+  'ustawienia-klawisze-stop': { klawiszStop: true },
+  // Klawisze przy „Taśma staje” na ekranie głównym; przycisk na ekranie z jadącą taśmą
+  'klawisze-stop': { tryb: 'keyboard', wlaczone: true, klawiszStop: true },
+  jedzie: { tryb: 'keyboard', jedzie: true },
+  obcy: {},
+  // Kopia danych: okno wyboru pliku zamknięte bez wyboru, jest kopia sprzed wczytania (utworzAtrape)
+  'kopia-wybor': {},
+  // ekran „Wybierz bieżnię”: lista znalezionych urządzeń od startu i trwające skanowanie
+  'lista-biezni': {},
+  skanowanie: { bieznia: 'skanowanie' },
+  // panel znajomych (0.6.2): pasek, z lewej, wyłączony, duży tekst, bez konta, długie nazwy
+  'panel-waski': { panel: 'waski' },
+  'panel-lewa': { strona: 'lewa' },
+  'panel-lewa-waski': { strona: 'lewa', panel: 'waski' },
+  'panel-wylaczony': { panel: 'wylaczony' },
+  'panel-duzy': { duzyTekst: true },
+  'panel-bez-konta': { konto: false },
+  'panel-dlugie': { dlugie: true, duzyTekst: true },
+  // collapsed strip (0.6.3): friends walking now (status dot, counter) and with a hidden level
+  // (initial), on both sides; and nobody walking (no counter)
+  'panel-waski-dlugie': { panel: 'waski', dlugie: true, duzyTekst: true },
+  'panel-lewa-waski-dlugie': { strona: 'lewa', panel: 'waski', dlugie: true },
+  'panel-waski-nikt': { panel: 'waski', niktNieIdzie: true },
+  'online-blad': { bladOnline: true },
+  'tekst-html': { tekstHtml: true },
+};
+
+/** Text from another user that must be shown literally (tests-ui/interactions.ts). */
+const TEKST_HTML = '<b>x</b><img src=x onerror=alert(1)>';
+
+function czytajScenariusz(): Scenariusz {
+  const p = new URLSearchParams(location.search);
+  const s: Scenariusz = { ...BAZA, ...(SCENARIUSZE[p.get('stan') ?? 'domyslny'] ?? {}) };
+  const tryb = p.get('tryb');
+  if (tryb === 'keyboard' || tryb === 'gamepad' || tryb === 'treadmill' || tryb === 'training') s.tryb = tryb;
+  const bieznia = p.get('bieznia');
+  if (bieznia) s.bieznia = bieznia as StanBiezni;
+  for (const pole of ['konto', 'historia', 'wlaczone', 'jedzie'] as const) {
+    const v = p.get(pole);
+    if (v !== null) s[pole] = v === '1';
+  }
+  const panel = p.get('panel');
+  if (panel === 'pelny' || panel === 'waski' || panel === 'wylaczony') s.panel = panel;
+  if (p.get('strona') === 'lewa' || p.get('strona') === 'prawa') s.strona = p.get('strona') as Scenariusz['strona'];
+  if (p.get('tekst') === 'duzy') s.duzyTekst = true;
+  return s;
+}
+
+// ============================================================================
+// Dane stałe (to, co rdzeń wysyła w statics)
+// ============================================================================
+
+const PALETA: K.PaletteColor[] = (
+  [
+    ['Czerwień', 0, '#fa3838', '#e70606'], ['Koral', 10, '#f34523', '#dc2e0c'],
+    ['Pomarańcz', 25, '#f96b06', '#bf5305'], ['Morela', 32, '#df8620', '#a56318'],
+    ['Banan', 52, '#f9d806', '#847303'], ['Limonka', 80, '#a4ec13', '#587f0a'],
+    ['Zieleń', 118, '#26df20', '#178613'], ['Szmaragd', 145, '#19e66f', '#0f8540'],
+    ['Mięta', 158, '#8fc2b0', '#2f5d50'], ['Morski', 174, '#13ecd6', '#0b8276'],
+    ['Niebo', 196, '#0db5f2', '#097ba5'], ['Błękit', 212, '#2384f3', '#0c6fe1'],
+    ['Chaber', 226, '#5c7ff2', '#1346ec'], ['Indygo', 242, '#7c78f0', '#2019e6'],
+    ['Fiolet', 258, '#956df3', '#5413ec'], ['Lawenda', 270, '#a16dd5', '#7f39c6'],
+    ['Orchidea', 292, '#cf46e5', '#c01fd8'], ['Fuksja', 312, '#f312c6', '#d30bab'],
+    ['Róż', 330, '#f42f91', '#df0c75'], ['Malina', 345, '#f0426e', '#e21246'],
+  ] as const
+).map(([name, hue, dark, light]) => ({ name, hue, dark, light }));
+
+const GLIFY = [
+  ['Pad', '\ue7fc'], ['Tarcza', '\uea18'], ['Ogień', '\uecad'], ['Gwiazda', '\ue734'],
+  ['Auto', '\ue804'], ['Samolot', '\ue709'], ['Świat', '\ue774'], ['Flaga', '\ue7c1'],
+  ['Robot', '\ue99a'], ['Klocek', '\uea86'], ['Iskry', '\uf4a5'], ['Serce', '\ueb51'],
+].map(([name, code]) => ({ name, code }));
+const GLIF_POSTAC = '\ue805';
+
+interface DefinicjeJson {
+  wersja: number;
+  xp_za_km: number;
+  xp_za_rzadkosc: Record<K.Rarity, number>;
+  rzadkosci: K.Rarity[];
+  poziomy_xp: number[];
+  rangi: Array<{ od_poziomu: number; nazwa: string; opis: string }>;
+  zasady: { seria_wolne_dni_na_7: number; min_km_dnia_serii: number };
+  osiagniecia: Array<Record<string, string | number>>;
+}
+
+function definicje(): K.LevelDefinitions {
+  const d = definicjeJson as unknown as DefinicjeJson;
+  return {
+    version: d.wersja,
+    xpPerKm: d.xp_za_km,
+    rarityXp: d.xp_za_rzadkosc,
+    rarities: d.rzadkosci,
+    levelsXp: d.poziomy_xp,
+    ranks: d.rangi.map((r) => ({ level: r.od_poziomu, name: r.nazwa, about: r.opis })),
+    achievements: d.osiagniecia.map((o) => {
+      const { id, typ, rzadkosc, znak, nazwa, klimat, warunek, ...params } = o;
+      return {
+        id: String(id), kind: typ as K.AchievementKind, rarity: rzadkosc as K.Rarity, mark: String(znak),
+        name: String(nazwa), flavor: String(klimat), condition: String(warunek),
+        km: typ === 'dystans' ? Number(o.km) : null, params,
+      };
+    }),
+    rules: { restDaysPer7: d.zasady.seria_wolne_dni_na_7, minKmPerStreakDay: d.zasady.min_km_dnia_serii },
+  };
+}
+
+// ============================================================================
+// Pomocnicze
+// ============================================================================
+
+/** Powtarzalny generator liczb (te same dane przy każdym uruchomieniu - stabilne zrzuty). */
+function losowosc(ziarno: number) {
+  let a = ziarno >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let x = Math.imul(a ^ (a >>> 15), 1 | a);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const kopia = <T>(v: T): T => (v === undefined ? v : structuredClone(v));
+const kmh = (x: number) => liczba(x, 1);
+const teraz = () => Date.now() / 1000;
+const id10 = (r: () => number) => Array.from({ length: 10 }, () => Math.floor(r() * 16).toString(16)).join('');
+
+function klawisz(name: string, scan: number, vk: number, mods: KeyBindingMods = []): K.KeyBinding {
+  const nazwy = { ctrl: 'Ctrl', alt: 'Alt', shift: 'Shift', win: 'Win' };
+  return { scan, extended: false, name, vk, mods, label: [...mods.map((m) => nazwy[m]), name].join('+') };
+}
+type KeyBindingMods = K.KeyBinding['mods'];
+
+function blad(code: K.ErrorCode, message: string, fields?: Record<string, string>): K.CmdError {
+  return fields ? { code, message, fields } : { code, message };
+}
+
+// ============================================================================
+// Atrapa
+// ============================================================================
+
+export function utworzAtrape(): Silnik {
+  const sc = czytajScenariusz();
+  const p = new URLSearchParams(location.search);
+  const r = losowosc(20261126);
+  const dlugie = sc.dlugie;
+
+  // ---------------- osoby i profile ----------------
+  const profil = (name: string, color: K.ColorName, glyph: string, direction: K.Direction): K.GameProfile => ({
+    id: id10(r), name, color, iconColor: null, icon: { color, glyph, url: null },
+    exe: name === 'Domyślny' ? null : `C:\\Gry\\${name}\\${name.replace(/\W+/g, '')}.exe`,
+    online: true,
+    summary: { direction, walkSpeed: 1.5, runSpeed: 2.5, padStepCount: dlugie ? 5 : 4, padMaxKmh: 4, trainingMin: 2, trainingMax: 5, standBelow: 1.2 },
+  });
+  const nazwaGry = dlugie ? 'Gra o bardzo długiej nazwie, czterdzieści' : 'Elden Ring';
+  const profileDamiana = [
+    profil(nazwaGry, 'Morela', GLIFY[0].code, sc.tryb),
+    profil(dlugie ? 'The Elder Scrolls V: Skyrim Special' : 'Skyrim', 'Niebo', GLIFY[1].code, 'treadmill'),
+    profil('Domyślny', 'Mięta', GLIF_POSTAC, 'keyboard'),
+    ...(dlugie
+      ? [profil('Minecraft', 'Zieleń', GLIFY[9].code, 'gamepad'), profil('Cyberpunk 2077', 'Fuksja', GLIFY[10].code, 'training'), profil('Factorio', 'Banan', GLIFY[8].code, 'keyboard')]
+      : []),
+  ];
+  const osoba = (name: string, color: K.ColorName, profiles: K.GameProfile[], konto: string | null): K.Person => ({
+    id: id10(r), name, color, activeProfileId: profiles[0].id, profiles, todaySteps: 0,
+    hasAccount: konto !== null, accountName: konto,
+  });
+  const ludzie: K.Person[] = [
+    osoba(dlugie ? 'Damianejro_bardzo_dlugi1' : 'Damian', 'Chaber', profileDamiana, sc.konto ? (dlugie ? 'Damianejro_bardzo_dlugi1' : 'Damianejro') : null),
+    osoba('Ola', 'Róż', [profil('Minecraft', 'Zieleń', GLIFY[9].code, 'keyboard'), profil('Domyślny', 'Mięta', GLIF_POSTAC, 'keyboard')], null),
+    ...(dlugie ? [osoba('Kuba', 'Limonka', [profil('Domyślny', 'Mięta', GLIF_POSTAC, 'keyboard')], null), osoba('Babcia Zosia', 'Lawenda', [profil('Domyślny', 'Mięta', GLIF_POSTAC, 'keyboard')], null)] : []),
+  ];
+
+  const people: K.PeopleView = {
+    ready: !sc.pierwsze,
+    activePersonId: sc.pierwsze ? '' : ludzie[0].id,
+    activeProfileId: sc.pierwsze ? '' : ludzie[0].profiles[0].id,
+    askAtStart: false,
+    people: sc.pierwsze ? [] : ludzie,
+  };
+  const aktywnaOsoba = () => people.people.find((o) => o.id === people.activePersonId) ?? null;
+  const aktywnyProfil = () => aktywnaOsoba()?.profiles.find((x) => x.id === people.activeProfileId) ?? null;
+
+  // ---------------- ustawienia ----------------
+  const motyw = p.get('motyw');
+  const settings: K.Settings = {
+    deviceAddress: 'C8:47:8C:12:34:56',
+    deviceName: dlugie ? 'KS-ST-X21C' : 'KS-NACH-MXG',
+    beltControl: true, quickStop: true,
+    toggleKey: klawisz('F8', 0x42, 0x77), fasterKey: klawisz('F7', 0x41, 0x76), slowerKey: klawisz('F6', 0x40, 0x75), togglePad: '',
+    simulator: sc.bieznia === 'symulator', record: false, detailedLogs: false,
+    theme: motyw === 'jasny' ? 'light' : motyw === 'ciemny' ? 'dark' : 'system',
+    largeText: sc.duzyTekst,
+    alwaysOnTop: false, floatingButton: false, showPersonSwitch: true, showProfileSwitch: true,
+    achievementPopups: true, achievementSound: true,
+    // panel znajomych: ?panel=pelny|waski|wylaczony, ?strona=lewa|prawa, ?powiadom=1
+    friendsPanel: sc.panel !== 'wylaczony', friendsPanelSide: sc.strona === 'lewa' ? 'left' : 'right',
+    friendsPanelCollapsed: sc.panel === 'waski', friendsNotify: p.get('powiadom') === '1',
+    direction: sc.tryb, output: sc.wyjscie,
+    walkKey: klawisz('W', 0x11, 0x57), runKey: klawisz('Shift', 0x2a, 0x10),
+    standBelow: 1.2, runOn: 3.4, runOff: 2.8,
+    idleSpeed: 1.0, walkSpeed: 1.5, runSpeed: 2.5,
+    keyHoldS: sc.klawiszStop ? 3 : 0, keyIdle: sc.klawiszStop ? 'stop' : 'slow',
+    padSteps: dlugie ? [[0, 1], [25, 1.5], [50, 2.5], [75, 3.5], [100, 4.5]] : [[0, 1], [25, 1.5], [50, 2.5], [100, 4]],
+    padIdle: 'stop',
+    trainingLevels: dlugie ? [6.5, 8.5, 10.5, 12.5] : [2, 3, 4, 5],
+    trainingLevel: 1,
+    profileColor: aktywnyProfil()?.color ?? 'Mięta',
+    personColor: aktywnaOsoba()?.color ?? 'Mięta',
+  };
+  // ?poziom=1..4 - poziom Treningu na starcie (np. podgląd przycisku na ekranie w kolorze biegu)
+  const poziomStartowy = Number(p.get('poziom'));
+  if (poziomStartowy >= 1 && poziomStartowy <= 4) settings.trainingLevel = (poziomStartowy - 1) as 0 | 1 | 2 | 3;
+
+  // ---------------- bieżnia ----------------
+  const model = dlugie ? 'WalkingPad X21 (KS-ST-X21C)' : 'KingSmith X21';
+  const caps: K.Capabilities = {
+    speedMin: 0.5, speedMax: 6, speedStep: 0.1, startSpeed: 1, startDelayS: 3,
+    acksCommands: true, pause: false, steps: true, incline: null,
+    telemetryS: 0.5, minCommandGapS: 0.3, control: true,
+  };
+  let stanBiezni: StanBiezni = sc.bieznia;
+  const device: K.DeviceView = {
+    link: 'idle', linkText: '', status: null as unknown as K.LinkStatus, device: null, caps,
+    remembered: true, label: '', scanning: false, scanText: '', devices: [], bluetoothOff: false,
+    diagnostics: { running: false, text: '' },
+  };
+
+  function przeliczBieznie() {
+    const s = stanBiezni;
+    const link: Record<StanBiezni, K.Link> = {
+      strumien: 'streaming', czekam: 'streaming', brak: 'idle', rozlaczona: 'idle', skanowanie: 'searching',
+      szukanie: 'searching', laczenie: 'connecting', ponawiam: 'retrying', bt: 'bluetoothOff',
+      nieobslugiwane: 'unsupported', symulator: 'streaming',
+    };
+    device.link = link[s];
+    device.remembered = s !== 'brak' && s !== 'skanowanie' && s !== 'symulator';
+    device.bluetoothOff = s === 'bt';
+    device.scanning = s === 'skanowanie';
+    device.device = s === 'strumien' || s === 'czekam'
+      ? { model, driver: 'kingsmith', profile: 'kingsmith-x21', name: settings.deviceName, firmware: '1.2.7', simulated: false }
+      : s === 'symulator' ? { model: t('ustawienia.bieznia.symulator'), driver: 'symulator', profile: '', name: '', firmware: '', simulated: true } : null;
+    device.linkText = s === 'ponawiam' ? t('ble.powod.timeout') : s === 'strumien' ? t('glowny.status.polaczono.podtytul', { min_kmh: kmh(caps.speedMin), max_kmh: kmh(caps.speedMax) }) : '';
+    const tasma = { min_kmh: kmh(caps.speedMin), max_kmh: kmh(caps.speedMax) };
+    const tekst = (k: string, zm: Record<string, string>) => (jestKlucz(k) ? t(k, zm) : '');
+    const st = (tone: K.Tone, busy: boolean, klucz: string, action: K.StatusAction, primary: boolean, zm: Record<string, string> = {}): K.LinkStatus => ({
+      tone, busy, action, primary,
+      title: tekst(`glowny.status.${klucz}.tytul`, zm),
+      sub: tekst(`glowny.status.${klucz}.podtytul`, zm),
+      actionLabel: tekst(`glowny.status.${klucz}.akcja`, zm),
+    });
+    const zModelem = { model, ...tasma };
+    const statusy: Record<StanBiezni, () => K.LinkStatus> = {
+      strumien: () => st('accent', false, 'polaczono', 'disconnect', false, zModelem),
+      czekam: () => ({ ...st('run', true, 'czekam', 'disconnect', false, zModelem), actionLabel: t('glowny.status.polaczono.akcja') }),
+      brak: () => st('muted', false, 'brak', 'scan', true),
+      rozlaczona: () => st('muted', false, 'rozlaczona', 'retry', true, zModelem),
+      skanowanie: () => st('accent', true, 'skanowanie', 'cancel', false),
+      szukanie: () => st('accent', true, 'szukanie', 'cancel', false, zModelem),
+      laczenie: () => st('accent', true, 'laczenie', 'cancel', false, zModelem),
+      ponawiam: () => ({ ...st('run', true, 'ponawiam', 'disconnect', false), sub: t('ble.powod.timeout'), actionLabel: t('glowny.status.ponawiam.akcja') }),
+      bt: () => st('danger', false, 'bt_wylaczony', 'retry', true),
+      nieobslugiwane: () => st('danger', false, 'nieobslugiwane', 'scan', true),
+      symulator: () => st('accent', false, 'symulator', 'simulatorOff', false, { klawisz_szybciej: settings.fasterKey.label, klawisz_wolniej: settings.slowerKey.label }),
+    };
+    device.status = statusy[s]();
+    device.label = s === 'symulator'
+      ? t('ustawienia.bieznia.symulator_opis', tasma)
+      : device.remembered
+        ? t('ustawienia.bieznia.opis', { ...zModelem, sekundy: caps.startDelayS, wersja_bt: '1.2.7' })
+        : t('ustawienia.bieznia.brak');
+    settings.simulator = s === 'symulator';
+  }
+  przeliczBieznie();
+  if (p.get('stan') === 'lista-biezni') {
+    device.devices = [
+      { address: 'C8:47:8C:12:34:56', name: settings.deviceName, rssi: -58, treadmill: true, model },
+      { address: 'D1:22:33:44:55:66', name: 'URTM051', rssi: -71, treadmill: true, model: 'Urevo SpaceWalk 5L' },
+      { address: 'E2:22:33:44:55:77', name: 'FS-BT-T4-WALKINGPAD-PRO-2024', rssi: -79, treadmill: true, model: 'FS-BT-T4-WALKINGPAD-PRO-2024' },
+      { address: 'A0:11:22:33:44:55', name: 'Mi Band 7', rssi: -80, treadmill: false, model: 'Mi Band 7' },
+      { address: 'A0:11:22:33:44:57', name: 'Słuchawki_Bluetooth_o_bardzo_długiej_nazwie_bez_spacji', rssi: -66, treadmill: false, model: '' },
+      { address: 'A0:11:22:33:44:56', name: '', rssi: -88, treadmill: false, model: '' },
+    ];
+    device.scanText = t('bieznia.lista.znalezione', { liczba: 3, razem: 3 });
+  }
+  if (device.scanning) device.scanText = t('bieznia.lista.szukam');
+
+  // ---------------- sterowanie ----------------
+  const control: K.ControlView = {
+    enabled: sc.wlaczone && !sc.pierwsze, direction: settings.direction, setsSpeed: false, hint: '', subtitle: '',
+    toggleLabel: '', walkName: '', runName: '', padButtonLabel: '', padCapturing: false, keyCapturing: null,
+    beltCommands: true,
+  };
+
+  function przeliczSterowanie() {
+    const d = settings.direction;
+    const zm = {
+      klawisz_chodu: settings.walkKey.name, klawisz_biegu: settings.runKey.name,
+      klawisz_szybciej: settings.fasterKey.label, klawisz_wolniej: settings.slowerKey.label,
+    };
+    control.direction = d;
+    control.setsSpeed = d !== 'treadmill';
+    control.toggleLabel = settings.toggleKey.label;
+    control.walkName = settings.walkKey.name;
+    control.runName = settings.runKey.name;
+    control.beltCommands = stanBiezni === 'strumien' || stanBiezni === 'symulator';
+    control.hint =
+      d === 'treadmill'
+        ? t(settings.output === 'dry' ? 'glowny.podpowiedz.chodzenie_proba' : 'glowny.podpowiedz.chodzenie', zm)
+        : d === 'keyboard' ? t(settings.keyIdle === 'stop' ? 'glowny.podpowiedz.klawisze_stop' : 'glowny.podpowiedz.klawisze', zm)
+          : d === 'gamepad' ? t('glowny.podpowiedz.pad', zm) : t('glowny.podpowiedz.trening', zm);
+    let opis = t(settings.beltControl ? 'glowny.sterowanie.opis.tasma' : 'glowny.sterowanie.opis.bez_tasmy');
+    if (control.padButtonLabel) opis = t('glowny.sterowanie.opis.z_padem', { opis, przycisk_pada: control.padButtonLabel });
+    const klucz = { treadmill: 'chodzenie', keyboard: 'klawisze', gamepad: 'pad', training: 'trening' } as const;
+    control.subtitle = t(`glowny.sterowanie.opis.${klucz[d]}`, { opis, ...zm });
+    const pr = aktywnyProfil();
+    if (pr) pr.summary.direction = d;
+  }
+  przeliczSterowanie();
+
+  // ---------------- historia ----------------
+  const dzis0 = new Date();
+  dzis0.setHours(0, 0, 0, 0);
+  const sesje: K.SessionDetail[] = [];
+  if (sc.historia) {
+    for (const o of ludzie) {
+      const ileDni = o === ludzie[0] ? 18 : 9;
+      for (let dzien = ileDni; dzien >= 0; dzien--) {
+        const ile = r() < 0.25 ? 0 : 1 + Math.floor(r() * 2);
+        for (let i = 0; i < ile; i++) {
+          const godzina = 7 + Math.floor(r() * 14);
+          const start = dzis0.getTime() / 1000 - dzien * 86400 + godzina * 3600 + Math.floor(r() * 50) * 60;
+          if (start > teraz() - 600) continue;
+          const activeS = (15 + Math.floor(r() * 55)) * 60;
+          const v = 2.4 + r() * 2.2;
+          const pr = o.profiles[Math.floor(r() * o.profiles.length)];
+          const symulator = r() < 0.08;
+          const kadencja = 85 + r() * 30;
+          sesje.push({
+            id: id10(r), start, end: start + activeS + 120, personId: o.id, personName: o.name,
+            profileId: pr.id, profileName: pr.name, steps: Math.round((activeS / 60) * kadencja),
+            distanceKm: (v * activeS) / 3600, activeS, avgKmh: v,
+            source: symulator ? 'symulator' : 'bieznia', mode: pr.summary.direction === 'training' ? 'trening' : 'gra',
+            icon: kopia(pr.icon),
+            online: o.hasAccount && !symulator ? { hidden: r() < 0.1, sent: r() < 0.85, rejected: null } : null,
+            cadence: kadencja, wholeS: activeS + 120, deviceModel: symulator ? t('ustawienia.bieznia.symulator') : model,
+            driver: symulator ? 'symulator' : 'kingsmith', firmware: symulator ? '' : '1.2.7', appVersion: '0.6.0',
+            tzOffsetMin: -dzis0.getTimezoneOffset(), linked: o.hasAccount,
+          });
+        }
+      }
+    }
+    sesje.sort((a, b) => b.start - a.start);
+    const odrzucona = sesje.find((s) => s.online);
+    if (odrzucona?.online) odrzucona.online = { hidden: false, sent: false, rejected: 'Sesja nachodzi na inną sesję z tego samego czasu.' };
+  }
+  let wersjaHistorii = 1;
+  const history: K.HistoryStamp = { available: true, stamp: '' };
+  function przeliczDzis() {
+    for (const o of people.people) {
+      o.todaySteps = sesje.filter((s) => s.personId === o.id && s.start >= dzis0.getTime() / 1000).reduce((a, s) => a + s.steps, 0);
+    }
+    history.stamp = `${wersjaHistorii}-${dzis0.toISOString().slice(0, 10)}-${people.activePersonId}`;
+  }
+  przeliczDzis();
+
+  function sumy(lista: K.SessionRow[]): K.Totals {
+    const steps = lista.reduce((a, s) => a + s.steps, 0);
+    const distanceKm = lista.reduce((a, s) => a + s.distanceKm, 0);
+    const activeS = lista.reduce((a, s) => a + s.activeS, 0);
+    return { steps, distanceKm, activeS, avgKmh: activeS > 0 ? distanceKm / (activeS / 3600) : 0 };
+  }
+
+  function zapytanieHistorii(q: K.HistoryQuery): K.HistoryView {
+    const many = people.people.length > 1;
+    const everyone = many && q.scope === 'all';
+    const od0 = dzis0.getTime() / 1000;
+    // okresy kalendarzowe jak w rdzeniu (0.6.2): tydzień od poniedziałku, miesiąc od 1. dnia
+    const pn0 = od0 - ((dzis0.getDay() + 6) % 7) * 86400;
+    const m0 = new Date(dzis0.getFullYear(), dzis0.getMonth(), 1).getTime() / 1000;
+    const dniMiesiaca = new Date(dzis0.getFullYear(), dzis0.getMonth() + 1, 0).getDate();
+    const od = { day: od0, week: pn0, month: m0, all: 0 }[q.range];
+    const lista = sesje.filter((s) => s.start >= od && (everyone || s.personId === people.activePersonId));
+    const groupKey = everyone ? 'person' : 'profile';
+    const nazwa = (s: K.SessionRow) => (everyone ? s.personName : s.profileName);
+    const kolorNazwy = new Map<string, string>();
+    for (const o of people.people) {
+      if (everyone) kolorNazwy.set(o.name, PALETA.find((k) => k.name === o.color)!.dark);
+      else for (const pr of o.profiles) kolorNazwy.set(pr.name, PALETA.find((k) => k.name === pr.color)!.dark);
+    }
+    const hourly = q.range === 'day';
+    const ileSlupkow = hourly ? 24 : q.range === 'week' ? 7 : q.range === 'month' ? dniMiesiaca : 30;
+    const start0 = q.range === 'week' ? pn0 : q.range === 'month' ? m0 : od0 - 29 * 86400;
+    const bars: K.HistoryChart['bars'] = [];
+    for (let i = 0; i < ileSlupkow; i++) {
+      const pocz = hourly ? od0 + i * 3600 : start0 + i * 86400;
+      const kon = pocz + (hourly ? 3600 : 86400);
+      const czesci = new Map<string, number>();
+      for (const s of lista) if (s.start >= pocz && s.start < kon) czesci.set(nazwa(s), (czesci.get(nazwa(s)) ?? 0) + s.steps);
+      const data = new Date(pocz * 1000);
+      bars.push({
+        label: hourly
+          ? String(i).padStart(2, '0')
+          : `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`,
+        weekday: hourly ? null : (data.getDay() + 6) % 7,
+        parts: [...czesci].map(([name, steps]) => ({ name, steps })).sort((a, b) => b.steps - a.steps),
+      });
+    }
+    const razem = sumy(lista);
+    const grupy = new Map<string, K.SessionRow[]>();
+    for (const s of lista) grupy.set(nazwa(s), [...(grupy.get(nazwa(s)) ?? []), s]);
+    const groups: K.HistoryGroup[] = [...grupy].map(([name, l]) => {
+      const tot = sumy(l);
+      const o = people.people.find((x) => x.name === name);
+      const pr = people.people.flatMap((x) => x.profiles).find((x) => x.name === name);
+      return {
+        name, totals: tot, share: razem.steps ? tot.steps / razem.steps : 0, color: kolorNazwy.get(name) ?? '#8fc2b0',
+        icon: !everyone && pr ? kopia(pr.icon) : null, avatarColor: everyone && o ? o.color : null,
+      };
+    }).sort((a, b) => b.totals.steps - a.totals.steps);
+    const legend = groups.slice(0, 6).map((g) => g.name).sort();
+    const recent = lista.slice(0, 8).map(({ cadence: _c, wholeS: _w, deviceModel: _d, driver: _dr, firmware: _f, appVersion: _a, tzOffsetMin: _t, linked: _l, ...w }) => w);
+    return {
+      query: q, stamp: history.stamp, many, everyone, totals: razem,
+      chart: { hourly, bars, colors: Object.fromEntries(kolorNazwy), legend, empty: lista.length === 0 },
+      groupKey, groups, recent, online: people.people.some((o) => o.hasAccount),
+    };
+  }
+
+  // ---------------- poziomy ----------------
+  const defs = definicje();
+  const rarytas = (id: string) => defs.achievements.find((a) => a.id === id)!;
+  function przeliczPoziomy(): K.LevelsView | null {
+    const o = aktywnaOsoba();
+    if (!o) return null;
+    const mojeSesje = sesje.filter((s) => s.personId === o.id && s.source === 'bieznia');
+    const km = (sc.historia && o === people.people[0] ? (dlugie ? 1234.5 : 212) : 0) + mojeSesje.reduce((a, s) => a + s.distanceKm, 0);
+    const rr = losowosc(7);
+    const progress: K.AchievementProgress[] = defs.achievements.map((a, i) => {
+      let target = Number(a.params.km ?? a.params.kroki ?? a.params.dni ?? a.params.gier ?? a.params.ile ?? 1);
+      if (a.kind === 'dystans') target = a.km ?? 1;
+      const current = a.kind === 'dystans' ? Math.min(km, target) : km > 0 ? Math.min(target, Math.round(target * rr() * 1.3 * 10) / 10) : 0;
+      const zdobyte = current >= target && km > 0;
+      return {
+        id: a.id, current, target, fraction: zdobyte ? 1 : target ? current / target : 0,
+        earnedAt: zdobyte ? teraz() - (defs.achievements.length - i) * 3 * 86400 * rr() : null,
+      };
+    });
+    const xp = Math.round(km * defs.xpPerKm) + progress.filter((x) => x.earnedAt !== null).reduce((a, x) => a + defs.rarityXp[rarytas(x.id).rarity], 0);
+    let level = 1;
+    while (level < defs.levelsXp.length && defs.levelsXp[level] <= xp) level++;
+    const floor = defs.levelsXp[level - 1];
+    const ceiling = defs.levelsXp[level] ?? floor;
+    const rank = [...defs.ranks].reverse().find((x) => x.level <= level) ?? defs.ranks[0];
+    const nextRank = defs.ranks.find((x) => x.level > level) ?? null;
+    return {
+      personId: o.id, km, xp, level, maxLevel: defs.levelsXp.length,
+      levelFloorXp: floor, levelCeilingXp: ceiling, levelFraction: ceiling > floor ? (xp - floor) / (ceiling - floor) : 1,
+      kmToNextLevel: Math.max(0, (ceiling - xp) / defs.xpPerKm), rank, nextRank,
+      earnedCount: progress.filter((x) => x.earnedAt !== null).length, total: progress.length, progress,
+    };
+  }
+  let levels = przeliczPoziomy();
+
+  // ---------------- konto i dane online ----------------
+  const pseudonim = ludzie[0].accountName ?? '';
+  const account: K.AccountView = {
+    enabled: true, personId: people.activePersonId, loggedIn: sc.konto && !sc.pierwsze, userId: sc.konto ? 'u-damianejro' : '',
+    name: sc.konto ? pseudonim : '', email: sc.konto ? 'damianejro@przyklad.pl' : '', verified: true, upload: true,
+    visibility: 'znajomi', live: true, liveStatus: 'wszystko', description: '',
+    profileVisibility: 'znajomi', gamesVisibility: 'znajomi',
+    terms: '2026-11-01', termsCurrent: dlugie ? '2026-11-20' : '2026-11-01', termsOutdated: dlugie,
+    gamesAllowed: true, remember: true, termsUrl: 'https://damnit.com.pl/bieznia/regulamin',
+    busy: [], message: '', verifyPolling: false, pendingUploads: 2,
+  };
+  const tydzien = (k: number): K.PeriodTotals => ({ steps: k, distanceKm: k / 1350, activeS: k * 0.55, sessions: Math.max(1, Math.round(k / 6000)) });
+  // poziom z XP jak w rdzeniu (definicje: próg każdego poziomu)
+  const poziomZXp = (xp: number) => {
+    let n = 1;
+    while (n < defs.levelsXp.length && defs.levelsXp[n] <= xp) n++;
+    return n;
+  };
+  const zywo = (kmh: number, minut: number, mode: K.SessionMode | null, game: string | null, km: number | null): K.LiveState => ({
+    kmh, steps: Math.round(minut * 95), activeS: minut * 60, since: teraz() - minut * 60, distanceKm: km, mode, game,
+  });
+  const znajomy = (id: string, name: string, xp: number | null, live: K.LiveState | null, week: number, description: string | null = null, dzis: number | null = null): K.Friend => ({
+    id, name, level: xp === null ? null : poziomZXp(xp), xp, description, live, week: tydzien(week),
+    today: dzis === null ? null : tydzien(dzis),
+  });
+  // panel znajomych 0.6.2: chodzą z grą, w Treningu i z ukrytą grą („W grze”), opis, ukryty poziom
+  const znajomi: K.Friend[] = [
+    znajomy('u-ola', 'OlaBiega', 50290, zywo(3.4, 27, 'gra', dlugie ? 'The Elder Scrolls V: Skyrim Special Edit' : 'World of Warcraft', 1.52), 31240, null, 2140),
+    // poziom ukryty: serwer nie podaje go (ani XP) bez zgody tej osoby
+    znajomy('u-kuba', 'KubaWędrowiec', null, zywo(4.2, 34, 'trening', null, 2.36), 18420),
+    znajomy('u-wera', 'WeraNaBieżni', 158400, zywo(5.1, 48, 'gra', null, 4.05), 68400),
+    znajomy('u-marta', 'Marta_z_Gór', 117900, null, 52310, dlugie ? 'Opis_bez_spacji_na_czterdziesci_znakow_x' : 'Do Mordoru i z powrotem', 6200),
+    // dziś już chodził (kroki dziś i w tygodniu), opis nie zasłania wyniku
+    znajomy('u-tomek', dlugie ? 'Tomasz_o_dlugim_nicku24' : 'Tomek', 4100, null, dlugie ? 1234567 : 4120, null, dlugie ? 123456 : 3200),
+    // hidden level and not walking: the collapsed strip shows the initial of the name
+    znajomy('u-ela', dlugie ? 'Żaneta_Wędrowna_z_Gór_24' : 'ela_spaceruje', null, null, 9100),
+    // walking with the game name and description, and not walking with the description
+    ...(sc.tekstHtml
+      ? [znajomy('u-html', 'Tekst_HTML', 20300, zywo(3.1, 12, 'gra', TEKST_HTML, 0.62), 12400, TEKST_HTML), znajomy('u-html-opis', 'Opis_HTML', 15200, null, 8300, TEKST_HTML)]
+      : []),
+  ].map((f) => (sc.niktNieIdzie ? { ...f, live: null } : f));
+  const ranking = (scope: K.RankingScope): { scope: K.RankingScope; rows: K.RankingRow[] } => {
+    const mnoznik = { tydzien: 1, miesiac: 4.2, razem: 26, poziom: 1 }[scope];
+    const wiersze = [
+      ...znajomi.map((f) => ({ id: f.id, name: f.name, me: false, level: f.level, steps: Math.round(f.week.steps * mnoznik), distanceKm: f.week.distanceKm * mnoznik })),
+      { id: account.userId, name: pseudonim, me: true, level: levels?.level ?? 1, steps: Math.round(41230 * mnoznik), distanceKm: 30.5 * mnoznik },
+      { id: 'u-ania', name: 'AniaNaBieżni', me: false, level: 31, steps: Math.round(68400 * mnoznik), distanceKm: 50.7 * mnoznik },
+      { id: 'u-rekord', name: 'Rekordzista', me: false, level: dlugie ? 100 : 41, steps: dlugie ? 12345678 : Math.round(90210 * mnoznik), distanceKm: dlugie ? 1234.5 : 66.8 * mnoznik },
+    ];
+    const klucz = scope === 'poziom' ? (w: (typeof wiersze)[number]) => (w.level ?? 0) * 1e9 + w.distanceKm : (w: (typeof wiersze)[number]) => w.steps;
+    return { scope, rows: wiersze.sort((a, b) => klucz(b) - klucz(a)).map((w, i) => ({ place: i + 1, ...w })) };
+  };
+  const pustyOnline = (): K.OnlineView => ({
+    personId: people.activePersonId, loading: [], stats: null, friends: null, invitations: null, ranking: null,
+    people: null, peopleQuery: { search: '', page: 1 }, person: null, regCode: null, achievementStats: null,
+  });
+  const online: K.OnlineView = pustyOnline();
+  if (account.loggedIn) {
+    online.stats = {
+      ...tydzien(41230),
+      games: [
+        { game: nazwaGry, gameId: 'g1', steps: 28100, distanceKm: 20.8, activeS: 14400 },
+        { game: 'Skyrim', gameId: 'g2', steps: 9800, distanceKm: 7.3, activeS: 5400 },
+        { game: '', gameId: null, steps: 3330, distanceKm: 2.4, activeS: 1900 },
+      ],
+    };
+    online.friends = znajomi;
+    online.invitations = {
+      incoming: [
+        { id: 'z1', person: { id: 'u-ewa', name: 'EwaKroczy' }, createdAt: teraz() - 7200 },
+        ...(dlugie ? [{ id: 'z2', person: { id: 'u-x', name: 'Zaproszenie_dlugie_nick' }, createdAt: teraz() - 86400 }, { id: 'z3', person: { id: 'u-y', name: 'Trzeci' }, createdAt: null }] : []),
+      ],
+      sent: [{ id: 'z9', person: { id: 'u-piotr', name: 'Piotr' }, createdAt: teraz() - 3 * 86400 }],
+    };
+    online.ranking = ranking('tydzien');
+  }
+
+  // ---------------- pozostałe wycinki ----------------
+  const app: K.AppInfo = {
+    version, title: `WalkLevel ${version} by damnit.com.pl`, installed: false, dataDir: 'C:\\Users\\Gracz\\AppData\\Local\\Bieznia',
+    firstRun: sc.pierwsze, legacy02: false, updatedFrom: null, latestBackup: null,
+    accountsEnabled: true, reportEndpoint: true, windowFocused: true,
+  };
+  // najdłuższy wariant Ustawień > Dane i kopia: z przyciskiem „Przywróć dane sprzed…”
+  if (dlugie) app.latestBackup = 'przed-importem-20261126-120000';
+  const kopiaWybor = p.get('stan') === 'kopia-wybor';
+  if (kopiaWybor) app.latestBackup = 'przed-importem-20261120-180000';
+  const update: K.UpdateView = { available: dlugie ? '0.6.1' : null, busy: false, status: '', installing: false };
+  const report: K.ReportView = { busy: false, status: '', lastFile: null, sentNumber: null };
+  const model1 = (id: string, name: string, driver: K.DriverId, match: string[], extra: Partial<K.ModelItem> = {}): K.ModelItem => ({
+    id, name, driver, driverName: driver === 'ftms' ? t('modele.rodzaj.ftms') : t('modele.rodzaj.kingsmith'), match, caps: kopia(caps),
+    generic: false, mine: false, source: 'wbudowany', removable: false, ...extra,
+  });
+  const models: K.ModelsView = {
+    items: [
+      model1('kingsmith-x21', 'KingSmith X21', 'kingsmith', ['KS-NACH-MXG', 'KS-ST-X21C'], { mine: true }),
+      model1('walkingpad', 'WalkingPad', 'kingsmith', ['KS-'], { generic: true }),
+      model1('urevo-5l', 'Urevo SpaceWalk 5L', 'ftms', ['URTM051']),
+      model1('moja', 'Moja bieżnia z pliku', 'ftms', ['MOJA-'], { source: 'dodatkowy', removable: true }),
+    ],
+    busy: false, status: '',
+  };
+  // taśma jedzie przy wyłączonym sterowaniu (scenariusz „jedzie”) - do pierwszego Stopu
+  let jedziePilotem = sc.jedzie;
+  const jedzieNaStart = (stanBiezni === 'strumien' || stanBiezni === 'symulator') && (control.enabled || jedziePilotem);
+  const bubble: K.BubbleView = {
+    visible: false, enabled: control.enabled, theme: settings.theme, accent: settings.profileColor,
+    training: settings.direction === 'training',
+    stop: settings.direction !== 'training' && jedzieNaStart && caps.control,
+    trainingLevel: settings.trainingLevel,
+    fasterLabel: settings.fasterKey.label, slowerLabel: settings.slowerKey.label,
+  };
+  const logi: string[] = [];
+  const loguj = (tekst: string) => {
+    const d = new Date();
+    const linia = `${d.toTimeString().slice(0, 8)}  ${tekst}`;
+    logi.push(linia);
+    if (logi.length > 500) logi.shift();
+    emituj('wl:log', linia);
+  };
+  for (let i = 0; i < 24; i++) logi.push(`0${8 + Math.floor(i / 6)}:${String(10 + i * 2).padStart(2, '0')}:0${i % 10}  bieznia.ble: odczyt prędkości ${liczba(2 + (i % 5) * 0.3, 1)} km/h, kroki ${1200 + i * 37}`);
+
+  // Dziennik: godziny przykładowych wpisów w formacie HH:MM:SS (pętla wyżej daje „010:34:02”),
+  // długie wpisy bez spacji (scenariusz „dlugie”) i nowe wpisy na żywo co 2,5 s
+  logi.forEach((l, i) => (logi[i] = l.replace(/^0(\d\d:)/, '$1')));
+  if (dlugie) {
+    logi.push('09:59:58  bieznia.zgloszenia: zapisano paczkę C:\\Users\\Gracz\\AppData\\Local\\Bieznia\\dane\\zgloszenia\\zgloszenie-20261126-095958-bardzo-dlugi-plik.zip');
+    logi.push(`09:59:59  bieznia.ble: ${'0123456789abcdef'.repeat(8)}`);
+  }
+  setInterval(() => {
+    if (stanBiezni === 'strumien' || stanBiezni === 'symulator') loguj(`bieznia.ble: odczyt prędkości ${liczba(Math.max(0, predkosc), 1)} km/h, kroki ${Math.floor(kroki)}`);
+  }, 2500);
+
+  const wycinki = (): K.SliceMap => ({
+    app, settings, people, device, control, levels, history, account, online, update, report, models, bubble,
+  });
+
+  // ---------------- zdarzenia ----------------
+  const sluchacze = new Map<string, Set<(tresc: unknown) => void>>();
+  let rev = 1;
+  function emituj(zdarzenie: string, tresc: unknown) {
+    for (const f of sluchacze.get(zdarzenie) ?? []) f(kopia(tresc));
+  }
+  function wyslij(...nazwy: K.SliceName[]) {
+    for (const slice of nazwy) {
+      rev++;
+      emituj('wl:stan', { rev, slice, value: wycinki()[slice] });
+    }
+  }
+  const toast = (text: string, kind: K.Toast['kind'] = 'info') => {
+    emituj('wl:komunikat', { text, kind });
+    loguj(text);
+  };
+  const pozniej = (ms: number, f: () => void) => setTimeout(f, ms);
+
+  function zmienOsobe() {
+    const o = aktywnaOsoba();
+    settings.personColor = o?.color ?? 'Mięta';
+    settings.profileColor = aktywnyProfil()?.color ?? 'Mięta';
+    bubble.accent = settings.profileColor;
+    bubble.training = settings.direction === 'training';
+    account.personId = people.activePersonId;
+    account.loggedIn = !!o?.hasAccount;
+    account.name = o?.accountName ?? '';
+    Object.assign(online, pustyOnline());
+    levels = przeliczPoziomy();
+    przeliczDzis();
+    przeliczSterowanie();
+    wyslij('people', 'settings', 'control', 'levels', 'history', 'account', 'online', 'bubble');
+  }
+
+  // ---------------- telemetria ----------------
+  let kroki = 0;
+  let dystans = 0;
+  let czasRuchu = 0;
+  let predkosc = 0;
+  let tMs = 0;
+  setInterval(() => {
+    tMs += 100;
+    const live = stanBiezni === 'strumien' || stanBiezni === 'symulator';
+    const s = settings;
+    const faza = Math.floor(tMs / 4000) % 3;
+    let cel = 0;
+    let mode: K.GaugeMode = 'idle';
+    let active = -1;
+    let caption = t('glowny.wskaznik.wylaczone', { klawisz_wlaczania: s.toggleKey.label });
+    const tasma = (v: number) => t('glowny.wskaznik.tasma_kmh', { kmh: kmh(v) });
+    if (control.enabled) {
+      if (s.direction === 'keyboard') {
+        const stoi = s.keyIdle === 'stop';
+        cel = [stoi ? 0 : s.idleSpeed, s.walkSpeed, s.runSpeed][faza];
+        active = faza;
+        mode = (['idle', 'walk', 'run'] as const)[faza];
+        const bez = stoi ? 'glowny.wskaznik.klawisze.stoi' : 'glowny.wskaznik.klawisze.bez';
+        caption = t(([bez, 'glowny.wskaznik.klawisze.chod', 'glowny.wskaznik.klawisze.bieg'] as const)[faza], { kmh: kmh(cel), klawisz_chodu: s.walkKey.name, klawisz_biegu: s.runKey.name });
+      } else if (s.direction === 'training') {
+        cel = s.trainingLevels[s.trainingLevel];
+        active = s.trainingLevel;
+        mode = s.trainingLevel < 2 ? 'walk' : 'run';
+        caption = t('glowny.wskaznik.trening', { poziom: s.trainingLevel + 1, kmh: kmh(cel) });
+      } else if (s.direction === 'gamepad') {
+        const krok = faza === 0 ? 0 : faza === 1 ? 2 : s.padSteps.length - 1;
+        cel = s.padSteps[krok][1];
+        active = krok;
+        mode = krok === 0 ? 'idle' : krok === s.padSteps.length - 1 ? 'run' : 'walk';
+        caption = t('glowny.wskaznik.pad.stan', { procent: s.padSteps[krok][0], stopien: krok, tasma: krok === 0 && s.padIdle === 'stop' ? t('glowny.wskaznik.tasma_stoi') : tasma(cel) });
+      } else {
+        cel = 2.2 + Math.sin(tMs / 3000) * 1.6;
+        active = cel < s.standBelow ? 0 : cel < s.runOn ? 1 : 2;
+        mode = (['idle', 'walk', 'run'] as const)[active];
+        const proba = s.output === 'dry';
+        caption = active === 0 ? t('glowny.wskaznik.chodzenie.stoisz')
+          : proba ? t('glowny.wskaznik.chodzenie.proba')
+            : t(active === 1 ? 'glowny.wskaznik.chodzenie.chod' : 'glowny.wskaznik.chodzenie.bieg', { klawisz_chodu: s.walkKey.name, klawisz_biegu: s.runKey.name });
+      }
+    }
+    if (!control.enabled && jedziePilotem) cel = s.idleSpeed;
+    if (!live) {
+      cel = 0;
+      mode = 'offline';
+      if (s.direction === 'treadmill' && control.enabled) caption = t('glowny.wskaznik.brak_danych');
+    }
+    predkosc += (cel - predkosc) * 0.25;
+    if (predkosc < 0.05) predkosc = cel === 0 ? 0 : predkosc;
+    const dt = 0.1;
+    if (predkosc > 0.3) {
+      czasRuchu += dt;
+      dystans += (predkosc * dt) / 3600;
+      kroki += (predkosc * 28 * dt) / 60;
+    }
+    const tel: K.Telemetry = {
+      tMs, speedKmh: predkosc, live, enabled: control.enabled, mode, active, caption,
+      steps: live ? Math.floor(kroki) : null, cadence: live && predkosc > 0.3 ? Math.round(predkosc * 28) : null,
+      distanceKm: dystans, activeS: czasRuchu, beltTargetKmh: control.enabled && control.setsSpeed ? cel : null,
+      pad: s.direction === 'gamepad'
+        ? { name: 'DualSense (Bluetooth)', deflection: s.padSteps[Math.max(0, active)][0] / 100, step: Math.max(0, active), statusText: `DualSense: wychylenie ${s.padSteps[Math.max(0, active)][0]}%, stopień ${Math.max(0, active)}.` }
+        : null,
+    };
+    emituj('wl:telemetria', tel);
+    // przycisk na ekranie: Stop pod kółkiem, gdy taśma jedzie (rdzeń: z histerezą 1 s)
+    const stop = !bubble.training && live && predkosc > 0.05 && caps.control;
+    if (stop !== bubble.stop) {
+      bubble.stop = stop;
+      wyslij('bubble');
+    }
+  }, 100);
+
+  // ---------------- powiadomienia nad grą (okno popup) ----------------
+  // Kolejka jak w rdzeniu (kontrakt 7.2): najwyżej 3 widoczne, najnowsze na końcu, każde 6000 ms,
+  // potem leaving: true na 220 ms i wypada; reszta czeka. Podgląd: /popup.html?demo=1 - trzy
+  // powiadomienia od razu, potem co 2,5 s kolejne z listy przykładów (&stan=dlugie - najdłuższe nazwy).
+  type TrescPopupu = Omit<K.PopupItem, 'id' | 'leaving'>;
+  const KOLOR_RZADKOSCI: Record<K.Rarity, string> = {
+    pospolite: '#9aa5b1', rzadkie: '#4aa3ff', epickie: '#b26bff', heroiczne: '#ff5470', legendarne: '#ffa133',
+  };
+  const rzadkoscPoziomu = (n: number): K.Rarity => (n < 10 ? 'pospolite' : n < 25 ? 'rzadkie' : n < 50 ? 'epickie' : n < 80 ? 'heroiczne' : 'legendarne');
+  const popupy: K.PopupItem[] = [];
+  const czekajace: TrescPopupu[] = [];
+  let numerPopupu = 0;
+  const wyslijPopupy = () => emituj('wl:popupy', { items: popupy } satisfies K.PopupsView);
+  function pompujPopupy() {
+    while (czekajace.length && popupy.length < 3) {
+      const it: K.PopupItem = { ...czekajace.shift()!, id: ++numerPopupu, leaving: false };
+      popupy.push(it);
+      pozniej(6000, () => {
+        it.leaving = true;
+        wyslijPopupy();
+        pozniej(220, () => {
+          popupy.splice(popupy.indexOf(it), 1);
+          pompujPopupy();
+          wyslijPopupy();
+        });
+      });
+    }
+    wyslijPopupy();
+  }
+  function przykladyPopupow(): TrescPopupu[] {
+    const najdluzsze = (lista: K.Achievement[]) => lista.reduce((a, b) => (b.name.length + b.condition.length > a.name.length + a.condition.length ? b : a));
+    const zRzadkosci = (r: K.Rarity) => {
+      const lista = defs.achievements.filter((a) => a.rarity === r);
+      return dlugie ? najdluzsze(lista) : lista[0];
+    };
+    const osiagniecie = (a: K.Achievement): TrescPopupu => ({
+      kicker: t('powiadomienie.osiagniecie.nad', { rzadkosc: t(`rzadkosc.${a.rarity}`) }),
+      title: a.name, line: t('powiadomienie.osiagniecie.linia', { xp: defs.rarityXp[a.rarity], warunek: a.condition }),
+      color: KOLOR_RZADKOSCI[a.rarity], rarity: a.rarity, mark: a.mark, badgeText: null, progress: null,
+    });
+    const poziom = dlugie ? 87 : (levels?.level ?? 11) + 1;
+    const ranga = [...defs.ranks].reverse().find((x) => x.level <= poziom) ?? defs.ranks[0];
+    const rzPoziomu = rzadkoscPoziomu(poziom);
+    return [
+      osiagniecie(dlugie ? najdluzsze(defs.achievements) : zRzadkosci('epickie')),
+      {
+        kicker: t('powiadomienie.awans.nad', { poziom }),
+        title: dlugie ? ranga.name : t('powiadomienie.awans.tytul', { poziom }),
+        line: t(dlugie ? 'powiadomienie.awans.ranga_linia' : 'powiadomienie.awans.linia', { km: liczba(dlugie ? 1234.5 : 3.2, 1) }),
+        color: KOLOR_RZADKOSCI[rzPoziomu], rarity: rzPoziomu, mark: '', badgeText: String(poziom), progress: 0.08,
+      },
+      {
+        kicker: t('powiadomienie.wiele.nad'), title: t('powiadomienie.wiele.tytul', { liczba: dlugie ? 12 : 4 }),
+        line: t('powiadomienie.wiele.linia'), color: KOLOR_RZADKOSCI.rzadkie, rarity: 'rzadkie', mark: 'korona', badgeText: null, progress: null,
+      },
+      osiagniecie(zRzadkosci('legendarne')),
+      {
+        kicker: t('powiadomienie.historia.nad'), title: t('powiadomienie.historia.tytul', { poziom, ranga: ranga.name }),
+        line: t('powiadomienie.historia.linia', { liczba: 7, km: liczba(levels?.km ?? 212, 1) }),
+        color: KOLOR_RZADKOSCI[rzPoziomu], rarity: rzPoziomu, mark: '', badgeText: String(poziom), progress: null,
+      },
+      osiagniecie(zRzadkosci('pospolite')),
+    ];
+  }
+  let demoPopupow = false;
+  function uruchomDemoPopupow() {
+    if (demoPopupow || p.get('demo') !== '1') return;
+    demoPopupow = true;
+    const przyklady = przykladyPopupow();
+    czekajace.push(...przyklady.slice(0, 3));
+    pompujPopupy();
+    let nastepny = 3;
+    setInterval(() => {
+      if (czekajace.length) return;
+      czekajace.push(przyklady[nastepny++ % przyklady.length]);
+      pompujPopupy();
+    }, 2500);
+  }
+
+  // ---------------- komendy ----------------
+  type A = Record<string, unknown>;
+  const komendy: Record<string, (a: A) => unknown> = {
+    app_snapshot: () => ({ rev, statics: statics(), logTail: logi, ...wycinki() }) satisfies K.AppSnapshot,
+    ui_ready: (a) => {
+      if (a.window === 'main' && sc.pierwsze) pozniej(50, () => emituj('wl:nawigacja', { to: 'wizard', reason: 'firstRun' }));
+    },
+    app_quit: () => loguj('Zamykanie (atrapa: okno zostaje otwarte)'),
+    window_theme: () => {},
+    window_show_main: () => undefined,
+    open_folder: (a) => loguj(`Otwórz folder: ${String(a.kind)} (atrapa)`),
+    open_link: (a) => loguj(`Otwórz adres: ${String(a.kind)} (atrapa)`),
+    log_tail: () => logi,
+    diagnostics_run: () => new Promise((ok) => {
+      device.diagnostics = { running: true, text: t('dziennik.raport_trwa') };
+      wyslij('device');
+      pozniej(1500, () => {
+        device.diagnostics = { running: false, text: t('dziennik.raport_gotowy') };
+        wyslij('device');
+        ok('logs\\diagnostyka-20261126-120000.txt');
+      });
+    }),
+
+    settings_set: (a) => {
+      const key = a.key as K.SettingKey;
+      (settings as unknown as A)[key] = a.value;
+      if (key === 'direction') {
+        przeliczSterowanie();
+        bubble.training = settings.direction === 'training';
+      }
+      if (key === 'output' || key === 'keyIdle') przeliczSterowanie();
+      if (key === 'simulator') {
+        stanBiezni = a.value ? 'symulator' : 'strumien';
+        przeliczBieznie();
+        przeliczSterowanie();
+        wyslij('device');
+      }
+      if (key === 'theme') bubble.theme = settings.theme;
+      if (key === 'floatingButton') bubble.visible = settings.floatingButton;
+      wyslij('settings', 'control', 'people', 'bubble');
+    },
+    thresholds_set: (a) => {
+      // same clamping as App::thresholds_set (actions.rs): the changed threshold wins, the other
+      // moves by the gap, and both stay within 0..maxSpeed
+      const { maxSpeed: top, thresholdGap: gap } = statics();
+      const v = Number(a.kmh);
+      let [walk, run] = [settings.standBelow, settings.runOn];
+      if (a.which === 'walk') {
+        walk = v;
+        if (run < walk + gap) {
+          run = Math.min(top, walk + gap);
+          walk = Math.min(walk, run - gap);
+        }
+      } else {
+        run = v;
+        if (run < walk + gap) {
+          walk = Math.max(0, run - gap);
+          run = Math.max(run, walk + gap);
+        }
+      }
+      settings.standBelow = Math.round(walk * 10) / 10;
+      settings.runOn = Math.round(run * 10) / 10;
+      settings.runOff = Math.round((settings.runOn - 0.6) * 10) / 10;
+      wyslij('settings');
+    },
+    pad_steps_count: (a) => {
+      settings.padSteps = kopia(statics().padPresets[a.count as 2 | 3 | 4 | 5]);
+      wyslij('settings', 'people');
+    },
+    pad_step_set: (a) => {
+      const i = Number(a.index);
+      const krok = settings.padSteps[i];
+      if (!krok) throw blad('invalid', t('wspolne.blad_nieznany'));
+      if (a.at !== null && a.at !== undefined) krok[0] = Number(a.at);
+      if (a.kmh !== null && a.kmh !== undefined) krok[1] = Number(a.kmh);
+      wyslij('settings');
+    },
+    training_speed_set: (a) => {
+      settings.trainingLevels[Number(a.index)] = Math.round(Number(a.kmh) * 10) / 10;
+      wyslij('settings', 'people');
+    },
+    key_capture: (a) => {
+      control.keyCapturing = (a.role as K.KeyRole | null) ?? null;
+      wyslij('control');
+    },
+    key_set: (a) => {
+      const role = a.role as K.KeyRole;
+      const k = a.key as K.KeyCapture;
+      control.keyCapturing = null;
+      if (k.code === 'Escape') {
+        wyslij('control');
+        throw blad('key', t('klawisz.blad.ogolny', { powod: t('klawisz.powod.esc') }));
+      }
+      const nazwa = k.code.startsWith('Key') ? k.code.slice(3) : k.code.startsWith('Digit') ? k.code.slice(5) : k.key.length === 1 ? k.key.toUpperCase() : k.code;
+      const mods: KeyBindingMods = role === 'toggle' || role === 'faster' || role === 'slower' ? [...(k.ctrl ? ['ctrl' as const] : []), ...(k.alt ? ['alt' as const] : []), ...(k.shift ? ['shift' as const] : [])] : [];
+      const kb = klawisz(nazwa, 0, 0, mods);
+      // jak rdzeń (klawisze.speed_problem): szybciej/wolniej różne i inne niż włączanie, chód i bieg
+      if (role === 'faster' || role === 'slower') {
+        const drugi = role === 'faster' ? settings.slowerKey : settings.fasterKey;
+        const komunikat = drugi.name === kb.name
+          ? t('klawisz.blad.tempo_te_same')
+          : [settings.toggleKey, settings.walkKey, settings.runKey].some((x) => x.name === kb.name)
+            ? t('klawisz.blad.tempo_koliduje')
+            : '';
+        if (komunikat) {
+          wyslij('control');
+          throw blad('key', komunikat);
+        }
+      } else {
+        const zajety = [settings.fasterKey, settings.slowerKey].find((x) => x.name === kb.name);
+        if (zajety) {
+          wyslij('control');
+          const powod = zajety === settings.fasterKey
+            ? t('klawisz.powod.szybciej', { klawisz_szybciej: zajety.label })
+            : t('klawisz.powod.wolniej', { klawisz_wolniej: zajety.label });
+          throw blad('key', t('klawisz.blad.ogolny', { powod }));
+        }
+      }
+      if (role === 'walk') settings.walkKey = kb;
+      else if (role === 'run') settings.runKey = kb;
+      else if (role === 'faster') settings.fasterKey = kb;
+      else if (role === 'slower') settings.slowerKey = kb;
+      else settings.toggleKey = kb;
+      Object.assign(bubble, { fasterLabel: settings.fasterKey.label, slowerLabel: settings.slowerKey.label });
+      przeliczSterowanie();
+      przeliczBieznie();
+      wyslij('settings', 'control', 'device', 'bubble');
+      return kb;
+    },
+    pad_capture_start: () => {
+      control.padCapturing = true;
+      wyslij('control');
+      pozniej(1500, () => {
+        if (!control.padCapturing) return;
+        control.padCapturing = false;
+        settings.togglePad = 'touchpad';
+        control.padButtonLabel = t('pad.ps.panel_dotykowy');
+        przeliczSterowanie();
+        wyslij('settings', 'control');
+      });
+    },
+    pad_capture_cancel: () => {
+      control.padCapturing = false;
+      wyslij('control');
+    },
+
+    control_set: (a) => {
+      control.enabled = Boolean(a.on);
+      bubble.enabled = control.enabled;
+      wyslij('control', 'bubble');
+    },
+    control_toggle: () => komendy.control_set({ on: !control.enabled }),
+    training_level_set: (a) => {
+      settings.trainingLevel = bubble.trainingLevel = Number(a.level) as 0 | 1 | 2 | 3;
+      if (!control.enabled) komendy.control_set({ on: true });
+      wyslij('settings', 'bubble');
+    },
+    training_level_step: (a) => {
+      settings.trainingLevel = bubble.trainingLevel = Math.max(0, Math.min(3, settings.trainingLevel + Number(a.step))) as 0 | 1 | 2 | 3;
+      if (!control.enabled) komendy.control_set({ on: true });
+      wyslij('settings', 'bubble');
+    },
+    training_stop: () => komendy.control_set({ on: false }),
+    device_belt_stop: () => {
+      jedziePilotem = false;
+      komendy.control_set({ on: false });
+    },
+
+    device_scan: () => {
+      stanBiezni = 'skanowanie';
+      device.devices = [];
+      device.scanText = t('bieznia.lista.szukam');
+      przeliczBieznie();
+      wyslij('device');
+      pozniej(1500, () => {
+        device.devices = [
+          { address: 'C8:47:8C:12:34:56', name: settings.deviceName, rssi: -58, treadmill: true, model },
+          { address: 'D1:22:33:44:55:66', name: 'URTM051', rssi: -71, treadmill: true, model: 'Urevo SpaceWalk 5L' },
+          { address: 'A0:11:22:33:44:55', name: 'Mi Band 7', rssi: -80, treadmill: false, model: 'Mi Band 7' },
+          { address: 'A0:11:22:33:44:56', name: '', rssi: -88, treadmill: false, model: '' },
+        ];
+        device.scanText = t('bieznia.lista.znalezione', { liczba: 2, razem: 2 });
+        stanBiezni = device.remembered ? 'rozlaczona' : 'brak';
+        przeliczBieznie();
+        device.scanning = false;
+        wyslij('device');
+      });
+    },
+    device_connect: (a) => {
+      settings.deviceAddress = String(a.address);
+      settings.deviceName = String(a.name);
+      stanBiezni = 'laczenie';
+      przeliczBieznie();
+      wyslij('device', 'settings');
+      pozniej(1200, () => {
+        stanBiezni = 'strumien';
+        przeliczBieznie();
+        przeliczSterowanie();
+        wyslij('device', 'control');
+      });
+    },
+    device_disconnect: () => {
+      stanBiezni = 'rozlaczona';
+      przeliczBieznie();
+      przeliczSterowanie();
+      wyslij('device', 'control');
+    },
+    device_forget: () => {
+      settings.deviceAddress = '';
+      settings.deviceName = '';
+      stanBiezni = 'brak';
+      przeliczBieznie();
+      wyslij('device', 'settings');
+    },
+    device_status_action: () => {
+      const akcja = device.status.action;
+      if (akcja === 'scan') {
+        // jak rdzeń: listę otwiera tylko przycisk Szukaj bieżni, nie sam wynik skanu
+        emituj('wl:nawigacja', { to: 'devices', reason: 'scan' });
+        return komendy.device_scan({});
+      }
+      if (akcja === 'disconnect' || akcja === 'cancel') return komendy.device_disconnect({});
+      if (akcja === 'simulatorOff') return komendy.settings_set({ key: 'simulator', value: false });
+      return komendy.device_connect({ address: settings.deviceAddress, name: settings.deviceName });
+    },
+    models_refresh: () => wyslij('models'),
+    models_fetch: () => new Promise((ok) => {
+      models.busy = true;
+      models.status = t('modele.sprawdzam');
+      wyslij('models');
+      pozniej(1000, () => {
+        models.busy = false;
+        models.status = t('modele.aktualne');
+        wyslij('models');
+        ok(models.status);
+      });
+    }),
+    models_add_file: () => null,
+    models_remove: (a) => {
+      models.items = models.items.filter((m) => m.id !== a.id || !m.removable);
+      models.status = t('modele.usunieto');
+      wyslij('models');
+    },
+
+    wizard_seed: () => ({ name: 'Szybki Wędrowiec', suggestions: ['Cicha Biegaczka', 'Dzielny Piechur', 'Wytrwała Tropicielka'], color: 'Szmaragd' }),
+    name_random: () => ['Spokojny Tropiciel', 'Zwinna Kozica', 'Nocny Marek'][Math.floor(Math.random() * 3)],
+    wizard_finish: (a) => {
+      const w = a.result as K.WizardResult;
+      const profiles = [profil('Domyślny', 'Mięta', GLIF_POSTAC, w.direction)];
+      if (w.game) profiles.unshift(profil(w.game.name, w.game.color, GLIFY[0].code, w.direction));
+      const nowa = osoba(w.name, w.color, profiles, null);
+      people.people.push(nowa);
+      people.ready = true;
+      people.activePersonId = nowa.id;
+      people.activeProfileId = nowa.activeProfileId;
+      app.firstRun = false;
+      settings.direction = w.direction;
+      wyslij('app');
+      zmienOsobe();
+    },
+    person_switch: (a) => {
+      const o = people.people.find((x) => x.id === a.personId);
+      if (!o) throw blad('notFound', t('wspolne.blad_nieznany'));
+      people.activePersonId = o.id;
+      people.activeProfileId = o.activeProfileId;
+      zmienOsobe();
+    },
+    person_update: (a) => {
+      const o = people.people.find((x) => x.id === a.personId);
+      const patch = a.patch as K.PersonPatch;
+      if (o && patch.name?.trim()) o.name = patch.name.trim();
+      if (o && patch.color) o.color = patch.color;
+      if (o?.id === people.activePersonId && patch.color) settings.personColor = patch.color;
+      wyslij('people', 'settings');
+    },
+    person_remove: (a) => {
+      if (people.people.length < 2) throw blad('invalid', t('wspolne.blad_nieznany'));
+      people.people = people.people.filter((x) => x.id !== a.personId);
+      if (people.activePersonId === a.personId) {
+        people.activePersonId = people.people[0].id;
+        people.activeProfileId = people.people[0].activeProfileId;
+      }
+      zmienOsobe();
+    },
+    profile_switch: (a) => {
+      const o = aktywnaOsoba();
+      if (!o?.profiles.some((x) => x.id === a.profileId)) throw blad('notFound', t('wspolne.blad_nieznany'));
+      people.activeProfileId = String(a.profileId);
+      o.activeProfileId = people.activeProfileId;
+      settings.profileColor = aktywnyProfil()!.color;
+      settings.direction = aktywnyProfil()!.summary.direction;
+      bubble.accent = settings.profileColor;
+      bubble.training = settings.direction === 'training';
+      przeliczSterowanie();
+      wyslij('people', 'settings', 'control', 'bubble');
+    },
+    game_pick: () => ({
+      pickId: 'wybor-1', name: 'Baldur’s Gate 3', exe: 'C:\\Gry\\Baldurs Gate 3\\bin\\bg3.exe', exeName: 'bg3.exe',
+      folderName: 'bin', icon: { color: 'Fiolet', glyph: GLIFY[3].code, url: null }, iconColor: 'Fiolet',
+    }) satisfies K.GamePick,
+    game_pick_discard: () => undefined,
+    profile_create: (a) => {
+      const d = a.draft as K.ProfileDraft;
+      const pr = profil(d.name, d.color, d.glyph ?? GLIF_POSTAC, settings.direction);
+      aktywnaOsoba()!.profiles.push(pr);
+      komendy.profile_switch({ profileId: pr.id });
+      return pr.id;
+    },
+    profile_update: (a) => {
+      const pr = people.people.flatMap((o) => o.profiles).find((x) => x.id === a.profileId);
+      if (!pr) throw blad('notFound', t('wspolne.blad_nieznany'));
+      const patch = a.patch as K.ProfilePatch;
+      if (patch.name?.trim()) pr.name = patch.name.trim();
+      if (patch.color) pr.color = pr.icon.color = patch.color;
+      if (patch.glyph) pr.icon = { color: pr.color, glyph: patch.glyph, url: null };
+      if (patch.online !== undefined) pr.online = patch.online;
+      if (pr.id === people.activeProfileId) settings.profileColor = bubble.accent = pr.color;
+      wyslij('people', 'settings', 'bubble');
+    },
+    profile_duplicate: (a) => {
+      const o = aktywnaOsoba()!;
+      const zrodlo = o.profiles.find((x) => x.id === a.profileId);
+      if (!zrodlo) throw blad('notFound', t('wspolne.blad_nieznany'));
+      const nowy = { ...kopia(zrodlo), id: id10(r), name: t('profil.kopia_nazwa', { profil: zrodlo.name }) };
+      o.profiles.push(nowy);
+      wyslij('people');
+      return nowy.id;
+    },
+    profile_remove: (a) => {
+      const o = aktywnaOsoba()!;
+      if (o.profiles.length < 2) throw blad('invalid', t('wspolne.blad_nieznany'));
+      o.profiles = o.profiles.filter((x) => x.id !== a.profileId);
+      if (people.activeProfileId === a.profileId) komendy.profile_switch({ profileId: o.profiles[0].id });
+      wyslij('people');
+    },
+
+    history_query: (a) => zapytanieHistorii(a.query as K.HistoryQuery),
+    history_session: (a) => sesje.find((s) => s.id === a.sessionId) ?? null,
+    history_session_delete: (a) => {
+      const i = sesje.findIndex((s) => s.id === a.sessionId);
+      if (i >= 0) sesje.splice(i, 1);
+      wersjaHistorii++;
+      przeliczDzis();
+      levels = przeliczPoziomy();
+      wyslij('history', 'people', 'levels');
+      toast(t('sesja.usunieta'));
+    },
+    history_session_hide_online: (a) => {
+      const s = sesje.find((x) => x.id === a.sessionId);
+      if (s?.online) s.online.hidden = Boolean(a.hidden);
+      wersjaHistorii++;
+      przeliczDzis();
+      wyslij('history');
+    },
+
+    levels_refresh: () => wyslij('levels'),
+    levels_sample_popup: () => emituj('wl:popupy', { items: [] }),
+
+    account_login: (a) => new Promise((ok, nie) => {
+      if (!String(a.email).includes('@')) return nie(blad('invalid', t('konto.blad.email'), { email: t('konto.blad.email') }));
+      if (!a.password) return nie(blad('invalid', t('konto.blad.logowanie')));
+      account.busy = ['login'];
+      wyslij('account');
+      pozniej(700, () => {
+        const o = aktywnaOsoba()!;
+        o.hasAccount = true;
+        o.accountName = 'Damianejro';
+        Object.assign(account, { busy: [], loggedIn: true, name: 'Damianejro', email: String(a.email), userId: 'u-damianejro' });
+        wyslij('account', 'people');
+        toast(t('konto.zalogowano', { pseudonim: account.name }));
+        emituj('wl:nawigacja', { to: 'online', reason: 'signedIn' });
+        ok(account);
+      });
+    }),
+    account_register: (a) => {
+      const fields: Record<string, string> = {};
+      if (String(a.code).length < 4) fields.code = t('konto.blad.kod');
+      if (!String(a.email).includes('@')) fields.email = t('konto.blad.email');
+      if (String(a.password).length < 10) fields.password = t('konto.blad.haslo_krotkie', { liczba: 10 });
+      if (String(a.name).length < 3) fields.name = t('konto.blad.pseudonim_dlugosc', { min: 3, max: 24 });
+      if (Object.keys(fields).length) throw blad('invalid', Object.values(fields)[0], fields);
+      Object.assign(account, { loggedIn: true, verified: false, name: String(a.name), email: String(a.email), message: t('konto.rejestracja.gotowe') });
+      wyslij('account');
+      return account;
+    },
+    account_remind_password: () => {
+      account.message = t('konto.reset.wyslano');
+      wyslij('account');
+    },
+    account_logout: () => {
+      const o = aktywnaOsoba();
+      if (o) Object.assign(o, { hasAccount: false, accountName: null });
+      Object.assign(account, { loggedIn: false, name: '', email: '', userId: '' });
+      Object.assign(online, pustyOnline());
+      wyslij('account', 'online', 'people');
+      toast(t('konto.wylogowano'));
+      emituj('wl:nawigacja', { to: 'settings', reason: 'settings' });
+    },
+    account_delete: (a) => {
+      if (!a.password) throw blad('invalid', t('konto.blad.logowanie'));
+      komendy.account_logout({});
+    },
+    account_change_password: (a) => {
+      if (String(a.newPassword).length < 10) throw blad('invalid', t('konto.blad.haslo_krotkie', { liczba: 10 }), { newPassword: t('konto.blad.haslo_krotkie', { liczba: 10 }) });
+    },
+    account_send_verification: () => {
+      account.verifyPolling = true;
+      wyslij('account');
+      toast(t('konto.email.wyslano_toast', { email: account.email }));
+      return 'wyslano';
+    },
+    account_check_verified: () => account.verified,
+    account_set_remember: (a) => { account.remember = Boolean(a.on); wyslij('account'); },
+    account_set_upload: (a) => { account.upload = Boolean(a.on); wyslij('account'); },
+    account_set_visibility: (a) => { account.visibility = a.value as K.SessionVisibility; wyslij('account'); },
+    account_set_live_status: (a) => {
+      account.liveStatus = a.value as K.LiveStatus;
+      account.live = account.liveStatus !== 'niewidoczny';
+      wyslij('account');
+    },
+    account_set_description: (a) => {
+      const opis = String(a.text ?? '').trim().replace(/\s+/g, ' ');
+      if ([...opis].length > 40) throw blad('invalid', t('konto.blad.opis_dlugosc', { liczba: 40 }));
+      account.description = opis;
+      wyslij('account');
+    },
+    account_set_profile_visibility: (a) => { account.profileVisibility = a.value as K.ProfileVisibility; wyslij('account'); },
+    account_set_games_visibility: (a) => { account.gamesVisibility = a.value as K.GamesVisibility; wyslij('account'); },
+    account_rename: (a) => {
+      const n = String(a.name);
+      if (n.length < 3 || n.length > 24) throw blad('invalid', t('konto.blad.pseudonim_dlugosc', { min: 3, max: 24 }));
+      account.name = n;
+      wyslij('account');
+    },
+    account_accept_terms: () => {
+      account.terms = account.termsCurrent;
+      account.termsOutdated = false;
+      wyslij('account');
+      toast(t('konto.regulamin.dziekujemy'));
+    },
+    account_upload_now: () => {
+      const n = account.pendingUploads;
+      account.pendingUploads = 0;
+      wyslij('account');
+      return n;
+    },
+    account_export_my_data: () => 'dane\\moje-dane-konto-20261126-120000.json',
+
+    online_load: (a) => {
+      if (!account.loggedIn) throw blad('loggedOut', t('konto.blad.niezalogowany'));
+      const tab = a.tab as K.OnlineTab;
+      // ?stan=online-blad: serwer kont nie odpowiada (karta błędu z ponawianiem)
+      if (sc.bladOnline && tab !== 'achievements') {
+        online.friends = null;
+        online.stats = null;
+        online.invitations = null;
+        wyslij('online');
+        throw blad('offline', t('konto.blad.internet'));
+      }
+      if (tab === 'achievements') {
+        // procent graczy dla co trzeciego osiągnięcia (prawdziwy serwer: od 25 kont)
+        if (!online.achievementStats) {
+          const percent: Record<string, number> = {};
+          defs.achievements.forEach((x, i) => {
+            if (i % 3 === 0) percent[x.id] = Math.round(((i * 37) % 97) * 10 + 5) / 10;
+          });
+          online.achievementStats = { accounts: 214, percent };
+          wyslij('online');
+        }
+        return;
+      }
+      const pierwszy = tab === 'friends' ? online.friends === null : tab === 'ranking' ? online.ranking === null : online.people === null;
+      if (pierwszy || a.force) {
+        online.loading = tab === 'friends' ? ['stats', 'friends', 'invitations'] : tab === 'ranking' ? ['ranking'] : ['people'];
+        wyslij('online');
+      }
+      pozniej(400, () => {
+        // odświeżenie znajomych co 10 s: „idzie teraz” rośnie, lista podmieniana w miejscu
+        if (tab === 'friends') {
+          for (const f of znajomi) {
+            if (!f.live) continue;
+            const dt = teraz() - (f.live.since ?? teraz()) - f.live.activeS;
+            f.live = {
+              ...f.live,
+              steps: f.live.steps + Math.round(dt * 1.6),
+              activeS: f.live.activeS + dt,
+              distanceKm: f.live.distanceKm === null ? null : f.live.distanceKm + (f.live.kmh * dt) / 3600,
+            };
+          }
+          online.friends = znajomi.map((f) => ({ ...f }));
+        }
+        if (tab === 'ranking') online.ranking = ranking(online.ranking?.scope ?? 'tydzien');
+        if (tab === 'people') komendy.online_people_search(online.peopleQuery);
+        online.loading = [];
+        wyslij('online');
+      });
+    },
+    online_ranking_scope: (a) => {
+      online.ranking = ranking(a.scope as K.RankingScope);
+      wyslij('online');
+    },
+    online_people_search: (a) => {
+      const search = String(a.search ?? '').toLowerCase();
+      const wszyscy = [...znajomi.map((f) => ({ id: f.id, name: f.name, level: f.level, weekSteps: f.week.steps, place: null, friend: true })),
+        { id: 'u-ania', name: 'AniaNaBieżni', level: 31, weekSteps: 68400, place: 2, friend: false },
+        { id: 'u-rekord', name: 'Rekordzista', level: 41, weekSteps: 90210, place: 1, friend: false }];
+      online.peopleQuery = { search: String(a.search ?? ''), page: Number(a.page ?? 1) };
+      online.people = { page: online.peopleQuery.page, hasNext: false, people: wszyscy.filter((x) => x.name.toLowerCase().includes(search)) };
+      wyslij('online');
+    },
+    online_person_open: (a) => {
+      const f = znajomi.find((x) => x.id === a.userId);
+      const ja = a.userId === account.userId;
+      const moje = (levels?.progress ?? []).filter((x) => x.earnedAt !== null).slice(0, 17);
+      const gryHtml = sc.tekstHtml && f?.id === 'u-html' ? [{ game: TEKST_HTML, gameId: 'g-html', steps: 9100, distanceKm: 6.7, activeS: 4300 }] : null;
+      const person: K.OnlinePerson = {
+        id: String(a.userId), name: ja ? account.name : f?.name ?? 'AniaNaBieżni', me: ja,
+        level: ja ? levels?.level ?? 1 : f ? f.level : 31, xp: f && f.level === null ? null : 25300, achievementsCount: 17,
+        // cudzy profil: serwer nie podaje czasu zdobycia (prywatność), kolejność z listy
+        achievements: moje.map((x) => ({ id: x.id, earnedAt: ja ? x.earnedAt : null })),
+        since: teraz() - 200 * 86400, treadmillModel: model, friend: !!f,
+        week: f?.week ?? tydzien(41230), total: { steps: 812400, distanceKm: 601.8, activeS: 1_300_000, sessions: 214 },
+        games: gryHtml ?? (f ? null : online.stats?.games ?? null), gamesHidden: !!f && !gryHtml,
+        otherGames: f ? null : { steps: 5230, distanceKm: 3.9, activeS: 2810, sessions: 3, games: 2 },
+        description: ja ? account.description || null : (f?.description ?? null),
+        today: ja ? tydzien(5120) : f ? f.today : null,
+      };
+      online.person = person;
+      wyslij('online');
+      emituj('wl:nawigacja', { to: 'onlinePerson', reason: 'personOpened' });
+      return person;
+    },
+    online_invite_name: (a) => {
+      toast(t('znajomi.zaproszono', { pseudonim: String(a.name) }));
+      return 'oczekuje';
+    },
+    online_invite_user: () => 'oczekuje',
+    online_invitation_answer: (a) => {
+      if (online.invitations) online.invitations.incoming = online.invitations.incoming.filter((x) => x.id !== a.invitationId);
+      wyslij('online');
+      toast(t('znajomi.odpowiedziano'));
+    },
+    online_invitation_withdraw: (a) => {
+      if (online.invitations) online.invitations.sent = online.invitations.sent.filter((x) => x.id !== a.invitationId);
+      wyslij('online');
+    },
+    online_friend_remove: (a) => {
+      online.friends = (online.friends ?? []).filter((x) => x.id !== a.friendId);
+      wyslij('online');
+      toast(t('znajomi.usunieto'));
+    },
+    online_registration_code: () => {
+      online.regCode = { code: 'WL-7K3M-Q9', validUntil: teraz() + 14 * 86400 };
+      wyslij('online');
+      return online.regCode;
+    },
+
+    backup_export_summary: (a) => {
+      const c = a.choice as K.ExportChoice;
+      const osoby = Object.values(c.people).filter((l) => l.length > 0);
+      return { people: osoby.length, profiles: osoby.flat().length, sessions: c.results ? sesje.length : 0, bytes: 48_000 + sesje.length * 900 };
+    },
+    backup_export: (a) => {
+      const s = komendy.backup_export_summary(a) as K.ExportSummary;
+      toast(t('kopia.eksport.gotowe', { liczba: s.people, profile: s.profiles, sesje: s.sessions }));
+      return s;
+    },
+    backup_import_open: () => kopiaWybor ? null : ({
+      file: 'kopia-walklevel-2026-11-20.bieznia', appVersion: '0.5.2', hasSettings: true, hasResults: true,
+      description: 'WalkLevel 0.5.2 · 2 osoby · 4 profile gier · 61 sesji',
+      people: [
+        { id: ludzie[0].id, name: ludzie[0].name, color: ludzie[0].color, profiles: 3, sessions: 48, exists: true },
+        { id: 'nowa', name: 'Kuba', color: 'Limonka', profiles: 1, sessions: 13, exists: false },
+      ],
+    }) satisfies K.ImportPreview,
+    backup_import_apply: () => {
+      app.latestBackup = 'przed-importem-20261126-120000';
+      wyslij('app');
+      return { peopleAdded: 1, peopleMerged: 1, profilesAdded: 1, profilesUpdated: 2, sessionsAdded: 13, backup: app.latestBackup } satisfies K.ImportReport;
+    },
+    backup_restore_latest: () => {
+      app.latestBackup = null;
+      wyslij('app');
+      toast(t('kopia.import.przywrocono'));
+    },
+
+    report_send: (a) => new Promise((ok, nie) => {
+      // characters as the core counts them (code points)
+      const dlugosc = [...String(a.description).trim()].length;
+      if (dlugosc === 0) return nie(blad('invalid', t('zgloszenie.blad.pusty')));
+      if (dlugosc < 5) return nie(blad('invalid', t('zgloszenie.blad.krotki', { liczba: 5 - dlugosc })));
+      report.busy = true;
+      report.status = t('zgloszenie.przygotowuje');
+      wyslij('report');
+      pozniej(1000, () => {
+        Object.assign(report, { busy: false, sentNumber: 'WL-1042', status: t('zgloszenie.wyslano', { numer: 'WL-1042' }) });
+        wyslij('report');
+        ok(undefined);
+      });
+    }),
+    report_save: () => {
+      report.lastFile = 'zgloszenie-20261126-120000.zip';
+      report.status = t('zgloszenie.zapisano', { plik: report.lastFile, email_autora: 'kontakt@damnit.com.pl' });
+      wyslij('report');
+      return report.lastFile;
+    },
+    update_check: (a) => {
+      if (a.install) throw blad('unavailable', t('glowny.pasek.aktualizuj_niedostepne'));
+      update.busy = true;
+      update.status = t('aktualizacja.sprawdzam');
+      wyslij('update');
+      pozniej(900, () => {
+        update.busy = false;
+        update.status = update.available ? t('aktualizacja.dostepna_krotko', { nowa_wersja: update.available }) : t('aktualizacja.najnowsza', { wersja: app.version });
+        wyslij('update');
+      });
+    },
+
+    bubble_click: () => komendy.control_toggle({}),
+    bubble_open: () => undefined,
+    bubble_drag_start: () => undefined,
+    bubble_drag_end: () => undefined,
+    popup_ready: () => {
+      uruchomDemoPopupow();
+      return { items: popupy } satisfies K.PopupsView;
+    },
+  };
+
+  // Zgłoś problem: stany do podglądu (?stan=zgloszenie-wyslano | zgloszenie-wysylanie |
+  // zgloszenie-email | zgloszenie-blad - wysyłka kończy się błędem braku internetu)
+  const stanZgloszenia = p.get('stan');
+  if (stanZgloszenia === 'zgloszenie-wyslano') Object.assign(report, { sentNumber: 'WL-1042', status: t('zgloszenie.wyslano', { numer: 'WL-1042' }) });
+  if (stanZgloszenia === 'zgloszenie-wysylanie') Object.assign(report, { busy: true, status: t('zgloszenie.przygotowuje') });
+  if (stanZgloszenia === 'zgloszenie-email') app.reportEndpoint = false;
+  if (stanZgloszenia === 'zgloszenie-blad') {
+    komendy.report_send = () => new Promise((_ok, nie) => pozniej(600, () => nie(blad('offline', t('zgloszenie.blad.internet')))));
+  }
+  // ?blad=account_set_upload,thresholds_set - these commands fail as without a network and the
+  // state does not change (switches must go back, tests-ui/interactions.ts)
+  for (const nazwa of (p.get('blad') ?? '').split(',').filter((n) => n in komendy)) {
+    komendy[nazwa] = () => new Promise((_ok, nie) => pozniej(100, () => nie(blad('offline', t('konto.blad.internet')))));
+  }
+
+  function statics(): K.StaticData {
+    return {
+      appName: 'WalkLevel', author: 'damnit.com.pl Damian Skrzypiec', homepage: 'https://damnit.com.pl',
+      contact: 'kontakt@damnit.com.pl', palette: PALETA, defaultColor: 'Mięta', runAltColor: 'Malina',
+      glyphs: GLIFY, defaultGlyph: GLIF_POSTAC,
+      modeNames: { keyboard: t('tryb.klawisze.nazwa'), gamepad: t('tryb.pad.nazwa'), treadmill: t('tryb.chodzenie.nazwa'), training: t('tryb.trening.nazwa') },
+      maxSpeed: 12, hysteresis: 0.6, thresholdGap: 0.8,
+      padPresets: {
+        2: [[0, 1], [100, 2.5]], 3: [[0, 1], [50, 2], [100, 3]],
+        4: [[0, 1], [25, 1.5], [50, 2.5], [100, 4]], 5: [[0, 1], [25, 1.5], [50, 2.5], [75, 3.5], [100, 4.5]],
+      },
+      padMinGap: 5, trainingRange: [0.5, 20], padSpeedRange: [0.5, 12],
+      reportPeriods: [
+        { seconds: 3600, label: t('zgloszenie.okres.1h') }, { seconds: 21600, label: t('zgloszenie.okres.6h') },
+        { seconds: 86400, label: t('zgloszenie.okres.24h') }, { seconds: 604800, label: t('zgloszenie.okres.7d') },
+      ],
+      reportDefaultS: 21600, reportMinChars: 5,
+      account: {
+        nameMin: 3, nameMax: 24, nameRe: '^[A-Za-z0-9 _.\\-ĄĆĘŁŃÓŚŹŻąćęłńóśźż]+$',
+        reservedNames: ['admin', 'administrator', 'moderator', 'damnit', 'bieznia', 'bieżnia'],
+        emailRe: '^[^@\\s]{1,64}@[^@\\s]{1,190}\\.[^@\\s]{2,24}$', passwordMin: 10, codeMin: 4, gameNameMax: 40,
+      },
+      definitions: defs,
+      driverNames: { kingsmith: t('modele.rodzaj.kingsmith'), ftms: t('modele.rodzaj.ftms') },
+    };
+  }
+
+  // Podgląd profilu osoby bez klikania (?ekran=onlinePerson): profil znajomego; &osoba=ja - własny,
+  // &osoba=obcy - osoba spoza znajomych (z podziałem na gry)
+  if (account.loggedIn && p.get('ekran') === 'onlinePerson') {
+    // scenariusz „obcy” (test:ui): profil spoza znajomych z podziałem na gry i „Inne gry”
+    const kto = p.get('osoba') ?? (p.get('stan') === 'obcy' ? 'obcy' : null);
+    void komendy.online_person_open({ userId: kto === 'ja' ? account.userId : kto === 'obcy' ? 'u-ania' : sc.tekstHtml ? 'u-html' : 'u-ola' });
+  }
+
+  // Narzędzie z design.md 11.2 dostępne w konsoli przeglądarki i dla testu: window.wystaje()
+  void import('./overflow-check').then((m) => Object.assign(window, { wystaje: m.wystaje }));
+
+  return {
+    async wywolaj(komenda, argumenty = {}) {
+      const f = komendy[komenda];
+      if (!f) throw blad('unavailable', `Atrapa nie zna komendy ${komenda}`);
+      return kopia(await f(argumenty));
+    },
+    async sluchaj(zdarzenie, obsluga) {
+      const zbior = sluchacze.get(zdarzenie) ?? new Set();
+      sluchacze.set(zdarzenie, zbior);
+      zbior.add(obsluga);
+      return () => zbior.delete(obsluga);
+    },
+  };
+}

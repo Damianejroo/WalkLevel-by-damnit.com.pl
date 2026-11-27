@@ -1,0 +1,3821 @@
+{
+ "decode": [
+  {
+   "hex": "9c2500005a00005a000000000000000c0000000000e000230100",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 90,
+    "incline_pct": 9.0,
+    "energy_kcal": 12,
+    "heart_rate": 0,
+    "elapsed_s": 224,
+    "steps": 291
+   }
+  },
+  {
+   "hex": "9c2564001400000000000000000000000200000000004a00000000",
+   "data": {
+    "speed_kmh": 1.0,
+    "distance_m": 20,
+    "incline_pct": 0.0,
+    "energy_kcal": 512,
+    "heart_rate": 0,
+    "elapsed_s": 18944,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2500005a00005a0000",
+   "data": null
+  },
+  {
+   "hex": "01",
+   "data": null
+  },
+  {
+   "hex": "",
+   "data": null
+  },
+  {
+   "hex": "00005e01",
+   "data": {
+    "speed_kmh": 3.5,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "01005e01",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25000000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25640000000000000000000000000000000000000000000000",
+   "data": {
+    "speed_kmh": 1.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 0,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25960000000000000000000000000000000000000100000000",
+   "data": {
+    "speed_kmh": 1.5,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 1,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25fa0000000000000000000000000000000000000200000000",
+   "data": {
+    "speed_kmh": 2.5,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 2,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25900100000000000000000000000000000000000300000000",
+   "data": {
+    "speed_kmh": 4.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 3,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25900100000000000000000000000000000000000400000000",
+   "data": {
+    "speed_kmh": 4.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 4,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25900100000000000000000000000000000000000500000000",
+   "data": {
+    "speed_kmh": 4.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 5,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25900100000000000000000000000000000000000600000000",
+   "data": {
+    "speed_kmh": 4.0,
+    "distance_m": 0,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 6,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25fa000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 2.5,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2518010a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 2.8,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25e6000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 2.3,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c25b4000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 1.8,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2582000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 1.3,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c255a000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.9,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2532000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.5,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2514000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.2,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "9c2500000a000000000000000000000000000000000700000000",
+   "data": {
+    "speed_kmh": 0.0,
+    "distance_m": 10,
+    "incline_pct": 0.0,
+    "energy_kcal": 0,
+    "heart_rate": 0,
+    "elapsed_s": 7,
+    "steps": 0
+   }
+  },
+  {
+   "hex": "5d21c9b861d82b64429482a09f50e9af660470dc7b8fcc4c262c42",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 6404297,
+    "incline_pct": 1122.4,
+    "energy_kcal": null,
+    "heart_rate": 233,
+    "elapsed_s": null,
+    "steps": 26287
+   }
+  },
+  {
+   "hex": "24378e8b6a1960d289c1",
+   "data": null
+  },
+  {
+   "hex": "4603b911d1abdee31240bc21c526724afc92c1b8",
+   "data": {
+    "speed_kmh": 45.37,
+    "distance_m": 1237982,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 188,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "be044237b3b50cd4fe49b4687b6982be85277f28693816bdaafa7830e03d2e1cd63d02769ed5",
+   "data": {
+    "speed_kmh": 141.46,
+    "distance_m": 16700428,
+    "incline_pct": -1938.3,
+    "energy_kcal": 10367,
+    "heart_rate": null,
+    "elapsed_s": 43709,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f3282534b6f5aeaff6b5057ad859b84d124328979e70d1fb2018d4c8d4fe26822b307b",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 31237,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 10307
+   }
+  },
+  {
+   "hex": "7c0a73338d3f03cdb9299ddb46",
+   "data": null
+  },
+  {
+   "hex": "74117832cb258e096d9d0354055088fee93591de67fc",
+   "data": {
+    "speed_kmh": 129.2,
+    "distance_m": 9315787,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 80,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "963eb5f4",
+   "data": null
+  },
+  {
+   "hex": "091eda702fd0a9c9cd587ef7bad8c1a19bc0c8dcd3a1456420ec",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 2889.0,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 52681,
+    "steps": null
+   }
+  },
+  {
+   "hex": "4b214d81a9de4a8b733a4d603ebc97c3a9cd",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -853.5,
+    "energy_kcal": null,
+    "heart_rate": 58,
+    "elapsed_s": null,
+    "steps": 24653
+   }
+  },
+  {
+   "hex": "020d6a83967c0a62da1472aa4d2d064cfc91c69ddb8b3a78eff99f16fa8b",
+   "data": {
+    "speed_kmh": 336.42,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 10,
+    "elapsed_s": 55906,
+    "steps": null
+   }
+  },
+  {
+   "hex": "98060e66",
+   "data": null
+  },
+  {
+   "hex": "e112f00b2137ef6540df9459f6450652d1f9ba",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 14113,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "b41fcbc52ec74272baf1d319006796d420cfd3bc12469ab23517c3ed4d0245c0f0",
+   "data": {
+    "speed_kmh": 506.35,
+    "distance_m": 4376366,
+    "incline_pct": null,
+    "energy_kcal": 26368,
+    "heart_rate": 207,
+    "elapsed_s": 4796,
+    "steps": null
+   }
+  },
+  {
+   "hex": "66286f1f937d75a0672a56eef31a9271423de9c19f1787e55d27ef390dd97c35444e4e8ef8",
+   "data": {
+    "speed_kmh": 80.47,
+    "distance_m": 6791285,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 37402
+   }
+  },
+  {
+   "hex": "6e1e05dd42620d790e43df3ee42a192eaf70f7aea4",
+   "data": null
+  },
+  {
+   "hex": "b33e309152b4f1072f7ecb4b57f039c3e7e1e576180e2d2d65314dd07cd2e9bf",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 52094,
+    "heart_rate": null,
+    "elapsed_s": 59331,
+    "steps": 25901
+   }
+  },
+  {
+   "hex": "6d15bf7b20bc973760577729894335a181803f21698825781e89f96b13bfe6d73d6894dc823b98",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 2128831,
+    "incline_pct": -2669.2,
+    "energy_kcal": null,
+    "heart_rate": 41,
+    "elapsed_s": 17289,
+    "steps": null
+   }
+  },
+  {
+   "hex": "7009ce508a5cf725cc17",
+   "data": null
+  },
+  {
+   "hex": "3b318cb9c98e7bc0bf31607a4b28930c7d040a",
+   "data": null
+  },
+  {
+   "hex": "940fe4112a8d4968eeceb07889c322a37cfaf79afad2964c06fcdba8d42570bd1d1057094187d4a42f",
+   "data": {
+    "speed_kmh": 45.8,
+    "distance_m": 4820266,
+    "incline_pct": null,
+    "energy_kcal": 35192,
+    "heart_rate": 124,
+    "elapsed_s": 39671,
+    "steps": null
+   }
+  },
+  {
+   "hex": "7e02ec09912a36d77065925de986",
+   "data": null
+  },
+  {
+   "hex": "f33b59844365d3b86d3eac4501ea6aba8aabb65b9c538c41a6681cf8",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 17836,
+    "heart_rate": 186,
+    "elapsed_s": null,
+    "steps": 42561
+   }
+  },
+  {
+   "hex": "430c314b1b19b020dc6105206ae36c0c5e40ac7ca5e66cc19c36dbd4b8bbbb4c",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 45081,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f50ac0cbd5fe30e29acf4c724c215de26557046335ac53ca5c32cdf823b838b44a54a636872a236794",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 14011328,
+    "incline_pct": null,
+    "energy_kcal": 19570,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "dc315ac40c79d8a5dd4f679e8a2d7808",
+   "data": null
+  },
+  {
+   "hex": "b53c3aaed02ce91e1febb80bb130c06bae3b9a47cf09b6512c8b84a2f2be9c58e54f52f7498eee6292",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 13676090,
+    "incline_pct": null,
+    "energy_kcal": 3000,
+    "heart_rate": null,
+    "elapsed_s": 44651,
+    "steps": 11345
+   }
+  },
+  {
+   "hex": "261016af9f63146bce161d7b3a074891065a250e952f44af253c2edcdb0dec",
+   "data": {
+    "speed_kmh": 448.22,
+    "distance_m": 13527828,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "550c5ed73997e7683ebeb64ce0edcc5ff11e19854a81f836e724213f6e",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 3790686,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 19638,
+    "steps": null
+   }
+  },
+  {
+   "hex": "7b12e90696e83fe6f983a9e5c2d8bc31a7a34e2c7a1a2348e4c68bb0",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -599.4,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "292cb6f8d023a25c36ddf72b85e5d6728edea4ce6c01c832933f8a13607315a9bbfd906f6ea59873",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -186.6,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 13916,
+    "steps": 34091
+   }
+  },
+  {
+   "hex": "440a81a2861a787aff",
+   "data": null
+  },
+  {
+   "hex": "bd0a943d10f616ee9fdb382a832abd43ebdd7c4a06058ad5",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 1064340,
+    "incline_pct": 587.8,
+    "energy_kcal": 17341,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "c027950c",
+   "data": null
+  },
+  {
+   "hex": "901279fb5f9e1069ef2d490203",
+   "data": null
+  },
+  {
+   "hex": "7f27f23a9587f4d13e3e79eb",
+   "data": null
+  },
+  {
+   "hex": "983c3f97792d94ac634dcc8a8457e866e10dbd08f4c7f68f",
+   "data": null
+  },
+  {
+   "hex": "991c54702e0c8fc99653587de51c3641df",
+   "data": null
+  },
+  {
+   "hex": "f83c6055e03cf5c74e271ded2e0c6d2591e906e0bd3e186eb7",
+   "data": null
+  },
+  {
+   "hex": "c719620ebe2ed475ad783444caac",
+   "data": null
+  },
+  {
+   "hex": "b730861e2ea308c27fe5885ba5a9696b162ed00e87c1ce48fc4524a0f5",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 566062,
+    "incline_pct": null,
+    "energy_kcal": 43429,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 52929
+   }
+  },
+  {
+   "hex": "c91c76",
+   "data": null
+  },
+  {
+   "hex": "bb2ebd5d4d2ee352de6ce564c22488b70d",
+   "data": null
+  },
+  {
+   "hex": "323f8da4fbc8d5a3fa397223d57469481ef8cef1ccbf2d",
+   "data": {
+    "speed_kmh": 421.25,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 35,
+    "elapsed_s": 26996,
+    "steps": 11711
+   }
+  },
+  {
+   "hex": "030f47b49feaaaf36e08d53e324e5082303cf8c451be",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 159,
+    "elapsed_s": 62378,
+    "steps": null
+   }
+  },
+  {
+   "hex": "b5192fa115d6738b",
+   "data": null
+  },
+  {
+   "hex": "1f3fdd6678304797f6f19a64e043b78f60dc356c8d4f072080a5c8e96efeba81",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 4665464,
+    "incline_pct": -240.9,
+    "energy_kcal": null,
+    "heart_rate": 143,
+    "elapsed_s": 13788,
+    "steps": 51365
+   }
+  },
+  {
+   "hex": "e60403a2fc6a291b",
+   "data": null
+  },
+  {
+   "hex": "812c2fc1964ace07804bbdc8d6",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 49455,
+    "heart_rate": null,
+    "elapsed_s": 32775,
+    "steps": 54984
+   }
+  },
+  {
+   "hex": "1329fb57ca8d4a7b32a3c3f1d54f7c2466bdbc8754aa3a32",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 50,
+    "elapsed_s": null,
+    "steps": 54769
+   }
+  },
+  {
+   "hex": "cc302e9648b9f2939c7f4a530ddd8ecd6aa593800a7079286b75287e42a2",
+   "data": {
+    "speed_kmh": 384.46,
+    "distance_m": 15907144,
+    "incline_pct": -2545.3,
+    "energy_kcal": 56589,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 31088
+   }
+  },
+  {
+   "hex": "5828881ef2fb2b2da4a2bc",
+   "data": null
+  },
+  {
+   "hex": "c03c79dcac06ad691b043dec886a51e42e235feca1c170beb2f5e131",
+   "data": {
+    "speed_kmh": 564.41,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 44294,
+    "heart_rate": null,
+    "elapsed_s": 60477,
+    "steps": 60511
+   }
+  },
+  {
+   "hex": "25100015900dc170b5051737619abb",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 9442560,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "91316abe377c45",
+   "data": null
+  },
+  {
+   "hex": "0b17b49ebf4af29815c6a6807f3bf597",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 1913.5,
+    "energy_kcal": null,
+    "heart_rate": 21,
+    "elapsed_s": 32934,
+    "steps": null
+   }
+  },
+  {
+   "hex": "8f392080f3065c75c753676ea98e3f0a37ac105df7d489",
+   "data": null
+  },
+  {
+   "hex": "8c34f24b46162759aeb375",
+   "data": null
+  },
+  {
+   "hex": "e823cc98b58a26e3cbd3f373651cffa059",
+   "data": null
+  },
+  {
+   "hex": "7415ac8d14ef3953c3bf9ace745c2babe1ee1c3e684f42c748c6c3f216",
+   "data": {
+    "speed_kmh": 362.68,
+    "distance_m": 3796756,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 92,
+    "elapsed_s": 43819,
+    "steps": null
+   }
+  },
+  {
+   "hex": "0d2ddc96dccc812195b5db",
+   "data": null
+  },
+  {
+   "hex": "b71906bf9a84a36d981dfd9e0c8b",
+   "data": null
+  },
+  {
+   "hex": "e42ee784d853e0a7fa1b49de28b4f4a4d9e90e1dccfaee383f171f77212c21ed4b82dabaaf62",
+   "data": {
+    "speed_kmh": 340.23,
+    "distance_m": 14701528,
+    "incline_pct": null,
+    "energy_kcal": 18715,
+    "heart_rate": null,
+    "elapsed_s": 55716,
+    "steps": 52253
+   }
+  },
+  {
+   "hex": "9c305ba3289de3fbb0c47c2a1f5631283734bbff",
+   "data": null
+  },
+  {
+   "hex": "b73fed5ab6a9c810a685709484777de520",
+   "data": null
+  },
+  {
+   "hex": "1e25f25247b2868085ecf3ab54c233fdb2560ace277e3d2e0ec0cb7bc4ec27bb851065",
+   "data": {
+    "speed_kmh": 212.34,
+    "distance_m": 8749190,
+    "incline_pct": -309.2,
+    "energy_kcal": null,
+    "heart_rate": 86,
+    "elapsed_s": 52746,
+    "steps": 32295
+   }
+  },
+  {
+   "hex": "aa00",
+   "data": null
+  },
+  {
+   "hex": "7b3dd1a3e72d",
+   "data": null
+  },
+  {
+   "hex": "0807d2feaad452ecf3c522365b2cbdb4722059e34c2e9bf09b47661558ddfb57296aa632db95",
+   "data": {
+    "speed_kmh": 652.34,
+    "distance_m": null,
+    "incline_pct": -1109.4,
+    "energy_kcal": null,
+    "heart_rate": 243,
+    "elapsed_s": 13858,
+    "steps": null
+   }
+  },
+  {
+   "hex": "740be55da5ccf29789d1ef8d65619659c7920e3f0103496b91",
+   "data": {
+    "speed_kmh": 240.37,
+    "distance_m": 15912101,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 97,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "93231ab22911ccd6b238ee0093328679db",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 14514,
+    "heart_rate": 50,
+    "elapsed_s": null,
+    "steps": 56185
+   }
+  },
+  {
+   "hex": "f0384bc08f21555f419e80a33b009c92409d7004bd738cbb36f866",
+   "data": {
+    "speed_kmh": 492.27,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 41856,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 35955
+   }
+  },
+  {
+   "hex": "0b233d1be6ccfd1df272c338c6f9d7df",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -1308.2,
+    "energy_kcal": null,
+    "heart_rate": 242,
+    "elapsed_s": null,
+    "steps": 14531
+   }
+  },
+  {
+   "hex": "b2230dd50c5bd47e38daebe2f8229eb5348699c4e55c9251b25d6c4957d3de1041745fe5",
+   "data": {
+    "speed_kmh": 545.41,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 63714,
+    "heart_rate": 52,
+    "elapsed_s": null,
+    "steps": 50329
+   }
+  },
+  {
+   "hex": "d02d025bd1e27e17855a92caff52c6fda7859d",
+   "data": null
+  },
+  {
+   "hex": "dc15754ca3589ac24ac3b3aeef0410a844e5a7de961e",
+   "data": null
+  },
+  {
+   "hex": "1e00984c1615c6a264a4c198365ebe539f56122dceeed9671128bcab05bcabd72ff8",
+   "data": {
+    "speed_kmh": 196.08,
+    "distance_m": 6595270,
+    "incline_pct": -1596.4,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "0d1f953effc9613b",
+   "data": null
+  },
+  {
+   "hex": "45100314f432ecbe583dac6dff37e853f7a24ba2ed128ca1f2",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 15995907,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "9d25eb0c97fb",
+   "data": null
+  },
+  {
+   "hex": "9f2db090e87a0ef91786e3c205cb",
+   "data": null
+  },
+  {
+   "hex": "75091b3d",
+   "data": null
+  },
+  {
+   "hex": "ab1f50da988d2daf6557c750c8",
+   "data": null
+  },
+  {
+   "hex": "1d0997157c39dce4a41b192907c2fae2a53c195aa0dfa185ddd44bbd1c4a82a76b087f",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 8131991,
+    "incline_pct": -915.9,
+    "energy_kcal": null,
+    "heart_rate": 194,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "1a12da34b1deaf4318fc06d0d90931a2af061f30507252b10f6daf2c1bf4ff",
+   "data": {
+    "speed_kmh": 135.3,
+    "distance_m": null,
+    "incline_pct": 1732.7,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f33ffbbcd7ae10c2578726b41b2a8f2436e1847586ba120c7fdb",
+   "data": null
+  },
+  {
+   "hex": "ca0f0f5fb8a5d8a4b97b17acb2560bfcae2727b740113767c9a83d8175770b9a4b5a3212a3c5",
+   "data": {
+    "speed_kmh": 243.35,
+    "distance_m": null,
+    "incline_pct": -2333.6,
+    "energy_kcal": 45740,
+    "heart_rate": 174,
+    "elapsed_s": 46887,
+    "steps": null
+   }
+  },
+  {
+   "hex": "2f0bcaf952c3665f",
+   "data": null
+  },
+  {
+   "hex": "2117b93b83ea14451dbed21b00f76d2219c5ee4de2",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 59,
+    "elapsed_s": 5354,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f22c7a25ad24aef9ff69d8c8b69462e5d519be456d2e7f9f34320dbd72bbcf8fdd031277073e535e",
+   "data": {
+    "speed_kmh": 95.94,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 38070,
+    "heart_rate": null,
+    "elapsed_s": 48665,
+    "steps": 32558
+   }
+  },
+  {
+   "hex": "7b31f7780507ecd421daefff6d6392e82002e0d27e991349794e4816df39cd9f051305c75c",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 179.7,
+    "energy_kcal": null,
+    "heart_rate": 146,
+    "elapsed_s": null,
+    "steps": 32466
+   }
+  },
+  {
+   "hex": "a72e8cee495ea48c7d085dab72d26331d79fbd",
+   "data": null
+  },
+  {
+   "hex": "4a1d634f85a7e8e28e1b22d21a00299741e951cdb36c0e94",
+   "data": {
+    "speed_kmh": 203.23,
+    "distance_m": null,
+    "incline_pct": -744.8,
+    "energy_kcal": null,
+    "heart_rate": 210,
+    "elapsed_s": 26,
+    "steps": null
+   }
+  },
+  {
+   "hex": "cb25a79074370d878c5eef",
+   "data": null
+  },
+  {
+   "hex": "390ecf4543e7a666414c8990c36e",
+   "data": null
+  },
+  {
+   "hex": "17081de7b223ca9a0996131a592db93a4bdf3def10985d213b21",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 13247410,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "1e23b3ec2789052769",
+   "data": null
+  },
+  {
+   "hex": "f8054a",
+   "data": null
+  },
+  {
+   "hex": "3e2bd10a71cf665e5d6de45d112040a2cc24",
+   "data": null
+  },
+  {
+   "hex": "c50e612bfeb5cd3948b1ff92cb8bb54f910efbed70c5683b30f27ec18c269f1006",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 16657249,
+    "incline_pct": null,
+    "energy_kcal": 14797,
+    "heart_rate": null,
+    "elapsed_s": 35787,
+    "steps": null
+   }
+  },
+  {
+   "hex": "d913a84e623246",
+   "data": null
+  },
+  {
+   "hex": "3c369964030d0fbe4d417cafe7543aedda24e19de3fe96db09",
+   "data": {
+    "speed_kmh": 257.53,
+    "distance_m": 986371,
+    "incline_pct": 1990.2,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 57636,
+    "steps": 2523
+   }
+  },
+  {
+   "hex": "4702",
+   "data": null
+  },
+  {
+   "hex": "0121f95d57cf07b74aa738b2c1be05ee07f72fb42bcef2bf68c81a44753c20d3869e",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 249,
+    "elapsed_s": null,
+    "steps": 22365
+   }
+  },
+  {
+   "hex": "cf1865558aace86b733a3b6b6c1139fb05eaa6c2a33fc38f167394",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 15248522,
+    "incline_pct": 2954.7,
+    "energy_kcal": 4460,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "b82a9970f5851dbe",
+   "data": null
+  },
+  {
+   "hex": "50136b561fcbe3ce74aa6f636da0c76ea4cfb2bb4e6ddae14812bc65",
+   "data": {
+    "speed_kmh": 221.23,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 170,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "222cd4856064463e",
+   "data": null
+  },
+  {
+   "hex": "432157a6507efdca19172827b84aafe0c8",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 126,
+    "elapsed_s": null,
+    "steps": 51965
+   }
+  },
+  {
+   "hex": "2a0bbc1d3dc8fa224f59e946831ef0691d06e94a20ec209b811a6348194b6fe4b1f7368d04",
+   "data": {
+    "speed_kmh": 76.12,
+    "distance_m": null,
+    "incline_pct": 895.4,
+    "energy_kcal": null,
+    "heart_rate": 70,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "9b1532f0044433a03858f3046e4dc067563bd3725435275cc77898681f5e118787f30c4f",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 1741.2,
+    "energy_kcal": 19822,
+    "heart_rate": 59,
+    "elapsed_s": 29395,
+    "steps": null
+   }
+  },
+  {
+   "hex": "d738855dd704a16aab4d481d5f41ea3500630a911630034e8415cd3d",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 10552535,
+    "incline_pct": null,
+    "energy_kcal": 16735,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 33870
+   }
+  },
+  {
+   "hex": "03206caa27b33aa1abf1c816b09ea122f4a43ae6dfdecdc9",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 45863
+   }
+  },
+  {
+   "hex": "c23d4b3467e15732dd199053dc030083b47d",
+   "data": null
+  },
+  {
+   "hex": "e607",
+   "data": null
+  },
+  {
+   "hex": "86275e5929830de183",
+   "data": null
+  },
+  {
+   "hex": "2936007cc1ff1b37c0e0",
+   "data": null
+  },
+  {
+   "hex": "55261d08b08e4fb6bbca",
+   "data": null
+  },
+  {
+   "hex": "1b15e7e0ef78385ff046d49f2bba8fc42a",
+   "data": null
+  },
+  {
+   "hex": "e037f38d320e8d70681cefd7184fe489f0abcf0cb6ec3883561b90c77f904e710f8dcc",
+   "data": {
+    "speed_kmh": 363.39,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 28813,
+    "heart_rate": 215,
+    "elapsed_s": 58447,
+    "steps": 46604
+   }
+  },
+  {
+   "hex": "2c11e87ba551b3076a704521e45fe2695fec411f0da942ed9118",
+   "data": {
+    "speed_kmh": 317.2,
+    "distance_m": 11751845,
+    "incline_pct": 2714.3,
+    "energy_kcal": null,
+    "heart_rate": 228,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "8300604ad5047af1",
+   "data": null
+  },
+  {
+   "hex": "5f3957f852b1c134",
+   "data": null
+  },
+  {
+   "hex": "c110b6c9c3e389b78d558d21b04310231830617913e5184473e2bc5be904b390e498e68646684257b3",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 50121,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "d8293123013d89a82ce8be6d910d",
+   "data": null
+  },
+  {
+   "hex": "522fb2",
+   "data": null
+  },
+  {
+   "hex": "ba1504d9aa221b34578135625684242c412895845ad578f0",
+   "data": null
+  },
+  {
+   "hex": "e71efe9264cb65185f10bf8b5346",
+   "data": null
+  },
+  {
+   "hex": "3b34c8028777ac776b02658fb015290cd1ebdb33217d67a49e82ae46396a008e3f9444cdc7459118",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 3059.9,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 10517,
+    "steps": 8499
+   }
+  },
+  {
+   "hex": "271a2b8e05afa24b1d410c978db8608c4b4ee2ed6298427ee8c073b0a8",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 10661637,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "6214ff1ed530491b8d2d093335a442aa",
+   "data": {
+    "speed_kmh": 79.35,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 11661,
+    "steps": null
+   }
+  },
+  {
+   "hex": "3235cc910c1d9a03567dd3291b8499a46d35ccf2c03c2f0e75a7e857d10e6d147e26a09f35",
+   "data": {
+    "speed_kmh": 373.24,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 41,
+    "elapsed_s": 33819,
+    "steps": 62156
+   }
+  },
+  {
+   "hex": "bf19c273bb6cd899891e2bcf53606244e8a68cbb5f5c72bfed77efe936f22a3fae7439f98658f38b10",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 14183611,
+    "incline_pct": -3031.1,
+    "energy_kcal": 42728,
+    "heart_rate": 92,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "6110d53c5e",
+   "data": null
+  },
+  {
+   "hex": "22385068019e12cbd3a3c8c2009bd803596dc75b5b8ea0f7381ee9418a8cd597932438b9234e6c",
+   "data": {
+    "speed_kmh": 267.04,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 55451
+   }
+  },
+  {
+   "hex": "a4348f302369d4",
+   "data": null
+  },
+  {
+   "hex": "3316cfb6dc42c3292cce91e23be481d9caa8e9e78a",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 58001,
+    "steps": null
+   }
+  },
+  {
+   "hex": "90129034984c6a802982dac92fa5fef49ec5740631336b605ded172c6425d7db76832422c608c0c67a",
+   "data": {
+    "speed_kmh": 134.56,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 33321,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "2c20c30e6df70abd25e39fc9345e15ba10849687cc94e8deb9bed8a14ffe6858",
+   "data": {
+    "speed_kmh": 37.79,
+    "distance_m": 718701,
+    "incline_pct": 966.1,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 24116
+   }
+  },
+  {
+   "hex": "5b0261b2a14755a6bf1be67a3530c44d2c6e0db16385",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 1833.7,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "642a0a8623578a7928dc4fed1321398f10f395f3c90921f57c823103bca49a516cdddaea787003",
+   "data": {
+    "speed_kmh": 343.14,
+    "distance_m": 9066275,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 8467
+   }
+  },
+  {
+   "hex": "9014905608e0590807d2b25cd934bbcf6ba3a10d",
+   "data": {
+    "speed_kmh": 221.6,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 53767,
+    "heart_rate": null,
+    "elapsed_s": 47924,
+    "steps": null
+   }
+  },
+  {
+   "hex": "2635ed895fbcc3b7c730a2a9063f7b2d0520c7ebce3aa6325e074bf5d6a922b7b4d86d",
+   "data": {
+    "speed_kmh": 353.09,
+    "distance_m": 13088707,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 162,
+    "elapsed_s": 1705,
+    "steps": 50976
+   }
+  },
+  {
+   "hex": "493a6ff276de8988",
+   "data": null
+  },
+  {
+   "hex": "5e3ce636194e15e9511d1be34f7f557257e9ef341d066ac9",
+   "data": null
+  },
+  {
+   "hex": "381ae43166d77599d95c72d358b62aa5469135e1a9ea92f0b345",
+   "data": {
+    "speed_kmh": 127.72,
+    "distance_m": null,
+    "incline_pct": -1039.4,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "b33582951b8ce71a219ff1bf4819b78793b57a8851c573451507f15b29e902",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 61855,
+    "heart_rate": 183,
+    "elapsed_s": 37767,
+    "steps": 29637
+   }
+  },
+  {
+   "hex": "dc2f62abf70a143ca51d51",
+   "data": null
+  },
+  {
+   "hex": "622e445ed47a8a14d5b294f913d8f96956f5febd242e5b0319c9deb5aa9919359cbf567912d8ec9d68",
+   "data": {
+    "speed_kmh": 241.32,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 38066,
+    "steps": 63960
+   }
+  },
+  {
+   "hex": "6f3f552e5d7290f13c442b",
+   "data": null
+  },
+  {
+   "hex": "ff131e02b77a62d70c8b5b3003616edef4b7cabce2aacb1b94d7c56e91",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 6453943,
+    "incline_pct": 328.7,
+    "energy_kcal": 51895,
+    "heart_rate": 203,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "67247e72d7bd476c",
+   "data": null
+  },
+  {
+   "hex": "2a2f509116f3179b34e7dc2cfd57",
+   "data": null
+  },
+  {
+   "hex": "b211edb3196f1273f83c",
+   "data": null
+  },
+  {
+   "hex": "d41e254d611394114a764e558bdd1c667966aa98a2e744629252f0d7242d8b8d09eb0ad1bd5b",
+   "data": {
+    "speed_kmh": 197.49,
+    "distance_m": 9704289,
+    "incline_pct": null,
+    "energy_kcal": 56715,
+    "heart_rate": null,
+    "elapsed_s": 39082,
+    "steps": null
+   }
+  },
+  {
+   "hex": "4114a75fcaae6414c5cf8d9bbf897fdbc80576fc262771d53c9fe5523faacc",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 51807,
+    "steps": null
+   }
+  },
+  {
+   "hex": "5c3909c7f652ff196ca0ee46293f924a9ca456476b622ea47c0146a8d9e1f8f337c0e6efe6d1e2",
+   "data": {
+    "speed_kmh": 509.53,
+    "distance_m": 16732918,
+    "incline_pct": 2767.3,
+    "energy_kcal": null,
+    "heart_rate": 156,
+    "elapsed_s": null,
+    "steps": 31908
+   }
+  },
+  {
+   "hex": "34342b807bdc6456279d00b6934e3aa6",
+   "data": null
+  },
+  {
+   "hex": "0132ba4f0aa09ff1de540d23a9a5144a381e3dc2",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 57073
+   }
+  },
+  {
+   "hex": "403102bd58006c012fcfcb4270",
+   "data": {
+    "speed_kmh": 483.86,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 0,
+    "elapsed_s": null,
+    "steps": 17099
+   }
+  },
+  {
+   "hex": "3e3c7f",
+   "data": null
+  },
+  {
+   "hex": "0908ce797076a4",
+   "data": null
+  },
+  {
+   "hex": "6a147deae2e70e3defc5773aad1a11fe83757d010060404c737bef4d432351a3f828f05f",
+   "data": {
+    "speed_kmh": 600.29,
+    "distance_m": null,
+    "incline_pct": 1563.0,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 6829,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f83d87f84c5706cd67f0bcae254ff1ce1f7f38c59cfd654dace89cb539c07faf3fe84f",
+   "data": {
+    "speed_kmh": 636.23,
+    "distance_m": null,
+    "incline_pct": 2234.8,
+    "energy_kcal": 52977,
+    "heart_rate": 197,
+    "elapsed_s": 64924,
+    "steps": 49209
+   }
+  },
+  {
+   "hex": "0f1d3f14f1ebd73a1629b69b85ed4d6b",
+   "data": null
+  },
+  {
+   "hex": "2908c98eab3465db6bc19bae4210255f30d9a7283593f21de452fa24eafd2df3dfaf1c0a67062372",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -2898.3,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "5e37e3e9dc8f07d01c33d06f7fbaee6253b1f564",
+   "data": null
+  },
+  {
+   "hex": "71360b15089e6617fa698b738943564b046e1a",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 35689,
+    "steps": 1099
+   }
+  },
+  {
+   "hex": "ed3ef53247ff4bcce510b659635211b56a254e79230e8bb0021a6d0720",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 4666101,
+    "incline_pct": 1945.5,
+    "energy_kcal": 25433,
+    "heart_rate": null,
+    "elapsed_s": 20005,
+    "steps": 27930
+   }
+  },
+  {
+   "hex": "a62619b854ecde05527ee804f087cbe65010aeca950b0f05e5429716fdf62ca92a9310",
+   "data": {
+    "speed_kmh": 471.29,
+    "distance_m": 5375454,
+    "incline_pct": null,
+    "energy_kcal": 1256,
+    "heart_rate": null,
+    "elapsed_s": 4176,
+    "steps": 51886
+   }
+  },
+  {
+   "hex": "9d013a38a84838a736fa57675c11935f15a992a2e813a6f2324e41672e4c1f7c21c8f4",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 11024442,
+    "incline_pct": 1440.8,
+    "energy_kcal": 37649,
+    "heart_rate": 146,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f511e33b384bcd642c4aae11e9e198acf3ae5a44cea7496768a55060820481731c133c",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 3685347,
+    "incline_pct": null,
+    "energy_kcal": 59665,
+    "heart_rate": 243,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "782e807f61a469d5534447a969e95b7afa7ca08c2f9e7fab",
+   "data": {
+    "speed_kmh": 326.4,
+    "distance_m": null,
+    "incline_pct": -2345.5,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 64122,
+    "steps": 12172
+   }
+  },
+  {
+   "hex": "8801b776",
+   "data": null
+  },
+  {
+   "hex": "db30",
+   "data": null
+  },
+  {
+   "hex": "ae3fce87fbbd97eca0515e192e",
+   "data": null
+  },
+  {
+   "hex": "132d6bf12c43b38add",
+   "data": null
+  },
+  {
+   "hex": "891986e10b8357860f44e68e3039",
+   "data": null
+  },
+  {
+   "hex": "7636a7468028b78562907bffacb81f27e7f8d97277e05f",
+   "data": null
+  },
+  {
+   "hex": "903d41bc46ee33af493a4ab24b1963d5b3243ba2",
+   "data": null
+  },
+  {
+   "hex": "bc2998aaf4d8506fb58431d902",
+   "data": null
+  },
+  {
+   "hex": "f31ad635b7d874861e0519b486ef4c3ae0cf524c21e7c19033000e6682",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 46105,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "891f54febd584479e79e15c57c94d4ef6504d9bd6568b4c446137fba83c1c43179663eea97",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -42.8,
+    "energy_kcal": 31044,
+    "heart_rate": 197,
+    "elapsed_s": 54420,
+    "steps": null
+   }
+  },
+  {
+   "hex": "e01f95c20aaf9e28d2810f61d404",
+   "data": null
+  },
+  {
+   "hex": "990e3a39",
+   "data": null
+  },
+  {
+   "hex": "e2002e00c1",
+   "data": null
+  },
+  {
+   "hex": "870e3371aa3ccf6e48d9199f828a9d2dd365ccc257e2185b7ba130141d096133be33d30d2364",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 13581482,
+    "incline_pct": null,
+    "energy_kcal": 18542,
+    "heart_rate": null,
+    "elapsed_s": 40330,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f90fd293f35e",
+   "data": null
+  },
+  {
+   "hex": "700ed7cfbb2c717a8f0b74c8d9355926be9499d998f5a33bd7f9927d0db9e8",
+   "data": {
+    "speed_kmh": 532.07,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 55752,
+    "steps": null
+   }
+  },
+  {
+   "hex": "6c30ab8f09032eb0fa052631b90bd1f98e0d79fdc4745934d8a061df5a099b4956a48df7b6",
+   "data": {
+    "speed_kmh": 367.79,
+    "distance_m": 3015433,
+    "incline_pct": -136.0,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 30989
+   }
+  },
+  {
+   "hex": "991dc6bd452892cb95a1fd60551ffa15e7176c0e4f73e96fe8",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -1695.4,
+    "energy_kcal": 24829,
+    "heart_rate": 21,
+    "elapsed_s": 6119,
+    "steps": null
+   }
+  },
+  {
+   "hex": "3a04c5036e1443f12ee3b7ff78d2",
+   "data": null
+  },
+  {
+   "hex": "d81f76a2156da1196dde80718c21b0a9112ff9f71ebeeb",
+   "data": null
+  },
+  {
+   "hex": "441b9b36",
+   "data": null
+  },
+  {
+   "hex": "a029b1837cdb131bf4e55a154cc3ad7ce6cb",
+   "data": {
+    "speed_kmh": 337.13,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 5083,
+    "heart_rate": 90,
+    "elapsed_s": null,
+    "steps": 44483
+   }
+  },
+  {
+   "hex": "9628e0c109a6f68810344d7f759ec6c857258c3f6072f5f59763af3ee829ea37b4eb",
+   "data": {
+    "speed_kmh": 496.32,
+    "distance_m": 1083638,
+    "incline_pct": null,
+    "energy_kcal": 50846,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 29280
+   }
+  },
+  {
+   "hex": "4104d1fdc486926bfd836bfa3f1acba5c2f19977c6a1c2170e7404737921b6d48f3e",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 50429,
+    "steps": null
+   }
+  },
+  {
+   "hex": "dd0ce7af00e87a2ca3a7c307e507b3cf39a3a13145942ffd1875210e3255604a6e0c2cf18cfb1c8c",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 45031,
+    "incline_pct": 3146.4,
+    "energy_kcal": 53171,
+    "heart_rate": null,
+    "elapsed_s": 17713,
+    "steps": null
+   }
+  },
+  {
+   "hex": "5024c4070e88b47583ff09c7776efe068501be03450a814db3cfdcd7",
+   "data": {
+    "speed_kmh": 19.88,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 2559,
+    "steps": 30663
+   }
+  },
+  {
+   "hex": "3318344555e4f25b9b4636344516698e9202ad458aef0d2a0e891158dd555513d2ec",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "a810e7156578b750171c01bb3f05b3d17280f98a38ac69cc005492258b79b64597e4b0b3",
+   "data": {
+    "speed_kmh": 56.07,
+    "distance_m": null,
+    "incline_pct": 3082.1,
+    "energy_kcal": 284,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "3030ec5d5aace98205d91d79bb031221e003209ef9fb2195d87e1a8ab0141e7791",
+   "data": {
+    "speed_kmh": 240.44,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 4611
+   }
+  },
+  {
+   "hex": "4f05153452cceafa7fa014c7fcb50ef5b2158f",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 15387730,
+    "incline_pct": 3276.2,
+    "energy_kcal": null,
+    "heart_rate": 252,
+    "elapsed_s": 3765,
+    "steps": null
+   }
+  },
+  {
+   "hex": "3531326c7e5235e59efba2c9fe37804f23bf3c926b22eee62c691a1e1c83",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 8285234,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 162,
+    "elapsed_s": null,
+    "steps": 9039
+   }
+  },
+  {
+   "hex": "372d273fe167150de923813c4d6c9884710c89f050d49752ef",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 1402849,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 77,
+    "elapsed_s": 39020,
+    "steps": 35084
+   }
+  },
+  {
+   "hex": "92368fd7925475b4133dfb6e3bf4d60f562a5afc801341ebb4ed3759668de85aae",
+   "data": {
+    "speed_kmh": 551.83,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 28411,
+    "heart_rate": null,
+    "elapsed_s": 10838,
+    "steps": 60225
+   }
+  },
+  {
+   "hex": "970e902c6d4a9c47972e6a92aaf638a5a22401044a23e96e5e52f87bf1b21b2ddcd36f38",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 10242669,
+    "incline_pct": null,
+    "energy_kcal": 43666,
+    "heart_rate": null,
+    "elapsed_s": 292,
+    "steps": null
+   }
+  },
+  {
+   "hex": "2d0c6dc88845b9a9",
+   "data": null
+  },
+  {
+   "hex": "e128",
+   "data": null
+  },
+  {
+   "hex": "d90b198b2b2641baa7f31f4a0fb7eb6b78dae24c9fd5e84c",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -2992.7,
+    "energy_kcal": 3914,
+    "heart_rate": 120,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "6532dfcd1f24af5c7568ff58ee717a6f98d5e9195d72ce3591e8e21f049cb2fc",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 2084319,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 29166
+   }
+  },
+  {
+   "hex": "a8327c57a1c81e64432cb5b48023734894f86546ca7423574541e2a5",
+   "data": {
+    "speed_kmh": 223.96,
+    "distance_m": null,
+    "incline_pct": -1417.5,
+    "energy_kcal": 46380,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 51782
+   }
+  },
+  {
+   "hex": "2e1361d06800bb53d00a",
+   "data": null
+  },
+  {
+   "hex": "fd1364a1643001f61c",
+   "data": null
+  },
+  {
+   "hex": "941aeac07e847812942c833311a1725a351563796654315a9d27cdc2c534c2cff8127766f5",
+   "data": {
+    "speed_kmh": 493.86,
+    "distance_m": 7898238,
+    "incline_pct": null,
+    "energy_kcal": 4403,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "073750b23e873db0f0368e0bb1e116770682207d07d59cadcae39a",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 4032318,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 176,
+    "elapsed_s": 36406,
+    "steps": 1655
+   }
+  },
+  {
+   "hex": "2e1526244326",
+   "data": null
+  },
+  {
+   "hex": "9b1c85a4fae27af04aadffce32ac3154af5566cac911be7eef97651aa82a329cfeee58c478da24",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -743.0,
+    "energy_kcal": 44082,
+    "heart_rate": null,
+    "elapsed_s": 26197,
+    "steps": null
+   }
+  },
+  {
+   "hex": "ce1672df5e0d538e01b8e5ff1bee0a434860b2da3b73",
+   "data": null
+  },
+  {
+   "hex": "2b233f99d063d1",
+   "data": null
+  },
+  {
+   "hex": "6c1f46",
+   "data": null
+  },
+  {
+   "hex": "561f21dd68d8502b8b16ef313168175abd316a766153abfdab0b3f2f97405da725396d70b2a1a309",
+   "data": {
+    "speed_kmh": 566.09,
+    "distance_m": 9120592,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 23,
+    "elapsed_s": 12733,
+    "steps": null
+   }
+  },
+  {
+   "hex": "2d2afaacec0b91384be05493132ee28471333f73",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 15510778,
+    "incline_pct": -2840.5,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 57902
+   }
+  },
+  {
+   "hex": "160cb3319d5d4671444358e996172b0162e4fc8a92a15e1c27",
+   "data": {
+    "speed_kmh": 127.23,
+    "distance_m": 4485446,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 11031,
+    "steps": null
+   }
+  },
+  {
+   "hex": "993ea5f318ea",
+   "data": null
+  },
+  {
+   "hex": "e12989fc4d5fe79117634ab4f1a0e8fbac46fcee3a67a3e6b528e2e53f1e26232aa4387fc7",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 24397,
+    "heart_rate": 99,
+    "elapsed_s": null,
+    "steps": 41201
+   }
+  },
+  {
+   "hex": "cf2f",
+   "data": null
+  },
+  {
+   "hex": "ef1341",
+   "data": null
+  },
+  {
+   "hex": "33225ab5e926b0878ec06c3d",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 15724
+   }
+  },
+  {
+   "hex": "be210507edcf6c5bfb247f37c4268d9e",
+   "data": null
+  },
+  {
+   "hex": "920f9d684a58ea9eac381e7cde3ea9439d291abafc",
+   "data": {
+    "speed_kmh": 267.81,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 31774,
+    "heart_rate": 67,
+    "elapsed_s": 6697,
+    "steps": null
+   }
+  },
+  {
+   "hex": "d115aff9b92ce8ab3a2082173d98775eff1af38562af013221d5",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 15019,
+    "heart_rate": 61,
+    "elapsed_s": 30616,
+    "steps": null
+   }
+  },
+  {
+   "hex": "89116708ded10fadffcabe1471fa062bb9ee06e049e6",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 215.1,
+    "energy_kcal": 44303,
+    "heart_rate": 20,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "1203d5779f7be04348aeff55c8",
+   "data": {
+    "speed_kmh": 306.77,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 255,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "b029c325d51bdb91765a5c4583a3c633a71beaf899a0ec284b628bb77237f9e16d326cab",
+   "data": {
+    "speed_kmh": 96.67,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 23642,
+    "heart_rate": 198,
+    "elapsed_s": null,
+    "steps": 59931
+   }
+  },
+  {
+   "hex": "bc0abad3",
+   "data": null
+  },
+  {
+   "hex": "b10c9bc74cfe14ae3f0a645746ca9884796e76410d77f96b94a075",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 16302,
+    "heart_rate": null,
+    "elapsed_s": 51782,
+    "steps": null
+   }
+  },
+  {
+   "hex": "042edf30f934bd09f0efbac161bc",
+   "data": {
+    "speed_kmh": 125.11,
+    "distance_m": 12399865,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 61424,
+    "steps": 48225
+   }
+  },
+  {
+   "hex": "833ea9",
+   "data": null
+  },
+  {
+   "hex": "53351567cc029c1f56ba57e23bc5771f47e09bbea6602a20f6851d6c431887",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 186,
+    "elapsed_s": 57943,
+    "steps": 57415
+   }
+  },
+  {
+   "hex": "352105853557",
+   "data": null
+  },
+  {
+   "hex": "8d22acd7dcf5f468cdcaa9cb4a535fb9d31fa1ac13ef",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 14473132,
+    "incline_pct": -282.7,
+    "energy_kcal": 43466,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 54201
+   }
+  },
+  {
+   "hex": "4835bead52",
+   "data": null
+  },
+  {
+   "hex": "372cb61df09a2d4bc8ef64f68ea1eca0213ee3f9c2304f",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 2988784,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 41358,
+    "steps": 15905
+   }
+  },
+  {
+   "hex": "ed1b286c686af757abb13c87d2cc0fd8bf80a15fac9528fb3db61dcd",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 6843432,
+    "incline_pct": -219.8,
+    "energy_kcal": 53895,
+    "heart_rate": 191,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "fc1d42b296bedb0146",
+   "data": null
+  },
+  {
+   "hex": "34047cb4d431c4cfc4f96d838cc13ca0bc",
+   "data": {
+    "speed_kmh": 462.04,
+    "distance_m": 12857812,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 49548,
+    "steps": null
+   }
+  },
+  {
+   "hex": "d80478e17017bce3e88e2a21ad4e7b9b8df887bf0361b6c3",
+   "data": {
+    "speed_kmh": 577.2,
+    "distance_m": null,
+    "incline_pct": 600.0,
+    "energy_kcal": 31566,
+    "heart_rate": null,
+    "elapsed_s": 49031,
+    "steps": null
+   }
+  },
+  {
+   "hex": "6a2f43a32f39b7eacfab93ba31475c0c",
+   "data": null
+  },
+  {
+   "hex": "d7298823dad42ba9b53249a8ea93c7ca3186a2c89051bf",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 2872538,
+    "incline_pct": null,
+    "energy_kcal": 37866,
+    "heart_rate": 134,
+    "elapsed_s": null,
+    "steps": 20880
+   }
+  },
+  {
+   "hex": "9b39a6f389cff75b61928c9b9f391667c9f841649b19c42fa2d1b87190bc8e70b182bf0685890587",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": -1240.7,
+    "energy_kcal": 14751,
+    "heart_rate": 248,
+    "elapsed_s": null,
+    "steps": 53666
+   }
+  },
+  {
+   "hex": "a53c438263dbc7d164de193efc894228c905988a67",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 6521411,
+    "incline_pct": null,
+    "energy_kcal": 53703,
+    "heart_rate": null,
+    "elapsed_s": 64574,
+    "steps": 26506
+   }
+  },
+  {
+   "hex": "e329f0327d19233e664315f0898a1e4f179b44d3a5fd7a8821d9afb0d23a6df5ed4853952b",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 15907,
+    "heart_rate": 240,
+    "elapsed_s": null,
+    "steps": 20254
+   }
+  },
+  {
+   "hex": "9a3247017ca9afc00f",
+   "data": null
+  },
+  {
+   "hex": "cd064f19768264be236f546bc9640c71e4db1311ca99a0",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 7739727,
+    "incline_pct": 2573.0,
+    "energy_kcal": 27476,
+    "heart_rate": null,
+    "elapsed_s": 56292,
+    "steps": null
+   }
+  },
+  {
+   "hex": "0121d92d9523b3637d276677d485c39044dbb6c82fb51b28180740ee83245756c8ca9cbd",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 217,
+    "elapsed_s": null,
+    "steps": 38189
+   }
+  },
+  {
+   "hex": "5229617cbbd7f4dcff1c3e2af6fb20cfb8bf",
+   "data": {
+    "speed_kmh": 318.41,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 42,
+    "elapsed_s": null,
+    "steps": 53024
+   }
+  },
+  {
+   "hex": "1239c7710ec89b7b7bbcfd47",
+   "data": null
+  },
+  {
+   "hex": "1b39ee65577eb264b22f9edbc91c",
+   "data": null
+  },
+  {
+   "hex": "ca1fb207c20b57739ec53835bc8d9ea167751e4351a3fef8419d0f12837b96c9df9d",
+   "data": {
+    "speed_kmh": 19.7,
+    "distance_m": null,
+    "incline_pct": 2952.7,
+    "energy_kcal": 48181,
+    "heart_rate": 103,
+    "elapsed_s": 17182,
+    "steps": null
+   }
+  },
+  {
+   "hex": "1905a65177d9b1c5fa13245d3338e0ee",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 2090.2,
+    "energy_kcal": null,
+    "heart_rate": 36,
+    "elapsed_s": 13149,
+    "steps": null
+   }
+  },
+  {
+   "hex": "a018f2b3ddd2d5e748bbd2d536544eb1f1d62182d8f7bfcc",
+   "data": {
+    "speed_kmh": 460.66,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 54738,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "4920e46da0cffb4adfc7d37ea79fbe5eb33b873c817211cc3857e2",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 2813.2,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 57162
+   }
+  },
+  {
+   "hex": "5824626a65ed64c2946986ece1b33f1053811daf75fbb84172",
+   "data": {
+    "speed_kmh": 272.34,
+    "distance_m": null,
+    "incline_pct": -476.3,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 16307,
+    "steps": 21264
+   }
+  },
+  {
+   "hex": "f104887adc31a06f319dcab583e4a62eeddc4e414a037854270e954084b5061861",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 40241,
+    "heart_rate": null,
+    "elapsed_s": 42724,
+    "steps": null
+   }
+  },
+  {
+   "hex": "9b34e080abbfbf6811095a",
+   "data": null
+  },
+  {
+   "hex": "aa19616397",
+   "data": null
+  },
+  {
+   "hex": "49259018cea20643200a7f519d164954d77170bbb721fa1e170385",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 628.8,
+    "energy_kcal": null,
+    "heart_rate": 67,
+    "elapsed_s": 2592,
+    "steps": 20863
+   }
+  },
+  {
+   "hex": "1c2f8398813b7f8ec6807842",
+   "data": null
+  },
+  {
+   "hex": "28030eafe6e91c917e15599c3122f43b2042ef887f8649637dd7f4452b0d8c86ed35326110",
+   "data": {
+    "speed_kmh": 448.14,
+    "distance_m": null,
+    "incline_pct": -565.8,
+    "energy_kcal": null,
+    "heart_rate": 21,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "3219990e0f6c44a846336a714d1b3f41f59f",
+   "data": {
+    "speed_kmh": 37.37,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 113,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "651f736ae006",
+   "data": null
+  },
+  {
+   "hex": "210e9cf5180ade2da0df7647fbd5db3e95e0912141d1c6f3f71309a49f4044dc",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 2584,
+    "steps": null
+   }
+  },
+  {
+   "hex": "aa1440f9637912c5d4c7717db15860ff22762d24c4cf1355a9",
+   "data": {
+    "speed_kmh": 638.08,
+    "distance_m": null,
+    "incline_pct": -1508.6,
+    "energy_kcal": 45437,
+    "heart_rate": null,
+    "elapsed_s": 30242,
+    "steps": null
+   }
+  },
+  {
+   "hex": "3d08b1bfecbf361130d086a655f2281f6e1d46c980c960a3811b8c86042b",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 15515569,
+    "incline_pct": 1401.5,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "bc11407986b8dcb5cbf4b21f8f5cb57e2fbf375832ab2cf2f226c35bb73006892c0cb7097212d7",
+   "data": {
+    "speed_kmh": 310.4,
+    "distance_m": 14465158,
+    "incline_pct": -1338.7,
+    "energy_kcal": 48943,
+    "heart_rate": 171,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "6c3f5987ec2885c057fb9064be17c5e5fe54b2efdd143d9e786ef0805cc42c37",
+   "data": {
+    "speed_kmh": 346.49,
+    "distance_m": 8726764,
+    "incline_pct": 2246.4,
+    "energy_kcal": null,
+    "heart_rate": 23,
+    "elapsed_s": 65253,
+    "steps": 30878
+   }
+  },
+  {
+   "hex": "402c501a66b712d1c01e94ccf956da8838a94d2a2b8a2a7c03b02426bcc3d6515ed900c601547f",
+   "data": {
+    "speed_kmh": 67.36,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 4791,
+    "steps": 37918
+   }
+  },
+  {
+   "hex": "50285c6da31b5781937401e5a368ab16fec635d37ccee43da4",
+   "data": {
+    "speed_kmh": 279.96,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 41957
+   }
+  },
+  {
+   "hex": "9e30539ffb6a8b9b4f246663a32a",
+   "data": null
+  },
+  {
+   "hex": "2f00f8",
+   "data": null
+  },
+  {
+   "hex": "b036f5acc79358e106109a",
+   "data": null
+  },
+  {
+   "hex": "b4189fa2c85111475855908e0e1649db663842c83f401e83b1",
+   "data": {
+    "speed_kmh": 416.31,
+    "distance_m": 1135048,
+    "incline_pct": null,
+    "energy_kcal": 5646,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "de051a79bf8308415b416c6e6502370c",
+   "data": null
+  },
+  {
+   "hex": "151b0ab076e1e673893498dc4a17961d358d9734742e087b",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": 7778314,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 52,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "fa011cec68970d46e44dd1958915c971c548f3eedc53",
+   "data": {
+    "speed_kmh": 604.44,
+    "distance_m": null,
+    "incline_pct": 1793.3,
+    "energy_kcal": 18629,
+    "heart_rate": 83,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "6b14b2d50d76f3879a87fec2b1daafab0fc16f465fc313da31c6b9595b9f4a5773170e26018d27ba6a",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 3022.1,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 49918,
+    "steps": null
+   }
+  },
+  {
+   "hex": "3d3188223002e3b1a0f5",
+   "data": null
+  },
+  {
+   "hex": "2c009ee2d4c85bdfb405ef52c3e5e22470abc409c0daf605dba3cd4c56055fde20851cc8",
+   "data": {
+    "speed_kmh": 580.14,
+    "distance_m": 6015188,
+    "incline_pct": -1923.3,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "7405082f0db9e22be7e2ae45abd222c6e92116302c67dea9385795570db00839edc00e4be10e",
+   "data": {
+    "speed_kmh": 120.4,
+    "distance_m": 14858509,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 210,
+    "elapsed_s": 50722,
+    "steps": null
+   }
+  },
+  {
+   "hex": "aa00f44479697ccf0a8034684c695bd4daf3bd1c608ca01fce879b4a85a11e7c5373",
+   "data": {
+    "speed_kmh": 176.52,
+    "distance_m": null,
+    "incline_pct": -1242.0,
+    "energy_kcal": 19560,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f133e05d70ae208a23cfda3a0138e81c44d7f3b4c4d111ef1de90ec89a68eb083b",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 53027,
+    "heart_rate": 56,
+    "elapsed_s": null,
+    "steps": 50356
+   }
+  },
+  {
+   "hex": "0e3856a04112e26bae79c585327f79082acbd8029dafa15cb1320be9776fb60763",
+   "data": {
+    "speed_kmh": 410.46,
+    "distance_m": 11430882,
+    "incline_pct": -1498.3,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": 40194
+   }
+  },
+  {
+   "hex": "081638104cf7d6c3d13c38f5e94ee9c5e41853c30491fb6dcbab956fa54bbc739b4718a368db32",
+   "data": {
+    "speed_kmh": 41.52,
+    "distance_m": null,
+    "incline_pct": -222.8,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": 14396,
+    "steps": null
+   }
+  },
+  {
+   "hex": "f5290650b28da33629d2eece7ed88cf635",
+   "data": null
+  },
+  {
+   "hex": "2309f427e98be3c2fa834fcdcb30c1a55c073172f1e8",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 139,
+    "elapsed_s": null,
+    "steps": null
+   }
+  },
+  {
+   "hex": "d22f468c6077a3184c24ac6ad266f6d29667b07717fed3dd720ade",
+   "data": {
+    "speed_kmh": 359.1,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 53866,
+    "heart_rate": 150,
+    "elapsed_s": 30640,
+    "steps": 56787
+   }
+  },
+  {
+   "hex": "712d9eda6d9b7bf96dce5612073795dc",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": null,
+    "heart_rate": 109,
+    "elapsed_s": 22222,
+    "steps": 38199
+   }
+  },
+  {
+   "hex": "e03554762b58638f1e7469cd4dfae2538fa57cf7582409024def7b28ac4f563356fd",
+   "data": {
+    "speed_kmh": 302.92,
+    "distance_m": null,
+    "incline_pct": null,
+    "energy_kcal": 36707,
+    "heart_rate": 205,
+    "elapsed_s": 64077,
+    "steps": 63356
+   }
+  },
+  {
+   "hex": "6912902c7052fc99204c8bd1c15edfd7bc24d4eb1995dea50bc1c46301be78e403e6",
+   "data": {
+    "speed_kmh": null,
+    "distance_m": null,
+    "incline_pct": 1140.8,
+    "energy_kcal": null,
+    "heart_rate": null,
+    "elapsed_s": null,
+    "steps": null
+   }
+  }
+ ],
+ "firmware": [
+  {
+   "hex": "5639302e30382e3135000020",
+   "text": "V90.08.15"
+  },
+  {
+   "hex": "",
+   "text": ""
+  },
+  {
+   "hex": "0000",
+   "text": ""
+  },
+  {
+   "hex": "205631200a",
+   "text": "V1"
+  },
+  {
+   "hex": "563100200a00",
+   "text": "V1\u0000"
+  },
+  {
+   "hex": "ff563180",
+   "text": "�V1�"
+  },
+  {
+   "hex": "09563109",
+   "text": "V1"
+  },
+  {
+   "hex": "1c56311f",
+   "text": "V1"
+  },
+  {
+   "hex": "560031",
+   "text": "V\u00001"
+  },
+  {
+   "hex": "0020005632",
+   "text": "V2"
+  },
+  {
+   "hex": "0d0a",
+   "text": ""
+  }
+ ],
+ "set_speed": [
+  {
+   "kmh": 0.0,
+   "hex": "020000"
+  },
+  {
+   "kmh": 0.5,
+   "hex": "023200"
+  },
+  {
+   "kmh": 1.0,
+   "hex": "026400"
+  },
+  {
+   "kmh": 2.5,
+   "hex": "02fa00"
+  },
+  {
+   "kmh": 6.0,
+   "hex": "025802"
+  },
+  {
+   "kmh": 0.005,
+   "hex": "020000"
+  },
+  {
+   "kmh": 0.015,
+   "hex": "020200"
+  },
+  {
+   "kmh": 1.005,
+   "hex": "026400"
+  },
+  {
+   "kmh": 2.675,
+   "hex": "020c01"
+  },
+  {
+   "kmh": 655.35,
+   "hex": "02ffff"
+  },
+  {
+   "kmh": 0.1691,
+   "hex": "021100"
+  },
+  {
+   "kmh": 9.5954,
+   "hex": "02c003"
+  },
+  {
+   "kmh": 4.0752,
+   "hex": "029801"
+  },
+  {
+   "kmh": 0.5191,
+   "hex": "023400"
+  },
+  {
+   "kmh": 0.8573,
+   "hex": "025600"
+  },
+  {
+   "kmh": 11.6024,
+   "hex": "028804"
+  },
+  {
+   "kmh": 17.1079,
+   "hex": "02af06"
+  },
+  {
+   "kmh": 6.2603,
+   "hex": "027202"
+  },
+  {
+   "kmh": 9.3192,
+   "hex": "02a403"
+  },
+  {
+   "kmh": 0.3397,
+   "hex": "022200"
+  },
+  {
+   "kmh": 17.7715,
+   "hex": "02f106"
+  },
+  {
+   "kmh": 0.5844,
+   "hex": "023a00"
+  },
+  {
+   "kmh": 1.1632,
+   "hex": "027400"
+  },
+  {
+   "kmh": 16.7055,
+   "hex": "028706"
+  },
+  {
+   "kmh": 12.3015,
+   "hex": "02ce04"
+  },
+  {
+   "kmh": 8.8338,
+   "hex": "027303"
+  },
+  {
+   "kmh": 4.6189,
+   "hex": "02ce01"
+  },
+  {
+   "kmh": 19.0537,
+   "hex": "027107"
+  },
+  {
+   "kmh": 11.8767,
+   "hex": "02a404"
+  },
+  {
+   "kmh": 1.0383,
+   "hex": "026800"
+  },
+  {
+   "kmh": 18.792,
+   "hex": "025707"
+  },
+  {
+   "kmh": 1.6038,
+   "hex": "02a000"
+  },
+  {
+   "kmh": 13.4224,
+   "hex": "023e05"
+  },
+  {
+   "kmh": 11.3668,
+   "hex": "027104"
+  },
+  {
+   "kmh": 4.4406,
+   "hex": "02bc01"
+  },
+  {
+   "kmh": 13.469,
+   "hex": "024305"
+  },
+  {
+   "kmh": 17.4398,
+   "hex": "02d006"
+  },
+  {
+   "kmh": 17.0456,
+   "hex": "02a906"
+  },
+  {
+   "kmh": 4.0393,
+   "hex": "029401"
+  },
+  {
+   "kmh": 9.5298,
+   "hex": "02b903"
+  },
+  {
+   "kmh": 2.7554,
+   "hex": "021401"
+  },
+  {
+   "kmh": 5.9692,
+   "hex": "025502"
+  },
+  {
+   "kmh": 19.669,
+   "hex": "02af07"
+  },
+  {
+   "kmh": 14.4074,
+   "hex": "02a105"
+  },
+  {
+   "kmh": 2.4678,
+   "hex": "02f700"
+  },
+  {
+   "kmh": 11.2132,
+   "hex": "026104"
+  },
+  {
+   "kmh": 2.2466,
+   "hex": "02e100"
+  },
+  {
+   "kmh": 6.0738,
+   "hex": "025f02"
+  },
+  {
+   "kmh": 17.4785,
+   "hex": "02d406"
+  },
+  {
+   "kmh": 0.8237,
+   "hex": "025200"
+  },
+  {
+   "kmh": 11.2772,
+   "hex": "026804"
+  },
+  {
+   "kmh": 3.3165,
+   "hex": "024c01"
+  },
+  {
+   "kmh": 16.5288,
+   "hex": "027506"
+  },
+  {
+   "kmh": 0.7801,
+   "hex": "024e00"
+  },
+  {
+   "kmh": 18.2434,
+   "hex": "022007"
+  },
+  {
+   "kmh": 17.3343,
+   "hex": "02c506"
+  },
+  {
+   "kmh": 16.7362,
+   "hex": "028a06"
+  },
+  {
+   "kmh": 16.5182,
+   "hex": "027406"
+  },
+  {
+   "kmh": 6.6248,
+   "hex": "029602"
+  },
+  {
+   "kmh": 19.9374,
+   "hex": "02ca07"
+  },
+  {
+   "kmh": 19.9822,
+   "hex": "02ce07"
+  },
+  {
+   "kmh": 7.8441,
+   "hex": "021003"
+  },
+  {
+   "kmh": 16.2142,
+   "hex": "025506"
+  },
+  {
+   "kmh": 17.6899,
+   "hex": "02e906"
+  },
+  {
+   "kmh": 3.4339,
+   "hex": "025701"
+  },
+  {
+   "kmh": 12.0179,
+   "hex": "02b204"
+  },
+  {
+   "kmh": 18.1517,
+   "hex": "021707"
+  },
+  {
+   "kmh": 12.5646,
+   "hex": "02e804"
+  },
+  {
+   "kmh": 11.1542,
+   "hex": "025b04"
+  },
+  {
+   "kmh": 8.2275,
+   "hex": "023703"
+  },
+  {
+   "kmh": 9.8518,
+   "hex": "02d903"
+  },
+  {
+   "kmh": 3.3229,
+   "hex": "024c01"
+  },
+  {
+   "kmh": 0.2093,
+   "hex": "021500"
+  },
+  {
+   "kmh": 13.8129,
+   "hex": "026505"
+  },
+  {
+   "kmh": 16.579,
+   "hex": "027a06"
+  },
+  {
+   "kmh": 19.7291,
+   "hex": "02b507"
+  },
+  {
+   "kmh": 12.4913,
+   "hex": "02e104"
+  },
+  {
+   "kmh": 3.6656,
+   "hex": "026f01"
+  },
+  {
+   "kmh": 8.5886,
+   "hex": "025b03"
+  },
+  {
+   "kmh": 15.8664,
+   "hex": "023306"
+  },
+  {
+   "kmh": 2.1027,
+   "hex": "02d200"
+  },
+  {
+   "kmh": 4.1306,
+   "hex": "029d01"
+  },
+  {
+   "kmh": 14.6564,
+   "hex": "02ba05"
+  },
+  {
+   "kmh": 17.5601,
+   "hex": "02dc06"
+  },
+  {
+   "kmh": 12.3724,
+   "hex": "02d504"
+  },
+  {
+   "kmh": 13.4594,
+   "hex": "024205"
+  },
+  {
+   "kmh": 1.1306,
+   "hex": "027100"
+  },
+  {
+   "kmh": 11.8659,
+   "hex": "02a304"
+  },
+  {
+   "kmh": 1.4858,
+   "hex": "029500"
+  },
+  {
+   "kmh": 6.1905,
+   "hex": "026b02"
+  },
+  {
+   "kmh": 18.1856,
+   "hex": "021b07"
+  },
+  {
+   "kmh": 1.9994,
+   "hex": "02c800"
+  },
+  {
+   "kmh": 3.7911,
+   "hex": "027b01"
+  },
+  {
+   "kmh": 13.351,
+   "hex": "023705"
+  },
+  {
+   "kmh": 5.8569,
+   "hex": "024a02"
+  },
+  {
+   "kmh": 1.7773,
+   "hex": "02b200"
+  },
+  {
+   "kmh": 5.4118,
+   "hex": "021d02"
+  },
+  {
+   "kmh": 18.934,
+   "hex": "026507"
+  },
+  {
+   "kmh": 5.2502,
+   "hex": "020d02"
+  },
+  {
+   "kmh": 9.8516,
+   "hex": "02d903"
+  },
+  {
+   "kmh": 17.0102,
+   "hex": "02a506"
+  },
+  {
+   "kmh": 9.3753,
+   "hex": "02aa03"
+  },
+  {
+   "kmh": 16.8537,
+   "hex": "029506"
+  },
+  {
+   "kmh": 7.8565,
+   "hex": "021203"
+  },
+  {
+   "kmh": 1.138,
+   "hex": "027200"
+  },
+  {
+   "kmh": 19.8054,
+   "hex": "02bd07"
+  },
+  {
+   "kmh": 3.7745,
+   "hex": "027901"
+  },
+  {
+   "kmh": 7.8472,
+   "hex": "021103"
+  },
+  {
+   "kmh": 8.904,
+   "hex": "027a03"
+  },
+  {
+   "kmh": 14.0223,
+   "hex": "027a05"
+  }
+ ],
+ "set_incline": [
+  {
+   "pct": -3.0,
+   "hex": "03e2ff"
+  },
+  {
+   "pct": 0.0,
+   "hex": "030000"
+  },
+  {
+   "pct": 0.05,
+   "hex": "030000"
+  },
+  {
+   "pct": 0.15,
+   "hex": "030200"
+  },
+  {
+   "pct": 9.0,
+   "hex": "035a00"
+  },
+  {
+   "pct": 1.25,
+   "hex": "030c00"
+  },
+  {
+   "pct": -0.349,
+   "hex": "03fdff"
+  },
+  {
+   "pct": 13.5,
+   "hex": "038700"
+  },
+  {
+   "pct": 9.92,
+   "hex": "036300"
+  },
+  {
+   "pct": 13.32,
+   "hex": "038500"
+  },
+  {
+   "pct": -9.252,
+   "hex": "03a3ff"
+  },
+  {
+   "pct": 11.507,
+   "hex": "037300"
+  },
+  {
+   "pct": 2.366,
+   "hex": "031800"
+  },
+  {
+   "pct": -6.619,
+   "hex": "03beff"
+  },
+  {
+   "pct": -4.127,
+   "hex": "03d7ff"
+  },
+  {
+   "pct": 3.966,
+   "hex": "032800"
+  },
+  {
+   "pct": 4.712,
+   "hex": "032f00"
+  },
+  {
+   "pct": 4.665,
+   "hex": "032f00"
+  },
+  {
+   "pct": -0.284,
+   "hex": "03fdff"
+  },
+  {
+   "pct": 8.53,
+   "hex": "035500"
+  },
+  {
+   "pct": 8.396,
+   "hex": "035400"
+  },
+  {
+   "pct": 14.363,
+   "hex": "039000"
+  },
+  {
+   "pct": 14.693,
+   "hex": "039300"
+  },
+  {
+   "pct": 0.238,
+   "hex": "030200"
+  },
+  {
+   "pct": 10.477,
+   "hex": "036900"
+  },
+  {
+   "pct": 0.983,
+   "hex": "030a00"
+  },
+  {
+   "pct": -1.804,
+   "hex": "03eeff"
+  },
+  {
+   "pct": -9.13,
+   "hex": "03a5ff"
+  },
+  {
+   "pct": 9.422,
+   "hex": "035e00"
+  },
+  {
+   "pct": -3.738,
+   "hex": "03dbff"
+  },
+  {
+   "pct": 6.969,
+   "hex": "034600"
+  },
+  {
+   "pct": -6.658,
+   "hex": "03bdff"
+  },
+  {
+   "pct": -1.343,
+   "hex": "03f3ff"
+  },
+  {
+   "pct": -4.928,
+   "hex": "03cfff"
+  },
+  {
+   "pct": -3.669,
+   "hex": "03dbff"
+  },
+  {
+   "pct": 8.723,
+   "hex": "035700"
+  },
+  {
+   "pct": 1.598,
+   "hex": "031000"
+  },
+  {
+   "pct": -6.426,
+   "hex": "03c0ff"
+  },
+  {
+   "pct": -6.133,
+   "hex": "03c3ff"
+  },
+  {
+   "pct": 2.262,
+   "hex": "031700"
+  },
+  {
+   "pct": -4.235,
+   "hex": "03d6ff"
+  },
+  {
+   "pct": -8.563,
+   "hex": "03aaff"
+  },
+  {
+   "pct": 5.496,
+   "hex": "033700"
+  },
+  {
+   "pct": -1.848,
+   "hex": "03eeff"
+  },
+  {
+   "pct": 7.867,
+   "hex": "034f00"
+  },
+  {
+   "pct": -2.721,
+   "hex": "03e5ff"
+  },
+  {
+   "pct": 6.112,
+   "hex": "033d00"
+  },
+  {
+   "pct": 10.665,
+   "hex": "036b00"
+  },
+  {
+   "pct": 6.892,
+   "hex": "034500"
+  },
+  {
+   "pct": 10.883,
+   "hex": "036d00"
+  },
+  {
+   "pct": 7.132,
+   "hex": "034700"
+  },
+  {
+   "pct": -7.649,
+   "hex": "03b4ff"
+  },
+  {
+   "pct": 0.45,
+   "hex": "030400"
+  },
+  {
+   "pct": -6.118,
+   "hex": "03c3ff"
+  },
+  {
+   "pct": 2.369,
+   "hex": "031800"
+  },
+  {
+   "pct": -3.085,
+   "hex": "03e1ff"
+  }
+ ],
+ "responses": [
+  {
+   "hex": "800701",
+   "result": [
+    7,
+    1
+   ]
+  },
+  {
+   "hex": "0102",
+   "result": null
+  },
+  {
+   "hex": "8007",
+   "result": null
+  },
+  {
+   "hex": "80020300",
+   "result": [
+    2,
+    3
+   ]
+  },
+  {
+   "hex": "",
+   "result": null
+  }
+ ],
+ "ranges": [
+  {
+   "hex": "640058020a00",
+   "speed": [
+    1.0,
+    6.0,
+    0.1
+   ],
+   "incline": [
+    10.0,
+    60.0,
+    1.0
+   ]
+  },
+  {
+   "hex": "0102",
+   "speed": null,
+   "incline": null
+  },
+  {
+   "hex": "ffff0080010099",
+   "speed": [
+    655.35,
+    327.68,
+    0.01
+   ],
+   "incline": [
+    -0.1,
+    -3276.8,
+    0.1
+   ]
+  }
+ ],
+ "commands": {
+  "request_control": "00",
+  "start": "07",
+  "stop": "0801",
+  "pause": "0802"
+ }
+}

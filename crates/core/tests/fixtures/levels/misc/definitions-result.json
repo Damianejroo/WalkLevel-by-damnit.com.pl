@@ -1,0 +1,1210 @@
+{
+ "version": 3,
+ "xpPerKm": 37,
+ "rarityXp": {
+  "a": 7,
+  "b": 13
+ },
+ "rarities": [
+  "a",
+  "b",
+  "c"
+ ],
+ "levels": [
+  0,
+  0,
+  50,
+  50,
+  200,
+  400
+ ],
+ "ranks": [
+  {
+   "level": 3,
+   "name": "Trzeci",
+   "about": "od 3"
+  },
+  {
+   "level": 5,
+   "name": "Piąty",
+   "about": "od 5"
+  }
+ ],
+ "achievements": [
+  {
+   "id": "k1",
+   "kind": "dystans",
+   "rarity": "a",
+   "mark": "s",
+   "name": "K1",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "km": 1
+   },
+   "km": 1.0
+  },
+  {
+   "id": "k05",
+   "kind": "dystans",
+   "rarity": "c",
+   "mark": "s",
+   "name": "K05",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "km": 0.5
+   },
+   "km": 0.5
+  },
+  {
+   "id": "k3",
+   "kind": "dystans",
+   "rarity": "b",
+   "mark": "s",
+   "name": "K3",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "km": 3.0,
+    "ikona": "nowa"
+   },
+   "km": 3.0
+  },
+  {
+   "id": "s3dni",
+   "kind": "seria",
+   "rarity": "b",
+   "mark": "s",
+   "name": "S3DNI",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "dni": 2,
+    "km_dziennie": 3.0
+   },
+   "km": null
+  },
+  {
+   "id": "s4dni",
+   "kind": "seria",
+   "rarity": "a",
+   "mark": "s",
+   "name": "S4DNI",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "dni": 4
+   },
+   "km": null
+  },
+  {
+   "id": "gry2a",
+   "kind": "gry_km",
+   "rarity": "a",
+   "mark": "s",
+   "name": "GRY2A",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "gier": 2,
+    "km": 1
+   },
+   "km": null
+  },
+  {
+   "id": "gry2b",
+   "kind": "gry_km",
+   "rarity": "b",
+   "mark": "s",
+   "name": "GRY2B",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "gier": 2,
+    "km": 3
+   },
+   "km": null
+  },
+  {
+   "id": "gry3a",
+   "kind": "gry_km",
+   "rarity": "b",
+   "mark": "s",
+   "name": "GRY3A",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "gier": 3,
+    "km": 1
+   },
+   "km": null
+  },
+  {
+   "id": "jedna",
+   "kind": "gra_km",
+   "rarity": "a",
+   "mark": "s",
+   "name": "JEDNA",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "km": 2.5
+   },
+   "km": null
+  },
+  {
+   "id": "zawsze",
+   "kind": "start_miedzy",
+   "rarity": "a",
+   "mark": "s",
+   "name": "ZAWSZE",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "od": 5,
+    "do": 5
+   },
+   "km": null
+  },
+  {
+   "id": "pozno",
+   "kind": "start_miedzy",
+   "rarity": "c",
+   "mark": "s",
+   "name": "POZNO",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "od": 22.9,
+    "do": 1.2
+   },
+   "km": null
+  },
+  {
+   "id": "kroki",
+   "kind": "dzien_kroki",
+   "rarity": "a",
+   "mark": "s",
+   "name": "KROKI",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "kroki": 1000.5
+   },
+   "km": null
+  },
+  {
+   "id": "sesja2",
+   "kind": "sesja_km",
+   "rarity": "b",
+   "mark": "s",
+   "name": "SESJA2",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "km": 2
+   },
+   "km": null
+  },
+  {
+   "id": "znaj2",
+   "kind": "znajomi",
+   "rarity": "a",
+   "mark": "s",
+   "name": "ZNAJ2",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "ile": 2
+   },
+   "km": null
+  },
+  {
+   "id": "pol0",
+   "kind": "polecenia",
+   "rarity": "b",
+   "mark": "s",
+   "name": "POL0",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "ile": 0
+   },
+   "km": null
+  },
+  {
+   "id": "nowe",
+   "kind": "cos_nowego",
+   "rarity": "a",
+   "mark": "s",
+   "name": "NOWE",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {
+    "ile": 5
+   },
+   "km": null
+  },
+  {
+   "id": "tren",
+   "kind": "trening",
+   "rarity": "c",
+   "mark": "s",
+   "name": "TREN",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {},
+   "km": null
+  },
+  {
+   "id": "pierwsza",
+   "kind": "gra_pierwsza",
+   "rarity": "a",
+   "mark": "s",
+   "name": "PIERWSZA",
+   "flavor": "Klimat.",
+   "condition": "Warunek.",
+   "params": {},
+   "km": null
+  }
+ ],
+ "trail": [
+  "k05",
+  "k1",
+  "k3"
+ ],
+ "maxLevel": 6,
+ "levelOf": [
+  [
+   0,
+   2
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   49,
+   2
+  ],
+  [
+   50,
+   4
+  ],
+  [
+   51,
+   4
+  ],
+  [
+   200,
+   5
+  ],
+  [
+   399,
+   5
+  ],
+  [
+   400,
+   6
+  ],
+  [
+   960,
+   6
+  ],
+  [
+   961,
+   6
+  ],
+  [
+   962,
+   6
+  ],
+  [
+   4996,
+   6
+  ],
+  [
+   99999,
+   6
+  ],
+  [
+   947099,
+   6
+  ],
+  [
+   947100,
+   6
+  ],
+  [
+   2000000,
+   6
+  ],
+  [
+   -5,
+   1
+  ],
+  [
+   0.5,
+   2
+  ],
+  [
+   960.999,
+   6
+  ]
+ ],
+ "xpFor": [
+  [
+   -3,
+   0
+  ],
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   0
+  ],
+  [
+   2,
+   0
+  ],
+  [
+   50,
+   400
+  ],
+  [
+   100,
+   400
+  ],
+  [
+   101,
+   400
+  ],
+  [
+   500,
+   400
+  ]
+ ],
+ "rankFor": [
+  [
+   0,
+   "Trzeci"
+  ],
+  [
+   1,
+   "Trzeci"
+  ],
+  [
+   2,
+   "Trzeci"
+  ],
+  [
+   3,
+   "Trzeci"
+  ],
+  [
+   4,
+   "Trzeci"
+  ],
+  [
+   5,
+   "Piąty"
+  ],
+  [
+   6,
+   "Piąty"
+  ],
+  [
+   7,
+   "Piąty"
+  ],
+  [
+   8,
+   "Piąty"
+  ],
+  [
+   9,
+   "Piąty"
+  ],
+  [
+   10,
+   "Piąty"
+  ],
+  [
+   11,
+   "Piąty"
+  ],
+  [
+   12,
+   "Piąty"
+  ],
+  [
+   13,
+   "Piąty"
+  ],
+  [
+   14,
+   "Piąty"
+  ],
+  [
+   15,
+   "Piąty"
+  ],
+  [
+   16,
+   "Piąty"
+  ],
+  [
+   17,
+   "Piąty"
+  ],
+  [
+   18,
+   "Piąty"
+  ],
+  [
+   19,
+   "Piąty"
+  ],
+  [
+   20,
+   "Piąty"
+  ],
+  [
+   21,
+   "Piąty"
+  ],
+  [
+   22,
+   "Piąty"
+  ],
+  [
+   23,
+   "Piąty"
+  ],
+  [
+   24,
+   "Piąty"
+  ],
+  [
+   25,
+   "Piąty"
+  ],
+  [
+   26,
+   "Piąty"
+  ],
+  [
+   27,
+   "Piąty"
+  ],
+  [
+   28,
+   "Piąty"
+  ],
+  [
+   29,
+   "Piąty"
+  ],
+  [
+   30,
+   "Piąty"
+  ],
+  [
+   31,
+   "Piąty"
+  ],
+  [
+   32,
+   "Piąty"
+  ],
+  [
+   33,
+   "Piąty"
+  ],
+  [
+   34,
+   "Piąty"
+  ],
+  [
+   35,
+   "Piąty"
+  ],
+  [
+   36,
+   "Piąty"
+  ],
+  [
+   37,
+   "Piąty"
+  ],
+  [
+   38,
+   "Piąty"
+  ],
+  [
+   39,
+   "Piąty"
+  ],
+  [
+   40,
+   "Piąty"
+  ],
+  [
+   41,
+   "Piąty"
+  ],
+  [
+   42,
+   "Piąty"
+  ],
+  [
+   43,
+   "Piąty"
+  ],
+  [
+   44,
+   "Piąty"
+  ],
+  [
+   45,
+   "Piąty"
+  ],
+  [
+   46,
+   "Piąty"
+  ],
+  [
+   47,
+   "Piąty"
+  ],
+  [
+   48,
+   "Piąty"
+  ],
+  [
+   49,
+   "Piąty"
+  ],
+  [
+   50,
+   "Piąty"
+  ],
+  [
+   51,
+   "Piąty"
+  ],
+  [
+   52,
+   "Piąty"
+  ],
+  [
+   53,
+   "Piąty"
+  ],
+  [
+   54,
+   "Piąty"
+  ],
+  [
+   55,
+   "Piąty"
+  ],
+  [
+   56,
+   "Piąty"
+  ],
+  [
+   57,
+   "Piąty"
+  ],
+  [
+   58,
+   "Piąty"
+  ],
+  [
+   59,
+   "Piąty"
+  ],
+  [
+   60,
+   "Piąty"
+  ],
+  [
+   61,
+   "Piąty"
+  ],
+  [
+   62,
+   "Piąty"
+  ],
+  [
+   63,
+   "Piąty"
+  ],
+  [
+   64,
+   "Piąty"
+  ],
+  [
+   65,
+   "Piąty"
+  ],
+  [
+   66,
+   "Piąty"
+  ],
+  [
+   67,
+   "Piąty"
+  ],
+  [
+   68,
+   "Piąty"
+  ],
+  [
+   69,
+   "Piąty"
+  ],
+  [
+   70,
+   "Piąty"
+  ],
+  [
+   71,
+   "Piąty"
+  ],
+  [
+   72,
+   "Piąty"
+  ],
+  [
+   73,
+   "Piąty"
+  ],
+  [
+   74,
+   "Piąty"
+  ],
+  [
+   75,
+   "Piąty"
+  ],
+  [
+   76,
+   "Piąty"
+  ],
+  [
+   77,
+   "Piąty"
+  ],
+  [
+   78,
+   "Piąty"
+  ],
+  [
+   79,
+   "Piąty"
+  ],
+  [
+   80,
+   "Piąty"
+  ],
+  [
+   81,
+   "Piąty"
+  ],
+  [
+   82,
+   "Piąty"
+  ],
+  [
+   83,
+   "Piąty"
+  ],
+  [
+   84,
+   "Piąty"
+  ],
+  [
+   85,
+   "Piąty"
+  ],
+  [
+   86,
+   "Piąty"
+  ],
+  [
+   87,
+   "Piąty"
+  ],
+  [
+   88,
+   "Piąty"
+  ],
+  [
+   89,
+   "Piąty"
+  ],
+  [
+   90,
+   "Piąty"
+  ],
+  [
+   91,
+   "Piąty"
+  ],
+  [
+   92,
+   "Piąty"
+  ],
+  [
+   93,
+   "Piąty"
+  ],
+  [
+   94,
+   "Piąty"
+  ],
+  [
+   95,
+   "Piąty"
+  ],
+  [
+   96,
+   "Piąty"
+  ],
+  [
+   97,
+   "Piąty"
+  ],
+  [
+   98,
+   "Piąty"
+  ],
+  [
+   99,
+   "Piąty"
+  ],
+  [
+   100,
+   "Piąty"
+  ],
+  [
+   101,
+   "Piąty"
+  ]
+ ],
+ "nextRankFor": [
+  [
+   0,
+   "Trzeci"
+  ],
+  [
+   1,
+   "Trzeci"
+  ],
+  [
+   2,
+   "Trzeci"
+  ],
+  [
+   3,
+   "Piąty"
+  ],
+  [
+   4,
+   "Piąty"
+  ],
+  [
+   5,
+   null
+  ],
+  [
+   6,
+   null
+  ],
+  [
+   7,
+   null
+  ],
+  [
+   8,
+   null
+  ],
+  [
+   9,
+   null
+  ],
+  [
+   10,
+   null
+  ],
+  [
+   11,
+   null
+  ],
+  [
+   12,
+   null
+  ],
+  [
+   13,
+   null
+  ],
+  [
+   14,
+   null
+  ],
+  [
+   15,
+   null
+  ],
+  [
+   16,
+   null
+  ],
+  [
+   17,
+   null
+  ],
+  [
+   18,
+   null
+  ],
+  [
+   19,
+   null
+  ],
+  [
+   20,
+   null
+  ],
+  [
+   21,
+   null
+  ],
+  [
+   22,
+   null
+  ],
+  [
+   23,
+   null
+  ],
+  [
+   24,
+   null
+  ],
+  [
+   25,
+   null
+  ],
+  [
+   26,
+   null
+  ],
+  [
+   27,
+   null
+  ],
+  [
+   28,
+   null
+  ],
+  [
+   29,
+   null
+  ],
+  [
+   30,
+   null
+  ],
+  [
+   31,
+   null
+  ],
+  [
+   32,
+   null
+  ],
+  [
+   33,
+   null
+  ],
+  [
+   34,
+   null
+  ],
+  [
+   35,
+   null
+  ],
+  [
+   36,
+   null
+  ],
+  [
+   37,
+   null
+  ],
+  [
+   38,
+   null
+  ],
+  [
+   39,
+   null
+  ],
+  [
+   40,
+   null
+  ],
+  [
+   41,
+   null
+  ],
+  [
+   42,
+   null
+  ],
+  [
+   43,
+   null
+  ],
+  [
+   44,
+   null
+  ],
+  [
+   45,
+   null
+  ],
+  [
+   46,
+   null
+  ],
+  [
+   47,
+   null
+  ],
+  [
+   48,
+   null
+  ],
+  [
+   49,
+   null
+  ],
+  [
+   50,
+   null
+  ],
+  [
+   51,
+   null
+  ],
+  [
+   52,
+   null
+  ],
+  [
+   53,
+   null
+  ],
+  [
+   54,
+   null
+  ],
+  [
+   55,
+   null
+  ],
+  [
+   56,
+   null
+  ],
+  [
+   57,
+   null
+  ],
+  [
+   58,
+   null
+  ],
+  [
+   59,
+   null
+  ],
+  [
+   60,
+   null
+  ],
+  [
+   61,
+   null
+  ],
+  [
+   62,
+   null
+  ],
+  [
+   63,
+   null
+  ],
+  [
+   64,
+   null
+  ],
+  [
+   65,
+   null
+  ],
+  [
+   66,
+   null
+  ],
+  [
+   67,
+   null
+  ],
+  [
+   68,
+   null
+  ],
+  [
+   69,
+   null
+  ],
+  [
+   70,
+   null
+  ],
+  [
+   71,
+   null
+  ],
+  [
+   72,
+   null
+  ],
+  [
+   73,
+   null
+  ],
+  [
+   74,
+   null
+  ],
+  [
+   75,
+   null
+  ],
+  [
+   76,
+   null
+  ],
+  [
+   77,
+   null
+  ],
+  [
+   78,
+   null
+  ],
+  [
+   79,
+   null
+  ],
+  [
+   80,
+   null
+  ],
+  [
+   81,
+   null
+  ],
+  [
+   82,
+   null
+  ],
+  [
+   83,
+   null
+  ],
+  [
+   84,
+   null
+  ],
+  [
+   85,
+   null
+  ],
+  [
+   86,
+   null
+  ],
+  [
+   87,
+   null
+  ],
+  [
+   88,
+   null
+  ],
+  [
+   89,
+   null
+  ],
+  [
+   90,
+   null
+  ],
+  [
+   91,
+   null
+  ],
+  [
+   92,
+   null
+  ],
+  [
+   93,
+   null
+  ],
+  [
+   94,
+   null
+  ],
+  [
+   95,
+   null
+  ],
+  [
+   96,
+   null
+  ],
+  [
+   97,
+   null
+  ],
+  [
+   98,
+   null
+  ],
+  [
+   99,
+   null
+  ],
+  [
+   100,
+   null
+  ],
+  [
+   101,
+   null
+  ]
+ ]
+}

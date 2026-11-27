@@ -1,0 +1,753 @@
+{
+ "name": "gry_i_trening",
+ "input": {
+  "sessions": [
+   {
+    "id": "00000000000000000000000000000073",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "a",
+    "profileName": "A",
+    "start": 1767290400.0,
+    "end": 1767294000.0,
+    "steps": 13333,
+    "distanceKm": 10.0,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "gra"
+   },
+   {
+    "id": "00000000000000000000000000000074",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "b",
+    "profileName": "B",
+    "start": 1767376800.0,
+    "end": 1767380400.0,
+    "steps": 13333,
+    "distanceKm": 10.0,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "gra"
+   },
+   {
+    "id": "00000000000000000000000000000075",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "c",
+    "profileName": "C",
+    "start": 1767463200.0,
+    "end": 1767466800.0,
+    "steps": 12000,
+    "distanceKm": 9.0,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "gra"
+   },
+   {
+    "id": "00000000000000000000000000000076",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "c",
+    "profileName": "C",
+    "start": 1767549600.0,
+    "end": 1767553200.0,
+    "steps": 6667,
+    "distanceKm": 5.0,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "trening"
+   },
+   {
+    "id": "00000000000000000000000000000077",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "c",
+    "profileName": "C",
+    "start": 1767636000.0,
+    "end": 1767639600.0,
+    "steps": 1333,
+    "distanceKm": 1.0,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "gra"
+   },
+   {
+    "id": "00000000000000000000000000000078",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "d",
+    "profileName": "D",
+    "start": 1767722400.0,
+    "end": 1767726000.0,
+    "steps": 13332,
+    "distanceKm": 9.999,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "gra"
+   },
+   {
+    "id": "00000000000000000000000000000079",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "d",
+    "profileName": "D",
+    "start": 1767808800.0,
+    "end": 1767812400.0,
+    "steps": 1,
+    "distanceKm": 0.001,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "gra"
+   },
+   {
+    "id": "0000000000000000000000000000007a",
+    "person": "p1",
+    "personName": "Olek",
+    "profile": "e",
+    "profileName": "E",
+    "start": 1767895200.0,
+    "end": 1767898800.0,
+    "steps": 13333,
+    "distanceKm": 10.0,
+    "activeS": 3600,
+    "deviceModel": "",
+    "driver": "",
+    "deviceProfile": "",
+    "firmware": "",
+    "appVersion": "",
+    "source": "bieznia",
+    "visibility": "prywatna",
+    "tzOffsetMin": 0,
+    "updated": 0.0,
+    "mode": "gra"
+   }
+  ],
+  "now": 1767981600.0,
+  "friends": 0,
+  "referrals": 0,
+  "earnedBefore": {},
+  "restPerWeek": 1
+ },
+ "expected": {
+  "walks": [
+   {
+    "start": 1767290400.0,
+    "end": 1767294000.0,
+    "km": 10.0,
+    "steps": 13333,
+    "game": "a",
+    "mode": "gra",
+    "tzOffsetMin": 0,
+    "day": 20454,
+    "hour": 18
+   },
+   {
+    "start": 1767376800.0,
+    "end": 1767380400.0,
+    "km": 10.0,
+    "steps": 13333,
+    "game": "b",
+    "mode": "gra",
+    "tzOffsetMin": 0,
+    "day": 20455,
+    "hour": 18
+   },
+   {
+    "start": 1767463200.0,
+    "end": 1767466800.0,
+    "km": 9.0,
+    "steps": 12000,
+    "game": "c",
+    "mode": "gra",
+    "tzOffsetMin": 0,
+    "day": 20456,
+    "hour": 18
+   },
+   {
+    "start": 1767549600.0,
+    "end": 1767553200.0,
+    "km": 5.0,
+    "steps": 6667,
+    "game": "c",
+    "mode": "trening",
+    "tzOffsetMin": 0,
+    "day": 20457,
+    "hour": 18
+   },
+   {
+    "start": 1767636000.0,
+    "end": 1767639600.0,
+    "km": 1.0,
+    "steps": 1333,
+    "game": "c",
+    "mode": "gra",
+    "tzOffsetMin": 0,
+    "day": 20458,
+    "hour": 18
+   },
+   {
+    "start": 1767722400.0,
+    "end": 1767726000.0,
+    "km": 9.999,
+    "steps": 13332,
+    "game": "d",
+    "mode": "gra",
+    "tzOffsetMin": 0,
+    "day": 20459,
+    "hour": 18
+   },
+   {
+    "start": 1767808800.0,
+    "end": 1767812400.0,
+    "km": 0.001,
+    "steps": 1,
+    "game": "d",
+    "mode": "gra",
+    "tzOffsetMin": 0,
+    "day": 20460,
+    "hour": 18
+   },
+   {
+    "start": 1767895200.0,
+    "end": 1767898800.0,
+    "km": 10.0,
+    "steps": 13333,
+    "game": "e",
+    "mode": "gra",
+    "tzOffsetMin": 0,
+    "day": 20461,
+    "hour": 18
+   }
+  ],
+  "km": 55.0,
+  "xp": 6540,
+  "level": 4,
+  "rank": "Bezimienny",
+  "nextRank": "Baron Harkonnen",
+  "levelFloor": 4996,
+  "levelCeiling": 7691,
+  "levelFraction": 0.5729128014842301,
+  "kmToNextLevel": 11.51,
+  "progress": [
+   {
+    "id": "km1",
+    "earnedAt": 1767294000.0,
+    "current": 55.0,
+    "target": 1.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "km2",
+    "earnedAt": 1767294000.0,
+    "current": 55.0,
+    "target": 2.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "km57",
+    "earnedAt": 1767294000.0,
+    "current": 55.0,
+    "target": 5.7,
+    "fraction": 1.0
+   },
+   {
+    "id": "km113",
+    "earnedAt": 1767380400.0,
+    "current": 55.0,
+    "target": 11.3,
+    "fraction": 1.0
+   },
+   {
+    "id": "km24",
+    "earnedAt": 1767466800.0,
+    "current": 55.0,
+    "target": 24.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "km30",
+    "earnedAt": 1767553200.0,
+    "current": 55.0,
+    "target": 30.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "km447",
+    "earnedAt": 1767726000.0,
+    "current": 55.0,
+    "target": 44.7,
+    "fraction": 1.0
+   },
+   {
+    "id": "km160",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 160.0,
+    "fraction": 0.34375
+   },
+   {
+    "id": "km200",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 200.0,
+    "fraction": 0.275
+   },
+   {
+    "id": "km318",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 318.0,
+    "fraction": 0.17295597484276728
+   },
+   {
+    "id": "km377",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 377.0,
+    "fraction": 0.14588859416445624
+   },
+   {
+    "id": "km483",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 483.0,
+    "fraction": 0.11387163561076605
+   },
+   {
+    "id": "km628",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 628.0,
+    "fraction": 0.0875796178343949
+   },
+   {
+    "id": "km737",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 737.0,
+    "fraction": 0.07462686567164178
+   },
+   {
+    "id": "km880",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 880.0,
+    "fraction": 0.0625
+   },
+   {
+    "id": "km950",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 950.0,
+    "fraction": 0.05789473684210526
+   },
+   {
+    "id": "km1019",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1019.0,
+    "fraction": 0.053974484789008834
+   },
+   {
+    "id": "km1150",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1150.0,
+    "fraction": 0.04782608695652174
+   },
+   {
+    "id": "km1257",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1257.0,
+    "fraction": 0.04375497215592681
+   },
+   {
+    "id": "km1400",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1400.0,
+    "fraction": 0.039285714285714285
+   },
+   {
+    "id": "km1530",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1530.0,
+    "fraction": 0.03594771241830065
+   },
+   {
+    "id": "km1670",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1670.0,
+    "fraction": 0.03293413173652695
+   },
+   {
+    "id": "km1800",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1800.0,
+    "fraction": 0.030555555555555555
+   },
+   {
+    "id": "km1940",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 1940.0,
+    "fraction": 0.028350515463917526
+   },
+   {
+    "id": "km2080",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 2080.0,
+    "fraction": 0.026442307692307692
+   },
+   {
+    "id": "km2220",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 2220.0,
+    "fraction": 0.024774774774774775
+   },
+   {
+    "id": "km2300",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 2300.0,
+    "fraction": 0.02391304347826087
+   },
+   {
+    "id": "km2414",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 2414.0,
+    "fraction": 0.022783761391880698
+   },
+   {
+    "id": "km2565",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 2565.0,
+    "fraction": 0.021442495126705652
+   },
+   {
+    "id": "km2715",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 2715.0,
+    "fraction": 0.020257826887661142
+   },
+   {
+    "id": "km2865",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 2865.0,
+    "fraction": 0.019197207678883072
+   },
+   {
+    "id": "km3060",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 3060.0,
+    "fraction": 0.017973856209150325
+   },
+   {
+    "id": "km3235",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 3235.0,
+    "fraction": 0.017001545595054096
+   },
+   {
+    "id": "km3490",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 3490.0,
+    "fraction": 0.015759312320916905
+   },
+   {
+    "id": "km4500",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 4500.0,
+    "fraction": 0.012222222222222223
+   },
+   {
+    "id": "km4800",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 4800.0,
+    "fraction": 0.011458333333333333
+   },
+   {
+    "id": "km5200",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 5200.0,
+    "fraction": 0.010576923076923078
+   },
+   {
+    "id": "km6128",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 6128.0,
+    "fraction": 0.008975195822454308
+   },
+   {
+    "id": "km7200",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 7200.0,
+    "fraction": 0.007638888888888889
+   },
+   {
+    "id": "km8047",
+    "earnedAt": null,
+    "current": 55.0,
+    "target": 8047.0,
+    "fraction": 0.006834845283956754
+   },
+   {
+    "id": "s3",
+    "earnedAt": 1767294000.0,
+    "current": 10.0,
+    "target": 3.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "s10",
+    "earnedAt": 1767294000.0,
+    "current": 10.0,
+    "target": 10.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "s21",
+    "earnedAt": null,
+    "current": 10.0,
+    "target": 21.0,
+    "fraction": 0.47619047619047616
+   },
+   {
+    "id": "d7",
+    "earnedAt": 1767294000.0,
+    "current": 13333.0,
+    "target": 7000.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "d12",
+    "earnedAt": 1767294000.0,
+    "current": 13333.0,
+    "target": 12000.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "d20",
+    "earnedAt": null,
+    "current": 13333.0,
+    "target": 20000.0,
+    "fraction": 0.66665
+   },
+   {
+    "id": "seria3",
+    "earnedAt": 1767466800.0,
+    "current": 1.0,
+    "target": 3.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "seria7",
+    "earnedAt": null,
+    "current": 1.0,
+    "target": 7.0,
+    "fraction": 0.14285714285714285
+   },
+   {
+    "id": "seria28",
+    "earnedAt": null,
+    "current": 1.0,
+    "target": 28.0,
+    "fraction": 0.03571428571428571
+   },
+   {
+    "id": "seria80",
+    "earnedAt": null,
+    "current": 1.0,
+    "target": 80.0,
+    "fraction": 0.0125
+   },
+   {
+    "id": "seria365",
+    "earnedAt": null,
+    "current": 1.0,
+    "target": 365.0,
+    "fraction": 0.0027397260273972603
+   },
+   {
+    "id": "gra1",
+    "earnedAt": 1767294000.0,
+    "current": 1.0,
+    "target": 1.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "gry3",
+    "earnedAt": 1767639600.0,
+    "current": 5.0,
+    "target": 3.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "gry5",
+    "earnedAt": 1767898800.0,
+    "current": 5.0,
+    "target": 5.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "gra100",
+    "earnedAt": null,
+    "current": 10.0,
+    "target": 100.0,
+    "fraction": 0.1
+   },
+   {
+    "id": "gra1000",
+    "earnedAt": null,
+    "current": 10.0,
+    "target": 1000.0,
+    "fraction": 0.01
+   },
+   {
+    "id": "trening",
+    "earnedAt": 1767553200.0,
+    "current": 1.0,
+    "target": 1.0,
+    "fraction": 1.0
+   },
+   {
+    "id": "rano",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "noc",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "znajomy",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   },
+   {
+    "id": "polecenie",
+    "earnedAt": null,
+    "current": 0.0,
+    "target": 1.0,
+    "fraction": 0.0
+   }
+  ],
+  "earned": [
+   "gry5",
+   "km447",
+   "gry3",
+   "km30",
+   "trening",
+   "km24",
+   "seria3",
+   "km113",
+   "km1",
+   "km2",
+   "km57",
+   "s3",
+   "s10",
+   "d7",
+   "d12",
+   "gra1"
+  ],
+  "closest": [
+   "d20",
+   "s21",
+   "km160"
+  ],
+  "closest10": [
+   "d20",
+   "s21",
+   "km160",
+   "km200",
+   "km318",
+   "km377",
+   "seria7",
+   "km483",
+   "gra100",
+   "km628"
+  ]
+ }
+}
