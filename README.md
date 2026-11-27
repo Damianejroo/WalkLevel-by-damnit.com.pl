@@ -2,9 +2,9 @@
 
 English · [Polski](README.pl.md)
 
-[![Latest release](https://img.shields.io/github/v/release/Damianejroo/WalkLevel-by-damnit.com.pl?color=555)](https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/latest)
-[![CI](https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/actions/workflows/ci.yml/badge.svg)](https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/actions/workflows/ci.yml)
-[![License: GPL-3.0](https://img.shields.io/github/license/Damianejroo/WalkLevel-by-damnit.com.pl?color=555)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/damnit-damian/WalkLevel-by-damnit.com.pl?color=555)](https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/latest)
+[![CI](https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/actions/workflows/ci.yml/badge.svg)](https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/actions/workflows/ci.yml)
+[![License: GPL-3.0](https://img.shields.io/github/license/damnit-damian/WalkLevel-by-damnit.com.pl?color=555)](LICENSE)
 
 Built with [Tauri 2](https://tauri.app) · Rust · [Svelte 5](https://svelte.dev) · TypeScript
 
@@ -55,7 +55,7 @@ Screenshots of version 0.6.2 with sample data (people, friends and results are m
 
 ## Installation
 
-1. Download **`Bieznia-Setup-….exe`** from the [latest release](https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/latest).
+1. Download **`Bieznia-Setup-….exe`** from the [latest release](https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/latest).
 2. Run the installer and click **Instaluj** (Install): one screen, no administrator rights.
    The app opens by itself after installation.
    Windows may show “Windows protected your PC” (the app has no paid publisher certificate):
@@ -254,7 +254,7 @@ SpaceWalk) is supported too, with speed reading and control.
   the installer runs only after the SHA-256 checksum given by GitHub matches,
 - releases are built in GitHub Actions from pinned versions (actions by commit, Inno Setup by
   SHA-256, libraries from `Cargo.lock` and `package-lock.json`) and have a provenance attestation
-  (`gh attestation verify Bieznia-Setup-….exe --repo Damianejroo/WalkLevel-by-damnit.com.pl`),
+  (`gh attestation verify Bieznia-Setup-….exe --repo damnit-damian/WalkLevel-by-damnit.com.pl`),
 - installation and operation without administrator rights; the app starts with control off,
   sends the treadmill only start, stop and speed (when control is on) and releases W/Shift after
   losing data, a crash or closing,

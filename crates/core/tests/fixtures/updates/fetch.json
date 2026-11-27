@@ -1,12 +1,12 @@
 [
  {
   "case": "ok",
-  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
   "version": "0.3.0"
  },
  {
   "case": "bom",
-  "body": "﻿{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "body": "﻿{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
   "version": "0.3.0"
  },
  {
@@ -21,14 +21,14 @@
  },
  {
   "case": "w_limicie_1mb",
-  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
-  "pad": 999658,
+  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "pad": 999656,
   "version": "0.3.0"
  },
  {
   "case": "obciety_ponad_1mb",
-  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
-  "pad": 999659,
+  "body": "{\"tag_name\": \"v0.3.0\", \"body\": \"  Poprawki połączenia\\n\", \"assets\": [{\"name\": \"Bieznia-Setup-0.3.0.exe\", \"browser_download_url\": \"https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe\", \"digest\": \"sha256:fbe6cce5fa6fb7da7ba0d641bd68b8080d2f8e2811c38ca5b1005467dac0849e\", \"size\": 10010}]}",
+  "pad": 999657,
   "error": "Nie udało się sprawdzić aktualizacji - sprawdź internet."
  },
  {

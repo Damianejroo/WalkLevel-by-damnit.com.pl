@@ -30,9 +30,9 @@ use sha2::{Digest, Sha256};
 use crate::compat::{strip as py_strip, truthy};
 
 /// Repozytorium z wydaniami (to samo co w wersji 0.5.x).
-pub const REPOSITORY: &str = "Damianejroo/WalkLevel-by-damnit.com.pl";
+pub const REPOSITORY: &str = "damnit-damian/WalkLevel-by-damnit.com.pl";
 /// Adres API z najnowszym wydaniem.
-pub const API_LATEST: &str = "https://api.github.com/repos/Damianejroo/WalkLevel-by-damnit.com.pl/releases/latest";
+pub const API_LATEST: &str = "https://api.github.com/repos/damnit-damian/WalkLevel-by-damnit.com.pl/releases/latest";
 /// Jedyne hosty, z których wolno pobierać (także po przekierowaniu).
 pub const ALLOWED_HOSTS: [&str; 4] = [
     "api.github.com",
@@ -493,7 +493,7 @@ mod tests {
     use std::cell::RefCell;
     use std::io::Cursor;
 
-    const URL: &str = "https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe";
+    const URL: &str = "https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/releases/download/v0.3.0/Bieznia-Setup-0.3.0.exe";
 
     fn payload() -> Vec<u8> {
         let mut data = b"MZ".to_vec();
