@@ -67,4 +67,6 @@ git tag -a v0.6.3 -F opis.txt
 git push origin v0.6.3
 ```
 
-GitHub Actions uruchamia bramki, buduje exe i instalator, potem publikuje wydanie.
+GitHub Actions uruchamia bramki, buduje exe i instalator, podpisuje instalator kluczem
+właściciela, potem publikuje wydanie. Bez sekretów do podpisu wydanie się zatrzymuje; zobacz
+[docs/release-signing.pl.md](docs/release-signing.pl.md).

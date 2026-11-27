@@ -817,6 +817,8 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `aktualizacja.powod.suma` | Suma kontrolna się nie zgadza - plik odrzucony. | Pobrany plik się nie zgadza, więc został odrzucony. Spróbuj ponownie. | |
 | `aktualizacja.powod.przerwane` | Pobieranie przerwane - spróbuj ponownie. | Pobieranie zostało przerwane. Spróbuj ponownie. | |
 | `aktualizacja.powod.system` | Aktualizacja działa tylko na Windows. | Aktualizacja działa tylko w Windows. | |
+| `aktualizacja.powod.signature-missing` | (nowy) | Nowa wersja nie ma podpisu autora, więc nie zostanie zainstalowana. Spróbuj później. | Od 0.6.4: wydanie bez pliku `.sig` obok instalatora. |
+| `aktualizacja.powod.signature-invalid` | (nowy) | Podpis nowej wersji się nie zgadza, więc nie zostanie zainstalowana. Zgłoś to w Ustawienia > Pomoc i diagnostyka. | Od 0.6.4: podpis innym kluczem, innego pliku albo innej wersji. |
 | `aktualizacja.zaktualizowano` | (tylko log: Zaktualizowano z {wersja} do {nowa_wersja}) | Zaktualizowano WalkLevel do wersji {nowa_wersja}. | Komunikat po pierwszym uruchomieniu nowej wersji. |
 
 ### 18.2. Dziennik zdarzeń

@@ -74,6 +74,14 @@
   "aktualizacja.powod.suma": "Pobrany plik się nie zgadza, więc został odrzucony. Spróbuj ponownie.",
   "aktualizacja.powod.przerwane": "Pobieranie zostało przerwane. Spróbuj ponownie.",
   "aktualizacja.powod.system": "Aktualizacja działa tylko w Windows.",
+  "aktualizacja.powod.signature-missing": "Nowa wersja nie ma podpisu autora, więc nie zostanie zainstalowana. Spróbuj później.",
+  "@aktualizacja.powod.signature-missing": {
+    "description": "Od 0.6.4: wydanie bez pliku `.sig` obok instalatora."
+  },
+  "aktualizacja.powod.signature-invalid": "Podpis nowej wersji się nie zgadza, więc nie zostanie zainstalowana. Zgłoś to w Ustawienia > Pomoc i diagnostyka.",
+  "@aktualizacja.powod.signature-invalid": {
+    "description": "Od 0.6.4: podpis innym kluczem, innego pliku albo innej wersji."
+  },
   "aktualizacja.zaktualizowano": "Zaktualizowano WalkLevel do wersji {nowa_wersja}.",
   "@aktualizacja.zaktualizowano": {
     "description": "Komunikat po pierwszym uruchomieniu nowej wersji.",

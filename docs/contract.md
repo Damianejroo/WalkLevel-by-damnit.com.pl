@@ -63,7 +63,7 @@ Spis treści:
 ## 2. Architektura
 
 ```
-┌──────────────────────── proces Bieznia.exe (Tauri 2) ────────────────────────┐
+┌──────────────────────── proces WalkLevel.exe (Tauri 2) ──────────────────────┐
 │                                                                              │
 │  wątek "petla" (50 ms, jak TICK_MS)       wątek "bluetooth" (tokio)          │
 │  ├─ Bridge.tick (mapowanie, klawisze)  ◄── odczyty prędkości/kroków          │
@@ -1477,7 +1477,7 @@ rdzeń już wylogował osobę i wysłał toast „Logowanie konta osoby X wygas�
 
 | Komenda | Argumenty | Wynik | Skutek |
 |---|---|---|---|
-| `update_check` | `install: bool` | `()` | `false`: tylko sprawdza (start - cicho, bez komunikatu „najnowsza”); `true`: sprawdza, pobiera (postęp w `update.status`), weryfikuje SHA-256, **zatrzymuje taśmę i zapisuje stan**, uruchamia instalator `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS` i po 400 ms zamyka aplikację. W wersji z kodu → `unavailable` |
+| `update_check` | `install: bool` | `()` | `false`: tylko sprawdza (start - cicho, bez komunikatu „najnowsza”); `true`: sprawdza, pobiera (postęp w `update.status`), weryfikuje SHA-256 i podpis (od 0.6.4, rozdz. 8.7), **zatrzymuje taśmę i zapisuje stan**, uruchamia instalator `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS` i po 400 ms zamyka aplikację. W wersji z kodu → `unavailable` |
 
 ### 6.13 Okna pomocnicze
 
@@ -1948,6 +1948,18 @@ Token nigdy nie trafia do plików, kopii danych ani logów; w żądaniach tylko 
   Instalator NSIS/MSI z Tauri nie przyjmie tych przełączników ani AppId.
 - 0.6.0 wymaga WebView2 Runtime (Windows 11 ma; Windows 10 zwykle ma) - instalator
   powinien zawierać bootstrapper WebView2 albo sprawdzać jego obecność.
+
+### 8.7 Nowe nazwy i podpis od 0.6.4
+
+- Repozytorium `damnit-damian/WalkLevel-by-damnit.com.pl` (konto przemianowane). Pobrania tylko z `github.com/<repozytorium>/releases/download/<tag>/<plik>` i z CDN
+  GitHuba po przekierowaniu.
+- Instalator `WalkLevel-Setup-X.Y.Z.exe`, program `WalkLevel.exe` (instalator usuwa
+  `Bieznia.exe`). Aktualizator szuka najpierw nowej nazwy, potem `Bieznia-Setup-…`; wydanie
+  0.6.4 ma kopię pod starą nazwą, bo 0.6.3 zna tylko ją.
+- Obok instalatora `<nazwa>.sig` (minisign, `tauri signer sign --app-version X.Y.Z`). Brak
+  podpisu → `aktualizacja.powod.signature-missing`, zły podpis, inny klucz, inny plik albo inna
+  wersja w podpisie → `aktualizacja.powod.signature-invalid`. Szczegóły:
+  [docs/release-signing.pl.md](release-signing.pl.md).
 - Dane w `%LOCALAPPDATA%\Bieznia` nie są ruszane przez instalator; 0.6.0 czyta je jak wyżej.
 - 0.5.1 przed uruchomieniem instalatora sam zatrzymuje taśmę i się zamyka - 0.6.0 robi to
   samo przy swojej aktualizacji (rozdz. 6.12).

@@ -121,10 +121,10 @@ pub async fn open_link(core: State<'_, Core>, kind: String) -> CmdResult<()> {
     let url = match kind.as_str() {
         "strona" => "https://damnit.com.pl".to_string(),
         "prywatnosc" => {
-            "https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl/blob/main/PRIVACY.pl.md"
+            "https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl/blob/main/PRIVACY.pl.md"
                 .to_string()
         }
-        "kod" => "https://github.com/Damianejroo/WalkLevel-by-damnit.com.pl".to_string(),
+        "kod" => "https://github.com/damnit-damian/WalkLevel-by-damnit.com.pl".to_string(),
         "regulamin" => terms,
         _ => return Err(CmdError::unexpected("Nieznany adres.")),
     };

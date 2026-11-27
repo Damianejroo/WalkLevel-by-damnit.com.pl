@@ -629,7 +629,7 @@ impl ProfileRegistry {
 
 // --- pobieranie ---------------------------------------------------------------------------
 
-pub const REPOSITORY: &str = "Damianejroo/WalkLevel-by-damnit.com.pl";
+pub const REPOSITORY: &str = "damnit-damian/WalkLevel-by-damnit.com.pl";
 pub const BRANCH: &str = "main";
 pub const INDEX: &str = "indeks.json";
 pub const INDEX_FORMAT: i64 = 1;

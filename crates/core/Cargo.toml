@@ -31,6 +31,7 @@ toml = "1.2.3"
 uuid = { version = "1.29.3", features = ["v4", "v7"] }
 windows = { version = "0.62.2", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Input_XboxController", "Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Security_Credentials", "Win32_Globalization"] }
 zip = { version = "9.8.2", default-features = false, features = ["deflate"] }
+minisign-verify = "0.3.0"
 
 [dev-dependencies]
 tempfile = "3.27.0"

@@ -1,5 +1,7 @@
 # Polityka prywatności aplikacji WalkLevel
 
+[English](PRIVACY.md) · Polski
+
 Administratorem danych jestem ja, Damian Skrzypiec - prowadzę damnit.com.pl prywatnie.
 We wszystkich sprawach dotyczących danych pisz na kontakt@damnit.com.pl.
 

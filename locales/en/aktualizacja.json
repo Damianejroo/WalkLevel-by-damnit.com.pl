@@ -22,5 +22,7 @@
   "aktualizacja.powod.przerwane": "The download was interrupted. Try again.",
   "aktualizacja.powod.system": "Updates work only on Windows.",
   "aktualizacja.zaktualizowano": "WalkLevel updated to version {nowa_wersja}.",
-  "aktualizacja.trwa": "An update is already in progress."
+  "aktualizacja.trwa": "An update is already in progress.",
+  "aktualizacja.powod.signature-missing": "The new version is not signed by the author, so it will not be installed. Try again later.",
+  "aktualizacja.powod.signature-invalid": "The signature of the new version does not match, so it will not be installed. Report it in Settings > Help and diagnostics."
 }

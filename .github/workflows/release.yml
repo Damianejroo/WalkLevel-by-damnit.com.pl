@@ -1,12 +1,13 @@
 name: Release
 
-# Nowa wersja:  git tag -a v0.6.1 -m "Co się zmieniło"  &&  git push origin v0.6.1
+# New version:  git tag -a v0.6.4 -m "What changed"  &&  git push origin v0.6.4
 #
-# Od 0.6.0 budujemy WalkLevel w Tauri 2 + Svelte + Rust. Testy i budowa idą równolegle.
-# Budowa tworzy wydanie jako SZKIC (niewidoczny dla przycisku Aktualizuj);
-# publikacja zmienia go w widoczne wydanie dopiero, gdy testy też przeszły.
-# Instalator: packaging/build.ps1 (ten sam skrypt co lokalnie), nazwa pliku
-# Bieznia-Setup-X.Y.Z.exe jak w 0.5.x - aktualizacja z 0.5.x podmienia aplikację.
+# Since 0.6.0 WalkLevel is built with Tauri 2 + Svelte + Rust. Tests and the build run in
+# parallel. The build creates the release as a DRAFT (invisible to the Update button); publishing
+# turns it into a visible release only when the tests have passed too.
+# Installer: packaging/build.ps1 (the same script as locally), file WalkLevel-Setup-X.Y.Z.exe,
+# signed with the owner's key (secrets WALKLEVEL_SIGNING_KEY and WALKLEVEL_SIGNING_KEY_PASSWORD,
+# docs/release-signing.md). WalkLevel 0.6.4 and newer install only a correctly signed installer.
 on:
   push:
     tags: ["v*.*.*"]
@@ -21,6 +22,10 @@ concurrency:
 env:
   TAG: ${{ github.ref_name }}
   CARGO_TERM_COLOR: never
+  # Needed for 0.6.4 only: WalkLevel 0.6.3 and older look only for Bieznia-Setup-X.Y.Z.exe, so
+  # the release also carries the same installer (with .sha256 and .sig) under that name.
+  # From 0.6.5 set this to "false"; later delete it with the step "Copy under the old name".
+  LEGACY_INSTALLER_COPY: "true"
 
 jobs:
   testy:
@@ -33,22 +38,22 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Node.js 24 (skrypty .ts bez kompilacji)
+      - name: Node.js 24 (TypeScript scripts run without a build step)
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-      - name: Rust stable (Rust 2024) i clippy
+      - name: Rust stable (Rust 2024) and clippy
         run: |
           rustup toolchain install stable --profile minimal --component clippy
           rustup default stable
           rustc --version
-      - name: Rdzeń i klej Tauri (clippy, testy)
+      - name: Core and Tauri layer (clippy, tests)
         run: |
           cargo clippy --workspace --all-targets --locked -- -D warnings
           if ($LASTEXITCODE) { throw "clippy" }
           cargo test --workspace --locked
           if ($LASTEXITCODE) { throw "cargo test" }
-      - name: Interfejs (typy, budowa, test widoków w Edge)
+      - name: Interface (types, build, view test in Edge)
         run: |
           npm ci
           if ($LASTEXITCODE) { throw "npm ci" }
@@ -63,10 +68,10 @@ jobs:
 
   budowa:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
-      contents: write # szkic wydania
-      id-token: write # poświadczenie pochodzenia (Sigstore)
+      contents: write # release draft
+      id-token: write # build provenance (Sigstore)
       attestations: write
     env:
       INNO_URL: https://github.com/jrsoftware/issrc/releases/download/is-7_1_1/innosetup-7.1.1-x64.exe
@@ -75,17 +80,34 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0 # treść tagu = opis wydania
-      - name: Node.js 24 (skrypty .ts bez kompilacji)
+          fetch-depth: 0 # tag message = release notes
+      - name: Version from the tag
+        shell: pwsh
+        run: |
+          if ($env:TAG -notmatch '^v(\d+\.\d+\.\d+)$') { throw "The tag must look like v1.2.3" }
+          "VERSION=$($Matches[1])" >> $env:GITHUB_ENV
+      - name: Signing keys are set (docs/release-signing.md)
+        shell: pwsh
+        env:
+          SIGNING_KEY: ${{ secrets.WALKLEVEL_SIGNING_KEY }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.WALKLEVEL_SIGNING_KEY_PASSWORD }}
+        run: |
+          $missing = @()
+          if (-not $env:SIGNING_KEY) { $missing += 'WALKLEVEL_SIGNING_KEY' }
+          if (-not $env:SIGNING_KEY_PASSWORD) { $missing += 'WALKLEVEL_SIGNING_KEY_PASSWORD' }
+          if ($missing) {
+            "::error::Missing Actions secret: $($missing -join ', '). The release stops here, because WalkLevel 0.6.4 and newer refuse an unsigned installer. See docs/release-signing.md."
+            exit 1
+          }
+          if (Select-String -Path crates/core/src/updates.rs -Pattern 'PLACEHOLDER: paste' -SimpleMatch -Quiet) {
+            "::error::SIGNING_PUBLIC_KEY in crates/core/src/updates.rs is still the placeholder. Paste the public key first, see docs/release-signing.md."
+            exit 1
+          }
+      - name: Node.js 24 (TypeScript scripts run without a build step)
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-      - name: Wersja z tagu
-        shell: pwsh
-        run: |
-          if ($env:TAG -notmatch '^v(\d+\.\d+\.\d+)$') { throw "Tag musi mieć postać v1.2.3" }
-          "VERSION=$($Matches[1])" >> $env:GITHUB_ENV
-      - name: Rust stable i Inno Setup (przypięta wersja, sprawdzona suma)
+      - name: Rust stable and Inno Setup (pinned version, checked hash)
         shell: pwsh
         run: |
           rustup toolchain install stable --profile minimal
@@ -93,34 +115,71 @@ jobs:
           $ProgressPreference = 'SilentlyContinue'
           $f = "$env:RUNNER_TEMP\innosetup.exe"
           Invoke-WebRequest -Uri $env:INNO_URL -OutFile $f -UseBasicParsing
-          if ((Get-FileHash $f -Algorithm SHA256).Hash.ToLower() -ne $env:INNO_SHA256) { throw "Zła suma Inno Setup" }
+          if ((Get-FileHash $f -Algorithm SHA256).Hash.ToLower() -ne $env:INNO_SHA256) { throw "Wrong Inno Setup hash" }
           $dir = "$env:RUNNER_TEMP\inno"
           Start-Process -FilePath $f -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CURRENTUSER','/PORTABLE=1',"/DIR=$dir" -Wait
           "ISCC=$dir\ISCC.exe" >> $env:GITHUB_ENV
-      - name: Zależności interfejsu
+      - name: Interface dependencies
         shell: pwsh
         run: |
           npm ci
           if ($LASTEXITCODE) { throw "npm ci" }
-      - name: Budowa exe i instalatora
+      - name: Build the exe and the installer
         shell: pwsh
         run: ./packaging/build.ps1 -Version $env:VERSION -Iscc $env:ISCC
-      - name: Poświadczenie pochodzenia instalatora
+      - name: Sign the installer (minisign, tauri signer)
+        shell: pwsh
+        env:
+          SIGNING_KEY: ${{ secrets.WALKLEVEL_SIGNING_KEY }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.WALKLEVEL_SIGNING_KEY_PASSWORD }}
+        run: |
+          # a secret pasted or piped with a line break at the end would not decode
+          $env:TAURI_SIGNING_PRIVATE_KEY = $env:SIGNING_KEY.Trim()
+          $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = $env:SIGNING_KEY_PASSWORD.TrimEnd("`r", "`n")
+          npx tauri signer sign --app-version $env:VERSION "dist-installer/WalkLevel-Setup-$env:VERSION.exe"
+          if ($LASTEXITCODE) { throw "tauri signer sign (check both secrets, docs/release-signing.md)" }
+      - name: Check the signature with the key built into the app
+        shell: pwsh
+        env:
+          WALKLEVEL_SIGNED_INSTALLER: ${{ github.workspace }}/dist-installer/WalkLevel-Setup-${{ env.VERSION }}.exe
+          WALKLEVEL_SIGNED_VERSION: ${{ env.VERSION }}
+        run: |
+          cargo test -p walklevel-core --lib --locked updates::tests::release_installer_is_signed_with_built_in_key -- --ignored --exact
+          if ($LASTEXITCODE) { throw "The signature does not match SIGNING_PUBLIC_KEY: the secret and the public key in updates.rs are not one pair (docs/release-signing.md)" }
+      - name: Copy under the old name for WalkLevel 0.6.3 (LEGACY_INSTALLER_COPY)
+        if: env.LEGACY_INSTALLER_COPY == 'true'
+        shell: pwsh
+        run: |
+          $dist = "dist-installer"
+          $new = "WalkLevel-Setup-$env:VERSION.exe"
+          $old = "Bieznia-Setup-$env:VERSION.exe"
+          Copy-Item "$dist/$new" "$dist/$old"
+          Copy-Item "$dist/$new.sig" "$dist/$old.sig"
+          $hash = (Get-FileHash "$dist/$old" -Algorithm SHA256).Hash.ToLower()
+          "$hash  $old" | Out-File -Encoding ascii "$dist/$old.sha256"
+      - name: Build provenance of the installer
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: dist-installer/Bieznia-Setup-*.exe
-      - name: Szkic wydania (jeszcze niewidoczny dla aplikacji)
+          subject-path: dist-installer/*-Setup-*.exe
+      - name: Release draft (not visible to the app yet)
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $notes = git tag -l --format='%(contents)' $env:TAG
           if (-not $notes) { $notes = "New version of WalkLevel.`n`nNowa wersja WalkLevel." }
-          $notes += "`n`n**Installation:** download Bieznia-Setup-$env:VERSION.exe and run it. Already have the app? Click Aktualizuj (Update) in it."
-          $notes += "`n`n**Instalacja:** pobierz Bieznia-Setup-$env:VERSION.exe i uruchom. Masz już aplikację? Kliknij w niej Aktualizuj."
+          $notes += "`n`n**Installation:** download WalkLevel-Setup-$env:VERSION.exe and run it. Already have the app? Click Aktualizuj (Update) in it. The app checks the signature (.sig) before it installs an update."
+          $notes += "`n`n**Instalacja:** pobierz WalkLevel-Setup-$env:VERSION.exe i uruchom. Masz już aplikację? Kliknij w niej Aktualizuj. Aplikacja sprawdza podpis (.sig), zanim zainstaluje aktualizację."
+          $names = @("WalkLevel-Setup-$env:VERSION.exe")
+          if ($env:LEGACY_INSTALLER_COPY -eq 'true') {
+            $names += "Bieznia-Setup-$env:VERSION.exe"
+            $notes += "`n`nBieznia-Setup-$env:VERSION.exe is the same installer under its old name, for the Update button of WalkLevel 0.6.3."
+            $notes += "`n`nBieznia-Setup-$env:VERSION.exe to ten sam instalator pod starą nazwą, dla przycisku Aktualizuj w WalkLevel 0.6.3."
+          }
           $notes | Out-File -Encoding utf8 notes.md
           $dist = "dist-installer"
-          gh release create $env:TAG "$dist/Bieznia-Setup-$env:VERSION.exe" "$dist/Bieznia-Setup-$env:VERSION.exe.sha256" --draft --title "WalkLevel $env:VERSION" --notes-file notes.md --verify-tag
+          $files = foreach ($name in $names) { "$dist/$name"; "$dist/$name.sha256"; "$dist/$name.sig" }
+          gh release create $env:TAG @files --draft --title "WalkLevel $env:VERSION" --notes-file notes.md --verify-tag
 
   publikacja:
     needs: [testy, budowa]
@@ -129,7 +188,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Opublikuj wydanie (testy i budowa przeszły)
+      - name: Publish the release (tests and build passed)
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}

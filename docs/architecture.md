@@ -15,7 +15,7 @@ The tagline stays: „Chodzisz w realu, idziesz w grze”.
 | `crates/core` | `walklevel-core`: all logic without UI (treadmill drivers, control, history, people and profiles, levels, online account, backups, reports, updates). It does not depend on Tauri. Core tests live here. |
 | `src-tauri` | Glue only: commands, events, windows. No business logic. |
 | `src` | Svelte 5 UI. One window with fixed screens driven by state; screens are mounted once and then only hidden, not rebuilt. |
-| `docs` | `contract.md` (types and commands), `design.md` (design tokens and components), `texts.md` (the single source of keys and Polish texts), `i18n.md` (languages and translations), `sync.md` (sync with the account server), `analysis-*.md` (analyses); `docs/readme/` holds the README screenshots. |
+| `docs` | `contract.md` (types and commands), `design.md` (design tokens and components), `texts.md` (the single source of keys and Polish texts), `i18n.md` (languages and translations), `sync.md` (sync with the account server), `release-signing.md` (signed releases), `analysis-*.md` (analyses); `docs/readme/` holds the README screenshots. |
 | `locales` | Language packs: `languages.json` (the list of languages), `pl/` generated from `docs/texts.md`, other languages translated by hand ([docs/i18n.md](i18n.md)). |
 | `tests-ui` | View test and the language pack generator. |
 | `packaging` | Icon, installer images and the Inno Setup script. |
@@ -92,8 +92,14 @@ Only after these, `npx tauri dev`.
 - The `Bieznia/konto` entry in Windows Credential Manager.
 - For development and tests, the `WALKLEVEL_DANE` environment variable points to another data
   folder, so real data stays untouched.
-- The Inno Setup installer keeps the same AppId, and the executable is still named
-  `Bieznia.exe` (the installer file is `Bieznia-Setup-X.Y.Z.exe`).
+- The Inno Setup installer keeps the same AppId and folder `{localappdata}\Programs\Bieznia`.
+  Since 0.6.4 the program is `WalkLevel.exe` and the installer `WalkLevel-Setup-X.Y.Z.exe`; the
+  installer removes the old `Bieznia.exe` and repoints the shortcuts. The updater looks for
+  `WalkLevel-Setup-…` first, then `Bieznia-Setup-…`, and the 0.6.4 release also carries a copy
+  under the old name for 0.6.3 (`LEGACY_INSTALLER_COPY` in `release.yml`).
+- The User-Agent header stays `Bieznia/<version>` (the account server may recognise it).
+- Since 0.6.4 the updater installs only an installer signed with the owner's key
+  ([docs/release-signing.md](release-signing.md)).
 
 ## No bloat
 
