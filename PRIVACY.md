@@ -3,6 +3,8 @@
 
 # WalkLevel app privacy policy
 
+English · [Polski](PRIVACY.pl.md)
+
 The data controller is me, Damian Skrzypiec - I run damnit.com.pl privately.
 For anything about your data, write to kontakt@damnit.com.pl.
 
