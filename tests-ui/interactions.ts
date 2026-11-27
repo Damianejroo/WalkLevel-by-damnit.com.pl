@@ -2,8 +2,8 @@
 // the friends panel header (collapse button in place on both sides, initials for hidden levels)
 // and collapsed strip on both sides, controls after a failed command,
 // threshold fields, "add a person with an online account", the report description length,
-// hiding a session online, the achievement date format, text from other users shown literally
-// and the focus ring only from Tab navigation.
+// hiding a session online, the achievement date format, text from other users shown literally,
+// the focus ring only from Tab navigation and the Settings > Language title, list and collapse.
 import type { Browser, Page } from 'playwright-core';
 import fs from 'node:fs';
 import { napis, znak } from '../src/lib/ui/badge-glyphs.ts';
@@ -421,6 +421,63 @@ async function focusRing(browser: Browser, address: string): Promise<Result> {
   return { nazwa: 'interakcje-obwodka-fokusu', problemy: problems };
 }
 
+/**
+ * Settings > Language: the title keeps the English word in every other language, the list shows
+ * each language in its own name; expanding and collapsing any category leaves all of them shown.
+ */
+async function languageCategory(browser: Browser, address: string): Promise<Result> {
+  const problems: string[] = [];
+  const manifest = JSON.parse(fs.readFileSync(new URL('../locales/languages.json', import.meta.url), 'utf8')) as {
+    languages: { code: string; name: string }[];
+  };
+  const own = new Map(manifest.languages.map((l) => [l.code, l.name]));
+  const titles = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('[data-ekran="settings"] .akordeon')].map((a) => {
+        const r = a.getBoundingClientRect();
+        const shown = a.checkVisibility({ opacityProperty: true, visibilityProperty: true }) && r.height > 0;
+        return { title: a.querySelector('.tytul')?.textContent ?? '', shown, transform: getComputedStyle(a).transform };
+      }),
+    );
+  let page = await browser.newPage({ viewport: { width: 740, height: 900 } });
+  try {
+    for (const [code, expected] of [['pl', `${polish('language.category.name')} · Language`], ['en', 'Language']]) {
+      await open(page, address, `ekran=settings&otwarte=jezyk&jezyk=${code}`);
+      const title = (await titles())[5]?.title;
+      if (title !== expected) problems.push(`${code}: kategoria języka „${title}”, oczekiwano „${expected}”`);
+      const rows = await page.locator('[data-ekran="settings"] li[lang]').evaluateAll((li) =>
+        li.map((l) => [l.getAttribute('lang') ?? '', l.querySelector('.tytul')?.textContent?.trim() ?? '']),
+      );
+      for (const [lang, name] of rows) {
+        if (own.has(lang) && own.get(lang) !== name) problems.push(`${code}: język ${lang} na liście jako „${name}”, nie „${own.get(lang)}”`);
+      }
+    }
+    for (const width of [740, 420]) {
+      await page.close();
+      page = await browser.newPage({ viewport: { width, height: 700 } });
+      await open(page, address, 'ekran=settings&otwarte=');
+      const count = (await titles()).length;
+      for (let i = 0; i < count; i++) {
+        const header = page.locator('[data-ekran="settings"] .akordeon > .naglowek').nth(i);
+        await header.click();
+        await page.waitForTimeout(300);
+        await header.click();
+        await page.waitForTimeout(300);
+        const after = await titles();
+        const missing = after.filter((a) => !a.shown || a.transform !== 'none').map((a) => a.title);
+        if (after.length !== count || missing.length) {
+          problems.push(`${width} px, po rozwinięciu i zwinięciu kategorii ${i + 1}: ${after.length}/${count} kategorii, niewidoczne: ${missing.join(', ')}`);
+        }
+      }
+    }
+  } catch (e) {
+    problems.push(String(e));
+  } finally {
+    await page.close();
+  }
+  return { nazwa: 'interakcje-kategoria-jezyka', problemy: problems };
+}
+
 export async function checkInteractions(browser: Browser, address: string): Promise<Result[]> {
   return [
     ...(await panelHeader(browser, address)),
@@ -434,5 +491,6 @@ export async function checkInteractions(browser: Browser, address: string): Prom
     badgeGlyphs(),
     await htmlFromOthers(browser, address),
     await focusRing(browser, address),
+    await languageCategory(browser, address),
   ];
 }

@@ -19,6 +19,7 @@
   import KatDane from './settings/data-section.svelte';
   import KatPomoc from './settings/help-section.svelte';
   import { t, tl, type Klucz } from '../lib/texts';
+  import { language } from '../lib/i18n.svelte';
   import { stan, type PropsEkranu } from '../lib/state.svelte';
   import * as api from '../lib/api';
 
@@ -84,6 +85,12 @@
             model: stan.device.device?.model || stan.device.label.split('\n')[0] || stan.settings.deviceName,
           }),
   );
+  // Ktoś, kto przez pomyłkę wybrał nieznany sobie język, znajdzie kategorię po angielskim słowie:
+  // dopisek dokłada kod, nie tłumaczenie, więc nie zgubi go żaden pakiet (docs/i18n.md).
+  const tytulJezyka = $derived.by(() => {
+    const nazwa = t('language.category.name');
+    return language.code.split('-')[0] === 'en' || nazwa === 'Language' ? nazwa : `${nazwa} · Language`;
+  });
   // wybrany język w opisie, nie w wartości: opis widać też poniżej 440 px, wartość tam znika
   const jezyk = $derived(stan.language.languages.find((l) => l.code === stan.language.chosen)?.name ?? stan.language.chosen);
   const wartosci = $derived<Record<Kategoria, string | undefined>>({
@@ -111,7 +118,7 @@
     {#each KATEGORIE as k (k.klucz)}
       <NaglowekAkordeonu
         ikona={k.ikona}
-        tytul={t(k.nazwa)}
+        tytul={k.klucz === 'jezyk' ? tytulJezyka : t(k.nazwa)}
         opis={k.klucz === 'jezyk' ? t(k.opis, { jezyk }) : t(k.opis)}
         wartosc={wartosci[k.klucz]}
         bind:otwarty={otwarte[k.klucz]}

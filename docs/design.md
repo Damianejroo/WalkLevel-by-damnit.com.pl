@@ -999,7 +999,11 @@ podgląd profilu – dane), tło `--surface-2`.
   ustawienie tego, jak aplikacja się pokazuje, więc stoi przy wyglądzie (i tam, gdzie szukali go
   użytkownicy 0.6.4), a przed sprawami rzadkimi (dane, pomoc). Opis nagłówka zaczyna się od
   nazwy wybranego języka w nim samym („Polski · wybór i pobieranie języków”), bez wartości
-  z prawej - opis widać w każdej szerokości, wartość znika poniżej 440 px. W środku jedna karta
+  z prawej - opis widać w każdej szerokości, wartość znika poniżej 440 px. Tytuł w każdym
+  języku poza angielskim ma dopisek „ · Language” („Język · Language”, po angielsku samo
+  „Language”), żeby ktoś, kto przez pomyłkę wybrał obcy język, znalazł drogę powrotu; dopisek
+  dokłada kod, nie tłumacz (docs/i18n.md, „Droga powrotu”). Lista języków pokazuje każdy język
+  w jego własnej nazwie (English, Polski, Deutsch). W środku jedna karta
   „Język aplikacji”: lista języków (wiersz z podpisem Zainstalowany / Do pobrania / Pobieranie… /
   Wybrany, wybrany z ramką), błąd pobierania w karcie błędu 8.17 z „Spróbuj ponownie”.
 - Wewnątrz: karty z tytułem bez paska; wiersze ustawień 8.2; segmentowane w pełnej szerokości.

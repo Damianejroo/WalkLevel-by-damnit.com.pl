@@ -395,7 +395,7 @@ Nazwy kategorii i kart są celem ścieżek „Ustawienia > …” we wszystkich 
 | `ustawienia.kat.poziomy.opis` | Popupy osiągnięć nad grą, dźwięk | Powiadomienia o osiągnięciach nad grą, dźwięk | |
 | `ustawienia.kat.wyglad.nazwa` | Wygląd i okno | Wygląd i okno | |
 | `ustawienia.kat.wyglad.opis` | Motyw, kolor, tekst, okno, przycisk na ekranie | Motyw, kolor, wielkość tekstu, okno, przycisk na ekranie | Język był tu w 0.6.4, od 0.6.5 ma własną kategorię. |
-| `language.category.name` | (nowy) | Język | Od 0.6.5: kategoria tuż po „Wygląd i okno”. Cel ścieżek „Ustawienia > Język”. |
+| `language.category.name` | (nowy) | Język | Od 0.6.5: kategoria tuż po „Wygląd i okno”. Cel ścieżek „Ustawienia > Język”. Samo słowo, bez „Language”: poza angielskim interfejs sam dopisuje „ · Language” (docs/i18n.md, „Droga powrotu”). |
 | `language.category.about` | (nowy) | {jezyk} · wybór i pobieranie języków | Opis pod nazwą kategorii. `{jezyk}` to nazwa wybranego języka w nim samym („Polski”, „English”). |
 | `ustawienia.kat.dane.nazwa` | Dane i kopia | Dane i kopia | |
 | `ustawienia.kat.dane.opis` | Eksport, import, folder danych | Kopia danych, przeniesienie na inny komputer | |

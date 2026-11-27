@@ -2,7 +2,7 @@
   "@@locale": "pl",
   "language.category.name": "Język",
   "@language.category.name": {
-    "description": "Od 0.6.5: kategoria tuż po „Wygląd i okno”. Cel ścieżek „Ustawienia > Język”."
+    "description": "Od 0.6.5: kategoria tuż po „Wygląd i okno”. Cel ścieżek „Ustawienia > Język”. Samo słowo, bez „Language”: poza angielskim interfejs sam dopisuje „ · Language” (docs/i18n.md, „Droga powrotu”)."
   },
   "language.category.about": "{jezyk} · wybór i pobieranie języków",
   "@language.category.about": {
