@@ -1377,7 +1377,10 @@ Trzeba je przejrzeć osobno w kodzie serwera według tych samych zasad.
 
 ## 26. Instalator (`packaging/installer.iss`)
 
-Jeśli 0.6.0 ma nowy instalator (Tauri/NSIS albo nowe Inno Setup), teksty:
+Instalator Inno Setup nie czyta pakietów językowych: teksty są w `[Messages]` i `[CustomMessages]`
+pliku `packaging/installer.iss` (po angielsku i po polsku), a tu są dla tłumaczy. Zmiana tekstu
+tutaj wymaga tej samej zmiany w `installer.iss`. Pozostałe teksty instalatora (okno wyboru języka,
+przyciski, pasek postępu) są z plików językowych Inno Setup.
 
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
@@ -1385,6 +1388,10 @@ Jeśli 0.6.0 ma nowy instalator (Tauri/NSIS albo nowe Inno Setup), teksty:
 | `instalator.gotowe1` | WalkLevel {wersja} by damnit.com.pl zostanie zainstalowany na tym komputerze. | WalkLevel {wersja} zostanie zainstalowany na tym komputerze. | „by damnit.com.pl” to wtrącenie po angielsku; autor jest w danych wydawcy. |
 | `instalator.gotowe2` | Kliknij Instaluj. Nie są potrzebne uprawnienia administratora, a po instalacji aplikacja otworzy się sama. | Kliknij Instaluj. Uprawnienia administratora nie są potrzebne, a po instalacji WalkLevel otworzy się sam. | |
 | `instalator.skrot` | WalkLevel | WalkLevel | Skrót w menu Start i na pulpicie. Instalator nadal usuwa stare skróty „Bieżnia” i „Bieżnia Gamingowa” (to nazwy plików, nie tekst dla gracza). |
+| `instalator.languages` | (nowy) | Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Wygląd i okno > Język. | Od 0.6.4: nad listą języków aplikacji, przed `instalator.gotowe2`. |
+| `instalator.english-built-in` | (nowy) | English (wbudowany) | Od 0.6.4: stała pozycja listy języków. Inne języki mają na liście swoją nazwę z `locales/languages.json`. |
+| `instalator.languages-type` | (nowy) | Wybrane języki | Od 0.6.4: jedyny typ instalacji; Inno go nie pokazuje, gdy typ jest jeden. |
+| `instalator.webview2-missing` | (nowy) | Brakuje składnika Microsoft Edge WebView2, z którego korzysta okno WalkLevel. Zainstaluj go ze strony https://developer.microsoft.com/microsoft-edge/webview2/ i uruchom WalkLevel ponownie. | Okno po instalacji, gdy w Windows nie ma WebView2. |
 
 ## 27. Domyślne nazwy i losowanie nazw
 

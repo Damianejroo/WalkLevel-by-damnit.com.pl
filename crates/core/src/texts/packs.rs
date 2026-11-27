@@ -17,8 +17,10 @@ use crate::paths::AppPaths;
 use crate::treadmill::profiles::{FetchError, Fetcher};
 
 pub const LOCALES_DIR: &str = "locales";
-/// Manifest entry kept with a downloaded pack (languages unknown to this version).
-pub const LANGUAGE_FILE: &str = "language.json";
+/// Manifest entry kept with a downloaded pack (languages unknown to this version). No namespace
+/// file can have this name (namespace files never contain `_`); `language.json` is the file of
+/// the `language` namespace.
+pub const LANGUAGE_FILE: &str = "_language.json";
 pub const MANIFEST_FILE: &str = "languages.json";
 /// Request from the installer: `{"language": "pl", "id": "..."}` next to the exe.
 pub const INSTALLER_FILE: &str = "installer.json";
@@ -599,15 +601,23 @@ mod tests {
             format!("{base}/de/app.json"),
             Ok(r#"{"@@locale":"de","app.wroc":"Zurück","app.wersja":"Version {falsch}","x.y":"?"}"#.to_string()),
         );
+        files.insert(
+            format!("{base}/de/language.json"),
+            Ok(r#"{"@@locale":"de","language.title":"Sprache"}"#.to_string()),
+        );
         let mut steps = 0;
         let count = download(&Fake(files), base, &german(), &paths, &mut |_, _| {
             steps += 1
         })
         .unwrap();
-        assert_eq!(count, 1);
+        assert_eq!(count, 2);
         assert_eq!(steps, built_in().namespaces.len());
         let texts = read_pack(&paths.data.join("locales/de")).unwrap();
         assert_eq!(texts.get("app.wroc").map(String::as_str), Some("Zurück"));
+        assert_eq!(
+            texts.get("language.title").map(String::as_str),
+            Some("Sprache")
+        );
         assert!(!texts.contains_key("app.wersja"));
         let list = languages(&paths, &[]);
         let de = list.iter().find(|l| l.language.code == "de").unwrap();

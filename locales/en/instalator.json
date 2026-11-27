@@ -3,5 +3,9 @@
   "instalator.tytul": "WalkLevel Setup",
   "instalator.gotowe1": "WalkLevel {wersja} will be installed on this computer.",
   "instalator.gotowe2": "Click Install. Administrator rights are not needed, and WalkLevel opens by itself after installation.",
-  "instalator.skrot": "WalkLevel"
+  "instalator.skrot": "WalkLevel",
+  "instalator.languages": "Choose the languages of WalkLevel. English is built in. You can change the language later in Settings > Appearance and window > Language.",
+  "instalator.english-built-in": "English (built in)",
+  "instalator.languages-type": "Selected languages",
+  "instalator.webview2-missing": "WalkLevel needs Microsoft Edge WebView2 for its window, and it is missing. Install it from https://developer.microsoft.com/microsoft-edge/webview2/ and start WalkLevel again."
 }

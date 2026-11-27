@@ -97,6 +97,9 @@ Only after these, `npx tauri dev`.
   installer removes the old `Bieznia.exe` and repoints the shortcuts. The updater looks for
   `WalkLevel-Setup-…` first, then `Bieznia-Setup-…`, and the 0.6.4 release also carries a copy
   under the old name for 0.6.3 (`LEGACY_INSTALLER_COPY` in `release.yml`).
+- Since 0.6.4 the installer asks for its language and the app languages
+  ([docs/i18n.md](i18n.md#installer)). The Inno language name `polish` stays as in 0.6.3, so an
+  update keeps Polish as the installer language, and Polish is preselected for those users.
 - The User-Agent header stays `Bieznia/<version>` (the account server may recognise it).
 - Since 0.6.4 the updater installs only an installer signed with the owner's key
   ([docs/release-signing.md](release-signing.md)).
