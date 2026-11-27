@@ -880,7 +880,9 @@ podgląd profilu – dane), tło `--surface-2`.
   zawsze przy krawędzi od strony głównej kolumny, plus przy krawędzi zewnętrznej:
   z prawej `[zwiń] Znajomi / podpis …… [+]` (tytuł do lewej), z lewej
   `Znajomi / podpis …… [+] [zwiń]`. Po obu stronach zwiń stoi 12 px od krawędzi kolumny - tak
-  samo jak wyśrodkowany w 64-pikselowym pasku, więc po zwinięciu się nie przesuwa. Pole po plusie:
+  samo jak wyśrodkowany w 64-pikselowym pasku, więc po zwinięciu się nie przesuwa. Strzałka na
+  przycisku pokazuje, w którą stronę ruszy zewnętrzna krawędź okna: w pełnym panelu w stronę
+  głównej kolumny, w pasku od niej (0.6.5). Pole po plusie:
   filtruje listę, pseudonim spoza listy (od 3 znaków) daje „Zaproś „nick” do znajomych”.
 - Lista: zaproszenia do mnie (ramka `--line`, Odrzuć/Przyjmij 36 px), grupy „Chodzą teraz · N”
   i „Pozostali · N” 13/600 `--text-2`. Wiersz 56 px: odznaka 34 | pseudonim 15/600, czynność 13

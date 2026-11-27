@@ -183,7 +183,7 @@
 
 {#snippet collapseButton()}
   <button type="button" class="ib zwijanie" aria-label={tytulZwijania} title={tytulZwijania} onclick={zwin}>
-    <Ikona nazwa={waski ? 'rozwin_panel' : 'zwin_panel'} />
+    <Ikona nazwa={waski ? 'zwin_panel' : 'rozwin_panel'} />
   </button>
 {/snippet}
 
@@ -399,8 +399,8 @@
   .ib:active { transform: scale(0.96); }
   .ib:disabled { color: var(--text-2); }
   .ib.mala { width: 36px; height: 36px; border: 1px solid var(--control); }
-  /* the arrow points the way the panel collapses (towards the window edge) and the other way in
-     the strip; the glyphs are drawn for a panel on the left, so they are mirrored on the right */
+  /* the arrow points the way the window's outer edge moves: towards the main column when
+     collapsing, away from it in the strip; drawn for a panel on the left, mirrored on the right */
   .right .zwijanie :global(.ikona) { transform: scaleX(-1); }
 
   .szukaj { display: grid; gap: 6px; padding: 4px 10px 8px; min-width: 0; }
