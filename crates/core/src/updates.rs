@@ -54,8 +54,7 @@ pub const CDN_HOSTS: [&str; 2] = [
 /// The owner's minisign public key for release signatures: the content of the `.pub` file
 /// from `npx tauri signer generate` (docs/release-signing.md). A release build does not
 /// compile while this is the placeholder.
-pub const SIGNING_PUBLIC_KEY: &str =
-    "PLACEHOLDER: paste the owner's public key here, see docs/release-signing.md";
+pub const SIGNING_PUBLIC_KEY: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEMzNjI0NkNFRTlBQjFCQjQKUldTMEc2dnB6a1ppd3pDcEdXZmRldGx5eDdRYjUzSUM0dXF4Si8rWlY3b1JYeHhBazZDS1ZCVFAK";
 
 #[cfg(not(debug_assertions))]
 const _: () = assert!(
