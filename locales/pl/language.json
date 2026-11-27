@@ -1,8 +1,19 @@
 {
   "@@locale": "pl",
-  "language.title": "Język",
+  "language.category.name": "Język",
+  "@language.category.name": {
+    "description": "Od 0.6.5: kategoria tuż po „Wygląd i okno”. Cel ścieżek „Ustawienia > Język”."
+  },
+  "language.category.about": "{jezyk} · wybór i pobieranie języków",
+  "@language.category.about": {
+    "description": "Opis pod nazwą kategorii. `{jezyk}` to nazwa wybranego języka w nim samym („Polski”, „English”).",
+    "placeholders": {
+      "jezyk": {}
+    }
+  },
+  "language.title": "Język aplikacji",
   "@language.title": {
-    "description": "Tytuł karty w Ustawienia > Wygląd i okno."
+    "description": "Tytuł karty w Ustawienia > Język (0.6.5: było „Język”, jak nazwa kategorii)."
   },
   "language.description": "Język napisów w WalkLevel. Zmiana działa od razu, bez ponownego uruchomienia.",
   "@language.description": {

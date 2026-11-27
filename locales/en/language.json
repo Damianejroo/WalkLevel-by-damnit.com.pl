@@ -1,6 +1,8 @@
 {
   "@@locale": "en",
-  "language.title": "Language",
+  "language.category.name": "Language",
+  "language.category.about": "{jezyk} · choose and download languages",
+  "language.title": "App language",
   "language.description": "Language of WalkLevel. The change works at once, without a restart.",
   "language.list": "Languages",
   "language.installed": "Installed",

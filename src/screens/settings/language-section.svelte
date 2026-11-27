@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Settings > Appearance and window > Language (docs/i18n.md): every language the app knows,
+  // Settings > Language (docs/i18n.md): every language the app knows,
   // installed or to download. A click shows an installed language at once; any other one is
   // downloaded first (progress in the row). A failed download shows the error card.
   import { onMount } from 'svelte';

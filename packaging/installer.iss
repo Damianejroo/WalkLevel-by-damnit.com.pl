@@ -68,10 +68,10 @@ Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 [Messages]
 english.WizardSelectComponents=WalkLevel Setup
 english.SelectComponentsDesc=WalkLevel {#AppVersion} will be installed on this computer.
-english.SelectComponentsLabel2=Choose the languages of WalkLevel. English is built in. You can change the language later in Settings > Appearance and window > Language.%n%nClick Install. Administrator rights are not needed, and WalkLevel opens by itself after installation.
+english.SelectComponentsLabel2=Choose the languages of WalkLevel. English is built in. You can change the language later in Settings > Language.%n%nClick Install. Administrator rights are not needed, and WalkLevel opens by itself after installation.
 polish.WizardSelectComponents=Instalacja WalkLevel
 polish.SelectComponentsDesc=WalkLevel {#AppVersion} zostanie zainstalowany na tym komputerze.
-polish.SelectComponentsLabel2=Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Wygląd i okno > Język.%n%nKliknij Instaluj. Uprawnienia administratora nie są potrzebne, a po instalacji WalkLevel otworzy się sam.
+polish.SelectComponentsLabel2=Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Język.%n%nKliknij Instaluj. Uprawnienia administratora nie są potrzebne, a po instalacji WalkLevel otworzy się sam.
 
 [CustomMessages]
 ; BCP 47 tag of the app language that matches the installer language (docs/i18n.md)

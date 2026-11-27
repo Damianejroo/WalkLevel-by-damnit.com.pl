@@ -10,9 +10,9 @@
   "ustawienia.kat.poziomy.nazwa": "Poziomy i powiadomienia",
   "ustawienia.kat.poziomy.opis": "Powiadomienia o osiągnięciach nad grą, dźwięk",
   "ustawienia.kat.wyglad.nazwa": "Wygląd i okno",
-  "ustawienia.kat.wyglad.opis": "Język, motyw, kolor, wielkość tekstu, okno, przycisk na ekranie",
+  "ustawienia.kat.wyglad.opis": "Motyw, kolor, wielkość tekstu, okno, przycisk na ekranie",
   "@ustawienia.kat.wyglad.opis": {
-    "description": "Język od 0.6.4."
+    "description": "Język był tu w 0.6.4, od 0.6.5 ma własną kategorię."
   },
   "ustawienia.kat.dane.nazwa": "Dane i kopia",
   "ustawienia.kat.dane.opis": "Kopia danych, przeniesienie na inny komputer",

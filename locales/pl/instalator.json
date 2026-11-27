@@ -15,7 +15,7 @@
   "@instalator.skrot": {
     "description": "Skrót w menu Start i na pulpicie. Instalator nadal usuwa stare skróty „Bieżnia” i „Bieżnia Gamingowa” (to nazwy plików, nie tekst dla gracza)."
   },
-  "instalator.languages": "Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Wygląd i okno > Język.",
+  "instalator.languages": "Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Język.",
   "@instalator.languages": {
     "description": "Od 0.6.4: nad listą języków aplikacji, przed `instalator.gotowe2`."
   },

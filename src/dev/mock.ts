@@ -81,6 +81,8 @@ export const SCENARIUSZE: Record<string, Partial<Scenariusz>> = {
   'ustawienia-wylogowany': { konto: false, bieznia: 'brak' },
   'ustawienia-dlugie': { dlugie: true, tryb: 'gamepad' },
   'ustawienia-klawisze-stop': { klawiszStop: true },
+  // Ustawienia z otwartą tylko kategorią Język (0.6.5; settings-screen.svelte: stan=kategoria-<klucz>)
+  'kategoria-jezyk': {},
   // Klawisze przy „Taśma staje” na ekranie głównym; przycisk na ekranie z jadącą taśmą
   'klawisze-stop': { tryb: 'keyboard', wlaczone: true, klawiszStop: true },
   jedzie: { tryb: 'keyboard', jedzie: true },

@@ -4,7 +4,7 @@
 
 <script lang="ts">
   // Ekran: Ustawienia (trasa 'settings'), docs/design.md 8.5, 9.3; docs/texts.md 9-18.
-  // Akordeon 7 kategorii: otwierają się niezależnie, kliknięty nagłówek stoi w miejscu (zmienia się
+  // Akordeon 8 kategorii: otwierają się niezależnie, kliknięty nagłówek stoi w miejscu (zmienia się
   // tylko to, co pod nim), bez automatycznego przewijania. Wartości przy nagłówkach liczone na
   // żywo ze stanu. Otwarte kategorie zostają po powrocie (ekran montowany raz). Bez akcentu.
   import Strona from '../lib/ui/page.svelte';
@@ -24,7 +24,7 @@
 
   let { parametry, aktywny }: PropsEkranu = $props();
 
-  type Kategoria = 'osoby' | 'sterowanie' | 'bieznia' | 'poziomy' | 'wyglad' | 'dane' | 'pomoc';
+  type Kategoria = 'osoby' | 'sterowanie' | 'bieznia' | 'poziomy' | 'wyglad' | 'jezyk' | 'dane' | 'pomoc';
   interface OpisKategorii {
     klucz: Kategoria;
     ikona: NazwaIkony;
@@ -37,19 +37,24 @@
     { klucz: 'bieznia', ikona: 'bieznia', nazwa: 'ustawienia.kat.bieznia.nazwa', opis: 'ustawienia.kat.bieznia.opis' },
     { klucz: 'poziomy', ikona: 'gwiazda', nazwa: 'ustawienia.kat.poziomy.nazwa', opis: 'ustawienia.kat.poziomy.opis' },
     { klucz: 'wyglad', ikona: 'wyglad', nazwa: 'ustawienia.kat.wyglad.nazwa', opis: 'ustawienia.kat.wyglad.opis' },
+    { klucz: 'jezyk', ikona: 'jezyk', nazwa: 'language.category.name', opis: 'language.category.about' },
     { klucz: 'dane', ikona: 'dane', nazwa: 'ustawienia.kat.dane.nazwa', opis: 'ustawienia.kat.dane.opis' },
     { klucz: 'pomoc', ikona: 'pomoc', nazwa: 'ustawienia.kat.pomoc.nazwa', opis: 'ustawienia.kat.pomoc.opis' },
   ];
 
   /**
    * Podgląd w przeglądarce (atrapa, test zrzutów): `?otwarte=osoby,pomoc` albo `?otwarte=wszystkie`;
-   * scenariusze atrapy `ustawienia*` otwierają wszystkie kategorie. W aplikacji wszystkie zwinięte.
+   * scenariusze atrapy `ustawienia*` otwierają wszystkie kategorie, `kategoria-<klucz>` tylko jedną
+   * (np. `kategoria-jezyk`). W aplikacji wszystkie zwinięte.
    */
   function naStart(): Record<Kategoria, boolean> {
     const wynik = Object.fromEntries(KATEGORIE.map((k) => [k.klucz, false])) as Record<Kategoria, boolean>;
     if (api.wTauri) return wynik;
     const p = new URLSearchParams(location.search);
-    const lista = p.get('otwarte') ?? (p.get('stan')?.startsWith('ustawienia') ? 'wszystkie' : '');
+    const scenariusz = p.get('stan') ?? '';
+    const lista =
+      p.get('otwarte') ??
+      (scenariusz.startsWith('ustawienia') ? 'wszystkie' : scenariusz.startsWith('kategoria-') ? scenariusz.slice(10) : '');
     for (const k of KATEGORIE) wynik[k.klucz] = lista === 'wszystkie' || lista.split(',').includes(k.klucz);
     return wynik;
   }
@@ -79,6 +84,8 @@
             model: stan.device.device?.model || stan.device.label.split('\n')[0] || stan.settings.deviceName,
           }),
   );
+  // wybrany język w opisie, nie w wartości: opis widać też poniżej 440 px, wartość tam znika
+  const jezyk = $derived(stan.language.languages.find((l) => l.code === stan.language.chosen)?.name ?? stan.language.chosen);
   const wartosci = $derived<Record<Kategoria, string | undefined>>({
     osoby: !osoba
       ? undefined
@@ -93,6 +100,7 @@
     bieznia,
     poziomy: t(stan.settings.achievementPopups ? 'ustawienia.wartosc.poziomy_wl' : 'ustawienia.wartosc.poziomy_wyl'),
     wyglad: motyw,
+    jezyk: undefined,
     dane: undefined,
     pomoc: t('ustawienia.wartosc.pomoc', { wersja: stan.app.version }),
   });
@@ -104,7 +112,7 @@
       <NaglowekAkordeonu
         ikona={k.ikona}
         tytul={t(k.nazwa)}
-        opis={t(k.opis)}
+        opis={k.klucz === 'jezyk' ? t(k.opis, { jezyk }) : t(k.opis)}
         wartosc={wartosci[k.klucz]}
         bind:otwarty={otwarte[k.klucz]}
       >
@@ -117,8 +125,9 @@
         {:else if k.klucz === 'poziomy'}
           <KatPoziomy />
         {:else if k.klucz === 'wyglad'}
-          <KatJezyk />
           <KatWyglad />
+        {:else if k.klucz === 'jezyk'}
+          <KatJezyk />
         {:else if k.klucz === 'dane'}
           <KatDane />
         {:else}

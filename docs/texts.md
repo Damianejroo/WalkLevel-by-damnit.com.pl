@@ -394,7 +394,9 @@ Nazwy kategorii i kart są celem ścieżek „Ustawienia > …” we wszystkich 
 | `ustawienia.kat.poziomy.nazwa` | Poziomy i powiadomienia | Poziomy i powiadomienia | |
 | `ustawienia.kat.poziomy.opis` | Popupy osiągnięć nad grą, dźwięk | Powiadomienia o osiągnięciach nad grą, dźwięk | |
 | `ustawienia.kat.wyglad.nazwa` | Wygląd i okno | Wygląd i okno | |
-| `ustawienia.kat.wyglad.opis` | Motyw, kolor, tekst, okno, przycisk na ekranie | Język, motyw, kolor, wielkość tekstu, okno, przycisk na ekranie | Język od 0.6.4. |
+| `ustawienia.kat.wyglad.opis` | Motyw, kolor, tekst, okno, przycisk na ekranie | Motyw, kolor, wielkość tekstu, okno, przycisk na ekranie | Język był tu w 0.6.4, od 0.6.5 ma własną kategorię. |
+| `language.category.name` | (nowy) | Język | Od 0.6.5: kategoria tuż po „Wygląd i okno”. Cel ścieżek „Ustawienia > Język”. |
+| `language.category.about` | (nowy) | {jezyk} · wybór i pobieranie języków | Opis pod nazwą kategorii. `{jezyk}` to nazwa wybranego języka w nim samym („Polski”, „English”). |
 | `ustawienia.kat.dane.nazwa` | Dane i kopia | Dane i kopia | |
 | `ustawienia.kat.dane.opis` | Eksport, import, folder danych | Kopia danych, przeniesienie na inny komputer | |
 | `ustawienia.kat.pomoc.nazwa` | Pomoc i diagnostyka | Pomoc i diagnostyka | |
@@ -1388,7 +1390,7 @@ przyciski, pasek postępu) są z plików językowych Inno Setup.
 | `instalator.gotowe1` | WalkLevel {wersja} by damnit.com.pl zostanie zainstalowany na tym komputerze. | WalkLevel {wersja} zostanie zainstalowany na tym komputerze. | „by damnit.com.pl” to wtrącenie po angielsku; autor jest w danych wydawcy. |
 | `instalator.gotowe2` | Kliknij Instaluj. Nie są potrzebne uprawnienia administratora, a po instalacji aplikacja otworzy się sama. | Kliknij Instaluj. Uprawnienia administratora nie są potrzebne, a po instalacji WalkLevel otworzy się sam. | |
 | `instalator.skrot` | WalkLevel | WalkLevel | Skrót w menu Start i na pulpicie. Instalator nadal usuwa stare skróty „Bieżnia” i „Bieżnia Gamingowa” (to nazwy plików, nie tekst dla gracza). |
-| `instalator.languages` | (nowy) | Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Wygląd i okno > Język. | Od 0.6.4: nad listą języków aplikacji, przed `instalator.gotowe2`. |
+| `instalator.languages` | (nowy) | Wybierz języki WalkLevel. Angielski jest wbudowany. Język zmienisz później w Ustawienia > Język. | Od 0.6.4: nad listą języków aplikacji, przed `instalator.gotowe2`. |
 | `instalator.english-built-in` | (nowy) | English (wbudowany) | Od 0.6.4: stała pozycja listy języków. Inne języki mają na liście swoją nazwę z `locales/languages.json`. |
 | `instalator.languages-type` | (nowy) | Wybrane języki | Od 0.6.4: jedyny typ instalacji; Inno go nie pokazuje, gdy typ jest jeden. |
 | `instalator.webview2-missing` | (nowy) | Brakuje składnika Microsoft Edge WebView2, z którego korzysta okno WalkLevel. Zainstaluj go ze strony https://developer.microsoft.com/microsoft-edge/webview2/ i uruchom WalkLevel ponownie. | Okno po instalacji, gdy w Windows nie ma WebView2. |
@@ -1767,13 +1769,13 @@ nie pokazuje. Podpowiedź awatara mówi tyle, ile serwer podał: przy chodzie da
 
 ## Dodatki: języki (0.6.4)
 
-Wybór języka w Ustawienia > Wygląd i okno > Język. Lista pokazuje języki wbudowane, zainstalowane
+Wybór języka w Ustawienia > Język (do 0.6.4 w Wygląd i okno). Lista pokazuje języki wbudowane, zainstalowane
 instalatorem, pobrane i dostępne w repozytorium WalkLevel. Nowe klucze są po angielsku
 (kebab-case), jak cały nowy kod. `{jezyk}` to nazwa języka w nim samym („English”, „Polski”).
 
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
-| `language.title` | (nowy) | Język | Tytuł karty w Ustawienia > Wygląd i okno. |
+| `language.title` | (nowy) | Język aplikacji | Tytuł karty w Ustawienia > Język (0.6.5: było „Język”, jak nazwa kategorii). |
 | `language.description` | (nowy) | Język napisów w WalkLevel. Zmiana działa od razu, bez ponownego uruchomienia. | Pod tytułem karty. |
 | `language.list` | (nowy) | Języki | Nazwa dostępności listy języków. |
 | `language.installed` | (nowy) | Zainstalowany | Podpis języka, który jest na tym komputerze (wbudowany, z instalatora albo pobrany). |

@@ -595,8 +595,8 @@ align-items: center;`, `padding: 0 14px`, **stała wysokość 64**):
 
 1. Ikona: pole 40 × 40, tło `--surface-2`, promień 10, glif 20 px `--text-2`
    (w 0.5.x akcent – teraz neutralny). Glify: Konto i osoby `E77B`, Gry i sterowanie `E7FC`,
-   Bieżnia `E805`, Poziomy i powiadomienia `E734`, Wygląd i okno `E771`, Dane i kopia `E74E`,
-   Pomoc i diagnostyka `E9D9`.
+   Bieżnia `E805`, Poziomy i powiadomienia `E734`, Wygląd i okno `E771`, Język `F2B7`
+   (LocaleLanguage: globus z „A字”), Dane i kopia `E74E`, Pomoc i diagnostyka `E9D9`.
 2. Tekst: tytuł 16/600 **w jednej linii** z wielokropkiem; pod nim opis 13 `--text-2`
    **w jednej linii** z wielokropkiem; pełny opis w `title`. Nic się nie łamie, więc tytuł
    nigdy nie nachodzi na opis, a wysokość nagłówka jest stała.
@@ -976,7 +976,16 @@ podgląd profilu – dane), tło `--surface-2`.
 
 ### 9.3 Ustawienia (uwagi b, c, e)
 
-- Kategorie jak w 0.5.x (7, ta sama kolejność i opisy), nagłówki z 8.5, niezależne otwieranie.
+- Kategorie jak w 0.5.x (ta sama kolejność i opisy), nagłówki z 8.5, niezależne otwieranie.
+  Od 0.6.5 jest ich 8: Konto i osoby, Gry i sterowanie, Bieżnia, Poziomy i powiadomienia,
+  Wygląd i okno, **Język**, Dane i kopia, Pomoc i diagnostyka.
+- Język (0.6.5; w 0.6.4 karta w Wygląd i okno): własna kategoria tuż po Wygląd i okno. To
+  ustawienie tego, jak aplikacja się pokazuje, więc stoi przy wyglądzie (i tam, gdzie szukali go
+  użytkownicy 0.6.4), a przed sprawami rzadkimi (dane, pomoc). Opis nagłówka zaczyna się od
+  nazwy wybranego języka w nim samym („Polski · wybór i pobieranie języków”), bez wartości
+  z prawej - opis widać w każdej szerokości, wartość znika poniżej 440 px. W środku jedna karta
+  „Język aplikacji”: lista języków (wiersz z podpisem Zainstalowany / Do pobrania / Pobieranie… /
+  Wybrany, wybrany z ramką), błąd pobierania w karcie błędu 8.17 z „Spróbuj ponownie”.
 - Wewnątrz: karty z tytułem bez paska; wiersze ustawień 8.2; segmentowane w pełnej szerokości.
 - „Liczba skoków” (pad): wiersz `flex-wrap` – napis i segmentowany (bez stałego 220 px).
 - „Aktywny jest tryb …” + „Włącz Pad”: flex-wrap, przycisk przechodzi pod tekst.

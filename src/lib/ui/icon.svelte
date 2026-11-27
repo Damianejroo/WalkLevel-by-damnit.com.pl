@@ -8,6 +8,7 @@
     plik: '', losuj: '', pole_zaznaczone: '', pole_puste: '', pole_czesciowo: '',
     konto: '', gwiazda: '', wyglad: '', dane: '', pomoc: '', bieznia: '',
     zamknij: '', w_gore: '', zwin_panel: '', ostrzezenie: '', rozwin_panel: '',
+    jezyk: '',
   } as const;
   export type NazwaIkony = keyof typeof IKONY;
 </script>

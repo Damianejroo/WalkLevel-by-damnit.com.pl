@@ -17,7 +17,7 @@ export const EKRANY: { ekran: string; scenariusze: string[]; szerokosci?: number
   { ekran: 'main', scenariusze: ['domyslny', 'trening', 'brak-biezni', 'wylogowany', 'dlugie', 'klawisze', 'pad', 'chodzenie', 'proba', 'symulator', 'szukanie', 'ponawiam', 'bt-wylaczony', 'rozlaczona', 'dlugie-pad', 'klawisze-stop'] },
   {
     ekran: 'settings',
-    scenariusze: ['domyslny', 'ustawienia', 'ustawienia-chodzenie', 'ustawienia-trening', 'ustawienia-wylogowany', 'ustawienia-dlugie', 'ustawienia-klawisze-stop'],
+    scenariusze: ['domyslny', 'ustawienia', 'ustawienia-chodzenie', 'ustawienia-trening', 'ustawienia-wylogowany', 'ustawienia-dlugie', 'ustawienia-klawisze-stop', 'kategoria-jezyk'],
   },
   { ekran: 'history', scenariusze: ['domyslny', 'pusto', 'dlugie'] },
   { ekran: 'achievements', scenariusze: ['domyslny', 'dlugie', 'pusto'] },
