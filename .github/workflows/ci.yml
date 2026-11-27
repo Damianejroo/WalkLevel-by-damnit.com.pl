@@ -1,24 +1,24 @@
 name: CI
 
-# Siatka bezpieczeństwa po pushu. Wydanie (release.yml) i tak powtarza testy przed budową,
-# więc zmiany w samej dokumentacji nie uruchamiają CI.
+# Safety net after a push. The release workflow repeats the tests before building,
+# so documentation-only changes do not run CI.
 on:
   push:
     branches: [main]
     paths-ignore: ["**.md", "LICENSE"]
   pull_request:
     paths-ignore: ["**.md", "LICENSE"]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-# Nowszy push przerywa starszy, niedokończony przebieg - liczy się tylko ostatni stan.
+# A newer push cancels an unfinished older run; only the latest state matters.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # WalkLevel 0.6.0+ (Tauri 2 + Svelte + Rust) - to idzie do użytkowników
   walklevel:
     runs-on: windows-latest
     timeout-minutes: 45
@@ -29,21 +29,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Node.js 24 (skrypty .ts bez kompilacji)
+      - name: Node.js 24 (TypeScript scripts run without a build step)
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-      - name: Rust stable (Rust 2024) i clippy
+      - name: Rust stable (Rust 2024) and clippy
         run: |
           rustup toolchain install stable --profile minimal --component clippy
           rustup default stable
-      - name: Rdzeń i klej Tauri (clippy, testy)
+      - name: Core and Tauri layer (clippy, tests)
         run: |
           cargo clippy --workspace --all-targets --locked -- -D warnings
           if ($LASTEXITCODE) { throw "clippy" }
           cargo test --workspace --locked
           if ($LASTEXITCODE) { throw "cargo test" }
-      - name: Interfejs (typy, budowa, test widoków w Edge)
+      - name: Interface (types, build, view test in Edge)
         run: |
           npm ci
           if ($LASTEXITCODE) { throw "npm ci" }
