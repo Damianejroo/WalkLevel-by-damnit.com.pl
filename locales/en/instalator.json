@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "instalator.tytul": "WalkLevel Setup",
+  "instalator.gotowe1": "WalkLevel {wersja} will be installed on this computer.",
+  "instalator.gotowe2": "Click Install. Administrator rights are not needed, and WalkLevel opens by itself after installation.",
+  "instalator.skrot": "WalkLevel"
+}

@@ -132,7 +132,7 @@ Kolumny w tabelach:
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
 | `app.nazwa` | WalkLevel | WalkLevel | Nazwa własna, bez tłumaczenia. |
-| `app.haslo` | (tylko w mailach: Chodzisz w realu, idziesz w grze) | Chodzisz w realu, idziesz w grze | Bez zmian, bez tłumaczenia (hasło marki). Do okna „O aplikacji” i ekranu pierwszego uruchomienia. |
+| `app.haslo` | (tylko w mailach: Chodzisz w realu, idziesz w grze) | Chodzisz w realu, idziesz w grze | Bez zmian (hasło marki). Do okna „O aplikacji” i ekranu pierwszego uruchomienia. |
 | `app.wersja` | wersja {wersja} | wersja {wersja} | Pod nazwą na pasku. |
 | `app.osoba_i_wersja` | {osoba} · wersja {wersja} | {osoba} · wersja {wersja} | Gdy na komputerze jest więcej niż jedna osoba. |
 | `app.o_aplikacji` | WalkLevel {wersja} · © 2026 {autor} | WalkLevel {wersja} · © 2026 {autor} | |

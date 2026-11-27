@@ -1,0 +1,16 @@
+{
+  "@@locale": "en",
+  "dymek.tytul_okna": "WalkLevel · control",
+  "dymek.dostepnosc": "Control: {stan}",
+  "dymek.podpowiedz": "Control {stan}\nClick to {akcja}\nRight-click opens the WalkLevel window\nDrag to move",
+  "dymek.stan.wl": "on",
+  "dymek.stan.wyl": "off",
+  "dymek.podpowiedz_wl": "Control on\nClick to turn it off\nRight-click opens the WalkLevel window\nDrag to move",
+  "dymek.podpowiedz_wyl": "Control off\nClick to turn it on\nRight-click opens the WalkLevel window\nDrag to move",
+  "dymek.trening.wyzej": "Higher level ({klawisz_szybciej})",
+  "dymek.trening.nizej": "Lower level ({klawisz_wolniej})",
+  "dymek.trening.poziom": "Level {poziom} of {liczba}",
+  "dymek.trening.stop": "Stop",
+  "dymek.trening.stop_dostepnosc": "Stop the belt and turn control off",
+  "dymek.stop_dostepnosc": "Stop the belt"
+}

@@ -1,0 +1,14 @@
+{
+  "@@locale": "en",
+  "wspolne.potwierdz": "Sure? Click again",
+  "wspolne.potwierdz_dostepnosc": "{tekst}, click twice to confirm",
+  "wspolne.zaznaczone": "checked / not checked / partly checked",
+  "wspolne.edytuj": "Edit",
+  "wspolne.edytuj_co": "Edit: {nazwa}",
+  "wspolne.wybrany": "{nazwa}, selected. {opis}",
+  "wspolne.anuluj": "Cancel",
+  "wspolne.usun": "Delete",
+  "wspolne.zmien": "Change",
+  "wspolne.blad_nieznany": "Something went wrong. Try again, and if it keeps happening, report a problem in Settings > Help and diagnostics.",
+  "wspolne.blad_zapisu": "Could not save to disk. Check that there is free space and try again. ({szczegoly})"
+}

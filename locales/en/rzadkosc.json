@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+  "rzadkosc.pospolite": "Common",
+  "rzadkosc.rzadkie": "Rare",
+  "rzadkosc.epickie": "Epic",
+  "rzadkosc.heroiczne": "Heroic",
+  "rzadkosc.legendarne": "Legendary"
+}

@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+  "pole.mniej": "{nazwa}: less",
+  "pole.wiecej": "{nazwa}: more",
+  "pole.wpisz": "{nazwa}: type a value",
+  "pole.wpisz_podpowiedz": "Click and type a value, e.g. 2.3",
+  "pole.kmh": "{kmh} km/h"
+}

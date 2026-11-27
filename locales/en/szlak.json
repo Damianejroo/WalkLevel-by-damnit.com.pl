@@ -1,5 +1,11 @@
 {
   "@@locale": "en",
   "szlak.tytul": "Your trail",
-  "szlak.km": "{km} km"
+  "szlak.km": "{km} km",
+  "szlak.tytul_km": "Your trail · {km} km",
+  "szlak.lacznie": "covered so far · {liczba} of {razem} stops",
+  "szlak.tu_jestes": "YOU ARE HERE",
+  "szlak.nastepny": "next stop in {km} km, about {dni} {dni, plural, one {day} other {days}} at 5 km a day",
+  "szlak.koniec": "You have finished the whole trail.",
+  "szlak.przystanki": "Trail stops"
 }
