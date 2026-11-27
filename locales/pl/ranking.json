@@ -1,0 +1,70 @@
+{
+  "@@locale": "pl",
+  "ranking.zakres": "Zakres rankingu",
+  "ranking.zakres.tydzien": "Ten tydzień",
+  "ranking.zakres.miesiac": "Ten miesiąc",
+  "ranking.zakres.zawsze": "Od początku",
+  "ranking.zakres.poziomy": "Poziomy",
+  "ranking.tytul.poziomy": "Ranking poziomów",
+  "ranking.tytul.kroki_zawsze": "Ranking kroków · od początku",
+  "ranking.tytul.kroki": "Ranking kroków",
+  "ranking.pusto": "W tym okresie nikt nie ma jeszcze wyników.",
+  "ranking.miejsce": "{liczba}.",
+  "@ranking.miejsce": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "ranking.wiersz.poziom": "{km} km łącznie",
+  "@ranking.wiersz.poziom": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "ranking.wiersz.kroki": "{kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km",
+  "@ranking.wiersz.kroki": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "ranking.opis.poziomy": "Ranking poziomów liczy kilometry od założenia konta. Ten tydzień liczy się od poniedziałku, ten miesiąc od 1. dnia (czas polski).",
+  "@ranking.opis.poziomy": {
+    "description": "Nawias „tylko sesje wysłane na bieżąco” był niezrozumiały. Jeśli to ważne (sesje sprzed konta się nie liczą), napisać wprost: „Sesje sprzed założenia konta się nie liczą.”"
+  },
+  "ranking.opis.zasady": "W rankingu liczą się sesje z prawdziwej bieżni, widoczne dla znajomych albo wszystkich. Sesje i profile ukryte nie są liczone.",
+  "ranking.ty": "(Ty)",
+  "@ranking.ty": {
+    "description": "Dopisek przy własnym pseudonimie w rankingu i na liście osób."
+  },
+  "ranking.wiersz.kroki_slowo": "{kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@ranking.wiersz.kroki_slowo": {
+    "description": "Słowo pod liczbą kroków w kolumnie statystyk (liczba osobno, krojem liczb).",
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "ranking.wiersz.km": "{km} km",
+  "@ranking.wiersz.km": {
+    "description": "Druga linia statystyk w wierszu rankingu i gry.",
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "ranking.wiersz.lacznie": "łącznie",
+  "@ranking.wiersz.lacznie": {
+    "description": "Słowo przy kilometrach w rankingu poziomów."
+  }
+}

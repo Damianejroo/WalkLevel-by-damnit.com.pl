@@ -1,0 +1,186 @@
+{
+  "@@locale": "pl",
+  "poziomy.tytul": "Poziomy i osiągnięcia",
+  "poziomy.naglowek": "POZIOM {poziom}",
+  "@poziomy.naglowek": {
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "poziomy.xp": "{xp} / {xp_max} XP",
+  "@poziomy.xp": {
+    "placeholders": {
+      "xp": {
+        "description": "punkty doświadczenia"
+      },
+      "xp_max": {
+        "description": "punkty doświadczenia"
+      }
+    }
+  },
+  "poziomy.do_nastepnego": "Jeszcze {km} km do poziomu {poziom}",
+  "@poziomy.do_nastepnego": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      },
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "poziomy.ranga": "{ranga}: {opis_rangi}",
+  "@poziomy.ranga": {
+    "placeholders": {
+      "ranga": {
+        "description": "nazwa i opis rangi"
+      },
+      "opis_rangi": {
+        "description": "nazwa i opis rangi"
+      }
+    }
+  },
+  "poziomy.ranga_dostepnosc": "Poziom {poziom}, ranga {ranga}",
+  "@poziomy.ranga_dostepnosc": {
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "ranga": {
+        "description": "nazwa i opis rangi"
+      }
+    }
+  },
+  "poziomy.ranga_wiersz": "Poziom {poziom} · {ranga}",
+  "@poziomy.ranga_wiersz": {
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "ranga": {
+        "description": "nazwa i opis rangi"
+      }
+    }
+  },
+  "poziomy.osiagniecia_tytul": "Osiągnięcia · {liczba} z {razem}",
+  "@poziomy.osiagniecia_tytul": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "poziomy.ostatnie": "Ostatnio zdobyte",
+  "poziomy.najblizej": "Najbliżej zdobycia",
+  "poziomy.pozostale": "Pozostałe",
+  "poziomy.grupa_licznik": "{liczba} z {razem}",
+  "@poziomy.grupa_licznik": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "poziomy.brak_osiagniec": "Jeszcze nie ma osiągnięć. Pierwsze wpadnie po 1 km na bieżni.",
+  "@poziomy.brak_osiagniec": {
+    "description": "Pusty stan z podpowiedzią."
+  },
+  "poziomy.pokaz_wszystkie": "Pokaż wszystkie ({liczba})",
+  "@poziomy.pokaz_wszystkie": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "poziomy.osiagniecie.xp": "+{xp} XP",
+  "@poziomy.osiagniecie.xp": {
+    "placeholders": {
+      "xp": {
+        "description": "punkty doświadczenia"
+      }
+    }
+  },
+  "poziomy.osiagniecie.zdobyte": "zdobyte {kiedy}",
+  "@poziomy.osiagniecie.zdobyte": {
+    "placeholders": {
+      "kiedy": {}
+    }
+  },
+  "poziomy.osiagniecie.dni_temu": "{dni} {dni, plural, one {dzień} few {dni} many {dni} other {dni}} temu",
+  "@poziomy.osiagniecie.dni_temu": {
+    "description": "Dla 1: „wczoraj”, dla 0: „dziś”. Powyżej 30 dni data „{data}”.",
+    "placeholders": {
+      "dni": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "poziomy.osiagniecie.dostepnosc": "{nazwa}: {stan}. {warunek}",
+  "@poziomy.osiagniecie.dostepnosc": {
+    "placeholders": {
+      "nazwa": {},
+      "stan": {},
+      "warunek": {}
+    }
+  },
+  "poziomy.osiagniecie.do_zdobycia": "do zdobycia",
+  "poziomy.postep.km": "{liczba} / {razem} km",
+  "@poziomy.postep.km": {
+    "description": "Jednostki małą literą; wersaliki przez CSS, jeśli styl tego wymaga.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "poziomy.postep.kroki": "{liczba} / {razem} {razem, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@poziomy.postep.kroki": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "poziomy.postep.dni": "{liczba} / {razem} {razem, plural, one {dzień} few {dni} many {dni} other {dni}}",
+  "@poziomy.postep.dni": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "poziomy.postep.gry": "{liczba} / {razem} {razem, plural, one {gra} few {gry} many {gier} other {gry}}",
+  "@poziomy.postep.gry": {
+    "description": "Dziś zawsze „GRY”.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "poziomy.symulator": "XP i osiągnięcia liczą się tylko z prawdziwej bieżni, bez symulatora.",
+  "@poziomy.symulator": {
+    "description": "Na dole ekranu."
+  }
+}

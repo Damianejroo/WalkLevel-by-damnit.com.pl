@@ -1,0 +1,262 @@
+{
+  "@@locale": "pl",
+  "panel.tytul": "Znajomi",
+  "@panel.tytul": {
+    "description": "Nagłówek panelu i jego nazwa dostępna."
+  },
+  "panel.chodza": "{liczba} z {razem} {liczba, plural, one {chodzi} few {chodzą} many {chodzi} other {chodzą}} teraz",
+  "@panel.chodza": {
+    "description": "Podpis nagłówka.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "panel.na_liscie": "Na liście: {liczba}",
+  "@panel.na_liscie": {
+    "description": "Podpis nagłówka, gdy nikt nie chodzi.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "panel.bez_konta": "bez konta online",
+  "@panel.bez_konta": {
+    "description": "Podpis nagłówka bez konta."
+  },
+  "panel.bez_konta_opis": "Tu zobaczysz znajomych: kto teraz chodzi, w co gra i jak rośnie mu poziom.",
+  "panel.bez_konta_opis2": "Potrzebne konto online (darmowe, na kod zaproszenia).",
+  "panel.konto": "Konto online",
+  "@panel.konto": {
+    "description": "Przycisk w panelu bez konta."
+  },
+  "panel.szukaj": "Szukaj albo zaproś znajomego",
+  "@panel.szukaj": {
+    "description": "Podpowiedź ikony plusa."
+  },
+  "panel.zwin": "Zwiń do paska",
+  "@panel.zwin": {
+    "description": "Podpowiedź ikony; okno zwęża się razem z panelem."
+  },
+  "panel.rozwin": "Rozwiń panel",
+  "panel.pole": "Pseudonim",
+  "@panel.pole": {
+    "description": "Podpowiedź w polu."
+  },
+  "panel.pole_dostepnosc": "Szukaj wśród znajomych albo zaproś po pseudonimie",
+  "panel.pole_opis": "Filtruje listę. Pseudonim spoza listy możesz od razu zaprosić.",
+  "panel.zapros": "Zaproś „{pseudonim}” do znajomych",
+  "@panel.zapros": {
+    "description": "Pseudonim spoza listy, co najmniej 3 znaki.",
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "panel.nikt": "Nikt z listy nie pasuje do „{fraza}”.",
+  "@panel.nikt": {
+    "placeholders": {
+      "fraza": {}
+    }
+  },
+  "panel.pusto": "Lista znajomych jest pusta. Kliknij plus i wpisz pseudonim.",
+  "panel.zaprasza": "zaprasza Cię",
+  "@panel.zaprasza": {
+    "description": "Wiersz zaproszenia do mnie."
+  },
+  "panel.chodza_teraz": "Chodzą teraz · {liczba}",
+  "@panel.chodza_teraz": {
+    "description": "Nagłówek grupy.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "panel.pozostali": "Pozostali · {liczba}",
+  "@panel.pozostali": {
+    "description": "Nagłówek grupy (sortowani po krokach tygodnia).",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "panel.gra": "{gra} · {kmh} km/h",
+  "@panel.gra": {
+    "description": "Czynność: gra z włączonym „Pokazuj tę grę na koncie online”.",
+    "placeholders": {
+      "gra": {},
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "panel.trening": "Trening · {kmh} km/h",
+  "@panel.trening": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "panel.w_grze": "W grze · {kmh} km/h",
+  "@panel.w_grze": {
+    "description": "Gra ukryta.",
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "panel.chodzi": "Chodzi · {kmh} km/h",
+  "@panel.chodzi": {
+    "description": "Osoba bez regulaminu z grami (serwer nie podaje trybu).",
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "panel.tydzien": "w tym tygodniu {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@panel.tydzien": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "panel.xp_sesja": "+{xp} XP",
+  "@panel.xp_sesja": {
+    "description": "Licznik przy pasku: XP z bieżącej sesji.",
+    "placeholders": {
+      "xp": {
+        "description": "punkty doświadczenia"
+      }
+    }
+  },
+  "panel.xp_procent": "{procent}%",
+  "@panel.xp_procent": {
+    "description": "Licznik przy pasku: postęp do następnego poziomu.",
+    "placeholders": {
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      }
+    }
+  },
+  "panel.xp_dostepnosc": "{xp} XP, {procent}% do poziomu {nastepny}",
+  "@panel.xp_dostepnosc": {
+    "placeholders": {
+      "xp": {
+        "description": "punkty doświadczenia"
+      },
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      },
+      "nastepny": {}
+    }
+  },
+  "panel.osoba": "{pseudonim} · poziom {poziom} · {ranga}",
+  "@panel.osoba": {
+    "description": "Podpowiedź wiersza i komunikat awansu w panelu.",
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      },
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "ranga": {
+        "description": "nazwa i opis rangi"
+      }
+    }
+  },
+  "panel.zaczyna": "{pseudonim} zaczyna chodzić.",
+  "@panel.zaczyna": {
+    "description": "Komunikat w oknie WalkLevel przy „Powiadom, gdy znajomy zacznie chodzić”.",
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "panel.status": "Status dla znajomych",
+  "@panel.status": {
+    "description": "Nazwa dostępna menu statusu i tytuł wyboru w Moje konto."
+  },
+  "panel.status.wszystko": "Pokazuj grę i tempo",
+  "panel.status.wszystko_opis": "Znajomi widzą, że chodzisz, jak szybko i w co grasz (gry z przełącznikiem).",
+  "panel.status.chodze": "Pokazuj tylko, że chodzę",
+  "panel.status.chodze_opis": "Tempo i kroki tak, nazwa gry nie.",
+  "panel.status.niewidoczny": "Niewidoczny",
+  "panel.status.niewidoczny_opis": "Znajomi nie widzą, że teraz chodzisz. Wyniki tygodnia zostają.",
+  "panel.opis": "Opis dla znajomych (do {liczba} znaków)",
+  "@panel.opis": {
+    "description": "Pole w menu statusu; Enter zapisuje.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "panel.opis_podpowiedz": "np. Cel: 5 km dziennie",
+  "panel.menu.profil": "Profil",
+  "@panel.menu.profil": {
+    "description": "Menu prawego przycisku na znajomym."
+  },
+  "panel.menu.usun": "Usuń ze znajomych",
+  "panel.usunieto": "Usunięto {pseudonim} ze znajomych",
+  "@panel.usunieto": {
+    "description": "Usunięcie idzie na serwer dopiero po zniknięciu komunikatu.",
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "panel.cofnij": "Cofnij",
+  "panel.dzis_tydzien": "dziś {dzis} {dzis, plural, one {krok} few {kroki} many {kroków} other {kroki}} · tydzień {tydzien}",
+  "@panel.dzis_tydzien": {
+    "description": "Panel znajomych, „Pozostali”, gdy dziś > 0 (inaczej `panel.tydzien`).",
+    "placeholders": {
+      "dzis": {},
+      "tydzien": {}
+    }
+  },
+  "panel.pasek_idzie": "{pseudonim} · idzie teraz",
+  "@panel.pasek_idzie": {
+    "description": "Początek podpowiedzi awatara w pasku, gdy znajomy idzie: „Ola · idzie teraz · World of Warcraft · 3,4 km/h”.",
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "panel.pasek_tydzien": "{pseudonim} · w tym tygodniu {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@panel.pasek_tydzien": {
+    "description": "Podpowiedź awatara w pasku, gdy znajomy nie idzie.",
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      },
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "panel.pasek_licznik": "{liczba} {liczba, plural, one {osoba idzie} few {osoby idą} many {osób idzie} other {osoby idą}} teraz",
+  "@panel.pasek_licznik": {
+    "description": "Licznik pod przyciskiem rozwijania (kropka + liczba); nazwa dostępna i podpowiedź. Bez licznika, gdy nikt nie idzie.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  }
+}

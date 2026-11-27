@@ -1,0 +1,18 @@
+{
+  "@@locale": "pl",
+  "instalator.tytul": "Instalacja WalkLevel",
+  "instalator.gotowe1": "WalkLevel {wersja} zostanie zainstalowany na tym komputerze.",
+  "@instalator.gotowe1": {
+    "description": "„by damnit.com.pl” to wtrącenie po angielsku; autor jest w danych wydawcy.",
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "instalator.gotowe2": "Kliknij Instaluj. Uprawnienia administratora nie są potrzebne, a po instalacji WalkLevel otworzy się sam.",
+  "instalator.skrot": "WalkLevel",
+  "@instalator.skrot": {
+    "description": "Skrót w menu Start i na pulpicie. Instalator nadal usuwa stare skróty „Bieżnia” i „Bieżnia Gamingowa” (to nazwy plików, nie tekst dla gracza)."
+  }
+}

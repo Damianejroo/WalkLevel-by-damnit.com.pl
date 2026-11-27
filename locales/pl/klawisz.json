@@ -1,0 +1,132 @@
+{
+  "@@locale": "pl",
+  "klawisz.przycisk": "{rola}: {klawisz}",
+  "@klawisz.przycisk": {
+    "placeholders": {
+      "rola": {},
+      "klawisz": {}
+    }
+  },
+  "klawisz.czekam": "{rola}: naciśnij klawisz…",
+  "@klawisz.czekam": {
+    "placeholders": {
+      "rola": {}
+    }
+  },
+  "klawisz.czekam_kombinacja": "{rola}: {wcisniete}+…",
+  "@klawisz.czekam_kombinacja": {
+    "description": "Trzymane modyfikatory.",
+    "placeholders": {
+      "rola": {},
+      "wcisniete": {}
+    }
+  },
+  "klawisz.podpowiedz": "Kliknij i naciśnij nowy klawisz. Esc anuluje.",
+  "klawisz.dostepnosc": "{rola}: {klawisz}. Kliknij, żeby zmienić.",
+  "@klawisz.dostepnosc": {
+    "placeholders": {
+      "rola": {},
+      "klawisz": {}
+    }
+  },
+  "klawisz.blad.ogolny": "Tego klawisza nie da się użyć: {powod}. Wybierz inny.",
+  "@klawisz.blad.ogolny": {
+    "placeholders": {
+      "powod": {}
+    }
+  },
+  "klawisz.powod.wolniej": "{klawisz_wolniej} zwalnia symulator i trening",
+  "@klawisz.powod.wolniej": {
+    "description": "Klawisz wolniej z Ustawień (domyślnie F6). Do 0.6.0 klucz `klawisz.powod.f6` ze stałym F6.",
+    "placeholders": {
+      "klawisz_wolniej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "klawisz.powod.szybciej": "{klawisz_szybciej} przyspiesza symulator i trening",
+  "@klawisz.powod.szybciej": {
+    "description": "Jw. dla klawisza szybciej (domyślnie F7).",
+    "placeholders": {
+      "klawisz_szybciej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "klawisz.powod.esc": "Esc anuluje wybór klawisza",
+  "klawisz.powod.f12": "F12 jest zajęty przez Windows",
+  "klawisz.powod.printscreen": "Print Screen robi zrzut ekranu",
+  "klawisz.powod.alt_tab": "Alt+Tab przełącza okna",
+  "klawisz.powod.alt_f4": "Alt+F4 zamyka okno",
+  "klawisz.powod.alt_esc": "Alt+Esc przełącza okna",
+  "klawisz.powod.alt_spacja": "Alt+Spacja otwiera menu okna",
+  "klawisz.powod.alt_enter": "Alt+Enter przełącza pełny ekran w grach",
+  "klawisz.powod.alt_z": "Alt+Z otwiera nakładkę NVIDIA",
+  "klawisz.powod.alt_f1": "Alt+F1 robi zrzut ekranu w NVIDIA",
+  "klawisz.powod.alt_f9": "Alt+F9 nagrywa w NVIDIA",
+  "klawisz.powod.alt_f10": "Alt+F10 zapisuje powtórkę w NVIDIA",
+  "klawisz.powod.shift_tab": "Shift+Tab otwiera nakładkę Steam",
+  "klawisz.powod.ctrl_esc": "Ctrl+Esc otwiera menu Start",
+  "klawisz.powod.ctrl_shift_esc": "Ctrl+Shift+Esc otwiera Menedżera zadań",
+  "@klawisz.powod.ctrl_shift_esc": {
+    "description": "Dopełniacz."
+  },
+  "klawisz.powod.ctrl_alt_del": "Ctrl+Alt+Delete jest zajęty przez Windows",
+  "klawisz.powod.ctrl_c": "Ctrl+C kopiuje",
+  "@klawisz.powod.ctrl_c": {
+    "description": "Analogicznie Ctrl+V wkleja, Ctrl+X wycina, Ctrl+Z cofa, Ctrl+Y ponawia, Ctrl+A zaznacza wszystko, Ctrl+S zapisuje."
+  },
+  "klawisz.blad.win": "Skrótów z klawiszem Windows nie da się użyć. Wybierz inną kombinację.",
+  "klawisz.blad.pojedynczy": "Ten klawisz zadziała tylko z Ctrl, Alt albo Shift, np. Ctrl+Shift+F8.",
+  "klawisz.blad.zajety": "{powod}. Wybierz inną kombinację.",
+  "@klawisz.blad.zajety": {
+    "placeholders": {
+      "powod": {}
+    }
+  },
+  "klawisz.blad.altgr": "{klawisz} działa jak AltGr i pisze polskie znaki. Wybierz inną kombinację.",
+  "@klawisz.blad.altgr": {
+    "placeholders": {
+      "klawisz": {}
+    }
+  },
+  "klawisz.blad.shift_litera": "Shift z literą pisze wielką literę. Dodaj Ctrl albo Alt, np. Ctrl+Shift+K.",
+  "klawisz.blad.te_same": "Chód i bieg muszą mieć różne klawisze.",
+  "klawisz.blad.wlaczanie_koliduje": "Klawisz włączania musi być inny niż klawisze chodu i biegu.",
+  "klawisz.blad.wlaczanie_niedozwolony": "Tego klawisza nie da się użyć jako klawisza włączania. Wybierz inny.",
+  "klawisz.blad.tempo_te_same": "Szybciej i wolniej muszą mieć różne klawisze.",
+  "klawisz.blad.tempo_koliduje": "Klawisze szybciej i wolniej muszą być inne niż klawisze włączania, chodu i biegu.",
+  "@klawisz.blad.tempo_koliduje": {
+    "description": "Ten sam klawisz z innym modyfikatorem też się liczy."
+  },
+  "klawisz.blad.tempo_niedozwolony": "Tego klawisza nie da się użyć do zmiany prędkości. Wybierz inny.",
+  "@klawisz.blad.tempo_niedozwolony": {
+    "description": "Klawisz bez kodu wirtualnego."
+  },
+  "klawisz.blad.chod_z_modyfikatorem": "Chód i bieg to pojedyncze klawisze, bez kombinacji z Ctrl, Alt albo Shift.",
+  "@klawisz.blad.chod_z_modyfikatorem": {
+    "description": "Sam Shift jako klawisz biegu jest dozwolony (domyślny), zabronione są tylko kombinacje. Stare zdanie sugerowało, że Shift w ogóle odpada."
+  },
+  "klawisz.kod": "Klawisz nr {liczba}",
+  "@klawisz.kod": {
+    "description": "Klawisz bez nazwy.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "klawisz.blad.nieznany": "Tego klawisza nie da się użyć. Wybierz inny.",
+  "@klawisz.blad.nieznany": {
+    "description": "Klawisz bez kodu Windows."
+  },
+  "klawisz.powod.ctrl_v": "Ctrl+V wkleja",
+  "@klawisz.powod.ctrl_v": {
+    "description": "Rodzeństwo `klawisz.powod.ctrl_c`."
+  },
+  "klawisz.powod.ctrl_x": "Ctrl+X wycina",
+  "klawisz.powod.ctrl_z": "Ctrl+Z cofa",
+  "klawisz.powod.ctrl_y": "Ctrl+Y ponawia",
+  "klawisz.powod.ctrl_a": "Ctrl+A zaznacza wszystko",
+  "klawisz.powod.ctrl_s": "Ctrl+S zapisuje"
+}

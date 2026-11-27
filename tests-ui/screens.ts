@@ -8,6 +8,9 @@ export const DOMYSLNE = [420, 740, 1400];
 export const SZEROKOSCI = [420, 484, 720, 740, 1400];
 export const MOTYWY = ['jasny', 'ciemny'];
 export const WYSOKOSC = 900;
+// Other languages (docs/i18n.md): English and the pseudo-language en-XA (longer, accented texts),
+// every screen at the narrowest width in the light theme.
+export const JEZYKI = ['en', 'en-XA'];
 
 // Each screen x scenario x width once (the test stops on a repeat).
 export const EKRANY: { ekran: string; scenariusze: string[]; szerokosci?: number[] }[] = [

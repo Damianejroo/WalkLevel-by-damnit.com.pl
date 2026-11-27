@@ -1,0 +1,22 @@
+{
+  "format": 1,
+  "source": "pl",
+  "fallback": "en",
+  "languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "englishName": "English",
+      "status": "in-progress",
+      "direction": "ltr"
+    },
+    {
+      "code": "pl",
+      "name": "Polski",
+      "englishName": "Polish",
+      "status": "complete",
+      "direction": "ltr",
+      "number": { "grouping": "always", "groupSeparator": " " }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "@@locale": "pl",
+  "osoba.edycja.tytul": "Edytuj osobę",
+  "osoba.edycja.nazwa": "Nazwa",
+  "osoba.edycja.kolor": "Kolor osoby",
+  "osoba.edycja.usun_opis": "Usunięcie osoby usuwa jej profile gier. Jej wyniki zostaną w historii pod nazwą „Usunięte osoby”.",
+  "osoba.edycja.usun": "Usuń osobę",
+  "@osoba.edycja.usun": {
+    "description": "Przycisk z przytrzymaniem."
+  },
+  "osoba.usuniete": "Usunięte osoby",
+  "@osoba.usuniete": {
+    "description": "Nazwa w historii."
+  },
+  "osoba.edycja.konto": "Konto online",
+  "@osoba.edycja.konto": {
+    "description": "Tytuł karty konta osoby."
+  },
+  "osoba.edycja.konto_jest": "Ta osoba ma konto online {pseudonim}.",
+  "@osoba.edycja.konto_jest": {
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "osoba.edycja.konto_brak": "Ta osoba nie ma konta online. Bez konta wszystko działa na tym komputerze.",
+  "osoba.edycja.konto_wybierz": "Kontem online zarządzasz, gdy ta osoba jest wybrana.",
+  "@osoba.edycja.konto_wybierz": {
+    "description": "Edycja osoby, która nie jest teraz wybrana."
+  },
+  "osoba.edycja.wybierz": "Wybierz tę osobę",
+  "@osoba.edycja.wybierz": {
+    "description": "Przełącza aplikację na tę osobę."
+  },
+  "osoba.blad.ostatnia": "Ostatniej osoby nie da się usunąć.",
+  "osoba.blad.brak": "Najpierw dodaj osobę."
+}

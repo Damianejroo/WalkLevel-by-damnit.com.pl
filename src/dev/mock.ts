@@ -15,6 +15,7 @@ import { jestKlucz, t } from '../lib/texts';
 import { liczba } from '../lib/format';
 import { version } from '../../package.json';
 import definicjeJson from '../../docs/definitions-v2.json';
+import { createMockLanguage } from './mock-language';
 
 // ============================================================================
 // Scenariusze
@@ -222,6 +223,8 @@ function blad(code: K.ErrorCode, message: string, fields?: Record<string, string
 export function utworzAtrape(): Silnik {
   const sc = czytajScenariusz();
   const p = new URLSearchParams(location.search);
+  // język najpierw: teksty, które atrapa wpisuje w stan, są w języku widoków
+  const jezyk = createMockLanguage(p);
   const r = losowosc(20261126);
   const dlugie = sc.dlugie;
 
@@ -677,6 +680,7 @@ export function utworzAtrape(): Silnik {
 
   const wycinki = (): K.SliceMap => ({
     app, settings, people, device, control, levels, history, account, online, update, report, models, bubble,
+    language: jezyk.view,
   });
 
   // ---------------- zdarzenia ----------------
@@ -1490,6 +1494,17 @@ export function utworzAtrape(): Silnik {
     bubble_open: () => undefined,
     bubble_drag_start: () => undefined,
     bubble_drag_end: () => undefined,
+    language_pack: () => jezyk.pack(),
+    languages_refresh: () => undefined,
+    language_set: ({ code }) =>
+      jezyk.set(
+        String(code),
+        () => wyslij('language'),
+        () => {
+          jezyk.view.error = t('language.error.offline');
+          wyslij('language');
+        },
+      ),
     popup_ready: () => {
       uruchomDemoPopupow();
       return { items: popupy } satisfies K.PopupsView;

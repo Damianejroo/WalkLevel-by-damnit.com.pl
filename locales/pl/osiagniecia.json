@@ -1,0 +1,67 @@
+{
+  "@@locale": "pl",
+  "osiagniecia.tytul": "Osiągnięcia",
+  "@osiagniecia.tytul": {
+    "description": "Tytuł ekranu (design.md 9.1: zmienna część w podpisie)."
+  },
+  "osiagniecia.podpis": "{liczba} z {razem} zdobytych",
+  "@osiagniecia.podpis": {
+    "description": "Podpis pod tytułem.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "osiagniecia.dzis": "dziś",
+  "@osiagniecia.dzis": {
+    "description": "Do `poziomy.osiagniecie.zdobyte`."
+  },
+  "osiagniecia.wczoraj": "wczoraj",
+  "@osiagniecia.wczoraj": {
+    "description": "Do `poziomy.osiagniecie.zdobyte`."
+  },
+  "osiagniecia.zdobyte": "zdobyte",
+  "@osiagniecia.zdobyte": {
+    "description": "Stan dla czytnika ekranu."
+  },
+  "osiagniecia.dostepnosc": "{nazwa}, {rzadkosc}, {stan}. {warunek}",
+  "@osiagniecia.dostepnosc": {
+    "description": "Nazwa wiersza osiągnięcia dla czytnika ekranu (zastępuje `poziomy.osiagniecie.dostepnosc`).",
+    "placeholders": {
+      "nazwa": {},
+      "rzadkosc": {},
+      "stan": {},
+      "warunek": {}
+    }
+  },
+  "osiagniecia.rzadkosc_dostepnosc": "{rzadkosc}: {liczba} z {razem}",
+  "@osiagniecia.rzadkosc_dostepnosc": {
+    "description": "Komórka paska rzadkości dla czytnika ekranu.",
+    "placeholders": {
+      "rzadkosc": {},
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "osiagniecia.lista_rzadkosci": "Zdobyte według rzadkości",
+  "@osiagniecia.lista_rzadkosci": {
+    "description": "Nazwa paska rzadkości dla czytnika ekranu."
+  },
+  "osiagniecia.procent_graczy": "Ma to {procent}% graczy",
+  "@osiagniecia.procent_graczy": {
+    "description": "Stopka osiągnięcia na ekranie Osiągnięcia (konto online, od 25 kont).",
+    "placeholders": {
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      }
+    }
+  }
+}

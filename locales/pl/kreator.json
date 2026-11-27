@@ -1,0 +1,89 @@
+{
+  "@@locale": "pl",
+  "kreator.krok": "Krok {liczba} z 3",
+  "@kreator.krok": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "kreator.wstecz": "Wstecz",
+  "kreator.anuluj": "Anuluj",
+  "kreator.dalej": "Dalej",
+  "kreator.gotowe": "Gotowe",
+  "kreator.imie.tytul_migracja": "WalkLevel ma teraz osoby",
+  "@kreator.imie.tytul_migracja": {
+    "description": "Po aktualizacji z bardzo starej wersji (0.2)."
+  },
+  "kreator.imie.opis_migracja": "Każda osoba ma własne profile gier i kroki. Wpisz swoją nazwę, a dotychczasowe ustawienia trafią do Twojej osoby.",
+  "kreator.imie.tytul": "Jak się nazywasz?",
+  "kreator.imie.opis": "Ta nazwa będzie widoczna w aplikacji. Jest wylosowana: losuj dalej albo wpisz własną.",
+  "@kreator.imie.opis": {
+    "description": "Bez „wylosowaliśmy”."
+  },
+  "kreator.imie.pole": "Nazwa osoby",
+  "kreator.imie.losuj": "Losuj inną nazwę",
+  "kreator.imie.propozycje": "Albo jedna z tych:",
+  "kreator.imie.kolor": "Kolor osoby",
+  "kreator.imie.domyslna": "Gracz",
+  "@kreator.imie.domyslna": {
+    "description": "Gdy pole puste."
+  },
+  "kreator.gra.tytul": "Pierwszy profil gry",
+  "kreator.gra.opis": "Profil gry to ustawienia sterowania dla jednej gry. Kolejne dodasz w dowolnej chwili.",
+  "kreator.gra.wskaz": "Wskaż folder gry / Nazwę, ikonę i kolor WalkLevel weźmie z pliku gry",
+  "kreator.gra.zmien": "Zmień",
+  "kreator.gra.nazwa": "Nazwa profilu, dowolna",
+  "@kreator.gra.nazwa": {
+    "description": "Placeholder."
+  },
+  "kreator.gra.nazwa_dostepnosc": "Nazwa profilu gry",
+  "kreator.gra.kolor_z_ikony": "Kolor {kolor} jest z ikony gry. Inny wybierzesz przyciskiem Kolor.",
+  "@kreator.gra.kolor_z_ikony": {
+    "placeholders": {
+      "kolor": {}
+    }
+  },
+  "kreator.gra.zostaw": "Zostaw moje obecne ustawienia / Profil Domyślny z dotychczasowymi ustawieniami",
+  "@kreator.gra.zostaw": {
+    "description": "Migracja."
+  },
+  "kreator.gra.domyslny": "Profil Domyślny / Dla dowolnej gry. Nazwę i ikonę zmienisz później.",
+  "kreator.gra.kopiuj": "Skopiuj moje profile gier",
+  "kreator.gra.kopiuj_od": "Skopiuj profile gier osoby {osoba}",
+  "@kreator.gra.kopiuj_od": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "kreator.gra.kopiuj_opis": "Z ikonami i ustawieniami. Historia kroków nowej osoby zacznie się od zera.",
+  "kreator.gra.brak_pliku": "Nie ma pliku gry w tym folderze. Wskaż folder z plikiem .exe gry.",
+  "kreator.tryb.tytul": "Jak chcesz sterować?",
+  "kreator.tryb.opis": "Dla profilu {profil}. Zmienisz to w Ustawienia > Gry i sterowanie.",
+  "@kreator.tryb.opis": {
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "kreator.tryb.klawisze": "Klawisze / Trzymasz W, a taśma przyspiesza. Puszczasz, a zwalnia.",
+  "kreator.tryb.pad": "Pad / Wychylenie gałki ustawia prędkość taśmy w kilku stopniach.",
+  "kreator.tryb.chodzenie": "Chodzenie / Chodzisz po bieżni, a postać idzie w grze. Gra dostaje W, przy szybszym tempie W + Shift.",
+  "kreator.tryb.trening": "Trening / Cztery stałe tempa bez gry. Poziom wybierasz kliknięciem albo F7 i F6.",
+  "@kreator.tryb.trening": {
+    "description": "Nowy (26.11): w 0.5 tryb Trening nie był do wyboru w kreatorze."
+  },
+  "kreator.tryb.wybrane": "{tryb}, wybrany",
+  "@kreator.tryb.wybrane": {
+    "description": "Dostępność.",
+    "placeholders": {
+      "tryb": {
+        "description": "nazwa trybu: Chodzenie, Klawisze, Pad, Trening"
+      }
+    }
+  }
+}

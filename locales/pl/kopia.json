@@ -1,0 +1,211 @@
+{
+  "@@locale": "pl",
+  "kopia.eksport.tytul": "Zapis kopii danych",
+  "kopia.eksport.osoby": "Osoby i profile gier",
+  "kopia.eksport.profile_wybrane": "{liczba} z {razem} profili gier",
+  "@kopia.eksport.profile_wybrane": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "kopia.eksport.co": "Co zapisać",
+  "kopia.eksport.ustawienia": "Ustawienia i profile gier / tryby, klawisze, stopnie pada, prędkości, ikony, kolory",
+  "kopia.eksport.wyniki": "Wyniki / historia kroków: sesje, kroki, dystans, czas",
+  "kopia.eksport.logi": "Dziennik / zapis działania aplikacji i Bluetooth, przydaje się przy zgłoszeniu problemu",
+  "kopia.eksport.zakres": "Zakres wyników",
+  "kopia.eksport.zakres.wszystko": "Wszystko",
+  "kopia.eksport.zakres.rok": "Ostatni rok",
+  "kopia.eksport.zakres.30": "Ostatnie 30 dni",
+  "kopia.eksport.podsumowanie": "W pliku: {liczba} {liczba, plural, one {osoba} few {osoby} many {osób} other {osoby}}, {profile} {profile, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}}, {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}}",
+  "@kopia.eksport.podsumowanie": {
+    "description": "Bez skrótu „os.”, z odmianą.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "profile": {},
+      "sesje": {}
+    }
+  },
+  "kopia.eksport.zapisz": "Zapisz plik kopii…",
+  "kopia.eksport.opis_pliku": "Plik kopii możesz otworzyć jak zwykłe archiwum ZIP i sprawdzić, co jest w środku.",
+  "@kopia.eksport.opis_pliku": {
+    "description": "Patrz uwaga o rozszerzeniu niżej."
+  },
+  "kopia.eksport.okno": "Zapisz kopię danych",
+  "@kopia.eksport.okno": {
+    "description": "Tytuł okna systemowego."
+  },
+  "kopia.filtr": "Kopia WalkLevel (*.walklevel, *.bieznia)",
+  "@kopia.filtr": {
+    "description": "Stara nazwa. Decyzja dla Damiana: nowe pliki z rozszerzeniem `.walklevel`, wczytywanie obu. Jeśli rozszerzenie zostaje, filtr „Kopia WalkLevel (*.bieznia)”."
+  },
+  "kopia.eksport.gotowe": "Zapisano kopię: {liczba} {liczba, plural, one {osoba} few {osoby} many {osób} other {osoby}}, {profile} {profile, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}}, {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}}.",
+  "@kopia.eksport.gotowe": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "profile": {},
+      "sesje": {}
+    }
+  },
+  "kopia.blad.brak_osoby": "Zaznacz co najmniej jedną osobę.",
+  "kopia.blad.brak_tresci": "Zaznacz, co zapisać: ustawienia, wyniki albo dziennik.",
+  "kopia.import.okno": "Wybierz plik kopii",
+  "kopia.import.tytul": "Wczytanie kopii danych",
+  "kopia.import.plik": "Plik",
+  "kopia.import.plik_opis": "z wersji {wersja} · {liczba} {liczba, plural, one {osoba} few {osoby} many {osób} other {osoby}} · {profile} {profile, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}} · {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}}",
+  "@kopia.import.plik_opis": {
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      },
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "profile": {},
+      "sesje": {}
+    }
+  },
+  "kopia.import.co": "Co wczytać",
+  "kopia.import.osoba_jest": "już jest na tym komputerze",
+  "kopia.import.osoba_nowa": "nowa osoba",
+  "kopia.import.osoba_opis": "{stan} · {profile} {profile, plural, one {profil} few {profile} many {profili} other {profile}} · {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}}",
+  "@kopia.import.osoba_opis": {
+    "placeholders": {
+      "stan": {},
+      "profile": {},
+      "sesje": {}
+    }
+  },
+  "kopia.import.ustawienia": "Ustawienia i profile gier / tryby, klawisze, prędkości, ikony, kolory",
+  "kopia.import.wyniki": "Wyniki / historia kroków",
+  "kopia.import.konflikt": "Osoba {osoba} już jest na tym komputerze",
+  "@kopia.import.konflikt": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "kopia.import.konflikt_dostepnosc": "Co zrobić z osobą {osoba}",
+  "@kopia.import.konflikt_dostepnosc": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "kopia.import.polacz": "Połącz",
+  "kopia.import.jako_nowa": "Dodaj jako nową osobę",
+  "kopia.import.polacz_opis": "Połącz: wyniki z pliku się dodadzą (te same sesje nie powtórzą się), profile o tej samej nazwie dostaną ustawienia z pliku, a nowe profile dojdą.",
+  "kopia.import.zachowaj": "Zachowaj moje ustawienia profili / Z pliku weź tylko nowe profile i wyniki",
+  "kopia.import.wczytaj": "Wczytaj",
+  "kopia.import.kopia_przed": "Przed wczytaniem WalkLevel zapisze kopię obecnych danych. Przywrócisz ją w Ustawienia > Dane i kopia.",
+  "kopia.import.gotowe": "Wczytano kopię. Nowe osoby: {liczba}, połączone: {razem}, nowe profile: {profile}, nowe sesje: {sesje}.",
+  "@kopia.import.gotowe": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      },
+      "profile": {},
+      "sesje": {}
+    }
+  },
+  "kopia.import.blad": "Nie udało się wczytać kopii. {powod}",
+  "@kopia.import.blad": {
+    "description": "`{powod}` z `kopia.blad.*`. Dane na komputerze zostają bez zmian (sprawdzić w kodzie).",
+    "placeholders": {
+      "powod": {}
+    }
+  },
+  "kopia.import.przywrocono": "Przywrócono dane sprzed wczytania kopii.",
+  "kopia.blad.brak_pliku": "Tego pliku nie ma albo jest za duży na kopię WalkLevel.",
+  "kopia.blad.nieznane_pliki": "To nie jest plik kopii WalkLevel.",
+  "@kopia.blad.nieznane_pliki": {
+    "description": "Stara nazwa usunięta."
+  },
+  "kopia.blad.nie_kopia": "To nie jest plik kopii WalkLevel.",
+  "kopia.blad.nowsza": "Ta kopia pochodzi z nowszej wersji WalkLevel. Zaktualizuj aplikację i spróbuj ponownie.",
+  "kopia.blad.uszkodzony": "Plik kopii jest uszkodzony. Spróbuj innej kopii.",
+  "kopia.nazwa_duplikatu": "{nazwa} {liczba}",
+  "@kopia.nazwa_duplikatu": {
+    "description": "Gdy nazwa osoby albo profilu się powtarza.",
+    "placeholders": {
+      "nazwa": {},
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "kopia.import.wybierz": "Wybierz plik kopii…",
+  "@kopia.import.wybierz": {
+    "description": "Ekran wczytania bez wybranego pliku (okno wyboru zamknięte bez wyboru)."
+  },
+  "kopia.import.wybierz_opis": "Wybierz plik kopii WalkLevel zapisany na tym albo innym komputerze. Przed wczytaniem zobaczysz, co jest w środku.",
+  "kopia.import.inny_plik": "Inny plik…",
+  "@kopia.import.inny_plik": {
+    "description": "Przy nazwie wybranego pliku."
+  },
+  "kopia.import.osoby_sa": "Osoby, które już są na tym komputerze",
+  "@kopia.import.osoby_sa": {
+    "description": "Tytuł karty, gdy w pliku jest więcej niż jedna taka osoba (dla jednej: `kopia.import.konflikt`)."
+  },
+  "kopia.import.jako_nowa_opis": "Dodaj jako nową osobę: osoba z pliku pojawi się obok obecnej, z numerem przy nazwie i z własnymi profilami gier oraz wynikami.",
+  "@kopia.import.jako_nowa_opis": {
+    "description": "Pod `kopia.import.polacz_opis`."
+  },
+  "kopia.import.wynik.tytul": "Wczytano kopię",
+  "@kopia.import.wynik.tytul": {
+    "description": "Karta po wczytaniu (zamiast samego komunikatu)."
+  },
+  "kopia.import.wynik.nowe_osoby": "Nowe osoby",
+  "@kopia.import.wynik.nowe_osoby": {
+    "description": "Kafelek."
+  },
+  "kopia.import.wynik.polaczone": "Połączone osoby",
+  "@kopia.import.wynik.polaczone": {
+    "description": "Kafelek."
+  },
+  "kopia.import.wynik.nowe_profile": "Nowe profile gier",
+  "@kopia.import.wynik.nowe_profile": {
+    "description": "Kafelek."
+  },
+  "kopia.import.wynik.nowe_sesje": "Nowe sesje",
+  "@kopia.import.wynik.nowe_sesje": {
+    "description": "Kafelek."
+  },
+  "kopia.import.zakoncz": "Gotowe",
+  "@kopia.import.zakoncz": {
+    "description": "Powrót do Ustawień po wczytaniu."
+  },
+  "kopia.import.przed.tytul": "Dane sprzed wczytania kopii",
+  "@kopia.import.przed.tytul": {
+    "description": "Karta z przywracaniem (gdy jest kopia `przed-importem-*`)."
+  },
+  "kopia.import.przed.opis": "Zapisano je przed ostatnim wczytaniem kopii. Przywrócenie cofa to wczytanie i wszystko, co zmieniło się od tamtej chwili, także nowe sesje.",
+  "@kopia.import.przed.opis": {
+    "description": "Pod nim przycisk z przytrzymaniem `kopia.import.przed.przywroc`."
+  },
+  "kopia.import.przed.przywroc": "Przywróć te dane",
+  "@kopia.import.przed.przywroc": {
+    "description": "Przycisk z przytrzymaniem w karcie `kopia.import.przed.tytul` (pełny napis `ustawienia.dane.przywroc` nie mieści się w wąskim oknie)."
+  },
+  "kopia.import.osoba_jest_tytul": "Ta osoba już jest na tym komputerze",
+  "@kopia.import.osoba_jest_tytul": {
+    "description": "Tytuł karty, gdy w pliku jest jedna taka osoba (tytuł w jednej linii, nazwa osoby w wierszu pod opisem). Zastępuje `kopia.import.konflikt` w tytule karty."
+  },
+  "kopia.blad.brak_wyboru": "Najpierw wybierz plik kopii.",
+  "kopia.blad.brak_przed": "Nie ma danych sprzed wczytania kopii.",
+  "kopia.blad.brak_danych": "Nie ma jeszcze danych do zapisania. Najpierw dodaj osobę.",
+  "kopia.blad.polaczenie": "Nie udało się połączyć danych z kopią. Spróbuj ponownie."
+}

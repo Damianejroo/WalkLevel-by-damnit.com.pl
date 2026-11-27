@@ -1,0 +1,31 @@
+{
+  "@@locale": "pl",
+  "pole.mniej": "{nazwa}: mniej",
+  "@pole.mniej": {
+    "description": "Dostępność.",
+    "placeholders": {
+      "nazwa": {}
+    }
+  },
+  "pole.wiecej": "{nazwa}: więcej",
+  "@pole.wiecej": {
+    "placeholders": {
+      "nazwa": {}
+    }
+  },
+  "pole.wpisz": "{nazwa}: wpisz wartość",
+  "@pole.wpisz": {
+    "placeholders": {
+      "nazwa": {}
+    }
+  },
+  "pole.wpisz_podpowiedz": "Kliknij i wpisz wartość, np. 2,3",
+  "pole.kmh": "{kmh} km/h",
+  "@pole.kmh": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  }
+}

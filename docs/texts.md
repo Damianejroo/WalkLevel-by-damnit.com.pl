@@ -1,6 +1,8 @@
 # WalkLevel 0.6.0: słownik tekstów interfejsu
 
-Jedyne źródło tekstów dla nowego interfejsu (Tauri 2 + Svelte 5). Powstało z pełnego przeglądu
+Jedyne źródło kluczy i polskich tekstów interfejsu (Tauri 2 + Svelte 5). `npm run texts` robi z
+niego pakiet `locales/pl/` i pakiet wbudowany; tłumaczenia są w `locales/<język>/`
+(docs/i18n.pl.md). Powstało z pełnego przeglądu
 tekstów wersji 0.5.2 w `bieznia/gui/`, `bieznia/konto/`, `bieznia/zgloszenia.py`,
 `bieznia/aktualizacje.py`, `bieznia/kopia.py`, `bieznia/klawisze.py`, `bieznia/pad.py`,
 `bieznia/ble/` i `bieznia/sterowniki/`, a także `packaging/installer.iss`.
@@ -79,9 +81,14 @@ Kolumny w tabelach:
 ### 0.4. Zmienne i odmiana
 
 - Zmienne w nawiasach klamrowych: `{kroki}`, `{km}`, `{kmh}`, `{model}` itd. Lista nazw w 0.5.
-- Odmiana po liczbie: `{zmienna:forma1/forma2-4/forma5}`, np. `{kroki} {kroki:krok/kroki/kroków}`.
-  Reguła polska: 1 → forma1; końcówka 2–4 (bez 12–14) → forma2-4; reszta → forma5. Funkcja
-  `odmiana(n, f1, f2, f5)` w jednym miejscu.
+- Teksty są w formacie ICU MessageFormat (od 0.6.4, docs/i18n.pl.md). Odmiana po liczbie:
+  `{kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}`. Kategorie i ich
+  reguły są z CLDR (`Intl.PluralRules`, w Rust ICU4X): `one` - 1; `few` - końcówka 2–4 (bez
+  12–14); `many` - reszta liczb całkowitych; `other` - ułamki („2,5”). Polski tekst musi mieć
+  wszystkie cztery. Wybór bez liczby: `{x, select, a {...} other {...}}`. Apostrof `'` przed `{`,
+  `}` albo (w odmianie) `#` zaczyna dosłowny tekst; samodzielny apostrof jest zwykłym znakiem.
+- Uwaga zawierająca „bez tłumaczenia” oznacza tekst taki sam we wszystkich językach (nazwy
+  własne); inne języki nie muszą go tłumaczyć.
 - Liczby wstawiane do tekstu są już sformatowane (patrz 0.2). `{kmh}` zawsze z jednym miejscem po
   przecinku, `{km}` z dwoma na ekranie głównym i w sesji, z jednym w podsumowaniach.
 - `\n` w nowym tekście oznacza złamanie wiersza (np. w dymku).
@@ -124,8 +131,8 @@ Kolumny w tabelach:
 
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
-| `app.nazwa` | WalkLevel | WalkLevel | |
-| `app.haslo` | (tylko w mailach: Chodzisz w realu, idziesz w grze) | Chodzisz w realu, idziesz w grze | Bez zmian. Do okna „O aplikacji” i ekranu pierwszego uruchomienia. |
+| `app.nazwa` | WalkLevel | WalkLevel | Nazwa własna, bez tłumaczenia. |
+| `app.haslo` | (tylko w mailach: Chodzisz w realu, idziesz w grze) | Chodzisz w realu, idziesz w grze | Bez zmian, bez tłumaczenia (hasło marki). Do okna „O aplikacji” i ekranu pierwszego uruchomienia. |
 | `app.wersja` | wersja {wersja} | wersja {wersja} | Pod nazwą na pasku. |
 | `app.osoba_i_wersja` | {osoba} · wersja {wersja} | {osoba} · wersja {wersja} | Gdy na komputerze jest więcej niż jedna osoba. |
 | `app.o_aplikacji` | WalkLevel {wersja} · © 2026 {autor} | WalkLevel {wersja} · © 2026 {autor} | |
@@ -150,7 +157,7 @@ Kolumny w tabelach:
 | `glowny.pasek.online` | Znajomi i ranking | Znajomi i ranking | Widoczne tylko z kontem online. |
 | `glowny.pasek.historia` | Historia kroków | Historia kroków | |
 | `glowny.pasek.ustawienia` | Ustawienia | Ustawienia | |
-| `glowny.osoby.dzis` | dziś {kroki} kroków | dziś {kroki} {kroki:krok/kroki/kroków} | Lista osób pod awatarem. Dziś brak odmiany („dziś 1 kroków”). |
+| `glowny.osoby.dzis` | dziś {kroki} kroków | dziś {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | Lista osób pod awatarem. Dziś brak odmiany („dziś 1 kroków”). |
 | `glowny.osoby.dodaj` | Dodaj osobę | Dodaj osobę | |
 | `glowny.osoby.zarzadzaj` | Zarządzaj osobami | Zarządzaj osobami | Otwiera Ustawienia > Konto i osoby. |
 
@@ -387,7 +394,7 @@ Nazwy kategorii i kart są celem ścieżek „Ustawienia > …” we wszystkich 
 | `ustawienia.kat.poziomy.nazwa` | Poziomy i powiadomienia | Poziomy i powiadomienia | |
 | `ustawienia.kat.poziomy.opis` | Popupy osiągnięć nad grą, dźwięk | Powiadomienia o osiągnięciach nad grą, dźwięk | |
 | `ustawienia.kat.wyglad.nazwa` | Wygląd i okno | Wygląd i okno | |
-| `ustawienia.kat.wyglad.opis` | Motyw, kolor, tekst, okno, przycisk na ekranie | Motyw, kolor, wielkość tekstu, okno, przycisk na ekranie | |
+| `ustawienia.kat.wyglad.opis` | Motyw, kolor, tekst, okno, przycisk na ekranie | Język, motyw, kolor, wielkość tekstu, okno, przycisk na ekranie | Język od 0.6.4. |
 | `ustawienia.kat.dane.nazwa` | Dane i kopia | Dane i kopia | |
 | `ustawienia.kat.dane.opis` | Eksport, import, folder danych | Kopia danych, przeniesienie na inny komputer | |
 | `ustawienia.kat.pomoc.nazwa` | Pomoc i diagnostyka | Pomoc i diagnostyka | |
@@ -408,7 +415,7 @@ Nazwy kategorii i kart są celem ścieżek „Ustawienia > …” we wszystkich 
 |---|---|---|---|
 | `ustawienia.osoby.tytul` | Osoby | Osoby | |
 | `ustawienia.osoby.opis` | Każda osoba ma swoje profile gier, ustawienia i historię kroków. | Każda osoba ma własne profile gier, ustawienia i historię kroków. | |
-| `ustawienia.osoby.wiersz` | {liczba} prof. gier · dziś {kroki} kroków · konto {pseudonim} | {liczba} {liczba:profil gry/profile gier/profili gier} · dziś {kroki} {kroki:krok/kroki/kroków} · konto {pseudonim} | Bez skrótu „prof.”, z odmianą. Część „· konto …” tylko z kontem. |
+| `ustawienia.osoby.wiersz` | {liczba} prof. gier · dziś {kroki} kroków · konto {pseudonim} | {liczba} {liczba, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}} · dziś {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · konto {pseudonim} | Bez skrótu „prof.”, z odmianą. Część „· konto …” tylko z kontem. |
 | `ustawienia.osoby.dodaj` | Dodaj osobę | Dodaj osobę | |
 | `ustawienia.osoby.dodaj_z_kontem` | Dodaj osobę z kontem online | Dodaj osobę z kontem online | |
 | `ustawienia.osoby.edytuj` | Edytuj: {osoba} | Edytuj: {osoba} | Ikona ołówka w wierszu. |
@@ -420,7 +427,7 @@ Nazwy kategorii i kart są celem ścieżek „Ustawienia > …” we wszystkich 
 | `ustawienia.profile.tytul` | Profile gier · {osoba} | Profile gier · {osoba} | |
 | `ustawienia.profile.opis` | Ustawienia sterowania i kolor zapisują się w zaznaczonym profilu. | Sterowanie i kolor zapisują się w zaznaczonym profilu gry. | |
 | `ustawienia.profile.nowy` | Nowy profil | Nowy profil gry | |
-| `ustawienia.profile.podsumowanie.pad` | Pad · {liczba} skoki · do {kmh} km/h | Pad · {liczba} {liczba:stopień/stopnie/stopni} · do {kmh} km/h | Dziś zawsze „skoki”, także przy 5. |
+| `ustawienia.profile.podsumowanie.pad` | Pad · {liczba} skoki · do {kmh} km/h | Pad · {liczba} {liczba, plural, one {stopień} few {stopnie} many {stopni} other {stopnie}} · do {kmh} km/h | Dziś zawsze „skoki”, także przy 5. |
 | `ustawienia.profile.podsumowanie.klawisze` | Klawisze · {kmh} / {kmh_bieg} km/h | Klawisze · chód {kmh} km/h, bieg {kmh_bieg} km/h | |
 | `ustawienia.profile.podsumowanie.trening` | Trening · {min_kmh}-{max_kmh} km/h | Trening · {min_kmh}–{max_kmh} km/h | |
 | `ustawienia.profile.podsumowanie.chodzenie` | Chodzenie · chód od {kmh} km/h | Chodzenie · chód od {kmh} km/h | |
@@ -698,7 +705,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 |---|---|---|---|
 | `dymek.tytul_okna` | WalkLevel - sterowanie | WalkLevel · sterowanie | |
 | `dymek.dostepnosc` | Sterowanie w grze: {stan} | Sterowanie: {stan} | `{stan}` = włączone / wyłączone. |
-| `dymek.podpowiedz` | Sterowanie: {stan}\nKliknij - {wyłącz/włącz}\nPrawy przycisk - okno Bieżni\nPrzeciągnij - przesuń | Sterowanie {stan}\nKliknij, żeby {wyłączyć/włączyć}\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Usunięta stara nazwa „okno Bieżni”. |
+| `dymek.podpowiedz` | Sterowanie: {stan}\nKliknij - {wyłącz/włącz}\nPrawy przycisk - okno Bieżni\nPrzeciągnij - przesuń | Sterowanie {stan}\nKliknij, żeby {akcja}\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć | Usunięta stara nazwa „okno Bieżni”. |
 | `dymek.stan.wl` | włączone | włączone | |
 | `dymek.stan.wyl` | wyłączone | wyłączone | |
 
@@ -729,12 +736,12 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `kopia.eksport.zakres.wszystko` | Wszystko | Wszystko | |
 | `kopia.eksport.zakres.rok` | Rok | Ostatni rok | |
 | `kopia.eksport.zakres.30` | 30 dni | Ostatnie 30 dni | |
-| `kopia.eksport.podsumowanie` | Plik: {liczba} os., {profile} profili gier, {sesje} sesji | W pliku: {liczba} {liczba:osoba/osoby/osób}, {profile} {profile:profil gry/profile gier/profili gier}, {sesje} {sesje:sesja/sesje/sesji} | Bez skrótu „os.”, z odmianą. |
+| `kopia.eksport.podsumowanie` | Plik: {liczba} os., {profile} profili gier, {sesje} sesji | W pliku: {liczba} {liczba, plural, one {osoba} few {osoby} many {osób} other {osoby}}, {profile} {profile, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}}, {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}} | Bez skrótu „os.”, z odmianą. |
 | `kopia.eksport.zapisz` | Zapisz plik kopii… | Zapisz plik kopii… | |
 | `kopia.eksport.opis_pliku` | Plik .bieznia to archiwum ZIP z danymi w JSON - można je otworzyć i sprawdzić. | Plik kopii możesz otworzyć jak zwykłe archiwum ZIP i sprawdzić, co jest w środku. | Patrz uwaga o rozszerzeniu niżej. |
 | `kopia.eksport.okno` | Zapisz kopię danych | Zapisz kopię danych | Tytuł okna systemowego. |
 | `kopia.filtr` | Kopia Bieżni (*.bieznia) | Kopia WalkLevel (*.walklevel, *.bieznia) | Stara nazwa. Decyzja dla Damiana: nowe pliki z rozszerzeniem `.walklevel`, wczytywanie obu. Jeśli rozszerzenie zostaje, filtr „Kopia WalkLevel (*.bieznia)”. |
-| `kopia.eksport.gotowe` | Zapisano: {liczba} os., {profile} profili, {sesje} sesji. | Zapisano kopię: {liczba} {liczba:osoba/osoby/osób}, {profile} {profile:profil gry/profile gier/profili gier}, {sesje} {sesje:sesja/sesje/sesji}. | |
+| `kopia.eksport.gotowe` | Zapisano: {liczba} os., {profile} profili, {sesje} sesji. | Zapisano kopię: {liczba} {liczba, plural, one {osoba} few {osoby} many {osób} other {osoby}}, {profile} {profile, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}}, {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}}. | |
 | `kopia.blad.brak_osoby` | Zaznacz co najmniej jedną osobę. | Zaznacz co najmniej jedną osobę. | |
 | `kopia.blad.brak_tresci` | Zaznacz, co zapisać: ustawienia, wyniki albo logi. | Zaznacz, co zapisać: ustawienia, wyniki albo dziennik. | |
 
@@ -745,11 +752,11 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `kopia.import.okno` | Wybierz kopię danych | Wybierz plik kopii | |
 | `kopia.import.tytul` | Import danych | Wczytanie kopii danych | |
 | `kopia.import.plik` | Plik | Plik | |
-| `kopia.import.plik_opis` | z wersji {wersja} · {liczba} os. · {profile} profili · {sesje} sesji | z wersji {wersja} · {liczba} {liczba:osoba/osoby/osób} · {profile} {profile:profil gry/profile gier/profili gier} · {sesje} {sesje:sesja/sesje/sesji} | |
+| `kopia.import.plik_opis` | z wersji {wersja} · {liczba} os. · {profile} profili · {sesje} sesji | z wersji {wersja} · {liczba} {liczba, plural, one {osoba} few {osoby} many {osób} other {osoby}} · {profile} {profile, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}} · {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}} | |
 | `kopia.import.co` | Co zaimportować | Co wczytać | |
 | `kopia.import.osoba_jest` | już jest na tym komputerze | już jest na tym komputerze | |
 | `kopia.import.osoba_nowa` | nowa osoba | nowa osoba | |
-| `kopia.import.osoba_opis` | {stan} · {profile} prof. · {sesje} sesji | {stan} · {profile} {profile:profil/profile/profili} · {sesje} {sesje:sesja/sesje/sesji} | |
+| `kopia.import.osoba_opis` | {stan} · {profile} prof. · {sesje} sesji | {stan} · {profile} {profile, plural, one {profil} few {profile} many {profili} other {profile}} · {sesje} {sesje, plural, one {sesja} few {sesje} many {sesji} other {sesje}} | |
 | `kopia.import.ustawienia` | Ustawienia i profile gier / tryby, klawisze, prędkości, ikony, kolory | Ustawienia i profile gier / tryby, klawisze, prędkości, ikony, kolory | |
 | `kopia.import.wyniki` | Wyniki / historia kroków | Wyniki / historia kroków | |
 | `kopia.import.konflikt` | {osoba} już jest | Osoba {osoba} już jest na tym komputerze | |
@@ -836,7 +843,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `zgloszenie.opis_przyklad` | Np. bieżnia rozłącza się po kilku minutach albo postać nie biegnie w grze. | Np. bieżnia rozłącza się po kilku minutach albo postać nie biegnie w grze. | |
 | `zgloszenie.opis_dostepnosc` | Opis problemu | Opis problemu | |
 | `zgloszenie.blad.pusty` | Opisz, co się stało - wystarczy jedno zdanie. | Opisz, co się stało. Wystarczy jedno zdanie. | Pod polem. |
-| `zgloszenie.blad.krotki` | Opis jest za krótki - dopisz jeszcze {liczba} {znak/znaki/znaków}, np. co poszło nie tak. | Opis jest za krótki. Dopisz jeszcze {liczba} {liczba:znak/znaki/znaków}, np. co poszło nie tak. | |
+| `zgloszenie.blad.krotki` | Opis jest za krótki - dopisz jeszcze {liczba} {znak/znaki/znaków}, np. co poszło nie tak. | Opis jest za krótki. Dopisz jeszcze {liczba} {liczba, plural, one {znak} few {znaki} many {znaków} other {znaki}}, np. co poszło nie tak. | |
 | `zgloszenie.kontakt_etykieta` | Kontakt (opcjonalnie) | Kontakt (opcjonalnie) | |
 | `zgloszenie.kontakt_przyklad` | Np. nick na Discordzie albo e-mail | Np. nick na Discordzie albo e-mail | |
 | `zgloszenie.kontakt_dostepnosc` | Kontakt | Kontakt | |
@@ -944,11 +951,11 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `historia.pusto` | Brak kroków w tym okresie. Wejdź na bieżnię - wyniki pojawią się tu same. | Brak kroków w tym okresie. Wejdź na bieżnię, a wyniki pojawią się tu same. | |
 | `historia.podzial.osoby` | Osoby | Osoby | |
 | `historia.podzial.profile` | Profile gier | Profile gier | |
-| `historia.podzial.wiersz` | {kroki} kroków / {km} km · {czas} · {procent}% | {kroki} {kroki:krok/kroki/kroków} / {km} km · {czas} · {procent}% | |
+| `historia.podzial.wiersz` | {kroki} kroków / {km} km · {czas} · {procent}% | {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} / {km} km · {czas} · {procent}% | |
 | `historia.sesje.tytul` | Ostatnie sesje | Ostatnie sesje | |
 | `historia.sesje.dzis` | Dziś | Dziś | |
 | `historia.sesje.wczoraj` | Wczoraj | Wczoraj | |
-| `historia.sesje.wiersz` | {dzien} {godzina} · {osoba} · {profil} / {kroki} kroków · {czas} · {kmh} km/h | {dzien} {godzina} · {osoba} · {profil} / {kroki} {kroki:krok/kroki/kroków} · {czas} · {kmh} km/h | |
+| `historia.sesje.wiersz` | {dzien} {godzina} · {osoba} · {profil} / {kroki} kroków · {czas} · {kmh} km/h | {dzien} {godzina} · {osoba} · {profil} / {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {czas} · {kmh} km/h | |
 | `historia.sesje.dostepnosc` | Sesja {dzien} {godzina} - szczegóły | Sesja {dzien} {godzina}. Kliknij, żeby zobaczyć szczegóły. | |
 | `historia.sesje.pusto` | (nowy) | Jeszcze nie ma sesji. Pierwsza zapisze się sama po kilku krokach na bieżni. | Pusta lista sesji. |
 | `historia.czas.godziny` | {godziny} h {minuty} min | {godziny} h {minuty} min | |
@@ -1009,13 +1016,13 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `poziomy.pokaz_wszystkie` | Pokaż wszystkie ({liczba}) | Pokaż wszystkie ({liczba}) | |
 | `poziomy.osiagniecie.xp` | +{xp} XP | +{xp} XP | |
 | `poziomy.osiagniecie.zdobyte` | zdobyte {kiedy} | zdobyte {kiedy} | |
-| `poziomy.osiagniecie.dni_temu` | {dni} dni temu | {dni} {dni:dzień/dni/dni} temu | Dla 1: „wczoraj”, dla 0: „dziś”. Powyżej 30 dni data „{data}”. |
-| `poziomy.osiagniecie.dostepnosc` | {nazwa}: zdobyte/do zdobycia. {warunek} | {nazwa}: {zdobyte/do zdobycia}. {warunek} | |
+| `poziomy.osiagniecie.dni_temu` | {dni} dni temu | {dni} {dni, plural, one {dzień} few {dni} many {dni} other {dni}} temu | Dla 1: „wczoraj”, dla 0: „dziś”. Powyżej 30 dni data „{data}”. |
+| `poziomy.osiagniecie.dostepnosc` | {nazwa}: zdobyte/do zdobycia. {warunek} | {nazwa}: {stan}. {warunek} | |
 | `poziomy.osiagniecie.do_zdobycia` | do zdobycia | do zdobycia | |
 | `poziomy.postep.km` | {liczba} / {razem} KM | {liczba} / {razem} km | Jednostki małą literą; wersaliki przez CSS, jeśli styl tego wymaga. |
-| `poziomy.postep.kroki` | {liczba} / {razem} KROKÓW | {liczba} / {razem} {razem:krok/kroki/kroków} | |
-| `poziomy.postep.dni` | {liczba} / {razem} DNI | {liczba} / {razem} {razem:dzień/dni/dni} | |
-| `poziomy.postep.gry` | {liczba} / {razem} GRY | {liczba} / {razem} {razem:gra/gry/gier} | Dziś zawsze „GRY”. |
+| `poziomy.postep.kroki` | {liczba} / {razem} KROKÓW | {liczba} / {razem} {razem, plural, one {krok} few {kroki} many {kroków} other {kroki}} | |
+| `poziomy.postep.dni` | {liczba} / {razem} DNI | {liczba} / {razem} {razem, plural, one {dzień} few {dni} many {dni} other {dni}} | |
+| `poziomy.postep.gry` | {liczba} / {razem} GRY | {liczba} / {razem} {razem, plural, one {gra} few {gry} many {gier} other {gry}} | Dziś zawsze „GRY”. |
 | `poziomy.symulator` | (nowy) | XP i osiągnięcia liczą się tylko z prawdziwej bieżni, bez symulatora. | Na dole ekranu. |
 
 ### 21.2. Szlak
@@ -1027,7 +1034,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `szlak.km` | {km} km | {km} km | |
 | `szlak.lacznie` | przebyte łącznie · {liczba} z {razem} przystanków szlaku | przebyte łącznie · {liczba} z {razem} przystanków | |
 | `szlak.tu_jestes` | TU JESTEŚ | TU JESTEŚ | |
-| `szlak.nastepny` | następny przystanek za {km} km · ok. {dni} dni przy 5 km dziennie | następny przystanek za {km} km, to ok. {dni} {dni:dzień/dni/dni} po 5 km dziennie | Odmiana. |
+| `szlak.nastepny` | następny przystanek za {km} km · ok. {dni} dni przy 5 km dziennie | następny przystanek za {km} km, to ok. {dni} {dni, plural, one {dzień} few {dni} many {dni} other {dni}} po 5 km dziennie | Odmiana. |
 
 ### 21.3. Powiadomienia (okienka w rogu ekranu)
 
@@ -1042,11 +1049,11 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `powiadomienie.awans.linia` | Następny poziom za {km} km | Następny poziom za {km} km | |
 | `powiadomienie.awans.ranga_linia` | Nowa ranga · następny poziom za {km} km | Nowa ranga · następny poziom za {km} km | |
 | `powiadomienie.wiele.nad` | OSIĄGNIĘCIA | OSIĄGNIĘCIA | |
-| `powiadomienie.wiele.tytul` | +{liczba} kolejnych | I {liczba} {liczba:kolejne/kolejne/kolejnych} | „+1 kolejnych” było błędne. |
+| `powiadomienie.wiele.tytul` | +{liczba} kolejnych | I {liczba} {liczba, plural, one {kolejne} few {kolejne} many {kolejnych} other {kolejne}} | „+1 kolejnych” było błędne. |
 | `powiadomienie.wiele.linia` | Wszystkie na liście osiągnięć | Wszystkie są w Poziomy i osiągnięcia. | Ścieżka do ekranu. |
 | `powiadomienie.historia.nad` | Z TWOJEJ HISTORII | Z TWOJEJ HISTORII | Po pierwszym przeliczeniu historii. |
 | `powiadomienie.historia.tytul` | Poziom {poziom} · {ranga} | Poziom {poziom} · {ranga} | |
-| `powiadomienie.historia.linia` | {liczba} {osiągnięcie/osiągnięcia/osiągnięć} · {km} km przebyte | {liczba} {liczba:osiągnięcie/osiągnięcia/osiągnięć} · {km} km za Tobą | |
+| `powiadomienie.historia.linia` | {liczba} {osiągnięcie/osiągnięcia/osiągnięć} · {km} km przebyte | {liczba} {liczba, plural, one {osiągnięcie} few {osiągnięcia} many {osiągnięć} other {osiągnięcia}} · {km} km za Tobą | |
 | `powiadomienie.dzwiek_brak` | (tylko log) | bez tekstu | Brak dźwięku nie wymaga komunikatu. |
 
 ### 21.4. Rzadkość osiągnięć
@@ -1091,7 +1098,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `konto.nowa_osoba_opis` | Konto będzie nową osobą w aplikacji (nazwa = pseudonim). | Konto będzie nową osobą w aplikacji, z nazwą taką jak pseudonim. | |
 | `konto.dla_osoby` | Konto dla osoby: {osoba}. | Konto dla osoby {osoba}. | |
 | `konto.pseudonim_zasady` | Pseudonim: 3-24 znaki - litery, cyfry, spacja, _, - i kropka. Nie wpisuj imienia i nazwiska. | Pseudonim: 3–24 znaki, litery, cyfry, spacja, podkreślnik, łącznik i kropka. Nie wpisuj imienia i nazwiska. | |
-| `konto.haslo_zasady` | Hasło: co najmniej {liczba} znaków. | Hasło: co najmniej {liczba} {liczba:znak/znaki/znaków}. | |
+| `konto.haslo_zasady` | Hasło: co najmniej {liczba} znaków. | Hasło: co najmniej {liczba} {liczba, plural, one {znak} few {znaki} many {znaków} other {znaki}}. | |
 | `konto.zapamietaj` | Zapamiętaj logowanie | Zapamiętaj logowanie | |
 | `konto.zapamietaj_opis` | Hasła nie zapisujemy - tylko bezpieczny token w Windows | Hasło nie jest zapisywane. Windows przechowuje tylko klucz logowania. | Bez słowa „token”. |
 | `konto.regulamin_zgoda` | Akceptuję regulamin i politykę prywatności | Akceptuję regulamin i politykę prywatności | |
@@ -1161,7 +1168,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 |---|---|---|---|
 | `znajomi.moj_profil` | Mój profil - jak widzą mnie inni | Mój profil oczami innych | Przycisk i podpowiedź. |
 | `znajomi.moje_wyniki` | Moje wyniki online · ten tydzień | Moje wyniki online · ten tydzień | |
-| `znajomi.moje_wyniki_wiersz` | {kroki} kroków · {km} km · {czas} | {kroki} {kroki:krok/kroki/kroków} · {km} km · {czas} | |
+| `znajomi.moje_wyniki_wiersz` | {kroki} kroków · {km} km · {czas} | {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km · {czas} | |
 | `znajomi.podzial_pokaz` | Pokaż podział na gry | Pokaż podział na gry | |
 | `znajomi.podzial_ukryj` | Ukryj podział na gry | Ukryj podział na gry | |
 | `znajomi.zaproszenia_do_mnie` | Zaproszenia do Ciebie | Zaproszenia do Ciebie | |
@@ -1169,8 +1176,8 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `znajomi.przyjmij` | Przyjmij | Przyjmij | |
 | `znajomi.lista` | Znajomi | Znajomi | |
 | `znajomi.pusto` | Jeszcze nikogo. Zaproś znajomego po pseudonimie albo zaproś do WalkLevel kogoś, kto nie ma konta. | Lista znajomych jest pusta. Zaproś kogoś po pseudonimie albo daj kod na nowe konto komuś, kto konta nie ma. | |
-| `znajomi.idzie` | idzie teraz {kmh} km/h · {kroki} kroków | idzie teraz {kmh} km/h · {kroki} {kroki:krok/kroki/kroków} | |
-| `znajomi.tydzien` | tydzień: {kroki} kroków · {czas} | w tym tygodniu: {kroki} {kroki:krok/kroki/kroków} · {czas} | |
+| `znajomi.idzie` | idzie teraz {kmh} km/h · {kroki} kroków | idzie teraz {kmh} km/h · {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | |
+| `znajomi.tydzien` | tydzień: {kroki} kroków · {czas} | w tym tygodniu: {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {czas} | |
 | `znajomi.usun` | Usuń | Usuń ze znajomych | Przycisk z przytrzymaniem. |
 | `znajomi.dodaj` | Dodaj znajomego | Dodaj znajomego | |
 | `znajomi.dodaj_opis` | Wpisz pseudonim osoby, która ma konto. Zaproszenie musi przyjąć. | Wpisz pseudonim osoby, która ma konto. Ta osoba musi przyjąć zaproszenie. | |
@@ -1205,7 +1212,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `ranking.pusto` | Na razie nikt nie ma wyników w tym okresie. | W tym okresie nikt nie ma jeszcze wyników. | |
 | `ranking.miejsce` | {liczba}. | {liczba}. | |
 | `ranking.wiersz.poziom` | {km} km łącznie | {km} km łącznie | |
-| `ranking.wiersz.kroki` | {kroki} kroków · {km} km | {kroki} {kroki:krok/kroki/kroków} · {km} km | |
+| `ranking.wiersz.kroki` | {kroki} kroków · {km} km | {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km | |
 | `ranking.opis.poziomy` | Ranking poziomów liczy wszystko od początku konta (tylko sesje wysłane na bieżąco). Tydzień i miesiąc to rankingi „na teraz”. | Ranking poziomów liczy kilometry od założenia konta. Ten tydzień liczy się od poniedziałku, ten miesiąc od 1. dnia (czas polski). | Nawias „tylko sesje wysłane na bieżąco” był niezrozumiały. Jeśli to ważne (sesje sprzed konta się nie liczą), napisać wprost: „Sesje sprzed założenia konta się nie liczą.” |
 | `ranking.opis.zasady` | W rankingu są tylko sesje z bieżni (bez symulatora) widoczne dla wszystkich albo dla znajomych. Ukryte sesje i profil ukryty nie wchodzą do rankingu. | W rankingu liczą się sesje z prawdziwej bieżni, widoczne dla znajomych albo wszystkich. Sesje i profile ukryte nie są liczone. | |
 
@@ -1220,7 +1227,7 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `osoby_online.nastepne` | Następne | Następna strona | |
 | `osoby_online.strona` | strona {liczba} | strona {liczba} | |
 | `osoby_online.pusto` | Nikogo nie znaleziono. | Nie ma nikogo o takim pseudonimie. Sprawdź pisownię. | Wariant bez wyszukiwania: „Na liście nie ma jeszcze nikogo.” (`osoby_online.pusto_lista`). |
-| `osoby_online.wiersz` | tydzień: {kroki} kroków · {liczba}. miejsce | w tym tygodniu: {kroki} {kroki:krok/kroki/kroków} · {liczba}. miejsce | |
+| `osoby_online.wiersz` | tydzień: {kroki} kroków · {liczba}. miejsce | w tym tygodniu: {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {liczba}. miejsce | |
 | `osoby_online.zapros` | Zaproś | Zaproś | |
 | `osoby_online.opis` | Na liście są tylko osoby, które same ustawiły profil jako widoczny dla wszystkich. E-maili nikt nie widzi. | Na liście są tylko osoby, które pokazują swój profil wszystkim. Adresów e-mail nikt nie widzi. | |
 
@@ -1281,13 +1288,13 @@ Format całego komunikatu: `klawisz.blad.ogolny` z jednym powodem.
 | `profil_online.nieznajomy` | Nie jesteście znajomymi | Nie jesteście znajomymi | |
 | `profil_online.7dni` | Ostatnie 7 dni | Ten tydzień | 0.6.2: serwer liczy tydzień od poniedziałku. |
 | `profil_online.razem` | Razem | Od początku | |
-| `profil_online.wiersz` | {kroki} kroków · {km} km · {czas} | {kroki} {kroki:krok/kroki/kroków} · {km} km · {czas} | |
-| `profil_online.sesje` | sesje: {liczba} | {liczba} {liczba:sesja/sesje/sesji} | |
+| `profil_online.wiersz` | {kroki} kroków · {km} km · {czas} | {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km · {czas} | |
+| `profil_online.sesje` | sesje: {liczba} | {liczba} {liczba, plural, one {sesja} few {sesje} many {sesji} other {sesje}} | |
 | `profil_online.gry` | Gry · razem | Gry · razem | |
 | `profil_online.gry_ukryte` | Ta osoba nie pokazuje podziału na gry. | Ta osoba nie pokazuje wyników w poszczególnych grach. | |
 | `profil_online.gry_brak` | Brak danych o grach. | Brak danych o grach. | |
 | `profil_online.bez_gry` | bez gry | bez nazwy gry | |
-| `profil_online.gra_wiersz` | {kroki} kroków · {km} km · {czas} | {kroki} {kroki:krok/kroki/kroków} · {km} km · {czas} | |
+| `profil_online.gra_wiersz` | {kroki} kroków · {km} km · {czas} | {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km · {czas} | |
 | `profil_online.moje_ukryte` | Sesje ukryte („Tylko ja”) nie wchodzą do wyników widocznych dla innych. | Sesje ukryte („Tylko ja”) nie liczą się w wynikach widocznych dla innych. | |
 | `profil_online.cudze_ukryte` | Widać tylko sesje, które ta osoba pokazuje Tobie (bez ukrytych). | Widać tylko sesje, które ta osoba Ci pokazuje. | |
 
@@ -1304,7 +1311,7 @@ Trzeba je przejrzeć osobno w kodzie serwera według tych samych zasad.
 | `konto.blad.pseudonim_zarezerwowany` | Ten pseudonim jest zarezerwowany - wybierz inny. | Ten pseudonim jest zajęty. Wybierz inny. | |
 | `konto.blad.kod` | Wpisz kod zaproszenia (dostaniesz go od znajomego). | Wpisz kod zaproszenia. Da Ci go ktoś, kto już ma konto. | |
 | `konto.blad.email` | Wpisz poprawny adres e-mail. | Wpisz poprawny adres e-mail, np. imie@poczta.pl. | |
-| `konto.blad.haslo_krotkie` | Hasło: co najmniej {liczba} znaków. | Hasło musi mieć co najmniej {liczba} {liczba:znak/znaki/znaków}. | |
+| `konto.blad.haslo_krotkie` | Hasło: co najmniej {liczba} znaków. | Hasło musi mieć co najmniej {liczba} {liczba, plural, one {znak} few {znaki} many {znaków} other {znaki}}. | |
 | `konto.blad.internet` | Brak połączenia z serwerem kont - sprawdź internet. | Brak połączenia z internetem. Sprawdź sieć. Wyniki zostają na komputerze i wyślą się później. | 0.6.2: zrozumiale dla każdego (zgłoszenie Damiana). |
 | `konto.blad.400` | Serwer nie przyjął danych. | Serwer nie przyjął tych danych. Sprawdź pola i spróbuj ponownie. | |
 | `konto.blad.403` | Brak dostępu - potwierdź adres e-mail (link w wiadomości). | Najpierw potwierdź adres e-mail: kliknij link w wiadomości od WalkLevel. Nowy link wyślesz w zakładce Moje konto. | |
@@ -1458,18 +1465,18 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
-| `ustawienia.osoby.wiersz_bez_konta` | (nowy) | {liczba} {liczba:profil gry/profile gier/profili gier} · dziś {kroki} {kroki:krok/kroki/kroków} | Wiersz osoby bez konta online (`ustawienia.osoby.wiersz` bez części „· konto …”). |
+| `ustawienia.osoby.wiersz_bez_konta` | (nowy) | {liczba} {liczba, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}} · dziś {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | Wiersz osoby bez konta online (`ustawienia.osoby.wiersz` bez części „· konto …”). |
 | `ustawienia.sterowanie.aktywny_tryb` | (nowy) | aktywny tryb | Podpowiedź przy kropce przed nazwą trybu, który działa teraz (zamiast „✓”). |
 | `ustawienia.wlaczanie.pad_rola` | (nowy) | Przycisk pada | Rola przycisku pada: „Przycisk pada: Panel dotykowy”. |
 ## Dodatki: historia
 
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
-| `historia.sesje.wiersz_moja` | (nowy) | {dzien} {godzina} · {profil} / {kroki} {kroki:krok/kroki/kroków} · {czas} · {kmh} km/h | Wiersz sesji w historii jednej osoby (bez nazwy osoby). |
+| `historia.sesje.wiersz_moja` | (nowy) | {dzien} {godzina} · {profil} / {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {czas} · {kmh} km/h | Wiersz sesji w historii jednej osoby (bez nazwy osoby). |
 | `historia.wykres.teraz` | teraz | teraz | Oś wykresu godzinowego, bieżąca godzina. W 0.5.2 wpisane w kod. |
 | `historia.wykres.dni_tygodnia` | pn wt śr cz pt sb nd | pn wt śr cz pt sb nd | Oś wykresu 7 dni. Skróty od poniedziałku, rozdzielone spacją. |
-| `historia.wykres.slupek` | (nowy) | {kiedy} · {kroki} {kroki:krok/kroki/kroków} | Podpowiedź po najechaniu na słupek, np. „13:00 · 1 234 kroki”. |
-| `historia.wykres.opis` | (nowy) | Razem {kroki} {kroki:krok/kroki/kroków}, najwięcej: {kiedy}. | Opis wykresu dla czytnika ekranu. |
+| `historia.wykres.slupek` | (nowy) | {kiedy} · {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | Podpowiedź po najechaniu na słupek, np. „13:00 · 1 234 kroki”. |
+| `historia.wykres.opis` | (nowy) | Razem {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}, najwięcej: {kiedy}. | Opis wykresu dla czytnika ekranu. |
 | `sesja.online.kto` | (nowy) | Kto ją widzi: {kto}. Zmienisz to w Konto online > Moje konto. | `{kto}` z `moje.widocznosc.*`. Tylko dla wybranej osoby z kontem. |
 | `sesja.usun.opis_lokalnie` | (nowy) | Sesja zniknie z historii na tym komputerze. Tego nie da się cofnąć. Przytrzymaj przycisk, żeby usunąć. | Wariant `sesja.usun.opis` dla osoby bez konta online. |
 ## Dodatki: Osiągnięcia i szlak
@@ -1493,16 +1500,16 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 | `online.pokaz_haslo` | (nowy) | Pokaż hasło | Przycisk z okiem w polu hasła (logowanie, rejestracja, Moje konto). |
 | `ranking.ty` | (nowy) | (Ty) | Dopisek przy własnym pseudonimie w rankingu i na liście osób. |
 | `online.poziom_ukryty` | (nowy) | Poziom ukryty | Podpowiedź przy inicjale nicku zamiast odznaki poziomu (znajomi, ranking, osoby z kontem) i wiersz w profilu osoby: serwer nie podaje poziomu bez zgody tej osoby. |
-| `ranking.wiersz.kroki_slowo` | (nowy) | {kroki:krok/kroki/kroków} | Słowo pod liczbą kroków w kolumnie statystyk (liczba osobno, krojem liczb). |
+| `ranking.wiersz.kroki_slowo` | (nowy) | {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | Słowo pod liczbą kroków w kolumnie statystyk (liczba osobno, krojem liczb). |
 | `ranking.wiersz.km` | (nowy) | {km} km | Druga linia statystyk w wierszu rankingu i gry. |
 | `ranking.wiersz.lacznie` | (nowy) | łącznie | Słowo przy kilometrach w rankingu poziomów. |
 | `znajomi.kod.skopiowano` | (nowy) | Skopiowano kod. | Toast po „Kopiuj kod”. |
 | `osoby_online.pusto_lista` | (nowy) | Na liście nie ma jeszcze nikogo. | Lista osób bez wyszukiwania. |
-| `osoby_online.wiersz_bez_miejsca` | (nowy) | w tym tygodniu: {kroki} {kroki:krok/kroki/kroków} | Osoba bez miejsca w rankingu tygodnia. |
+| `osoby_online.wiersz_bez_miejsca` | (nowy) | w tym tygodniu: {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | Osoba bez miejsca w rankingu tygodnia. |
 | `osoby_online.wyslano` | (nowy) | Wysłano | Napis przycisku „Zaproś” po wysłaniu zaproszenia (lista osób, profil). |
-| `moje.wyslano` | (nowy) | Wysłano {liczba} {liczba:sesję/sesje/sesji}. | Toast po „Wyślij teraz”. |
+| `moje.wyslano` | (nowy) | Wysłano {liczba} {liczba, plural, one {sesję} few {sesje} many {sesji} other {sesje}}. | Toast po „Wyślij teraz”. |
 | `moje.wyslano_nic` | (nowy) | Wszystkie sesje są już na serwerze. | Toast po „Wyślij teraz”, gdy nie było czego wysłać. |
-| `moje.czeka` | (nowy) | Na wysłanie {liczba:czeka/czekają/czeka} {liczba} {liczba:sesja/sesje/sesji}. | Pod „Wyślij teraz”, gdy coś czeka. |
+| `moje.czeka` | (nowy) | Na wysłanie {liczba, plural, one {czeka} few {czekają} many {czeka} other {czekają}} {liczba} {liczba, plural, one {sesja} few {sesje} many {sesji} other {sesje}}. | Pod „Wyślij teraz”, gdy coś czeka. |
 | `moje.konto.adres` | (nowy) | Adres e-mail: {email} | Karta Konto w zakładce Moje konto. |
 | `moje.konto.regulamin_wersja` | (nowy) | Zaakceptowany regulamin: wersja z {data}. | Karta Konto, obok linku do regulaminu. |
 | `profil_online.brak_osiagniec` | (nowy) | Jeszcze bez osiągnięć. | Profil osoby bez zdobytych osiągnięć. |
@@ -1519,7 +1526,7 @@ pliku, nie z tego słownika. Przegląd według tych samych zasad:
 
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
-| `dziennik.podpis` | (nowy) | Na żywo · {liczba} {liczba:wpis/wpisy/wpisów} | Podpis tytułu strony; najwyżej 500 ostatnich wpisów. |
+| `dziennik.podpis` | (nowy) | Na żywo · {liczba} {liczba, plural, one {wpis} few {wpisy} many {wpisów} other {wpisy}} | Podpis tytułu strony; najwyżej 500 ostatnich wpisów. |
 | `dziennik.pusty` | (nowy) | Dziennik jest pusty. Wpisy pojawią się tutaj, gdy coś się wydarzy. | W miejscu listy wpisów. |
 | `dziennik.kopiuj` | (nowy) | Kopiuj dziennik | Przycisk: wszystkie wpisy z listy do schowka. |
 | `dziennik.skopiowano` | (nowy) | Skopiowano dziennik. Możesz go wkleić do wiadomości. | Komunikat na dole okna. |
@@ -1671,7 +1678,7 @@ Panel z boku okna (docs/design.md 8.20), status i opis dla znajomych, Ustawienia
 | `ustawienia.wyglad.panel_powiadom` | (nowy) | Powiadom, gdy znajomy zacznie chodzić | Domyślnie wyłączone. |
 | `ustawienia.wyglad.panel_powiadom_opis` | (nowy) | Krótki komunikat w oknie WalkLevel. Nad grą nic się nie pokazuje. | |
 | `panel.tytul` | (nowy) | Znajomi | Nagłówek panelu i jego nazwa dostępna. |
-| `panel.chodza` | (nowy) | {liczba} z {razem} {liczba:chodzi/chodzą/chodzi} teraz | Podpis nagłówka. |
+| `panel.chodza` | (nowy) | {liczba} z {razem} {liczba, plural, one {chodzi} few {chodzą} many {chodzi} other {chodzą}} teraz | Podpis nagłówka. |
 | `panel.na_liscie` | (nowy) | Na liście: {liczba} | Podpis nagłówka, gdy nikt nie chodzi. |
 | `panel.bez_konta` | (nowy) | bez konta online | Podpis nagłówka bez konta. |
 | `panel.bez_konta_opis` | (nowy) | Tu zobaczysz znajomych: kto teraz chodzi, w co gra i jak rośnie mu poziom. | |
@@ -1693,7 +1700,7 @@ Panel z boku okna (docs/design.md 8.20), status i opis dla znajomych, Ustawienia
 | `panel.trening` | (nowy) | Trening · {kmh} km/h | |
 | `panel.w_grze` | (nowy) | W grze · {kmh} km/h | Gra ukryta. |
 | `panel.chodzi` | (nowy) | Chodzi · {kmh} km/h | Osoba bez regulaminu z grami (serwer nie podaje trybu). |
-| `panel.tydzien` | (nowy) | w tym tygodniu {kroki} {kroki:krok/kroki/kroków} | |
+| `panel.tydzien` | (nowy) | w tym tygodniu {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | |
 | `panel.xp_sesja` | (nowy) | +{xp} XP | Licznik przy pasku: XP z bieżącej sesji. |
 | `panel.xp_procent` | (nowy) | {procent}% | Licznik przy pasku: postęp do następnego poziomu. |
 | `panel.xp_dostepnosc` | (nowy) | {xp} XP, {procent}% do poziomu {nastepny} | |
@@ -1735,7 +1742,7 @@ Serwer i Historia liczą okresy kalendarzowo: dzisiaj (doba), ten tydzień (od p
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
 | `profil_online.dzis` | (nowy) | Dzisiaj | Karta nad „Ten tydzień” w profilu osoby; tylko gdy serwer podał `dzis`. |
-| `panel.dzis_tydzien` | (nowy) | dziś {dzis} {dzis:krok/kroki/kroków} · tydzień {tydzien} | Panel znajomych, „Pozostali”, gdy dziś > 0 (inaczej `panel.tydzien`). |
+| `panel.dzis_tydzien` | (nowy) | dziś {dzis} {dzis, plural, one {krok} few {kroki} many {kroków} other {kroki}} · tydzień {tydzien} | Panel znajomych, „Pozostali”, gdy dziś > 0 (inaczej `panel.tydzien`). |
 
 ## Dodatki: zwinięty pasek panelu znajomych (0.6.3)
 
@@ -1746,5 +1753,31 @@ nie pokazuje. Podpowiedź awatara mówi tyle, ile serwer podał: przy chodzie da
 | Klucz | Obecny tekst | Nowy tekst | Uwaga |
 |---|---|---|---|
 | `panel.pasek_idzie` | (nowy) | {pseudonim} · idzie teraz | Początek podpowiedzi awatara w pasku, gdy znajomy idzie: „Ola · idzie teraz · World of Warcraft · 3,4 km/h”. |
-| `panel.pasek_tydzien` | (nowy) | {pseudonim} · w tym tygodniu {kroki} {kroki:krok/kroki/kroków} | Podpowiedź awatara w pasku, gdy znajomy nie idzie. |
-| `panel.pasek_licznik` | (nowy) | {liczba} {liczba:osoba idzie/osoby idą/osób idzie} teraz | Licznik pod przyciskiem rozwijania (kropka + liczba); nazwa dostępna i podpowiedź. Bez licznika, gdy nikt nie idzie. |
+| `panel.pasek_tydzien` | (nowy) | {pseudonim} · w tym tygodniu {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} | Podpowiedź awatara w pasku, gdy znajomy nie idzie. |
+| `panel.pasek_licznik` | (nowy) | {liczba} {liczba, plural, one {osoba idzie} few {osoby idą} many {osób idzie} other {osoby idą}} teraz | Licznik pod przyciskiem rozwijania (kropka + liczba); nazwa dostępna i podpowiedź. Bez licznika, gdy nikt nie idzie. |
+
+## Dodatki: języki (0.6.4)
+
+Wybór języka w Ustawienia > Wygląd i okno > Język. Lista pokazuje języki wbudowane, zainstalowane
+instalatorem, pobrane i dostępne w repozytorium WalkLevel. Nowe klucze są po angielsku
+(kebab-case), jak cały nowy kod. `{jezyk}` to nazwa języka w nim samym („English”, „Polski”).
+
+| Klucz | Obecny tekst | Nowy tekst | Uwaga |
+|---|---|---|---|
+| `language.title` | (nowy) | Język | Tytuł karty w Ustawienia > Wygląd i okno. |
+| `language.description` | (nowy) | Język napisów w WalkLevel. Zmiana działa od razu, bez ponownego uruchomienia. | Pod tytułem karty. |
+| `language.list` | (nowy) | Języki | Nazwa dostępności listy języków. |
+| `language.installed` | (nowy) | Zainstalowany | Podpis języka, który jest na tym komputerze (wbudowany, z instalatora albo pobrany). |
+| `language.download` | (nowy) | Do pobrania | Podpis języka z repozytorium, którego nie ma na komputerze. Kliknięcie pobiera i włącza. |
+| `language.downloading` | (nowy) | Pobieranie… {procent}% | Podpis w trakcie pobierania. |
+| `language.selected` | (nowy) | Wybrany | Podpis wybranego języka (zamiast „Zainstalowany”). |
+| `language.in-progress` | (nowy) | tłumaczenie w toku | Dopisek po „ · ”, gdy część tekstów jest jeszcze po polsku. |
+| `language.shown-instead` | (nowy) | Wybrany język nie jest jeszcze pobrany, więc teksty są po angielsku. | Pod listą, gdy wybranego języka nie ma na komputerze (np. bez internetu przy pierwszym starcie). |
+| `language.downloaded` | (nowy) | Pobrano język: {jezyk} | Komunikat po pobraniu. |
+| `language.error.title` | (nowy) | Nie udało się pobrać języka | Tytuł karty błędu. |
+| `language.error.offline` | (nowy) | Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie. | |
+| `language.error.not-published` | (nowy) | Tego języka nie ma jeszcze w repozytorium WalkLevel. | |
+| `language.error.status` | (nowy) | Serwer odpowiedział kodem {kod}. Spróbuj ponownie później. | |
+| `language.error.address` | (nowy) | Pakiet języka może pochodzić tylko z repozytorium WalkLevel na GitHubie. | |
+| `language.error.format` | (nowy) | Pobrany pakiet języka jest uszkodzony. Spróbuj ponownie później. | |
+| `language.error.write` | (nowy) | Nie da się zapisać pakietu języka. ({szczegoly}) | |

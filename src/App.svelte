@@ -13,6 +13,7 @@
   import { stan, ui, uruchom, schowajKomunikat, type Trasa } from './lib/state.svelte';
   import { rozwinMotyw, ustawAkcent, ustawDuzyTekst, ustawMotyw } from './lib/theme';
   import { t } from './lib/texts';
+  import { language } from './lib/i18n.svelte';
 
   let bladStartu = $state(false);
   const odwiedzone = new SvelteSet<Trasa>(['main']);
@@ -92,6 +93,8 @@
   const parametry = (trasa: Trasa) => ui.stos.findLast((w) => w.trasa === trasa)?.parametry ?? {};
 </script>
 
+<!-- zmiana języka: widoki od nowa w nowym języku (stan ekranów i nawigacji zostaje w state.svelte.ts) -->
+{#key language.code}
 <div class="uklad" data-panel={trybPanelu} data-strona-panelu={stronaPanelu} style:grid-template-columns={kolumny}>
 <main class="okno">
   {#if ui.gotowy}
@@ -126,6 +129,7 @@
 </div>
 
 <Toast toast={ui.toast} onzamknij={() => schowajKomunikat()} />
+{/key}
 
 <style>
   .uklad {

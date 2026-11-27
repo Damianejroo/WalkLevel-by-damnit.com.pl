@@ -8,6 +8,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import Przycisk from './bubble-window.svelte';
 import { logUiErrors, wTauri } from '../lib/api';
+import { loadLanguagePack, watchLanguage } from '../lib/language-sync';
 import { t } from '../lib/texts';
 
 logUiErrors();
@@ -27,5 +28,8 @@ async function przeciagnijOkno(): Promise<void> {
   const { getCurrentWindow } = await import('@tauri-apps/api/window');
   await getCurrentWindow().startDragging();
 }
+
+await loadLanguagePack();
+await watchLanguage();
 
 export default mount(Przycisk, { target: document.getElementById('app')!, props: { przeciagnijOkno } });

@@ -1,0 +1,21 @@
+{
+  "@@locale": "pl",
+  "tasma.uruchamiam": "Uruchamiam taśmę…",
+  "tasma.uruchamiam_odliczanie": "Uruchamiam taśmę. Bieżnia odlicza ok. {sekundy} s…",
+  "@tasma.uruchamiam_odliczanie": {
+    "placeholders": {
+      "sekundy": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "tasma.rusza": "Taśma rusza.",
+  "tasma.zatrzymana": "Taśma zatrzymana.",
+  "tasma.odmowa": "Bieżnia nie przyjęła startu. Sprawdź klucz bezpieczeństwa, obudź bieżnię pilotem i włącz sterowanie jeszcze raz.",
+  "@tasma.odmowa": {
+    "description": "Kolejność czynności jak w praktyce."
+  },
+  "tasma.bez_odpowiedzi": "Bieżnia nie odpowiedziała na start. Jeśli taśma stoi, uruchom ją pilotem.",
+  "tasma.nieobslugiwane": "Ta bieżnia nie pozwala na start z komputera. Uruchom taśmę pilotem.",
+  "tasma.brak_polaczenia": "Bieżnia nie jest połączona. Taśmę uruchomisz i zatrzymasz tylko pilotem."
+}

@@ -3,9 +3,15 @@
 
 pub use walklevel_core::texts::{kmh, t};
 
-/// Liczba całkowita z odstępami tysięcy (12 345).
+/// Liczba całkowita z odstępami tysięcy (12 345) w bieżącym języku.
 pub fn int(value: f64) -> String {
-    walklevel_core::texts::number_pl(value.round(), 0)
+    walklevel_core::texts::number(value.round(), 0)
+}
+
+/// Nazwa albo opis z definicji poziomów: tłumaczenie z pakietu `levels`, inaczej tekst z pliku
+/// definicji (docs/i18n.md).
+pub fn level_text(key: &str, own: &str) -> String {
+    walklevel_core::texts::translated(key).unwrap_or_else(|| own.to_string())
 }
 
 /// Kilometry w powiadomieniach: od 100 km całe z odstępami, niżej jedno miejsce bez „,0”.
@@ -13,8 +19,13 @@ pub fn km(value: f64) -> String {
     if value >= 100.0 {
         int(value)
     } else {
-        let text = walklevel_core::texts::number_pl(value, 1);
-        text.strip_suffix(",0").map_or(text.clone(), str::to_string)
+        // bez końcowego zera po separatorze dziesiętnym („12,0” -> „12”)
+        let tenths = (value * 10.0).round();
+        if tenths % 10.0 == 0.0 {
+            walklevel_core::texts::number(tenths / 10.0, 0)
+        } else {
+            walklevel_core::texts::number(value, 1)
+        }
     }
 }
 

@@ -1,0 +1,1347 @@
+{
+  "@@locale": "pl",
+  "levels.rank.1.name": "Hobbit z Shire",
+  "@levels.rank.1.name": {
+    "description": "Nazwa rangi od poziomu 1 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.1.about": "Hobbici rzadko chodzili dalej niż do sąsiedniej wsi.",
+  "@levels.rank.1.about": {
+    "description": "Opis rangi od poziomu 1: ile ta postać chodzi."
+  },
+  "levels.rank.2.name": "Robinson Crusoe",
+  "@levels.rank.2.name": {
+    "description": "Nazwa rangi od poziomu 2 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.2.about": "Dwadzieścia osiem lat na jednej wyspie. Zna każdą jej ścieżkę.",
+  "@levels.rank.2.about": {
+    "description": "Opis rangi od poziomu 2: ile ta postać chodzi."
+  },
+  "levels.rank.3.name": "Sim z The Sims",
+  "@levels.rank.3.name": {
+    "description": "Nazwa rangi od poziomu 3 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.3.about": "Najdalsze wyprawy: do lodówki i do skrzynki na listy.",
+  "@levels.rank.3.about": {
+    "description": "Opis rangi od poziomu 3: ile ta postać chodzi."
+  },
+  "levels.rank.4.name": "Bezimienny",
+  "@levels.rank.4.name": {
+    "description": "Nazwa rangi od poziomu 4 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.4.about": "Cały jego świat mieścił się pod Barierą o średnicy około 2 km.",
+  "@levels.rank.4.about": {
+    "description": "Opis rangi od poziomu 4: ile ta postać chodzi."
+  },
+  "levels.rank.5.name": "Baron Harkonnen",
+  "@levels.rank.5.name": {
+    "description": "Nazwa rangi od poziomu 5 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.5.about": "Po Arrakis wożą go dryfy i ornitoptery, więc sam chodzi niewiele.",
+  "@levels.rank.5.about": {
+    "description": "Opis rangi od poziomu 5: ile ta postać chodzi."
+  },
+  "levels.rank.6.name": "Chell",
+  "@levels.rank.6.name": {
+    "description": "Nazwa rangi od poziomu 6 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.6.about": "Przeszła wszystkie komory testowe Aperture, kilometry korytarzy.",
+  "@levels.rank.6.about": {
+    "description": "Opis rangi od poziomu 6: ile ta postać chodzi."
+  },
+  "levels.rank.7.name": "V z Night City",
+  "@levels.rank.7.name": {
+    "description": "Nazwa rangi od poziomu 7 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.7.about": "Night City zna na pamięć, choć zwykle zza kierownicy.",
+  "@levels.rank.7.about": {
+    "description": "Opis rangi od poziomu 7: ile ta postać chodzi."
+  },
+  "levels.rank.9.name": "Gordon Freeman",
+  "@levels.rank.9.name": {
+    "description": "Nazwa rangi od poziomu 9 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.9.about": "Z Black Mesa do City 17, prawie cały czas pieszo i z łomem.",
+  "@levels.rank.9.about": {
+    "description": "Opis rangi od poziomu 9: ile ta postać chodzi."
+  },
+  "levels.rank.10.name": "Nieumarły Wybraniec",
+  "@levels.rank.10.name": {
+    "description": "Nazwa rangi od poziomu 10 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.10.about": "Lordran przeszedł wzdłuż i w dół, ginąc po drodze setki razy.",
+  "@levels.rank.10.about": {
+    "description": "Opis rangi od poziomu 10: ile ta postać chodzi."
+  },
+  "levels.rank.12.name": "Naznaczony",
+  "@levels.rank.12.name": {
+    "description": "Nazwa rangi od poziomu 12 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.12.about": "Z Kordonu przez całą Zonę aż pod Elektrownię.",
+  "@levels.rank.12.about": {
+    "description": "Opis rangi od poziomu 12: ile ta postać chodzi."
+  },
+  "levels.rank.13.name": "Bohater Kvatch",
+  "@levels.rank.13.name": {
+    "description": "Nazwa rangi od poziomu 13 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.13.about": "Cyrodiil od bramy do bramy Otchłani.",
+  "@levels.rank.13.about": {
+    "description": "Opis rangi od poziomu 13: ile ta postać chodzi."
+  },
+  "levels.rank.15.name": "Smocze Dziecię",
+  "@levels.rank.15.name": {
+    "description": "Nazwa rangi od poziomu 15 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.15.about": "Skyrim ma kilka kilometrów wszerz, a zadania wysyłają w każdy jego kąt.",
+  "@levels.rank.15.about": {
+    "description": "Opis rangi od poziomu 15: ile ta postać chodzi."
+  },
+  "levels.rank.17.name": "Nerevaryjczyk",
+  "@levels.rank.17.name": {
+    "description": "Nazwa rangi od poziomu 17 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.17.about": "Vvardenfell pieszo, od Seyda Neen po Czerwoną Górę.",
+  "@levels.rank.17.about": {
+    "description": "Opis rangi od poziomu 17: ile ta postać chodzi."
+  },
+  "levels.rank.19.name": "Link",
+  "@levels.rank.19.name": {
+    "description": "Nazwa rangi od poziomu 19 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.19.about": "Obudził się po stu latach i przeszedł Hyrule wzdłuż i wszerz.",
+  "@levels.rank.19.about": {
+    "description": "Opis rangi od poziomu 19: ile ta postać chodzi."
+  },
+  "levels.rank.21.name": "Minsc i Boo",
+  "@levels.rank.21.name": {
+    "description": "Nazwa rangi od poziomu 21 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.21.about": "Wojownik z Rashemenu i jego chomik przeszli całe Wybrzeże Mieczy, szukając zła do skopania.",
+  "@levels.rank.21.about": {
+    "description": "Opis rangi od poziomu 21: ile ta postać chodzi."
+  },
+  "levels.rank.23.name": "Master Chief",
+  "@levels.rank.23.name": {
+    "description": "Nazwa rangi od poziomu 23 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.23.about": "Przeszedł spory kawałek pierścienia Halo, metr po metrze.",
+  "@levels.rank.23.about": {
+    "description": "Opis rangi od poziomu 23: ile ta postać chodzi."
+  },
+  "levels.rank.26.name": "Samotny Wędrowiec",
+  "@levels.rank.26.name": {
+    "description": "Nazwa rangi od poziomu 26 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.26.about": "Wyszedł z Krypty 101 i przeszedł całe Stołeczne Pustkowie.",
+  "@levels.rank.26.about": {
+    "description": "Opis rangi od poziomu 26: ile ta postać chodzi."
+  },
+  "levels.rank.31.name": "Arthur Morgan",
+  "@levels.rank.31.name": {
+    "description": "Nazwa rangi od poziomu 31 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.31.about": "Pół Dzikiego Zachodu przemierzył z gangiem, choć głównie w siodle.",
+  "@levels.rank.31.about": {
+    "description": "Opis rangi od poziomu 31: ile ta postać chodzi."
+  },
+  "levels.rank.35.name": "Kurier z Mojave",
+  "@levels.rank.35.name": {
+    "description": "Nazwa rangi od poziomu 35 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.35.about": "Z kulą w głowie przeszedł pustynię od Goodsprings po Zaporę Hoovera.",
+  "@levels.rank.35.about": {
+    "description": "Opis rangi od poziomu 35: ile ta postać chodzi."
+  },
+  "levels.rank.40.name": "Drużyna z tawerny",
+  "@levels.rank.40.name": {
+    "description": "Nazwa rangi od poziomu 40 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.40.about": "Każda kampania D&D zaczyna się w tawernie, a kończy kilka tysięcy mil dalej.",
+  "@levels.rank.40.about": {
+    "description": "Opis rangi od poziomu 40: ile ta postać chodzi."
+  },
+  "levels.rank.44.name": "Steve",
+  "@levels.rank.44.name": {
+    "description": "Nazwa rangi od poziomu 44 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.44.about": "Świat Minecrafta ma 60 milionów bloków szerokości, więc zawsze jest dokąd iść.",
+  "@levels.rank.44.about": {
+    "description": "Opis rangi od poziomu 44: ile ta postać chodzi."
+  },
+  "levels.rank.48.name": "Bohater Azeroth",
+  "@levels.rank.48.name": {
+    "description": "Nazwa rangi od poziomu 48 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.48.about": "W pierwszym WoW-ie wierzchowiec był dopiero od 40 poziomu, więc całe Azeroth trzeba było przejść pieszo.",
+  "@levels.rank.48.about": {
+    "description": "Opis rangi od poziomu 48: ile ta postać chodzi."
+  },
+  "levels.rank.52.name": "Lara Croft",
+  "@levels.rank.52.name": {
+    "description": "Nazwa rangi od poziomu 52 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.52.about": "Grobowce na wszystkich kontynentach, zwykle na piechotę i z liną.",
+  "@levels.rank.52.about": {
+    "description": "Opis rangi od poziomu 52: ile ta postać chodzi."
+  },
+  "levels.rank.55.name": "Nathan Drake",
+  "@levels.rank.55.name": {
+    "description": "Nazwa rangi od poziomu 55 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.55.about": "Szukał skarbów od Borneo po Madagaskar.",
+  "@levels.rank.55.about": {
+    "description": "Opis rangi od poziomu 55: ile ta postać chodzi."
+  },
+  "levels.rank.59.name": "Kratos",
+  "@levels.rank.59.name": {
+    "description": "Nazwa rangi od poziomu 59 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.59.about": "Z synem przez Midgard na najwyższy szczyt wszystkich krain.",
+  "@levels.rank.59.about": {
+    "description": "Opis rangi od poziomu 59: ile ta postać chodzi."
+  },
+  "levels.rank.62.name": "Geralt z Rivii",
+  "@levels.rank.62.name": {
+    "description": "Nazwa rangi od poziomu 62 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.62.about": "Wiedźmin całe życie na szlaku, choć sporą część drogi zrobiła Płotka.",
+  "@levels.rank.62.about": {
+    "description": "Opis rangi od poziomu 62: ile ta postać chodzi."
+  },
+  "levels.rank.65.name": "Aloy",
+  "@levels.rank.65.name": {
+    "description": "Nazwa rangi od poziomu 65 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.65.about": "Przemierzyła pieszo cały Zakazany Zachód.",
+  "@levels.rank.65.about": {
+    "description": "Opis rangi od poziomu 65: ile ta postać chodzi."
+  },
+  "levels.rank.69.name": "Ellie",
+  "@levels.rank.69.name": {
+    "description": "Nazwa rangi od poziomu 69 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.69.about": "Przez zrujnowane Stany, od Bostonu na zachód.",
+  "@levels.rank.69.about": {
+    "description": "Opis rangi od poziomu 69: ile ta postać chodzi."
+  },
+  "levels.rank.72.name": "Arya Stark",
+  "@levels.rank.72.name": {
+    "description": "Nazwa rangi od poziomu 72 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.72.about": "Z Królewskiej Przystani przez całe Dorzecze, potem do Braavos i z powrotem.",
+  "@levels.rank.72.about": {
+    "description": "Opis rangi od poziomu 72: ile ta postać chodzi."
+  },
+  "levels.rank.75.name": "Arthas",
+  "@levels.rank.75.name": {
+    "description": "Nazwa rangi od poziomu 75 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.75.about": "Z Lordaeronu przez morze do mroźnego Northrendu.",
+  "@levels.rank.75.about": {
+    "description": "Opis rangi od poziomu 75: ile ta postać chodzi."
+  },
+  "levels.rank.78.name": "Paul Atryda",
+  "@levels.rank.78.name": {
+    "description": "Nazwa rangi od poziomu 78 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.78.about": "Z Arrakin w głęboką pustynię, a potem z Fremenami przez cały Arrakis.",
+  "@levels.rank.78.about": {
+    "description": "Opis rangi od poziomu 78: ile ta postać chodzi."
+  },
+  "levels.rank.81.name": "Ciri",
+  "@levels.rank.81.name": {
+    "description": "Nazwa rangi od poziomu 81 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.81.about": "Jaskółka, która wędrowała nie tylko po Kontynencie, ale i między światami.",
+  "@levels.rank.81.about": {
+    "description": "Opis rangi od poziomu 81: ile ta postać chodzi."
+  },
+  "levels.rank.84.name": "Duncan Idaho",
+  "@levels.rank.84.name": {
+    "description": "Nazwa rangi od poziomu 84 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.84.about": "Mistrz miecza Atrydów, który miesiącami żył z Fremenami na pustyni.",
+  "@levels.rank.84.about": {
+    "description": "Opis rangi od poziomu 84: ile ta postać chodzi."
+  },
+  "levels.rank.87.name": "Bilbo Baggins",
+  "@levels.rank.87.name": {
+    "description": "Nazwa rangi od poziomu 87 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.87.about": "Włamywacz z Bag End, który wyruszył na wyprawę nawet bez chusteczki do nosa.",
+  "@levels.rank.87.about": {
+    "description": "Opis rangi od poziomu 87: ile ta postać chodzi."
+  },
+  "levels.rank.89.name": "Frodo Baggins",
+  "@levels.rank.89.name": {
+    "description": "Nazwa rangi od poziomu 89 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.89.about": "Pieszo z Shire do Mordoru, prawie 3 000 km.",
+  "@levels.rank.89.about": {
+    "description": "Opis rangi od poziomu 89: ile ta postać chodzi."
+  },
+  "levels.rank.92.name": "Sam Porter Bridges",
+  "@levels.rank.92.name": {
+    "description": "Nazwa rangi od poziomu 92 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.92.about": "Tragarz, który pieszo połączył Amerykę od wybrzeża do wybrzeża.",
+  "@levels.rank.92.about": {
+    "description": "Opis rangi od poziomu 92: ile ta postać chodzi."
+  },
+  "levels.rank.95.name": "Odyseusz",
+  "@levels.rank.95.name": {
+    "description": "Nazwa rangi od poziomu 95 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.95.about": "Dziesięć lat wracał spod Troi na Itakę.",
+  "@levels.rank.95.about": {
+    "description": "Opis rangi od poziomu 95: ile ta postać chodzi."
+  },
+  "levels.rank.97.name": "Obieżyświat",
+  "@levels.rank.97.name": {
+    "description": "Nazwa rangi od poziomu 97 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.97.about": "Strażnik Północy, który przez dziesiątki lat przemierzał Śródziemie.",
+  "@levels.rank.97.about": {
+    "description": "Opis rangi od poziomu 97: ile ta postać chodzi."
+  },
+  "levels.rank.100.name": "Szary Pielgrzym",
+  "@levels.rank.100.name": {
+    "description": "Nazwa rangi od poziomu 100 (postać z gry, książki albo filmu)."
+  },
+  "levels.rank.100.about": "Gandalf wędrował po Śródziemiu przez dwa tysiące lat.",
+  "@levels.rank.100.about": {
+    "description": "Opis rangi od poziomu 100: ile ta postać chodzi."
+  },
+  "levels.achievement.km1.name": "Tutorial ukończony",
+  "@levels.achievement.km1.name": {
+    "description": "Nazwa osiągnięcia km1."
+  },
+  "levels.achievement.km1.flavor": "Postać przeszła pierwszy kilometr i samouczek zniknął z ekranu.",
+  "@levels.achievement.km1.flavor": {
+    "description": "Klimat osiągnięcia km1: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1.condition": "Przejdź łącznie 1 km.",
+  "@levels.achievement.km1.condition": {
+    "description": "Warunek osiągnięcia km1, sucho."
+  },
+  "levels.achievement.km2.name": "Za Barierą",
+  "@levels.achievement.km2.name": {
+    "description": "Nazwa osiągnięcia km2."
+  },
+  "levels.achievement.km2.flavor": "Według opisu gry magiczna bariera nad Kolonią z Gothica to kula o średnicy dwóch kilometrów. Od ściany do ściany.",
+  "@levels.achievement.km2.flavor": {
+    "description": "Klimat osiągnięcia km2: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2.condition": "Przejdź łącznie 2 km.",
+  "@levels.achievement.km2.condition": {
+    "description": "Warunek osiągnięcia km2, sucho."
+  },
+  "levels.achievement.km57.name": "Skyrim na piechotę",
+  "@levels.achievement.km57.name": {
+    "description": "Nazwa osiągnięcia km57."
+  },
+  "levels.achievement.km57.flavor": "Mniej więcej tyle ma mapa Skyrima w grze z zachodu na wschód. Cała prowincja, w skali gry, przebyta pieszo.",
+  "@levels.achievement.km57.flavor": {
+    "description": "Klimat osiągnięcia km57: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km57.condition": "Przejdź łącznie 5,7 km.",
+  "@levels.achievement.km57.condition": {
+    "description": "Warunek osiągnięcia km57, sucho."
+  },
+  "levels.achievement.km113.name": "Erangel po przekątnej",
+  "@levels.achievement.km113.name": {
+    "description": "Nazwa osiągnięcia km113."
+  },
+  "levels.achievement.km113.flavor": "Mapa Erangel z PUBG ma 8 na 8 km, więc z rogu do rogu to ponad 11 km.",
+  "@levels.achievement.km113.flavor": {
+    "description": "Klimat osiągnięcia km113: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km113.condition": "Przejdź łącznie 11,3 km.",
+  "@levels.achievement.km113.condition": {
+    "description": "Warunek osiągnięcia km113, sucho."
+  },
+  "levels.achievement.km212.name": "Chernarus z rogu w róg",
+  "@levels.achievement.km212.name": {
+    "description": "Nazwa osiągnięcia km212."
+  },
+  "levels.achievement.km212.flavor": "Chernarus z DayZ ma 225 km², czyli 15 na 15 km. Z rogu w róg wychodzi ponad 21 km.",
+  "@levels.achievement.km212.flavor": {
+    "description": "Klimat osiągnięcia km212: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km212.condition": "Przejdź łącznie 21,2 km.",
+  "@levels.achievement.km212.condition": {
+    "description": "Warunek osiągnięcia km212, sucho."
+  },
+  "levels.achievement.km24.name": "Skrót przez Nether",
+  "@levels.achievement.km24.name": {
+    "description": "Nazwa osiągnięcia km24."
+  },
+  "levels.achievement.km24.flavor": "W Netherze z Minecrafta każdy blok liczy się za osiem. Tam te 24 km to tylko 3 000 bloków.",
+  "@levels.achievement.km24.flavor": {
+    "description": "Klimat osiągnięcia km24: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km24.condition": "Przejdź łącznie 24 km.",
+  "@levels.achievement.km24.condition": {
+    "description": "Warunek osiągnięcia km24, sucho."
+  },
+  "levels.achievement.km30.name": "Przez Zonę",
+  "@levels.achievement.km30.name": {
+    "description": "Nazwa osiągnięcia km30."
+  },
+  "levels.achievement.km30.flavor": "Zona ze Stalkera to strefa wokół elektrowni o promieniu około 30 km. Z Kordonu na południu pod samą Elektrownię.",
+  "@levels.achievement.km30.flavor": {
+    "description": "Klimat osiągnięcia km30: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km30.condition": "Przejdź łącznie 30 km.",
+  "@levels.achievement.km30.condition": {
+    "description": "Warunek osiągnięcia km30, sucho."
+  },
+  "levels.achievement.km447.name": "Cytadela od końca do końca",
+  "@levels.achievement.km447.name": {
+    "description": "Nazwa osiągnięcia km447."
+  },
+  "levels.achievement.km447.flavor": "Stacja Cytadela z Mass Effect ma 44,7 km długości, od końca do końca.",
+  "@levels.achievement.km447.flavor": {
+    "description": "Klimat osiągnięcia km447: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km447.condition": "Przejdź łącznie 44,7 km.",
+  "@levels.achievement.km447.condition": {
+    "description": "Warunek osiągnięcia km447, sucho."
+  },
+  "levels.achievement.km53.name": "Przełęcz Chilkoot",
+  "@levels.achievement.km53.name": {
+    "description": "Nazwa osiągnięcia km53."
+  },
+  "levels.achievement.km53.flavor": "Szlakiem przez przełęcz Chilkoot Buck z „Zewu krwi” Londona idzie ku Klondike. Od Dyea do jeziora Bennett to 53 km.",
+  "@levels.achievement.km53.flavor": {
+    "description": "Klimat osiągnięcia km53: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km53.condition": "Przejdź łącznie 53 km.",
+  "@levels.achievement.km53.condition": {
+    "description": "Warunek osiągnięcia km53, sucho."
+  },
+  "levels.achievement.km63.name": "Krawędź Valheim",
+  "@levels.achievement.km63.name": {
+    "description": "Nazwa osiągnięcia km63."
+  },
+  "levels.achievement.km63.flavor": "Świat Valheim to dysk o promieniu 10 km. Dookoła, wzdłuż samej krawędzi, wychodzi prawie 63 km.",
+  "@levels.achievement.km63.flavor": {
+    "description": "Klimat osiągnięcia km63: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km63.condition": "Przejdź łącznie 63 km.",
+  "@levels.achievement.km63.condition": {
+    "description": "Warunek osiągnięcia km63, sucho."
+  },
+  "levels.achievement.km70.name": "Cuszima wzdłuż",
+  "@levels.achievement.km70.name": {
+    "description": "Nazwa osiągnięcia km70."
+  },
+  "levels.achievement.km70.flavor": "Wyspa Cuszima, na której dzieje się Ghost of Tsushima, ma w rzeczywistości około 70 km z północy na południe.",
+  "@levels.achievement.km70.flavor": {
+    "description": "Klimat osiągnięcia km70: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km70.condition": "Przejdź łącznie 70 km.",
+  "@levels.achievement.km70.condition": {
+    "description": "Warunek osiągnięcia km70, sucho."
+  },
+  "levels.achievement.km805.name": "Słoniem do Allahabadu",
+  "@levels.achievement.km805.name": {
+    "description": "Nazwa osiągnięcia km805."
+  },
+  "levels.achievement.km805.flavor": "W „W 80 dni dookoła świata” brakuje 50 mil torów między Kholby a Allahabadem. Tę lukę Phileas Fogg pokonuje na grzbiecie słonia.",
+  "@levels.achievement.km805.flavor": {
+    "description": "Klimat osiągnięcia km805: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km805.condition": "Przejdź łącznie 80,5 km.",
+  "@levels.achievement.km805.condition": {
+    "description": "Warunek osiągnięcia km805, sucho."
+  },
+  "levels.achievement.km100.name": "Srebrny Jogger",
+  "@levels.achievement.km100.name": {
+    "description": "Nazwa osiągnięcia km100."
+  },
+  "levels.achievement.km100.flavor": "Srebrny medal Jogger w Pokémon GO wymaga 100 km przebytych pieszo z telefonem w kieszeni.",
+  "@levels.achievement.km100.flavor": {
+    "description": "Klimat osiągnięcia km100: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km100.condition": "Przejdź łącznie 100 km.",
+  "@levels.achievement.km100.condition": {
+    "description": "Warunek osiągnięcia km100, sucho."
+  },
+  "levels.achievement.km115.name": "Prom w Bucklebury",
+  "@levels.achievement.km115.name": {
+    "description": "Nazwa osiągnięcia km115."
+  },
+  "levels.achievement.km115.flavor": "Etap drogi Froda: prom przez Brandywinę na wschodnim skraju Shire.",
+  "@levels.achievement.km115.flavor": {
+    "description": "Klimat osiągnięcia km115: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km115.condition": "Przejdź łącznie 115 km.",
+  "@levels.achievement.km115.condition": {
+    "description": "Warunek osiągnięcia km115, sucho."
+  },
+  "levels.achievement.km160.name": "Gwiazda Śmierci na wylot",
+  "@levels.achievement.km160.name": {
+    "description": "Nazwa osiągnięcia km160."
+  },
+  "levels.achievement.km160.flavor": "Pierwsza Gwiazda Śmierci miała 160 km średnicy. Tyle z bieguna na biegun.",
+  "@levels.achievement.km160.flavor": {
+    "description": "Klimat osiągnięcia km160: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km160.condition": "Przejdź łącznie 160 km.",
+  "@levels.achievement.km160.condition": {
+    "description": "Warunek osiągnięcia km160, sucho."
+  },
+  "levels.achievement.km200.name": "Z Carthag do Arrakin",
+  "@levels.achievement.km200.name": {
+    "description": "Nazwa osiągnięcia km200."
+  },
+  "levels.achievement.km200.flavor": "Tyle dzieli dwa miasta Arrakis z „Diuny”. Fremeni przeszliby to bez rytmu, żeby nie zwabić czerwia.",
+  "@levels.achievement.km200.flavor": {
+    "description": "Klimat osiągnięcia km200: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km200.condition": "Przejdź łącznie 200 km.",
+  "@levels.achievement.km200.condition": {
+    "description": "Warunek osiągnięcia km200, sucho."
+  },
+  "levels.achievement.km215.name": "Pod Rozbrykanym Kucykiem",
+  "@levels.achievement.km215.name": {
+    "description": "Nazwa osiągnięcia km215."
+  },
+  "levels.achievement.km215.flavor": "Etap drogi Froda: gospoda w Bree, pierwszy nocleg za granicą Shire.",
+  "@levels.achievement.km215.flavor": {
+    "description": "Klimat osiągnięcia km215: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km215.condition": "Przejdź łącznie 215 km.",
+  "@levels.achievement.km215.condition": {
+    "description": "Warunek osiągnięcia km215, sucho."
+  },
+  "levels.achievement.km246.name": "Z Aten do Sparty",
+  "@levels.achievement.km246.name": {
+    "description": "Nazwa osiągnięcia km246."
+  },
+  "levels.achievement.km246.flavor": "Według „Dziejów” Herodota posłaniec Filippides dobiegł z Aten do Sparty w dwa dni. Spartathlon na tej trasie liczy 246 km.",
+  "@levels.achievement.km246.flavor": {
+    "description": "Klimat osiągnięcia km246: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km246.condition": "Przejdź łącznie 246 km.",
+  "@levels.achievement.km246.condition": {
+    "description": "Warunek osiągnięcia km246, sucho."
+  },
+  "levels.achievement.km318.name": "Halo w poprzek",
+  "@levels.achievement.km318.name": {
+    "description": "Nazwa osiągnięcia km318."
+  },
+  "levels.achievement.km318.flavor": "Pierścień Halo ma 318 km szerokości. Od jednej ściany do drugiej.",
+  "@levels.achievement.km318.flavor": {
+    "description": "Klimat osiągnięcia km318: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km318.condition": "Przejdź łącznie 318 km.",
+  "@levels.achievement.km318.condition": {
+    "description": "Warunek osiągnięcia km318, sucho."
+  },
+  "levels.achievement.km385.name": "Wichrowy Czub",
+  "@levels.achievement.km385.name": {
+    "description": "Nazwa osiągnięcia km385."
+  },
+  "levels.achievement.km385.flavor": "Etap drogi Froda: ruiny strażnicy na samotnym wzgórzu przy Wielkim Gościńcu.",
+  "@levels.achievement.km385.flavor": {
+    "description": "Klimat osiągnięcia km385: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km385.condition": "Przejdź łącznie 385 km.",
+  "@levels.achievement.km385.condition": {
+    "description": "Warunek osiągnięcia km385, sucho."
+  },
+  "levels.achievement.km420.name": "Najdłuższy etap Togo",
+  "@levels.achievement.km420.name": {
+    "description": "Nazwa osiągnięcia km420."
+  },
+  "levels.achievement.km420.flavor": "W sztafecie z surowicą do Nome w 1925 roku zaprzęg z psem Togo na czele pokonał 261 mil, czyli około 420 km. To najdłuższy odcinek całej sztafety.",
+  "@levels.achievement.km420.flavor": {
+    "description": "Klimat osiągnięcia km420: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km420.condition": "Przejdź łącznie 420 km.",
+  "@levels.achievement.km420.condition": {
+    "description": "Warunek osiągnięcia km420, sucho."
+  },
+  "levels.achievement.km483.name": "Patrol na Murze",
+  "@levels.achievement.km483.name": {
+    "description": "Nazwa osiągnięcia km483."
+  },
+  "levels.achievement.km483.flavor": "Mur zamyka północ Westeros od morza do morza. Patrol przez całą długość zaliczony.",
+  "@levels.achievement.km483.flavor": {
+    "description": "Klimat osiągnięcia km483: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km483.condition": "Przejdź łącznie 483 km.",
+  "@levels.achievement.km483.condition": {
+    "description": "Warunek osiągnięcia km483, sucho."
+  },
+  "levels.achievement.km583.name": "Via Appia do Brindisi",
+  "@levels.achievement.km583.name": {
+    "description": "Nazwa osiągnięcia km583."
+  },
+  "levels.achievement.km583.flavor": "Przy Via Appia Sienkiewicz umieścił scenę „Quo vadis, Domine?”. Według Britanniki droga liczyła 132 mile do Kapui i 230 dalej, razem około 583 km.",
+  "@levels.achievement.km583.flavor": {
+    "description": "Klimat osiągnięcia km583: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km583.condition": "Przejdź łącznie 583 km.",
+  "@levels.achievement.km583.condition": {
+    "description": "Warunek osiągnięcia km583, sucho."
+  },
+  "levels.achievement.km640.name": "Szlak św. Olafa",
+  "@levels.achievement.km640.name": {
+    "description": "Nazwa osiągnięcia km640."
+  },
+  "levels.achievement.km640.flavor": "Pielgrzymi szlak z Oslo do katedry Nidaros w Trondheim, gdzie pochowano króla Olafa, ma około 640 km.",
+  "@levels.achievement.km640.flavor": {
+    "description": "Klimat osiągnięcia km640: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km640.condition": "Przejdź łącznie 640 km.",
+  "@levels.achievement.km640.condition": {
+    "description": "Warunek osiągnięcia km640, sucho."
+  },
+  "levels.achievement.km737.name": "Do Rivendell",
+  "@levels.achievement.km737.name": {
+    "description": "Nazwa osiągnięcia km737."
+  },
+  "levels.achievement.km737.flavor": "Tyle szli hobbici z Hobbitonu do domu Elronda, z Nazgûlami na karku.",
+  "@levels.achievement.km737.flavor": {
+    "description": "Klimat osiągnięcia km737: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km737.condition": "Przejdź łącznie 737 km.",
+  "@levels.achievement.km737.condition": {
+    "description": "Warunek osiągnięcia km737, sucho."
+  },
+  "levels.achievement.km800.name": "Po Pathfindera",
+  "@levels.achievement.km800.name": {
+    "description": "Nazwa osiągnięcia km800."
+  },
+  "levels.achievement.km800.flavor": "Watney z „Marsjanina” jedzie łazikiem po starą sondę Pathfinder. Według NASA miejsce lądowania Ares 3 leży około 800 km na północ od niej.",
+  "@levels.achievement.km800.flavor": {
+    "description": "Klimat osiągnięcia km800: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km800.condition": "Przejdź łącznie 800 km.",
+  "@levels.achievement.km800.condition": {
+    "description": "Warunek osiągnięcia km800, sucho."
+  },
+  "levels.achievement.km950.name": "Z Bostonu do Pittsburgha",
+  "@levels.achievement.km950.name": {
+    "description": "Nazwa osiągnięcia km950."
+  },
+  "levels.achievement.km950.flavor": "Pierwszy duży etap Joela i Ellie w The Last of Us, przez zarośnięte autostrady.",
+  "@levels.achievement.km950.flavor": {
+    "description": "Klimat osiągnięcia km950: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km950.condition": "Przejdź łącznie 950 km.",
+  "@levels.achievement.km950.condition": {
+    "description": "Warunek osiągnięcia km950, sucho."
+  },
+  "levels.achievement.km1009.name": "Pielgrzymka Harolda Fry",
+  "@levels.achievement.km1009.name": {
+    "description": "Nazwa osiągnięcia km1009."
+  },
+  "levels.achievement.km1009.flavor": "W powieści Rachel Joyce emeryt Harold Fry wychodzi wysłać list i idzie dalej pieszo, z Kingsbridge do Berwick-upon-Tweed. To 627 mil, czyli około 1 009 km.",
+  "@levels.achievement.km1009.flavor": {
+    "description": "Klimat osiągnięcia km1009: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1009.condition": "Przejdź łącznie 1 009 km.",
+  "@levels.achievement.km1009.condition": {
+    "description": "Warunek osiągnięcia km1009, sucho."
+  },
+  "levels.achievement.km1085.name": "Surowica dla Nome",
+  "@levels.achievement.km1085.name": {
+    "description": "Nazwa osiągnięcia km1085."
+  },
+  "levels.achievement.km1085.flavor": "W 1925 roku sztafeta psich zaprzęgów przewiozła surowicę z Nenany do Nome: 674 mile, czyli około 1 085 km, w pięć i pół dnia. Ostatni etap poprowadził Balto.",
+  "@levels.achievement.km1085.flavor": {
+    "description": "Klimat osiągnięcia km1085: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1085.condition": "Przejdź łącznie 1 085 km.",
+  "@levels.achievement.km1085.condition": {
+    "description": "Warunek osiągnięcia km1085, sucho."
+  },
+  "levels.achievement.km1190.name": "Przełęcz Caradhrasu",
+  "@levels.achievement.km1190.name": {
+    "description": "Nazwa osiągnięcia km1190."
+  },
+  "levels.achievement.km1190.flavor": "Etap wyprawy Drużyny: śnieżna przełęcz, która nie wpuściła ich w góry.",
+  "@levels.achievement.km1190.flavor": {
+    "description": "Klimat osiągnięcia km1190: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1190.condition": "Przejdź łącznie 1 190 km.",
+  "@levels.achievement.km1190.condition": {
+    "description": "Warunek osiągnięcia km1190, sucho."
+  },
+  "levels.achievement.km1257.name": "Dookoła Muna",
+  "@levels.achievement.km1257.name": {
+    "description": "Nazwa osiągnięcia km1257."
+  },
+  "levels.achievement.km1257.flavor": "Mun z Kerbal Space Program ma 200 km promienia. Okrążony bez rakiety.",
+  "@levels.achievement.km1257.flavor": {
+    "description": "Klimat osiągnięcia km1257: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1257.condition": "Przejdź łącznie 1 257 km.",
+  "@levels.achievement.km1257.condition": {
+    "description": "Warunek osiągnięcia km1257, sucho."
+  },
+  "levels.achievement.km1285.name": "Wrota Morii",
+  "@levels.achievement.km1285.name": {
+    "description": "Nazwa osiągnięcia km1285."
+  },
+  "levels.achievement.km1285.flavor": "Z Rivendell pod zachodnią ścianę Morii, przez śniegi Caradhrasu.",
+  "@levels.achievement.km1285.flavor": {
+    "description": "Klimat osiągnięcia km1285: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1285.condition": "Przejdź łącznie 1 285 km.",
+  "@levels.achievement.km1285.condition": {
+    "description": "Warunek osiągnięcia km1285, sucho."
+  },
+  "levels.achievement.km1407.name": "Land’s End – John o’Groats",
+  "@levels.achievement.km1407.name": {
+    "description": "Nazwa osiągnięcia km1407."
+  },
+  "levels.achievement.km1407.flavor": "Klasyczna wędrówka przez całą Wielką Brytanię, od cypla w Kornwalii po północny kraniec Szkocji. Drogami to tradycyjnie 874 mile, czyli 1 407 km.",
+  "@levels.achievement.km1407.flavor": {
+    "description": "Klimat osiągnięcia km1407: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1407.condition": "Przejdź łącznie 1 407 km.",
+  "@levels.achievement.km1407.condition": {
+    "description": "Warunek osiągnięcia km1407, sucho."
+  },
+  "levels.achievement.km1480.name": "Lothlórien",
+  "@levels.achievement.km1480.name": {
+    "description": "Nazwa osiągnięcia km1480."
+  },
+  "levels.achievement.km1480.flavor": "Etap Drużyny: złoty las elfów nad Srebrną Żyłą, w którym zima jakby nie miała wstępu.",
+  "@levels.achievement.km1480.flavor": {
+    "description": "Klimat osiągnięcia km1480: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1480.condition": "Przejdź łącznie 1 480 km.",
+  "@levels.achievement.km1480.condition": {
+    "description": "Warunek osiągnięcia km1480, sucho."
+  },
+  "levels.achievement.km1609.name": "Ściana Pierścienia",
+  "@levels.achievement.km1609.name": {
+    "description": "Nazwa osiągnięcia km1609."
+  },
+  "levels.achievement.km1609.flavor": "Ściany na brzegach Pierścienia z powieści Nivena mają około 1 000 mil wysokości. Tyle w pionie, gdyby dało się po nich iść.",
+  "@levels.achievement.km1609.flavor": {
+    "description": "Klimat osiągnięcia km1609: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1609.condition": "Przejdź łącznie 1 609 km.",
+  "@levels.achievement.km1609.condition": {
+    "description": "Warunek osiągnięcia km1609, sucho."
+  },
+  "levels.achievement.km1697.name": "Szlak Tōkai",
+  "@levels.achievement.km1697.name": {
+    "description": "Nazwa osiągnięcia km1697."
+  },
+  "levels.achievement.km1697.flavor": "Japoński szlak przyrodniczy Tōkai biegnie górami z Takao pod Tokio do Minoo pod Osaką. Według władz Tokio ma 1 697 km.",
+  "@levels.achievement.km1697.flavor": {
+    "description": "Klimat osiągnięcia km1697: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1697.condition": "Przejdź łącznie 1 697 km.",
+  "@levels.achievement.km1697.condition": {
+    "description": "Warunek osiągnięcia km1697, sucho."
+  },
+  "levels.achievement.km1770.name": "Dzika droga",
+  "@levels.achievement.km1770.name": {
+    "description": "Nazwa osiągnięcia km1770."
+  },
+  "levels.achievement.km1770.flavor": "W „Dzikiej drodze” Cheryl Strayed opisuje, jak samotnie przeszła 1 100 mil szlaku Pacific Crest Trail. To około 1 770 km.",
+  "@levels.achievement.km1770.flavor": {
+    "description": "Klimat osiągnięcia km1770: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1770.condition": "Przejdź łącznie 1 770 km.",
+  "@levels.achievement.km1770.condition": {
+    "description": "Warunek osiągnięcia km1770, sucho."
+  },
+  "levels.achievement.km1854.name": "Równik Daymara",
+  "@levels.achievement.km1854.name": {
+    "description": "Nazwa osiągnięcia km1854."
+  },
+  "levels.achievement.km1854.flavor": "Daymar, księżyc gazowego olbrzyma Crusader ze Star Citizen, ma w grze 295 km promienia. Jego równik to około 1 854 km.",
+  "@levels.achievement.km1854.flavor": {
+    "description": "Klimat osiągnięcia km1854: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1854.condition": "Przejdź łącznie 1 854 km.",
+  "@levels.achievement.km1854.condition": {
+    "description": "Warunek osiągnięcia km1854, sucho."
+  },
+  "levels.achievement.km1935.name": "Progi Sarn Gebir",
+  "@levels.achievement.km1935.name": {
+    "description": "Nazwa osiągnięcia km1935."
+  },
+  "levels.achievement.km1935.flavor": "Etap Drużyny: skaliste progi na Anduinie, przed którymi łodzie trzeba przenieść brzegiem.",
+  "@levels.achievement.km1935.flavor": {
+    "description": "Klimat osiągnięcia km1935: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km1935.condition": "Przejdź łącznie 1 935 km.",
+  "@levels.achievement.km1935.condition": {
+    "description": "Warunek osiągnięcia km1935, sucho."
+  },
+  "levels.achievement.km2000.name": "Via Francigena",
+  "@levels.achievement.km2000.name": {
+    "description": "Nazwa osiągnięcia km2000."
+  },
+  "levels.achievement.km2000.flavor": "Szlak pielgrzymów z Canterbury do Rzymu opisał arcybiskup Sigeric w 990 roku. Według przewodników dzisiejsza trasa ma około 2 000 km.",
+  "@levels.achievement.km2000.flavor": {
+    "description": "Klimat osiągnięcia km2000: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2000.condition": "Przejdź łącznie 2 000 km.",
+  "@levels.achievement.km2000.condition": {
+    "description": "Warunek osiągnięcia km2000, sucho."
+  },
+  "levels.achievement.km2105.name": "Wodogrzmoty Rauros",
+  "@levels.achievement.km2105.name": {
+    "description": "Nazwa osiągnięcia km2105."
+  },
+  "levels.achievement.km2105.flavor": "Wielkie wodogrzmoty na Anduinie, do których Drużyna dopłynęła łodziami elfów.",
+  "@levels.achievement.km2105.flavor": {
+    "description": "Klimat osiągnięcia km2105: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2105.condition": "Przejdź łącznie 2 105 km.",
+  "@levels.achievement.km2105.condition": {
+    "description": "Warunek osiągnięcia km2105, sucho."
+  },
+  "levels.achievement.km2220.name": "Zejście z Emyn Muil",
+  "@levels.achievement.km2220.name": {
+    "description": "Nazwa osiągnięcia km2220."
+  },
+  "levels.achievement.km2220.flavor": "Etap drogi Froda i Sama: po kilku dniach błądzenia po skałach zejście z urwiska po elfickiej linie.",
+  "@levels.achievement.km2220.flavor": {
+    "description": "Klimat osiągnięcia km2220: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2220.condition": "Przejdź łącznie 2 220 km.",
+  "@levels.achievement.km2220.condition": {
+    "description": "Warunek osiągnięcia km2220, sucho."
+  },
+  "levels.achievement.km2300.name": "Wielka Rafa Koralowa",
+  "@levels.achievement.km2300.name": {
+    "description": "Nazwa osiągnięcia km2300."
+  },
+  "levels.achievement.km2300.flavor": "Rafa, na której mieszka Nemo z filmu Pixara, ciągnie się wzdłuż wybrzeża Australii przez ponad 2 300 km.",
+  "@levels.achievement.km2300.flavor": {
+    "description": "Klimat osiągnięcia km2300: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2300.condition": "Przejdź łącznie 2 300 km.",
+  "@levels.achievement.km2300.condition": {
+    "description": "Warunek osiągnięcia km2300, sucho."
+  },
+  "levels.achievement.km2360.name": "Martwe Bagna",
+  "@levels.achievement.km2360.name": {
+    "description": "Nazwa osiągnięcia km2360."
+  },
+  "levels.achievement.km2360.flavor": "Etap drogi Froda i Sama: bagna ze światełkami, za którymi nie wolno iść.",
+  "@levels.achievement.km2360.flavor": {
+    "description": "Klimat osiągnięcia km2360: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2360.condition": "Przejdź łącznie 2 360 km.",
+  "@levels.achievement.km2360.condition": {
+    "description": "Warunek osiągnięcia km2360, sucho."
+  },
+  "levels.achievement.km2414.name": "Wzdłuż płotu przeciw królikom",
+  "@levels.achievement.km2414.name": {
+    "description": "Nazwa osiągnięcia km2414."
+  },
+  "levels.achievement.km2414.flavor": "W filmie „Rabbit-Proof Fence” trzy dziewczynki uciekają z ośrodka i przez dziewięć tygodni idą do domu wzdłuż płotu. To 1 500 mil, około 2 414 km.",
+  "@levels.achievement.km2414.flavor": {
+    "description": "Klimat osiągnięcia km2414: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2414.condition": "Przejdź łącznie 2 414 km.",
+  "@levels.achievement.km2414.condition": {
+    "description": "Warunek osiągnięcia km2414, sucho."
+  },
+  "levels.achievement.km2480.name": "Czarna Brama",
+  "@levels.achievement.km2480.name": {
+    "description": "Nazwa osiągnięcia km2480."
+  },
+  "levels.achievement.km2480.flavor": "Etap drogi Froda i Sama: zamknięte wrota Mordoru.",
+  "@levels.achievement.km2480.flavor": {
+    "description": "Klimat osiągnięcia km2480: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2480.condition": "Przejdź łącznie 2 480 km.",
+  "@levels.achievement.km2480.condition": {
+    "description": "Warunek osiągnięcia km2480, sucho."
+  },
+  "levels.achievement.km2540.name": "Ithilien",
+  "@levels.achievement.km2540.name": {
+    "description": "Nazwa osiągnięcia km2540."
+  },
+  "levels.achievement.km2540.flavor": "Etap drogi Froda i Sama: zielona, pachnąca ziołami kraina Gondoru tuż pod górami Mordoru.",
+  "@levels.achievement.km2540.flavor": {
+    "description": "Klimat osiągnięcia km2540: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2540.condition": "Przejdź łącznie 2 540 km.",
+  "@levels.achievement.km2540.condition": {
+    "description": "Warunek osiągnięcia km2540, sucho."
+  },
+  "levels.achievement.km2650.name": "Schody Cirith Ungol",
+  "@levels.achievement.km2650.name": {
+    "description": "Nazwa osiągnięcia km2650."
+  },
+  "levels.achievement.km2650.flavor": "Etap drogi Froda i Sama: kręte schody wykute w skałach Ephel Dúath.",
+  "@levels.achievement.km2650.flavor": {
+    "description": "Klimat osiągnięcia km2650: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2650.condition": "Przejdź łącznie 2 650 km.",
+  "@levels.achievement.km2650.condition": {
+    "description": "Warunek osiągnięcia km2650, sucho."
+  },
+  "levels.achievement.km2700.name": "Z wielbłądami do oceanu",
+  "@levels.achievement.km2700.name": {
+    "description": "Nazwa osiągnięcia km2700."
+  },
+  "levels.achievement.km2700.flavor": "Robyn Davidson, której wyprawę pokazuje film „Tracks”, przeszła z wielbłądami przez australijskie pustynie z Alice Springs nad Ocean Indyjski. Około 2 700 km.",
+  "@levels.achievement.km2700.flavor": {
+    "description": "Klimat osiągnięcia km2700: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2700.condition": "Przejdź łącznie 2 700 km.",
+  "@levels.achievement.km2700.condition": {
+    "description": "Warunek osiągnięcia km2700, sucho."
+  },
+  "levels.achievement.km2762.name": "Omsk",
+  "@levels.achievement.km2762.name": {
+    "description": "Nazwa osiągnięcia km2762."
+  },
+  "levels.achievement.km2762.flavor": "Według Verne’a Omsk leży mniej więcej w połowie drogi kuriera carskiego z Moskwy do Irkucka.",
+  "@levels.achievement.km2762.flavor": {
+    "description": "Klimat osiągnięcia km2762: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2762.condition": "Przejdź łącznie 2 762 km.",
+  "@levels.achievement.km2762.condition": {
+    "description": "Warunek osiągnięcia km2762, sucho."
+  },
+  "levels.achievement.km2865.name": "Z buta do Mordoru",
+  "@levels.achievement.km2865.name": {
+    "description": "Nazwa osiągnięcia km2865."
+  },
+  "levels.achievement.km2865.flavor": "Cała droga Froda i Sama z Shire na zbocze Góry Przeznaczenia.",
+  "@levels.achievement.km2865.flavor": {
+    "description": "Klimat osiągnięcia km2865: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km2865.condition": "Przejdź łącznie 2 865 km.",
+  "@levels.achievement.km2865.condition": {
+    "description": "Warunek osiągnięcia km2865, sucho."
+  },
+  "levels.achievement.km3058.name": "Pony Express",
+  "@levels.achievement.km3058.name": {
+    "description": "Nazwa osiągnięcia km3058."
+  },
+  "levels.achievement.km3058.flavor": "Konni kurierzy z 1860 roku wieźli pocztę z St. Joseph do Sacramento w dziesięć dni. Trasa liczyła około 1 900 mil, czyli 3 058 km.",
+  "@levels.achievement.km3058.flavor": {
+    "description": "Klimat osiągnięcia km3058: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km3058.condition": "Przejdź łącznie 3 058 km.",
+  "@levels.achievement.km3058.condition": {
+    "description": "Warunek osiągnięcia km3058, sucho."
+  },
+  "levels.achievement.km3235.name": "Do krateru Schiaparelli",
+  "@levels.achievement.km3235.name": {
+    "description": "Nazwa osiągnięcia km3235."
+  },
+  "levels.achievement.km3235.flavor": "Tyle Mark Watney z „Marsjanina” przejechał łazikiem przez Marsa, żeby wrócić do domu.",
+  "@levels.achievement.km3235.flavor": {
+    "description": "Klimat osiągnięcia km3235: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km3235.condition": "Przejdź łącznie 3 235 km.",
+  "@levels.achievement.km3235.condition": {
+    "description": "Warunek osiągnięcia km3235, sucho."
+  },
+  "levels.achievement.km3490.name": "Szlak do Oregonu",
+  "@levels.achievement.km3490.name": {
+    "description": "Nazwa osiągnięcia km3490."
+  },
+  "levels.achievement.km3490.flavor": "Historyczny Szlak Oregoński, po którym prowadzi gra The Oregon Trail, liczył około 2 170 mil. Wozem i pieszo przez prerię.",
+  "@levels.achievement.km3490.flavor": {
+    "description": "Klimat osiągnięcia km3490: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km3490.condition": "Przejdź łącznie 3 490 km.",
+  "@levels.achievement.km3490.condition": {
+    "description": "Warunek osiągnięcia km3490, sucho."
+  },
+  "levels.achievement.km3940.name": "Route 66",
+  "@levels.achievement.km3940.name": {
+    "description": "Nazwa osiągnięcia km3940."
+  },
+  "levels.achievement.km3940.flavor": "Steinbeck nazwał ją w „Gronach gniewu” Matką Dróg. Cała Route 66 z Chicago do Santa Monica miała 2 448 mil, czyli 3 940 km.",
+  "@levels.achievement.km3940.flavor": {
+    "description": "Klimat osiągnięcia km3940: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km3940.condition": "Przejdź łącznie 3 940 km.",
+  "@levels.achievement.km3940.condition": {
+    "description": "Warunek osiągnięcia km3940, sucho."
+  },
+  "levels.achievement.km4023.name": "Dwa i pół tysiąca mil",
+  "@levels.achievement.km4023.name": {
+    "description": "Nazwa osiągnięcia km4023."
+  },
+  "levels.achievement.km4023.flavor": "W „Zewie krwi” zaprzęg Bucka w niecałe pięć miesięcy przebył 2 500 mil, czyli około 4 023 km.",
+  "@levels.achievement.km4023.flavor": {
+    "description": "Klimat osiągnięcia km4023: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km4023.condition": "Przejdź łącznie 4 023 km.",
+  "@levels.achievement.km4023.condition": {
+    "description": "Warunek osiągnięcia km4023, sucho."
+  },
+  "levels.achievement.km4500.name": "Przesyłka dostarczona",
+  "@levels.achievement.km4500.name": {
+    "description": "Nazwa osiągnięcia km4500."
+  },
+  "levels.achievement.km4500.flavor": "Mniej więcej tyle ma Ameryka z Death Stranding, od wschodniego wybrzeża do zachodniego.",
+  "@levels.achievement.km4500.flavor": {
+    "description": "Klimat osiągnięcia km4500: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km4500.condition": "Przejdź łącznie 4 500 km.",
+  "@levels.achievement.km4500.condition": {
+    "description": "Warunek osiągnięcia km4500, sucho."
+  },
+  "levels.achievement.km4800.name": "Z Muru do Dorne",
+  "@levels.achievement.km4800.name": {
+    "description": "Nazwa osiągnięcia km4800."
+  },
+  "levels.achievement.km4800.flavor": "Westeros od Muru po południowe wybrzeże Dorne, około 3 000 mil w skali map, w której Mur ma 300 mil.",
+  "@levels.achievement.km4800.flavor": {
+    "description": "Klimat osiągnięcia km4800: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km4800.condition": "Przejdź łącznie 4 800 km.",
+  "@levels.achievement.km4800.condition": {
+    "description": "Warunek osiągnięcia km4800, sucho."
+  },
+  "levels.achievement.km5523.name": "Kurier carski",
+  "@levels.achievement.km5523.name": {
+    "description": "Nazwa osiągnięcia km5523."
+  },
+  "levels.achievement.km5523.flavor": "Droga Michała Strogowa z powieści Verne’a: 5 200 wiorst z Moskwy do Irkucka przez całą Syberię.",
+  "@levels.achievement.km5523.flavor": {
+    "description": "Klimat osiągnięcia km5523: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km5523.condition": "Przejdź łącznie 5 523 km.",
+  "@levels.achievement.km5523.condition": {
+    "description": "Warunek osiągnięcia km5523, sucho."
+  },
+  "levels.achievement.km6128.name": "Do serca Arrakis",
+  "@levels.achievement.km6128.name": {
+    "description": "Nazwa osiągnięcia km6128."
+  },
+  "levels.achievement.km6128.flavor": "Według Encyklopedii Diuny promień Arrakis to 6 128 km. Tyle dzieli piasek od środka planety.",
+  "@levels.achievement.km6128.flavor": {
+    "description": "Klimat osiągnięcia km6128: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km6128.condition": "Przejdź łącznie 6 128 km.",
+  "@levels.achievement.km6128.condition": {
+    "description": "Warunek osiągnięcia km6128, sucho."
+  },
+  "levels.achievement.km6500.name": "Z łagru do Indii",
+  "@levels.achievement.km6500.name": {
+    "description": "Nazwa osiągnięcia km6500."
+  },
+  "levels.achievement.km6500.flavor": "Sławomir Rawicz opisał ucieczkę z łagru na Syberii i marsz aż do Indii, około 6 500 km. Prawdziwość tej relacji jest dziś podważana.",
+  "@levels.achievement.km6500.flavor": {
+    "description": "Klimat osiągnięcia km6500: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km6500.condition": "Przejdź łącznie 6 500 km.",
+  "@levels.achievement.km6500.condition": {
+    "description": "Warunek osiągnięcia km6500, sucho."
+  },
+  "levels.achievement.km7200.name": "Przez Hoth",
+  "@levels.achievement.km7200.name": {
+    "description": "Nazwa osiągnięcia km7200."
+  },
+  "levels.achievement.km7200.flavor": "Lodowa planeta z Gwiezdnych Wojen ma 7 200 km średnicy. Na wylot, w śniegu po kolana.",
+  "@levels.achievement.km7200.flavor": {
+    "description": "Klimat osiągnięcia km7200: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km7200.condition": "Przejdź łącznie 7 200 km.",
+  "@levels.achievement.km7200.condition": {
+    "description": "Warunek osiągnięcia km7200, sucho."
+  },
+  "levels.achievement.km8047.name": "Od Osi do Krawędzi",
+  "@levels.achievement.km8047.name": {
+    "description": "Nazwa osiągnięcia km8047."
+  },
+  "levels.achievement.km8047.flavor": "Świat Dysku Pratchetta ma około 10 000 mil średnicy. Od środka aż do wodospadu na krawędzi.",
+  "@levels.achievement.km8047.flavor": {
+    "description": "Klimat osiągnięcia km8047: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km8047.condition": "Przejdź łącznie 8 047 km.",
+  "@levels.achievement.km8047.condition": {
+    "description": "Warunek osiągnięcia km8047, sucho."
+  },
+  "levels.achievement.km9656.name": "Brobdingnag wzdłuż",
+  "@levels.achievement.km9656.name": {
+    "description": "Nazwa osiągnięcia km9656."
+  },
+  "levels.achievement.km9656.flavor": "Kraina olbrzymów z „Podróży Guliwera” ma według Swifta około 6 000 mil długości. Tyle co 9 656 km.",
+  "@levels.achievement.km9656.flavor": {
+    "description": "Klimat osiągnięcia km9656: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km9656.condition": "Przejdź łącznie 9 656 km.",
+  "@levels.achievement.km9656.condition": {
+    "description": "Warunek osiągnięcia km9656, sucho."
+  },
+  "levels.achievement.km10000.name": "Platynowy Jogger",
+  "@levels.achievement.km10000.name": {
+    "description": "Nazwa osiągnięcia km10000."
+  },
+  "levels.achievement.km10000.flavor": "Najwyższy stopień medalu Jogger w Pokémon GO: 10 000 km przebytych pieszo.",
+  "@levels.achievement.km10000.flavor": {
+    "description": "Klimat osiągnięcia km10000: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.km10000.condition": "Przejdź łącznie 10 000 km.",
+  "@levels.achievement.km10000.condition": {
+    "description": "Warunek osiągnięcia km10000, sucho."
+  },
+  "levels.achievement.s3.name": "Pierwszy checkpoint",
+  "@levels.achievement.s3.name": {
+    "description": "Nazwa osiągnięcia s3."
+  },
+  "levels.achievement.s3.flavor": "Gra zapisała postęp. Można iść dalej.",
+  "@levels.achievement.s3.flavor": {
+    "description": "Klimat osiągnięcia s3: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.s3.condition": "Przejdź 3 km w jednej sesji.",
+  "@levels.achievement.s3.condition": {
+    "description": "Warunek osiągnięcia s3, sucho."
+  },
+  "levels.achievement.s10.name": "Jeszcze jedna tura",
+  "@levels.achievement.s10.name": {
+    "description": "Nazwa osiągnięcia s10."
+  },
+  "levels.achievement.s10.flavor": "Znany problem graczy strategii przeniósł się na bieżnię.",
+  "@levels.achievement.s10.flavor": {
+    "description": "Klimat osiągnięcia s10: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.s10.condition": "Przejdź 10 km w jednej sesji.",
+  "@levels.achievement.s10.condition": {
+    "description": "Warunek osiągnięcia s10, sucho."
+  },
+  "levels.achievement.s21.name": "Na jednym życiu",
+  "@levels.achievement.s21.name": {
+    "description": "Nazwa osiągnięcia s21."
+  },
+  "levels.achievement.s21.flavor": "Run jak w roguelike’u: od startu do końca bez zapisu gry.",
+  "@levels.achievement.s21.flavor": {
+    "description": "Klimat osiągnięcia s21: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.s21.condition": "Przejdź 21 km w jednej sesji.",
+  "@levels.achievement.s21.condition": {
+    "description": "Warunek osiągnięcia s21, sucho."
+  },
+  "levels.achievement.d7.name": "Siedem tysięcy stopni",
+  "@levels.achievement.d7.name": {
+    "description": "Nazwa osiągnięcia d7."
+  },
+  "levels.achievement.d7.flavor": "Tyle stopni prowadzi na Gardło Świata do Wysokiego Hrothgaru.",
+  "@levels.achievement.d7.flavor": {
+    "description": "Klimat osiągnięcia d7: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.d7.condition": "Zrób 7 000 kroków jednego dnia.",
+  "@levels.achievement.d7.condition": {
+    "description": "Warunek osiągnięcia d7, sucho."
+  },
+  "levels.achievement.d12.name": "Dzień farmienia",
+  "@levels.achievement.d12.name": {
+    "description": "Nazwa osiągnięcia d12."
+  },
+  "levels.achievement.d12.flavor": "Licznik kroków nabił dziś tyle, co niejeden przez tydzień.",
+  "@levels.achievement.d12.flavor": {
+    "description": "Klimat osiągnięcia d12: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.d12.condition": "Zrób 12 000 kroków jednego dnia.",
+  "@levels.achievement.d12.condition": {
+    "description": "Warunek osiągnięcia d12, sucho."
+  },
+  "levels.achievement.d20.name": "Poziom trudności: koszmar",
+  "@levels.achievement.d20.name": {
+    "description": "Nazwa osiągnięcia d20."
+  },
+  "levels.achievement.d20.flavor": "Najwyższy poziom trudności w trybie dziennym. Mało kto go wybiera.",
+  "@levels.achievement.d20.flavor": {
+    "description": "Klimat osiągnięcia d20: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.d20.condition": "Zrób 20 000 kroków jednego dnia.",
+  "@levels.achievement.d20.condition": {
+    "description": "Warunek osiągnięcia d20, sucho."
+  },
+  "levels.achievement.seria3.name": "Trzy dni do upadku",
+  "@levels.achievement.seria3.name": {
+    "description": "Nazwa osiągnięcia seria3."
+  },
+  "levels.achievement.seria3.flavor": "W Majora’s Mask Termina ma trzy dni, zanim spadnie na nią księżyc. Twoja seria przetrwała pełny cykl.",
+  "@levels.achievement.seria3.flavor": {
+    "description": "Klimat osiągnięcia seria3: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.seria3.condition": "Chodź min. 2 km dziennie przez 3 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+  "@levels.achievement.seria3.condition": {
+    "description": "Warunek osiągnięcia seria3, sucho."
+  },
+  "levels.achievement.seria7.name": "Noc hordy",
+  "@levels.achievement.seria7.name": {
+    "description": "Nazwa osiągnięcia seria7."
+  },
+  "levels.achievement.seria7.flavor": "W 7 Days to Die co siódma noc przychodzi horda. Twoja seria doczekała pierwszej.",
+  "@levels.achievement.seria7.flavor": {
+    "description": "Klimat osiągnięcia seria7: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.seria7.condition": "Chodź min. 2 km dziennie przez 7 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+  "@levels.achievement.seria7.condition": {
+    "description": "Warunek osiągnięcia seria7, sucho."
+  },
+  "levels.achievement.seria28.name": "Pełna pora roku",
+  "@levels.achievement.seria28.name": {
+    "description": "Nazwa osiągnięcia seria28."
+  },
+  "levels.achievement.seria28.flavor": "Pora roku w Stardew Valley trwa 28 dni. Seria przetrwała całą, od pierwszego do ostatniego dnia.",
+  "@levels.achievement.seria28.flavor": {
+    "description": "Klimat osiągnięcia seria28: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.seria28.condition": "Chodź min. 2 km dziennie przez 28 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+  "@levels.achievement.seria28.condition": {
+    "description": "Warunek osiągnięcia seria28, sucho."
+  },
+  "levels.achievement.seria80.name": "W 80 dni dookoła świata",
+  "@levels.achievement.seria80.name": {
+    "description": "Nazwa osiągnięcia seria80."
+  },
+  "levels.achievement.seria80.flavor": "Phileas Fogg z powieści Verne’a okrążył świat w 80 dni. Seria trwa tyle samo.",
+  "@levels.achievement.seria80.flavor": {
+    "description": "Klimat osiągnięcia seria80: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.seria80.condition": "Chodź min. 2 km dziennie przez 80 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+  "@levels.achievement.seria80.condition": {
+    "description": "Warunek osiągnięcia seria80, sucho."
+  },
+  "levels.achievement.seria365.name": "Rok na wyspie",
+  "@levels.achievement.seria365.name": {
+    "description": "Nazwa osiągnięcia seria365."
+  },
+  "levels.achievement.seria365.flavor": "W Animal Crossing czas płynie jak w kalendarzu, więc pełny rok na wyspie trwa naprawdę rok.",
+  "@levels.achievement.seria365.flavor": {
+    "description": "Klimat osiągnięcia seria365: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.seria365.condition": "Chodź min. 2 km dziennie przez 365 dni z rzędu (1 dzień wolny na 7 nie przerywa serii).",
+  "@levels.achievement.seria365.condition": {
+    "description": "Warunek osiągnięcia seria365, sucho."
+  },
+  "levels.achievement.gra1.name": "Nowa gra",
+  "@levels.achievement.gra1.name": {
+    "description": "Nazwa osiągnięcia gra1."
+  },
+  "levels.achievement.gra1.flavor": "Postać w tej grze pierwszy raz idzie twoimi nogami.",
+  "@levels.achievement.gra1.flavor": {
+    "description": "Klimat osiągnięcia gra1: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.gra1.condition": "Rozegraj pierwszą sesję w profilu gry.",
+  "@levels.achievement.gra1.condition": {
+    "description": "Warunek osiągnięcia gra1, sucho."
+  },
+  "levels.achievement.gry3.name": "Trzy światy",
+  "@levels.achievement.gry3.name": {
+    "description": "Nazwa osiągnięcia gry3."
+  },
+  "levels.achievement.gry3.flavor": "Postacie się zmieniają, zakwasy zostają te same.",
+  "@levels.achievement.gry3.flavor": {
+    "description": "Klimat osiągnięcia gry3: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.gry3.condition": "Przejdź po 10 km w 3 różnych grach.",
+  "@levels.achievement.gry3.condition": {
+    "description": "Warunek osiągnięcia gry3, sucho."
+  },
+  "levels.achievement.gry5.name": "Turysta międzywymiarowy",
+  "@levels.achievement.gry5.name": {
+    "description": "Nazwa osiągnięcia gry5."
+  },
+  "levels.achievement.gry5.flavor": "Pięć światów nosi już twoje ślady.",
+  "@levels.achievement.gry5.flavor": {
+    "description": "Klimat osiągnięcia gry5: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.gry5.condition": "Przejdź po 10 km w 5 różnych grach.",
+  "@levels.achievement.gry5.condition": {
+    "description": "Warunek osiągnięcia gry5, sucho."
+  },
+  "levels.achievement.gra100.name": "Mój main",
+  "@levels.achievement.gra100.name": {
+    "description": "Nazwa osiągnięcia gra100."
+  },
+  "levels.achievement.gra100.flavor": "Reszta biblioteki zaczyna być zazdrosna.",
+  "@levels.achievement.gra100.flavor": {
+    "description": "Klimat osiągnięcia gra100: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.gra100.condition": "Przejdź 100 km w jednej grze.",
+  "@levels.achievement.gra100.condition": {
+    "description": "Warunek osiągnięcia gra100, sucho."
+  },
+  "levels.achievement.gra1000.name": "Tu mieszkam",
+  "@levels.achievement.gra1000.name": {
+    "description": "Nazwa osiągnięcia gra1000."
+  },
+  "levels.achievement.gra1000.flavor": "Strażnicy w tej grze znają cię z imienia.",
+  "@levels.achievement.gra1000.flavor": {
+    "description": "Klimat osiągnięcia gra1000: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.gra1000.condition": "Przejdź 1 000 km w jednej grze.",
+  "@levels.achievement.gra1000.condition": {
+    "description": "Warunek osiągnięcia gra1000, sucho."
+  },
+  "levels.achievement.trening.name": "Tryb treningowy",
+  "@levels.achievement.trening.name": {
+    "description": "Nazwa osiągnięcia trening."
+  },
+  "levels.achievement.trening.flavor": "Jak w bijatykach: najpierw trening, potem prawdziwe walki.",
+  "@levels.achievement.trening.flavor": {
+    "description": "Klimat osiągnięcia trening: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.trening.condition": "Ukończ pierwszą sesję w trybie Trening.",
+  "@levels.achievement.trening.condition": {
+    "description": "Warunek osiągnięcia trening, sucho."
+  },
+  "levels.achievement.rano.name": "Pierwszy na serwerze",
+  "@levels.achievement.rano.name": {
+    "description": "Nazwa osiągnięcia rano."
+  },
+  "levels.achievement.rano.flavor": "Sesja przed siódmą, serwer jeszcze pusty.",
+  "@levels.achievement.rano.flavor": {
+    "description": "Klimat osiągnięcia rano: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.rano.condition": "Rozpocznij sesję między 4:00 a 7:00.",
+  "@levels.achievement.rano.condition": {
+    "description": "Warunek osiągnięcia rano, sucho."
+  },
+  "levels.achievement.noc.name": "Nocny grind",
+  "@levels.achievement.noc.name": {
+    "description": "Nazwa osiągnięcia noc."
+  },
+  "levels.achievement.noc.flavor": "Jeszcze jeden kilometr i spać. Na pewno.",
+  "@levels.achievement.noc.flavor": {
+    "description": "Klimat osiągnięcia noc: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.noc.condition": "Rozpocznij sesję między 23:00 a 4:00.",
+  "@levels.achievement.noc.condition": {
+    "description": "Warunek osiągnięcia noc, sucho."
+  },
+  "levels.achievement.znajomy.name": "Party +1",
+  "@levels.achievement.znajomy.name": {
+    "description": "Nazwa osiągnięcia znajomy."
+  },
+  "levels.achievement.znajomy.flavor": "Do drużyny dołączył pierwszy kompan.",
+  "@levels.achievement.znajomy.flavor": {
+    "description": "Klimat osiągnięcia znajomy: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.znajomy.condition": "Dodaj pierwszego znajomego.",
+  "@levels.achievement.znajomy.condition": {
+    "description": "Warunek osiągnięcia znajomy, sucho."
+  },
+  "levels.achievement.polecenie.name": "Werbownik",
+  "@levels.achievement.polecenie.name": {
+    "description": "Nazwa osiągnięcia polecenie."
+  },
+  "levels.achievement.polecenie.flavor": "Ktoś założył konto z twojego zaproszenia i drużyna urosła.",
+  "@levels.achievement.polecenie.flavor": {
+    "description": "Klimat osiągnięcia polecenie: zdanie ze świata gry albo książki."
+  },
+  "levels.achievement.polecenie.condition": "Ktoś założy konto z twoim kodem.",
+  "@levels.achievement.polecenie.condition": {
+    "description": "Warunek osiągnięcia polecenie, sucho."
+  }
+}

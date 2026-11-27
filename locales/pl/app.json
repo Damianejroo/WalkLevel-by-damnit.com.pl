@@ -1,0 +1,67 @@
+{
+  "@@locale": "pl",
+  "app.nazwa": "WalkLevel",
+  "@app.nazwa": {
+    "description": "Nazwa własna, bez tłumaczenia."
+  },
+  "app.haslo": "Chodzisz w realu, idziesz w grze",
+  "@app.haslo": {
+    "description": "Bez zmian, bez tłumaczenia (hasło marki). Do okna „O aplikacji” i ekranu pierwszego uruchomienia."
+  },
+  "app.wersja": "wersja {wersja}",
+  "@app.wersja": {
+    "description": "Pod nazwą na pasku.",
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "app.osoba_i_wersja": "{osoba} · wersja {wersja}",
+  "@app.osoba_i_wersja": {
+    "description": "Gdy na komputerze jest więcej niż jedna osoba.",
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      },
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "app.o_aplikacji": "WalkLevel {wersja} · © 2026 {autor}",
+  "@app.o_aplikacji": {
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      },
+      "autor": {}
+    }
+  },
+  "app.link.strona": "Strona autora",
+  "app.link.prywatnosc": "Polityka prywatności",
+  "@app.link.prywatnosc": {
+    "description": "Pełna nazwa dokumentu, jak przy rejestracji."
+  },
+  "app.link.kod": "Kod źródłowy",
+  "@app.link.kod": {
+    "description": "„Kod” myli się z kodem zaproszenia."
+  },
+  "app.wroc": "Wróć",
+  "@app.wroc": {
+    "description": "Przycisk w nagłówku podstron."
+  },
+  "app.zapis.auto": "Zmiany zapisują się same",
+  "app.zapis.zapisano": "Zapisano",
+  "@app.zapis.zapisano": {
+    "description": "Krótki znacznik po zmianie."
+  },
+  "app.zapis.dostepnosc": "Stan zapisu",
+  "@app.zapis.dostepnosc": {
+    "description": "Nazwa dla czytnika ekranu."
+  },
+  "app.zamykanie.tasma": "Zatrzymuję taśmę i zamykam WalkLevel…",
+  "@app.zamykanie.tasma": {
+    "description": "Dziś tylko w logu („Zamykanie: zatrzymano taśmę”). Pokazać, gdy zamknięcie czeka na stop taśmy."
+  }
+}

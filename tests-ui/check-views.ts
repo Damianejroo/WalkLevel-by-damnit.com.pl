@@ -6,13 +6,14 @@
 // motyw: brak poziomego przewijania, żaden widoczny element poza oknem ani ucięty bez
 // wielokropka (window.wystaje z src/dev/overflow-check.ts), brak błędów w konsoli, aktywny ten
 // ekran, o który chodziło. Na końcu zachowanie po kliknięciach (tests-ui/interactions.ts).
-// Zrzuty: docs/screenshots/<ekran>-<scenariusz>-<szer>-<motyw>.png (cała wysokość treści ekranu).
+// Zrzuty: docs/screenshots/<ekran>-<scenariusz>-<szer>-<motyw>[-<język>].png (cała wysokość treści
+// ekranu); po polsku wszystkie szerokości i motywy, po angielsku i w en-XA najwęższe okno.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright-core';
-import { DOMYSLNE, EKRANY, MOTYWY, OKNA, SZEROKOSCI, WYSOKOSC } from './screens.ts';
+import { chromium, type Page } from 'playwright-core';
+import { DOMYSLNE, EKRANY, JEZYKI, MOTYWY, OKNA, SZEROKOSCI, WYSOKOSC } from './screens.ts';
 import { buildMock, previewMock, productionBuildProblems } from './mock-build.ts';
 import { checkInteractions } from './interactions.ts';
 
@@ -37,12 +38,70 @@ if (!arg('no-build')) {
 const serwer = await previewMock(4173);
 const adres = serwer.resolvedUrls!.local[0];
 
-const przegladarka = await chromium.launch({ channel: 'msedge', headless: true });
-fs.mkdirSync(zrzuty, { recursive: true });
-
 const bledy: { nazwa: string; problemy: string[] }[] = [];
 const widziane = new Set<string>();
 let sprawdzone = 0;
+interface Widok {
+  ekran: string;
+  scenariusz: string;
+  szer: number;
+  motyw: string;
+  /** null - Polish (the mock's default language) */
+  jezyk: string | null;
+}
+
+/** One screen x scenario x width x theme (x language): nothing sticks out, no console errors. */
+async function sprawdzEkran(strona: Page, konsola: string[], w: Widok) {
+  const { ekran, scenariusz, szer, motyw, jezyk } = w;
+  const nazwa = `${ekran}-${scenariusz}-${szer}-${motyw}${jezyk ? `-${jezyk}` : ''}`;
+  if (widziane.has(nazwa)) throw new Error(`tests-ui/screens.ts: ${nazwa} jest na liście więcej niż raz`);
+  widziane.add(nazwa);
+  await strona.setViewportSize({ width: szer, height: WYSOKOSC });
+  await strona.goto(`${adres}?ekran=${ekran}&stan=${scenariusz}&motyw=${motyw}${jezyk ? `&jezyk=${jezyk}` : ''}`);
+  await strona.waitForFunction(
+    (m) => document.documentElement.dataset.gotowe === '1' && document.documentElement.dataset.theme === m && typeof window.wystaje === 'function',
+    motyw === 'jasny' ? 'light' : 'dark',
+  );
+  await strona.evaluate(() => document.fonts.ready);
+  await strona.waitForTimeout(300); // nawigacja z rdzenia (np. konfigurator), pomiary ResizeObserver
+
+  const wynik = await strona.evaluate((jezykStrony) => ({
+    przewijanie: document.documentElement.scrollWidth - window.innerWidth,
+    wystaje: window.wystaje(document.body),
+    aktywny: document.querySelector('.ekran[data-stan="aktywny"]')?.getAttribute('data-ekran') ?? '',
+    lang: document.documentElement.lang === (jezykStrony ?? 'pl') ? '' : document.documentElement.lang,
+  }), jezyk);
+  const problemy = [
+    // a scenario that ends on another screen would check the wrong view
+    ...(wynik.aktywny !== ekran ? [`aktywny ekran: ${wynik.aktywny || 'brak'} zamiast ${ekran}`] : []),
+    ...(wynik.przewijanie > 0 ? [`poziome przewijanie strony: ${wynik.przewijanie} px`] : []),
+    ...(wynik.lang ? [`lang dokumentu: ${wynik.lang}`] : []),
+    ...wynik.wystaje,
+    ...konsola.map((k) => `konsola: ${k}`),
+  ];
+  sprawdzone++;
+  if (problemy.length) {
+    bledy.push({ nazwa, problemy });
+    console.log(`BŁĄD ${nazwa}\n  ${problemy.slice(0, 12).join('\n  ')}`);
+  } else {
+    console.log(`ok   ${nazwa}`);
+  }
+
+  if (!arg('no-screenshots')) {
+    // cała wysokość treści: okno wydłużone do wysokości przewijanej kolumny aktywnego ekranu
+    const pelna = await strona.evaluate(() => {
+      const e = document.querySelector('.ekran[data-stan="aktywny"]');
+      const p = e?.querySelector('.przewijanie');
+      return p ? Math.ceil(p.getBoundingClientRect().top + p.scrollHeight) : 0;
+    });
+    if (pelna > WYSOKOSC) await strona.setViewportSize({ width: szer, height: Math.min(pelna, 6000) });
+    await strona.screenshot({ path: path.join(zrzuty, `${nazwa}.png`) });
+  }
+}
+
+const przegladarka = await chromium.launch({ channel: 'msedge', headless: true });
+fs.mkdirSync(zrzuty, { recursive: true });
+
 try {
   for (const motyw of MOTYWY) {
     for (const szer of SZEROKOSCI) {
@@ -53,7 +112,7 @@ try {
         locale: 'pl-PL',
       });
       const strona = await kontekst.newPage();
-      let konsola: string[] = [];
+      const konsola: string[] = [];
       strona.on('console', (m) => m.type() === 'error' && konsola.push(m.text()));
       strona.on('pageerror', (e) => konsola.push(String(e)));
 
@@ -61,57 +120,40 @@ try {
         if (tylkoEkran && ekran !== tylkoEkran) continue;
         if (!szerokosci.includes(szer)) continue;
         for (const scenariusz of scenariusze) {
-          const nazwa = `${ekran}-${scenariusz}-${szer}-${motyw}`;
-          if (widziane.has(nazwa)) throw new Error(`tests-ui/screens.ts: ${nazwa} jest na liście więcej niż raz`);
-          widziane.add(nazwa);
-          konsola = [];
-          await strona.setViewportSize({ width: szer, height: WYSOKOSC });
-          await strona.goto(`${adres}?ekran=${ekran}&stan=${scenariusz}&motyw=${motyw}`);
-          await strona.waitForFunction(
-            (m) => document.documentElement.dataset.gotowe === '1' && document.documentElement.dataset.theme === m && typeof window.wystaje === 'function',
-            motyw === 'jasny' ? 'light' : 'dark',
-          );
-          await strona.evaluate(() => document.fonts.ready);
-          await strona.waitForTimeout(300); // nawigacja z rdzenia (np. konfigurator), pomiary ResizeObserver
-
-          const wynik = await strona.evaluate(() => ({
-            przewijanie: document.documentElement.scrollWidth - window.innerWidth,
-            wystaje: window.wystaje(document.body),
-            aktywny: document.querySelector('.ekran[data-stan="aktywny"]')?.getAttribute('data-ekran') ?? '',
-          }));
-          const problemy = [
-            // a scenario that ends on another screen would check the wrong view
-            ...(wynik.aktywny !== ekran ? [`aktywny ekran: ${wynik.aktywny || 'brak'} zamiast ${ekran}`] : []),
-            ...(wynik.przewijanie > 0 ? [`poziome przewijanie strony: ${wynik.przewijanie} px`] : []),
-            ...wynik.wystaje,
-            ...konsola.map((k) => `konsola: ${k}`),
-          ];
-          sprawdzone++;
-          if (problemy.length) {
-            bledy.push({ nazwa, problemy });
-            console.log(`BŁĄD ${nazwa}\n  ${problemy.slice(0, 12).join('\n  ')}`);
-          } else {
-            console.log(`ok   ${nazwa}`);
-          }
-
-          if (!arg('no-screenshots')) {
-            // cała wysokość treści: okno wydłużone do wysokości przewijanej kolumny aktywnego ekranu
-            const pelna = await strona.evaluate(() => {
-              const e = document.querySelector('.ekran[data-stan="aktywny"]');
-              const p = e?.querySelector('.przewijanie');
-              return p ? Math.ceil(p.getBoundingClientRect().top + p.scrollHeight) : 0;
-            });
-            if (pelna > WYSOKOSC) await strona.setViewportSize({ width: szer, height: Math.min(pelna, 6000) });
-            await strona.screenshot({ path: path.join(zrzuty, `${nazwa}.png`) });
-          }
+          konsola.length = 0;
+          await sprawdzEkran(strona, konsola, { ekran, scenariusz, szer, motyw, jezyk: null });
         }
       }
       await kontekst.close();
     }
   }
 
+  // Inne języki (docs/i18n.md): każdy ekran i scenariusz w najwęższym oknie po angielsku i w
+  // pseudo-języku en-XA (teksty dłuższe o ~40%, z akcentami) - nic nie może wystawać.
+  for (const jezyk of JEZYKI) {
+    const motyw = 'jasny';
+    const kontekst = await przegladarka.newContext({ viewport: { width: 420, height: WYSOKOSC }, reducedMotion: 'reduce', colorScheme: 'light', locale: 'en-US' });
+    const strona = await kontekst.newPage();
+    const konsola: string[] = [];
+    strona.on('console', (m) => m.type() === 'error' && konsola.push(m.text()));
+    strona.on('pageerror', (e) => konsola.push(String(e)));
+    const zrobione = new Set<string>();
+    for (const { ekran, scenariusze, szerokosci = DOMYSLNE } of EKRANY) {
+      if (tylkoEkran && ekran !== tylkoEkran) continue;
+      const szer = szerokosci.includes(420) ? 420 : Math.min(...szerokosci);
+      for (const scenariusz of scenariusze) {
+        if (zrobione.has(`${ekran}-${scenariusz}-${szer}`)) continue;
+        zrobione.add(`${ekran}-${scenariusz}-${szer}`);
+        konsola.length = 0;
+        await sprawdzEkran(strona, konsola, { ekran, scenariusz, szer, motyw, jezyk });
+      }
+    }
+    await kontekst.close();
+  }
+
   // Osobne okna (popup, przycisk): stały rozmiar, podgląd ?demo=1 z marginesem 16 px wokół okna
-  for (const motyw of MOTYWY) {
+  const oknaJezyki: [string, string | null][] = [...MOTYWY.map((m): [string, null] => [m, null]), ...JEZYKI.map((j): [string, string] => ['jasny', j])];
+  for (const [motyw, jezyk] of oknaJezyki) {
     for (const { ekran, strona: plik, okno, scenariusze } of OKNA) {
       if (tylkoEkran && ekran !== tylkoEkran) continue;
       const kontekst = await przegladarka.newContext({
@@ -126,12 +168,12 @@ try {
       strona.on('console', (m) => m.type() === 'error' && konsola.push(m.text()));
       strona.on('pageerror', (e) => konsola.push(String(e)));
       for (const { nazwa: scenariusz, zapytanie, okno: oknoScenariusza } of scenariusze) {
-        const nazwa = `${ekran}-${scenariusz}-${motyw}`;
+        const nazwa = `${ekran}-${scenariusz}-${motyw}${jezyk ? `-${jezyk}` : ''}`;
         konsola = [];
         // scenariusz może mieć własny rozmiar okna (przycisk w trybie Trening)
         const o = oknoScenariusza ?? okno;
         await strona.setViewportSize({ width: o.szer + 32, height: o.wys + 32 });
-        await strona.goto(`${adres}${plik}?demo=1&${zapytanie}&motyw=${motyw}`);
+        await strona.goto(`${adres}${plik}?demo=1&${zapytanie}&motyw=${motyw}${jezyk ? `&jezyk=${jezyk}` : ''}`);
         await strona.waitForFunction(() => document.documentElement.dataset.gotowe === '1' && typeof window.wystaje === 'function');
         await strona.evaluate(() => document.fonts.ready);
         await strona.waitForTimeout(300);

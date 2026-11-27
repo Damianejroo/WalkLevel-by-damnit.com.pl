@@ -17,7 +17,7 @@ node tests-ui/settings-collapse.ts
 .\packaging\build.ps1 -Version X.Y.Z [-Iscc path\to\ISCC.exe]   # exe and installer
 ```
 
-Generators: `npm run texts` (text dictionary from `docs/texts.md`),
+Generators: `npm run texts` (language packs from `docs/texts.md`, see `docs/i18n.md`),
 `npm run server-definitions` (definitions file for the account server).
 Scripts are TypeScript run by Node.js 24 directly, without a build step.
 
@@ -36,7 +36,8 @@ separate tasks, not as a side effect of other changes.
   `README.md` (English) and `README.pl.md` (Polish). In the repository
   root only `README`, `CONTRIBUTING`, `PRIVACY` and `LICENSE` are upper case.
 - Dates in the UI and in documents: DD.MM.YYYY.
-- User-facing texts come from `docs/texts.md` (`npm run texts` regenerates the dictionary).
+- User-facing texts come from `docs/texts.md`, translations from `locales/` (`npm run texts`
+  regenerates the packs, `docs/i18n.md` explains how to translate).
 - One change per task, no abstractions in advance, no dependency for a single function.
 
 ## Commits, pull requests and releases

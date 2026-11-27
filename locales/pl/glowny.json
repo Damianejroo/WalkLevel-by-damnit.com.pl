@@ -1,0 +1,653 @@
+{
+  "@@locale": "pl",
+  "glowny.pasek.osoba": "Zmień osobę",
+  "@glowny.pasek.osoba": {
+    "description": "Podpowiedź i nazwa dostępności awatara."
+  },
+  "glowny.pasek.aktualizuj": "Aktualizuj",
+  "glowny.pasek.aktualizuj_do": "Zainstaluj wersję {nowa_wersja}",
+  "@glowny.pasek.aktualizuj_do": {
+    "description": "Podpowiedź, gdy jest nowa wersja.",
+    "placeholders": {
+      "nowa_wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "glowny.pasek.aktualizuj_niedostepne": "Aktualizacje działają tylko w wersji zainstalowanej instalatorem.",
+  "@glowny.pasek.aktualizuj_niedostepne": {
+    "description": "Wersja deweloperska."
+  },
+  "glowny.pasek.zglos": "Zgłoś problem",
+  "glowny.pasek.online": "Znajomi i ranking",
+  "@glowny.pasek.online": {
+    "description": "Widoczne tylko z kontem online."
+  },
+  "glowny.pasek.historia": "Historia kroków",
+  "glowny.pasek.ustawienia": "Ustawienia",
+  "glowny.osoby.dzis": "dziś {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@glowny.osoby.dzis": {
+    "description": "Lista osób pod awatarem. Dziś brak odmiany („dziś 1 kroków”).",
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "glowny.osoby.dodaj": "Dodaj osobę",
+  "glowny.osoby.zarzadzaj": "Zarządzaj osobami",
+  "@glowny.osoby.zarzadzaj": {
+    "description": "Otwiera Ustawienia > Konto i osoby."
+  },
+  "glowny.status.brak.tytul": "Bieżnia nie jest połączona",
+  "@glowny.status.brak.tytul": {
+    "description": "Brak zapamiętanej bieżni."
+  },
+  "glowny.status.brak.podtytul": "Włącz bieżnię i kliknij Szukaj bieżni.",
+  "glowny.status.brak.akcja": "Szukaj bieżni",
+  "glowny.status.rozlaczona.tytul": "Rozłączono z {model}",
+  "@glowny.status.rozlaczona.tytul": {
+    "description": "Bieżnia zapamiętana, ale połączenie zakończone przyciskiem Rozłącz.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "glowny.status.rozlaczona.podtytul": "Kliknij Połącz, żeby połączyć ponownie.",
+  "glowny.status.rozlaczona.akcja": "Połącz",
+  "@glowny.status.rozlaczona.akcja": {
+    "description": "Łączy z zapamiętaną bieżnią bez skanowania."
+  },
+  "glowny.status.skanowanie.tytul": "Szukam bieżni w pobliżu…",
+  "glowny.status.skanowanie.podtytul": "Bieżnia musi być włączona, a jej aplikacja w telefonie zamknięta.",
+  "glowny.status.skanowanie.akcja": "Anuluj",
+  "@glowny.status.skanowanie.akcja": {
+    "description": "W 0.5.2 przycisk „Szukaj bieżni” w trakcie szukania."
+  },
+  "glowny.status.szukanie.tytul": "Szukam bieżni {model}…",
+  "@glowny.status.szukanie.tytul": {
+    "description": "Zapamiętana bieżnia, przed połączeniem. Nazwa modelu zamiast nazwy Bluetooth.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "glowny.status.szukanie.podtytul": "Bieżnia musi być włączona, a jej aplikacja w telefonie zamknięta.",
+  "glowny.status.szukanie.akcja": "Anuluj",
+  "glowny.status.laczenie.tytul": "Łączę z {model}…",
+  "@glowny.status.laczenie.tytul": {
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "glowny.status.laczenie.podtytul": "To trwa zwykle kilka sekund.",
+  "glowny.status.laczenie.akcja": "Anuluj",
+  "glowny.status.polaczono.tytul": "Połączono z {model}",
+  "@glowny.status.polaczono.tytul": {
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "glowny.status.polaczono.podtytul": "Taśma {min_kmh}–{max_kmh} km/h",
+  "@glowny.status.polaczono.podtytul": {
+    "description": "Zamiast opisu sterownika. Opis techniczny tylko w Dzienniku.",
+    "placeholders": {
+      "min_kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "max_kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.status.polaczono.akcja": "Rozłącz",
+  "glowny.status.czekam.tytul": "Połączono z {model}",
+  "@glowny.status.czekam.tytul": {
+    "description": "Połączono, ale od kilku sekund brak danych.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "glowny.status.czekam.podtytul": "Czekam na dane z bieżni. Jeśli to trwa, wyłącz i włącz bieżnię.",
+  "glowny.status.ponawiam.tytul": "Łączę ponownie…",
+  "@glowny.status.ponawiam.tytul": {
+    "description": "Podtytuł: jeden z tekstów `ble.powod.*`."
+  },
+  "glowny.status.ponawiam.akcja": "Przerwij",
+  "@glowny.status.ponawiam.akcja": {
+    "description": "Przerywa ponawianie, bieżnia zostaje zapamiętana."
+  },
+  "glowny.status.bt_wylaczony.tytul": "Bluetooth jest wyłączony",
+  "glowny.status.bt_wylaczony.podtytul": "Włącz go w Start > Ustawienia > Bluetooth i urządzenia.",
+  "glowny.status.bt_wylaczony.akcja": "Spróbuj ponownie",
+  "glowny.status.nieobslugiwane.tytul": "To urządzenie nie jest obsługiwaną bieżnią",
+  "glowny.status.nieobslugiwane.podtytul": "Wybierz inne urządzenie. Jeśli to bieżnia, zgłoś ją w Ustawienia > Pomoc i diagnostyka > Zgłoś problem.",
+  "glowny.status.nieobslugiwane.akcja": "Szukaj bieżni",
+  "glowny.status.symulator.tytul": "Symulator bieżni jest włączony",
+  "glowny.status.symulator.podtytul": "{klawisz_szybciej} przyspiesza, {klawisz_wolniej} zwalnia. Sesje nie trafiają na konto online.",
+  "@glowny.status.symulator.podtytul": {
+    "placeholders": {
+      "klawisz_szybciej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      },
+      "klawisz_wolniej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "glowny.status.symulator.akcja": "Wyłącz symulator",
+  "glowny.poziom.dostepnosc": "Poziom i osiągnięcia. Kliknij, żeby zobaczyć szczegóły.",
+  "@glowny.poziom.dostepnosc": {
+    "description": "Nazwa dla czytnika ekranu."
+  },
+  "glowny.poziom.naglowek": "POZIOM {poziom}",
+  "@glowny.poziom.naglowek": {
+    "description": "Wersaliki to styl, w danych zwykła pisownia „Poziom {poziom}” i CSS `text-transform`.",
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "glowny.poziom.xp": "{xp} / {xp_max} XP",
+  "@glowny.poziom.xp": {
+    "placeholders": {
+      "xp": {
+        "description": "punkty doświadczenia"
+      },
+      "xp_max": {
+        "description": "punkty doświadczenia"
+      }
+    }
+  },
+  "glowny.poziom.xp_max": "{xp} XP",
+  "@glowny.poziom.xp_max": {
+    "description": "Najwyższy poziom.",
+    "placeholders": {
+      "xp": {
+        "description": "punkty doświadczenia"
+      }
+    }
+  },
+  "glowny.poziom.do_nastepnego": "Jeszcze {km} km do poziomu {poziom}",
+  "@glowny.poziom.do_nastepnego": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      },
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "glowny.poziom.najwyzszy": "Najwyższy poziom. Szacunek.",
+  "glowny.poziom.licznik": "{liczba}/{razem}",
+  "@glowny.poziom.licznik": {
+    "description": "Liczba osiągnięć przy pucharze.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "glowny.poziom.podpowiedz": "{ranga}: {opis_rangi}",
+  "@glowny.poziom.podpowiedz": {
+    "placeholders": {
+      "ranga": {
+        "description": "nazwa i opis rangi"
+      },
+      "opis_rangi": {
+        "description": "nazwa i opis rangi"
+      }
+    }
+  },
+  "glowny.poziom.symulator": "Poziomy rosną tylko za kilometry na prawdziwej bieżni.",
+  "@glowny.poziom.symulator": {
+    "description": "Pokazać na karcie, gdy włączony jest symulator. Dziś brak informacji, dlaczego XP nie rośnie."
+  },
+  "glowny.wskaznik.dostepnosc": "Prędkość taśmy",
+  "glowny.wskaznik.jednostka": "km/h",
+  "@glowny.wskaznik.jednostka": {
+    "description": "Pod liczbą. „taśmy” jest w nazwie karty."
+  },
+  "glowny.wskaznik.opis_dostepnosc": "{kmh} km/h, {podpis}",
+  "@glowny.wskaznik.opis_dostepnosc": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "podpis": {}
+    }
+  },
+  "glowny.wskaznik.wylaczone": "Sterowanie wyłączone. {klawisz_wlaczania} włącza.",
+  "@glowny.wskaznik.wylaczone": {
+    "placeholders": {
+      "klawisz_wlaczania": {
+        "description": "np. „F8”"
+      }
+    }
+  },
+  "glowny.wskaznik.brak_danych": "Brak danych z bieżni",
+  "@glowny.wskaznik.brak_danych": {
+    "description": "Tryb Chodzenie, bieżnia niepołączona."
+  },
+  "glowny.wskaznik.czekam": "Czekam na dane z bieżni…",
+  "glowny.wskaznik.chodzenie.stoisz": "Stoisz",
+  "glowny.wskaznik.chodzenie.chod": "Chód · gra dostaje {klawisz_chodu}",
+  "@glowny.wskaznik.chodzenie.chod": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "glowny.wskaznik.chodzenie.bieg": "Bieg · gra dostaje {klawisz_biegu} + {klawisz_chodu}",
+  "@glowny.wskaznik.chodzenie.bieg": {
+    "placeholders": {
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "glowny.wskaznik.chodzenie.proba": "Chód · tryb próbny, gra nic nie dostaje",
+  "@glowny.wskaznik.chodzenie.proba": {
+    "description": "Zastępuje dopisek „(podgląd)”. Dla biegu: „Bieg · tryb próbny, gra nic nie dostaje”."
+  },
+  "glowny.wskaznik.klawisze.bez": "Bez klawisza · taśma {kmh} km/h",
+  "@glowny.wskaznik.klawisze.bez": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.wskaznik.klawisze.chod": "Chód · {klawisz_chodu} · taśma {kmh} km/h",
+  "@glowny.wskaznik.klawisze.chod": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.wskaznik.klawisze.bieg": "Bieg · {klawisz_chodu} + {klawisz_biegu} · taśma {kmh} km/h",
+  "@glowny.wskaznik.klawisze.bieg": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.wskaznik.pad.brak": "Nie widać pada · {tasma}",
+  "@glowny.wskaznik.pad.brak": {
+    "description": "`{tasma}` = `glowny.wskaznik.tasma_stoi` albo `glowny.wskaznik.tasma_kmh`.",
+    "placeholders": {
+      "tasma": {}
+    }
+  },
+  "glowny.wskaznik.pad.stan": "Gałka {procent}% · stopień {stopien} · {tasma}",
+  "@glowny.wskaznik.pad.stan": {
+    "placeholders": {
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      },
+      "stopien": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "tasma": {}
+    }
+  },
+  "glowny.wskaznik.tasma_stoi": "taśma stoi",
+  "glowny.wskaznik.tasma_kmh": "taśma {kmh} km/h",
+  "@glowny.wskaznik.tasma_kmh": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.wskaznik.trening": "Trening · poziom {poziom} · taśma {kmh} km/h",
+  "@glowny.wskaznik.trening": {
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.stoisz": "Stoisz / poniżej {kmh} km/h",
+  "@glowny.strefy.stoisz": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.chod": "Chód · {klawisz_chodu} / od {kmh} km/h",
+  "@glowny.strefy.chod": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.bieg": "Bieg · {klawisz_biegu} + {klawisz_chodu} / od {kmh} km/h",
+  "@glowny.strefy.bieg": {
+    "description": "Spacje wokół „+” jak wszędzie indziej.",
+    "placeholders": {
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.bez_klawisza": "Bez klawisza / {kmh} km/h",
+  "@glowny.strefy.bez_klawisza": {
+    "description": "Tryb Klawisze.",
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.klawisz": "{klawisz_chodu} / {kmh} km/h",
+  "@glowny.strefy.klawisz": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.klawisz_bieg": "{klawisz_chodu} + {klawisz_biegu} / {kmh} km/h",
+  "@glowny.strefy.klawisz_bieg": {
+    "description": "Ta sama kolejność co we wskaźniku trybu Klawisze.",
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.poziom": "Poziom {poziom} / {kmh} km/h",
+  "@glowny.strefy.poziom": {
+    "description": "Trening.",
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.puszczona": "Gałka puszczona / {kmh} km/h",
+  "@glowny.strefy.puszczona": {
+    "description": "Pad, przy 5 stopniach skrót „0%”.",
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.stopien": "od {procent}% / {kmh} km/h",
+  "@glowny.strefy.stopien": {
+    "placeholders": {
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.strefy.stop": "stop",
+  "@glowny.strefy.stop": {
+    "description": "Wartość, gdy puszczona gałka zatrzymuje taśmę."
+  },
+  "glowny.trening.poziom": "{poziom}\n{kmh} km/h",
+  "@glowny.trening.poziom": {
+    "description": "Przycisk poziomu.",
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.trening.poziom_dostepnosc": "Poziom {poziom}: {kmh} km/h. Kliknij, żeby ustawić.",
+  "@glowny.trening.poziom_dostepnosc": {
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "glowny.trening.stop": "Stop",
+  "glowny.trening.stop_dostepnosc": "Zatrzymaj taśmę",
+  "glowny.licznik.kroki": "Kroki",
+  "glowny.licznik.kadencja": "Kroki na minutę",
+  "@glowny.licznik.kadencja": {
+    "description": "„Kroki/min” w kafelku, pełna nazwa dla czytnika ekranu."
+  },
+  "glowny.licznik.dystans": "Dystans",
+  "glowny.licznik.czas": "Czas ruchu",
+  "glowny.licznik.brak": "–",
+  "@glowny.licznik.brak": {
+    "description": "Brak wartości."
+  },
+  "glowny.licznik.km": "{km} km",
+  "@glowny.licznik.km": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "glowny.sterowanie.profil": "{profil}",
+  "@glowny.sterowanie.profil": {
+    "description": "Nazwa profilu gry, z rozwijaną listą, gdy profili jest więcej.",
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "glowny.sterowanie.profil_dostepnosc": "Profil gry: {profil}. Kliknij, żeby zmienić.",
+  "@glowny.sterowanie.profil_dostepnosc": {
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "glowny.sterowanie.bez_profilu": "Sterowanie",
+  "@glowny.sterowanie.bez_profilu": {
+    "description": "Gdy nie ma jeszcze osoby."
+  },
+  "glowny.sterowanie.zarzadzaj": "Zarządzaj profilami gier",
+  "@glowny.sterowanie.zarzadzaj": {
+    "description": "Otwiera Ustawienia > Gry i sterowanie."
+  },
+  "glowny.sterowanie.przelacznik": "Sterowanie",
+  "@glowny.sterowanie.przelacznik": {
+    "description": "Przełącznik. W trybie Trening gra nic nie dostaje, więc „w grze” mylił."
+  },
+  "glowny.sterowanie.klawisz_dostepnosc": "Klawisz włączania: {klawisz_wlaczania}. Kliknij, żeby zmienić.",
+  "@glowny.sterowanie.klawisz_dostepnosc": {
+    "placeholders": {
+      "klawisz_wlaczania": {
+        "description": "np. „F8”"
+      }
+    }
+  },
+  "glowny.sterowanie.klawisz_podpowiedz": "Kliknij, żeby zmienić klawisz",
+  "glowny.sterowanie.opis.tasma": "uruchamia i zatrzymuje taśmę",
+  "@glowny.sterowanie.opis.tasma": {
+    "description": "Podpis przy klawiszu, gdy start i stop taśmy jest włączony."
+  },
+  "glowny.sterowanie.opis.bez_tasmy": "włącza i wyłącza sterowanie",
+  "glowny.sterowanie.opis.z_padem": "{opis} · na padzie: {przycisk_pada}",
+  "@glowny.sterowanie.opis.z_padem": {
+    "description": "Nawias na początku zdania był nieczytelny.",
+    "placeholders": {
+      "opis": {},
+      "przycisk_pada": {
+        "description": "np. „Panel dotykowy”"
+      }
+    }
+  },
+  "glowny.sterowanie.opis.trening": "{opis} · {klawisz_szybciej} szybciej, {klawisz_wolniej} wolniej",
+  "@glowny.sterowanie.opis.trening": {
+    "placeholders": {
+      "opis": {},
+      "klawisz_szybciej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      },
+      "klawisz_wolniej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "glowny.sterowanie.opis.klawisze": "{opis} · {klawisz_chodu} przyspiesza",
+  "@glowny.sterowanie.opis.klawisze": {
+    "placeholders": {
+      "opis": {},
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "glowny.sterowanie.opis.pad": "{opis} · gałka ustawia tempo",
+  "@glowny.sterowanie.opis.pad": {
+    "placeholders": {
+      "opis": {}
+    }
+  },
+  "glowny.sterowanie.opis.chodzenie": "{opis} · działa też w grze",
+  "@glowny.sterowanie.opis.chodzenie": {
+    "placeholders": {
+      "opis": {}
+    }
+  },
+  "glowny.podpowiedz.chodzenie": "Idź po bieżni, a postać pójdzie razem z Tobą: gra dostaje {klawisz_chodu}, a przy szybszym tempie {klawisz_biegu} + {klawisz_chodu}. Okno gry musi być na wierzchu.",
+  "@glowny.podpowiedz.chodzenie": {
+    "description": "Ostatnie zdanie to częsta przyczyna „postać nie idzie”.",
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "glowny.podpowiedz.chodzenie_proba": "Tryb próbny: gra nie dostaje klawiszy, więc postać stoi. Żeby szła, włącz Ustawienia > Gry i sterowanie > Sterowanie > Klawisze w grze.",
+  "@glowny.podpowiedz.chodzenie_proba": {
+    "description": "Nazwa opcji zgodna z `ustawienia.chodzenie.klawisze_w_grze`."
+  },
+  "glowny.podpowiedz.klawisze": "Trzymaj {klawisz_chodu}, a taśma przyspieszy. {klawisz_chodu} + {klawisz_biegu} to bieg. Puść klawisz, a taśma zwolni.",
+  "@glowny.podpowiedz.klawisze": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "glowny.podpowiedz.pad": "Wychyl lewą gałkę: im dalej, tym szybciej jedzie taśma. Stopnie ustawisz w Ustawienia > Gry i sterowanie > Sterowanie.",
+  "glowny.podpowiedz.trening": "Kliknij poziom albo użyj {klawisz_szybciej} i {klawisz_wolniej}. Gra nie dostaje klawiszy.",
+  "@glowny.podpowiedz.trening": {
+    "placeholders": {
+      "klawisz_szybciej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      },
+      "klawisz_wolniej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "glowny.osoby.lista": "Osoby na tym komputerze",
+  "@glowny.osoby.lista": {
+    "description": "Nazwa listy rozwijanej osób (czytnik ekranu)."
+  },
+  "glowny.sterowanie.lista": "Profile gier",
+  "@glowny.sterowanie.lista": {
+    "description": "Nazwa listy rozwijanej profili (czytnik ekranu)."
+  },
+  "glowny.sterowanie.tryby": "Tryb sterowania",
+  "@glowny.sterowanie.tryby": {
+    "description": "Nazwa grupy kafelków trybu (czytnik ekranu)."
+  },
+  "glowny.licznik.kadencja_krotko": "Kroki/min",
+  "@glowny.licznik.kadencja_krotko": {
+    "description": "Tytuł kafelka; pełna nazwa dla czytnika ekranu to `glowny.licznik.kadencja`."
+  },
+  "glowny.strefy.puszczona_krotko": "0%",
+  "@glowny.strefy.puszczona_krotko": {
+    "description": "Nazwa pierwszego żetonu trybu Pad przy 5 stopniach (krótsza niż „Gałka puszczona”)."
+  },
+  "glowny.wskaznik.chodzenie.proba_bieg": "Bieg · tryb próbny, gra nic nie dostaje",
+  "@glowny.wskaznik.chodzenie.proba_bieg": {
+    "description": "Wariant `glowny.wskaznik.chodzenie.proba` dla biegu."
+  },
+  "glowny.wskaznik.klawisze.stoi": "Bez klawisza · taśma stoi",
+  "@glowny.wskaznik.klawisze.stoi": {
+    "description": "Podpis wskaźnika przy „Taśma staje”."
+  },
+  "glowny.podpowiedz.klawisze_stop": "Trzymaj {klawisz_chodu}, a taśma ruszy. Puść, a stanie.",
+  "@glowny.podpowiedz.klawisze_stop": {
+    "description": "Podpowiedź karty sterowania przy „Taśma staje” (zamiast `glowny.podpowiedz.klawisze`).",
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  }
+}

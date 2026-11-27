@@ -121,10 +121,11 @@ pub enum SliceName {
     Report,
     Models,
     Bubble,
+    Language,
 }
 
 impl SliceName {
-    pub const ALL: [SliceName; 13] = [
+    pub const ALL: [SliceName; 14] = [
         SliceName::App,
         SliceName::Settings,
         SliceName::People,
@@ -138,6 +139,7 @@ impl SliceName {
         SliceName::Report,
         SliceName::Models,
         SliceName::Bubble,
+        SliceName::Language,
     ];
 }
 
@@ -473,10 +475,11 @@ pub struct RankView {
 
 impl From<&walklevel_core::levels::Rank> for RankView {
     fn from(r: &walklevel_core::levels::Rank) -> Self {
+        let key = |field: &str| format!("levels.rank.{}.{field}", r.level);
         Self {
             level: r.level,
-            name: r.name.clone(),
-            about: r.about.clone(),
+            name: crate::texts::level_text(&key("name"), &r.name),
+            about: crate::texts::level_text(&key("about"), &r.about),
         }
     }
 }

@@ -2,6 +2,9 @@
 // (docs/contract.md 7.5) - bez tego każde okno mogłoby wołać każdą komendę.
 const COMMANDS: &[&str] = &[
     "app_snapshot",
+    "language_pack",
+    "language_set",
+    "languages_refresh",
     "ui_ready",
     "app_quit",
     "window_show_main",

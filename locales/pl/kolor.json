@@ -1,0 +1,26 @@
+{
+  "@@locale": "pl",
+  "kolor.przycisk": "Kolor",
+  "@kolor.przycisk": {
+    "description": "Otwiera 20 kolorów."
+  },
+  "kolor.dostepnosc": "Kolor profilu: {kolor}",
+  "@kolor.dostepnosc": {
+    "placeholders": {
+      "kolor": {}
+    }
+  },
+  "kolor.probka": "Kolor {kolor}",
+  "@kolor.probka": {
+    "placeholders": {
+      "kolor": {}
+    }
+  },
+  "kolor.z_ikony": "· dobrany z ikony gry",
+  "kolor.recznie": "· wybrany ręcznie (z ikony: {kolor})",
+  "@kolor.recznie": {
+    "placeholders": {
+      "kolor": {}
+    }
+  }
+}

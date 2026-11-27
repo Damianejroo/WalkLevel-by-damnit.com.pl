@@ -156,3 +156,21 @@ fn a_failed_restore_opens_the_history_again() {
         "history must not stay closed until restart"
     );
 }
+
+#[test]
+fn language_slice_lists_what_is_on_this_computer() {
+    let t = test_app("language");
+    let v = serde_json::to_value(t.app.language_view()).expect("language slice");
+    let languages = v["languages"].as_array().expect("languages");
+    let availability = |code: &str| {
+        languages
+            .iter()
+            .find(|l| l["code"] == code)
+            .map(|l| l["availability"].clone())
+    };
+    // English is built in; this data folder has no Polish pack, so Polish is to download
+    assert_eq!(availability("en"), Some("built-in".into()));
+    assert_eq!(availability("pl"), Some("download".into()));
+    assert!(v["download"].is_null() && v["error"].is_null());
+    assert!(SliceName::ALL.contains(&SliceName::Language));
+}

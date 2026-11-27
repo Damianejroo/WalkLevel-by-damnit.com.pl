@@ -105,10 +105,19 @@ impl App {
                 "powiadomienie.osiagniecie.nad",
                 &[("rzadkosc", &texts::rarity_name(&a.rarity).to_uppercase())],
             ),
-            title: a.name.clone(),
+            title: texts::level_text(&format!("levels.achievement.{}.name", a.id), &a.name),
             line: texts::t(
                 "powiadomienie.osiagniecie.linia",
-                &[("xp", &texts::int(xp)), ("warunek", &a.condition)],
+                &[
+                    ("xp", &texts::int(xp)),
+                    (
+                        "warunek",
+                        &texts::level_text(
+                            &format!("levels.achievement.{}.condition", a.id),
+                            &a.condition,
+                        ),
+                    ),
+                ],
             ),
             color: texts::rarity_color(&a.rarity).into(),
             rarity: a.rarity.clone(),
@@ -126,7 +135,7 @@ impl App {
         PopupData {
             kicker: texts::t("powiadomienie.awans.nad", &vars),
             title: if new_rank {
-                status.rank.name.clone()
+                crate::views::RankView::from(&status.rank).name
             } else {
                 texts::t("powiadomienie.awans.tytul", &vars)
             },
@@ -187,10 +196,11 @@ impl App {
         let n = status.earned().len().to_string();
         let level = status.level.to_string();
         let km = texts::km(status.km);
+        let rank = crate::views::RankView::from(&status.rank).name;
         let vars = [
             ("liczba", n.as_str()),
             ("poziom", level.as_str()),
-            ("ranga", status.rank.name.as_str()),
+            ("ranga", rank.as_str()),
             ("km", km.as_str()),
         ];
         self.popups.push(PopupData {

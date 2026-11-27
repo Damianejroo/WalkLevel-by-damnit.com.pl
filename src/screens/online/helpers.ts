@@ -4,7 +4,7 @@
 import type * as K from '../../lib/contract';
 import { jestBledemKomendy } from '../../lib/api';
 import { t } from '../../lib/texts';
-import { liczba } from '../../lib/format';
+import { data as formatDaty, liczba } from '../../lib/format';
 
 /** Ranga dla poziomu: ostatnia z `level <= poziom` (rangi w definicjach rosnąco). */
 export function rangaPoziomu(defs: K.LevelDefinitions, poziom: number): K.Rank | null {
@@ -19,18 +19,15 @@ export function granicePoziomu(defs: K.LevelDefinitions, poziom: number): { od: 
   return { od, do: defs.levelsXp[poziom] ?? od };
 }
 
-const dwa = (n: number) => String(n).padStart(2, '0');
-
 /** „26.11.2026” z czasu UTC w sekundach (strefa komputera). */
 export function data(sekundy: number): string {
-  const d = new Date(sekundy * 1000);
-  return `${dwa(d.getDate())}.${dwa(d.getMonth() + 1)}.${d.getFullYear()}`;
+  return formatDaty(new Date(sekundy * 1000));
 }
 
 /** Wersja regulaminu „2026-11-01” -> „01.11.2026” (inne napisy bez zmian). */
 export function wersjaRegulaminu(wersja: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(wersja);
-  return m ? `${m[3]}.${m[2]}.${m[1]}` : wersja;
+  return m ? formatDaty(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : wersja;
 }
 
 /** „dziś”, „wczoraj”, „3 dni temu” - dni kalendarzowe. */

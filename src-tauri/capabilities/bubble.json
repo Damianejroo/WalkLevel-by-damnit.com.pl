@@ -17,6 +17,7 @@
     "allow-training-stop",
     "allow-device-belt-stop",
     "allow-app-snapshot",
+    "allow-language-pack",
     "allow-ui-ready",
     "allow-log-ui-error"
   ]

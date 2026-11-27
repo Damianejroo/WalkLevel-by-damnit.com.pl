@@ -1,0 +1,46 @@
+{
+  "@@locale": "pl",
+  "dziennik.tytul": "Dziennik zdarzeń",
+  "dziennik.opis": "Gdy coś nie działa, najprościej użyć Ustawienia > Pomoc i diagnostyka > Zgłoś problem. Raport diagnostyczny pomaga, gdy bieżnia się nie łączy.",
+  "@dziennik.opis": {
+    "description": "Zamiast „wyślij plik z folderu logs” (nie wiadomo, dokąd)."
+  },
+  "dziennik.dostepnosc": "Dziennik zdarzeń",
+  "dziennik.folder": "Otwórz folder dziennika",
+  "dziennik.raport": "Zapisz raport diagnostyczny",
+  "dziennik.raport_trwa": "Zbieram raport, to potrwa ok. 30 s…",
+  "dziennik.raport_gotowy": "Raport zapisany. Dołączy się sam do następnego zgłoszenia.",
+  "@dziennik.raport_gotowy": {
+    "description": "Dziś „Raport: Raport gotowy” (zdublowane słowo)."
+  },
+  "dziennik.raport_blad": "Nie udało się zebrać raportu. Sprawdź, czy Bluetooth jest włączony.",
+  "dziennik.raport_brak_biezni": "Raport nie znalazł bieżni. Włącz ją i zamknij jej aplikację w telefonie.",
+  "@dziennik.raport_brak_biezni": {
+    "description": "Ostatni wiersz raportu widoczny jako stan."
+  },
+  "dziennik.podpis": "Na żywo · {liczba} {liczba, plural, one {wpis} few {wpisy} many {wpisów} other {wpisy}}",
+  "@dziennik.podpis": {
+    "description": "Podpis tytułu strony; najwyżej 500 ostatnich wpisów.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "dziennik.pusty": "Dziennik jest pusty. Wpisy pojawią się tutaj, gdy coś się wydarzy.",
+  "@dziennik.pusty": {
+    "description": "W miejscu listy wpisów."
+  },
+  "dziennik.kopiuj": "Kopiuj dziennik",
+  "@dziennik.kopiuj": {
+    "description": "Przycisk: wszystkie wpisy z listy do schowka."
+  },
+  "dziennik.skopiowano": "Skopiowano dziennik. Możesz go wkleić do wiadomości.",
+  "@dziennik.skopiowano": {
+    "description": "Komunikat na dole okna."
+  },
+  "dziennik.kopiuj_blad": "Nie udało się skopiować dziennika. Zaznacz wpisy myszą i naciśnij Ctrl+C.",
+  "@dziennik.kopiuj_blad": {
+    "description": "Komunikat na dole okna, gdy schowek jest niedostępny."
+  }
+}

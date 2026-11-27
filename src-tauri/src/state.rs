@@ -259,6 +259,7 @@ pub struct App {
     pub history_rev: u64,
     pub dirty: BTreeSet<SliceName>,
     pub out: Vec<Wyjscie>,
+    pub language: crate::language::LanguageState,
 }
 
 // --- ustawienia domyślne i normalizacja (app.py defaults_from / normalize) -----------------
@@ -347,6 +348,8 @@ pub fn defaults_from(config: &Config) -> Map<String, Value> {
     put("friends_panel_side", json!("right"));
     put("friends_panel_collapsed", json!(false));
     put("friends_notify", json!(false));
+    put(crate::language::LANGUAGE_KEY, json!(""));
+    put(crate::language::INSTALLER_ID_KEY, json!(""));
     normalize(d)
 }
 
@@ -748,6 +751,7 @@ impl App {
             SliceName::Report => serde_json::to_value(&self.report),
             SliceName::Models => serde_json::to_value(&self.models),
             SliceName::Bubble => serde_json::to_value(self.bubble_view()),
+            SliceName::Language => serde_json::to_value(self.language_view()),
         };
         v.unwrap_or(Value::Null)
     }
@@ -1363,9 +1367,13 @@ impl App {
             .achievements
             .iter()
             .map(|a| {
+                let text = |field: &str, own: &str| {
+                    texts::level_text(&format!("levels.achievement.{}.{field}", a.id), own)
+                };
                 json!({
-                    "id": a.id, "kind": a.kind, "rarity": a.rarity, "mark": a.mark, "name": a.name,
-                    "flavor": a.flavor, "condition": a.condition,
+                    "id": a.id, "kind": a.kind, "rarity": a.rarity, "mark": a.mark,
+                    "name": text("name", &a.name), "flavor": text("flavor", &a.flavor),
+                    "condition": text("condition", &a.condition),
                     "km": if a.kind == "dystans" { a.km() } else { None },
                     "params": a.params,
                 })
@@ -1382,7 +1390,10 @@ impl App {
             "runAltColor": palette::run_alt().name,
             "glyphs": glyphs,
             "defaultGlyph": store::DEFAULT_GLYPH,
-            "modeNames": {"keyboard": "Klawisze", "gamepad": "Pad", "treadmill": "Chodzenie", "training": "Trening"},
+            "modeNames": {
+                "keyboard": texts::t("tryb.klawisze.nazwa", &[]), "gamepad": texts::t("tryb.pad.nazwa", &[]),
+                "treadmill": texts::t("tryb.chodzenie.nazwa", &[]), "training": texts::t("tryb.trening.nazwa", &[]),
+            },
             "maxSpeed": self.max_speed(),
             "hysteresis": 0.6,
             "thresholdGap": 0.8,
@@ -1405,7 +1416,7 @@ impl App {
                 "achievements": achievements,
                 "rules": {"restDaysPer7": 1, "minKmPerStreakDay": streak_km},
             },
-            "driverNames": {"kingsmith": "KingSmith", "ftms": "Bluetooth FTMS"},
+            "driverNames": {"kingsmith": texts::t("modele.rodzaj.kingsmith", &[]), "ftms": texts::t("modele.rodzaj.ftms", &[])},
         })
     }
 }

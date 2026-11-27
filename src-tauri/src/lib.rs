@@ -8,6 +8,7 @@ mod actions;
 mod app_tests;
 mod commands;
 mod control_loop;
+mod language;
 mod levels;
 mod people;
 mod popups;
@@ -196,6 +197,7 @@ fn build_app(
         history_rev: 0,
         dirty: Default::default(),
         out: Vec::new(),
+        language: Default::default(),
     };
     let (walk, run) = app.profile_keys();
     app.walk_key = walk;
@@ -382,7 +384,8 @@ pub fn run() {
                     return Ok(());
                 }
             };
-            let app = build_app(paths.clone(), config, clock.clone(), store);
+            let mut app = build_app(paths.clone(), config, clock.clone(), store);
+            let download_language = app.start_language();
             walklevel_core::logs::set_detailed(app.b("detailed_logs"));
             let konto_ctx = account::KontoCtx::open(&account_url, &data);
             let sink = Box::new(window::TauriSink(handle.clone()));
@@ -398,6 +401,11 @@ pub fn run() {
             core.with(|a| a.connect_source(true));
             account::start(&core);
             control_loop::spawn(core.clone());
+            if download_language {
+                let c = core.clone();
+                let code = lock(&c.0.app).language.chosen.clone();
+                std::thread::spawn(move || language::download(&c, &code, false));
+            }
             let c = core.clone();
             std::thread::spawn(move || {
                 let _ = actions::update_check(&c, false); // tylko informacja, bez instalowania
@@ -440,6 +448,9 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::app_snapshot,
+            language::language_pack,
+            language::language_set,
+            language::languages_refresh,
             commands::ui_ready,
             commands::app_quit,
             commands::window_show_main,

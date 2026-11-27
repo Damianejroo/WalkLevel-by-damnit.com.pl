@@ -1,0 +1,48 @@
+{
+  "@@locale": "pl",
+  "online.tytul": "Konto online · {pseudonim}",
+  "@online.tytul": {
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "online.tytul_ogolny": "Konto online",
+  "online.zakladka.znajomi": "Znajomi",
+  "online.zakladka.ranking": "Ranking",
+  "online.zakladka.osoby": "Osoby z kontem",
+  "@online.zakladka.osoby": {
+    "description": "„Osoby” myliło się z osobami na komputerze."
+  },
+  "online.zakladka.konto": "Moje konto",
+  "online.laduje": "Wczytuję…",
+  "online.blad_ladowania": "(0.6.2: zastąpione kartą błędu `online.blad.*`)",
+  "@online.blad_ladowania": {
+    "description": "Nie udało się wczytać danych. {powod}"
+  },
+  "online.ponow": "Spróbuj ponownie",
+  "online.pokaz_haslo": "Pokaż hasło",
+  "@online.pokaz_haslo": {
+    "description": "Przycisk z okiem w polu hasła (logowanie, rejestracja, Moje konto)."
+  },
+  "online.poziom_ukryty": "Poziom ukryty",
+  "@online.poziom_ukryty": {
+    "description": "Podpowiedź przy inicjale nicku zamiast odznaki poziomu (znajomi, ranking, osoby z kontem) i wiersz w profilu osoby: serwer nie podaje poziomu bez zgody tej osoby."
+  },
+  "online.blad.znajomi": "Nie udało się wczytać znajomych",
+  "@online.blad.znajomi": {
+    "description": "Tytuł karty błędu (zakładka Znajomi, panel znajomych)."
+  },
+  "online.blad.ranking": "Nie udało się wczytać rankingu",
+  "online.blad.osoby": "Nie udało się wczytać listy osób z kontem",
+  "online.ponowi": "Kolejna próba za {sekundy} s",
+  "@online.ponowi": {
+    "description": "Obok „Spróbuj ponownie”, gdy aplikacja ponawia sama.",
+    "placeholders": {
+      "sekundy": {
+        "description": "liczby czasu"
+      }
+    }
+  }
+}

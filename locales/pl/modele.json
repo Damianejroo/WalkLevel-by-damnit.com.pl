@@ -1,0 +1,145 @@
+{
+  "@@locale": "pl",
+  "modele.tytul": "Obsługiwane bieżnie",
+  "modele.opis": "WalkLevel rozpoznaje bieżnię po nazwie Bluetooth. Profil bieżni opisuje zakres prędkości i czas startu. Nowy model działa od razu po pobraniu jego profilu.",
+  "@modele.opis": {
+    "description": "Zdanie „nie program” to wiedza dla programisty."
+  },
+  "modele.rodzaj.kingsmith": "KingSmith",
+  "modele.rodzaj.ftms": "Standard Bluetooth FTMS",
+  "modele.wbudowany": "wbudowany",
+  "modele.zakres": "{min_kmh}–{max_kmh} km/h",
+  "@modele.zakres": {
+    "placeholders": {
+      "min_kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "max_kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "modele.marka_reszta": "pozostałe modele marki",
+  "modele.rozruch": "start ok. {sekundy} s",
+  "@modele.rozruch": {
+    "placeholders": {
+      "sekundy": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "modele.nazwy": "nazwy Bluetooth: {lista}",
+  "@modele.nazwy": {
+    "placeholders": {
+      "lista": {}
+    }
+  },
+  "modele.twoja": "{model} · Twoja bieżnia",
+  "@modele.twoja": {
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "modele.usun": "Usuń",
+  "modele.usun_dostepnosc": "Usuń profil bieżni {model}",
+  "@modele.usun_dostepnosc": {
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "modele.dodaj": "Dodaj z pliku…",
+  "modele.dodaj_podpowiedz": "Plik profilu bieżni od autora albo innej osoby",
+  "modele.dodaj_okno": "Dodaj profil bieżni",
+  "@modele.dodaj_okno": {
+    "description": "Tytuł okna systemowego."
+  },
+  "modele.dodaj_filtr": "Profil bieżni (*.json)",
+  "modele.sprawdz": "Sprawdź nowe modele",
+  "modele.sprawdzam": "Sprawdzam listę modeli…",
+  "modele.blad": "Nie udało się pobrać listy modeli. {powod}",
+  "@modele.blad": {
+    "description": "`{powod}` z `modele.powod.*`.",
+    "placeholders": {
+      "powod": {}
+    }
+  },
+  "modele.nowe": "Nowe modele: {lista}.",
+  "@modele.nowe": {
+    "placeholders": {
+      "lista": {}
+    }
+  },
+  "modele.zaktualizowane": "Zaktualizowane: {lista}.",
+  "@modele.zaktualizowane": {
+    "placeholders": {
+      "lista": {}
+    }
+  },
+  "modele.odrzucone": "Pominięte, bo plik był uszkodzony: {liczba}.",
+  "@modele.odrzucone": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "modele.aktualne": "Masz wszystkie znane modele.",
+  "modele.dodano": "Dodano profil bieżni {model}.",
+  "@modele.dodano": {
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "modele.usunieto": "Usunięto profil bieżni.",
+  "modele.powod.adres": "Pobieranie przerwane dla bezpieczeństwa (nieznany adres).",
+  "modele.powod.przekierowanie": "Pobieranie przerwane dla bezpieczeństwa (nieznany adres).",
+  "@modele.powod.przekierowanie": {
+    "description": "Jeden tekst dla obu przypadków."
+  },
+  "modele.powod.brak_listy": "Lista modeli jest jeszcze niedostępna. Spróbuj po aktualizacji WalkLevel.",
+  "modele.powod.kod": "Serwer nie odpowiada poprawnie. Spróbuj później. (kod {kod})",
+  "@modele.powod.kod": {
+    "placeholders": {
+      "kod": {
+        "description": "kod zaproszenia, numer zgłoszenia"
+      }
+    }
+  },
+  "modele.powod.internet": "Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie.",
+  "modele.powod.za_duzy": "To nie jest profil bieżni: plik jest za duży.",
+  "modele.powod.format": "Ta lista modeli wymaga nowszej wersji. Zaktualizuj WalkLevel.",
+  "modele.powod.zly_wpis": "Lista modeli jest uszkodzona. Spróbuj później.",
+  "modele.plik.nieczytelny": "Nie da się odczytać tego pliku.",
+  "@modele.plik.nieczytelny": {
+    "description": "Dodawanie z pliku."
+  },
+  "modele.plik.za_duzy": "To nie jest profil bieżni: plik jest za duży.",
+  "modele.plik.zly": "To nie jest poprawny profil bieżni. ({szczegoly})",
+  "@modele.plik.zly": {
+    "description": "Szczegóły z walidacji (`sterowniki/profile.py`) zostają techniczne, w nawiasie.",
+    "placeholders": {
+      "szczegoly": {
+        "description": "techniczny dopisek z błędu (zawsze na końcu, w nawiasie)"
+      }
+    }
+  },
+  "modele.dodatkowy": "dodatkowy",
+  "@modele.dodatkowy": {
+    "description": "Profil bieżni spoza aplikacji (pobrany albo dodany z pliku), można go usunąć."
+  },
+  "modele.blad_folder": "Nie da się zapisać profilu bieżni: brak folderu danych.",
+  "modele.blad_zapisu": "Nie da się zapisać profilu bieżni. ({szczegoly})",
+  "@modele.blad_zapisu": {
+    "placeholders": {
+      "szczegoly": {
+        "description": "techniczny dopisek z błędu (zawsze na końcu, w nawiasie)"
+      }
+    }
+  }
+}

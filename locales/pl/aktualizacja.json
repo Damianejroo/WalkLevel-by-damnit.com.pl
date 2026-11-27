@@ -1,0 +1,87 @@
+{
+  "@@locale": "pl",
+  "aktualizacja.sprawdzam": "Sprawdzam aktualizacje…",
+  "aktualizacja.pobieram": "Pobieram wersję {nowa_wersja}: {procent}%",
+  "@aktualizacja.pobieram": {
+    "placeholders": {
+      "nowa_wersja": {
+        "description": "numer wersji aplikacji"
+      },
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      }
+    }
+  },
+  "aktualizacja.dostepna_krotko": "Dostępna wersja {nowa_wersja}",
+  "@aktualizacja.dostepna_krotko": {
+    "description": "Pod nazwą na pasku.",
+    "placeholders": {
+      "nowa_wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "aktualizacja.dostepna": "Jest nowa wersja {nowa_wersja}. Kliknij Aktualizuj na górnym pasku.",
+  "@aktualizacja.dostepna": {
+    "description": "Ikona pobierania ma podpis „Aktualizuj”.",
+    "placeholders": {
+      "nowa_wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "aktualizacja.najnowsza_krotko": "Masz najnowszą wersję",
+  "aktualizacja.najnowsza": "Masz najnowszą wersję ({wersja}).",
+  "@aktualizacja.najnowsza": {
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "aktualizacja.nieudana_krotko": "Aktualizacja się nie udała",
+  "@aktualizacja.nieudana_krotko": {
+    "description": "Pod nazwą na pasku; pełny powód w Ustawienia > Pomoc i diagnostyka."
+  },
+  "aktualizacja.instaluje": "Instaluję wersję {nowa_wersja}. WalkLevel za chwilę uruchomi się ponownie.",
+  "@aktualizacja.instaluje": {
+    "placeholders": {
+      "nowa_wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "aktualizacja.instalator_blad": "Nie udało się uruchomić instalatora. Pobierz go ze strony autora.",
+  "aktualizacja.powod.adres": "Pobieranie przerwane dla bezpieczeństwa (nieznany adres).",
+  "aktualizacja.powod.numer": "Nowa wersja jest źle opisana na serwerze. Spróbuj później.",
+  "aktualizacja.powod.suma_brak": "Nowej wersji nie da się sprawdzić, więc nie zostanie zainstalowana. Spróbuj później.",
+  "aktualizacja.powod.brak_instalatora": "Nowa wersja nie ma jeszcze instalatora. Spróbuj później.",
+  "aktualizacja.powod.brak_wydan": "Brak wersji do pobrania.",
+  "aktualizacja.powod.kod": "Serwer aktualizacji nie odpowiada poprawnie. Spróbuj później. (kod {kod})",
+  "@aktualizacja.powod.kod": {
+    "placeholders": {
+      "kod": {
+        "description": "kod zaproszenia, numer zgłoszenia"
+      }
+    }
+  },
+  "aktualizacja.powod.internet": "Nie udało się sprawdzić aktualizacji. Sprawdź połączenie z internetem.",
+  "aktualizacja.powod.odpowiedz": "Serwer aktualizacji odpowiedział niezrozumiale. Spróbuj później.",
+  "aktualizacja.powod.za_duzy": "Pobrany plik się nie zgadza, więc został odrzucony. Spróbuj ponownie.",
+  "@aktualizacja.powod.za_duzy": {
+    "description": "Oba przypadki tym samym tekstem."
+  },
+  "aktualizacja.powod.suma": "Pobrany plik się nie zgadza, więc został odrzucony. Spróbuj ponownie.",
+  "aktualizacja.powod.przerwane": "Pobieranie zostało przerwane. Spróbuj ponownie.",
+  "aktualizacja.powod.system": "Aktualizacja działa tylko w Windows.",
+  "aktualizacja.zaktualizowano": "Zaktualizowano WalkLevel do wersji {nowa_wersja}.",
+  "@aktualizacja.zaktualizowano": {
+    "description": "Komunikat po pierwszym uruchomieniu nowej wersji.",
+    "placeholders": {
+      "nowa_wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "aktualizacja.trwa": "Aktualizacja już trwa."
+}

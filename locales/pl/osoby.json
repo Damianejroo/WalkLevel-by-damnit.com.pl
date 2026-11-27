@@ -1,0 +1,18 @@
+{
+  "@@locale": "pl",
+  "osoby.nieczytelne": "Nie da się odczytać pliku z osobami i ustawieniami ({powod}). Kopia pliku jest w {kopia}. WalkLevel się zamknie, żeby go nie nadpisać. Uruchom go ponownie za chwilę.",
+  "@osoby.nieczytelne": {
+    "description": "Okno błędu przy starcie (0.6.3). Wcześniej pokazywał się kreator, który nadpisywał plik.",
+    "placeholders": {
+      "powod": {},
+      "kopia": {}
+    }
+  },
+  "osoby.nieczytelne_bez_kopii": "Nie da się odczytać pliku z osobami i ustawieniami ({powod}). WalkLevel się zamknie, żeby go nie nadpisać. Uruchom go ponownie za chwilę. Jeśli to nie pomoże, przywróć dane z kopii.",
+  "@osoby.nieczytelne_bez_kopii": {
+    "description": "Jw., gdy nie udało się też zrobić kopii pliku.",
+    "placeholders": {
+      "powod": {}
+    }
+  }
+}

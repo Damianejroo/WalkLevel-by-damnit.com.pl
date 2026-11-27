@@ -1,0 +1,50 @@
+{
+  "@@locale": "pl",
+  "osoby_online.szukaj_pole": "Szukaj po pseudonimie",
+  "osoby_online.szukaj": "Szukaj",
+  "osoby_online.tytul": "Osoby z kontem",
+  "osoby_online.poprzednie": "Poprzednia strona",
+  "osoby_online.nastepne": "Następna strona",
+  "osoby_online.strona": "strona {liczba}",
+  "@osoby_online.strona": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "osoby_online.pusto": "Nie ma nikogo o takim pseudonimie. Sprawdź pisownię.",
+  "@osoby_online.pusto": {
+    "description": "Wariant bez wyszukiwania: „Na liście nie ma jeszcze nikogo.” (`osoby_online.pusto_lista`)."
+  },
+  "osoby_online.wiersz": "w tym tygodniu: {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {liczba}. miejsce",
+  "@osoby_online.wiersz": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "osoby_online.zapros": "Zaproś",
+  "osoby_online.opis": "Na liście są tylko osoby, które pokazują swój profil wszystkim. Adresów e-mail nikt nie widzi.",
+  "osoby_online.pusto_lista": "Na liście nie ma jeszcze nikogo.",
+  "@osoby_online.pusto_lista": {
+    "description": "Lista osób bez wyszukiwania."
+  },
+  "osoby_online.wiersz_bez_miejsca": "w tym tygodniu: {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@osoby_online.wiersz_bez_miejsca": {
+    "description": "Osoba bez miejsca w rankingu tygodnia.",
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "osoby_online.wyslano": "Wysłano",
+  "@osoby_online.wyslano": {
+    "description": "Napis przycisku „Zaproś” po wysłaniu zaproszenia (lista osób, profil)."
+  }
+}

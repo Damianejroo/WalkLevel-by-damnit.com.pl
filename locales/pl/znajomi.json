@@ -1,0 +1,116 @@
+{
+  "@@locale": "pl",
+  "znajomi.moj_profil": "Mój profil oczami innych",
+  "@znajomi.moj_profil": {
+    "description": "Przycisk i podpowiedź."
+  },
+  "znajomi.moje_wyniki": "Moje wyniki online · ten tydzień",
+  "znajomi.moje_wyniki_wiersz": "{kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km · {czas}",
+  "@znajomi.moje_wyniki_wiersz": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "km": {
+        "description": "dystans w km"
+      },
+      "czas": {
+        "description": "czas ruchu sformatowany („1 h 05 min”, „12 min”)"
+      }
+    }
+  },
+  "znajomi.podzial_pokaz": "Pokaż podział na gry",
+  "znajomi.podzial_ukryj": "Ukryj podział na gry",
+  "znajomi.zaproszenia_do_mnie": "Zaproszenia do Ciebie",
+  "znajomi.odrzuc": "Odrzuć",
+  "znajomi.przyjmij": "Przyjmij",
+  "znajomi.lista": "Znajomi",
+  "znajomi.pusto": "Lista znajomych jest pusta. Zaproś kogoś po pseudonimie albo daj kod na nowe konto komuś, kto konta nie ma.",
+  "znajomi.idzie": "idzie teraz {kmh} km/h · {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@znajomi.idzie": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "znajomi.tydzien": "w tym tygodniu: {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {czas}",
+  "@znajomi.tydzien": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "czas": {
+        "description": "czas ruchu sformatowany („1 h 05 min”, „12 min”)"
+      }
+    }
+  },
+  "znajomi.usun": "Usuń ze znajomych",
+  "@znajomi.usun": {
+    "description": "Przycisk z przytrzymaniem."
+  },
+  "znajomi.dodaj": "Dodaj znajomego",
+  "znajomi.dodaj_opis": "Wpisz pseudonim osoby, która ma konto. Ta osoba musi przyjąć zaproszenie.",
+  "znajomi.dodaj_pole": "Pseudonim",
+  "znajomi.zapros": "Zaproś",
+  "znajomi.wyslane": "Wysłane zaproszenia, czekają na odpowiedź",
+  "znajomi.wycofaj": "Wycofaj",
+  "znajomi.zaproszono": "Wysłano zaproszenie do {pseudonim}.",
+  "@znajomi.zaproszono": {
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "znajomi.przyjeto": "{pseudonim} jest teraz na liście Twoich znajomych.",
+  "@znajomi.przyjeto": {
+    "description": "Bez rodzaju.",
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "znajomi.odpowiedziano": "Zapisano odpowiedź.",
+  "@znajomi.odpowiedziano": {
+    "description": "„Gotowe.” po przyjęciu albo odrzuceniu niczego nie mówiło. Lepiej osobno: „Przyjęto zaproszenie.” / „Odrzucono zaproszenie.”"
+  },
+  "znajomi.usunieto": "Usunięto ze znajomych.",
+  "znajomi.kod.tytul": "Zaproś do WalkLevel",
+  "znajomi.kod.opis": "Dla kogoś bez konta: kod do wpisania przy zakładaniu konta. Ta osoba od razu trafi na Twoją listę znajomych.",
+  "@znajomi.kod.opis": {
+    "description": "Bez rodzaju."
+  },
+  "znajomi.kod.pokaz": "Pokaż kod na nowe konto",
+  "znajomi.kod.kod": "Kod na nowe konto: {kod}",
+  "@znajomi.kod.kod": {
+    "placeholders": {
+      "kod": {
+        "description": "kod zaproszenia, numer zgłoszenia"
+      }
+    }
+  },
+  "znajomi.kod.zasady": "Kod działa raz, przez 14 dni.",
+  "@znajomi.kod.zasady": {
+    "description": "Druga część jest już w opisie."
+  },
+  "znajomi.kod.kolejny": "Nowy kod",
+  "znajomi.kod.kopiuj": "Kopiuj kod",
+  "@znajomi.kod.kopiuj": {
+    "description": "Przycisk; po kliknięciu „Skopiowano kod.” (`znajomi.kod.skopiowano`)."
+  },
+  "znajomi.kod.skopiowano": "Skopiowano kod.",
+  "@znajomi.kod.skopiowano": {
+    "description": "Toast po „Kopiuj kod”."
+  },
+  "znajomi.przyjeto_zaproszenie": "Przyjęto zaproszenie.",
+  "@znajomi.przyjeto_zaproszenie": {
+    "description": "Za `znajomi.odpowiedziano` (uwaga tam)."
+  },
+  "znajomi.odrzucono_zaproszenie": "Odrzucono zaproszenie.",
+  "znajomi.wycofano": "Wycofano zaproszenie."
+}

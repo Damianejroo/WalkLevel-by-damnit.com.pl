@@ -1,59 +1,25 @@
-// Teksty interfejsu. Jedyne źródło: docs/texts.md -> src/lib/texts-dictionary.ts (`npm run texts`).
+// Teksty interfejsu w bieżącym języku (docs/i18n.md). Źródło kluczy: docs/texts.md
+// (`npm run texts`), komunikaty w ICU MessageFormat, silnik: src/lib/i18n.svelte.ts.
 // Użycie: t('glowny.status.polaczono.tytul', { model: 'KingSmith X21' })
 //         t('glowny.osoby.dzis', { kroki: 1234 })  ->  „dziś 1 234 kroki”
-import { SLOWNIK } from './texts-dictionary';
-import { liczba } from './format';
+import { isTextKey, translate, type TextKey, type Values } from './i18n.svelte';
 
-export type Klucz = keyof typeof SLOWNIK;
-export type Zmienne = Record<string, string | number>;
+export type Klucz = TextKey;
+export type Zmienne = Values;
 
 /** Czy napis jest kluczem słownika (dla kluczy składanych w locie). */
 export function jestKlucz(k: string): k is Klucz {
-  return Object.hasOwn(SLOWNIK, k);
-}
-
-/** Odmiana po liczbie: 1 -> f1; końcówka 2-4 (bez 12-14) -> f2; reszta -> f5. Ułamki -> f2 („2,5 kroku”). */
-export function odmiana(n: number, f1: string, f2: string, f5: string): string {
-  if (!Number.isInteger(n)) return f2;
-  const a = Math.abs(n);
-  if (a === 1) return f1;
-  const d = a % 10;
-  const s = a % 100;
-  return d >= 2 && d <= 4 && (s < 12 || s > 14) ? f2 : f5;
-}
-
-/** Wartość liczbowa zmiennej (liczba albo już sformatowany napis „12 345”, „2,5”). */
-function wartosc(v: string | number | undefined): number | null {
-  if (typeof v === 'number') return v;
-  if (typeof v !== 'string') return null;
-  const n = Number(v.replace(/[\s  ]/g, '').replace(',', '.'));
-  return Number.isFinite(n) ? n : null;
+  return isTextKey(k);
 }
 
 /**
- * Tekst ze słownika z podstawionymi zmiennymi.
- * - `{nazwa}` - wartość; liczby całkowite formatowane z odstępem tysięcy, ułamki z jednym
- *   miejscem po przecinku (inną dokładność podaj jako gotowy napis: `liczba(km, 2)`),
- * - `{nazwa:f1/f2/f5}` - odmiana według wartości zmiennej `nazwa`.
+ * Tekst ze słownika z podstawionymi zmiennymi: `{nazwa}` - wartość (liczby całkowite
+ * z separatorem tysięcy języka, ułamki z jednym miejscem; inną dokładność podaj jako gotowy
+ * napis: `liczba(km, 2)`), `{nazwa, plural, ...}` - forma według reguł CLDR języka.
  * Brak zmiennej zostawia `{nazwa}` w tekście (widać to od razu na ekranie).
  */
 export function t(klucz: Klucz, zmienne: Zmienne = {}): string {
-  const wzor: string | undefined = SLOWNIK[klucz];
-  if (wzor === undefined) {
-    console.error(`Brak tekstu „${klucz}” w docs/texts.md`);
-    return klucz;
-  }
-  return wzor
-    .replace(/\{([a-z_0-9]+):([^/{}]*)\/([^/{}]*)\/([^/{}]*)\}/g, (cale, nazwa: string, f1: string, f2: string, f5: string) => {
-      const n = wartosc(zmienne[nazwa]);
-      return n === null ? cale : odmiana(n, f1, f2, f5);
-    })
-    .replace(/\{([a-z_0-9]+)\}/g, (cale, nazwa: string) => {
-      const v = zmienne[nazwa];
-      if (v === undefined) return cale;
-      if (typeof v === 'number') return liczba(v, Number.isInteger(v) ? 0 : 1);
-      return v;
-    });
+  return translate(klucz, zmienne);
 }
 
 /** Tekst dzielony na części „ / ” (np. tytuł / opis kafelka, warianty „jak Windows / jasny / ciemny”). */

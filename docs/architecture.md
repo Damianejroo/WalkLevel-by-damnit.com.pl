@@ -4,8 +4,9 @@ English · [Polski](architecture.pl.md)
 
 WalkLevel is a Windows app: walking on a treadmill controls a character in a game, with levels,
 a distance trail and an optional online account. Since 0.6.0 it is built with Tauri 2, Svelte 5
-and Rust, and the whole project lives in the repository root. User-facing texts are in Polish,
-with full diacritics. The tagline stays: „Chodzisz w realu, idziesz w grze”.
+and Rust, and the whole project lives in the repository root. User-facing texts are in English and
+Polish, more languages come as data packs ([docs/i18n.md](i18n.md)); Polish has full diacritics.
+The tagline stays: „Chodzisz w realu, idziesz w grze”.
 
 ## Project layout
 
@@ -14,8 +15,9 @@ with full diacritics. The tagline stays: „Chodzisz w realu, idziesz w grze”.
 | `crates/core` | `walklevel-core`: all logic without UI (treadmill drivers, control, history, people and profiles, levels, online account, backups, reports, updates). It does not depend on Tauri. Core tests live here. |
 | `src-tauri` | Glue only: commands, events, windows. No business logic. |
 | `src` | Svelte 5 UI. One window with fixed screens driven by state; screens are mounted once and then only hidden, not rebuilt. |
-| `docs` | `contract.md` (types and commands), `design.md` (design tokens and components), `texts.md` (the single source of UI texts), `sync.md` (sync with the account server), `analysis-*.md` (analyses); `docs/readme/` holds the README screenshots. |
-| `tests-ui` | View test and the text dictionary generator. |
+| `docs` | `contract.md` (types and commands), `design.md` (design tokens and components), `texts.md` (the single source of keys and Polish texts), `i18n.md` (languages and translations), `sync.md` (sync with the account server), `analysis-*.md` (analyses); `docs/readme/` holds the README screenshots. |
+| `locales` | Language packs: `languages.json` (the list of languages), `pl/` generated from `docs/texts.md`, other languages translated by hand ([docs/i18n.md](i18n.md)). |
+| `tests-ui` | View test and the language pack generator. |
 | `packaging` | Icon, installer images and the Inno Setup script. |
 | `tools` | Helper scripts (definitions file for the account server). |
 
@@ -50,7 +52,7 @@ Do not mix these with older APIs; many examples online are written for earlier v
   only renders them. Treadmill telemetry is a separate event, `wl:telemetria` (10-20 Hz; the
   control loop runs every 50 ms). Other events: `wl:komunikat` (toasts), `wl:log`,
   `wl:nawigacja`, `wl:popupy`, `wl:panel-okno`.
-- Command errors: the error type implements `Serialize` and carries a Polish message for the
+- Command errors: the error type implements `Serialize` and carries a message in the current language for the
   user.
 - Async commands: no `MutexGuard` held across `.await`; arguments are owned (`String`), not
   borrowed.

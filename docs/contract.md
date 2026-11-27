@@ -1957,11 +1957,18 @@ Token nigdy nie trafia do plików, kopii danych ani logów; w żądaniach tylko 
 ## 9. Teksty liczone przez rdzeń
 
 Brzmienie: wyłącznie `docs/texts.md` (kolumna „Nowy tekst”). Rdzeń bierze teksty po kluczu z
-tego samego słownika co interfejs (`walklevel_core::texts::t(klucz, zmienne)` czyta
-`src/lib/texts-dictionary.ts`, generowany przez `npm run texts`); test
-`teksty::tests::every_used_key_exists` pilnuje, że każdy użyty w Rust klucz istnieje. Tu jest
-tylko logika: który klucz kiedy. Liczby: `{kmh}` z jednym miejscem po przecinku („2,5”, „6,0”),
-tysiące z wąską twardą spacją. UI tylko wyświetla gotowe teksty.
+tych samych pakietów co interfejs (`walklevel_core::texts::t(klucz, zmienne)`: pakiety języka
+na ekranie, potem `src/lib/texts-built-in.json`, oba z `npm run texts`, docs/i18n.pl.md); test
+`texts::tests::every_used_key_exists` pilnuje, że każdy użyty w Rust klucz istnieje. Tu jest
+tylko logika: który klucz kiedy. Liczby według języka (`texts::number`): `{kmh}` z jednym
+miejscem po przecinku („2,5”, „6,0”; po angielsku „2.5”), tysiące po polsku z wąską twardą
+spacją. UI tylko wyświetla gotowe teksty.
+
+Język (0.6.4): wycinek `language` (`LanguageView` w src/lib/contract.ts), komendy
+`language_pack` (pakiety języka na ekranie dla okna), `language_set(code)` (wybór; brakujący
+pakiet rdzeń pobiera, postęp w wycinku) i `languages_refresh` (języki z repozytorium). Po zmianie
+języka rdzeń oznacza wszystkie wycinki jako zmienione, a okna wczytują pakiety i dane stałe na
+nowo.
 
 ### 9.1 Karta statusu bieżni (`device.status`)
 

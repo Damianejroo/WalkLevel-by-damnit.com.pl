@@ -1,0 +1,91 @@
+{
+  "@@locale": "pl",
+  "klawiatura.strzalka_w_gore": "Strzałka w górę",
+  "@klawiatura.strzalka_w_gore": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.strzalka_w_dol": "Strzałka w dół",
+  "@klawiatura.strzalka_w_dol": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.strzalka_w_lewo": "Strzałka w lewo",
+  "@klawiatura.strzalka_w_lewo": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.strzalka_w_prawo": "Strzałka w prawo",
+  "@klawiatura.strzalka_w_prawo": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.shift": "Shift",
+  "@klawiatura.shift": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.prawy_shift": "Prawy Shift",
+  "@klawiatura.prawy_shift": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.ctrl": "Ctrl",
+  "@klawiatura.ctrl": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.prawy_ctrl": "Prawy Ctrl",
+  "@klawiatura.prawy_ctrl": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.alt": "Alt",
+  "@klawiatura.alt": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.prawy_alt": "Prawy Alt",
+  "@klawiatura.prawy_alt": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.spacja": "Spacja",
+  "@klawiatura.spacja": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.tab": "Tab",
+  "@klawiatura.tab": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.caps_lock": "Caps Lock",
+  "@klawiatura.caps_lock": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.enter": "Enter",
+  "@klawiatura.enter": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.backspace": "Backspace",
+  "@klawiatura.backspace": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.insert": "Insert",
+  "@klawiatura.insert": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.delete": "Delete",
+  "@klawiatura.delete": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.home": "Home",
+  "@klawiatura.home": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.end": "End",
+  "@klawiatura.end": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.page_up": "Page Up",
+  "@klawiatura.page_up": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.page_down": "Page Down",
+  "@klawiatura.page_down": {
+    "description": "Nazwy jak na klawiaturze."
+  },
+  "klawiatura.win": "Win",
+  "@klawiatura.win": {
+    "description": "Nazwy jak na klawiaturze."
+  }
+}

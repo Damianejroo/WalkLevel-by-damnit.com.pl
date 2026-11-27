@@ -1,0 +1,160 @@
+{
+  "@@locale": "pl",
+  "zgloszenie.tytul": "Zgłoś problem",
+  "zgloszenie.wstep": "Opisz, co się stało. Razem z opisem wyślemy dziennik aplikacji, żeby autor szybciej znalazł przyczynę.",
+  "@zgloszenie.wstep": {
+    "description": "„wyślemy” jest bez rodzaju."
+  },
+  "zgloszenie.opis_etykieta": "Co się stało?",
+  "zgloszenie.opis_przyklad": "Np. bieżnia rozłącza się po kilku minutach albo postać nie biegnie w grze.",
+  "zgloszenie.opis_dostepnosc": "Opis problemu",
+  "zgloszenie.blad.pusty": "Opisz, co się stało. Wystarczy jedno zdanie.",
+  "@zgloszenie.blad.pusty": {
+    "description": "Pod polem."
+  },
+  "zgloszenie.blad.krotki": "Opis jest za krótki. Dopisz jeszcze {liczba} {liczba, plural, one {znak} few {znaki} many {znaków} other {znaki}}, np. co poszło nie tak.",
+  "@zgloszenie.blad.krotki": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "zgloszenie.kontakt_etykieta": "Kontakt (opcjonalnie)",
+  "zgloszenie.kontakt_przyklad": "Np. nick na Discordzie albo e-mail",
+  "zgloszenie.kontakt_dostepnosc": "Kontakt",
+  "zgloszenie.okres_etykieta": "Kiedy był problem",
+  "zgloszenie.okres_dostepnosc": "Z jakiego okresu dołączyć dziennik",
+  "zgloszenie.okres.1h": "W ciągu godziny",
+  "zgloszenie.okres.6h": "W ciągu 6 godzin",
+  "zgloszenie.okres.24h": "W ciągu doby",
+  "zgloszenie.okres.7d": "W ciągu tygodnia",
+  "zgloszenie.okres_opis": "Paczka ma najwyżej 2 MB. Przy dłuższym okresie trafi do niej najnowsza część dziennika.",
+  "zgloszenie.dolaczone_tytul": "Co zostanie dołączone",
+  "zgloszenie.dolaczone1": "dziennik aplikacji i Bluetooth z wybranego okresu,",
+  "@zgloszenie.dolaczone1": {
+    "description": "Lista punktowana w HTML zamiast myślników w tekście."
+  },
+  "zgloszenie.dolaczone2": "ostatni raport diagnostyczny, jeśli jest,",
+  "zgloszenie.dolaczone3": "wersja aplikacji i Windows, ustawienia sterowania i model bieżni.",
+  "zgloszenie.niedolaczone": "Nie dołączamy haseł, plików z komputera, naciśniętych klawiszy ani historii kroków. Nazwa użytkownika Windows i adresy innych urządzeń Bluetooth są usuwane.",
+  "zgloszenie.droga": "Zgłoszenie trafia przez serwer {serwer} prosto na skrzynkę autora. Serwer niczego nie przechowuje.",
+  "@zgloszenie.droga": {
+    "description": "Adres serwera jako zmienna (konfiguracja).",
+    "placeholders": {
+      "serwer": {}
+    }
+  },
+  "zgloszenie.wyslij": "Wyślij zgłoszenie",
+  "zgloszenie.przygotuj_email": "Przygotuj e-mail ze zgłoszeniem",
+  "@zgloszenie.przygotuj_email": {
+    "description": "Gdy brak serwera zgłoszeń."
+  },
+  "zgloszenie.zapisz": "Zapisz paczkę na dysk",
+  "zgloszenie.zapisz_podpowiedz": "Zapisuje paczkę z dziennikiem do pliku, żeby wysłać ją samodzielnie, np. e-mailem.",
+  "zgloszenie.przygotowuje": "Przygotowuję zgłoszenie…",
+  "zgloszenie.wyslano": "Wysłano zgłoszenie nr {numer}. Dziękujemy, autor dostał opis i dziennik.",
+  "@zgloszenie.wyslano": {
+    "description": "Bez wykrzyknika. Bez numeru: „Wysłano zgłoszenie. Dziękujemy, autor dostał opis i dziennik.”",
+    "placeholders": {
+      "numer": {
+        "description": "kod zaproszenia, numer zgłoszenia"
+      }
+    }
+  },
+  "zgloszenie.email_gotowy": "Otworzył się e-mail do autora i folder z paczką {plik}. Przeciągnij plik do wiadomości i wyślij ją.",
+  "@zgloszenie.email_gotowy": {
+    "placeholders": {
+      "plik": {
+        "description": "nazwa pliku, ścieżka folderu"
+      }
+    }
+  },
+  "zgloszenie.zapisano": "Zapisano paczkę {plik}. Folder z nią otworzył się obok. Wyślij ją e-mailem na {email_autora}.",
+  "@zgloszenie.zapisano": {
+    "placeholders": {
+      "plik": {
+        "description": "nazwa pliku, ścieżka folderu"
+      },
+      "email_autora": {}
+    }
+  },
+  "zgloszenie.bez_opisu": "(bez opisu)",
+  "@zgloszenie.bez_opisu": {
+    "description": "Treść zgłoszenia, gdy zapis paczki bez opisu."
+  },
+  "zgloszenie.blad.paczka": "Nie udało się przygotować zgłoszenia. Spróbuj ponownie. ({szczegoly})",
+  "@zgloszenie.blad.paczka": {
+    "placeholders": {
+      "szczegoly": {
+        "description": "techniczny dopisek z błędu (zawsze na końcu, w nawiasie)"
+      }
+    }
+  },
+  "zgloszenie.blad.za_duza": "Paczka jest za duża. Wybierz krótszy okres w polu Kiedy był problem i spróbuj ponownie.",
+  "@zgloszenie.blad.za_duza": {
+    "description": "Gracz nie wie, jak „usunąć stare logi”."
+  },
+  "zgloszenie.blad.adres": "Adres serwera zgłoszeń w konfiguracji jest błędny.",
+  "@zgloszenie.blad.adres": {
+    "description": "Błąd konfiguracji, rzadki."
+  },
+  "zgloszenie.blad.odrzucone": "Serwer nie przyjął zgłoszenia. Zapisz paczkę na dysk i wyślij ją e-mailem. (kod {kod})",
+  "@zgloszenie.blad.odrzucone": {
+    "placeholders": {
+      "kod": {
+        "description": "kod zaproszenia, numer zgłoszenia"
+      }
+    }
+  },
+  "zgloszenie.blad.za_duza_serwer": "Paczka jest za duża, żeby ją wysłać. Zapisz ją na dysk i wyślij e-mailem.",
+  "zgloszenie.blad.limit": "Wysłano już dużo zgłoszeń. Spróbuj za godzinę albo zapisz paczkę na dysk.",
+  "zgloszenie.blad.mail": "Serwer nie mógł teraz wysłać zgłoszenia. Zapisz paczkę na dysk i wyślij ją e-mailem na {email_autora}.",
+  "@zgloszenie.blad.mail": {
+    "placeholders": {
+      "email_autora": {}
+    }
+  },
+  "zgloszenie.blad.internet": "Nie udało się wysłać zgłoszenia. Sprawdź połączenie z internetem albo zapisz paczkę na dysk.",
+  "zgloszenie.email.temat": "WalkLevel {wersja}: zgłoszenie problemu",
+  "@zgloszenie.email.temat": {
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "zgloszenie.email.tresc": "{opis}\n\nPaczka do dołączenia: {plik}\nFolder z paczką otworzył się obok. Przeciągnij plik do tej wiadomości.",
+  "@zgloszenie.email.tresc": {
+    "placeholders": {
+      "opis": {},
+      "plik": {
+        "description": "nazwa pliku, ścieżka folderu"
+      }
+    }
+  },
+  "zgloszenie.droga_ogolna": "Zgłoszenie trafia przez serwer WalkLevel prosto na skrzynkę autora. Serwer niczego nie przechowuje.",
+  "@zgloszenie.droga_ogolna": {
+    "description": "Zamiast `zgloszenie.droga`, dopóki rdzeń nie podaje adresu serwera zgłoszeń (w `statics` nie ma takiego pola)."
+  },
+  "zgloszenie.droga_email": "Otworzy się e-mail do autora i folder z paczką. Wystarczy przeciągnąć plik do wiadomości.",
+  "@zgloszenie.droga_email": {
+    "description": "Gdy brak serwera zgłoszeń (`app.reportEndpoint = false`), przy przycisku „Przygotuj e-mail ze zgłoszeniem”."
+  },
+  "zgloszenie.wyslano_bez_numeru": "Wysłano zgłoszenie. Dziękujemy, autor dostał opis i dziennik.",
+  "@zgloszenie.wyslano_bez_numeru": {
+    "description": "`zgloszenie.wyslano`, gdy serwer nie podał numeru."
+  },
+  "zgloszenie.blad.mail_serwer": "{powod} Zapisz paczkę na dysk i wyślij ją e-mailem na {email_autora}.",
+  "@zgloszenie.blad.mail_serwer": {
+    "description": "`zgloszenie.blad.mail`, gdy serwer podał własny powód.",
+    "placeholders": {
+      "powod": {},
+      "email_autora": {}
+    }
+  },
+  "zgloszenie.trwa": "Zgłoszenie już się przygotowuje…",
+  "@zgloszenie.trwa": {
+    "description": "Drugie kliknięcie w trakcie."
+  }
+}

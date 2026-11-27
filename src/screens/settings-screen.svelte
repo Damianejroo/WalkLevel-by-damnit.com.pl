@@ -1,3 +1,7 @@
+<script module lang="ts">
+  const zapamietane: { otwarte?: Record<string, boolean> } = {};
+</script>
+
 <script lang="ts">
   // Ekran: Ustawienia (trasa 'settings'), docs/design.md 8.5, 9.3; docs/texts.md 9-18.
   // Akordeon 7 kategorii: otwierają się niezależnie, kliknięty nagłówek stoi w miejscu (zmienia się
@@ -11,6 +15,7 @@
   import KatBieznia from './settings/treadmill-section.svelte';
   import KatPoziomy from './settings/levels-section.svelte';
   import KatWyglad from './settings/appearance-section.svelte';
+  import KatJezyk from './settings/language-section.svelte';
   import KatDane from './settings/data-section.svelte';
   import KatPomoc from './settings/help-section.svelte';
   import { t, tl, type Klucz } from '../lib/texts';
@@ -48,7 +53,11 @@
     for (const k of KATEGORIE) wynik[k.klucz] = lista === 'wszystkie' || lista.split(',').includes(k.klucz);
     return wynik;
   }
-  const otwarte = $state(naStart());
+  // otwarte kategorie przetrwają przebudowę widoków po zmianie języka (App.svelte {#key})
+  const otwarte = $state<Record<Kategoria, boolean>>(zapamietane.otwarte ?? naStart());
+  $effect(() => {
+    zapamietane.otwarte = { ...otwarte };
+  });
   // Wejście z odnośnika („Zarządzaj profilami gier”, klawisz włączania na ekranie głównym) rozwija
   // wskazaną kategorię; pozostałe zostają, jak były.
   $effect(() => {
@@ -108,6 +117,7 @@
         {:else if k.klucz === 'poziomy'}
           <KatPoziomy />
         {:else if k.klucz === 'wyglad'}
+          <KatJezyk />
           <KatWyglad />
         {:else if k.klucz === 'dane'}
           <KatDane />

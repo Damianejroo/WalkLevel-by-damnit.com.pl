@@ -1,0 +1,45 @@
+{
+  "@@locale": "pl",
+  "ble.powod.bt_wylaczony": "Bluetooth jest wyłączony albo niedostępny. Włącz go w Start > Ustawienia > Bluetooth i urządzenia.",
+  "ble.powod.nie_widze": "Nie widać bieżni. Włącz ją i zamknij jej aplikację w telefonie.",
+  "@ble.powod.nie_widze": {
+    "description": "Jeden tekst zamiast dwóch prawie takich samych (worker.py:121 i :375)."
+  },
+  "ble.powod.timeout": "Bieżnia nie odpowiada. Jeśli to się powtarza, wyłącz ją i włącz ponownie.",
+  "ble.powod.rozlaczyla": "Bieżnia się rozłączyła. Łączę ponownie…",
+  "ble.powod.inny": "Problem z Bluetooth. Łączę ponownie… ({szczegoly})",
+  "@ble.powod.inny": {
+    "description": "Techniczny opis w nawiasie na końcu.",
+    "placeholders": {
+      "szczegoly": {
+        "description": "techniczny dopisek z błędu (zawsze na końcu, w nawiasie)"
+      }
+    }
+  },
+  "ble.powod.nieobslugiwane": "To urządzenie nie wygląda na bieżnię. Jeśli to bieżnia, zgłoś ją w Ustawienia > Pomoc i diagnostyka > Zgłoś problem.",
+  "@ble.powod.nieobslugiwane": {
+    "description": "Bez nazw usług."
+  },
+  "ble.rozlaczono": "Rozłączono",
+  "ble.wybierz_z_listy": "Wybierz bieżnię z listy.",
+  "@ble.wybierz_z_listy": {
+    "description": "Po skanowaniu bez zapamiętanej bieżni."
+  },
+  "ble.stop_nie_zdazyl": "Nie udało się zatrzymać taśmy. Zatrzymaj ją pilotem.",
+  "@ble.stop_nie_zdazyl": {
+    "description": "Dziś tylko w logu; przy zamykaniu aplikacji gracz musi to zobaczyć (powiadomienie systemowe)."
+  },
+  "ble.stop_niepotwierdzony": "Bieżnia nie potwierdziła zatrzymania. Zatrzymaj taśmę pilotem albo wyjmij klucz bezpieczeństwa.",
+  "@ble.stop_niepotwierdzony": {
+    "description": "Pokazać jako komunikat, nie tylko w logu."
+  },
+  "ble.predkosc_nieprzyjeta": "Bieżnia nie przyjmuje prędkości {kmh} km/h. Sprawdź, czy taśma jedzie, i spróbuj jeszcze raz.",
+  "@ble.predkosc_nieprzyjeta": {
+    "description": "Dziś tylko w logu. Pokazać jako komunikat.",
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  }
+}

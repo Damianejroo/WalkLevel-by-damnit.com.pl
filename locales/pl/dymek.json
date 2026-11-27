@@ -1,0 +1,68 @@
+{
+  "@@locale": "pl",
+  "dymek.tytul_okna": "WalkLevel · sterowanie",
+  "dymek.dostepnosc": "Sterowanie: {stan}",
+  "@dymek.dostepnosc": {
+    "description": "`{stan}` = włączone / wyłączone.",
+    "placeholders": {
+      "stan": {}
+    }
+  },
+  "dymek.podpowiedz": "Sterowanie {stan}\nKliknij, żeby {akcja}\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć",
+  "@dymek.podpowiedz": {
+    "description": "Usunięta stara nazwa „okno Bieżni”.",
+    "placeholders": {
+      "stan": {},
+      "akcja": {}
+    }
+  },
+  "dymek.stan.wl": "włączone",
+  "dymek.stan.wyl": "wyłączone",
+  "dymek.podpowiedz_wl": "Sterowanie włączone\nKliknij, żeby wyłączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć",
+  "@dymek.podpowiedz_wl": {
+    "description": "Gotowa forma `dymek.podpowiedz` dla włączonego sterowania (`{wyłączyć/włączyć}` nie jest zmienną słownika)."
+  },
+  "dymek.podpowiedz_wyl": "Sterowanie wyłączone\nKliknij, żeby włączyć\nPrawy przycisk otwiera okno WalkLevel\nPrzeciągnij, żeby przesunąć",
+  "@dymek.podpowiedz_wyl": {
+    "description": "Jw. dla wyłączonego sterowania."
+  },
+  "dymek.trening.wyzej": "Poziom wyżej ({klawisz_szybciej})",
+  "@dymek.trening.wyzej": {
+    "description": "Przycisk + przy kółku w trybie Trening (nazwa i podpowiedź).",
+    "placeholders": {
+      "klawisz_szybciej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "dymek.trening.nizej": "Poziom niżej ({klawisz_wolniej})",
+  "@dymek.trening.nizej": {
+    "description": "Przycisk − w trybie Trening.",
+    "placeholders": {
+      "klawisz_wolniej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "dymek.trening.poziom": "Poziom {poziom} z {liczba}",
+  "@dymek.trening.poziom": {
+    "description": "Numer poziomu między + i − (czytnik ekranu i podpowiedź).",
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "dymek.trening.stop": "Stop",
+  "@dymek.trening.stop": {
+    "description": "Przycisk pod kółkiem w trybie Trening."
+  },
+  "dymek.trening.stop_dostepnosc": "Zatrzymaj taśmę i wyłącz sterowanie",
+  "dymek.stop_dostepnosc": "Zatrzymaj taśmę",
+  "@dymek.stop_dostepnosc": {
+    "description": "Stop pod kółkiem poza Treningiem, gdy taśma jedzie (napis jak `dymek.trening.stop`). Włączone sterowanie się wyłącza."
+  }
+}

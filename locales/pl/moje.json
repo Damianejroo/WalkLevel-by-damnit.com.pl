@@ -1,0 +1,105 @@
+{
+  "@@locale": "pl",
+  "moje.wyniki.tytul": "Moje wyniki na koncie",
+  "moje.wyniki.wysylaj": "Wysyłaj moje sesje",
+  "moje.wyniki.wysylaj_opis": "Co 2 minuty i po każdej sesji.",
+  "moje.wyniki.kto": "Kto widzi moje sesje",
+  "moje.widocznosc.ja": "Tylko ja",
+  "moje.widocznosc.znajomi": "Znajomi",
+  "moje.widocznosc.wszyscy": "Wszyscy",
+  "moje.wyniki.jedna_sesja": "Pojedynczą sesję ukryjesz w Historia kroków > szczegóły sesji. Zostanie wtedy tylko na tym komputerze.",
+  "@moje.wyniki.jedna_sesja": {
+    "description": "Pełna ścieżka."
+  },
+  "moje.wyslij_teraz": "Wyślij teraz",
+  "moje.profil.tytul": "Mój profil oczami innych",
+  "moje.profil.etykieta": "Profil",
+  "moje.profil.pseudonim": "Pseudonim",
+  "moje.profil.zapisz": "Zapisz pseudonim",
+  "moje.profil.zapisano": "Zapisano.",
+  "moje.profil.lista": "Kto widzi mój profil",
+  "moje.profil.lista_dostepnosc": "Widoczność profilu",
+  "moje.profil.ukryty": "Nikt",
+  "@moje.profil.ukryty": {
+    "description": "Opcje: Nikt / Znajomi / Wszyscy (dziś Ukryty / Znajomi / Wszyscy)."
+  },
+  "moje.gry.kto": "Kto widzi wyniki w poszczególnych grach",
+  "moje.gry.kto_dostepnosc": "Kto widzi podział na gry",
+  "moje.gry.opis": "Inni widzą sumę kroków, a po kliknięciu także wyniki w poszczególnych grach. Pojedynczą grę ukryjesz w Ustawienia > Gry i sterowanie > Profile gier > (profil) > Pokazuj tę grę na koncie online.",
+  "moje.haslo.tytul": "Hasło",
+  "moje.haslo.obecne": "Obecne hasło",
+  "moje.haslo.nowe": "Nowe hasło",
+  "moje.haslo.nowe2": "Powtórz nowe hasło",
+  "moje.haslo.zmien": "Zmień hasło",
+  "moje.haslo.rozne": "Nowe hasła się różnią. Wpisz to samo w obu polach.",
+  "moje.haslo.opis": "Po zmianie hasła inne komputery zostaną wylogowane.",
+  "moje.haslo.zmienione": "Zmieniono hasło. Inne komputery zostały wylogowane.",
+  "moje.konto.tytul": "Konto",
+  "moje.konto.zapamietaj": "Zapamiętaj logowanie",
+  "moje.konto.zapamietaj_wyl": "Gdy wyłączone, zamknięcie WalkLevel wyloguje z konta.",
+  "moje.konto.pobierz": "Pobierz moje dane z serwera",
+  "moje.konto.pobieram": "Pobieram dane do {plik}…",
+  "@moje.konto.pobieram": {
+    "placeholders": {
+      "plik": {
+        "description": "nazwa pliku, ścieżka folderu"
+      }
+    }
+  },
+  "moje.konto.pobrano": "Zapisano Twoje dane z serwera w pliku {plik}.",
+  "@moje.konto.pobrano": {
+    "placeholders": {
+      "plik": {
+        "description": "nazwa pliku, ścieżka folderu"
+      }
+    }
+  },
+  "moje.konto.wyloguj": "Wyloguj się",
+  "moje.konto.usun_opis": "Usunięcie konta kasuje je z serwera razem z wynikami i znajomymi. Wyniki na tym komputerze zostaną. Wpisz hasło i przytrzymaj przycisk.",
+  "moje.konto.usun_haslo": "Hasło",
+  "moje.konto.usun": "Usuń konto",
+  "@moje.konto.usun": {
+    "description": "Przycisk z przytrzymaniem."
+  },
+  "moje.konto.usun_brak_hasla": "Wpisz hasło, żeby usunąć konto.",
+  "moje.wyslano": "Wysłano {liczba} {liczba, plural, one {sesję} few {sesje} many {sesji} other {sesje}}.",
+  "@moje.wyslano": {
+    "description": "Toast po „Wyślij teraz”.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "moje.wyslano_nic": "Wszystkie sesje są już na serwerze.",
+  "@moje.wyslano_nic": {
+    "description": "Toast po „Wyślij teraz”, gdy nie było czego wysłać."
+  },
+  "moje.czeka": "Na wysłanie {liczba, plural, one {czeka} few {czekają} many {czeka} other {czekają}} {liczba} {liczba, plural, one {sesja} few {sesje} many {sesji} other {sesje}}.",
+  "@moje.czeka": {
+    "description": "Pod „Wyślij teraz”, gdy coś czeka.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "moje.konto.adres": "Adres e-mail: {email}",
+  "@moje.konto.adres": {
+    "description": "Karta Konto w zakładce Moje konto.",
+    "placeholders": {
+      "email": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "moje.konto.regulamin_wersja": "Zaakceptowany regulamin: wersja z {data}.",
+  "@moje.konto.regulamin_wersja": {
+    "description": "Karta Konto, obok linku do regulaminu.",
+    "placeholders": {
+      "data": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "@@locale": "pl",
+  "powiadomienie.tytul_okna": "{tytul} · WalkLevel",
+  "@powiadomienie.tytul_okna": {
+    "placeholders": {
+      "tytul": {}
+    }
+  },
+  "powiadomienie.dostepnosc": "Powiadomienie o osiągnięciu",
+  "powiadomienie.osiagniecie.nad": "OSIĄGNIĘCIE · {rzadkosc}",
+  "@powiadomienie.osiagniecie.nad": {
+    "description": "Wersaliki przez CSS.",
+    "placeholders": {
+      "rzadkosc": {}
+    }
+  },
+  "powiadomienie.osiagniecie.linia": "+{xp} XP · {warunek}",
+  "@powiadomienie.osiagniecie.linia": {
+    "description": "Jedna spacja wokół kropki.",
+    "placeholders": {
+      "xp": {
+        "description": "punkty doświadczenia"
+      },
+      "warunek": {}
+    }
+  },
+  "powiadomienie.awans.nad": "AWANS · POZIOM {poziom}",
+  "@powiadomienie.awans.nad": {
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "powiadomienie.awans.tytul": "Poziom {poziom}",
+  "@powiadomienie.awans.tytul": {
+    "description": "Bez nowej rangi; z nową rangą tytułem jest `{ranga}`.",
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "powiadomienie.awans.linia": "Następny poziom za {km} km",
+  "@powiadomienie.awans.linia": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "powiadomienie.awans.ranga_linia": "Nowa ranga · następny poziom za {km} km",
+  "@powiadomienie.awans.ranga_linia": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "powiadomienie.wiele.nad": "OSIĄGNIĘCIA",
+  "powiadomienie.wiele.tytul": "I {liczba} {liczba, plural, one {kolejne} few {kolejne} many {kolejnych} other {kolejne}}",
+  "@powiadomienie.wiele.tytul": {
+    "description": "„+1 kolejnych” było błędne.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "powiadomienie.wiele.linia": "Wszystkie są w Poziomy i osiągnięcia.",
+  "@powiadomienie.wiele.linia": {
+    "description": "Ścieżka do ekranu."
+  },
+  "powiadomienie.historia.nad": "Z TWOJEJ HISTORII",
+  "@powiadomienie.historia.nad": {
+    "description": "Po pierwszym przeliczeniu historii."
+  },
+  "powiadomienie.historia.tytul": "Poziom {poziom} · {ranga}",
+  "@powiadomienie.historia.tytul": {
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "ranga": {
+        "description": "nazwa i opis rangi"
+      }
+    }
+  },
+  "powiadomienie.historia.linia": "{liczba} {liczba, plural, one {osiągnięcie} few {osiągnięcia} many {osiągnięć} other {osiągnięcia}} · {km} km za Tobą",
+  "@powiadomienie.historia.linia": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "powiadomienie.dzwiek_brak": "bez tekstu",
+  "@powiadomienie.dzwiek_brak": {
+    "description": "Brak dźwięku nie wymaga komunikatu."
+  }
+}

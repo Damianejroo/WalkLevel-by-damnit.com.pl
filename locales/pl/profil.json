@@ -1,0 +1,153 @@
+{
+  "@@locale": "pl",
+  "profil.tytul_edycja": "Edytuj profil gry",
+  "profil.tytul_nowy": "Nowy profil gry",
+  "profil.gra": "Gra",
+  "profil.wskaz_folder": "Wskaż folder gry…",
+  "@profil.wskaz_folder": {
+    "description": "Otwiera okno wyboru."
+  },
+  "profil.wskaz_plik_okno": "Wskaż plik gry",
+  "@profil.wskaz_plik_okno": {
+    "description": "Tytuł okna systemowego."
+  },
+  "profil.filtr_plikow": "Gry (*.exe, *.lnk) / Wszystkie pliki",
+  "@profil.filtr_plikow": {
+    "description": "Filtr okna wyboru (format zależny od API Tauri)."
+  },
+  "profil.wskaz_opis": "Wskaż folder gry, a WalkLevel weźmie z niej nazwę, ikonę i kolor.",
+  "profil.wskaz_podpowiedz": "Wybierz plik gry (.exe) albo jej skrót.",
+  "profil.z_gry": "Ikona i kolor są z pliku gry. Możesz je zmienić niżej.",
+  "profil.zmien": "Zmień",
+  "profil.brak_pliku": "Nie ma pliku gry w tym folderze. Wskaż folder z plikiem .exe gry.",
+  "@profil.brak_pliku": {
+    "description": "Bez rodzaju i z działaniem."
+  },
+  "profil.nazwa": "Nazwa profilu",
+  "profil.nazwa_przyklad": "Np. Cyberpunk 2077",
+  "@profil.nazwa_przyklad": {
+    "description": "Placeholder."
+  },
+  "profil.online": "Pokazuj tę grę na koncie online",
+  "profil.online_opis": "Gdy wyłączone, sesje trafiają na konto bez nazwy gry.",
+  "profil.kolor": "Kolor",
+  "profil.ikona": "Ikona",
+  "profil.duplikuj": "Duplikuj",
+  "profil.usun": "Usuń profil",
+  "@profil.usun": {
+    "description": "Przycisk z przytrzymaniem."
+  },
+  "profil.zacznij_od": "Zacznij od",
+  "profil.zacznij_kopia": "Kopii obecnego",
+  "@profil.zacznij_kopia": {
+    "description": "Druga forma pasuje do „Zacznij od”."
+  },
+  "profil.zacznij_domyslne": "Ustawień domyślnych",
+  "profil.zacznij_opis": "Kopia przejmie tryb, klawisze, stopnie pada i prędkości z profilu {profil}.",
+  "@profil.zacznij_opis": {
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "profil.utworz": "Utwórz profil i przełącz na niego",
+  "profil.domyslna_nazwa": "Profil",
+  "@profil.domyslna_nazwa": {
+    "description": "Nazwa nowego profilu, gdy pole puste."
+  },
+  "profil.domyslny": "Domyślny",
+  "@profil.domyslny": {
+    "description": "Nazwa pierwszego profilu."
+  },
+  "profil.kopia_nazwa": "{profil} (kopia)",
+  "@profil.kopia_nazwa": {
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "profil.ikona.pad": "Pad",
+  "@profil.ikona.pad": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.tarcza": "Tarcza",
+  "@profil.ikona.tarcza": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.ogien": "Ogień",
+  "@profil.ikona.ogien": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.gwiazda": "Gwiazda",
+  "@profil.ikona.gwiazda": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.auto": "Auto",
+  "@profil.ikona.auto": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.samolot": "Samolot",
+  "@profil.ikona.samolot": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.swiat": "Świat",
+  "@profil.ikona.swiat": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.flaga": "Flaga",
+  "@profil.ikona.flaga": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.robot": "Robot",
+  "@profil.ikona.robot": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.klocek": "Klocek",
+  "@profil.ikona.klocek": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.iskry": "Iskry",
+  "@profil.ikona.iskry": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.ikona.serce": "Serce",
+  "@profil.ikona.serce": {
+    "description": "Nazwy ikon dla czytnika ekranu: `Ikona {nazwa}`."
+  },
+  "profil.wskaz_plik": "Wskaż plik gry…",
+  "@profil.wskaz_plik": {
+    "description": "Drugi przycisk obok „Wskaż folder gry…”: plik .exe albo skrót (podpowiedź `profil.wskaz_podpowiedz`)."
+  },
+  "profil.folder_gry": "…\\{folder}",
+  "@profil.folder_gry": {
+    "description": "Pod nazwą pliku gry: folder, w którym leży.",
+    "placeholders": {
+      "folder": {
+        "description": "nazwa pliku, ścieżka folderu"
+      }
+    }
+  },
+  "profil.ikona_dostepnosc": "Ikona {nazwa}",
+  "@profil.ikona_dostepnosc": {
+    "description": "Nazwa pola w siatce ikon dla czytnika ekranu (nazwy w `profil.ikona.*`).",
+    "placeholders": {
+      "nazwa": {}
+    }
+  },
+  "profil.zacznij_domyslne_opis": "Tryb, klawisze, stopnie pada i prędkości będą takie jak po instalacji.",
+  "@profil.zacznij_domyslne_opis": {
+    "description": "Pod „Zacznij od”, gdy wybrane „Ustawień domyślnych”."
+  },
+  "profil.wskaz_folder_okno": "Wskaż folder gry",
+  "@profil.wskaz_folder_okno": {
+    "description": "Tytuł okna systemowego (`profil.wskaz_folder` to przycisk z „…”)."
+  },
+  "profil.wybierz_ponownie": "Wybierz grę jeszcze raz: wskaż jej folder albo plik.",
+  "@profil.wybierz_ponownie": {
+    "description": "Wybór gry wygasł."
+  },
+  "profil.blad.brak": "Nie ma takiego profilu gry.",
+  "profil.blad.ostatni": "Ostatniego profilu gry nie da się usunąć."
+}

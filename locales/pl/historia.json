@@ -1,0 +1,172 @@
+{
+  "@@locale": "pl",
+  "historia.tytul": "Historia kroków",
+  "historia.brak_osoby": "Historia pojawi się, gdy dodasz pierwszą osobę.",
+  "historia.niedostepna": "Historia kroków jest chwilowo niedostępna. Uruchom WalkLevel ponownie. Jeśli to nie pomoże, zgłoś problem.",
+  "@historia.niedostepna": {
+    "description": "Baza zablokowana albo uszkodzona. Dziś gracz nic nie widzi, a sesje się nie zapisują."
+  },
+  "historia.czyja": "Czyja historia",
+  "historia.czyja.moja": "Moja",
+  "historia.czyja.wszyscy": "Wszystkie osoby",
+  "historia.zakres": "Zakres",
+  "historia.zakres.dzis": "Dziś",
+  "historia.zakres.7": "Ten tydzień",
+  "@historia.zakres.7": {
+    "description": "0.6.2: tydzień od poniedziałku (kalendarzowy, strefa komputera)."
+  },
+  "historia.zakres.30": "Ten miesiąc",
+  "@historia.zakres.30": {
+    "description": "0.6.2: od 1. dnia miesiąca."
+  },
+  "historia.zakres.wszystko": "Wszystko",
+  "historia.suma.kroki": "Kroki",
+  "historia.suma.dystans": "Dystans",
+  "historia.suma.czas": "Czas ruchu",
+  "historia.suma.srednio": "Średnie tempo",
+  "historia.wykres.dzien": "Kroki w ciągu dnia",
+  "historia.wykres.dni": "Kroki dziennie",
+  "historia.wykres.tys": "{liczba} tys.",
+  "@historia.wykres.tys": {
+    "description": "Oś wykresu.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "historia.wykres.dzis": "dziś",
+  "historia.pusto": "Brak kroków w tym okresie. Wejdź na bieżnię, a wyniki pojawią się tu same.",
+  "historia.podzial.osoby": "Osoby",
+  "historia.podzial.profile": "Profile gier",
+  "historia.podzial.wiersz": "{kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} / {km} km · {czas} · {procent}%",
+  "@historia.podzial.wiersz": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "km": {
+        "description": "dystans w km"
+      },
+      "czas": {
+        "description": "czas ruchu sformatowany („1 h 05 min”, „12 min”)"
+      },
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      }
+    }
+  },
+  "historia.sesje.tytul": "Ostatnie sesje",
+  "historia.sesje.dzis": "Dziś",
+  "historia.sesje.wczoraj": "Wczoraj",
+  "historia.sesje.wiersz": "{dzien} {godzina} · {osoba} · {profil} / {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {czas} · {kmh} km/h",
+  "@historia.sesje.wiersz": {
+    "placeholders": {
+      "dzien": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      },
+      "godzina": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      },
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      },
+      "profil": {
+        "description": "nazwa profilu gry"
+      },
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "czas": {
+        "description": "czas ruchu sformatowany („1 h 05 min”, „12 min”)"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "historia.sesje.dostepnosc": "Sesja {dzien} {godzina}. Kliknij, żeby zobaczyć szczegóły.",
+  "@historia.sesje.dostepnosc": {
+    "placeholders": {
+      "dzien": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      },
+      "godzina": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      }
+    }
+  },
+  "historia.sesje.pusto": "Jeszcze nie ma sesji. Pierwsza zapisze się sama po kilku krokach na bieżni.",
+  "@historia.sesje.pusto": {
+    "description": "Pusta lista sesji."
+  },
+  "historia.czas.godziny": "{godziny} h {minuty} min",
+  "@historia.czas.godziny": {
+    "placeholders": {
+      "godziny": {},
+      "minuty": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "historia.czas.minuty": "{minuty} min",
+  "@historia.czas.minuty": {
+    "placeholders": {
+      "minuty": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "historia.sesje.wiersz_moja": "{dzien} {godzina} · {profil} / {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {czas} · {kmh} km/h",
+  "@historia.sesje.wiersz_moja": {
+    "description": "Wiersz sesji w historii jednej osoby (bez nazwy osoby).",
+    "placeholders": {
+      "dzien": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      },
+      "godzina": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      },
+      "profil": {
+        "description": "nazwa profilu gry"
+      },
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "czas": {
+        "description": "czas ruchu sformatowany („1 h 05 min”, „12 min”)"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "historia.wykres.teraz": "teraz",
+  "@historia.wykres.teraz": {
+    "description": "Oś wykresu godzinowego, bieżąca godzina. W 0.5.2 wpisane w kod."
+  },
+  "historia.wykres.dni_tygodnia": "pn wt śr cz pt sb nd",
+  "@historia.wykres.dni_tygodnia": {
+    "description": "Oś wykresu 7 dni. Skróty od poniedziałku, rozdzielone spacją."
+  },
+  "historia.wykres.slupek": "{kiedy} · {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@historia.wykres.slupek": {
+    "description": "Podpowiedź po najechaniu na słupek, np. „13:00 · 1 234 kroki”.",
+    "placeholders": {
+      "kiedy": {},
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "historia.wykres.opis": "Razem {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}, najwięcej: {kiedy}.",
+  "@historia.wykres.opis": {
+    "description": "Opis wykresu dla czytnika ekranu.",
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "kiedy": {}
+    }
+  }
+}

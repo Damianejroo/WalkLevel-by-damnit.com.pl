@@ -4,7 +4,8 @@
 
 WalkLevel to aplikacja na Windows: chodzenie po bieżni steruje postacią w grze, do tego poziomy,
 szlak dystansu i opcjonalne konto online. Od 0.6.0 powstaje w Tauri 2, Svelte 5 i Ruście, a cały
-projekt jest w katalogu głównym repozytorium. Teksty dla użytkownika są po polsku, z pełnymi
+projekt jest w katalogu głównym repozytorium. Teksty dla użytkownika są po angielsku i po polsku,
+kolejne języki dochodzą jako pakiety danych ([docs/i18n.pl.md](i18n.pl.md)); polski z pełnymi
 znakami. Hasło bez zmian: „Chodzisz w realu, idziesz w grze”.
 
 ## Układ projektu
@@ -14,8 +15,9 @@ znakami. Hasło bez zmian: „Chodzisz w realu, idziesz w grze”.
 | `crates/core` | `walklevel-core`: cała logika bez interfejsu (sterowniki bieżni, sterowanie, historia, osoby i profile, poziomy, konto online, kopie, zgłoszenia, aktualizacje). Nie zależy od Tauri. Tu są testy rdzenia. |
 | `src-tauri` | Tylko klej: komendy, zdarzenia, okna. Bez logiki biznesowej. |
 | `src` | Interfejs w Svelte 5. Jedno okno, stałe ekrany sterowane stanem; ekrany montują się raz, potem są tylko chowane, bez przebudowy. |
-| `docs` | `contract.md` (typy i komendy), `design.md` (tokeny i komponenty), `texts.md` (jedyne źródło tekstów interfejsu), `sync.md` (synchronizacja z serwerem kont), `analysis-*.md` (analizy); w `docs/readme/` są zrzuty do README. |
-| `tests-ui` | Test widoków i generator słownika tekstów. |
+| `docs` | `contract.md` (typy i komendy), `design.md` (tokeny i komponenty), `texts.md` (jedyne źródło kluczy i polskich tekstów), `i18n.md` (języki i tłumaczenia), `sync.md` (synchronizacja z serwerem kont), `analysis-*.md` (analizy); w `docs/readme/` są zrzuty do README. |
+| `locales` | Pakiety językowe: `languages.json` (lista języków), `pl/` generowany z `docs/texts.md`, pozostałe języki tłumaczone ręcznie ([docs/i18n.pl.md](i18n.pl.md)). |
+| `tests-ui` | Test widoków i generator pakietów językowych. |
 | `packaging` | Ikona, grafiki instalatora i skrypt Inno Setup. |
 | `tools` | Skrypty pomocnicze (plik definicji dla serwera kont). |
 
@@ -51,7 +53,7 @@ Nie mieszać ze starszymi API; wiele przykładów w sieci dotyczy wcześniejszyc
   (`src/lib/state.svelte.ts`) i tylko renderuje. Telemetria bieżni idzie osobnym zdarzeniem,
   `wl:telemetria` (10-20 Hz; pętla sterowania działa co 50 ms). Pozostałe zdarzenia:
   `wl:komunikat` (komunikaty), `wl:log`, `wl:nawigacja`, `wl:popupy`, `wl:panel-okno`.
-- Błędy komend: typ błędu implementuje `Serialize` i niesie komunikat po polsku dla
+- Błędy komend: typ błędu implementuje `Serialize` i niesie komunikat w bieżącym języku dla
   użytkownika.
 - Komendy async: bez `MutexGuard` trzymanego przez `.await`; argumenty posiadane (`String`),
   nie pożyczone.

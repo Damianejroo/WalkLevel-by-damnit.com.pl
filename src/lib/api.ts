@@ -111,6 +111,9 @@ export async function sluchaj<N extends keyof K.Zdarzenia>(
 // ============================================================================
 
 export const appSnapshot = () => wywolaj<K.AppSnapshot>('app_snapshot');
+export const languagePack = () => wywolaj<K.LanguagePack>('language_pack');
+export const languageSet = (code: string) => wywolaj<void>('language_set', { code });
+export const languagesRefresh = () => wywolaj<void>('languages_refresh');
 export const uiReady = (window: K.WindowLabel) => wywolaj<void>('ui_ready', { window });
 export const appQuit = () => wywolaj<void>('app_quit');
 export const windowShowMain = () => wywolaj<void>('window_show_main');

@@ -7,6 +7,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import Popup from './popup-window.svelte';
 import { logUiErrors, wTauri } from '../lib/api';
+import { loadLanguagePack, watchLanguage } from '../lib/language-sync';
 
 logUiErrors();
 
@@ -17,5 +18,8 @@ root.classList.add('okno-przezroczyste');
 if (wTauri) addEventListener('contextmenu', (e) => e.preventDefault());
 // Podgląd: stos w prawym dolnym rogu strony na neutralnym tle (jak nad grą).
 else if (new URLSearchParams(location.search).has('demo')) root.classList.add('podglad-okna');
+
+await loadLanguagePack();
+await watchLanguage();
 
 export default mount(Popup, { target: document.getElementById('app')! });

@@ -710,16 +710,22 @@ pub trait Fetcher {
 /// Pobieranie przez reqwest (blokujące - tylko poza wątkiem tokio, np. w spawn_blocking).
 pub struct HttpFetcher {
     client: reqwest::blocking::Client,
+    max_bytes: usize,
 }
 
 impl HttpFetcher {
     pub fn new() -> Result<Self, DownloadError> {
+        Self::with_limit("Bieznia-profile", MAX_BYTES).ok_or(DownloadError::Offline)
+    }
+
+    /// Inny nagłówek User-Agent i limit treści (pakiety języków są większe od profili).
+    pub fn with_limit(user_agent: &str, max_bytes: usize) -> Option<Self> {
         let client = reqwest::blocking::Client::builder()
-            .user_agent("Bieznia-profile")
+            .user_agent(user_agent)
             .timeout(Duration::from_secs(TIMEOUT_S))
             .build()
-            .map_err(|_| DownloadError::Offline)?;
-        Ok(Self { client })
+            .ok()?;
+        Some(Self { client, max_bytes })
     }
 }
 
@@ -737,7 +743,7 @@ impl Fetcher for HttpFetcher {
         let final_url = response.url().to_string();
         let mut body = Vec::new();
         response
-            .take(MAX_BYTES as u64 + 1)
+            .take(self.max_bytes as u64 + 1)
             .read_to_end(&mut body)
             .map_err(|_| FetchError::Network)?;
         Ok(Fetched { final_url, body })

@@ -4,7 +4,7 @@
 // threshold fields, "add a person with an online account", the report description length,
 // hiding a session online, the achievement date format and text from other users shown literally.
 import type { Browser, Page } from 'playwright-core';
-import { SLOWNIK } from '../src/lib/texts-dictionary.ts';
+import fs from 'node:fs';
 import { napis, znak } from '../src/lib/ui/badge-glyphs.ts';
 
 export interface Result {
@@ -12,9 +12,15 @@ export interface Result {
   problemy: string[];
 }
 
-type Key = keyof typeof SLOWNIK;
-const text = (key: Key, vars: Record<string, string> = {}) =>
-  SLOWNIK[key].replace(/\{([a-z_0-9]+)\}/g, (all, name: string) => vars[name] ?? all);
+// Polish texts (the mock core starts in Polish): locales/pl/<namespace>.json
+const polish = (key: string): string => {
+  const file = new URL(`../locales/pl/${key.slice(0, key.indexOf('.')).replace(/_/g, '-')}.json`, import.meta.url);
+  const text = (JSON.parse(fs.readFileSync(file, 'utf8')) as Record<string, unknown>)[key];
+  if (typeof text !== 'string') throw new Error(`No text ${key}`);
+  return text;
+};
+const text = (key: string, vars: Record<string, string> = {}) =>
+  polish(key).replace(/\{([a-z_0-9]+)\}/g, (all, name: string) => vars[name] ?? all);
 const spaces = (s: string | null) => (s ?? '').replace(/\s+/g, ' ').trim();
 
 async function open(page: Page, address: string, query: string) {

@@ -1,0 +1,103 @@
+{
+  "@@locale": "pl",
+  "profil_online.tytul": "Profil",
+  "profil_online.pokaz": "Pokaż profil",
+  "profil_online.moj_opis": "Tak widzą Twój profil inni. Kto go widzi, ustawisz w zakładce Moje konto.",
+  "@profil_online.moj_opis": {
+    "description": "Zakładka „Ja” nie istnieje od 0.5.0 (nazywa się „Konto”)."
+  },
+  "profil_online.od": "W WalkLevel od {data}",
+  "@profil_online.od": {
+    "placeholders": {
+      "data": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      }
+    }
+  },
+  "profil_online.bieznia": "Bieżnia: {model}",
+  "@profil_online.bieznia": {
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "profil_online.znajomy": "Na liście znajomych",
+  "@profil_online.znajomy": {
+    "description": "Bez rodzaju."
+  },
+  "profil_online.nieznajomy": "Nie jesteście znajomymi",
+  "profil_online.7dni": "Ten tydzień",
+  "@profil_online.7dni": {
+    "description": "0.6.2: serwer liczy tydzień od poniedziałku."
+  },
+  "profil_online.razem": "Od początku",
+  "profil_online.wiersz": "{kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km · {czas}",
+  "@profil_online.wiersz": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "km": {
+        "description": "dystans w km"
+      },
+      "czas": {
+        "description": "czas ruchu sformatowany („1 h 05 min”, „12 min”)"
+      }
+    }
+  },
+  "profil_online.sesje": "{liczba} {liczba, plural, one {sesja} few {sesje} many {sesji} other {sesje}}",
+  "@profil_online.sesje": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "profil_online.gry": "Gry · razem",
+  "profil_online.gry_ukryte": "Ta osoba nie pokazuje wyników w poszczególnych grach.",
+  "profil_online.gry_brak": "Brak danych o grach.",
+  "profil_online.bez_gry": "bez nazwy gry",
+  "profil_online.gra_wiersz": "{kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · {km} km · {czas}",
+  "@profil_online.gra_wiersz": {
+    "placeholders": {
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "km": {
+        "description": "dystans w km"
+      },
+      "czas": {
+        "description": "czas ruchu sformatowany („1 h 05 min”, „12 min”)"
+      }
+    }
+  },
+  "profil_online.moje_ukryte": "Sesje ukryte („Tylko ja”) nie liczą się w wynikach widocznych dla innych.",
+  "profil_online.cudze_ukryte": "Widać tylko sesje, które ta osoba Ci pokazuje.",
+  "profil_online.brak_osiagniec": "Jeszcze bez osiągnięć.",
+  "@profil_online.brak_osiagniec": {
+    "description": "Profil osoby bez zdobytych osiągnięć."
+  },
+  "profil_online.zdobyte_dzis": "dziś",
+  "@profil_online.zdobyte_dzis": {
+    "description": "„zdobyte dziś” w wierszu osiągnięcia na profilu."
+  },
+  "profil_online.zdobyte_wczoraj": "wczoraj",
+  "@profil_online.zdobyte_wczoraj": {
+    "description": "„zdobyte wczoraj” w wierszu osiągnięcia na profilu."
+  },
+  "profil_online.brak_osoby": "Nie ma już tej osoby na liście. Odśwież listę.",
+  "profil_online.inne_gry": "Inne gry ({liczba})",
+  "@profil_online.inne_gry": {
+    "description": "Ostatni wiersz podziału na gry w profilu osoby (`inne_gry`: gry bez nazw).",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "profil_online.dzis": "Dzisiaj",
+  "@profil_online.dzis": {
+    "description": "Karta nad „Ten tydzień” w profilu osoby; tylko gdy serwer podał `dzis`."
+  }
+}

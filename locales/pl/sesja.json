@@ -1,0 +1,92 @@
+{
+  "@@locale": "pl",
+  "sesja.tytul_dostepnosc": "Szczegóły sesji",
+  "sesja.tytul": "Sesja",
+  "sesja.brak": "Tej sesji już nie ma. Mogła zostać usunięta.",
+  "sesja.kiedy": "{data} · {godzina}–{godzina_koniec}",
+  "@sesja.kiedy": {
+    "placeholders": {
+      "data": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      },
+      "godzina": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      },
+      "godzina_koniec": {}
+    }
+  },
+  "sesja.kto": "{osoba} · {profil}",
+  "@sesja.kto": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      },
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "sesja.kroki": "Kroki",
+  "sesja.dystans": "Dystans",
+  "sesja.czas": "Czas ruchu",
+  "sesja.srednio": "Średnie tempo",
+  "sesja.kadencja": "Kroki/min",
+  "sesja.wykres": "Cała sesja",
+  "sesja.skad": "Źródło",
+  "sesja.skad.symulator": "Symulator bieżni",
+  "sesja.skad.bieznia": "Bieżnia",
+  "@sesja.skad.bieznia": {
+    "description": "Gdy model nieznany."
+  },
+  "sesja.skad.oprogramowanie": "oprogramowanie bieżni {wersja_bt}",
+  "@sesja.skad.oprogramowanie": {
+    "placeholders": {
+      "wersja_bt": {}
+    }
+  },
+  "sesja.skad.aplikacja": "WalkLevel {wersja}",
+  "@sesja.skad.aplikacja": {
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "sesja.online.etykieta": "Konto online: {stan}",
+  "@sesja.online.etykieta": {
+    "placeholders": {
+      "stan": {}
+    }
+  },
+  "sesja.online.ukryta": "ukryta, widać ją tylko tutaj",
+  "sesja.online.wyslana": "wysłana",
+  "sesja.online.czeka": "czeka na wysłanie",
+  "sesja.online.odrzucona": "serwer jej nie przyjął, WalkLevel spróbuje ponownie za dobę",
+  "@sesja.online.odrzucona": {
+    "description": "Od 0.5.2 odrzucone sesje są ponawiane po dobie, ale gracz tego nie widzi."
+  },
+  "sesja.online.ukryj": "Ukryj na koncie online",
+  "@sesja.online.ukryj": {
+    "description": "Podpowiedź ikony oka."
+  },
+  "sesja.online.pokaz": "Ukryta na koncie online. Kliknij, żeby pokazać.",
+  "sesja.online.symulator": "Sesje z symulatora nie trafiają na konto online.",
+  "sesja.usun.tytul": "Usuń sesję",
+  "sesja.usun.opis": "Sesja zniknie z historii na tym komputerze i z konta online. Tego nie da się cofnąć. Przytrzymaj przycisk, żeby usunąć.",
+  "@sesja.usun.opis": {
+    "description": "Wariant bez konta: bez „i z konta online”."
+  },
+  "sesja.usun.przycisk": "Usuń sesję",
+  "sesja.usunieta": "Usunięto sesję.",
+  "sesja.online.kto": "Kto ją widzi: {kto}. Zmienisz to w Konto online > Moje konto.",
+  "@sesja.online.kto": {
+    "description": "`{kto}` z `moje.widocznosc.*`. Tylko dla wybranej osoby z kontem.",
+    "placeholders": {
+      "kto": {}
+    }
+  },
+  "sesja.usun.opis_lokalnie": "Sesja zniknie z historii na tym komputerze. Tego nie da się cofnąć. Przytrzymaj przycisk, żeby usunąć.",
+  "@sesja.usun.opis_lokalnie": {
+    "description": "Wariant `sesja.usun.opis` dla osoby bez konta online."
+  }
+}

@@ -61,6 +61,9 @@ pub const SHARED_KEYS: &[&str] = &[
     "friends_panel",
     "friends_panel_side",
     "friends_panel_collapsed",
+    // język (0.6.4): wybór i ostatnia zastosowana prośba instalatora (docs/i18n.md)
+    "language",
+    "installer_language_id",
 ];
 /// Klucze wyglądu - osobne dla każdej osoby.
 pub const LOOK_KEYS: &[&str] = &[

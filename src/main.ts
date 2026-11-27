@@ -3,6 +3,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import App from './App.svelte';
 import { logUiErrors } from './lib/api';
+import { loadLanguagePack } from './lib/language-sync';
 
 logUiErrors();
 
@@ -20,5 +21,8 @@ if (szer >= 320) {
   root.style.setProperty('--podglad-szer', `${szer}px`);
   root.classList.add('podglad-szer');
 }
+
+// Teksty w języku z rdzenia przed pierwszym malowaniem (bez nich zostaje pakiet wbudowany).
+await loadLanguagePack();
 
 export default mount(App, { target: document.getElementById('app')! });

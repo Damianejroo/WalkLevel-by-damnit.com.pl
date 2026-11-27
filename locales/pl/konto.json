@@ -1,0 +1,219 @@
+{
+  "@@locale": "pl",
+  "konto.karta.tytul": "Konto online · {osoba} (opcjonalne)",
+  "@konto.karta.tytul": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "konto.karta.opis": "Bez konta wszystko działa na tym komputerze i nic nie jest wysyłane. Konto daje wyniki online, znajomych i ranking. Każda osoba może mieć własne konto albo żadnego.",
+  "konto.karta.zaloz": "Załóż konto",
+  "konto.karta.zaloguj": "Zaloguj się",
+  "konto.karta.otworz": "Znajomi, ranking i ustawienia konta",
+  "konto.co_wysylamy.tytul": "Co trafia na serwer",
+  "konto.co_wysylamy": "Na serwer trafia: e-mail, pseudonim i sesje osoby, do której należy konto (data, kroki, dystans, czas ruchu, model bieżni, nazwa gry, jeśli jest pokazywana). Nie trafiają: nazwy osób, ustawienia, kolory i sesje z symulatora.",
+  "@konto.co_wysylamy": {
+    "description": "„nazwy gier” nie trafiają było nieaktualne od podziału na gry (0.5.0). Sprawdzić z regulaminem."
+  },
+  "konto.logowanie.tytul": "Logowanie",
+  "konto.rejestracja.tytul": "Nowe konto",
+  "konto.reset.tytul": "Nie pamiętam hasła",
+  "konto.potwierdz.tytul": "Potwierdź e-mail",
+  "konto.tytul_ogolny": "Konto",
+  "konto.pole.email": "E-mail",
+  "konto.pole.haslo": "Hasło",
+  "konto.pole.haslo2": "Powtórz hasło",
+  "konto.pole.pseudonim": "Pseudonim (widzą go inni)",
+  "@konto.pole.pseudonim": {
+    "description": "Widać go też w rankingu i na liście osób."
+  },
+  "konto.pole.kod": "Kod zaproszenia",
+  "konto.kod_opis": "Konto założysz tylko z kodem zaproszenia. Kod da Ci ktoś, kto już ma konto.",
+  "konto.nowa_osoba_opis": "Konto będzie nową osobą w aplikacji, z nazwą taką jak pseudonim.",
+  "konto.dla_osoby": "Konto dla osoby {osoba}.",
+  "@konto.dla_osoby": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "konto.pseudonim_zasady": "Pseudonim: 3–24 znaki, litery, cyfry, spacja, podkreślnik, łącznik i kropka. Nie wpisuj imienia i nazwiska.",
+  "konto.haslo_zasady": "Hasło: co najmniej {liczba} {liczba, plural, one {znak} few {znaki} many {znaków} other {znaki}}.",
+  "@konto.haslo_zasady": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "konto.zapamietaj": "Zapamiętaj logowanie",
+  "konto.zapamietaj_opis": "Hasło nie jest zapisywane. Windows przechowuje tylko klucz logowania.",
+  "@konto.zapamietaj_opis": {
+    "description": "Bez słowa „token”."
+  },
+  "konto.regulamin_zgoda": "Akceptuję regulamin i politykę prywatności",
+  "konto.regulamin_wersja": "Wersja z {data}",
+  "@konto.regulamin_wersja": {
+    "placeholders": {
+      "data": {
+        "description": "„26.11.2026”, „18:40”, „Dziś”/„Wczoraj”/„24.11”"
+      }
+    }
+  },
+  "konto.regulamin_czytaj": "Przeczytaj regulamin i politykę prywatności",
+  "konto.przycisk.zaloguj": "Zaloguj się",
+  "konto.przycisk.zaloz": "Załóż konto",
+  "konto.trwa.logowanie": "Loguję…",
+  "konto.trwa.zakladanie": "Zakładam konto…",
+  "konto.trwa.wysylanie": "Wysyłam…",
+  "konto.link.nie_pamietam": "Nie pamiętam hasła",
+  "konto.link.zaloz": "Nie masz konta? Załóż je",
+  "konto.link.mam_konto": "Masz już konto? Zaloguj się",
+  "konto.link.do_logowania": "Wróć do logowania",
+  "konto.link.przejdz": "Przejdź do logowania",
+  "konto.rejestracja.gotowe": "Konto założone. Otwórz e-mail od WalkLevel i kliknij link potwierdzający (sprawdź też spam). Do tego czasu funkcje online nie działają.",
+  "konto.reset.opis": "Na Twój adres przyjdzie link do ustawienia nowego hasła. Link działa 30 minut. Po zmianie hasła trzeba zalogować się ponownie na każdym komputerze.",
+  "konto.reset.wyslij": "Wyślij link",
+  "konto.reset.wyslano": "Jeśli konto z tym adresem istnieje, przyjdzie na nie e-mail z linkiem. Sprawdź też spam.",
+  "konto.blad.hasla_rozne": "Hasła się różnią. Wpisz to samo hasło w obu polach.",
+  "konto.blad.regulamin": "Zaznacz akceptację regulaminu, żeby założyć konto.",
+  "konto.zalogowano": "Zalogowano jako {pseudonim}.",
+  "@konto.zalogowano": {
+    "placeholders": {
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "konto.wylogowano": "Wylogowano.",
+  "konto.usunieto": "Usunięto konto.",
+  "konto.wygaslo": "Logowanie osoby {osoba} wygasło albo hasło zostało zmienione. Zaloguj się ponownie w Ustawienia > Konto i osoby.",
+  "@konto.wygaslo": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "konto.przypiete": "To konto należy już do osoby {osoba} na tym komputerze. Przełącz się na nią.",
+  "@konto.przypiete": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "konto.przypiete_nieznana": "inna osoba",
+  "@konto.przypiete_nieznana": {
+    "description": "Gdy nazwy nie da się ustalić (dziś „?”)."
+  },
+  "konto.email.niepotwierdzony": "Adres e-mail nie jest potwierdzony. Bez tego nie odzyskasz hasła.",
+  "konto.email.wyslij_link": "Wyślij link potwierdzający",
+  "konto.email.wyslano_toast": "Link potwierdzający jest w drodze na {email}. Kliknij go w wiadomości (sprawdź też spam).",
+  "@konto.email.wyslano_toast": {
+    "placeholders": {
+      "email": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "konto.email.wyslano": "Wysłano link potwierdzający. Sprawdź skrzynkę.",
+  "konto.email.juz": "Adres e-mail jest już potwierdzony.",
+  "konto.email.potwierdzony": "Potwierdzono adres e-mail.",
+  "@konto.email.potwierdzony": {
+    "description": "Krótko; reszta wynika z kontekstu."
+  },
+  "konto.regulamin.zmiana_tytul": "Regulamin konta się zmienił",
+  "@konto.regulamin.zmiana_tytul": {
+    "description": "Bez „zaktualizowaliśmy”."
+  },
+  "konto.regulamin.zmiana_opis": "Przeczytaj zmiany i zaakceptuj je, żeby korzystać z nowych funkcji: podziału wyników na gry, poziomów i osiągnięć widocznych dla znajomych. Do tego czasu sesje wysyłają się jak dotąd, bez nazw gier i trybu.",
+  "@konto.regulamin.zmiana_opis": {
+    "description": "0.6.2: sesje bez akceptacji idą jak dotąd (bez pól gier) - stare „czekają na komputerze” było nieprawdą."
+  },
+  "konto.regulamin.czytaj": "Przeczytaj",
+  "konto.regulamin.akceptuj": "Akceptuję",
+  "konto.regulamin.dziekujemy": "Dziękujemy. Regulamin zaakceptowany.",
+  "konto.blad.pseudonim_spacje": "Pseudonim nie może zaczynać się ani kończyć spacją.",
+  "konto.blad.pseudonim_dlugosc": "Pseudonim musi mieć od {min} do {max} znaków.",
+  "@konto.blad.pseudonim_dlugosc": {
+    "placeholders": {
+      "min": {},
+      "max": {}
+    }
+  },
+  "konto.blad.pseudonim_znaki": "Pseudonim może mieć tylko litery, cyfry, spację, podkreślnik, łącznik i kropkę.",
+  "konto.blad.pseudonim_zarezerwowany": "Ten pseudonim jest zajęty. Wybierz inny.",
+  "konto.blad.kod": "Wpisz kod zaproszenia. Da Ci go ktoś, kto już ma konto.",
+  "konto.blad.email": "Wpisz poprawny adres e-mail, np. imie@poczta.pl.",
+  "konto.blad.haslo_krotkie": "Hasło musi mieć co najmniej {liczba} {liczba, plural, one {znak} few {znaki} many {znaków} other {znaki}}.",
+  "@konto.blad.haslo_krotkie": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "konto.blad.internet": "Brak połączenia z internetem. Sprawdź sieć. Wyniki zostają na komputerze i wyślą się później.",
+  "@konto.blad.internet": {
+    "description": "0.6.2: zrozumiale dla każdego (zgłoszenie Damiana)."
+  },
+  "konto.blad.400": "Serwer nie przyjął tych danych. Sprawdź pola i spróbuj ponownie.",
+  "konto.blad.403": "Najpierw potwierdź adres e-mail: kliknij link w wiadomości od WalkLevel. Nowy link wyślesz w zakładce Moje konto.",
+  "konto.blad.404": "Tego nie ma już na serwerze. Odśwież listę.",
+  "konto.blad.404_funkcja": "Ta funkcja jeszcze nie działa na serwerze. Spróbuj później.",
+  "konto.blad.413": "Za dużo danych naraz. Spróbuj ponownie za chwilę.",
+  "konto.blad.429": "Za dużo prób. Odczekaj chwilę i spróbuj ponownie.",
+  "konto.blad.429_logowanie": "Za dużo prób logowania. Spróbuj za minutę.",
+  "konto.blad.logowanie": "Nieprawidłowy e-mail lub hasło.",
+  "konto.blad.500": "Serwer kont chwilowo nie odpowiada. Wyniki zostają na komputerze i wyślą się później.",
+  "konto.blad.kod_inny": "Serwer kont chwilowo nie działa poprawnie. Wyniki zostają na komputerze. Spróbuj później.",
+  "@konto.blad.kod_inny": {
+    "description": "Bez kodu dla gracza (kod jest w dzienniku)."
+  },
+  "konto.blad.niezalogowany": "Zaloguj się, żeby korzystać z funkcji online.",
+  "konto.blad.sesja_wygasla": "Logowanie wygasło. Zaloguj się ponownie w Ustawienia > Konto i osoby.",
+  "@konto.blad.sesja_wygasla": {
+    "description": "„Sesja” znaczy w aplikacji co innego (sesja chodzenia)."
+  },
+  "konto.blad.aktualizacja": "Ta wersja WalkLevel jest za stara dla konta online. Zaktualizuj aplikację: kliknij Aktualizuj na górnym pasku.",
+  "@konto.blad.aktualizacja": {
+    "description": "Tekst zastępczy, gdy serwer nie poda własnego."
+  },
+  "konto.blad.przekierowanie": "Połączenie z serwerem kont przerwano dla bezpieczeństwa. Jeśli sieć wymaga logowania (np. Wi-Fi w hotelu), zaloguj się w przeglądarce i spróbuj ponownie.",
+  "konto.blad.za_duza_odpowiedz": "Serwer odpowiedział niezrozumiale. Spróbuj później.",
+  "@konto.blad.za_duza_odpowiedz": {
+    "description": "Trzy rzadkie przypadki jednym tekstem."
+  },
+  "konto.blad.format": "Serwer odpowiedział niezrozumiale. Spróbuj później.",
+  "konto.blad.adres_https": "Adres serwera kont w konfiguracji jest błędny.",
+  "@konto.blad.adres_https": {
+    "description": "Błąd konfiguracji."
+  },
+  "konto.blad.adres": "Adres serwera kont w konfiguracji jest błędny.",
+  "konto.blad.sejf": "Nie da się zapamiętać logowania w tym Windows. Po zamknięciu WalkLevel trzeba będzie zalogować się ponownie.",
+  "@konto.blad.sejf": {
+    "description": "Dziś tylko w logu."
+  },
+  "konto.sejf.opis": "WalkLevel: logowanie do konta online",
+  "@konto.sejf.opis": {
+    "description": "Opis wpisu w Menedżerze poświadczeń Windows."
+  },
+  "konto.blad.trwa": "WalkLevel już to robi. Poczekaj chwilę.",
+  "@konto.blad.trwa": {
+    "description": "0.6.2: wczytywanie danych już tego nie pokazuje (drugie wczytanie czeka na pierwsze)."
+  },
+  "konto.blad.zapis": "Nie udało się zapisać danych konta na tym komputerze.",
+  "konto.blad.opis_dlugosc": "Opis może mieć najwyżej {liczba} znaków.",
+  "@konto.blad.opis_dlugosc": {
+    "description": "Ten sam tekst zwraca serwer (400).",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  }
+}

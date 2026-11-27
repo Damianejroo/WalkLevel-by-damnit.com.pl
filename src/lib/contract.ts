@@ -120,8 +120,41 @@ export interface SliceMap {
   report: ReportView;
   models: ModelsView;
   bubble: BubbleView;          // dla okna "przycisk"
+  language: LanguageView;      // 0.6.4: język (docs/i18n.md)
 }
 export type SliceName = keyof SliceMap;
+
+// ============================================================================
+// Język (0.6.4, docs/i18n.md)
+// ============================================================================
+
+/** Gdzie jest język: wbudowany w program, z instalatora, pobrany, do pobrania z repozytorium. */
+export type LanguageAvailability = 'built-in' | 'installed' | 'downloaded' | 'download';
+
+export interface LanguageEntry {
+  code: string;                // BCP 47: „en”, „pl”, „pt-BR”
+  name: string;                // nazwa w tym języku („Polski”)
+  englishName: string;
+  status: 'complete' | 'in-progress';
+  direction: 'ltr' | 'rtl';
+  availability: LanguageAvailability;
+}
+
+export interface LanguageView {
+  chosen: string;              // wybór (zapisany w ustawieniach wspólnych)
+  shown: string;               // język na ekranie (inny, dopóki wybrany się nie pobierze)
+  direction: 'ltr' | 'rtl';
+  languages: LanguageEntry[];
+  download: { code: string; done: number; total: number } | null;
+  error: string | null;        // ostatni błąd pobierania (komunikat w bieżącym języku)
+}
+
+/** Pakiety języka na ekranie dla okna (`language_pack`); pakiet wbudowany okno ma samo. */
+export interface LanguagePack {
+  code: string;
+  direction: string;
+  overlays: { code: string; texts: Record<string, string> }[];
+}
 export interface SliceEvent<K extends SliceName = SliceName> {
   rev: number;
   slice: K;

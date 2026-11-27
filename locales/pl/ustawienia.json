@@ -1,0 +1,571 @@
+{
+  "@@locale": "pl",
+  "ustawienia.tytul": "Ustawienia",
+  "ustawienia.kat.osoby.nazwa": "Konto i osoby",
+  "ustawienia.kat.osoby.opis": "Osoby, konto online, kto widzi wyniki",
+  "ustawienia.kat.sterowanie.nazwa": "Gry i sterowanie",
+  "ustawienia.kat.sterowanie.opis": "Profile gier, tryb sterowania, klawisz włączania",
+  "ustawienia.kat.bieznia.nazwa": "Bieżnia",
+  "ustawienia.kat.bieznia.opis": "Twoja bieżnia, start i stop taśmy, symulator",
+  "ustawienia.kat.poziomy.nazwa": "Poziomy i powiadomienia",
+  "ustawienia.kat.poziomy.opis": "Powiadomienia o osiągnięciach nad grą, dźwięk",
+  "ustawienia.kat.wyglad.nazwa": "Wygląd i okno",
+  "ustawienia.kat.wyglad.opis": "Język, motyw, kolor, wielkość tekstu, okno, przycisk na ekranie",
+  "@ustawienia.kat.wyglad.opis": {
+    "description": "Język od 0.6.4."
+  },
+  "ustawienia.kat.dane.nazwa": "Dane i kopia",
+  "ustawienia.kat.dane.opis": "Kopia danych, przeniesienie na inny komputer",
+  "ustawienia.kat.pomoc.nazwa": "Pomoc i diagnostyka",
+  "ustawienia.kat.pomoc.opis": "Zgłoś problem, dziennik, aktualizacje",
+  "ustawienia.wartosc.osoby": "{osoba} · konto {pseudonim}",
+  "@ustawienia.wartosc.osoby": {
+    "description": "Wartość przy zwiniętej kategorii.",
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      },
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "ustawienia.wartosc.sterowanie": "{profil} · {tryb} · {klawisz_wlaczania}",
+  "@ustawienia.wartosc.sterowanie": {
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      },
+      "tryb": {
+        "description": "nazwa trybu: Chodzenie, Klawisze, Pad, Trening"
+      },
+      "klawisz_wlaczania": {
+        "description": "np. „F8”"
+      }
+    }
+  },
+  "ustawienia.wartosc.bieznia_symulator": "symulator",
+  "ustawienia.wartosc.bieznia_brak": "nie wybrano",
+  "ustawienia.wartosc.bieznia": "{model}",
+  "@ustawienia.wartosc.bieznia": {
+    "description": "Nazwa modelu zamiast nazwy Bluetooth.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "ustawienia.wartosc.poziomy_wl": "powiadomienia włączone",
+  "ustawienia.wartosc.poziomy_wyl": "powiadomienia wyłączone",
+  "ustawienia.wartosc.motyw": "jak Windows / jasny / ciemny",
+  "ustawienia.wartosc.pomoc": "wersja {wersja}",
+  "@ustawienia.wartosc.pomoc": {
+    "placeholders": {
+      "wersja": {
+        "description": "numer wersji aplikacji"
+      }
+    }
+  },
+  "ustawienia.osoby.tytul": "Osoby",
+  "ustawienia.osoby.opis": "Każda osoba ma własne profile gier, ustawienia i historię kroków.",
+  "ustawienia.osoby.wiersz": "{liczba} {liczba, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}} · dziś {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}} · konto {pseudonim}",
+  "@ustawienia.osoby.wiersz": {
+    "description": "Bez skrótu „prof.”, z odmianą. Część „· konto …” tylko z kontem.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "kroki": {
+        "description": "liczba kroków"
+      },
+      "pseudonim": {
+        "description": "dane konta online"
+      }
+    }
+  },
+  "ustawienia.osoby.dodaj": "Dodaj osobę",
+  "ustawienia.osoby.dodaj_z_kontem": "Dodaj osobę z kontem online",
+  "ustawienia.osoby.edytuj": "Edytuj: {osoba}",
+  "@ustawienia.osoby.edytuj": {
+    "description": "Ikona ołówka w wierszu.",
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "ustawienia.profile.tytul": "Profile gier · {osoba}",
+  "@ustawienia.profile.tytul": {
+    "placeholders": {
+      "osoba": {
+        "description": "nazwa osoby na tym komputerze"
+      }
+    }
+  },
+  "ustawienia.profile.opis": "Sterowanie i kolor zapisują się w zaznaczonym profilu gry.",
+  "ustawienia.profile.nowy": "Nowy profil gry",
+  "ustawienia.profile.podsumowanie.pad": "Pad · {liczba} {liczba, plural, one {stopień} few {stopnie} many {stopni} other {stopnie}} · do {kmh} km/h",
+  "@ustawienia.profile.podsumowanie.pad": {
+    "description": "Dziś zawsze „skoki”, także przy 5.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "ustawienia.profile.podsumowanie.klawisze": "Klawisze · chód {kmh} km/h, bieg {kmh_bieg} km/h",
+  "@ustawienia.profile.podsumowanie.klawisze": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "kmh_bieg": {}
+    }
+  },
+  "ustawienia.profile.podsumowanie.trening": "Trening · {min_kmh}–{max_kmh} km/h",
+  "@ustawienia.profile.podsumowanie.trening": {
+    "placeholders": {
+      "min_kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "max_kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "ustawienia.profile.podsumowanie.chodzenie": "Chodzenie · chód od {kmh} km/h",
+  "@ustawienia.profile.podsumowanie.chodzenie": {
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "ustawienia.wyglad.kolor": "Kolor · zapisuje się w profilu gry {profil}",
+  "@ustawienia.wyglad.kolor": {
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "ustawienia.sterowanie.tytul": "Sterowanie · {profil}",
+  "@ustawienia.sterowanie.tytul": {
+    "placeholders": {
+      "profil": {
+        "description": "nazwa profilu gry"
+      }
+    }
+  },
+  "ustawienia.sterowanie.wybor": "Tryb",
+  "@ustawienia.sterowanie.wybor": {
+    "description": "Nazwa przełącznika trybów dla czytnika ekranu."
+  },
+  "ustawienia.sterowanie.aktywny": "Ten tryb działa teraz. Możesz też wybrać inny i ustawić go na później.",
+  "@ustawienia.sterowanie.aktywny": {
+    "description": "Bez znaku ✓ w treści (ikona w przełączniku wystarczy)."
+  },
+  "ustawienia.sterowanie.nieaktywny": "Teraz działa tryb {tryb_aktywny}. Te ustawienia zadziałają po przełączeniu na tryb {tryb}.",
+  "@ustawienia.sterowanie.nieaktywny": {
+    "placeholders": {
+      "tryb_aktywny": {},
+      "tryb": {
+        "description": "nazwa trybu: Chodzenie, Klawisze, Pad, Trening"
+      }
+    }
+  },
+  "ustawienia.sterowanie.wlacz_tryb": "Przełącz na {tryb}",
+  "@ustawienia.sterowanie.wlacz_tryb": {
+    "placeholders": {
+      "tryb": {
+        "description": "nazwa trybu: Chodzenie, Klawisze, Pad, Trening"
+      }
+    }
+  },
+  "ustawienia.chodzenie.klawisz_chodu": "Klawisz chodu",
+  "@ustawienia.chodzenie.klawisz_chodu": {
+    "description": "Rola przycisku przypisywania."
+  },
+  "ustawienia.chodzenie.klawisz_biegu": "Klawisz biegu",
+  "ustawienia.chodzenie.klawisze_w_grze": "Klawisze w grze: Włączone / Tryb próbny",
+  "@ustawienia.chodzenie.klawisze_w_grze": {
+    "description": "Główna zmiana zgłoszona przez Damiana. „Wyjście” i „Podgląd” nic nie mówiły graczowi."
+  },
+  "ustawienia.chodzenie.klawisze_w_grze_opis": "Tryb próbny: aplikacja pokazuje, co by nacisnęła, ale gra nic nie dostaje. Do sprawdzenia progów bez ruszania postacią.",
+  "@ustawienia.chodzenie.klawisze_w_grze_opis": {
+    "description": "Pod przełącznikiem."
+  },
+  "ustawienia.chodzenie.chod_od": "Chód od",
+  "@ustawienia.chodzenie.chod_od": {
+    "description": "Pole z km/h."
+  },
+  "ustawienia.chodzenie.bieg_od": "Bieg od",
+  "ustawienia.chodzenie.histereza": "Bieg wyłącza się {kmh} km/h poniżej progu, żeby {klawisz_biegu} nie włączał się i nie wyłączał co chwilę.",
+  "@ustawienia.chodzenie.histereza": {
+    "description": "Z prawdziwym klawiszem zamiast „Shift”.",
+    "placeholders": {
+      "kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "ustawienia.chodzenie.szybkie_stop": "Szybkie zatrzymanie postaci",
+  "ustawienia.chodzenie.szybkie_stop_opis": "Postać staje od razu, gdy taśma gwałtownie zwalnia.",
+  "ustawienia.chodzenie.szybkie_stop_dostepnosc": "Szybkie zatrzymanie postaci",
+  "ustawienia.klawisze.klawisz_chodu": "Klawisz chodu",
+  "ustawienia.klawisze.klawisz_biegu": "Klawisz biegu",
+  "ustawienia.klawisze.bez": "Bez klawisza / Tempo, gdy nie trzymasz klawisza i po wyłączeniu sterowania.",
+  "@ustawienia.klawisze.bez": {
+    "description": "Pole z km/h przy „Klawisz puszczony: Wolne tempo” (0.6.1)."
+  },
+  "ustawienia.klawisze.chod": "{klawisz_chodu} / tempo chodu",
+  "@ustawienia.klawisze.chod": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "ustawienia.klawisze.bieg": "{klawisz_chodu} + {klawisz_biegu} / tempo biegu",
+  "@ustawienia.klawisze.bieg": {
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      },
+      "klawisz_biegu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "ustawienia.klawisze.opis": "Trzymany klawisz ustawia prędkość taśmy. Gra też dostaje te klawisze.",
+  "@ustawienia.klawisze.opis": {
+    "description": "Dziś tryb nie ma żadnego opisu w Ustawieniach. Jeśli gra nie dostaje klawiszy w tym trybie, drugie zdanie usunąć (sprawdzić w kodzie 0.6.0)."
+  },
+  "ustawienia.pad.brak": "Nie widać pada. Podłącz DualSense, DualShock 4 albo pad Xbox kablem lub przez Bluetooth.",
+  "ustawienia.pad.stan": "{pad}: wychylenie {procent}%, stopień {stopien}.",
+  "@ustawienia.pad.stan": {
+    "placeholders": {
+      "pad": {
+        "description": "nazwa pada („DualSense (Bluetooth)”)"
+      },
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      },
+      "stopien": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "ustawienia.pad.drabinka_opis": "Przeciągnij kółko, żeby ustawić, od jakiego wychylenia gałki zaczyna się stopień. Trójkąt pokazuje, gdzie jest gałka teraz.",
+  "ustawienia.pad.drabinka_dostepnosc": "Progi stopni pada",
+  "ustawienia.pad.liczba": "Liczba stopni",
+  "ustawienia.pad.puszczona": "Gałka puszczona",
+  "ustawienia.pad.puszczona.stop": "Taśma staje",
+  "ustawienia.pad.puszczona.wolno": "Tempo stopnia 1",
+  "@ustawienia.pad.puszczona.wolno": {
+    "description": "Taśma jedzie dalej najwolniejszym tempem."
+  },
+  "ustawienia.pad.puszczona.zero": "0 km/h (próba)",
+  "ustawienia.pad.odliczanie": "Ta bieżnia po zatrzymaniu rusza dopiero po ok. {sekundy} s. Wybierz „Tempo stopnia 1”, żeby taśma nie stawała i gałka działała od razu.",
+  "@ustawienia.pad.odliczanie": {
+    "placeholders": {
+      "sekundy": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "ustawienia.pad.stopien": "Stopień {stopien} / od {procent}% wychylenia",
+  "@ustawienia.pad.stopien": {
+    "placeholders": {
+      "stopien": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      },
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      }
+    }
+  },
+  "ustawienia.pad.stopien_puszczona": "Gałka puszczona",
+  "@ustawienia.pad.stopien_puszczona": {
+    "description": "Pierwszy wiersz listy prędkości."
+  },
+  "ustawienia.trening.opis": "Sterowanie bieżnią z komputera, bez gry. {klawisz_wlaczania} uruchamia i zatrzymuje taśmę, {klawisz_szybciej} i {klawisz_wolniej} zmieniają poziom. Poziom wybierzesz też kliknięciem na ekranie głównym.",
+  "@ustawienia.trening.opis": {
+    "placeholders": {
+      "klawisz_wlaczania": {
+        "description": "np. „F8”"
+      },
+      "klawisz_szybciej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      },
+      "klawisz_wolniej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "ustawienia.trening.poziom": "Poziom {poziom}",
+  "@ustawienia.trening.poziom": {
+    "description": "Pole z km/h.",
+    "placeholders": {
+      "poziom": {
+        "description": "numer stopnia pada, numer poziomu treningu albo poziomu XP"
+      }
+    }
+  },
+  "ustawienia.wlaczanie.tytul": "Klawisz włączania sterowania",
+  "ustawienia.wlaczanie.rola": "Klawisz włączania",
+  "@ustawienia.wlaczanie.rola": {
+    "description": "Rola przycisku przypisywania."
+  },
+  "ustawienia.wlaczanie.opis": "Kliknij przycisk niżej i naciśnij klawisz albo kombinację, np. Ctrl+Shift+F8. Działa też w trakcie gry. Skróty Windows i nakładek (np. Alt+Tab, Shift+Tab) nie zadziałają.",
+  "ustawienia.wlaczanie.pad_naglowek": "Albo przycisk na padzie (DualSense, DualShock, Xbox)",
+  "ustawienia.wlaczanie.pad_przypisz": "Przypisz przycisk pada",
+  "ustawienia.wlaczanie.pad_czekam": "Naciśnij przycisk na padzie…",
+  "ustawienia.wlaczanie.pad_podpowiedz": "Przycisk pada działa jak klawisz włączania, także w trakcie gry. Wybierz taki, którego gra nie używa, np. panel dotykowy, Create albo wciśnięcie gałki.",
+  "ustawienia.wlaczanie.pad_usun": "Usuń",
+  "ustawienia.wlaczanie.pad_ostrzezenie": "{przycisk_pada} w wielu grach to skok albo akcja. Lepiej wybierz inny przycisk.",
+  "@ustawienia.wlaczanie.pad_ostrzezenie": {
+    "description": "Komunikat po przypisaniu Krzyżyka/Kółka/A/B.",
+    "placeholders": {
+      "przycisk_pada": {
+        "description": "np. „Panel dotykowy”"
+      }
+    }
+  },
+  "ustawienia.tempo.tytul": "Klawisze szybciej i wolniej",
+  "@ustawienia.tempo.tytul": {
+    "description": "Karta pod kartą klawisza włączania."
+  },
+  "ustawienia.tempo.opis": "W trybie Trening zmieniają poziom, z symulatorem jego prędkość. Działają też w trakcie gry. Kombinacje są dozwolone, np. Ctrl+F7.",
+  "ustawienia.tempo.szybciej": "Szybciej",
+  "@ustawienia.tempo.szybciej": {
+    "description": "Rola przycisku przypisywania („Szybciej: F7”)."
+  },
+  "ustawienia.tempo.wolniej": "Wolniej",
+  "@ustawienia.tempo.wolniej": {
+    "description": "Jw. („Wolniej: F6”)."
+  },
+  "ustawienia.wlaczanie.zmiana_profilu": "Zmiana profilu gry na ekranie głównym",
+  "ustawienia.wlaczanie.zmiana_profilu_opis": "Kliknięcie nazwy profilu otwiera listę profili. Działa, gdy profili jest więcej niż jeden.",
+  "ustawienia.bieznia.tytul": "Twoja bieżnia",
+  "ustawienia.bieznia.opis": "{model}\nTaśma {min_kmh}–{max_kmh} km/h · start ok. {sekundy} s · oprogramowanie {wersja_bt}",
+  "@ustawienia.bieznia.opis": {
+    "description": "Nazwę Bluetooth pokazać w podpowiedzi po najechaniu, nie w treści.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      },
+      "min_kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "max_kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "sekundy": {
+        "description": "liczby czasu"
+      },
+      "wersja_bt": {}
+    }
+  },
+  "ustawienia.bieznia.symulator_opis": "Symulator bieżni · {min_kmh}–{max_kmh} km/h",
+  "@ustawienia.bieznia.symulator_opis": {
+    "placeholders": {
+      "min_kmh": {
+        "description": "prędkość, zakres prędkości"
+      },
+      "max_kmh": {
+        "description": "prędkość, zakres prędkości"
+      }
+    }
+  },
+  "ustawienia.bieznia.brak": "Nie wybrano bieżni. Kliknij Szukaj bieżni na ekranie głównym.",
+  "ustawienia.bieznia.start_stop": "{klawisz_wlaczania} uruchamia i zatrzymuje taśmę",
+  "@ustawienia.bieznia.start_stop": {
+    "placeholders": {
+      "klawisz_wlaczania": {
+        "description": "np. „F8”"
+      }
+    }
+  },
+  "ustawienia.bieznia.start_stop_opis": "Wyłącz, jeśli taśmę uruchamiasz tylko pilotem.",
+  "ustawienia.bieznia.start_stop_dostepnosc": "Start i stop taśmy",
+  "ustawienia.bieznia.symulator": "Symulator bieżni",
+  "ustawienia.bieznia.symulator_przelacznik_opis": "Próba bez bieżni: {klawisz_szybciej} przyspiesza, {klawisz_wolniej} zwalnia. Sesje z symulatora nie dają XP i nie trafiają na konto online.",
+  "@ustawienia.bieznia.symulator_przelacznik_opis": {
+    "description": "Gracz nie wiedział, czemu nie rośnie poziom.",
+    "placeholders": {
+      "klawisz_szybciej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      },
+      "klawisz_wolniej": {
+        "description": "klawisze symulatora i treningu (np. „F7”, „F6”)"
+      }
+    }
+  },
+  "ustawienia.bieznia.modele": "Obsługiwane bieżnie…",
+  "ustawienia.bieznia.modele_podpowiedz": "Lista modeli, pobieranie nowych i dodawanie profilu bieżni z pliku",
+  "ustawienia.bieznia.zapomnij": "Zapomnij bieżnię",
+  "@ustawienia.bieznia.zapomnij": {
+    "description": "Przycisk z przytrzymaniem."
+  },
+  "ustawienia.poziomy.tytul": "Powiadomienia o osiągnięciach i awansach",
+  "ustawienia.poziomy.wlacz": "Powiadomienia nad grą",
+  "ustawienia.poziomy.wlacz_opis": "Pojawiają się w prawym dolnym rogu, także nad grą. Nie przerywają gry: klawisze i kliknięcia dalej trafiają do gry.",
+  "@ustawienia.poziomy.wlacz_opis": {
+    "description": "Bez słowa „fokus”."
+  },
+  "ustawienia.poziomy.dzwiek": "Dźwięk powiadomienia",
+  "ustawienia.poziomy.dzwiek_opis": "Krótki dźwięk przy nowym osiągnięciu i awansie.",
+  "ustawienia.poziomy.przyklad": "Pokaż przykładowe powiadomienie",
+  "ustawienia.wyglad.tytul": "Motyw i okno",
+  "ustawienia.wyglad.motyw": "Motyw",
+  "ustawienia.wyglad.motyw.system": "Jak Windows",
+  "ustawienia.wyglad.motyw.jasny": "Jasny",
+  "ustawienia.wyglad.motyw.ciemny": "Ciemny",
+  "ustawienia.wyglad.duzy_tekst": "Duży tekst",
+  "ustawienia.wyglad.duzy_tekst_opis": "Wszystkie napisy są o 15% większe.",
+  "ustawienia.wyglad.na_wierzchu": "Zawsze na wierzchu",
+  "ustawienia.wyglad.na_wierzchu_opis": "Okno WalkLevel nie chowa się pod grą.",
+  "ustawienia.wyglad.na_wierzchu_blad": "Nie udało się ustawić okna na wierzchu.",
+  "@ustawienia.wyglad.na_wierzchu_blad": {
+    "description": "Komunikat, gdy Windows odmówi."
+  },
+  "ustawienia.wyglad.przycisk": "Przycisk na ekranie",
+  "ustawienia.wyglad.przycisk_opis": "Mały przycisk nad grą. Kliknięcie włącza i wyłącza sterowanie, prawy przycisk myszy otwiera okno WalkLevel.",
+  "ustawienia.wyglad.zmiana_osoby": "Zmiana osoby na pasku",
+  "ustawienia.wyglad.zmiana_osoby_opis": "Awatar na górnym pasku otwiera listę osób. Widać go, gdy osób jest więcej niż jedna.",
+  "ustawienia.dane.tytul": "Kopia danych",
+  "ustawienia.dane.opis": "Zapisz osoby, profile gier i wyniki do pliku, żeby mieć kopię albo przenieść je na inny komputer.",
+  "ustawienia.dane.eksport": "Zapisz kopię…",
+  "@ustawienia.dane.eksport": {
+    "description": "Prostsze słowa."
+  },
+  "ustawienia.dane.import": "Wczytaj kopię…",
+  "ustawienia.dane.przywroc": "Przywróć dane sprzed ostatniego wczytania kopii",
+  "@ustawienia.dane.przywroc": {
+    "description": "Przycisk z przytrzymaniem."
+  },
+  "ustawienia.dane.folder": "Otwórz folder danych",
+  "ustawienia.dane.folder_podpowiedz": "Tu WalkLevel trzyma osoby, profile, historię i ustawienia.",
+  "ustawienia.pomoc.tytul": "Pomoc",
+  "ustawienia.pomoc.zglos": "Zgłoś problem…",
+  "ustawienia.pomoc.logi_bt": "Szczegółowy dziennik Bluetooth",
+  "ustawienia.pomoc.logi_bt_opis": "Zapisuje dokładnie, co aplikacja wymienia z bieżnią. Włącz, gdy połączenie sprawia kłopoty, i wyślij zgłoszenie. Klawisze i dane z gier nie są zapisywane.",
+  "ustawienia.pomoc.nagrywanie": "Nagrywaj odczyty z bieżni",
+  "@ustawienia.pomoc.nagrywanie": {
+    "description": "Funkcja dla autora. Rozważyć ukrycie w wersji instalowanej."
+  },
+  "ustawienia.pomoc.nagrywanie_opis": "Zapisuje prędkość i kroki do pliku w folderze nagrania. Potrzebne tylko na prośbę autora.",
+  "ustawienia.pomoc.dziennik": "Dziennik zdarzeń",
+  "ustawienia.pomoc.folder_logow": "Otwórz folder dziennika",
+  "ustawienia.pomoc.aktualizacje_tytul": "Aktualizacje i informacje",
+  "ustawienia.pomoc.sprawdz": "Sprawdź aktualizacje",
+  "ustawienia.osoby.wiersz_bez_konta": "{liczba} {liczba, plural, one {profil gry} few {profile gier} many {profili gier} other {profile gier}} · dziś {kroki} {kroki, plural, one {krok} few {kroki} many {kroków} other {kroki}}",
+  "@ustawienia.osoby.wiersz_bez_konta": {
+    "description": "Wiersz osoby bez konta online (`ustawienia.osoby.wiersz` bez części „· konto …”).",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "kroki": {
+        "description": "liczba kroków"
+      }
+    }
+  },
+  "ustawienia.sterowanie.aktywny_tryb": "aktywny tryb",
+  "@ustawienia.sterowanie.aktywny_tryb": {
+    "description": "Podpowiedź przy kropce przed nazwą trybu, który działa teraz (zamiast „✓”)."
+  },
+  "ustawienia.wlaczanie.pad_rola": "Przycisk pada",
+  "@ustawienia.wlaczanie.pad_rola": {
+    "description": "Rola przycisku pada: „Przycisk pada: Panel dotykowy”."
+  },
+  "ustawienia.pad.blad.liczba": "Liczba stopni pada: od 2 do 5.",
+  "@ustawienia.pad.blad.liczba": {
+    "description": "Ochrona komendy; interfejs nie pozwala na inne."
+  },
+  "ustawienia.pad.blad.brak": "Nie ma takiego stopnia pada.",
+  "@ustawienia.pad.blad.brak": {
+    "description": "Jw."
+  },
+  "ustawienia.pad.blad.progi": "Stopnie pada: pierwszy od 0%, kolejne co najmniej 5 punktów dalej, najwyżej 100%. Prędkość 0,5–12 km/h.",
+  "@ustawienia.pad.blad.progi": {
+    "description": "Jw."
+  },
+  "ustawienia.trening.blad_predkosc": "Prędkość poziomu treningu: 0,5–20 km/h.",
+  "@ustawienia.trening.blad_predkosc": {
+    "description": "Jw."
+  },
+  "ustawienia.klawisze.puszczony": "Klawisz puszczony",
+  "@ustawienia.klawisze.puszczony": {
+    "description": "Grupa z wyborem w trybie Klawisze (ustawienie `key_idle`)."
+  },
+  "ustawienia.klawisze.puszczony.wolno": "Wolne tempo",
+  "@ustawienia.klawisze.puszczony.wolno": {
+    "description": "Taśma jedzie tempem „Bez klawisza” (jak do 0.6.0)."
+  },
+  "ustawienia.klawisze.puszczony.stop": "Taśma staje",
+  "@ustawienia.klawisze.puszczony.stop": {
+    "description": "Puszczony klawisz zatrzymuje taśmę; wpisany też zamiast liczby w polu „Bez klawisza”."
+  },
+  "ustawienia.klawisze.bez_stoi": "Puść klawisz, a taśma stanie. Wciśnij, a ruszy.",
+  "@ustawienia.klawisze.bez_stoi": {
+    "description": "Opis pola „Bez klawisza” przy „Taśma staje”, bieżnia z rozruchem poniżej 2 s."
+  },
+  "ustawienia.klawisze.bez_stoi_rozruch": "Puść klawisz, a taśma stanie. Wciśnij, a ruszy (rozruch ok. {sekundy} s).",
+  "@ustawienia.klawisze.bez_stoi_rozruch": {
+    "description": "Jw., rozruch bieżni od 2 s (`caps.startDelayS`).",
+    "placeholders": {
+      "sekundy": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "ustawienia.klawisze.przytrzymanie": "Przyspieszaj po przytrzymaniu",
+  "@ustawienia.klawisze.przytrzymanie": {
+    "description": "Grupa z wyborem (ustawienie `key_hold_s`)."
+  },
+  "ustawienia.klawisze.przytrzymanie.od_razu": "Od razu",
+  "@ustawienia.klawisze.przytrzymanie.od_razu": {
+    "description": "Bez opóźnienia (jak do 0.6.0)."
+  },
+  "ustawienia.klawisze.przytrzymanie.sekundy": "{sekundy} s",
+  "@ustawienia.klawisze.przytrzymanie.sekundy": {
+    "description": "1, 2 albo 3 s.",
+    "placeholders": {
+      "sekundy": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "ustawienia.klawisze.przytrzymanie_opis": "Taśma przyspiesza dopiero, gdy trzymasz klawisz tyle sekund - krótkie kliknięcie nic nie zmienia. Puszczenie działa od razu. Gra dostaje klawisze bez opóźnienia.",
+  "@ustawienia.klawisze.przytrzymanie_opis": {
+    "description": "Pod wyborem."
+  },
+  "ustawienia.pomoc.podziekowania": "Pomysłodawca i główny tester: Velczer",
+  "@ustawienia.pomoc.podziekowania": {
+    "description": "Ustawienia > Pomoc i diagnostyka, pod wersją aplikacji; zwykły tekst --text-2, bez ikony i akcentu (decyzja Damiana)."
+  },
+  "ustawienia.wyglad.panel": "Panel znajomych",
+  "@ustawienia.wyglad.panel": {
+    "description": "Przełącznik (ustawienie `friends_panel`, domyślnie włączony)."
+  },
+  "ustawienia.wyglad.panel_opis": "Lista znajomych z boku okna: kto teraz chodzi, w co gra i jak rośnie mu poziom.",
+  "ustawienia.wyglad.panel_strona": "Strona panelu",
+  "@ustawienia.wyglad.panel_strona": {
+    "description": "Wybór Z lewej / Z prawej (domyślnie z prawej)."
+  },
+  "ustawienia.wyglad.panel_strona.lewa": "Z lewej",
+  "ustawienia.wyglad.panel_strona.prawa": "Z prawej",
+  "ustawienia.wyglad.panel_powiadom": "Powiadom, gdy znajomy zacznie chodzić",
+  "@ustawienia.wyglad.panel_powiadom": {
+    "description": "Domyślnie wyłączone."
+  },
+  "ustawienia.wyglad.panel_powiadom_opis": "Krótki komunikat w oknie WalkLevel. Nad grą nic się nie pokazuje."
+}

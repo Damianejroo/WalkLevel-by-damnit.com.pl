@@ -1,0 +1,47 @@
+{
+  "@@locale": "pl",
+  "wspolne.potwierdz": "Na pewno? Kliknij jeszcze raz",
+  "@wspolne.potwierdz": {
+    "description": "Napis groźnego przycisku po pierwszym kliknięciu (26.11: zamiast przytrzymania, które nic nie zapowiadało). Po 4 s wraca."
+  },
+  "wspolne.potwierdz_dostepnosc": "{tekst} - kliknij dwa razy, żeby potwierdzić",
+  "@wspolne.potwierdz_dostepnosc": {
+    "description": "Nazwa dostępna groźnego przycisku.",
+    "placeholders": {
+      "tekst": {}
+    }
+  },
+  "wspolne.zaznaczone": "zaznaczone / niezaznaczone / zaznaczone częściowo",
+  "@wspolne.zaznaczone": {
+    "description": "Dostępność pola wyboru."
+  },
+  "wspolne.edytuj": "Edytuj",
+  "wspolne.edytuj_co": "Edytuj: {nazwa}",
+  "@wspolne.edytuj_co": {
+    "placeholders": {
+      "nazwa": {}
+    }
+  },
+  "wspolne.wybrany": "{nazwa}, wybrany. {opis}",
+  "@wspolne.wybrany": {
+    "placeholders": {
+      "nazwa": {},
+      "opis": {}
+    }
+  },
+  "wspolne.anuluj": "Anuluj",
+  "wspolne.usun": "Usuń",
+  "wspolne.zmien": "Zmień",
+  "wspolne.blad_nieznany": "Coś poszło nie tak. Spróbuj ponownie, a jeśli to wraca, zgłoś problem w Ustawienia > Pomoc i diagnostyka.",
+  "@wspolne.blad_nieznany": {
+    "description": "Ostatnia deska dla nieprzewidzianych błędów z Rust. Nigdy surowy komunikat wyjątku."
+  },
+  "wspolne.blad_zapisu": "Nie udało się zapisać na dysku. Sprawdź, czy jest wolne miejsce, i spróbuj ponownie. ({szczegoly})",
+  "@wspolne.blad_zapisu": {
+    "placeholders": {
+      "szczegoly": {
+        "description": "techniczny dopisek z błędu (zawsze na końcu, w nawiasie)"
+      }
+    }
+  }
+}

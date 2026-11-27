@@ -1,0 +1,67 @@
+{
+  "@@locale": "pl",
+  "pad.ps.krzyzyk": "Krzyżyk",
+  "@pad.ps.krzyzyk": {
+    "description": "Analogicznie: Kółko, Kwadrat, Trójkąt, Create, Options, Panel dotykowy."
+  },
+  "pad.ps.kolko": "Kółko",
+  "pad.ps.kwadrat": "Kwadrat",
+  "pad.ps.trojkat": "Trójkąt",
+  "pad.ps.create": "Create",
+  "pad.ps.options": "Options",
+  "pad.ps.panel_dotykowy": "Panel dotykowy",
+  "pad.ps.l3": "L3 (wciśnięcie lewej gałki)",
+  "pad.ps.r3": "R3 (wciśnięcie prawej gałki)",
+  "pad.xbox.ls": "LS (wciśnięcie lewej gałki)",
+  "pad.xbox.rs": "RS (wciśnięcie prawej gałki)",
+  "pad.xbox.view": "View",
+  "pad.xbox.menu": "Menu",
+  "pad.xbox.xbox": "Xbox",
+  "pad.xbox.a": "A",
+  "pad.xbox.b": "B",
+  "pad.xbox.x": "X",
+  "pad.xbox.y": "Y",
+  "pad.xbox.lb": "LB",
+  "pad.xbox.rb": "RB",
+  "pad.strzalki": "Strzałka w górę / w dół / w lewo / w prawo",
+  "pad.przycisk_nr": "Przycisk {liczba}",
+  "@pad.przycisk_nr": {
+    "description": "Nieznany pad.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "pad.nazwa.xbox": "Pad Xbox {liczba}",
+  "@pad.nazwa.xbox": {
+    "description": "Bez „XInput”.",
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "pad.nazwa.ps": "Pad PlayStation",
+  "pad.nazwa.ps_model": "{model} (Bluetooth/USB)",
+  "@pad.nazwa.ps_model": {
+    "description": "DualSense, DualSense Edge, DualShock 4.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      }
+    }
+  },
+  "pad.nazwa.ogolna": "Pad {liczba}",
+  "@pad.nazwa.ogolna": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "pad.brak": "brak",
+  "@pad.brak": {
+    "description": "Gdy nie przypisano przycisku."
+  }
+}

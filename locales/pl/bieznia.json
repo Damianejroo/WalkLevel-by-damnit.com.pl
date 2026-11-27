@@ -1,0 +1,77 @@
+{
+  "@@locale": "pl",
+  "bieznia.lista.tytul": "Wybierz bieżnię",
+  "bieznia.lista.szukam": "Szukam bieżni w pobliżu (ok. 6 s)…",
+  "bieznia.lista.znalezione": "Bieżnie: {liczba}. Inne urządzenia: {razem}.",
+  "@bieznia.lista.znalezione": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "bieznia.lista.szukaj_ponownie": "Szukaj ponownie",
+  "bieznia.lista.bieznia_podpis": "{model} · sygnał {sygnal}",
+  "@bieznia.lista.bieznia_podpis": {
+    "description": "Gdy model nieznany: „Bieżnia · sygnał {sygnal}”.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      },
+      "sygnal": {
+        "description": "„silny”, „średni” albo „słaby”"
+      }
+    }
+  },
+  "bieznia.lista.bieznia_ogolna": "Bieżnia",
+  "bieznia.lista.inne_naglowek": "Inne urządzenia w pobliżu",
+  "bieznia.lista.inne_podpis": "sygnał {sygnal}",
+  "@bieznia.lista.inne_podpis": {
+    "placeholders": {
+      "sygnal": {
+        "description": "„silny”, „średni” albo „słaby”"
+      }
+    }
+  },
+  "bieznia.lista.bez_nazwy": "Urządzenie bez nazwy",
+  "bieznia.lista.automatycznie": "Znaleziono jedną bieżnię. Łączę…",
+  "@bieznia.lista.automatycznie": {
+    "description": "Krótki komunikat, żeby gracz wiedział, czemu lista zniknęła."
+  },
+  "bieznia.lista.bt_wylaczony.tytul": "Bluetooth jest wyłączony",
+  "bieznia.lista.bt_wylaczony.krok1": "1. Otwórz Start > Ustawienia > Bluetooth i urządzenia.",
+  "bieznia.lista.bt_wylaczony.krok2": "2. Włącz Bluetooth.",
+  "bieznia.lista.bt_wylaczony.krok3": "3. Wróć tutaj i kliknij Szukaj ponownie.",
+  "bieznia.lista.brak.tytul": "Nie widać żadnej bieżni",
+  "bieznia.lista.brak.krok1": "1. Włącz bieżnię pilotem albo przyciskiem.",
+  "bieznia.lista.brak.krok2": "2. Zamknij aplikację bieżni w telefonie (np. KS Fit, Urevo) albo wyłącz w nim Bluetooth. Bieżnia łączy się tylko z jednym urządzeniem naraz.",
+  "bieznia.lista.brak.krok3": "3. Sprawdź, czy Bluetooth jest włączony: Start > Ustawienia > Bluetooth i urządzenia.",
+  "bieznia.lista.brak.krok4": "4. Kliknij Szukaj ponownie.",
+  "bieznia.sygnal.silny": "silny",
+  "@bieznia.sygnal.silny": {
+    "description": "`{sygnal}` w wierszu urządzenia, rssi ≥ -60."
+  },
+  "bieznia.sygnal.sredni": "średni",
+  "@bieznia.sygnal.sredni": {
+    "description": "rssi od -61 do -75."
+  },
+  "bieznia.sygnal.slaby": "słaby",
+  "@bieznia.sygnal.slaby": {
+    "description": "rssi poniżej -75."
+  },
+  "bieznia.lista.twoja_podpis": "{model} · Twoja bieżnia · sygnał {sygnal}",
+  "@bieznia.lista.twoja_podpis": {
+    "description": "Wiersz zapamiętanej bieżni na liście wyników skanowania.",
+    "placeholders": {
+      "model": {
+        "description": "nazwa modelu bieżni („KingSmith X21”)"
+      },
+      "sygnal": {
+        "description": "„silny”, „średni” albo „słaby”"
+      }
+    }
+  }
+}

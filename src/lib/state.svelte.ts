@@ -3,6 +3,7 @@
 // Komponenty tylko czytają: `stan.control.enabled`, `zywo.telemetria?.speedKmh`, `ui.trasa`.
 import type * as K from './contract';
 import * as api from './api';
+import { followLanguage } from './language-sync';
 
 /** Wszystkie wycinki + dane stałe. Pola są wypełnione, gdy `ui.gotowy` (po app_snapshot). */
 export type StanRdzenia = K.SliceMap & { statics: K.StaticData };
@@ -165,6 +166,12 @@ function zastosuj(ev: K.SliceEvent) {
   if (ev.rev <= (ostatniRev.get(ev.slice) ?? revStartu)) return;
   ostatniRev.set(ev.slice, ev.rev);
   scal(stan as unknown as Record<string, unknown>, ev.slice, ev.value);
+  // inny język na ekranie: nowe pakiety i dane stałe (nazwy trybów, osiągnięć) z rdzenia
+  if (ev.slice === 'language') {
+    followLanguage((ev.value as K.LanguageView).shown, async () => {
+      stan.statics = (await api.appSnapshot()).statics;
+    });
+  }
 }
 
 function obsluzNawigacje(n: K.NavRequest) {

@@ -9,6 +9,7 @@
     "core:event:allow-listen",
     "core:event:allow-unlisten",
     "allow-popup-ready",
+    "allow-language-pack",
     "allow-ui-ready",
     "allow-log-ui-error"
   ]

@@ -193,6 +193,30 @@ fn standard_message(status: u16) -> Option<String> {
     })
 }
 
+/// `Accept-Language` dla serwera kont: język na ekranie, potem polski (dotąd jedyny język
+/// komunikatów serwera).
+fn accept_language() -> String {
+    let shown = crate::texts::language();
+    if shown == "pl" {
+        "pl".to_string()
+    } else {
+        format!("{shown}, pl;q=0.5")
+    }
+}
+
+/// Nasz tekst dla stałego kodu błędu z serwera (`code` w odpowiedzi, klucz
+/// `konto.serwer.<code>`) - wtedy język komunikatu nie zależy od serwera.
+fn coded_message(body: &Value) -> Option<String> {
+    let code = body.get("code")?.as_str()?;
+    let valid = !code.is_empty()
+        && code.len() <= 64
+        && code
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-');
+    let key = format!("konto.serwer.{code}");
+    (valid && crate::texts::has(&key)).then(|| t(&key, &[]))
+}
+
 /// Komunikat z serwera albo nasz - nigdy surowy błąd. Trasy /api/bieznia/* mówią po polsku
 /// (`{message}`); wbudowane trasy PocketBase po angielsku - te mapujemy po kodzie.
 pub fn friendly(status: u16, body: &Value, path: &str) -> String {
@@ -207,6 +231,9 @@ pub fn friendly(status: u16, body: &Value, path: &str) -> String {
         body = &Value::Null;
     } else if status == 404 {
         return t("konto.blad.404_funkcja", &[]);
+    }
+    if let Some(message) = coded_message(body) {
+        return message;
     }
     if let Some(message) = body.get("message").and_then(Value::as_str)
         && !message.trim().is_empty()
@@ -706,6 +733,8 @@ impl Client {
             ("Accept".to_string(), "application/json".to_string()),
             ("User-Agent".to_string(), format!("Bieznia/{version}")),
             ("X-Bieznia-Wersja".to_string(), version.to_string()),
+            // serwer kont może odpowiadać w tym języku (docs/i18n.md)
+            ("Accept-Language".to_string(), accept_language()),
         ];
         let data = match body {
             Some(b) => {

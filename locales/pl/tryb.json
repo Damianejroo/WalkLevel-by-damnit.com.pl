@@ -1,0 +1,44 @@
+{
+  "@@locale": "pl",
+  "tryb.chodzenie.nazwa": "Chodzenie",
+  "tryb.chodzenie.opis": "idziesz, postać idzie",
+  "@tryb.chodzenie.opis": {
+    "description": "Zapis z „=” był zagadką. Klawisz może nie być W."
+  },
+  "tryb.klawisze.nazwa": "Klawisze",
+  "tryb.klawisze.opis": "{klawisz_chodu} rusza taśmę",
+  "@tryb.klawisze.opis": {
+    "description": "Z prawdziwym klawiszem.",
+    "placeholders": {
+      "klawisz_chodu": {
+        "description": "np. „W”, „Shift”"
+      }
+    }
+  },
+  "tryb.pad.nazwa": "Pad",
+  "tryb.pad.opis": "gałka ustawia tempo",
+  "tryb.trening.nazwa": "Trening",
+  "tryb.trening.opis": "4 stałe tempa, bez gry",
+  "tryb.dostepnosc": "Tryb {tryb}: {opis}",
+  "@tryb.dostepnosc": {
+    "placeholders": {
+      "tryb": {
+        "description": "nazwa trybu: Chodzenie, Klawisze, Pad, Trening"
+      },
+      "opis": {}
+    }
+  },
+  "tryb.wybrany": "{tryb}, wybrany. {opis}",
+  "@tryb.wybrany": {
+    "placeholders": {
+      "tryb": {
+        "description": "nazwa trybu: Chodzenie, Klawisze, Pad, Trening"
+      },
+      "opis": {}
+    }
+  },
+  "tryb.chodzenie.opis_proba": "tryb próbny, postać stoi",
+  "@tryb.chodzenie.opis_proba": {
+    "description": "Opis kafelka Chodzenie w trybie próbnym (gra nie dostaje klawiszy)."
+  }
+}

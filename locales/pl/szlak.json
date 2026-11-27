@@ -1,0 +1,52 @@
+{
+  "@@locale": "pl",
+  "szlak.tytul": "Twój szlak",
+  "szlak.tytul_km": "Twój szlak · {km} km",
+  "@szlak.tytul_km": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "szlak.km": "{km} km",
+  "@szlak.km": {
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      }
+    }
+  },
+  "szlak.lacznie": "przebyte łącznie · {liczba} z {razem} przystanków",
+  "@szlak.lacznie": {
+    "placeholders": {
+      "liczba": {
+        "description": "liczby ogólne"
+      },
+      "razem": {
+        "description": "liczby ogólne"
+      }
+    }
+  },
+  "szlak.tu_jestes": "TU JESTEŚ",
+  "szlak.nastepny": "następny przystanek za {km} km, to ok. {dni} {dni, plural, one {dzień} few {dni} many {dni} other {dni}} po 5 km dziennie",
+  "@szlak.nastepny": {
+    "description": "Odmiana.",
+    "placeholders": {
+      "km": {
+        "description": "dystans w km"
+      },
+      "dni": {
+        "description": "liczby czasu"
+      }
+    }
+  },
+  "szlak.koniec": "Cały szlak jest już za Tobą.",
+  "@szlak.koniec": {
+    "description": "Wiersz „TU JESTEŚ” po ostatnim przystanku."
+  },
+  "szlak.przystanki": "Przystanki szlaku",
+  "@szlak.przystanki": {
+    "description": "Nazwa listy dla czytnika ekranu."
+  }
+}

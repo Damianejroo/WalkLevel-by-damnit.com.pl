@@ -1,0 +1,75 @@
+{
+  "@@locale": "pl",
+  "language.title": "Język",
+  "@language.title": {
+    "description": "Tytuł karty w Ustawienia > Wygląd i okno."
+  },
+  "language.description": "Język napisów w WalkLevel. Zmiana działa od razu, bez ponownego uruchomienia.",
+  "@language.description": {
+    "description": "Pod tytułem karty."
+  },
+  "language.list": "Języki",
+  "@language.list": {
+    "description": "Nazwa dostępności listy języków."
+  },
+  "language.installed": "Zainstalowany",
+  "@language.installed": {
+    "description": "Podpis języka, który jest na tym komputerze (wbudowany, z instalatora albo pobrany)."
+  },
+  "language.download": "Do pobrania",
+  "@language.download": {
+    "description": "Podpis języka z repozytorium, którego nie ma na komputerze. Kliknięcie pobiera i włącza."
+  },
+  "language.downloading": "Pobieranie… {procent}%",
+  "@language.downloading": {
+    "description": "Podpis w trakcie pobierania.",
+    "placeholders": {
+      "procent": {
+        "description": "liczba procent bez znaku %"
+      }
+    }
+  },
+  "language.selected": "Wybrany",
+  "@language.selected": {
+    "description": "Podpis wybranego języka (zamiast „Zainstalowany”)."
+  },
+  "language.in-progress": "tłumaczenie w toku",
+  "@language.in-progress": {
+    "description": "Dopisek po „ · ”, gdy część tekstów jest jeszcze po polsku."
+  },
+  "language.shown-instead": "Wybrany język nie jest jeszcze pobrany, więc teksty są po angielsku.",
+  "@language.shown-instead": {
+    "description": "Pod listą, gdy wybranego języka nie ma na komputerze (np. bez internetu przy pierwszym starcie)."
+  },
+  "language.downloaded": "Pobrano język: {jezyk}",
+  "@language.downloaded": {
+    "description": "Komunikat po pobraniu.",
+    "placeholders": {
+      "jezyk": {}
+    }
+  },
+  "language.error.title": "Nie udało się pobrać języka",
+  "@language.error.title": {
+    "description": "Tytuł karty błędu."
+  },
+  "language.error.offline": "Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie.",
+  "language.error.not-published": "Tego języka nie ma jeszcze w repozytorium WalkLevel.",
+  "language.error.status": "Serwer odpowiedział kodem {kod}. Spróbuj ponownie później.",
+  "@language.error.status": {
+    "placeholders": {
+      "kod": {
+        "description": "kod zaproszenia, numer zgłoszenia"
+      }
+    }
+  },
+  "language.error.address": "Pakiet języka może pochodzić tylko z repozytorium WalkLevel na GitHubie.",
+  "language.error.format": "Pobrany pakiet języka jest uszkodzony. Spróbuj ponownie później.",
+  "language.error.write": "Nie da się zapisać pakietu języka. ({szczegoly})",
+  "@language.error.write": {
+    "placeholders": {
+      "szczegoly": {
+        "description": "techniczny dopisek z błędu (zawsze na końcu, w nawiasie)"
+      }
+    }
+  }
+}

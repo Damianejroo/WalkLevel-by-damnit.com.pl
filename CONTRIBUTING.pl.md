@@ -17,7 +17,7 @@ node tests-ui/settings-collapse.ts
 .\packaging\build.ps1 -Version X.Y.Z [-Iscc ścieżka\do\ISCC.exe]   # exe i instalator
 ```
 
-Generatory: `npm run texts` (słownik tekstów z `docs/texts.md`),
+Generatory: `npm run texts` (pakiety językowe z `docs/texts.md`, zob. `docs/i18n.pl.md`),
 `npm run server-definitions` (plik definicji dla serwera kont). Skrypty są
 w TypeScripcie i uruchamia je bezpośrednio Node.js 24, bez kompilacji.
 
@@ -37,7 +37,8 @@ w osobnych zadaniach, nie przy okazji innych zmian.
   (angielski) i `README.pl.md` (polski). W katalogu głównym wielkimi
   literami są tylko `README`, `CONTRIBUTING`, `PRIVACY` i `LICENSE`.
 - Data w interfejsie i w dokumentach: DD.MM.RRRR.
-- Teksty dla użytkownika pochodzą z `docs/texts.md` (`npm run texts` odtwarza słownik).
+- Teksty dla użytkownika pochodzą z `docs/texts.md`, tłumaczenia z `locales/` (`npm run texts`
+  odtwarza pakiety, `docs/i18n.pl.md` opisuje tłumaczenie).
 - Jedna zmiana na zadanie, bez abstrakcji na zapas, bez zależności dla jednej funkcji.
 
 ## Commity, pull requesty i wydania

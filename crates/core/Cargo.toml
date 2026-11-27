@@ -13,6 +13,11 @@ btleplug = "0.13.5"
 chrono = "0.4.45"
 futures = "0.3.34"
 hex = "0.4.3"
+icu_decimal = "2.4.0"
+icu_locale_core = "2.4.0"
+icu_plurals = "2.4.0"
+icu_provider = { version = "2.4.0", features = ["sync"] }
+writeable = "0.6.4"
 log = "0.4.35"
 regex = "1.13.2"
 reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "blocking"] }
@@ -24,7 +29,7 @@ thiserror = "2.0.21"
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
 toml = "1.2.3"
 uuid = { version = "1.29.3", features = ["v4", "v7"] }
-windows = { version = "0.62.2", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Input_XboxController", "Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Security_Credentials"] }
+windows = { version = "0.62.2", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Input_XboxController", "Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Security_Credentials", "Win32_Globalization"] }
 zip = { version = "9.8.2", default-features = false, features = ["deflate"] }
 
 [dev-dependencies]
