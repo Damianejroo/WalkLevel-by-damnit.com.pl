@@ -5107,7 +5107,7 @@ dependencies = [
 
 [[package]]
 name = "walklevel"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "chrono",
  "log",
@@ -5125,7 +5125,7 @@ dependencies = [
 
 [[package]]
 name = "walklevel-core"
-version = "0.6.3"
+version = "0.6.4"
 dependencies = [
  "base64 0.23.1",
  "btleplug",
