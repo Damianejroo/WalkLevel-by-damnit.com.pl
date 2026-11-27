@@ -1,6 +1,7 @@
 # Budowanie WalkLevel: interfejs, exe (release, statyczny runtime C++) i instalator Inno Setup.
 #   powershell -ExecutionPolicy Bypass -File packaging\build.ps1 -Version 0.6.0
-# Wynik: dist-installer\Bieznia-Setup-<wersja>.exe + .sha256 (jak w 0.5.x).
+# Output: dist-installer\WalkLevel-Setup-<version>.exe + .sha256 (named Bieznia-Setup up to 0.6.3).
+# The release workflow signs it afterwards (docs/release-signing.md).
 param(
     [Parameter(Mandatory = $true)][string]$Version,
     [string]$Iscc = ""
@@ -28,9 +29,9 @@ if (-not $Iscc) { $Iscc = Join-Path $root 'tools\inno\ISCC.exe' }
 if (-not (Test-Path $Iscc)) { throw "Brak Inno Setup: $Iscc" }
 & $Iscc "/DAppVersion=$Version" (Join-Path $PSScriptRoot 'installer.iss'); if ($LASTEXITCODE) { throw "ISCC" }
 
-$setup = Join-Path $root "dist-installer\Bieznia-Setup-$Version.exe"
+$setup = Join-Path $root "dist-installer\WalkLevel-Setup-$Version.exe"
 $hash = (Get-FileHash $setup -Algorithm SHA256).Hash.ToLower()
-"$hash  Bieznia-Setup-$Version.exe" | Out-File -Encoding ascii "$setup.sha256"
+"$hash  WalkLevel-Setup-$Version.exe" | Out-File -Encoding ascii "$setup.sha256"
 $mb = [math]::Round((Get-Item $setup).Length / 1MB, 1)
 $exe = [math]::Round((Get-Item (Join-Path $root 'target-release\release\walklevel.exe')).Length / 1MB, 1)
 "Gotowe: $setup ($mb MB, exe $exe MB), SHA-256 $hash"

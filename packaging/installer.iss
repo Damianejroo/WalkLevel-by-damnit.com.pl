@@ -1,9 +1,9 @@
 ; Instalator WalkLevel 0.6.0+ (Tauri 2 + Rust). Budowanie: packaging/build.ps1
 ; Jedno kliknięcie: bez pytań i bez umowy, pasek postępu, potem aplikacja sama się otwiera.
 ; Instalacja na koncie użytkownika (bez administratora). Dane w %LOCALAPPDATA%\Bieznia
-; zostają przy aktualizacji i odinstalowaniu. Techniczne nazwy (Bieznia.exe, folder, AppId,
-; plik Bieznia-Setup-*.exe) są te same co w 0.5.x - przycisk Aktualizuj w 0.5.x podmienia
-; aplikację tym instalatorem bez zmian po stronie użytkownika.
+; zostają przy aktualizacji i odinstalowaniu. Folder instalacji i AppId są te same co w 0.5.x,
+; więc przycisk Aktualizuj w starszej wersji podmienia aplikację tym instalatorem. Od 0.6.4
+; program to WalkLevel.exe (wcześniej Bieznia.exe), a instalator WalkLevel-Setup-X.Y.Z.exe.
 
 #ifndef AppVersion
   #define AppVersion "0.0.0"
@@ -27,7 +27,7 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist-installer
-OutputBaseFilename=Bieznia-Setup-{#AppVersion}
+OutputBaseFilename=WalkLevel-Setup-{#AppVersion}
 SetupIconFile=icon.ico
 UninstallDisplayIcon={app}\walklevel.ico
 UninstallDisplayName=WalkLevel
@@ -52,36 +52,43 @@ ReadyLabel1=WalkLevel {#AppVersion} by damnit.com.pl zostanie zainstalowany na t
 ReadyLabel2b=Kliknij Instaluj. Nie są potrzebne uprawnienia administratora, a po instalacji aplikacja otworzy się sama.
 
 [Files]
-; jeden plik exe (interfejs wbudowany); nazwa Bieznia.exe jak w 0.5.x - skróty i aktualizacja
-; z 0.5.x wskazują ten plik
-Source: "..\target-release\release\walklevel.exe"; DestDir: "{app}"; DestName: "Bieznia.exe"; Flags: ignoreversion
+; jeden plik exe (interfejs wbudowany)
+Source: "..\target-release\release\walklevel.exe"; DestDir: "{app}"; DestName: "WalkLevel.exe"; Flags: ignoreversion
 ; konfiguracja obok exe (adresy serwera i zgłoszeń, jak w 0.5.x)
 Source: "..\config.toml"; DestDir: "{app}"; Flags: ignoreversion
 ; ikona skrótów jako osobny plik o nowej nazwie: Windows trzyma ikonę w pamięci podręcznej po
-; ścieżce pliku, więc skrót wskazujący Bieznia.exe po aktualizacji mógł pokazywać stare logo
+; ścieżce pliku, więc skrót wskazujący stary exe po aktualizacji mógł pokazywać stare logo
 Source: "icon.ico"; DestDir: "{app}"; DestName: "walklevel.ico"; Flags: ignoreversion
 
 [InstallDelete]
 ; przy aktualizacji z 0.5.x usuń wersję w Pythonie (biblioteki PyInstallera i pliki obok exe)
 Type: filesandordirs; Name: "{app}\_internal"
 Type: files; Name: "{app}\wersja.txt"
+; program do 0.6.3 (od 0.6.4 WalkLevel.exe); CloseApplications zamyka go przed usunięciem
+Type: files; Name: "{app}\Bieznia.exe"
 ; skróty ze starszych wersji (nazwy "Bieżnia" i "Bieżnia Gamingowa")
 Type: files; Name: "{autoprograms}\Bieżnia.lnk"
 Type: files; Name: "{autodesktop}\Bieżnia.lnk"
 Type: files; Name: "{autoprograms}\Bieżnia Gamingowa.lnk"
 Type: files; Name: "{autodesktop}\Bieżnia Gamingowa.lnk"
 
+[UninstallDelete]
+; gdyby przy aktualizacji z 0.6.3 stary exe był jeszcze zablokowany i nie dał się usunąć
+Type: files; Name: "{app}\Bieznia.exe"
+
 [Icons]
-Name: "{autoprograms}\WalkLevel"; Filename: "{app}\Bieznia.exe"; IconFilename: "{app}\walklevel.ico"
+Name: "{autoprograms}\WalkLevel"; Filename: "{app}\WalkLevel.exe"; IconFilename: "{app}\walklevel.ico"
 ; skrót na pulpicie przy pierwszej instalacji albo w miejsce starego - aktualizacja nie odtworzy
 ; skrótu, który użytkownik sam usunął
-Name: "{autodesktop}\WalkLevel"; Filename: "{app}\Bieznia.exe"; IconFilename: "{app}\walklevel.ico"; Check: WantDesktopIcon
+Name: "{autodesktop}\WalkLevel"; Filename: "{app}\WalkLevel.exe"; IconFilename: "{app}\walklevel.ico"; Check: WantDesktopIcon
+; przypięcie do paska zadań z 0.6.3 wskazuje Bieznia.exe: przepnij je, tylko jeśli już jest
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\WalkLevel"; Filename: "{app}\WalkLevel.exe"; IconFilename: "{app}\walklevel.ico"; Check: HasTaskbarPin
 
 [Run]
 ; nowa ikona i nazwa: odśwież pamięć ikon Windows (skróty, pasek zadań, menu Start)
 Filename: "{sys}\ie4uinit.exe"; Parameters: "-show"; Flags: runhidden nowait skipifdoesntexist
 ; po instalacji (także cichej, z przycisku Aktualizuj) od razu uruchom aplikację
-Filename: "{app}\Bieznia.exe"; Flags: nowait
+Filename: "{app}\WalkLevel.exe"; Flags: nowait
 
 [Code]
 var
@@ -120,4 +127,9 @@ end;
 function WantDesktopIcon(): Boolean;
 begin
   Result := DesktopIcon;
+end;
+
+function HasTaskbarPin(): Boolean;
+begin
+  Result := FileExists(ExpandConstant('{userappdata}\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\WalkLevel.lnk'));
 end;
