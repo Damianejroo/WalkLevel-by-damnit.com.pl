@@ -147,17 +147,17 @@
   {
    "od_poziomu": 6,
    "nazwa": "Chell",
-   "opis": "Przeszła wszystkie komory testowe Aperture, kilometry korytarzy."
+   "opis": "Przeszła wszystkie komory testowe Aperture Science, a potem uciekła przez zaplecze ośrodka."
   },
   {
    "od_poziomu": 7,
    "nazwa": "V z Night City",
-   "opis": "Night City zna na pamięć, choć zwykle zza kierownicy."
+   "opis": "Po Night City, od Watson po Santo Domingo, jeździ głównie samochodem."
   },
   {
    "od_poziomu": 9,
    "nazwa": "Gordon Freeman",
-   "opis": "Z Black Mesa do City 17, prawie cały czas pieszo i z łomem."
+   "opis": "Z łomem w ręku przedzierał się przez Black Mesa, od miejsca katastrofy aż do portalu na Xen."
   },
   {
    "od_poziomu": 10,
@@ -167,7 +167,7 @@
   {
    "od_poziomu": 12,
    "nazwa": "Naznaczony",
-   "opis": "Z Kordonu przez całą Zonę aż pod Elektrownię."
+   "opis": "Z Kordonu przeszedł przez całą Zonę aż pod Elektrownię."
   },
   {
    "od_poziomu": 13,
@@ -176,13 +176,13 @@
   },
   {
    "od_poziomu": 15,
-   "nazwa": "Smocze Dziecię",
-   "opis": "Mógłby korzystać z szybkiej podróży, ale po drodze zawsze trafia się jakaś jaskinia."
+   "nazwa": "Kyle Crane",
+   "opis": "Po Harranie biegał głównie dachami, bo na ulicach było pełno zarażonych."
   },
   {
    "od_poziomu": 17,
-   "nazwa": "Nerevaryjczyk",
-   "opis": "Vvardenfell pieszo, od Seyda Neen po Czerwoną Górę."
+   "nazwa": "Smocze Dziecię",
+   "opis": "Mógłby korzystać z szybkiej podróży, ale po drodze zawsze trafia się jakaś jaskinia."
   },
   {
    "od_poziomu": 19,
@@ -192,12 +192,12 @@
   {
    "od_poziomu": 21,
    "nazwa": "Minsc i Boo",
-   "opis": "Wojownik z Rashemenu i jego chomik przeszli całe Wybrzeże Mieczy, szukając zła do skopania."
+   "opis": "Razem przemierzyli Wybrzeże Mieczy w pierwszym Baldur’s Gate i Amn w drugim."
   },
   {
    "od_poziomu": 23,
    "nazwa": "Master Chief",
-   "opis": "Przeszedł spory kawałek pierścienia Halo, metr po metrze."
+   "opis": "Od kapsuły ratunkowej aż po Bibliotekę przemierzył spory kawałek pierścienia Halo."
   },
   {
    "od_poziomu": 26,
@@ -212,22 +212,22 @@
   {
    "od_poziomu": 35,
    "nazwa": "Kurier z Mojave",
-   "opis": "Z kulą w głowie przeszedł pustynię od Goodsprings po Zaporę Hoovera."
+   "opis": "Po postrzale w głowę przeszedł pustynię od Goodsprings po Zaporę Hoovera."
   },
   {
    "od_poziomu": 40,
-   "nazwa": "Drużyna z tawerny",
-   "opis": "Każda kampania D&D zaczyna się w tawernie, a kończy kilka tysięcy mil dalej."
+   "nazwa": "Rincewind",
+   "opis": "Z Dwukwiatem i jego Bagażem uciekał z Ankh-Morpork aż na Krawędź Dysku."
   },
   {
    "od_poziomu": 44,
-   "nazwa": "Steve",
-   "opis": "Świat Minecrafta ma 60 milionów bloków szerokości, więc zawsze jest dokąd iść."
+   "nazwa": "Mario",
+   "opis": "W pierwszym Super Mario Bros. przeszedł 32 plansze, od 1-1 do 8-4, żeby uratować księżniczkę."
   },
   {
    "od_poziomu": 48,
-   "nazwa": "Bohater Azeroth",
-   "opis": "W pierwszym WoW-ie wierzchowiec był dopiero od 40 poziomu, więc całe Azeroth trzeba było przejść pieszo."
+   "nazwa": "Ash Ketchum",
+   "opis": "Z Pikachu wędrował przez kolejne regiony, aż w Aloli został mistrzem ligi."
   },
   {
    "od_poziomu": 52,
@@ -242,7 +242,7 @@
   {
    "od_poziomu": 59,
    "nazwa": "Kratos",
-   "opis": "Z synem przez Midgard na najwyższy szczyt wszystkich krain."
+   "opis": "Z synem niósł prochy żony przez Midgard aż na najwyższy szczyt wszystkich krain."
   },
   {
    "od_poziomu": 62,
@@ -292,7 +292,7 @@
   {
    "od_poziomu": 89,
    "nazwa": "Frodo Baggins",
-   "opis": "Pieszo z Shire do Mordoru, prawie 3 000 km."
+   "opis": "Pół roku szedł z Shire na Górę Przeznaczenia."
   },
   {
    "od_poziomu": 92,
@@ -306,8 +306,8 @@
   },
   {
    "od_poziomu": 97,
-   "nazwa": "Obieżyświat",
-   "opis": "Strażnik Północy, który przez dziesiątki lat przemierzał Śródziemie."
+   "nazwa": "Roland Deschain",
+   "opis": "Przeszedł pustynię za człowiekiem w czerni, a potem przez Świat Pośredni dotarł do Mrocznej Wieży."
   },
   {
    "od_poziomu": 100,

@@ -364,9 +364,8 @@ fn v2_changes_only_the_trail() {
         (old.xp_per_km, &old.rarity_xp, &old.rarities),
         (new.xp_per_km, &new.rarity_xp, &new.rarities)
     );
-    let ranks = |d: &Definitions| -> Vec<(u32, String)> {
-        d.ranks.iter().map(|r| (r.level, r.name.clone())).collect()
-    };
+    // 0.6.5: nowe nazwy rang, progi rang zostają
+    let ranks = |d: &Definitions| -> Vec<u32> { d.ranks.iter().map(|r| r.level).collect() };
     assert_eq!((&old.levels, ranks(&old)), (&new.levels, ranks(new)));
 }
 

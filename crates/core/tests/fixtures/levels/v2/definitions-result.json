@@ -146,17 +146,17 @@
   {
    "level": 6,
    "name": "Chell",
-   "about": "Przeszła wszystkie komory testowe Aperture, kilometry korytarzy."
+   "about": "Przeszła wszystkie komory testowe Aperture Science, a potem uciekła przez zaplecze ośrodka."
   },
   {
    "level": 7,
    "name": "V z Night City",
-   "about": "Night City zna na pamięć, choć zwykle zza kierownicy."
+   "about": "Po Night City, od Watson po Santo Domingo, jeździ głównie samochodem."
   },
   {
    "level": 9,
    "name": "Gordon Freeman",
-   "about": "Z Black Mesa do City 17, prawie cały czas pieszo i z łomem."
+   "about": "Z łomem w ręku przedzierał się przez Black Mesa, od miejsca katastrofy aż do portalu na Xen."
   },
   {
    "level": 10,
@@ -166,7 +166,7 @@
   {
    "level": 12,
    "name": "Naznaczony",
-   "about": "Z Kordonu przez całą Zonę aż pod Elektrownię."
+   "about": "Z Kordonu przeszedł przez całą Zonę aż pod Elektrownię."
   },
   {
    "level": 13,
@@ -175,13 +175,13 @@
   },
   {
    "level": 15,
-   "name": "Smocze Dziecię",
-   "about": "Mógłby korzystać z szybkiej podróży, ale po drodze zawsze trafia się jakaś jaskinia."
+   "name": "Kyle Crane",
+   "about": "Po Harranie biegał głównie dachami, bo na ulicach było pełno zarażonych."
   },
   {
    "level": 17,
-   "name": "Nerevaryjczyk",
-   "about": "Vvardenfell pieszo, od Seyda Neen po Czerwoną Górę."
+   "name": "Smocze Dziecię",
+   "about": "Mógłby korzystać z szybkiej podróży, ale po drodze zawsze trafia się jakaś jaskinia."
   },
   {
    "level": 19,
@@ -191,12 +191,12 @@
   {
    "level": 21,
    "name": "Minsc i Boo",
-   "about": "Wojownik z Rashemenu i jego chomik przeszli całe Wybrzeże Mieczy, szukając zła do skopania."
+   "about": "Razem przemierzyli Wybrzeże Mieczy w pierwszym Baldur’s Gate i Amn w drugim."
   },
   {
    "level": 23,
    "name": "Master Chief",
-   "about": "Przeszedł spory kawałek pierścienia Halo, metr po metrze."
+   "about": "Od kapsuły ratunkowej aż po Bibliotekę przemierzył spory kawałek pierścienia Halo."
   },
   {
    "level": 26,
@@ -211,22 +211,22 @@
   {
    "level": 35,
    "name": "Kurier z Mojave",
-   "about": "Z kulą w głowie przeszedł pustynię od Goodsprings po Zaporę Hoovera."
+   "about": "Po postrzale w głowę przeszedł pustynię od Goodsprings po Zaporę Hoovera."
   },
   {
    "level": 40,
-   "name": "Drużyna z tawerny",
-   "about": "Każda kampania D&D zaczyna się w tawernie, a kończy kilka tysięcy mil dalej."
+   "name": "Rincewind",
+   "about": "Z Dwukwiatem i jego Bagażem uciekał z Ankh-Morpork aż na Krawędź Dysku."
   },
   {
    "level": 44,
-   "name": "Steve",
-   "about": "Świat Minecrafta ma 60 milionów bloków szerokości, więc zawsze jest dokąd iść."
+   "name": "Mario",
+   "about": "W pierwszym Super Mario Bros. przeszedł 32 plansze, od 1-1 do 8-4, żeby uratować księżniczkę."
   },
   {
    "level": 48,
-   "name": "Bohater Azeroth",
-   "about": "W pierwszym WoW-ie wierzchowiec był dopiero od 40 poziomu, więc całe Azeroth trzeba było przejść pieszo."
+   "name": "Ash Ketchum",
+   "about": "Z Pikachu wędrował przez kolejne regiony, aż w Aloli został mistrzem ligi."
   },
   {
    "level": 52,
@@ -241,7 +241,7 @@
   {
    "level": 59,
    "name": "Kratos",
-   "about": "Z synem przez Midgard na najwyższy szczyt wszystkich krain."
+   "about": "Z synem niósł prochy żony przez Midgard aż na najwyższy szczyt wszystkich krain."
   },
   {
    "level": 62,
@@ -291,7 +291,7 @@
   {
    "level": 89,
    "name": "Frodo Baggins",
-   "about": "Pieszo z Shire do Mordoru, prawie 3 000 km."
+   "about": "Pół roku szedł z Shire na Górę Przeznaczenia."
   },
   {
    "level": 92,
@@ -305,8 +305,8 @@
   },
   {
    "level": 97,
-   "name": "Obieżyświat",
-   "about": "Strażnik Północy, który przez dziesiątki lat przemierzał Śródziemie."
+   "name": "Roland Deschain",
+   "about": "Przeszedł pustynię za człowiekiem w czerni, a potem przez Świat Pośredni dotarł do Mrocznej Wieży."
   },
   {
    "level": 100,
@@ -1682,19 +1682,19 @@
   ],
   [
    15,
-   "Smocze Dziecię"
+   "Kyle Crane"
   ],
   [
    16,
-   "Smocze Dziecię"
+   "Kyle Crane"
   ],
   [
    17,
-   "Nerevaryjczyk"
+   "Smocze Dziecię"
   ],
   [
    18,
-   "Nerevaryjczyk"
+   "Smocze Dziecię"
   ],
   [
    19,
@@ -1782,51 +1782,51 @@
   ],
   [
    40,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    41,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    42,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    43,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    44,
-   "Steve"
+   "Mario"
   ],
   [
    45,
-   "Steve"
+   "Mario"
   ],
   [
    46,
-   "Steve"
+   "Mario"
   ],
   [
    47,
-   "Steve"
+   "Mario"
   ],
   [
    48,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    49,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    50,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    51,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    52,
@@ -2010,15 +2010,15 @@
   ],
   [
    97,
-   "Obieżyświat"
+   "Roland Deschain"
   ],
   [
    98,
-   "Obieżyświat"
+   "Roland Deschain"
   ],
   [
    99,
-   "Obieżyświat"
+   "Roland Deschain"
   ],
   [
    100,
@@ -2084,19 +2084,19 @@
   ],
   [
    13,
-   "Smocze Dziecię"
+   "Kyle Crane"
   ],
   [
    14,
-   "Smocze Dziecię"
+   "Kyle Crane"
   ],
   [
    15,
-   "Nerevaryjczyk"
+   "Smocze Dziecię"
   ],
   [
    16,
-   "Nerevaryjczyk"
+   "Smocze Dziecię"
   ],
   [
    17,
@@ -2172,55 +2172,55 @@
   ],
   [
    35,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    36,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    37,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    38,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    39,
-   "Drużyna z tawerny"
+   "Rincewind"
   ],
   [
    40,
-   "Steve"
+   "Mario"
   ],
   [
    41,
-   "Steve"
+   "Mario"
   ],
   [
    42,
-   "Steve"
+   "Mario"
   ],
   [
    43,
-   "Steve"
+   "Mario"
   ],
   [
    44,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    45,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    46,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    47,
-   "Bohater Azeroth"
+   "Ash Ketchum"
   ],
   [
    48,
@@ -2412,11 +2412,11 @@
   ],
   [
    95,
-   "Obieżyświat"
+   "Roland Deschain"
   ],
   [
    96,
-   "Obieżyświat"
+   "Roland Deschain"
   ],
   [
    97,
