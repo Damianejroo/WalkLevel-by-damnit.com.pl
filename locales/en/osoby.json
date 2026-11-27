@@ -1,0 +1,5 @@
+{
+  "@@locale": "en",
+  "osoby.nieczytelne": "Cannot read the file with people and settings ({powod}). A copy of the file is in {kopia}. WalkLevel will close so it does not overwrite the file. Start it again in a moment.",
+  "osoby.nieczytelne_bez_kopii": "Cannot read the file with people and settings ({powod}). WalkLevel will close so it does not overwrite the file. Start it again in a moment. If that does not help, restore your data from a backup."
+}

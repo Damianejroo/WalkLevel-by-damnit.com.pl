@@ -1,4 +1,26 @@
 {
   "@@locale": "en",
-  "bieznia.lista.tytul": "Choose a treadmill"
+  "bieznia.lista.tytul": "Choose a treadmill",
+  "bieznia.lista.szukam": "Looking for treadmills nearby (about 6 s)…",
+  "bieznia.lista.znalezione": "Treadmills: {liczba}. Other devices: {razem}.",
+  "bieznia.lista.szukaj_ponownie": "Search again",
+  "bieznia.lista.bieznia_podpis": "{model} · signal {sygnal}",
+  "bieznia.lista.bieznia_ogolna": "Treadmill",
+  "bieznia.lista.inne_naglowek": "Other devices nearby",
+  "bieznia.lista.inne_podpis": "signal {sygnal}",
+  "bieznia.lista.bez_nazwy": "Unnamed device",
+  "bieznia.lista.automatycznie": "Found one treadmill. Connecting…",
+  "bieznia.lista.bt_wylaczony.tytul": "Bluetooth is off",
+  "bieznia.lista.bt_wylaczony.krok1": "1. Open Start > Settings > Bluetooth & devices.",
+  "bieznia.lista.bt_wylaczony.krok2": "2. Turn on Bluetooth.",
+  "bieznia.lista.bt_wylaczony.krok3": "3. Come back here and click Search again.",
+  "bieznia.lista.brak.tytul": "No treadmill found",
+  "bieznia.lista.brak.krok1": "1. Turn on the treadmill with the remote or its button.",
+  "bieznia.lista.brak.krok2": "2. Close the treadmill's phone app (e.g. KS Fit, Urevo) or turn off Bluetooth on the phone. The treadmill connects to only one device at a time.",
+  "bieznia.lista.brak.krok3": "3. Check that Bluetooth is on: Start > Settings > Bluetooth & devices.",
+  "bieznia.lista.brak.krok4": "4. Click Search again.",
+  "bieznia.sygnal.silny": "strong",
+  "bieznia.sygnal.sredni": "medium",
+  "bieznia.sygnal.slaby": "weak",
+  "bieznia.lista.twoja_podpis": "{model} · your treadmill · signal {sygnal}"
 }

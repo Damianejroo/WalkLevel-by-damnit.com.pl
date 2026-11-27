@@ -1,4 +1,16 @@
 {
   "@@locale": "en",
-  "osoba.edycja.tytul": "Edit person"
+  "osoba.edycja.tytul": "Edit person",
+  "osoba.edycja.nazwa": "Name",
+  "osoba.edycja.kolor": "Person colour",
+  "osoba.edycja.usun_opis": "Deleting a person deletes their game profiles. Their results stay in the history as “Deleted people”.",
+  "osoba.edycja.usun": "Delete person",
+  "osoba.usuniete": "Deleted people",
+  "osoba.edycja.konto": "Online account",
+  "osoba.edycja.konto_jest": "This person has the online account {pseudonim}.",
+  "osoba.edycja.konto_brak": "This person has no online account. Without an account everything works on this computer.",
+  "osoba.edycja.konto_wybierz": "You can manage the online account when this person is selected.",
+  "osoba.edycja.wybierz": "Switch to this person",
+  "osoba.blad.ostatnia": "The last person cannot be deleted.",
+  "osoba.blad.brak": "Add a person first."
 }

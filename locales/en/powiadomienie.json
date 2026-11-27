@@ -1,0 +1,18 @@
+{
+  "@@locale": "en",
+  "powiadomienie.tytul_okna": "{tytul} · WalkLevel",
+  "powiadomienie.dostepnosc": "Achievement notification",
+  "powiadomienie.osiagniecie.nad": "ACHIEVEMENT · {rzadkosc}",
+  "powiadomienie.osiagniecie.linia": "+{xp} XP · {warunek}",
+  "powiadomienie.awans.nad": "LEVEL UP · LEVEL {poziom}",
+  "powiadomienie.awans.tytul": "Level {poziom}",
+  "powiadomienie.awans.linia": "Next level in {km} km",
+  "powiadomienie.awans.ranga_linia": "New rank · next level in {km} km",
+  "powiadomienie.wiele.nad": "ACHIEVEMENTS",
+  "powiadomienie.wiele.tytul": "And {liczba} more",
+  "powiadomienie.wiele.linia": "You can see them all in Achievements.",
+  "powiadomienie.historia.nad": "FROM YOUR HISTORY",
+  "powiadomienie.historia.tytul": "Level {poziom} · {ranga}",
+  "powiadomienie.historia.linia": "{liczba} {liczba, plural, one {achievement} other {achievements}} · {km} km behind you",
+  "powiadomienie.dzwiek_brak": "no text"
+}

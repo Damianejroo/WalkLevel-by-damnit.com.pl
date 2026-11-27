@@ -1,0 +1,14 @@
+{
+  "@@locale": "en",
+  "ble.powod.bt_wylaczony": "Bluetooth is off or unavailable. Turn it on in Start > Settings > Bluetooth & devices.",
+  "ble.powod.nie_widze": "Cannot see the treadmill. Turn it on and close its phone app.",
+  "ble.powod.timeout": "The treadmill is not responding. If this keeps happening, turn it off and on again.",
+  "ble.powod.rozlaczyla": "The treadmill disconnected. Reconnecting…",
+  "ble.powod.inny": "Bluetooth problem. Reconnecting… ({szczegoly})",
+  "ble.powod.nieobslugiwane": "This device does not look like a treadmill. If it is one, report it in Settings > Help and diagnostics > Report a problem.",
+  "ble.rozlaczono": "Disconnected",
+  "ble.wybierz_z_listy": "Choose a treadmill from the list.",
+  "ble.stop_nie_zdazyl": "Could not stop the belt. Stop it with the remote.",
+  "ble.stop_niepotwierdzony": "The treadmill did not confirm the stop. Stop the belt with the remote or remove the safety key.",
+  "ble.predkosc_nieprzyjeta": "The treadmill does not accept {kmh} km/h. Check that the belt is moving and try again."
+}

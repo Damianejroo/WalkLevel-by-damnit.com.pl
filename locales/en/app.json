@@ -1,5 +1,6 @@
 {
   "@@locale": "en",
+  "app.haslo": "Walk IRL, level up in-game",
   "app.wersja": "version {wersja}",
   "app.osoba_i_wersja": "{osoba} · version {wersja}",
   "app.o_aplikacji": "WalkLevel {wersja} · © 2026 {autor}",

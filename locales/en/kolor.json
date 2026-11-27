@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+  "kolor.przycisk": "Colour",
+  "kolor.dostepnosc": "Profile colour: {kolor}",
+  "kolor.probka": "Colour {kolor}",
+  "kolor.z_ikony": "· taken from the game icon",
+  "kolor.recznie": "· chosen by hand (from the icon: {kolor})"
+}

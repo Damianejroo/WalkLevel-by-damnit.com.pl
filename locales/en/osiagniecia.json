@@ -1,4 +1,12 @@
 {
   "@@locale": "en",
-  "osiagniecia.tytul": "Achievements"
+  "osiagniecia.tytul": "Achievements",
+  "osiagniecia.podpis": "{liczba} of {razem} earned",
+  "osiagniecia.dzis": "today",
+  "osiagniecia.wczoraj": "yesterday",
+  "osiagniecia.zdobyte": "earned",
+  "osiagniecia.dostepnosc": "{nazwa}, {rzadkosc}, {stan}. {warunek}",
+  "osiagniecia.rzadkosc_dostepnosc": "{rzadkosc}: {liczba} of {razem}",
+  "osiagniecia.lista_rzadkosci": "Earned by rarity",
+  "osiagniecia.procent_graczy": "{procent}% of players have it"
 }

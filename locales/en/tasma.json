@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "tasma.uruchamiam": "Starting the belt…",
+  "tasma.uruchamiam_odliczanie": "Starting the belt. The treadmill counts down about {sekundy} s…",
+  "tasma.rusza": "The belt is starting.",
+  "tasma.zatrzymana": "Belt stopped.",
+  "tasma.odmowa": "The treadmill refused to start. Check the safety key, wake the treadmill with the remote and turn control on again.",
+  "tasma.bez_odpowiedzi": "The treadmill did not respond to the start. If the belt is not moving, start it with the remote.",
+  "tasma.nieobslugiwane": "This treadmill cannot be started from the computer. Start the belt with the remote.",
+  "tasma.brak_polaczenia": "The treadmill is not connected. You can start and stop the belt only with the remote."
+}
