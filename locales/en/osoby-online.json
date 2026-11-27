@@ -1,0 +1,16 @@
+{
+  "@@locale": "en",
+  "osoby_online.szukaj_pole": "Search by username",
+  "osoby_online.szukaj": "Search",
+  "osoby_online.tytul": "People with an account",
+  "osoby_online.poprzednie": "Previous page",
+  "osoby_online.nastepne": "Next page",
+  "osoby_online.strona": "page {liczba}",
+  "osoby_online.pusto": "No one has this username. Check the spelling.",
+  "osoby_online.wiersz": "this week: {kroki} {kroki, plural, one {step} other {steps}} · place {liczba}",
+  "osoby_online.zapros": "Invite",
+  "osoby_online.opis": "The list shows only people who show their profile to everyone. No one sees e-mail addresses.",
+  "osoby_online.pusto_lista": "No one is on the list yet.",
+  "osoby_online.wiersz_bez_miejsca": "this week: {kroki} {kroki, plural, one {step} other {steps}}",
+  "osoby_online.wyslano": "Sent"
+}

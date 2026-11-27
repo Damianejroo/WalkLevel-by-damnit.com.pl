@@ -1,5 +1,18 @@
 {
   "@@locale": "en",
   "online.tytul": "Online account · {pseudonim}",
-  "online.tytul_ogolny": "Online account"
+  "online.tytul_ogolny": "Online account",
+  "online.zakladka.znajomi": "Friends",
+  "online.zakladka.ranking": "Ranking",
+  "online.zakladka.osoby": "People with an account",
+  "online.zakladka.konto": "My account",
+  "online.laduje": "Loading…",
+  "online.blad_ladowania": "(0.6.2: replaced by the error card `online.blad.*`)",
+  "online.ponow": "Try again",
+  "online.pokaz_haslo": "Show password",
+  "online.poziom_ukryty": "Level hidden",
+  "online.blad.znajomi": "Could not load friends",
+  "online.blad.ranking": "Could not load the ranking",
+  "online.blad.osoby": "Could not load the list of people with an account",
+  "online.ponowi": "Next try in {sekundy} s"
 }

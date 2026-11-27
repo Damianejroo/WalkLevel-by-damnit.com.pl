@@ -1,4 +1,27 @@
 {
   "@@locale": "en",
-  "profil_online.tytul": "Profile"
+  "profil_online.tytul": "Profile",
+  "profil_online.pokaz": "Show profile",
+  "profil_online.moj_opis": "This is how others see your profile. You choose who sees it in the My account tab.",
+  "profil_online.od": "On WalkLevel since {data}",
+  "profil_online.bieznia": "Treadmill: {model}",
+  "profil_online.znajomy": "On your friends list",
+  "profil_online.nieznajomy": "You are not friends",
+  "profil_online.7dni": "This week",
+  "profil_online.razem": "All time",
+  "profil_online.wiersz": "{kroki} {kroki, plural, one {step} other {steps}} · {km} km · {czas}",
+  "profil_online.sesje": "{liczba} {liczba, plural, one {session} other {sessions}}",
+  "profil_online.gry": "Games · total",
+  "profil_online.gry_ukryte": "This person does not show results for each game.",
+  "profil_online.gry_brak": "No game data.",
+  "profil_online.bez_gry": "no game name",
+  "profil_online.gra_wiersz": "{kroki} {kroki, plural, one {step} other {steps}} · {km} km · {czas}",
+  "profil_online.moje_ukryte": "Hidden sessions (“Only me”) do not count in the results others see.",
+  "profil_online.cudze_ukryte": "You see only the sessions this person shows you.",
+  "profil_online.brak_osiagniec": "No achievements yet.",
+  "profil_online.zdobyte_dzis": "today",
+  "profil_online.zdobyte_wczoraj": "yesterday",
+  "profil_online.brak_osoby": "This person is no longer on the list. Refresh the list.",
+  "profil_online.inne_gry": "Other games ({liczba})",
+  "profil_online.dzis": "Today"
 }
