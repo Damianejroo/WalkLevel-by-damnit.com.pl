@@ -4,8 +4,10 @@ import './styles/base.css';
 import App from './App.svelte';
 import { logUiErrors } from './lib/api';
 import { loadLanguagePack } from './lib/language-sync';
+import { trackKeyboardNav } from './lib/keyboard-nav';
 
 logUiErrors();
+trackKeyboardNav();
 
 const root = document.documentElement;
 // Motyw przed pierwszym malowaniem (potem ustawia go App z ustawień osoby).

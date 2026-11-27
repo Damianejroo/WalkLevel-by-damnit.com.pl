@@ -2,7 +2,8 @@
 // the friends panel header (collapse button in place on both sides, initials for hidden levels)
 // and collapsed strip on both sides, controls after a failed command,
 // threshold fields, "add a person with an online account", the report description length,
-// hiding a session online, the achievement date format and text from other users shown literally.
+// hiding a session online, the achievement date format, text from other users shown literally
+// and the focus ring only from Tab navigation.
 import type { Browser, Page } from 'playwright-core';
 import fs from 'node:fs';
 import { napis, znak } from '../src/lib/ui/badge-glyphs.ts';
@@ -370,6 +371,56 @@ async function htmlFromOthers(browser: Browser, address: string): Promise<Result
   return { nazwa: 'interakcje-tekst-html', problemy: problems };
 }
 
+/**
+ * Focus ring only from Tab navigation: none after a click, also when a global key (F8) follows
+ * or a script moves focus, and one after Tab.
+ */
+async function focusRing(browser: Browser, address: string): Promise<Result> {
+  const problems: string[] = [];
+  const page = await browser.newPage({ viewport: { width: 1000, height: 800 } });
+  /** Ring drawn around the focused element, or why it cannot be judged. */
+  const ring = () =>
+    page.evaluate(() => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el || el === document.body) return { focused: null, ring: false };
+      const s = getComputedStyle(el);
+      return {
+        focused: el.className,
+        ring: (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0) || s.boxShadow !== 'none',
+      };
+    });
+  const afterClick = async (what: string, selector: string) => {
+    await page.locator(selector).first().click();
+    await page.waitForTimeout(200);
+    await page.keyboard.press('F8');
+    const r = await ring();
+    if (!r.focused) problems.push(`${what}: po kliknięciu nic nie ma fokusu`);
+    else if (r.ring) problems.push(`${what}: obwódka fokusu po kliknięciu i F8`);
+  };
+  try {
+    await open(page, address, 'ekran=main&panel=pelny');
+    await afterClick('wiersz znajomego', '.slot-panelu .wiersz');
+    await page.evaluate(() => document.querySelector<HTMLElement>('.slot-panelu .ib')?.focus());
+    if ((await ring()).ring) problems.push('obwódka po focus() ze skryptu');
+    await afterClick('„Usuń ze znajomych”', `[data-ekran="onlinePerson"] button:has-text("${text('znajomi.usun')}")`);
+    await afterClick('stopka panelu', '.slot-panelu .stopka .status');
+    await page.keyboard.press('Escape');
+    await page.locator('.slot-panelu .wiersz').first().click();
+    await page.keyboard.press('Tab');
+    const tab = await ring();
+    if (!tab.focused) problems.push('po Tab nic nie ma fokusu');
+    else if (!tab.ring) problems.push(`po Tab brak obwódki fokusu (${tab.focused})`);
+    await page.mouse.down();
+    await page.mouse.up();
+    if ((await ring()).ring) problems.push('obwódka zostaje po kliknięciu myszą po Tab');
+  } catch (e) {
+    problems.push(String(e));
+  } finally {
+    await page.close();
+  }
+  return { nazwa: 'interakcje-obwodka-fokusu', problemy: problems };
+}
+
 export async function checkInteractions(browser: Browser, address: string): Promise<Result[]> {
   return [
     ...(await panelHeader(browser, address)),
@@ -382,5 +433,6 @@ export async function checkInteractions(browser: Browser, address: string): Prom
     await achievementDates(browser, address),
     badgeGlyphs(),
     await htmlFromOthers(browser, address),
+    await focusRing(browser, address),
   ];
 }

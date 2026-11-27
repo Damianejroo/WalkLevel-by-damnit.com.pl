@@ -80,8 +80,8 @@
     outline: 3px solid var(--text);
     outline-offset: 2px;
   }
-  .probka:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: 3px; }
-  .probka[aria-checked='true']:focus-visible { outline-width: 3px; }
+  :global([data-keyboard-nav]) .probka:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: 3px; }
+  :global([data-keyboard-nav]) .probka[aria-checked='true']:focus-visible { outline-width: 3px; }
   .opis { font-size: var(--fs-sm); color: var(--text-2); }
   @container paleta (min-width: 380px) {
     .siatka { grid-template-columns: repeat(10, 32px); }

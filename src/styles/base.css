@@ -60,9 +60,11 @@ h1, h2, h3, h4 {
 
 ul, ol { padding: 0; list-style: none; }
 
-/* Obwódka fokusu tylko z klawiatury, neutralna */
+/* Obwódka fokusu tylko przy przechodzeniu Tab / strzałkami (data-keyboard-nav, lib/keyboard-nav.ts),
+   neutralna. Komponenty zmieniają --focus-w / --focus-offset, a własny wariant też tylko pod
+   [data-keyboard-nav] (docs/design.md 8.1). */
 :focus { outline: none; }
-:focus-visible {
+[data-keyboard-nav] :focus-visible {
   outline: var(--focus-w) solid var(--focus);
   outline-offset: var(--focus-offset);
 }

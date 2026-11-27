@@ -96,7 +96,7 @@
   }
   .link { border-radius: 2px; text-underline-offset: 3px; }
   .link:hover,
-  .link:focus-visible { text-decoration: underline; }
+  :global([data-keyboard-nav]) .link:focus-visible { text-decoration: underline; }
   .ty { flex: none; font-size: var(--fs-sm); color: var(--text-2); }
   .ranga { padding-block-start: 0.12em; }
   .koniec { display: flex; justify-content: flex-end; min-width: 0; max-width: 11rem; }

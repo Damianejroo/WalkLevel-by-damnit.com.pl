@@ -273,8 +273,8 @@
   .przycisk.bieg { --wyp: var(--run); --obrys: var(--run); }
   .przycisk.wlaczone:hover { --obrys: var(--text); }
   .przycisk.przeciaga { cursor: grabbing; }
-  .przycisk:focus-visible { outline: none; }
-  .przycisk:focus-visible .kolo { stroke: var(--focus); }
+  :global([data-keyboard-nav]) .przycisk:focus-visible { outline: none; }
+  :global([data-keyboard-nav]) .przycisk:focus-visible .kolo { stroke: var(--focus); }
 
   /* Własna warstwa: napisy wygładzane w odcieniach szarości (bez kolorowych obwódek ClearType
      na przezroczystym oknie - w 0.5.x dlatego rysowano je jako ścieżki). */
@@ -349,6 +349,6 @@
     font-weight: var(--fw-bold);
   }
   .stop:hover { background: var(--danger); color: var(--bg); }
-  .maly:focus-visible,
-  .stop:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .maly,
+  .stop { --focus-offset: -2px; }
 </style>

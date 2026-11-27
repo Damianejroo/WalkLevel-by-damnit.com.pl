@@ -10,8 +10,10 @@ import Przycisk from './bubble-window.svelte';
 import { logUiErrors, wTauri } from '../lib/api';
 import { loadLanguagePack, watchLanguage } from '../lib/language-sync';
 import { t } from '../lib/texts';
+import { trackKeyboardNav } from '../lib/keyboard-nav';
 
 logUiErrors();
+trackKeyboardNav();
 
 const root = document.documentElement;
 // Motyw przed pierwszym malowaniem; potem z wycinka „bubble” (motyw osoby).

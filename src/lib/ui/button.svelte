@@ -144,7 +144,7 @@
     font-weight: var(--fw-regular);
   }
   .link:hover:not(:disabled),
-  .link:focus-visible { background: transparent; text-decoration: underline; }
+  :global([data-keyboard-nav]) .link:focus-visible { background: transparent; text-decoration: underline; }
   .link:active:not(:disabled) { background: transparent; }
 
   .stop,

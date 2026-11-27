@@ -41,7 +41,8 @@ Spis:
 6. **Bez wzorców „typowych dla AI”**: bez pastylek wszędzie, bez kolorowych pasków z lewej,
    bez gradientów, bez emoji, bez poświat (sekcja 10).
 7. **Dostępność jak w 0.5.x**: kontrast tekstu 7:1, tekstu pomocniczego 4,5:1, ramki kontrolki
-   3:1; pole trafienia min. 44×44; obwódka fokusu tylko z klawiatury (`:focus-visible`);
+   3:1; pole trafienia min. 44×44; obwódka fokusu tylko przy przechodzeniu klawiaturą (Tab, strzałki
+   w grupach – 8.1), nigdy po kliknięciu;
    „Ogranicz ruch” z Windows wyłącza animacje (`prefers-reduced-motion`).
 
 ---
@@ -545,7 +546,22 @@ Każdy komponent: anatomia, wymiary, stany, tokeny, zachowanie w wąskim kontene
     26.11: zastąpiło przytrzymanie 1 s, którego nic nie zapowiadało („usuwanie nie ma
     potwierdzenia”).
 - Wyłączony: tekst `--text-2`, ramka `--line`, `cursor: default`.
-- Fokus: `outline: 2px solid var(--focus); outline-offset: 2px;` tylko `:focus-visible`.
+- Fokus: `outline: 2px solid var(--focus); outline-offset: 2px;` tylko `:focus-visible` pod
+  `[data-keyboard-nav]`. Zasada dla wszystkich komponentów:
+  - Obwódka jest tylko wtedy, gdy fokus przesuwa klawiatura: Tab / Shift+Tab albo strzałki
+    w grupie (`radiogroup`: segmenty, kafelki, palety, siatka ikon, listy rozwijane; `menu`;
+    `slider`). Wtedy `src/lib/keyboard-nav.ts` ustawia `data-keyboard-nav` na `<html>`;
+    `pointerdown` (mysz, dotyk, pióro) go zdejmuje.
+  - Samo `:focus-visible` nie wystarcza: WebView2 włącza je na klikniętym przycisku, gdy tylko
+    padnie dowolny klawisz, a okno dostaje też F6/F7/F8 i klawisze sterowania. Stąd 27.11
+    (0.6.5) białe ramki na wierszu znajomego, „Usuń ze znajomych” i stopce panelu po kliknięciu.
+    Klawisze globalne i sterowania, Enter, Spacja i Esc atrybutu nie ustawiają; `focus()` ze
+    skryptu po kliknięciu też nie pokazuje obwódki.
+  - Reguła jest jedna, w `src/styles/base.css`. Komponent zmienia tylko `--focus-w` /
+    `--focus-offset`; własny wariant (podkreślenie linku, obrys koła w przycisku na ekranie)
+    też pisze pod `:global([data-keyboard-nav])`.
+  - Pola tekstowe i wartość steppera (8.6) mają osobny stan `:focus` (ramka `--text`) także po
+    kliknięciu: to miejsce pisania, nie obwódka fokusu.
 
 ### 8.2 Przełącznik (`switch.svelte`)
 
@@ -608,7 +624,7 @@ align-items: center;`, `padding: 0 14px`, **stała wysokość 64**):
    podmiany glifu.
 
 Stany: najechanie tło `--surface-2`; otwarta: ramka 1 px `--control` (neutralnie, bez akcentu);
-fokus z klawiatury: obwódka `--focus`. `<button aria-expanded aria-controls>`.
+fokus z klawiatury (8.1): obwódka `--focus`. `<button aria-expanded aria-controls>`.
 
 Zachowanie (uwaga e – kliknięty nagłówek nie ucieka spod kursora):
 
@@ -1140,7 +1156,7 @@ obrysowuje na czerwono elementy zwrócone przez `wystaje()`.
 | `T_COLOR, T_PRESS, T_PANEL_IN/OUT, T_MORPH, T_SLIDE, T_THEME`, `EASE_*` | `--t-*`, `--ease-enter/-exit/-smooth` |
 | `apply_backdrop` (Mica, ciemny pasek tytułu) | `windowEffects: mica` + `setTheme`, `--bg-window` |
 | `system_reduces_motion`, `Motion.enabled` | `prefers-reduced-motion` |
-| `FocusRing` | `:focus-visible` z `--focus` |
+| `FocusRing` | `[data-keyboard-nav] :focus-visible` z `--focus` (8.1) |
 | `Switch` | `switch.svelte` (8.2) |
 | `Segmented` | `Segmenty.svelte` (8.3) |
 | `HoldButton` | `Przycisk` wariant potwierdz (8.1) |
