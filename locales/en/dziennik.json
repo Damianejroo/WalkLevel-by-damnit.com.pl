@@ -1,5 +1,17 @@
 {
   "@@locale": "en",
   "dziennik.tytul": "Event log",
-  "dziennik.podpis": "Live · {liczba} {liczba, plural, one {entry} other {entries}}"
+  "dziennik.opis": "When something does not work, the easiest way is Settings > Help and diagnostics > Report a problem. A diagnostic report helps when the treadmill does not connect.",
+  "dziennik.dostepnosc": "Event log",
+  "dziennik.folder": "Open log folder",
+  "dziennik.raport": "Save diagnostic report",
+  "dziennik.raport_trwa": "Collecting the report, this takes about 30 s…",
+  "dziennik.raport_gotowy": "Report saved. It is attached to your next problem report automatically.",
+  "dziennik.raport_blad": "Could not collect the report. Check that Bluetooth is on.",
+  "dziennik.raport_brak_biezni": "The report did not find the treadmill. Turn it on and close its phone app.",
+  "dziennik.podpis": "Live · {liczba} {liczba, plural, one {entry} other {entries}}",
+  "dziennik.pusty": "The log is empty. Entries appear here when something happens.",
+  "dziennik.kopiuj": "Copy log",
+  "dziennik.skopiowano": "Log copied. You can paste it into a message.",
+  "dziennik.kopiuj_blad": "Could not copy the log. Select the entries with the mouse and press Ctrl+C."
 }
