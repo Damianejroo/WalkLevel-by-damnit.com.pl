@@ -1,0 +1,5 @@
+{
+  "@@locale": "en",
+  "dziennik.tytul": "Event log",
+  "dziennik.podpis": "Live · {liczba} {liczba, plural, one {entry} other {entries}}"
+}

@@ -1,0 +1,14 @@
+{
+  "@@locale": "en",
+  "tryb.chodzenie.nazwa": "Walking",
+  "tryb.chodzenie.opis": "you walk, your character walks",
+  "tryb.klawisze.nazwa": "Keys",
+  "tryb.klawisze.opis": "{klawisz_chodu} starts the belt",
+  "tryb.pad.nazwa": "Gamepad",
+  "tryb.pad.opis": "the stick sets the pace",
+  "tryb.trening.nazwa": "Training",
+  "tryb.trening.opis": "4 fixed paces, no game",
+  "tryb.dostepnosc": "{tryb} mode: {opis}",
+  "tryb.wybrany": "{tryb}, selected. {opis}",
+  "tryb.chodzenie.opis_proba": "trial mode, the character stands still"
+}

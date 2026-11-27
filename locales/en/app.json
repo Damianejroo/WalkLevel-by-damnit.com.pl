@@ -1,0 +1,14 @@
+{
+  "@@locale": "en",
+  "app.wersja": "version {wersja}",
+  "app.osoba_i_wersja": "{osoba} · version {wersja}",
+  "app.o_aplikacji": "WalkLevel {wersja} · © 2026 {autor}",
+  "app.link.strona": "Author's website",
+  "app.link.prywatnosc": "Privacy policy",
+  "app.link.kod": "Source code",
+  "app.wroc": "Back",
+  "app.zapis.auto": "Changes save automatically",
+  "app.zapis.zapisano": "Saved",
+  "app.zapis.dostepnosc": "Save status",
+  "app.zamykanie.tasma": "Stopping the belt and closing WalkLevel…"
+}

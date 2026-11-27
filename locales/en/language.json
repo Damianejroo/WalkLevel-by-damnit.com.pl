@@ -1,0 +1,20 @@
+{
+  "@@locale": "en",
+  "language.title": "Language",
+  "language.description": "Language of WalkLevel. The change works at once, without a restart.",
+  "language.list": "Languages",
+  "language.installed": "Installed",
+  "language.download": "Available to download",
+  "language.downloading": "Downloading… {procent}%",
+  "language.selected": "Selected",
+  "language.in-progress": "translation in progress",
+  "language.shown-instead": "The chosen language is not downloaded yet, so texts are in English.",
+  "language.downloaded": "Language downloaded: {jezyk}",
+  "language.error.title": "Could not download the language",
+  "language.error.offline": "No internet connection. Check the connection and try again.",
+  "language.error.not-published": "This language is not in the WalkLevel repository yet.",
+  "language.error.status": "The server answered with code {kod}. Try again later.",
+  "language.error.address": "A language pack can come only from the WalkLevel repository on GitHub.",
+  "language.error.format": "The downloaded language pack is damaged. Try again later.",
+  "language.error.write": "Cannot save the language pack. ({szczegoly})"
+}
